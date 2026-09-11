@@ -46,12 +46,12 @@
   "github_actions": [
     {
       "workflow": ".github/workflows/ci.yml",
-      "uses": "actions/checkout@v4",
+      "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
       "resolved_sha": "11d5960a326750d5838078e36cf38b85af677262",
       "resolved_tag": "v4 (== v4.4.0)",
       "resolved_at": "2026-09-12",
       "resolution": "git ls-remote https://github.com/actions/checkout refs/tags/v4",
-      "note": "The workflow file itself is outside the T02 write scope; the immutable revision is recorded here and docs/proposals/T02.md requests the owning surface apply the SHA pin."
+      "note": "Pinned in-file by coordinator at T02 integration per proposal P1 and independent review F2; SHA verified via git ls-remote (v4 == v4.4.0)."
     }
   ]
 }
