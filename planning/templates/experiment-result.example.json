@@ -1,0 +1,20 @@
+{
+  "experiment_id": "P11",
+  "status": "not_run",
+  "baseline_commit": null,
+  "candidate_commit": null,
+  "config_sha256": null,
+  "fixture_manifest_sha256": null,
+  "split": "development",
+  "environment": null,
+  "controls": {
+    "adjacent_fields": "required",
+    "clean_rows": "required"
+  },
+  "metrics": null,
+  "raw_artifact_paths": [],
+  "acceptance": "At least 20% additional useful target recoveries with no more than 1 percentage point precision loss; no invalid source transforms; the original runtime budgets remain respected.",
+  "decision": "default_off_pending_evidence",
+  "reviewer": null,
+  "note": "Legitimate future receipt format, not a fabricated result. Procedure and thresholds in research/experiments.json P11."
+}

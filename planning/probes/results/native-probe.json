@@ -1,0 +1,193 @@
+{
+  "started_at": "2026-09-11T15:46:53.540512+00:00",
+  "duration_ms": 269,
+  "status": "passed",
+  "scope": "fixed synthetic native probe; not browser/product validation",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux",
+    "machine": "x86_64",
+    "pypdfium2": "5.8.0",
+    "pdfium": "149.0.7825.0",
+    "pypdf": "5.9.0",
+    "pillow": "12.3.0",
+    "tesseract": "tesseract 5.5.0"
+  },
+  "assertions": {
+    "same_render_bytes": true,
+    "mapped_reading": true,
+    "control_reading": true,
+    "ocr_crop_amount": true
+  },
+  "ocr": {
+    "stdout": "$100\n",
+    "stderr": "",
+    "psm": 7,
+    "crop_pixels": [
+      80,
+      244,
+      400,
+      390
+    ],
+    "render_scale": 2,
+    "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "model_bytes": 4113088,
+    "model_git_blob": "bbef4675053b5b468cdb477053e28b1c698ba08e"
+  },
+  "records": [
+    {
+      "fixture": "covered-amount.pdf",
+      "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$1,00000\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$1,000$100\nRendered marks and extracted text are separate.",
+      "size": [
+        520.0,
+        400.0
+      ],
+      "cropbox": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "rotation": 0,
+      "user_unit": 1,
+      "render_pixels": [
+        1040,
+        800
+      ]
+    },
+    {
+      "fixture": "geometry-0.pdf",
+      "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "size": [
+        480.0,
+        350.0
+      ],
+      "cropbox": [
+        20.0,
+        40.0,
+        500.0,
+        390.0
+      ],
+      "rotation": 0,
+      "user_unit": 2,
+      "render_pixels": [
+        960,
+        700
+      ]
+    },
+    {
+      "fixture": "geometry-180.pdf",
+      "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "size": [
+        480.0,
+        350.0
+      ],
+      "cropbox": [
+        20.0,
+        40.0,
+        500.0,
+        390.0
+      ],
+      "rotation": 180,
+      "user_unit": 2,
+      "render_pixels": [
+        960,
+        700
+      ]
+    },
+    {
+      "fixture": "geometry-270.pdf",
+      "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "size": [
+        350.0,
+        480.0
+      ],
+      "cropbox": [
+        20.0,
+        40.0,
+        500.0,
+        390.0
+      ],
+      "rotation": 270,
+      "user_unit": 2,
+      "render_pixels": [
+        700,
+        960
+      ]
+    },
+    {
+      "fixture": "geometry-90.pdf",
+      "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+      "pdfium_text": "Rendered marks and extracted text are separate.\r\n$100\r\nNo real transaction. Reader behavior only.\r\nSYNTHETIC EXAMPLE",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "size": [
+        350.0,
+        480.0
+      ],
+      "cropbox": [
+        20.0,
+        40.0,
+        500.0,
+        390.0
+      ],
+      "rotation": 90,
+      "user_unit": 2,
+      "render_pixels": [
+        700,
+        960
+      ]
+    },
+    {
+      "fixture": "mapping-amount.pdf",
+      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$1,000\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$1,000\nRendered marks and extracted text are separate.",
+      "size": [
+        520.0,
+        400.0
+      ],
+      "cropbox": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "rotation": 0,
+      "user_unit": 1,
+      "render_pixels": [
+        1040,
+        800
+      ]
+    },
+    {
+      "fixture": "mapping-control.pdf",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "pdfium_text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
+      "pypdf_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "size": [
+        520.0,
+        400.0
+      ],
+      "cropbox": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "rotation": 0,
+      "user_unit": 1,
+      "render_pixels": [
+        1040,
+        800
+      ]
+    }
+  ]
+}

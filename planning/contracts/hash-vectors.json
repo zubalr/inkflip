@@ -1,0 +1,67 @@
+[
+  {
+    "value": null,
+    "canonical_hex": "4e",
+    "sha256": "8ce86a6ae65d3692e7305e2c58ac62eebd97d3d943e093f577da25c36988246b"
+  },
+  {
+    "value": true,
+    "canonical_hex": "54",
+    "sha256": "e632b7095b0bf32c260fa4c539e9fd7b852d0de454e9be26f24d0d6f91d069d3"
+  },
+  {
+    "value": false,
+    "canonical_hex": "46",
+    "sha256": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9"
+  },
+  {
+    "value": 1,
+    "canonical_hex": "443ff0000000000000",
+    "sha256": "51af69ddbd70d5e059b525219907e53939d4a4a92747901f5eeba7561d31f19a"
+  },
+  {
+    "value": 1.0,
+    "canonical_hex": "443ff0000000000000",
+    "sha256": "51af69ddbd70d5e059b525219907e53939d4a4a92747901f5eeba7561d31f19a"
+  },
+  {
+    "value": -0.0,
+    "canonical_hex": "440000000000000000",
+    "sha256": "a45bff2be728c2a3bc8f717d63cf960b042edc6fed969d538c8fe87434b5b636"
+  },
+  {
+    "value": 0.1,
+    "canonical_hex": "443fb999999999999a",
+    "sha256": "5418ea74080a880376394a3d4e3252d2b0971e1f0460dc40ebbcb70b30c3c97b"
+  },
+  {
+    "value": "$1,000",
+    "canonical_hex": "530000000624312c303030",
+    "sha256": "eb663b2d241a9b8fe347a40169d825885e4b6d519d05c65e7305edab72193ff6"
+  },
+  {
+    "value": "مرحبا 😀",
+    "canonical_hex": "530000000fd985d8b1d8add8a8d8a720f09f9880",
+    "sha256": "b06f029985f7b5c491b45af4d777820ecb44c076ef4ddd4f0818bc453bce87d6"
+  },
+  {
+    "value": {
+      "z": [
+        1,
+        2
+      ],
+      "a": "é"
+    },
+    "canonical_hex": "4f000000025300000001615300000002c3a953000000017a4c00000002443ff0000000000000444000000000000000",
+    "sha256": "f6522c496f80878eeb4703cf0c53760e34cc3659411f12ed76fc20ed57ca38c8"
+  },
+  {
+    "value": [
+      {},
+      [],
+      null
+    ],
+    "canonical_hex": "4c000000034f000000004c000000004e",
+    "sha256": "7b6a6afef56dab8c447ce8cfaf28b4c3c101cc24f3b510bf925d1d5bea387cef"
+  }
+]

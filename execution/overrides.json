@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "max_product_workers": 5,
+  "development_port_base": 5180,
+  "path_replacements": {
+    "pnpm-workspace.yaml": "bunfig.toml",
+    "pnpm-lock.yaml": "bun.lock"
+  },
+  "command_replacements": [
+    ["pnpm exec ", "bun x --no-install "],
+    ["pnpm ", "bun run "]
+  ],
+  "scope_additions": {
+    "T01": [
+      "AGENTS.md",
+      "tsconfig.json",
+      "tests/bootstrap/",
+      "packages/*/package.json",
+      "packages/*/tsconfig.json",
+      "config/acceptance-commands.json",
+      "config/test-toolchain.json",
+      "native/inkflip/__init__.py",
+      "native/tests/bootstrap/"
+    ],
+    "T02": ["bunfig.toml"]
+  },
+  "reserved_paths": [
+    "planning/",
+    "scripts/coordination.py",
+    "tests/coordination/",
+    "execution/overrides.json",
+    "docs/COORDINATION.md",
+    "prompts/"
+  ]
+}

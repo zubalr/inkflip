@@ -1,0 +1,2224 @@
+[
+  {
+    "id": "REQ-001",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Bootstrap the separate monorepo and honest origin",
+    "task_ids": [
+      "T01"
+    ],
+    "test_ids": [
+      "TEST-01"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/REPOSITORY_AND_DEPENDENCIES.md",
+      "architecture/ORIGIN_AND_MIGRATION.md",
+      "deployment/CI_AND_LOCAL_COMMANDS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-002",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Freeze actual dependency locks, model assets and build provenance",
+    "task_ids": [
+      "T02"
+    ],
+    "test_ids": [
+      "TEST-02"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "config/dependencies.json",
+      "config/model-assets.json",
+      "security/LICENSE_AND_ATTRIBUTION.md",
+      "deployment/STATIC_DEPLOYMENT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-003",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement schema, strict validation, canonical identity and generated types",
+    "task_ids": [
+      "T03"
+    ],
+    "test_ids": [
+      "TEST-03"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "contracts/README.md",
+      "contracts/inkflip.schema.json",
+      "architecture/GLOSSARY_AND_INVARIANTS.md",
+      "adrs/005-contracts.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-004",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement canonical geometry and transform conformance",
+    "task_ids": [
+      "T04"
+    ],
+    "test_ids": [
+      "TEST-04"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/COORDINATES.md",
+      "contracts/inkflip.schema.json",
+      "probes/results/native-probe.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-005",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Create original fixture foundation and rights manifest",
+    "task_ids": [
+      "T05"
+    ],
+    "test_ids": [
+      "TEST-05"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "quality/FIXTURE_PROGRAM.md",
+      "quality/fixture-catalog.json",
+      "product/DEMO_AND_GALLERY.md",
+      "probes/make_fixtures.py"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-006",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Translate selected composition into tokens and visual foundations",
+    "task_ids": [
+      "T06"
+    ],
+    "test_ids": [
+      "TEST-06"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "product/design-tokens.json",
+      "product/DESIGN_SYSTEM_AND_COMPONENTS.md",
+      "reference/index.html"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-007",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Build accessible reusable controls and navigation",
+    "task_ids": [
+      "T07"
+    ],
+    "test_ids": [
+      "TEST-07"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "product/DESIGN_SYSTEM_AND_COMPONENTS.md",
+      "product/ACCESSIBILITY.md",
+      "product/copy.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-008",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement local file validation and page/region selection",
+    "task_ids": [
+      "T08"
+    ],
+    "test_ids": [
+      "TEST-08"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md",
+      "product/PRODUCT_AND_JOURNEYS.md",
+      "config/settings.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-009",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement PDF.js rendering/text reader adapter",
+    "task_ids": [
+      "T09"
+    ],
+    "test_ids": [
+      "TEST-09"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "architecture/COORDINATES.md",
+      "architecture/CAPABILITIES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-010",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement browser selected-page/crop OCR",
+    "task_ids": [
+      "T10"
+    ],
+    "test_ids": [
+      "TEST-10"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "architecture/RUNTIME_LIFECYCLE.md",
+      "config/model-assets.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-011",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement run lifecycle, backpressure and cancellation",
+    "task_ids": [
+      "T11"
+    ],
+    "test_ids": [
+      "TEST-11"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md",
+      "contracts/inkflip.schema.json",
+      "config/settings.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-012",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement raw normalization and conservative alignment",
+    "task_ids": [
+      "T12"
+    ],
+    "test_ids": [
+      "TEST-12"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md",
+      "contracts/README.md",
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-013",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Integrate page/text/compare viewer and exact evidence navigation",
+    "task_ids": [
+      "T13"
+    ],
+    "test_ids": [
+      "TEST-13"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "architecture/COORDINATES.md",
+      "product/ACCESSIBILITY.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-014",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement findings, coverage and plain explanations",
+    "task_ids": [
+      "T14"
+    ],
+    "test_ids": [
+      "TEST-14"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md",
+      "product/copy.json",
+      "product/PRODUCT_AND_JOURNEYS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-015",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Prove initial own-file no-egress behavior",
+    "task_ids": [
+      "T15"
+    ],
+    "test_ids": [
+      "TEST-15"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "security/PRIVACY_AND_NETWORK_TESTS.md",
+      "deployment/_headers",
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-016",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement portable JSON and escaped HTML export foundation",
+    "task_ids": [
+      "T16"
+    ],
+    "test_ids": [
+      "TEST-16"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md",
+      "product/copy.json",
+      "tools/export_html.py"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-017",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Earn the browser amount demo and prepared manifest",
+    "task_ids": [
+      "T17"
+    ],
+    "test_ids": [
+      "TEST-17"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "product/DEMO_AND_GALLERY.md",
+      "probes/results/native-probe.json",
+      "quality/FIXTURE_PROGRAM.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-018",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Pass the first integrated own-file evidence gate",
+    "task_ids": [
+      "T18"
+    ],
+    "test_ids": [
+      "TEST-18"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "execution/MILESTONES.md",
+      "quality/TEST_MATRIX.md",
+      "architecture/GLOSSARY_AND_INVARIANTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-019",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Complete large-document and narrow-device interaction",
+    "task_ids": [
+      "T19"
+    ],
+    "test_ids": [
+      "TEST-19"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "quality/PERFORMANCE_AND_COMPATIBILITY.md",
+      "config/settings.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-020",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Finish repeated, ambiguous, order and unmatched evidence UX",
+    "task_ids": [
+      "T20"
+    ],
+    "test_ids": [
+      "TEST-20"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md",
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "product/copy.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-021",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Complete all six original public examples and controls",
+    "task_ids": [
+      "T21"
+    ],
+    "test_ids": [
+      "TEST-21"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "product/DEMO_AND_GALLERY.md",
+      "quality/FIXTURE_PROGRAM.md",
+      "security/LICENSE_AND_ATTRIBUTION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-022",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement strict local JSON import and reopen flow",
+    "task_ids": [
+      "T22"
+    ],
+    "test_ids": [
+      "TEST-22"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md",
+      "security/THREAT_MODEL.md",
+      "product/copy.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-023",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Finish export selection, annotations and privacy preview",
+    "task_ids": [
+      "T23"
+    ],
+    "test_ids": [
+      "TEST-23"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md",
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "security/PRIVACY_AND_NETWORK_TESTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-024",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Harden malicious report, text and image boundaries",
+    "task_ids": [
+      "T24"
+    ],
+    "test_ids": [
+      "TEST-24"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "security/THREAT_MODEL.md",
+      "architecture/REPORT_EXPORT_IMPORT.md",
+      "config/settings.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-025",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement explicit offline static/model cache lifecycle",
+    "task_ids": [
+      "T25"
+    ],
+    "test_ids": [
+      "TEST-25"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "security/PRIVACY_AND_NETWORK_TESTS.md",
+      "deployment/STATIC_DEPLOYMENT.md",
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-026",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement native PDFium and pypdf reader adapters",
+    "task_ids": [
+      "T26"
+    ],
+    "test_ids": [
+      "TEST-26"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "architecture/COORDINATES.md",
+      "architecture/CAPABILITIES.md",
+      "probes/results/pdfium-characters.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-027",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement native rendered-region Tesseract reader",
+    "task_ids": [
+      "T27"
+    ],
+    "test_ids": [
+      "TEST-27"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "config/model-assets.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-028",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement bounded native structural observations",
+    "task_ids": [
+      "T28"
+    ],
+    "test_ids": [
+      "TEST-28"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CAPABILITIES.md",
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "research/UPSTREAM_TECHNIQUES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-029",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement native parent supervision and atomic partial results",
+    "task_ids": [
+      "T29"
+    ],
+    "test_ids": [
+      "TEST-29"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "security/THREAT_MODEL.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-030",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement native inspect/report/replay command contracts",
+    "task_ids": [
+      "T30"
+    ],
+    "test_ids": [
+      "TEST-30"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md",
+      "architecture/REPORT_EXPORT_IMPORT.md",
+      "product/copy.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-031",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement shared Node comparison bridge",
+    "task_ids": [
+      "T31"
+    ],
+    "test_ids": [
+      "TEST-31"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/TARGET_ARCHITECTURE.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "contracts/README.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-032",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement corpus run, journal and validated resume",
+    "task_ids": [
+      "T32"
+    ],
+    "test_ids": [
+      "TEST-32"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md",
+      "quality/EVALUATION.md",
+      "contracts/inkflip.schema.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-033",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement explicit version-isolated reader profiles",
+    "task_ids": [
+      "T33"
+    ],
+    "test_ids": [
+      "TEST-33"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md",
+      "security/THREAT_MODEL.md",
+      "deployment/examples/reader-upgrade.sh"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-034",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Implement stored-run comparison, rules and immutable baselines",
+    "task_ids": [
+      "T34"
+    ],
+    "test_ids": [
+      "TEST-34"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md",
+      "contracts/inkflip.schema.json",
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-035",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Deliver the runnable local reader-upgrade CI example",
+    "task_ids": [
+      "T35"
+    ],
+    "test_ids": [
+      "TEST-35"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "deployment/examples/reader-upgrade.sh",
+      "architecture/CLI_AND_REGRESSION.md",
+      "deployment/CI_AND_LOCAL_COMMANDS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-036",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Build independent evaluation protocol and held-out corpus",
+    "task_ids": [
+      "T36"
+    ],
+    "test_ids": [
+      "TEST-36"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/EVALUATION.md",
+      "quality/FIXTURE_PROGRAM.md",
+      "research/EXPERIMENT_MATRIX.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-037",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Complete accessibility and manual assistive-technology review",
+    "task_ids": [
+      "T37"
+    ],
+    "test_ids": [
+      "TEST-37"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "product/ACCESSIBILITY.md",
+      "product/DESIGN_SYSTEM_AND_COMPONENTS.md",
+      "quality/PERFORMANCE_AND_COMPATIBILITY.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-038",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Polish complete visual states on real supported layouts",
+    "task_ids": [
+      "T38"
+    ],
+    "test_ids": [
+      "TEST-38"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "product/UX_LAYOUT_AND_INTERACTION.md",
+      "product/DESIGN_SYSTEM_AND_COMPONENTS.md",
+      "reference/index.html"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-039",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Measure and enforce runtime/device performance budgets",
+    "task_ids": [
+      "T39"
+    ],
+    "test_ids": [
+      "TEST-39"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/PERFORMANCE_AND_COMPATIBILITY.md",
+      "config/settings.json",
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-040",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Verify native containment and failure recovery",
+    "task_ids": [
+      "T40"
+    ],
+    "test_ids": [
+      "TEST-40"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "security/THREAT_MODEL.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "deployment/examples/Dockerfile.native"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-041",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Run paint-order and ink-counterexample experiment",
+    "task_ids": [
+      "T41"
+    ],
+    "test_ids": [
+      "TEST-41"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "research/UPSTREAM_TECHNIQUES.md",
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-042",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Run targeted OCR escalation experiment",
+    "task_ids": [
+      "T42"
+    ],
+    "test_ids": [
+      "TEST-42"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "architecture/READER_ADAPTER_CONTRACT.md",
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-043",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Evaluate secondary browser reader, decide explicitly",
+    "task_ids": [
+      "T43"
+    ],
+    "test_ids": [
+      "TEST-43"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "architecture/CAPABILITIES.md",
+      "security/LICENSE_AND_ATTRIBUTION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-044",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Evaluate one native RapidOCR complement",
+    "task_ids": [
+      "T44"
+    ],
+    "test_ids": [
+      "TEST-44"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "security/LICENSE_AND_ATTRIBUTION.md",
+      "config/model-assets.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-045",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Evaluate original-preserving raster geometry only",
+    "task_ids": [
+      "T45"
+    ],
+    "test_ids": [
+      "TEST-45"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "architecture/COORDINATES.md",
+      "quality/FIXTURE_PROGRAM.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-046",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Verify browser/native and cross-environment parity",
+    "task_ids": [
+      "T46"
+    ],
+    "test_ids": [
+      "TEST-46"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md",
+      "quality/PERFORMANCE_AND_COMPATIBILITY.md",
+      "contracts/README.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-047",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Close distribution rights, SBOM and vulnerability gate",
+    "task_ids": [
+      "T47"
+    ],
+    "test_ids": [
+      "TEST-47"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "security/LICENSE_AND_ATTRIBUTION.md",
+      "security/THIRD_PARTY_NOTICES.md",
+      "config/dependencies.json",
+      "research/upstream-ledger.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-048",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Validate static build, CSP, caching and deployment preflight",
+    "task_ids": [
+      "T48"
+    ],
+    "test_ids": [
+      "TEST-48"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/STATIC_DEPLOYMENT.md",
+      "deployment/_headers",
+      "deployment/wrangler.example.json",
+      "security/PRIVACY_AND_NETWORK_TESTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-049",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Finish user/developer docs and honest limitations",
+    "task_ids": [
+      "T49"
+    ],
+    "test_ids": [
+      "TEST-49"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "launch/README_AND_CASE_STUDY.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "launch/CLAIMS_LEDGER.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-050",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Prepare evidence-linked launch and portfolio material",
+    "task_ids": [
+      "T50"
+    ],
+    "test_ids": [
+      "TEST-50"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "launch/LAUNCH_COPY.md",
+      "launch/README_AND_CASE_STUDY.md",
+      "product/DEMO_AND_GALLERY.md",
+      "launch/CLAIMS_LEDGER.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-051",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Close complete public investigation capability gate",
+    "task_ids": [
+      "T51"
+    ],
+    "test_ids": [
+      "TEST-51"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "execution/MILESTONES.md",
+      "quality/TEST_MATRIX.md",
+      "product/PRODUCT_AND_JOURNEYS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-052",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Close native and regression capability gate",
+    "task_ids": [
+      "T52"
+    ],
+    "test_ids": [
+      "TEST-52"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "execution/MILESTONES.md",
+      "architecture/CLI_AND_REGRESSION.md",
+      "quality/TEST_MATRIX.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-053",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Close quality, privacy, performance and rights gate",
+    "task_ids": [
+      "T53"
+    ],
+    "test_ids": [
+      "TEST-53"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "execution/MILESTONES.md",
+      "quality/EVALUATION.md",
+      "security/THREAT_MODEL.md",
+      "quality/ADVERSARIAL_REVIEW.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-054",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Owner-authorized static deployment, rollback and final release",
+    "task_ids": [
+      "T54"
+    ],
+    "test_ids": [
+      "TEST-54"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/RELEASE_RUNBOOK.md",
+      "deployment/STATIC_DEPLOYMENT.md",
+      "execution/RELEASE_CHECKLIST.md",
+      "OWNER_INPUTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-055",
+    "master_sections": [
+      19,
+      20
+    ],
+    "statement": "Perform final adversarial merged-branch review",
+    "task_ids": [
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "quality/ADVERSARIAL_REVIEW.md",
+      "execution/RELEASE_CHECKLIST.md",
+      "launch/CLAIMS_LEDGER.md",
+      "DECISIONS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-056",
+    "master_sections": [
+      1,
+      19
+    ],
+    "statement": "No development calendar/hour/worker ceiling; capability gates only",
+    "task_ids": [
+      "T01",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "execution/MILESTONES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-057",
+    "master_sections": [
+      2,
+      4,
+      9
+    ],
+    "statement": "Public own-file experience meaningful without native or hosted compute",
+    "task_ids": [
+      "T18",
+      "T51"
+    ],
+    "test_ids": [
+      "TEST-18",
+      "TEST-51"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/TARGET_ARCHITECTURE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-058",
+    "master_sections": [
+      3,
+      18
+    ],
+    "statement": "Separate original repository; exact provenance and genuine authorship",
+    "task_ids": [
+      "T01",
+      "T49",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-49",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "architecture/ORIGIN_AND_MIGRATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-059",
+    "master_sections": [
+      7,
+      8
+    ],
+    "statement": "Every selected gallery example has actual bytes/readings/rights and controls",
+    "task_ids": [
+      "T17",
+      "T21"
+    ],
+    "test_ids": [
+      "TEST-17",
+      "TEST-21"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "product/DEMO_AND_GALLERY.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-060",
+    "master_sections": [
+      15
+    ],
+    "statement": "First G1 includes clean control, alignment, cancellation, export/reopen and no-egress",
+    "task_ids": [
+      "T18"
+    ],
+    "test_ids": [
+      "TEST-18"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "execution/MILESTONES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-061",
+    "master_sections": [
+      9
+    ],
+    "statement": "Multiple named reading paths with explicit capability negotiation",
+    "task_ids": [
+      "T09",
+      "T10",
+      "T26",
+      "T27",
+      "T28"
+    ],
+    "test_ids": [
+      "TEST-09",
+      "TEST-10",
+      "TEST-26",
+      "TEST-27",
+      "TEST-28"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CAPABILITIES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-062",
+    "master_sections": [
+      10
+    ],
+    "statement": "Preserve duplicate occurrences and raw-to-normalized scalar maps",
+    "task_ids": [
+      "T03",
+      "T12",
+      "T20"
+    ],
+    "test_ids": [
+      "TEST-03",
+      "TEST-12",
+      "TEST-20"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-063",
+    "master_sections": [
+      10
+    ],
+    "statement": "Coordinate chain covers crop origins, rotation, UserUnit, DPR and OCR crop inversion",
+    "task_ids": [
+      "T04",
+      "T09",
+      "T26"
+    ],
+    "test_ids": [
+      "TEST-04",
+      "TEST-09",
+      "TEST-26"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/COORDINATES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-064",
+    "master_sections": [
+      10
+    ],
+    "statement": "Geometry precision cannot be fabricated from text; ambiguous alignment abstains",
+    "task_ids": [
+      "T04",
+      "T12",
+      "T20"
+    ],
+    "test_ids": [
+      "TEST-04",
+      "TEST-12",
+      "TEST-20"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/COORDINATES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-065",
+    "master_sections": [
+      10
+    ],
+    "statement": "Observed structure, reading difference, OCR interpretation, hypothesis and human note distinct",
+    "task_ids": [
+      "T14",
+      "T23"
+    ],
+    "test_ids": [
+      "TEST-14",
+      "TEST-23"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-066",
+    "master_sections": [
+      10,
+      11
+    ],
+    "statement": "Coverage plan accounts for complete/partial/unsupported/error/skipped/cancelled work",
+    "task_ids": [
+      "T03",
+      "T11",
+      "T14"
+    ],
+    "test_ids": [
+      "TEST-03",
+      "TEST-11",
+      "TEST-14"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-067",
+    "master_sections": [
+      10,
+      15
+    ],
+    "statement": "Unknown, missing or unreadable does not become plausible default or normal scan alarm",
+    "task_ids": [
+      "T14",
+      "T28"
+    ],
+    "test_ids": [
+      "TEST-14",
+      "TEST-28"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/ALIGNMENT_AND_FINDINGS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-068",
+    "master_sections": [
+      7,
+      11
+    ],
+    "statement": "Model preparation, cold/cached/offline and missing-model failures visible",
+    "task_ids": [
+      "T10",
+      "T25",
+      "T27"
+    ],
+    "test_ids": [
+      "TEST-10",
+      "TEST-25",
+      "TEST-27"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-069",
+    "master_sections": [
+      11
+    ],
+    "statement": "Worker generation/digest authority, backpressure and cancellation before cleanup",
+    "task_ids": [
+      "T11",
+      "T15"
+    ],
+    "test_ids": [
+      "TEST-11",
+      "TEST-15"
+    ],
+    "gate": "G1",
+    "spec_files": [
+      "architecture/RUNTIME_LIFECYCLE.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-070",
+    "master_sections": [
+      11,
+      15
+    ],
+    "statement": "Runtime limits for bytes/pages/pixels/edges/jobs/time/output verified without unbounded allocations",
+    "task_ids": [
+      "T08",
+      "T19",
+      "T29",
+      "T39"
+    ],
+    "test_ids": [
+      "TEST-08",
+      "TEST-19",
+      "TEST-29",
+      "TEST-39"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "config/settings.json"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-071",
+    "master_sections": [
+      4,
+      12
+    ],
+    "statement": "Named reader comparison and stored before/after local corpus regression included in finished release",
+    "task_ids": [
+      "T31",
+      "T32",
+      "T34",
+      "T35",
+      "T52"
+    ],
+    "test_ids": [
+      "TEST-31",
+      "TEST-32",
+      "TEST-34",
+      "TEST-35",
+      "TEST-52"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-072",
+    "master_sections": [
+      12,
+      16
+    ],
+    "statement": "Two incompatible reader versions truly isolated; no automatic untrusted plugins",
+    "task_ids": [
+      "T33",
+      "T35",
+      "T40"
+    ],
+    "test_ids": [
+      "TEST-33",
+      "TEST-35",
+      "TEST-40"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-073",
+    "master_sections": [
+      12
+    ],
+    "statement": "Changed/improved/regressed status requires clear rule semantics; loss of coverage never improves",
+    "task_ids": [
+      "T34"
+    ],
+    "test_ids": [
+      "TEST-34"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-074",
+    "master_sections": [
+      12,
+      18
+    ],
+    "statement": "Immutable baseline creation explicit, no self-refresh or overwrite",
+    "task_ids": [
+      "T34",
+      "T35"
+    ],
+    "test_ids": [
+      "TEST-34",
+      "TEST-35"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/CLI_AND_REGRESSION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-075",
+    "master_sections": [
+      13
+    ],
+    "statement": "Portable machine report and human HTML preserve readings/transforms/settings/coverage",
+    "task_ids": [
+      "T16",
+      "T22",
+      "T23"
+    ],
+    "test_ids": [
+      "TEST-16",
+      "TEST-22",
+      "TEST-23"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-076",
+    "master_sections": [
+      13
+    ],
+    "statement": "Default one-finding export excludes complete PDF/filename/notes/unrelated evidence",
+    "task_ids": [
+      "T16",
+      "T23",
+      "T24"
+    ],
+    "test_ids": [
+      "TEST-16",
+      "TEST-23",
+      "TEST-24"
+    ],
+    "gate": "G2",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-077",
+    "master_sections": [
+      13
+    ],
+    "statement": "Diagnostic/evidence/replayable semantics reflect actual bytes and environment availability",
+    "task_ids": [
+      "T16",
+      "T22",
+      "T30"
+    ],
+    "test_ids": [
+      "TEST-16",
+      "TEST-22",
+      "TEST-30"
+    ],
+    "gate": "G3",
+    "spec_files": [
+      "architecture/REPORT_EXPORT_IMPORT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-078",
+    "master_sections": [
+      13,
+      16
+    ],
+    "statement": "Malicious import rejects HTML/scripts/URLs/archive/traversal/oversize and never chooses executables",
+    "task_ids": [
+      "T22",
+      "T24",
+      "T40"
+    ],
+    "test_ids": [
+      "TEST-22",
+      "TEST-24",
+      "TEST-40"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "security/THREAT_MODEL.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-079",
+    "master_sections": [
+      13
+    ],
+    "statement": "Canary tests cover bytes, text, filename, crops, hashes, reports and telemetry/storage/URLs",
+    "task_ids": [
+      "T15",
+      "T24",
+      "T25",
+      "T54"
+    ],
+    "test_ids": [
+      "TEST-15",
+      "TEST-24",
+      "TEST-25",
+      "TEST-54"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "security/PRIVACY_AND_NETWORK_TESTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-080",
+    "master_sections": [
+      13
+    ],
+    "statement": "Ephemeral document state; separate model cache clearing; no secure-erasure/redaction claim",
+    "task_ids": [
+      "T23",
+      "T25",
+      "T49"
+    ],
+    "test_ids": [
+      "TEST-23",
+      "TEST-25",
+      "TEST-49"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "security/PRIVACY_AND_NETWORK_TESTS.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-081",
+    "master_sections": [
+      3,
+      14
+    ],
+    "statement": "Targeted upstream inventory records pins/depth/lineage/license/missing access; no fake89audit",
+    "task_ids": [
+      "T36",
+      "T47",
+      "T49"
+    ],
+    "test_ids": [
+      "TEST-36",
+      "TEST-47",
+      "TEST-49"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "research/UPSTREAM_TECHNIQUES.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-082",
+    "master_sections": [
+      14,
+      15,
+      19
+    ],
+    "statement": "Independent optimization/review/held-out roles and family splits prevent leakage",
+    "task_ids": [
+      "T36",
+      "T41",
+      "T42",
+      "T43",
+      "T44",
+      "T45",
+      "T53"
+    ],
+    "test_ids": [
+      "TEST-36",
+      "TEST-41",
+      "TEST-42",
+      "TEST-43",
+      "TEST-44",
+      "TEST-45",
+      "TEST-53"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-083",
+    "master_sections": [
+      14
+    ],
+    "statement": "Experiments include baseline, candidate, clean controls, metrics, resource bounds and rejection",
+    "task_ids": [
+      "T41",
+      "T42",
+      "T43",
+      "T44",
+      "T45",
+      "T46"
+    ],
+    "test_ids": [
+      "TEST-41",
+      "TEST-42",
+      "TEST-43",
+      "TEST-44",
+      "TEST-45",
+      "TEST-46"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "research/EXPERIMENT_MATRIX.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-084",
+    "master_sections": [
+      15
+    ],
+    "statement": "Clean native/searchable, contrasting white text, cover/clipping/crop and wrong mappings tested",
+    "task_ids": [
+      "T05",
+      "T21",
+      "T28",
+      "T36"
+    ],
+    "test_ids": [
+      "TEST-05",
+      "TEST-21",
+      "TEST-28",
+      "TEST-36"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/FIXTURE_PROGRAM.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-085",
+    "master_sections": [
+      15
+    ],
+    "statement": "Ligatures/non-Latin, digit/punctuation/negation and adjacent crop cases within declared support",
+    "task_ids": [
+      "T12",
+      "T20",
+      "T36"
+    ],
+    "test_ids": [
+      "TEST-12",
+      "TEST-20",
+      "TEST-36"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/FIXTURE_PROGRAM.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-086",
+    "master_sections": [
+      15
+    ],
+    "statement": "Malformed/encrypted/unusual-size files, missing regions and runtime faults tested",
+    "task_ids": [
+      "T08",
+      "T29",
+      "T39",
+      "T40"
+    ],
+    "test_ids": [
+      "TEST-08",
+      "TEST-29",
+      "TEST-39",
+      "TEST-40"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/FIXTURE_PROGRAM.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-087",
+    "master_sections": [
+      15
+    ],
+    "statement": "Measured precision, coverage, false alarms, alignment, repeatability and costs distinguish targets",
+    "task_ids": [
+      "T36",
+      "T39",
+      "T46",
+      "T53"
+    ],
+    "test_ids": [
+      "TEST-36",
+      "TEST-39",
+      "TEST-46",
+      "TEST-53"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "quality/EVALUATION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-088",
+    "master_sections": [
+      7,
+      15
+    ],
+    "statement": "Complete keyboard/text equivalents/focus/reflow/reduced motion and manual AT tests",
+    "task_ids": [
+      "T07",
+      "T13",
+      "T37"
+    ],
+    "test_ids": [
+      "TEST-07",
+      "TEST-13",
+      "TEST-37"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "product/ACCESSIBILITY.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-089",
+    "master_sections": [
+      7
+    ],
+    "statement": "Distinct first-screen composition and exact copy/component state specifications implemented",
+    "task_ids": [
+      "T06",
+      "T07",
+      "T14",
+      "T38"
+    ],
+    "test_ids": [
+      "TEST-06",
+      "TEST-07",
+      "TEST-14",
+      "TEST-38"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "product/UX_LAYOUT_AND_INTERACTION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-090",
+    "master_sections": [
+      16
+    ],
+    "statement": "Threat model includes PDF/native/WASM/import/export/model/supply chain/deploy boundaries",
+    "task_ids": [
+      "T24",
+      "T40",
+      "T47",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-24",
+      "TEST-40",
+      "TEST-47",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "security/THREAT_MODEL.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-091",
+    "master_sections": [
+      16
+    ],
+    "statement": "Actual build license and model/font/codec notices separate from own MIT",
+    "task_ids": [
+      "T02",
+      "T47"
+    ],
+    "test_ids": [
+      "TEST-02",
+      "TEST-47"
+    ],
+    "gate": "G4",
+    "spec_files": [
+      "security/LICENSE_AND_ATTRIBUTION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-092",
+    "master_sections": [
+      17
+    ],
+    "statement": "Static CF config no SSR/main/dynamiccatchall/upload/meteredfallback; account request path verified",
+    "task_ids": [
+      "T48",
+      "T54"
+    ],
+    "test_ids": [
+      "TEST-48",
+      "TEST-54"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/STATIC_DEPLOYMENT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-093",
+    "master_sections": [
+      17
+    ],
+    "statement": "Same-origin model cache integrity, asset size, CSP and offline verified against selected runtime",
+    "task_ids": [
+      "T02",
+      "T10",
+      "T25",
+      "T48"
+    ],
+    "test_ids": [
+      "TEST-02",
+      "TEST-10",
+      "TEST-25",
+      "TEST-48"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/STATIC_DEPLOYMENT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-094",
+    "master_sections": [
+      17
+    ],
+    "statement": "Provider allowance not hard account-spend cap; unrelated account usage not covered",
+    "task_ids": [
+      "T48",
+      "T49",
+      "T54"
+    ],
+    "test_ids": [
+      "TEST-48",
+      "TEST-49",
+      "TEST-54"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/STATIC_DEPLOYMENT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-095",
+    "master_sections": [
+      17,
+      18
+    ],
+    "statement": "Release/rollback uses exact archived build, source, manifests and original bytes",
+    "task_ids": [
+      "T54",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-54",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "deployment/RELEASE_RUNBOOK.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-096",
+    "master_sections": [
+      19
+    ],
+    "statement": "Elastic workers have isolated worktrees/envs/artifacts and serialized shared owners",
+    "task_ids": [
+      "T01",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "execution/OWNERSHIP.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-097",
+    "master_sections": [
+      19
+    ],
+    "statement": "Each task has scoped deliverables, dependencies, acceptance, failure, rollback and review brief",
+    "task_ids": [
+      "T01",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "execution/COORDINATOR_PROMPT.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-098",
+    "master_sections": [
+      19,
+      22
+    ],
+    "statement": "Fresh agent resumes from package/state without private chat memory",
+    "task_ids": [
+      "T01",
+      "T49"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-49"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "execution/RESUME_HANDOFF.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-099",
+    "master_sections": [
+      18,
+      19
+    ],
+    "statement": "Actual agent mode/interventions/commits recorded without fictional internal access",
+    "task_ids": [
+      "T01",
+      "T49",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-49",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "execution/OWNER_SUPERVISION.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-100",
+    "master_sections": [
+      4,
+      21
+    ],
+    "statement": "No SaaS, high-stakes adjudicator, repair, payload generator or unrelated platform infrastructure",
+    "task_ids": [
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "PROJECT_BRIEF.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-101",
+    "master_sections": [
+      2,
+      20
+    ],
+    "statement": "Launch/readme/case study prove actual shipped behavior; no adoption/hiring/autonomy fabrication",
+    "task_ids": [
+      "T49",
+      "T50",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-49",
+      "TEST-50",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "launch/CLAIMS_LEDGER.md"
+    ],
+    "status": "planned"
+  },
+  {
+    "id": "REQ-102",
+    "master_sections": [
+      20,
+      21,
+      22
+    ],
+    "statement": "Plan readiness distinct from implemented readiness, validators and real ZIP integrity",
+    "task_ids": [
+      "T01",
+      "T55"
+    ],
+    "test_ids": [
+      "TEST-01",
+      "TEST-55"
+    ],
+    "gate": "G5",
+    "spec_files": [
+      "PACKAGE_AUDIT.md"
+    ],
+    "status": "planned"
+  }
+]

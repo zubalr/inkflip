@@ -4,3 +4,21 @@
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Local environments, generated build output, and private scratch.
+.DS_Store
+__pycache__/
+*.py[cod]
+.tools/
+.venv/
+.cache/
+.private/
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+test-results/
+playwright-report/
+artifacts/scratch/
+runs/

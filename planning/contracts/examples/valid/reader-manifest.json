@@ -1,0 +1,37 @@
+{
+  "kind": "reader_manifest",
+  "schema_version": "1.0.0",
+  "reader": {
+    "id": "r_pdfium",
+    "name": "PDFium via pypdfium2",
+    "version": "5.8.0",
+    "build": "PDFium 149.0.7825.0",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "native",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "none"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "Recorded fixed probe only; product adapter is not implemented."
+        ]
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "This is an executed native fixture probe, not a browser benchmark."
+    ]
+  },
+  "distribution_digest": null,
+  "asset_hashes": [],
+  "execution_policy": "installed_allowlist_no_report_commands"
+}

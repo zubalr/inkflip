@@ -1,0 +1,29 @@
+{
+  "kind": "comparison",
+  "schema_version": "1.0.0",
+  "id": "adfc1bf23505d6937658bd6a428a228ef3b66e4703aebcc46492032024e2a757",
+  "left_report_id": "c1961dc78b9c3412845a3c2f3dbca795ecd491ee7addd68f7d8e9f7aa28f7624",
+  "right_report_id": "e4979b256924b3d4be13597911cd00ce43074ef473feb05e589c3a451bceb324",
+  "left_document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+  "right_document_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "mode": "reader_upgrade",
+  "status": "unchanged",
+  "acceptance_rules_sha256": null,
+  "changes": [
+    {
+      "id": "delta_repeat",
+      "kind": "text",
+      "page_index": 0,
+      "left_occurrence_ids": [],
+      "right_occurrence_ids": [
+        "o_repeated"
+      ],
+      "status": "changed",
+      "rule_id": null,
+      "explanation": "Contract example: output changed; no truth or acceptance rule is supplied."
+    }
+  ],
+  "limitations": [
+    "Contract example only. Both reports must be supplied locally to inspect evidence."
+  ]
+}

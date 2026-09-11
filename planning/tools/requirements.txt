@@ -1,0 +1,3 @@
+# Planning validator dependencies only; not an application/native distribution lock.
+jsonschema==4.26.0
+PyYAML==6.0.3

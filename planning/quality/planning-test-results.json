@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "started_at": "2026-09-11T17:00:16.054692+00:00",
+  "duration_seconds": 1.802,
+  "scope": "Planning utility tests and syntax checks, not implemented product acceptance.",
+  "python_version": "3.13.5",
+  "tests_run": 20,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "all_valid_contract_examples": 12,
+  "all_invalid_contract_examples": 30,
+  "python_syntax_files": [
+    "probes/browser/prepare_model.py",
+    "probes/geometry_probe.py",
+    "probes/lifecycle_probe.py",
+    "probes/make_fixtures.py",
+    "probes/native_probe.py",
+    "probes/reference_probe.py",
+    "tools/bootstrap_repo.py",
+    "tools/build_index.py",
+    "tools/contractlib.py",
+    "tools/export_html.py",
+    "tools/generate_types.py",
+    "tools/ready_tasks.py",
+    "tools/render_planning_views.py",
+    "tools/run_planning_checks.py",
+    "tools/seal_package.py",
+    "tools/test_validators.py",
+    "tools/validate_package.py"
+  ],
+  "javascript_syntax_checks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "reference/reference.js"
+      ],
+      "exit_code": 0,
+      "scope": "JavaScript syntax only; imports are not installed or executed."
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "probes/hash_parity.mjs"
+      ],
+      "exit_code": 0,
+      "scope": "JavaScript syntax only; imports are not installed or executed."
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "probes/browser/probe.mjs"
+      ],
+      "exit_code": 0,
+      "scope": "JavaScript syntax only; imports are not installed or executed."
+    }
+  ],
+  "typescript_declaration_check": {
+    "version": "Version 5.8.3",
+    "exit_code": 0,
+    "scope": "Generated structural declaration compatibility only; not a selected TypeScript 6 application build."
+  },
+  "network_or_ocr_executed": false
+}

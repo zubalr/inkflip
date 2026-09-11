@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "scope": "analytic affine math only; browser overlays not executed",
+  "seed": 8090,
+  "roundtrips": 10000,
+  "max_error_pt": 5.684341886080801e-13,
+  "tolerance_pt": 1e-05,
+  "worked_example": {
+    "pdf_user": [
+      48,
+      220
+    ],
+    "canonical": [
+      56,
+      340
+    ],
+    "rotated": [
+      360,
+      56
+    ],
+    "raster": [
+      540.0,
+      84.0
+    ],
+    "ocr_crop": [
+      80.0,
+      48.0
+    ]
+  },
+  "corner_cases": 4
+}

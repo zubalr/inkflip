@@ -1,0 +1,18 @@
+# Implementation template. T02 must replace action major tags with reviewed commit SHAs.
+name: verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: corepack enable && corepack prepare pnpm@12.3.4 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify && pnpm build
+      - run: python scripts/check_static_dist.py apps/web/dist --config wrangler.json

@@ -1,0 +1,460 @@
+[
+  {
+    "id": "P01",
+    "hypothesis": "Real-byte amount and clean twin",
+    "task": "T05",
+    "baseline": "Native literal extraction versus generated display",
+    "candidate": "PDFium 5.8.0 + one Tesseract 5.5.0 selected-crop read",
+    "source_ids": [
+      "S22",
+      "S26"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02"
+    ],
+    "clean_controls": "mapping-control.pdf renders identically",
+    "metrics": "Mapped text $1,000; control $100; raster byte equality; OCR crop $100; hashes recorded",
+    "acceptance_rejection": "All four assertions pass on recorded native environment; any mismatch blocks using that output as prepared evidence",
+    "resource_cost": "One crop OCR, two small renders; <4MP each",
+    "execution_status": "executed",
+    "result": "passed",
+    "procedure": "probes/native_probe.py",
+    "result_artifact": "probes/results/native-probe.json",
+    "integration_decision": "Keep actual native prepared evidence; browser result requires P07.",
+    "dependencies": []
+  },
+  {
+    "id": "P02",
+    "hypothesis": "Coordinate round trips and UserUnit",
+    "task": "T04",
+    "baseline": "Unqualified bbox and renderer size",
+    "candidate": "Explicit C/R/S/crop transforms, per-adapter UserUnit handling",
+    "source_ids": [
+      "S22",
+      "S26"
+    ],
+    "fixture_ids": [
+      "F07",
+      "F08",
+      "F09",
+      "F10"
+    ],
+    "clean_controls": "All rotations, nonzero origins, analytic points",
+    "metrics": "10,000 deterministic affine round trips <=1e-5 pt; independent worked vector; native size observation",
+    "acceptance_rejection": "All analytic checks pass; browser p95<=2CSSpx in T04; any wrong-page highlight blocks release",
+    "resource_cost": "No OCR; tiny deterministic math",
+    "execution_status": "executed",
+    "result": "passed_scoped_probe",
+    "procedure": "probes/geometry_probe.py",
+    "result_artifact": "probes/results/geometry-probe.json",
+    "integration_decision": "Keep canonical model. Unsupported transforms downgrade geometry; never guess.",
+    "dependencies": []
+  },
+  {
+    "id": "P03",
+    "hypothesis": "Contract examples and semantic failures",
+    "task": "T03",
+    "baseline": "Shape-only JSON parsing",
+    "candidate": "Closed schema plus strict JSON and semantic checks",
+    "source_ids": [
+      "S32",
+      "S43"
+    ],
+    "fixture_ids": [
+      "F24",
+      "F25",
+      "F26"
+    ],
+    "clean_controls": "Valid empty/partial/cancelled reports",
+    "metrics": "Every valid example accepted; every invalid fixture rejected at declared class; corrupted hash fails",
+    "acceptance_rejection": "No unexpected accept/reject; malformed imported data must never execute or fetch",
+    "resource_cost": "Bounded JSON only",
+    "execution_status": "executed",
+    "result": "passed_scoped_probe",
+    "procedure": "tools/test_validators.py",
+    "result_artifact": "quality/planning-test-results.json",
+    "integration_decision": "Canonical schema remains sole domain model; fix contract coherently, not consumer exceptions.",
+    "dependencies": [],
+    "qualification": "Python planning validator and contract examples executed; browser Ajv parity remains T03, not claimed passed."
+  },
+  {
+    "id": "P04",
+    "hypothesis": "Python and Node evidence identities",
+    "task": "T03",
+    "baseline": "JSON stringify hashes",
+    "candidate": "inkflip-c14n-v1 with explicit scalar keys and binary64 numbers",
+    "source_ids": [
+      "S32"
+    ],
+    "fixture_ids": [
+      "F25"
+    ],
+    "clean_controls": "0,-0,1,1.0,Unicode,emoji and reordered objects",
+    "metrics": "All vectors produce identical SHA-256 in Python/Node; report identity exclusions tested",
+    "acceptance_rejection": "Zero identity drift; adapters use same vectors on release",
+    "resource_cost": "No PDF/OCR/network",
+    "execution_status": "executed",
+    "result": "passed_scoped_probe",
+    "procedure": "probes/hash_parity.mjs",
+    "result_artifact": "probes/results/hash-parity.json",
+    "integration_decision": "Keep canonical encoder. Reject unsafe integer/nonfinite/lone-surrogate input.",
+    "dependencies": [
+      "P03"
+    ]
+  },
+  {
+    "id": "P05",
+    "hypothesis": "Script-free evidence export",
+    "task": "T16",
+    "baseline": "Screenshot-only bug report",
+    "candidate": "Escaped HTML plus disclosed canonical JSON",
+    "source_ids": [
+      "S18",
+      "S43"
+    ],
+    "fixture_ids": [
+      "F24"
+    ],
+    "clean_controls": "Legitimate < > & quotes and hostile HTML-like data",
+    "metrics": "No script/event attributes/external resource URLs; selected source absent; opening makes no request",
+    "acceptance_rejection": "Zero unintended content inclusion or network; second reader can interpret recorded limits",
+    "resource_cost": "One bounded PNG/report",
+    "execution_status": "executed",
+    "result": "passed_generation_and_escaping_tests",
+    "procedure": "tools/export_html.py",
+    "result_artifact": "examples/native-evidence.html",
+    "integration_decision": "Evidence-only remains useful; replay label requires bytes/environment.",
+    "dependencies": [
+      "P03"
+    ],
+    "qualification": "Script-free HTML generated and escaping/inclusion tested. Independent human handoff and deployed browser no-egress are not executed."
+  },
+  {
+    "id": "P06",
+    "hypothesis": "Stale event and parent timeout model",
+    "task": "T11",
+    "baseline": "Blindly accepting delayed events",
+    "candidate": "Generation/digest/sequence validation and disposable child supervision",
+    "source_ids": [
+      "S17"
+    ],
+    "fixture_ids": [
+      "F21",
+      "F22"
+    ],
+    "clean_controls": "Completed empty work not retried; good result survives crash",
+    "metrics": "Old generation rejected; out-of-order rejected; hung test child terminated; successful data retained",
+    "acceptance_rejection": "All protocol checks pass; real browser/native integration fault tests still required",
+    "resource_cost": "One short synthetic child, no parser/large input",
+    "execution_status": "executed",
+    "result": "passed_scoped_probe",
+    "procedure": "probes/lifecycle_probe.py",
+    "result_artifact": "probes/results/lifecycle-probe.json",
+    "integration_decision": "Keep revoke-first model. No claim of complete browser/container containment.",
+    "dependencies": [
+      "P03"
+    ]
+  },
+  {
+    "id": "P07",
+    "hypothesis": "Actual pinned browser feasibility",
+    "task": "T18",
+    "baseline": "Executed native demo only",
+    "candidate": "PDF.js + Tesseract.js actual local File, cancellation/export/import/network trace",
+    "source_ids": [
+      "S22",
+      "S23",
+      "S24"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02",
+      "F07",
+      "F21"
+    ],
+    "clean_controls": "Mapping clean twin and ordinary native page",
+    "metrics": "Correct native/browser named readings, geometric anchor, no stale result, no payload egress, actual model status",
+    "acceptance_rejection": "G1 all required checks pass; no fixture-name conditional; missing npm/browser assets blocks proof",
+    "resource_cost": "Desktop profile; one OCR page/crop <=4MP",
+    "execution_status": "blocked",
+    "result": "not_run",
+    "procedure": "probes/browser/README.md",
+    "result_artifact": "probes/results/browser-status.json",
+    "integration_decision": "Implement selected stack. If pinned patch needs update, T02 locks maintained compatible patch. Native proof never stands in for G1.",
+    "dependencies": [
+      "P01",
+      "P02",
+      "P03",
+      "P05",
+      "P06"
+    ]
+  },
+  {
+    "id": "P08",
+    "hypothesis": "Useful disagreement versus alignment noise",
+    "task": "T12",
+    "baseline": "Viewer+text dump; blanket hidden-text warnings",
+    "candidate": "region-match-v1 and benign-layer handling",
+    "source_ids": [
+      "S02",
+      "S15",
+      "S16"
+    ],
+    "fixture_ids": [
+      "F03",
+      "F11",
+      "F12",
+      "F13",
+      "F14",
+      "F15"
+    ],
+    "clean_controls": "Clean searchable scans and repeated values",
+    "metrics": "Useful-finding precision >=0.95; clean false-findings <=0.05/page; exact amounts/signs never normalized equal",
+    "acceptance_rejection": "Meet predeclared clean/damaged denominators; ambiguous alignments abstain; no safety interpretation",
+    "resource_cost": "Reference 300+300 pages in held-out plan; no unbounded OCR escalation",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "quality/EVALUATION.md",
+    "result_artifact": "artifacts/P08/result.json",
+    "integration_decision": "Selected-region comparison remains mandatory; only enable automatic local claims at measured operating point.",
+    "dependencies": [
+      "P07"
+    ]
+  },
+  {
+    "id": "P09",
+    "hypothesis": "Paint metadata versus rectangular ink",
+    "task": "T41",
+    "baseline": "Near-white or any-dark-pixel bbox heuristics",
+    "candidate": "Documented object render modes plus narrowly scoped paint/ink observations",
+    "source_ids": [
+      "S15",
+      "S16",
+      "S27"
+    ],
+    "fixture_ids": [
+      "F04",
+      "F05",
+      "F06"
+    ],
+    "clean_controls": "White-on-dark, invisible-over-border, partial alpha",
+    "metrics": "Per-mechanism precision/coverage, zero normal-layer alarm, same-point timing",
+    "acceptance_rejection": "Zero hard-control misclassification; metadata reason remains distinct from visibility hypothesis; reject general all-visible claim",
+    "resource_cost": "One <=12MP native render; bounded objects",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "research/UPSTREAM_TECHNIQUES.md",
+    "result_artifact": "artifacts/P09/result.json",
+    "integration_decision": "Documented native object mode is selected; complex compositing remains unavailable unless independently proven.",
+    "dependencies": [
+      "P02",
+      "P08"
+    ]
+  },
+  {
+    "id": "P10",
+    "hypothesis": "Version-isolated regression and baseline integrity",
+    "task": "T34",
+    "baseline": "Same process resolves only one version; auto-refresh goldens",
+    "candidate": "Separate reader profiles, immutable rules/baselines, shared comparator",
+    "source_ids": [
+      "S08",
+      "S18",
+      "S45"
+    ],
+    "fixture_ids": [
+      "F23",
+      "F25"
+    ],
+    "clean_controls": "Unchanged sources; identical run; lost coverage",
+    "metrics": "Changed without rule != regression; coverage loss fails coverage rule; input mismatch incomparable; baseline unchanged",
+    "acceptance_rejection": "All exit-code cases and non-overwrite tests pass; no imported profile execution",
+    "resource_cost": "Two isolated local envs, explicit setup network only",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "deployment/examples/reader-upgrade.sh",
+    "result_artifact": "artifacts/P10/result.json",
+    "integration_decision": "Ship local/CI workflow. Profile install failure is explicit, no silent fallback reader.",
+    "dependencies": [
+      "P03",
+      "P04"
+    ]
+  },
+  {
+    "id": "P11",
+    "hypothesis": "Targeted OCR retry value",
+    "task": "T42",
+    "baseline": "Single selected-page OCR, no reread",
+    "candidate": "Padded selected/mismatched-region rerun with inverse transform",
+    "source_ids": [
+      "S20"
+    ],
+    "fixture_ids": [
+      "F14",
+      "F15",
+      "F16"
+    ],
+    "clean_controls": "Adjacent-field crops and normal clean rows",
+    "metrics": ">=20% more useful target recoveries at <=1pp precision loss; all transformed anchors valid; within run pixel/time limits",
+    "acceptance_rejection": "Predeclared baseline/candidate seeds and same inputs; reject if gains require clipping neighbors or more false alerts",
+    "resource_cost": "At most original job total20MP and120s desktop",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "architecture/READER_ADAPTER_CONTRACT.md",
+    "result_artifact": "artifacts/P11/result.json",
+    "integration_decision": "Default off until accepted; explicit user-selected OCR remains available.",
+    "dependencies": [
+      "P07",
+      "P08"
+    ]
+  },
+  {
+    "id": "P12",
+    "hypothesis": "Secondary browser PDFium reader",
+    "task": "T43",
+    "baseline": "PDF.js plus OCR",
+    "candidate": "EmbedPDF PDFium release v2.15.0; pdfium-dist.tar.gz pinned to source S48 digest; no full viewer integration.",
+    "source_ids": [
+      "S22",
+      "S26",
+      "S48"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F07",
+      "F11",
+      "F12"
+    ],
+    "clean_controls": "Clean mapping twin and same-reader control",
+    "metrics": "Complementary inspectable differences; all chunks <24MiB; cold OCR+optional budget disclosed; <=512MiB reference peak",
+    "acceptance_rejection": "At least one generalizable mechanism benefit at fixed review budget; public API and full notices; no private undocumented glyph claim",
+    "resource_cost": "Optional lazy download, max one active secondary reader",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "architecture/CAPABILITIES.md",
+    "result_artifact": "artifacts/P12/result.json",
+    "integration_decision": "Selected default unavailable. Rejection closes experiment; browser core remains complete.",
+    "dependencies": [
+      "P07",
+      "P08"
+    ]
+  },
+  {
+    "id": "P13",
+    "hypothesis": "Native RapidOCR complement",
+    "task": "T44",
+    "baseline": "Tesseract native reader",
+    "candidate": "RapidOCR v3.8.1 with one PP-OCRv5 mobile English configuration; exact official weights and notices must be locked before execution.",
+    "source_ids": [
+      "S19",
+      "S20",
+      "S21",
+      "S47"
+    ],
+    "fixture_ids": [
+      "F14",
+      "F15",
+      "F16"
+    ],
+    "clean_controls": "Same renders, clean text and missing-region negatives",
+    "metrics": "Complementary useful findings at fixed precision; timing/RSS/model bytes/rights measured",
+    "acceptance_rejection": "Keep only if coverage gain survives clean controls and distribution audit; engine agreement never truth",
+    "resource_cost": "Native profile1GiB child cap; no runtime download",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "security/LICENSE_AND_ATTRIBUTION.md",
+    "result_artifact": "artifacts/P13/result.json",
+    "integration_decision": "Default not installed. Candidate and rejected artifacts stay in experiment namespace.",
+    "dependencies": [
+      "P08"
+    ]
+  },
+  {
+    "id": "P14",
+    "hypothesis": "Original-preserving geometric raster experiment",
+    "task": "T45",
+    "baseline": "Unmodified render OCR",
+    "candidate": "Single deskew or strip-registration candidate with full transform chain",
+    "source_ids": [
+      "S19",
+      "S21"
+    ],
+    "fixture_ids": [
+      "F06",
+      "F07",
+      "F15"
+    ],
+    "clean_controls": "Ordinary ruled forms, already aligned clean pages",
+    "metrics": "No clean-control corruption; accepted alignment roundtrip; incremental recovery measured separately",
+    "acceptance_rejection": "Reject broad reconstruction or generator-only benefit. Any source registration loss rejects result",
+    "resource_cost": "One candidate transform per chosen crop, no PDF mutation",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "quality/FIXTURE_PROGRAM.md",
+    "result_artifact": "artifacts/P14/result.json",
+    "integration_decision": "Default rejected from production until demonstrated; never automated repair/sanitization.",
+    "dependencies": [
+      "P02",
+      "P08"
+    ]
+  },
+  {
+    "id": "P15",
+    "hypothesis": "Runtime parity, assets and compatibility",
+    "task": "T46",
+    "baseline": "One dev-machine success",
+    "candidate": "Pinned browser/native manifests, cold/warm renders and repeated output checks",
+    "source_ids": [
+      "S26",
+      "S29",
+      "S45"
+    ],
+    "fixture_ids": [
+      "F07",
+      "F10",
+      "F23",
+      "F25"
+    ],
+    "clean_controls": "Same reader/build/platform repeated; explicit engine differences",
+    "metrics": "Stable semantic report for repeated fixed environment; explained cross-engine differences; no stale cache mixing",
+    "acceptance_rejection": "No unexplained parity in promised equivalence; show unsupported elsewhere",
+    "resource_cost": "Supported Chromium/Firefox/WebKit and native platform matrix, resource profile recorded",
+    "execution_status": "proposed",
+    "result": "not_run",
+    "procedure": "quality/PERFORMANCE_AND_COMPATIBILITY.md",
+    "result_artifact": "artifacts/P15/result.json",
+    "integration_decision": "Capabilities vary explicitly; do not claim cross-engine pixel identity.",
+    "dependencies": [
+      "P04",
+      "P07",
+      "P10"
+    ]
+  },
+  {
+    "id": "P16",
+    "hypothesis": "Interaction reference rendering",
+    "task": "T06",
+    "baseline": "Prose-only UI plan",
+    "candidate": "Prepared-native-data HTML reference at wide/narrow widths",
+    "source_ids": [
+      "S42"
+    ],
+    "fixture_ids": [
+      "F01"
+    ],
+    "clean_controls": "Source crop and sample labels always visible",
+    "metrics": "No horizontal overflow; mode buttons keyboard usable; disclosure/details readable; screenshots inspected",
+    "acceptance_rejection": "Fix clipping/illegible labels before handing design to workers; not an accessibility certification",
+    "resource_cost": "Local Chromium, no model inference",
+    "execution_status": "executed",
+    "result": "passed_scoped_probe",
+    "procedure": "probes/reference_probe.py",
+    "result_artifact": "probes/results/reference-probe.json",
+    "integration_decision": "Use reference as visual target, never production own-file processing proof.",
+    "dependencies": [
+      "P01"
+    ],
+    "qualification": "Owned HTML rendered with local DOM injection because localhost navigation was blocked by environment policy. Four screenshots inspected. Not a PDF.js/Tesseract.js or hosting/privacy test."
+  }
+]

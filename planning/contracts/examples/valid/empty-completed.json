@@ -1,0 +1,287 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "eea3ee625924247595cfbfec571bb663bf23bf25351b4686c68b489fa25e774b",
+  "document": {
+    "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+    "byte_length": 1437,
+    "page_count": 1,
+    "display_name": null,
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "r_pdfium",
+      "name": "PDFium via pypdfium2",
+      "version": "5.8.0",
+      "build": "PDFium 149.0.7825.0",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "Recorded fixed probe only; product adapter is not implemented."
+          ]
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "This is an executed native fixture probe, not a browser benchmark."
+      ]
+    },
+    {
+      "id": "r_tesseract",
+      "name": "Tesseract",
+      "version": "5.5.0",
+      "build": "native CLI; English tessdata_fast",
+      "adapter_version": "1.0.0",
+      "method": "ocr",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": "eng",
+        "psm": 7,
+        "render_reader_id": "r_pdfium",
+        "raster_dpi": 144,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "ocr",
+          "support": "supported",
+          "limits": [
+            "Recorded fixed probe only; product adapter is not implemented."
+          ]
+        }
+      ],
+      "model_hashes": [
+        "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      ],
+      "limitations": [
+        "This is an executed native fixture probe, not a browser benchmark."
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "crop_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "effective_view_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "box_source": "Generated fixed source and native page metadata",
+      "user_unit": 1,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "raw_to_canonical_transform_id": "t_canonical",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_canonical",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "Fixed source geometry; API character extents"
+    },
+    {
+      "id": "t_raster",
+      "page_index": 0,
+      "from_space": "canonical:p0",
+      "to_space": "raster:amount",
+      "matrix": [
+        2,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "inverse": [
+        0.5,
+        0,
+        0,
+        0.5,
+        0,
+        0
+      ],
+      "operation": "raster_scale",
+      "precision": "exact",
+      "source": "PDFium page.render(scale=2)"
+    },
+    {
+      "id": "t_crop",
+      "page_index": 0,
+      "from_space": "raster:amount",
+      "to_space": "ocr:amount",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        -80,
+        -244
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        80,
+        244
+      ],
+      "operation": "crop_translation",
+      "precision": "exact",
+      "source": "Fixed selected input crop [80,244,400,390] pixels"
+    }
+  ],
+  "occurrences": [],
+  "findings": [],
+  "annotations": [],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [
+      {
+        "id": "region_amount",
+        "page_index": 0,
+        "geometry": {
+          "precision": "exact",
+          "space": "canonical_page",
+          "polygon": [
+            [
+              40,
+              122
+            ],
+            [
+              200,
+              122
+            ],
+            [
+              200,
+              195
+            ],
+            [
+              40,
+              195
+            ]
+          ],
+          "transform_ids": [
+            "t_canonical"
+          ],
+          "basis": "Selected crop boundary in canonical points"
+        },
+        "label": "Selected amount crop"
+      }
+    ],
+    "checks": [
+      {
+        "id": "c_native",
+        "page_index": 0,
+        "reader_ids": [
+          "r_pdfium"
+        ],
+        "capability": "native_text",
+        "region_id": "region_amount"
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "native",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "c_native",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    }
+  ],
+  "execution": {
+    "execution_id": "94b59f8e-32d9-474d-ae09-29dd07f7c4c7",
+    "run_key": "69a978e4f87f0b5e5bb6dae05f7823fb60c445fbb10bd55a7317b9f1c6478668",
+    "status": "complete",
+    "started_at": "2026-09-11T15:46:53.540512+00:00",
+    "duration_ms": 269,
+    "environment": "Python 3.13.5; Linux x86_64; Pillow 12.3.0",
+    "result_origin": "contract_example",
+    "errors": []
+  },
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "document_hash",
+      "settings",
+      "coverage"
+    ],
+    "omissions": [
+      "Original PDF excluded.",
+      "Filename excluded.",
+      "Other extracted source occurrences excluded.",
+      "Reader runtime binaries and model bytes excluded."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  },
+  "assets": [],
+  "limitations": [
+    "Synthetic contract fixture, not measured reader output."
+  ]
+}

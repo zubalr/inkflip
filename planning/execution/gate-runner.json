@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "gate_manifest": "execution/gates.json",
+  "task_manifest": "execution/tasks.json",
+  "state_file": "execution/state.json",
+  "plan_paths": "Paths refer to the target repository after bootstrap; planning/execution retains the immutable source snapshot.",
+  "recursive_gate_dispatch": false,
+  "pre_release": {
+    "required_gate_ids": [
+      "G1",
+      "G2",
+      "G3",
+      "G4"
+    ],
+    "required_task_ids": [
+      "T48",
+      "T49",
+      "T50"
+    ],
+    "scenario_commands": [
+      "python -m unittest discover -s tests/gates/final -v"
+    ],
+    "owner_task": "T55",
+    "deploys": false
+  },
+  "public_release": {
+    "gate_id": "G5",
+    "owner_task": "T54",
+    "requires_owner_approval": true,
+    "origin_environment_variable": "INKFLIP_PUBLIC_ORIGIN",
+    "deploy_is_explicit_runbook_step": true
+  },
+  "collection_policy": "Any registered scenario with zero collected tests is a failure. Missing, skipped or stale required receipts cannot be treated as accepted. The runner does not automatically update baselines or invoke publication."
+}

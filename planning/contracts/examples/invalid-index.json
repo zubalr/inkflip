@@ -1,0 +1,122 @@
+[
+  {
+    "path": "contracts/examples/invalid/missing-schema-version.json",
+    "expected_code": "SCHEMA"
+  },
+  {
+    "path": "contracts/examples/invalid/unknown-property.json",
+    "expected_code": "SCHEMA"
+  },
+  {
+    "path": "contracts/examples/invalid/unknown-reader.json",
+    "expected_code": "REFERENCE"
+  },
+  {
+    "path": "contracts/examples/invalid/duplicate-occurrence.json",
+    "expected_code": "ID"
+  },
+  {
+    "path": "contracts/examples/invalid/wrong-page.json",
+    "expected_code": "REFERENCE"
+  },
+  {
+    "path": "contracts/examples/invalid/fabricated-geometry.json",
+    "expected_code": "GEOMETRY"
+  },
+  {
+    "path": "contracts/examples/invalid/wrong-inverse.json",
+    "expected_code": "TRANSFORM"
+  },
+  {
+    "path": "contracts/examples/invalid/double-user-unit.json",
+    "expected_code": "GEOMETRY"
+  },
+  {
+    "path": "contracts/examples/invalid/erased-digit.json",
+    "expected_code": "NORMALIZATION"
+  },
+  {
+    "path": "contracts/examples/invalid/missing-terminal-check.json",
+    "expected_code": "COVERAGE"
+  },
+  {
+    "path": "contracts/examples/invalid/false-complete.json",
+    "expected_code": "COVERAGE"
+  },
+  {
+    "path": "contracts/examples/invalid/incomplete-without-reason.json",
+    "expected_code": "COVERAGE"
+  },
+  {
+    "path": "contracts/examples/invalid/unsupported-as-evidence.json",
+    "expected_code": "EVIDENCE"
+  },
+  {
+    "path": "contracts/examples/invalid/one-reader-difference.json",
+    "expected_code": "EVIDENCE"
+  },
+  {
+    "path": "contracts/examples/invalid/hidden-filename.json",
+    "expected_code": "PRIVACY"
+  },
+  {
+    "path": "contracts/examples/invalid/replay-without-source.json",
+    "expected_code": "REPLAY"
+  },
+  {
+    "path": "contracts/examples/invalid/corrupt-asset.json",
+    "expected_code": "ASSET"
+  },
+  {
+    "path": "contracts/examples/invalid/tampered-report-hash.json",
+    "expected_code": "HASH"
+  },
+  {
+    "path": "contracts/examples/invalid/judgment-without-rule.json",
+    "expected_code": "RULE"
+  },
+  {
+    "path": "contracts/examples/invalid/different-document-unchanged.json",
+    "expected_code": "DOCUMENT"
+  },
+  {
+    "path": "contracts/examples/invalid/unsafe-corpus-path.json",
+    "expected_code": "PATH"
+  },
+  {
+    "path": "contracts/examples/invalid/terminal-without-status.json",
+    "expected_code": "MESSAGE"
+  },
+  {
+    "path": "contracts/examples/invalid/undisclosed-reading-text.json",
+    "expected_code": "PRIVACY"
+  },
+  {
+    "path": "contracts/examples/invalid/undisclosed-annotation.json",
+    "expected_code": "PRIVACY"
+  },
+  {
+    "path": "contracts/examples/invalid/uncited-reading-support.json",
+    "expected_code": "EVIDENCE"
+  },
+  {
+    "path": "contracts/examples/invalid/degenerate-highlight.json",
+    "expected_code": "GEOMETRY"
+  },
+  {
+    "path": "contracts/examples/invalid/png-disguised-as-original.json",
+    "expected_code": "ASSET"
+  },
+  {
+    "path": "contracts/examples/invalid/undisclosed-full-page-image.json",
+    "expected_code": "PRIVACY"
+  },
+  {
+    "path": "contracts/examples/invalid/duplicate-check-occurrence.json",
+    "expected_code": "ID"
+  },
+  {
+    "path": "contracts/examples/invalid/cross-page-geometry-transform.json",
+    "expected_code": "TRANSFORM"
+  }
+]

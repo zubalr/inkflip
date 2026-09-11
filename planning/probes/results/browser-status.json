@@ -1,0 +1,11 @@
+{
+  "probe_id": "P07",
+  "status": "blocked",
+  "result": "not_run",
+  "reason": "npm registry network access from the planning container failed; the selected PDF.js/Tesseract.js packages were not installed or executed.",
+  "source_files_delivered": true,
+  "native_proof_is_not_browser_proof": true,
+  "next_task": "T02 resolves actual dependencies, then T18 executes G1 on the implemented own-file path.",
+  "registry_diagnostic": "registry-access.json",
+  "diagnostic_summary": "The bounded npm request exited 1 with DNS EAI_AGAIN for registry.npmjs.org; this is not evidence that the chosen package version does not exist."
+}

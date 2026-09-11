@@ -1,0 +1,37 @@
+{
+  "kind": "acceptance_rules",
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "preserve-native-amount",
+      "type": "expected_text",
+      "document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "page_index": 0,
+      "reader_id": "r_pdfium",
+      "region_id": "region_amount",
+      "expected_text": "$1,000",
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": null,
+      "explanation": "Fixture expectation is the intended mapped extraction, not a claim about the visible amount."
+    },
+    {
+      "id": "retain-native-coverage",
+      "type": "required_coverage",
+      "document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "page_index": 0,
+      "reader_id": "r_pdfium",
+      "region_id": null,
+      "expected_text": null,
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": "native_text",
+      "explanation": "Reader upgrade may not pass by skipping the read."
+    }
+  ],
+  "policy": {
+    "fail_on_coverage_loss": true,
+    "fail_on_error": true,
+    "unruled_change": "changed"
+  }
+}

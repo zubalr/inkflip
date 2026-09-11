@@ -1,0 +1,17 @@
+# Target-repository recipe, completed after T02 and T29. Not a built planning artifact.
+# BASE_IMAGE must be a reviewed digest-pinned Python 3.13 image prepared by T02,
+# with native Tesseract, the selected patched Node 22 runtime, and all corresponding
+# linked-library notices already installed. The fixed Node comparison entry point
+# is required; copying JavaScript alone does not supply a Node executable.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+WORKDIR /app
+COPY native/dist/ /wheels/
+COPY release/native-requirements.lock /locks/requirements.lock
+RUN python -m pip install --no-index --find-links=/wheels --require-hashes -r /locks/requirements.lock
+COPY release/node/ /app/node/
+COPY release/models/ /app/models/
+COPY release/notices/ /app/notices/
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+USER 65532:65532
+ENTRYPOINT ["inkflip"]

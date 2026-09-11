@@ -1,0 +1,118 @@
+[
+  {
+    "id": "G1",
+    "title": "Real browser own-file evidence loop",
+    "task": "T18",
+    "exit_criteria": "Real interesting PDF plus clean control, source geometry, local own-file path, cancellation/replace, selected export/reopen and no-egress on merged branch.",
+    "required_task_ids": [
+      "T01",
+      "T02",
+      "T03",
+      "T04",
+      "T05",
+      "T06",
+      "T07",
+      "T08",
+      "T09",
+      "T10",
+      "T11",
+      "T12",
+      "T13",
+      "T14",
+      "T15",
+      "T16",
+      "T17",
+      "T22",
+      "T24"
+    ],
+    "status": "not_executed_product_gate",
+    "scenario_commands": [
+      "pnpm exec playwright test tests/gates/g1.spec.ts"
+    ],
+    "runner_policy": "Verify accepted prerequisite receipts against the merged candidate, execute these scenario commands, reject zero collected tests or missing manual evidence, and write a fresh gate receipt. Do not recursively invoke task acceptance commands for gate-owner tasks."
+  },
+  {
+    "id": "G2",
+    "title": "Complete public investigation surface",
+    "task": "T51",
+    "exit_criteria": "All six real examples, advanced occurrence/ambiguity UI, supported large/mobile profiles, import/export/privacy and explicit offline model behavior work without native.",
+    "required_task_ids": [
+      "T19",
+      "T20",
+      "T21",
+      "T23",
+      "T25"
+    ],
+    "status": "not_executed_product_gate",
+    "scenario_commands": [
+      "pnpm exec playwright test tests/gates/g2.spec.ts"
+    ],
+    "runner_policy": "Verify accepted prerequisite receipts against the merged candidate, execute these scenario commands, reject zero collected tests or missing manual evidence, and write a fresh gate receipt. Do not recursively invoke task acceptance commands for gate-owner tasks."
+  },
+  {
+    "id": "G3",
+    "title": "Complete local native and regression surface",
+    "task": "T52",
+    "exit_criteria": "Native readers/checks, bounded corpus, exact exit codes, isolated versions, immutable baselines, rule-aware comparison and local CI example all execute.",
+    "required_task_ids": [
+      "T26",
+      "T27",
+      "T28",
+      "T29",
+      "T30",
+      "T31",
+      "T32",
+      "T33",
+      "T34",
+      "T35"
+    ],
+    "status": "not_executed_product_gate",
+    "scenario_commands": [
+      "uv run --project native python -m pytest native/tests/gates -q"
+    ],
+    "runner_policy": "Verify accepted prerequisite receipts against the merged candidate, execute these scenario commands, reject zero collected tests or missing manual evidence, and write a fresh gate receipt. Do not recursively invoke task acceptance commands for gate-owner tasks."
+  },
+  {
+    "id": "G4",
+    "title": "Quality, security, accessibility and rights",
+    "task": "T53",
+    "exit_criteria": "All essential invariant/device/fault/held-out targets and manual receipts pass; experiment decisions and shipped licenses/assets are closed.",
+    "required_task_ids": [
+      "T36",
+      "T37",
+      "T38",
+      "T39",
+      "T40",
+      "T41",
+      "T42",
+      "T43",
+      "T44",
+      "T45",
+      "T46",
+      "T47"
+    ],
+    "status": "not_executed_product_gate",
+    "scenario_commands": [
+      "python -m unittest discover -s tests/gates/quality -v",
+      "python scripts/check_manual_receipts.py release"
+    ],
+    "runner_policy": "Verify accepted prerequisite receipts against the merged candidate, execute these scenario commands, reject zero collected tests or missing manual evidence, and write a fresh gate receipt. Do not recursively invoke task acceptance commands for gate-owner tasks."
+  },
+  {
+    "id": "G5",
+    "title": "Actual safe static release and rollback",
+    "task": "T54",
+    "exit_criteria": "Final merged review, docs/claims, owner approval, actual deployed request-path/privacy/header checks and rollback proof on exact archived release.",
+    "required_task_ids": [
+      "T48",
+      "T49",
+      "T50",
+      "T55"
+    ],
+    "status": "not_executed_product_gate",
+    "scenario_commands": [
+      "pnpm exec playwright test tests/deployment/public.spec.ts"
+    ],
+    "runner_policy": "Verify accepted prerequisite receipts against the merged candidate, execute these scenario commands, reject zero collected tests or missing manual evidence, and write a fresh gate receipt. Do not recursively invoke task acceptance commands for gate-owner tasks."
+  }
+]

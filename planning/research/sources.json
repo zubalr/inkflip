@@ -1,0 +1,482 @@
+[
+  {
+    "id": "S01",
+    "title": "mib-intake / mib/pdfio.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/mib/pdfio.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Color/alpha/crop heuristics and Span geometry exist; no complete compositing model.",
+    "remaining_verification": "Read source, not executed on challenge corpus."
+  },
+  {
+    "id": "S02",
+    "title": "mib-intake / mib/extract.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/mib/extract.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Observation loses geometry; fallback boxes are separate; value deduplication can erase occurrences.",
+    "remaining_verification": "Relevant definitions/absorption paths inspected; not every branch exercised."
+  },
+  {
+    "id": "S03",
+    "title": "mib-intake / mib/schema.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/mib/schema.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Plausible fallback values meet a challenge-specific output contract.",
+    "remaining_verification": "Do not import fallback semantics."
+  },
+  {
+    "id": "S04",
+    "title": "mib-intake / MEMO.md",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/MEMO.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "137.89 is explicitly in-sample; model-fold diagnostic has globally fitted path prior.",
+    "remaining_verification": "No score reproduction; no private ranking."
+  },
+  {
+    "id": "S05",
+    "title": "mib-intake / APPENDIX.md",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/APPENDIX.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Output-only repairs, calibration caveats and environment-sensitive OCR matter.",
+    "remaining_verification": "Documented gains are author reports, not reproduced results."
+  },
+  {
+    "id": "S06",
+    "title": "mib-intake / mib/cli.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/mib/cli.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Batch submits extraction then finalizes with corpus context and writes at end.",
+    "remaining_verification": "Relevant lifecycle section inspected; no challenge run."
+  },
+  {
+    "id": "S07",
+    "title": "mib-intake / mib/model.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/mib/model.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Joblib-loaded legacy classifier, blending and safety decisions are task-specific.",
+    "remaining_verification": "Binary was not deserialized. No new product confidence model."
+  },
+  {
+    "id": "S08",
+    "title": "mib-intake / tools/train_adjudicator.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/tools/train_adjudicator.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Global path probabilities and corpus context precede folds.",
+    "remaining_verification": "Do not treat estimator CV alone as untouched end-to-end evaluation."
+  },
+  {
+    "id": "S09",
+    "title": "mib-intake / tests/test_pdfio.py",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/tests/test_pdfio.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Focused visible/white/invisible/off-crop fixtures; broader control coverage missing.",
+    "remaining_verification": "Read, not executed in legacy environment."
+  },
+  {
+    "id": "S10",
+    "title": "mib-intake / requirements.txt",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/requirements.txt",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Legacy dependency pins include PyMuPDF and OCR/model stack.",
+    "remaining_verification": "Not adopted as new product dependency lock."
+  },
+  {
+    "id": "S11",
+    "title": "mib-intake / Dockerfile",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/Dockerfile",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Floating base/apt inputs and no non-root USER despite offline run instructions.",
+    "remaining_verification": "Not a proof of parser isolation or bit-reproducible image."
+  },
+  {
+    "id": "S12",
+    "title": "mib-intake / LICENSE",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/LICENSE",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Own source is MIT; dependency obligations remain separate.",
+    "remaining_verification": "No blanket legal conclusion for combined stack."
+  },
+  {
+    "id": "S13",
+    "title": "mib-intake / README.md",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/README.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Historical product, source layout and license disclosures.",
+    "remaining_verification": "README is not runtime evidence."
+  },
+  {
+    "id": "S14",
+    "title": "Challenge evaluator",
+    "url": "https://github.com/8090-inc/mib-doc-challenge/blob/38ce8883dea9f87c27a8a95f134e54fe8b673064/scripts/evaluate.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "38ce8883dea9f87c27a8a95f134e54fe8b673064",
+    "status": "source-verified",
+    "interpretation": "Weighted fields, blank flag normalization, unrecoverable exclusions, payoff and Brier objective explain old compromises.",
+    "remaining_verification": "Relevant 1–240 lines inspected, not rerun."
+  },
+  {
+    "id": "S15",
+    "title": "Vishnu visibility",
+    "url": "https://github.com/vishnualpha/mib-doc-challenge-solution/blob/ca1a1e24c495b08d0d6e4b92c1723389247e2ca2/mib/visibility.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "ca1a1e24c495b08d0d6e4b92c1723389247e2ca2",
+    "status": "source-verified",
+    "interpretation": "Retained reasons, shared seqno, preceding fills versus later covers; thresholds are approximations.",
+    "remaining_verification": "No reproduction; trace type must not be assumed identical to all PDF Tr values."
+  },
+  {
+    "id": "S16",
+    "title": "Henry reader and memo",
+    "url": "https://github.com/henrybrewer00-dotcom/mib-doc-solution/blob/f9f751ee7ea779cc549c3bcff5960020c2517e72/mibdoc/reader.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "f9f751ee7ea779cc549c3bcff5960020c2517e72",
+    "status": "source-verified",
+    "interpretation": "Reader excerpts and memo identify unrelated border ink as a failure of box-ink corroboration.",
+    "remaining_verification": "Reader excerpts, not full file audit or runtime proof; memo and PR differ about presence features."
+  },
+  {
+    "id": "S17",
+    "title": "Handeman watchdog tests",
+    "url": "https://github.com/handemanai/mib-doc-challenge-solution/blob/4313d28b34abc4cef4c89586060f4d3d34848c88/tests/test_watchdog.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "4313d28b34abc4cef4c89586060f4d3d34848c88",
+    "status": "source-verified",
+    "interpretation": "Tests distinguish explicit empty success, retries, recycling and parent-supervised hangs.",
+    "remaining_verification": "First 150 lines and reviewer guide inspected; tests not executed."
+  },
+  {
+    "id": "S18",
+    "title": "BMD attribution",
+    "url": "https://github.com/bmdhodl/mib-doc-solution/blob/1846faa62473a2a5691db314ccefe6df82f15268/ATTRIBUTION.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "1846faa62473a2a5691db314ccefe6df82f15268",
+    "status": "source-verified",
+    "interpretation": "Pinned derivative lineage and explicit exclusions prevent false independent-evidence claims.",
+    "remaining_verification": "Their scores and artifact inventories are author reports."
+  },
+  {
+    "id": "S19",
+    "title": "Arthur experiment ledger",
+    "url": "https://github.com/arthurmichel00/mib-doc-solution/blob/80453d557e3b57d8f426bb81001a7e12ea087d90/LEVERS.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "80453d557e3b57d8f426bb81001a7e12ea087d90",
+    "status": "source-verified",
+    "interpretation": "Shipped, dormant, redundant, unproven and harmful experiments are distinct.",
+    "remaining_verification": "Relevant ledger sections inspected, not all code or reported experiments executed."
+  },
+  {
+    "id": "S20",
+    "title": "Selective OCR",
+    "url": "https://github.com/zeroinfinity03/mib-doc-challenge-solution/blob/1a0ccbedcafaa0d5499f7bb13a3108f754199e32/step2_ocr.py",
+    "access_date": "2026-09-11",
+    "version_or_commit": "1a0ccbedcafaa0d5499f7bb13a3108f754199e32",
+    "status": "source-verified",
+    "interpretation": "Targeted rereading can be bounded; fixed top-band and text dedupe are template-specific.",
+    "remaining_verification": "A replacement text without updated geometry is unsuitable for this product; no gain reproduced."
+  },
+  {
+    "id": "S21",
+    "title": "Shrey geometry/candidate code",
+    "url": "https://github.com/ShreyShingala/ocr-document-pipeline-challenge/tree/5508a8bc36faacdafbea768554923346f895a8c5",
+    "access_date": "2026-09-11",
+    "version_or_commit": "5508a8bc36faacdafbea768554923346f895a8c5",
+    "status": "source-verified",
+    "interpretation": "Indexed row_restore/closed_vocab/ocr excerpts provide narrow geometry leads.",
+    "remaining_verification": "Discovery-level excerpts and PR only; not an adopted implementation."
+  },
+  {
+    "id": "S22",
+    "title": "PDF.js API",
+    "url": "https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html",
+    "access_date": "2026-09-11",
+    "version_or_commit": "selected release 6.3.289; mutable API documentation",
+    "status": "source-verified",
+    "interpretation": "getDocument/getTextContent/getViewport/RenderTask and TextItem transform are the public browser boundary.",
+    "remaining_verification": "No glyph paint provenance promised. Exact selected browser build not executed here."
+  },
+  {
+    "id": "S23",
+    "title": "PDF.js release",
+    "url": "https://github.com/mozilla/pdf.js/releases/tag/v6.3.289",
+    "access_date": "2026-09-11",
+    "version_or_commit": "6.3.289",
+    "status": "source-verified",
+    "interpretation": "Published release with modern and legacy distributions.",
+    "remaining_verification": "Download unavailable in this container; package lock/security audit and browser probe required."
+  },
+  {
+    "id": "S24",
+    "title": "Tesseract.js API and README",
+    "url": "https://github.com/naptha/tesseract.js/blob/v7.0.0/src/index.d.ts",
+    "access_date": "2026-09-11",
+    "version_or_commit": "7.0.0",
+    "status": "source-verified",
+    "interpretation": "Image input, explicit blocks output, createWorker options and termination; rasterize PDFs first.",
+    "remaining_verification": "Browser worker/CSP/offline combination must be executed after npm install."
+  },
+  {
+    "id": "S25",
+    "title": "Tesseract English data",
+    "url": "https://github.com/tesseract-ocr/tessdata_fast/tree/65727574dfcd264acbb0c3e07860e4e9e9b22185",
+    "access_date": "2026-09-11",
+    "version_or_commit": "65727574dfcd264acbb0c3e07860e4e9e9b22185",
+    "status": "executed",
+    "interpretation": "Official tree eng blob matches installed 4,113,088-byte model used by probe. Apache-2.0 license read.",
+    "remaining_verification": "Model is not bundled in this planning ZIP; fetch and verify exact hash at product bootstrap."
+  },
+  {
+    "id": "S26",
+    "title": "pypdfium2 API and licensing",
+    "url": "https://pypdfium2.readthedocs.io/en/stable/readme.html",
+    "access_date": "2026-09-11",
+    "version_or_commit": "5.8.0 installed / PDFium 149.0.7825.0",
+    "status": "executed",
+    "interpretation": "Native rendering/text are usable; concurrent PDFium threads are unsafe; wrapper/build notices separate.",
+    "remaining_verification": "Public helper API is a support-model choice; cross-platform parity and full packaged wheel licenses gate release."
+  },
+  {
+    "id": "S27",
+    "title": "PDFium text object API",
+    "url": "https://pdfium.googlesource.com/pdfium/+/refs/heads/main/public/fpdf_edit.h",
+    "access_date": "2026-09-11",
+    "version_or_commit": "public header; symbols found in installed PDFium 149.0.7825.0",
+    "status": "source-verified",
+    "interpretation": "FPDFTextObj_GetTextRenderMode and FPDFTextObj_GetText are real API names.",
+    "remaining_verification": "Availability verified, not comprehensive object-to-character binding or paint-order correctness."
+  },
+  {
+    "id": "S28",
+    "title": "pypdf release",
+    "url": "https://pypi.org/project/pypdf/6.18.0/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "6.18.0 / source 18e4c226a4c2dd7f187854015f52e87350f84161",
+    "status": "source-verified",
+    "interpretation": "Choose current pinned pypdf for page dictionary metadata and independent page-level text. BSD-3-Clause.",
+    "remaining_verification": "Executed exploratory pypdf was 5.9.0, not this selected version; rerun before integration."
+  },
+  {
+    "id": "S29",
+    "title": "Vite React TS template",
+    "url": "https://github.com/vitejs/vite/blob/1aec41b32510681131c6fa6978ddc227fa6f3aa8/packages/create-vite/template-react-ts/package.json",
+    "access_date": "2026-09-11",
+    "version_or_commit": "1aec41b32510681131c6fa6978ddc227fa6f3aa8",
+    "status": "source-verified",
+    "interpretation": "Pins usable starting families: Vite 8.3, React 19.2.8, TS 6.0.2, plugin-react 6.1.1.",
+    "remaining_verification": "Resolve transitive lock and build; a template is not a security audit."
+  },
+  {
+    "id": "S30",
+    "title": "Static Next.js alternative",
+    "url": "https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/static-exports.mdx",
+    "access_date": "2026-09-11",
+    "version_or_commit": "inspected blob c5fa38612c66070efe46dd1aa3aae4d7b426d18f",
+    "status": "source-verified",
+    "interpretation": "output:export produces static files; Next.js does not inherently require paid SSR.",
+    "remaining_verification": "Rejected here for unnecessary conventions, not inability to host statically."
+  },
+  {
+    "id": "S31",
+    "title": "pnpm release",
+    "url": "https://github.com/pnpm/pnpm/releases/tag/v12.3.4",
+    "access_date": "2026-09-11",
+    "version_or_commit": "12.3.4",
+    "status": "source-verified",
+    "interpretation": "Pinned package manager; one integration owner controls lockfile.",
+    "remaining_verification": "Registry fetch unavailable in current container."
+  },
+  {
+    "id": "S32",
+    "title": "Ajv package",
+    "url": "https://github.com/ajv-validator/ajv/blob/v8.17.1/package.json",
+    "access_date": "2026-09-11",
+    "version_or_commit": "8.17.1",
+    "status": "source-verified",
+    "interpretation": "MIT validator; use build-time standalone output for browser strict CSP.",
+    "remaining_verification": "Browser compilation and compatibility test still required."
+  },
+  {
+    "id": "S33",
+    "title": "Cloudflare static billing",
+    "url": "https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "documentation last updated 2026-04-23",
+    "status": "source-verified",
+    "interpretation": "Static requests/storage documented without incremental charge; Worker execution billed separately.",
+    "remaining_verification": "No account inspection, deployment or perpetual price guarantee."
+  },
+  {
+    "id": "S34",
+    "title": "Cloudflare static setup",
+    "url": "https://developers.cloudflare.com/workers/static-assets/get-started/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "documentation accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Static-site route supports local wrangler dev and deploy; deploy can be declined during setup.",
+    "remaining_verification": "Use explicit config, not scaffold defaults that create a script."
+  },
+  {
+    "id": "S35",
+    "title": "Cloudflare headers",
+    "url": "https://developers.cloudflare.com/workers/static-assets/headers/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "documentation accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Static _headers controls response headers.",
+    "remaining_verification": "Validate on actual preview; script-handled responses have different behavior, and none are allowed here."
+  },
+  {
+    "id": "S36",
+    "title": "Cloudflare limits",
+    "url": "https://developers.cloudflare.com/workers/platform/limits/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "documentation accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Per-asset size and number limits must be checked before upload.",
+    "remaining_verification": "Exact current account quotas rechecked in deploy preflight; planning target per file <24 MiB."
+  },
+  {
+    "id": "S37",
+    "title": "Wrangler release",
+    "url": "https://github.com/cloudflare/workers-sdk/releases/tag/wrangler%404.131.0",
+    "access_date": "2026-09-11",
+    "version_or_commit": "4.131.0 published 2026-09-10",
+    "status": "source-verified",
+    "interpretation": "Pin actual Wrangler release, not monorepo latest helper package.",
+    "remaining_verification": "Dry-run and paid-route proof not executed here."
+  },
+  {
+    "id": "S38",
+    "title": "Devin execution capabilities",
+    "url": "https://docs.devin.ai/work-with-devin/advanced-capabilities",
+    "access_date": "2026-09-11",
+    "version_or_commit": "mutable documentation accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Managed isolated sessions are documented; operator-driven separate sessions remain a viable arrangement.",
+    "remaining_verification": "No account entitlement, model availability, quotas or promotion permanence verified; no Devin worker was launched here."
+  },
+  {
+    "id": "S39",
+    "title": "PyMuPDF licensing",
+    "url": "https://artifex.com/licensing",
+    "access_date": "2026-09-11",
+    "version_or_commit": "accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "AGPL/commercial choice is not erased by an MIT application notice or API boundary.",
+    "remaining_verification": "Qualified advice required for any later PyMuPDF redistribution; excluded from primary product."
+  },
+  {
+    "id": "S40",
+    "title": "Show HN guidelines",
+    "url": "https://news.ycombinator.com/showhn.html",
+    "access_date": "2026-09-11",
+    "version_or_commit": "accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "A directly tryable artifact fits the channel better than a waitlist.",
+    "remaining_verification": "No reach, adoption or hiring prediction."
+  },
+  {
+    "id": "S41",
+    "title": "Existing Inkflip name use",
+    "url": "https://www.etsy.com/shop/Inkflip",
+    "access_date": "2026-09-11",
+    "version_or_commit": "prior attached research; basic conflict retained",
+    "status": "reported",
+    "interpretation": "Keep a configurable provisional identity; collision is already enough not to claim clearance.",
+    "remaining_verification": "No trademark or domain clearance; no name search expansion required."
+  },
+  {
+    "id": "S42",
+    "title": "WCAG 2.2",
+    "url": "https://www.w3.org/TR/WCAG22/",
+    "access_date": "2026-09-11",
+    "version_or_commit": "W3C Recommendation, accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Keyboard access, focus visibility, text alternatives, contrast and reflow motivate explicit product tests.",
+    "remaining_verification": "Automated tests cannot establish complete conformance; manual AT/device tests are release work."
+  },
+  {
+    "id": "S43",
+    "title": "Ajv standalone validators",
+    "url": "https://ajv.js.org/standalone.html",
+    "access_date": "2026-09-11",
+    "version_or_commit": "Ajv 8 documentation, accessed 2026-09-11",
+    "status": "source-verified",
+    "interpretation": "Precompile trusted schemas into static validator modules rather than require runtime schema code generation.",
+    "remaining_verification": "Exact selected schema generation/build not executed because npm retrieval is blocked."
+  },
+  {
+    "id": "S44",
+    "title": "Legacy calibration artifact",
+    "url": "https://github.com/zubalr/mib-intake/blob/94f35ce9f9beb1640ddebdc2c72aa379ecebb004/policy/calibration.json",
+    "access_date": "2026-09-11",
+    "version_or_commit": "94f35ce9f9beb1640ddebdc2c72aa379ecebb004",
+    "status": "source-verified",
+    "interpretation": "Artifact states 1,000 training rows, fitted path distributions and source; no transfer to new inspector confidence.",
+    "remaining_verification": "Read JSON only. No model deserialization or benchmark reproduction."
+  },
+  {
+    "id": "S45",
+    "title": "Evaluation framing correction",
+    "url": "https://github.com/zubalr/mib-intake/commit/634daacb02a944ddf41733ddd2e969449681ec3c",
+    "access_date": "2026-09-11",
+    "version_or_commit": "634daacb02a944ddf41733ddd2e969449681ec3c",
+    "status": "source-verified",
+    "interpretation": "Actual commit/diff corrected globally calibrated model-fold framing; intermediate score was 137.83, not final 137.89.",
+    "remaining_verification": "History inspection, not recreation of the evaluations."
+  },
+  {
+    "id": "S46",
+    "title": "PR 91 shared-substrate portfolio",
+    "url": "https://github.com/speculator19/mib-portfolio/blob/07b1c9659104e3f79b88ffba130e4a1576beefc7/README.md",
+    "access_date": "2026-09-11",
+    "version_or_commit": "07b1c9659104e3f79b88ffba130e4a1576beefc7",
+    "status": "source-verified",
+    "interpretation": "README identifies three vendored pipelines including zubalr on shared rendering/OCR; this is correlated lineage, not independent evidence.",
+    "remaining_verification": "README inspected; reported scores, full attribution and runtime not independently audited."
+  },
+  {
+    "id": "S47",
+    "title": "RapidOCR selected experiment release",
+    "url": "https://github.com/RapidAI/RapidOCR/releases/tag/v3.8.1",
+    "access_date": "2026-09-11",
+    "version_or_commit": "v3.8.1",
+    "status": "source-verified release metadata",
+    "interpretation": "Release metadata confirms this bounded experiment candidate exists. The default product remains Tesseract. No package installation, weight provenance audit or benchmark was executed. Selected decision: Bounded optional experiment only; default unavailable until accepted.",
+    "remaining_verification": "Installed assets, APIs, exact weight/bundle rights, memory, geometry and useful-finding value."
+  },
+  {
+    "id": "S48",
+    "title": "EmbedPDF selected secondary-browser experiment release",
+    "url": "https://github.com/embedpdf/embed-pdf-viewer/releases/tag/v2.15.0",
+    "access_date": "2026-09-11",
+    "version_or_commit": "v2.15.0",
+    "status": "source-verified release metadata",
+    "interpretation": "Release inventory includes pdfium-dist.tar.gz, 2,661,637 bytes, SHA-256 31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42. This archive size is not an installed WASM-memory measurement. API, full bundle notices and runtime value remain the P12 experiment. Selected decision: Bounded optional experiment only; default unavailable until accepted.",
+    "remaining_verification": "Installed assets, APIs, exact weight/bundle rights, memory, geometry and useful-finding value."
+  }
+]

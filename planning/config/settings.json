@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "brand": {
+    "name": "Inkflip",
+    "descriptor": "PDF reading inspector",
+    "provisional": true
+  },
+  "browser": {
+    "max_file_bytes": 20971520,
+    "max_document_pages": 1000,
+    "max_native_pages_per_run": 20,
+    "max_ocr_pages_per_run": 5,
+    "max_raster_pixels": 4000000,
+    "max_run_ocr_pixels": 20000000,
+    "max_live_rasters": 2,
+    "max_ocr_workers": 1,
+    "max_result_chunk_occurrences": 256,
+    "max_unacked_chunks": 2,
+    "max_occurrences_per_page": 20000,
+    "max_occurrences_per_run": 100000,
+    "max_raw_text_bytes_per_run": 8388608,
+    "parse_timeout_ms": 10000,
+    "render_timeout_ms": 10000,
+    "ocr_page_timeout_ms": 30000,
+    "run_timeout_ms": 120000,
+    "max_transient_retries": 1,
+    "cancel_ui_target_ms": 100,
+    "terminate_target_ms": 500,
+    "tracked_allocation_target_bytes": 268435456,
+    "measured_peak_rss_target_bytes": 536870912,
+    "max_raster_edge": 8192
+  },
+  "mobile": {
+    "max_file_bytes": 10485760,
+    "max_native_pages_per_run": 5,
+    "max_ocr_pages_per_run": 1,
+    "max_raster_pixels": 2000000,
+    "ocr_opt_in": true
+  },
+  "native": {
+    "max_file_bytes": 104857600,
+    "max_pages": 1000,
+    "default_jobs": 1,
+    "max_ocr_pages_per_run": 20,
+    "max_raster_pixels": 12000000,
+    "page_timeout_ms": 30000,
+    "file_timeout_ms": 180000,
+    "max_retries": 1,
+    "child_memory_bytes": 1073741824,
+    "scratch_bytes": 536870912,
+    "max_output_bytes_per_file": 67108864,
+    "max_stdout_message_bytes": 1048576,
+    "max_raster_edge": 16384
+  },
+  "import": {
+    "max_json_bytes": 33554432,
+    "max_total_decoded_assets_bytes": 20971520,
+    "max_asset_bytes": 20971520,
+    "max_assets": 128,
+    "max_depth": 24,
+    "max_string_chars": 2000000,
+    "max_png_pixels": 4000000,
+    "archive_import": false
+  },
+  "geometry": {
+    "coordinate_decimals": 6,
+    "roundtrip_tolerance_pt": 1e-05,
+    "overlay_p95_css_px": 2,
+    "overlay_max_css_px": 4
+  },
+  "assets": {
+    "per_static_file_target_bytes": 25165824,
+    "cold_ocr_transfer_target_bytes": 20971520,
+    "app_entry_gzip_target_bytes": 250000
+  },
+  "normalization": "scalar-whitespace-v1",
+  "alignment": "region-match-v1",
+  "report_format": "inkflip-json-v1",
+  "ocr_language": "eng",
+  "ocr_default_psm": 6
+}

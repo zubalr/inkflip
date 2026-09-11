@@ -1,0 +1,20 @@
+{
+  "kind": "worker_message",
+  "schema_version": "1.0.0",
+  "generation": 2,
+  "run_key": "72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83",
+  "document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+  "job_id": "job_native",
+  "seq": 1,
+  "event": "check_terminal",
+  "payload": {
+    "check_id": "c_native",
+    "occurrences": [],
+    "status": null,
+    "reason": null,
+    "completed_units": null,
+    "total_units": null,
+    "transfer_slot": null,
+    "transfer_bytes": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "task_id": "T09",
+  "status": "planned",
+  "branch": null,
+  "base_commit": null,
+  "implementation_commit": null,
+  "merged_commit": null,
+  "contract_version": "1.0.0",
+  "provider": null,
+  "observable_model_mode": null,
+  "session_id": null,
+  "owned_paths": [
+    "packages/readers-pdfjs/",
+    "tests/readers/pdfjs.spec.ts"
+  ],
+  "shared_leases": [],
+  "commands": [],
+  "reviewer": null,
+  "receipt_path": null,
+  "interventions": [],
+  "limitations": [
+    "Example format only; no task execution recorded."
+  ],
+  "rollback": "Revert task commits, preserve raw evidence and invalidate dependent receipts.",
+  "next_action": "Load T09 only after dependencies T02/T03/T04/T05 accepted."
+}

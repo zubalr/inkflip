@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<title>Inkflip — interaction reference</title>
+<link rel="stylesheet" href="./reference.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the example</a>
+<div class="reference-note">INTERACTION REFERENCE <span>Prepared native output · not live browser processing</span></div>
+<header><a class="brand" href="#main" aria-label="Inkflip home"><span class="mark" aria-hidden="true">if</span>inkflip<span class="brand-small">PDF READING INSPECTOR</span></a><nav aria-label="Main"><a href="#examples">Examples</a><a href="../architecture/CAPABILITIES.md">What it checks</a><a href="../START_HERE.md">Build package</a></nav><button id="menu" class="menu-button" aria-haspopup="dialog">Menu</button></header>
+<main id="main">
+<section class="hero" aria-labelledby="headline">
+<div class="intro"><p class="eyebrow">ONE DOCUMENT. MORE THAN ONE READING.</p><h1 id="headline">Your PDF can<br>look right.<br><span>And read wrong.</span></h1><p class="lede">Compare the page with its extracted text. Find the difference, inspect the evidence, and keep the uncertainty.</p><div class="actions"><button class="primary" id="try">Try the $100 example <span aria-hidden="true">↗</span></button><button class="secondary" id="file-flow">See local-file flow</button></div><p class="local-note">The finished app opens your file locally. This reference shows actual, prepared native evidence.</p></div>
+<div class="stage" aria-label="Interactive prepared example">
+<div class="stage-heading"><div><span class="dot" aria-hidden="true"></span> The amount that reads differently</div><span class="badge">SYNTHETIC</span></div>
+<div class="modebar"><div class="tabs" role="tablist" aria-label="Compare representations"><button role="tab" id="tab-page" aria-controls="evidence-panel" aria-selected="true" tabindex="0" data-mode="page">Page</button><button role="tab" id="tab-reading" aria-controls="evidence-panel" aria-selected="false" tabindex="-1" data-mode="reading">Reading</button><button role="tab" id="tab-compare" aria-controls="evidence-panel" aria-selected="false" tabindex="-1" data-mode="compare">Compare</button></div><span class="page-label">Page 1 / 1</span></div>
+<div id="evidence-panel" class="evidence-panel" role="tabpanel" aria-labelledby="tab-page" tabindex="0">
+<div class="paper-view" id="paper-view"><div class="paper"><p class="paper-kicker">SYNTHETIC EXAMPLE</p><p class="paper-sub">No real transaction. Reader behavior only.</p><div class="amount-crop"><img src="../probes/results/amount-crop.png" alt="Actual rendered crop of the generated PDF, visibly showing $100."><span class="corner corner-a"></span><span class="corner corner-b"></span><span class="corner corner-c"></span><span class="corner corner-d"></span></div><p class="paper-foot">The picture is not the text layer.</p></div><p class="view-caption">Actual crop · PDFium 149.0.7825.0 render</p></div>
+<div class="reading-view" id="reading-view" hidden><div class="reading-paper"><p class="paper-kicker">EXTRACTED READING</p><p class="paper-sub" id="reader-label">Loading actual prepared report…</p><pre id="native-reading" class="amount">—</pre><p class="reading-foot">A named reader’s output. Not a verdict about the amount.</p></div><p class="view-caption">Raw output from the same PDF bytes</p></div>
+</div>
+<button class="finding" id="finding" aria-expanded="false" aria-controls="finding-detail"><span class="finding-symbol" aria-hidden="true">≠</span><span><strong>This amount reads differently</strong><small>Inspect the readings and their limits</small></span><span aria-hidden="true">↗</span></button>
+<div id="finding-detail" class="detail" hidden><h2>The same glyph maps to different text.</h2><p>The example’s Unicode mapping turns the displayed “1” into the extracted sequence “1,0”. The unchanged rendered crop and clean twin make the difference inspectable.</p><dl><div><dt>Native reading</dt><dd id="detail-native">—</dd></div><div><dt>Rendered-crop OCR</dt><dd id="detail-ocr">—</dd></div><div><dt>Alignment</dt><dd>Selected crop; not an automatic browser alignment result</dd></div></dl><p class="limit">Two readings disagree. This does not establish which is right, document safety or fraud.</p><a class="text-link" href="../fixtures/mapping-amount.pdf" download>Download the actual synthetic PDF</a></div>
+<div class="coverage"><span class="coverage-icon" aria-hidden="true">◐</span><span>2 checks completed · automatic alignment not checked</span><button id="show-coverage">Details</button></div>
+</div>
+</section>
+<section class="handoff" aria-label="Evidence export"><div><p class="eyebrow">KEEP THE EXPLANATION</p><h2>A difference worth investigating.<br>Not another screenshot without context.</h2><p>Keep the raw readings, source crop, exact readers and what was not checked. The original PDF is excluded from this evidence report.</p></div><button class="export-button" id="export">Preview example export <span aria-hidden="true">↓</span></button></section>
+<section class="examples" id="examples" aria-labelledby="gallery-title"><div class="section-heading"><div><p class="eyebrow">A SMALL GALLERY. DIFFERENT MECHANISMS.</p><h2 id="gallery-title">Read the difference.</h2></div><p>Only the first card has prepared native evidence here.<br>The others open their implementation specification.</p></div><div class="cards">
+<button class="sample selected" id="sample-amount"><span class="sample-art">$100 <em>≠</em> $1,000</span><span class="sample-label">01 / REAL NATIVE PROBE</span><strong>A different amount</strong><span>Same picture. Different mapping.</span></button>
+<a class="sample" href="../product/DEMO_AND_GALLERY.md"><span class="sample-art type-scan">Aa <em>=</em> Aa</span><span class="sample-label">02 / CONTROL · SPECIFIED</span><strong>A normal searchable scan</strong><span>Invisible text is not automatically wrong.</span></a>
+<a class="sample" href="../product/DEMO_AND_GALLERY.md"><span class="sample-art type-contrast"><span>Aa</span> <em>/</em> Aa</span><span class="sample-label">03 / SPECIFIED</span><strong>White does not mean hidden</strong><span>The background changes what is visible.</span></a>
+<a class="sample" href="../product/DEMO_AND_GALLERY.md"><span class="sample-art">↱ <em>90°</em> ↲</span><span class="sample-label">04 / NATIVE GEOMETRY PROBE</span><strong>A rotated, cropped page</strong><span>Coordinates must follow the evidence.</span></a>
+<a class="sample" href="../product/DEMO_AND_GALLERY.md"><span class="sample-art type-order">1 3 <em>→</em> 1 2</span><span class="sample-label">05 / SPECIFIED</span><strong>A tangled reading order</strong><span>What comes next depends on the reader.</span></a>
+<a class="sample" href="../product/DEMO_AND_GALLERY.md"><span class="sample-art">O <em>or</em> 0</span><span class="sample-label">06 / SPECIFIED</span><strong>An uncertain character</strong><span>Keep alternatives. Do not invent a winner.</span></a>
+</div></section>
+<footer><span>inkflip <small>Working identity · not commercially cleared</small></span><span>Open → compare → inspect → export</span><a href="../PACKAGE_AUDIT.md">What was actually verified</a></footer>
+</main>
+<dialog id="dialog"><div class="dialog-head"><h2 id="dialog-title">Export preview</h2><button id="close" aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
+<p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+<script src="./reference.js" defer></script>
+</body></html>

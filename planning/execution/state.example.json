@@ -1,0 +1,448 @@
+{
+  "schema_version": "1.0.0",
+  "integration_commit": null,
+  "tasks": {
+    "T01": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T02": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T03": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T04": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T05": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T06": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T07": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T08": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T09": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T10": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T11": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T12": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T13": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T14": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T15": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T16": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T17": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T18": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T19": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T20": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T21": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T22": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T23": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T24": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T25": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T26": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T27": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T28": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T29": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T30": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T31": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T32": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T33": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T34": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T35": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T36": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T37": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T38": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T39": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T40": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T41": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T42": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T43": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T44": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T45": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T46": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T47": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T48": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T49": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T50": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T51": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T52": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T53": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T54": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    },
+    "T55": {
+      "status": "planned",
+      "branch": null,
+      "implementation_commit": null,
+      "reviewer": null,
+      "receipt": null,
+      "blocker": null
+    }
+  },
+  "active_leases": [],
+  "note": "Initial state only; no implementation tasks have been executed in this planning pass."
+}

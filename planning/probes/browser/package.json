@@ -1,0 +1,7 @@
+{
+  "name": "inkflip-browser-feasibility-probe",
+  "private": true,
+  "type": "module",
+  "dependencies": { "pdfjs-dist": "6.3.289", "tesseract.js": "7.0.0", "tesseract.js-core": "7.0.0" },
+  "packageManager": "pnpm@12.3.4"
+}

@@ -1,0 +1,53 @@
+{
+  "color": {
+    "canvas": "#F6F3EC",
+    "paper": "#FFFDF8",
+    "ink": "#172A2F",
+    "muted": "#526368",
+    "teal": "#006C67",
+    "rust": "#934420",
+    "line": "#C9D2CC",
+    "focus": "#005FCC",
+    "mark": "#F0CA69"
+  },
+  "space": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64,
+    96
+  ],
+  "radius": {
+    "control": 8,
+    "card": 12,
+    "stage": 20
+  },
+  "type": {
+    "display": "Georgia, Times New Roman, serif",
+    "ui": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "mono": "ui-monospace, SFMono-Regular, Consolas, monospace",
+    "body_px": 16,
+    "body_line": 1.55,
+    "caption_px": 13,
+    "heading_desktop_px": 64,
+    "heading_mobile_px": 42
+  },
+  "motion_ms": {
+    "state": 120,
+    "panel": 180,
+    "reduced": 0
+  },
+  "layout": {
+    "max_width": 1280,
+    "desktop_min": 1100,
+    "intermediate_min": 768,
+    "minimum_css_width": 320,
+    "header_height": 64,
+    "evidence_column": 360,
+    "control_min_height": 44
+  }
+}

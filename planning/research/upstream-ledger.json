@@ -1,0 +1,247 @@
+[
+  {
+    "pr": 28,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/28",
+    "source_repository": "vishnualpha/mib-doc-challenge-solution",
+    "source_commit": "ca1a1e24c495b08d0d6e4b92c1723389247e2ca2",
+    "inspection_depth": "source-file",
+    "inspected_files": [
+      "mib/visibility.py"
+    ],
+    "tests_executed": false,
+    "technique": "Earlier background versus later covering fills; retain reasons and seqno.",
+    "integration_decision": "T41: independent bounded experiment; metadata/raster approximations stay separate.",
+    "lineage": "Single lead, not reproduced.",
+    "license_state": "Repository MIT reported; no code copied into package; exact file notice required before a port.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 86,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/86",
+    "source_repository": "henrybrewer00-dotcom/mib-doc-solution",
+    "source_commit": "f9f751ee7ea779cc549c3bcff5960020c2517e72",
+    "inspection_depth": "source-excerpts-and-memo",
+    "inspected_files": [
+      "mibdoc/reader.py",
+      "MEMO.md"
+    ],
+    "tests_executed": false,
+    "technique": "Unrelated border ink defeats box-ink presence; trace type versus render mode caution.",
+    "integration_decision": "T41 controls and metadata-first capability; reject universal ink oracle.",
+    "lineage": "Same corpus and some shared OCR family as other leads.",
+    "license_state": "No copied implementation; full license audit before any adaptation.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 16,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/16",
+    "source_repository": "handemanai/mib-doc-challenge-solution",
+    "source_commit": "4313d28b34abc4cef4c89586060f4d3d34848c88",
+    "inspection_depth": "preliminary-pr",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Parent watchdog, recycling and successful/empty output invariants.",
+    "integration_decision": "T29/T40 independent implementation of bounded lifecycle tests.",
+    "lineage": "16 is preliminary; 22 final. One technique family.",
+    "license_state": "MIT claimed by source; no upstream code bundled.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 22,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/22",
+    "source_repository": "handemanai/mib-doc-challenge-solution",
+    "source_commit": "4313d28b34abc4cef4c89586060f4d3d34848c88",
+    "inspection_depth": "tests-excerpts-and-guide",
+    "inspected_files": [
+      "tests/test_watchdog.py",
+      "docs/REVIEWER_GUIDE.md"
+    ],
+    "tests_executed": false,
+    "technique": "Parent watchdog, recycling and successful/empty output invariants.",
+    "integration_decision": "T29/T40 independent implementation of bounded lifecycle tests.",
+    "lineage": "16 is preliminary; 22 final. One technique family.",
+    "license_state": "MIT claimed by source; no upstream code bundled.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 85,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/85",
+    "source_repository": "bmdhodl/mib-doc-solution",
+    "source_commit": "1846faa62473a2a5691db314ccefe6df82f15268",
+    "inspection_depth": "attribution-file",
+    "inspected_files": [
+      "ATTRIBUTION.md"
+    ],
+    "tests_executed": false,
+    "technique": "Pinned ancestry and exclusions, render-first PDFium fallback.",
+    "integration_decision": "Use provenance discipline; reject learned score heads.",
+    "lineage": "Strobl d6752ecd88220e8fcd07f6d6825d2b8d642c9edc → Abhishek 08947bd72b0058d5803d9bfe08428cd7311485b7; Arjun 798ad2277a89a25cd3dfc596be572df4aade55c6; Kirtan 288da617686a115ef1b27fcf751dea9e61948226.",
+    "license_state": "MIT notices referenced by attribution; dependencies/weights are separate obligations.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 51,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/51",
+    "source_repository": "arthurmichel00/mib-doc-solution",
+    "source_commit": "80453d557e3b57d8f426bb81001a7e12ea087d90",
+    "inspection_depth": "superseded-pr",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Per-lever baselines, controls, negative results, composed versus isolated yield.",
+    "integration_decision": "T42–T45 experiments; no accumulated CTC/repair/ensemble stack by default.",
+    "lineage": "51→58→68→83 same author; ported candidate readers and custom weights are not independent evidence.",
+    "license_state": "Detailed attribution referenced; exact model terms not cleared here, none copied.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 58,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/58",
+    "source_repository": "arthurmichel00/mib-doc-solution",
+    "source_commit": "80453d557e3b57d8f426bb81001a7e12ea087d90",
+    "inspection_depth": "superseded-pr",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Per-lever baselines, controls, negative results, composed versus isolated yield.",
+    "integration_decision": "T42–T45 experiments; no accumulated CTC/repair/ensemble stack by default.",
+    "lineage": "51→58→68→83 same author; ported candidate readers and custom weights are not independent evidence.",
+    "license_state": "Detailed attribution referenced; exact model terms not cleared here, none copied.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 68,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/68",
+    "source_repository": "arthurmichel00/mib-doc-solution",
+    "source_commit": "80453d557e3b57d8f426bb81001a7e12ea087d90",
+    "inspection_depth": "superseded-pr",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Per-lever baselines, controls, negative results, composed versus isolated yield.",
+    "integration_decision": "T42–T45 experiments; no accumulated CTC/repair/ensemble stack by default.",
+    "lineage": "51→58→68→83 same author; ported candidate readers and custom weights are not independent evidence.",
+    "license_state": "Detailed attribution referenced; exact model terms not cleared here, none copied.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 83,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/83",
+    "source_repository": "arthurmichel00/mib-doc-solution",
+    "source_commit": "80453d557e3b57d8f426bb81001a7e12ea087d90",
+    "inspection_depth": "experiment-ledger-sections",
+    "inspected_files": [
+      "LEVERS.md"
+    ],
+    "tests_executed": false,
+    "technique": "Per-lever baselines, controls, negative results, composed versus isolated yield.",
+    "integration_decision": "T42–T45 experiments; no accumulated CTC/repair/ensemble stack by default.",
+    "lineage": "51→58→68→83 same author; ported candidate readers and custom weights are not independent evidence.",
+    "license_state": "Detailed attribution referenced; exact model terms not cleared here, none copied.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 39,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/39",
+    "source_repository": "zeroinfinity03/mib-doc-challenge-solution",
+    "source_commit": "1a0ccbedcafaa0d5499f7bb13a3108f754199e32",
+    "inspection_depth": "source-file",
+    "inspected_files": [
+      "step2_ocr.py"
+    ],
+    "tests_executed": false,
+    "technique": "Selective top-band/uncertain-line OCR.",
+    "integration_decision": "T42 spatially generic selected-region reread; preserve new geometry.",
+    "lineage": "Same PaddleOCR family is correlated interpretation, not independent documents.",
+    "license_state": "MIT source reported; no OCR models copied.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 59,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/59",
+    "source_repository": "ShreyShingala/ocr-document-pipeline-challenge",
+    "source_commit": "5508a8bc36faacdafbea768554923346f895a8c5",
+    "inspection_depth": "indexed-excerpts",
+    "inspected_files": [
+      "mib/row_restore.py",
+      "mib/closed_vocab.py",
+      "mib/ocr.py",
+      "REPORT.md"
+    ],
+    "tests_executed": false,
+    "technique": "Frame registration and candidate scoring under closed menus.",
+    "integration_decision": "T45 bounded raster-only experiment; no automated PDF repair or open-world snapping.",
+    "lineage": "Arthur references some reused mechanisms/artifacts.",
+    "license_state": "No adaptation or model redistribution authorized by this excerpt inspection.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 66,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/66",
+    "source_repository": "newthrash/mib-doc-solution",
+    "source_commit": "4801163b72c825bd15c79054d8ebece526945918",
+    "inspection_depth": "pr-and-head-metadata",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Gated strip realignment and measured failed alternatives.",
+    "integration_decision": "Clean ruled-page controls for T45; implementation not imported.",
+    "lineage": "PR report, not independent reproduced gain.",
+    "license_state": "MIT added in inspected head metadata; no code audit.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 80,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/80",
+    "source_repository": "dhyantsoni/mib-doc-challenge",
+    "source_commit": null,
+    "inspection_depth": "pr-only",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Rendered corroboration and source-bound extraction.",
+    "integration_decision": "T41 overlapping-ink control; no wholesale pipeline.",
+    "lineage": "Submission head is not treated as verified solution-source commit.",
+    "license_state": "Unknown exact reused-file rights; no port.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 81,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/81",
+    "source_repository": "HetanshWaghela/mib-ledger",
+    "source_commit": null,
+    "inspection_depth": "pr-only",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Fold-clean versus template-grouped evaluation.",
+    "integration_decision": "T36 generator-family splits; no use of reported scores.",
+    "lineage": "Submission head does not pin the separate solution repository.",
+    "license_state": "No code/model copied; license verification needed before port.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 91,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/91",
+    "source_repository": "speculator19/mib-portfolio",
+    "source_commit": "07b1c9659104e3f79b88ffba130e4a1576beefc7",
+    "inspection_depth": "readme",
+    "inspected_files": [
+      "README.md"
+    ],
+    "tests_executed": false,
+    "technique": "Shared render/OCR substrate and three vendored challenge pipelines including zubalr.",
+    "integration_decision": "Reuse raster caches only with identical renderer/config/transform; reject referee/adjudication.",
+    "lineage": "thegoleffect, tylergibbs1 and zubalr derivatives share evidence; not three independent validations.",
+    "license_state": "README points to attribution; full adaptation license audit not performed.",
+    "access_date": "2026-09-11"
+  },
+  {
+    "pr": 52,
+    "submission_url": "https://github.com/8090-inc/mib-doc-challenge/pull/52",
+    "source_repository": "Zwin-ux/XenoLedger",
+    "source_commit": "c25a47845ad0eb1307c84484df7bf564c8fbe0cb",
+    "inspection_depth": "pr-only",
+    "inspected_files": [],
+    "tests_executed": false,
+    "technique": "Public demonstration/reviewer surfaces.",
+    "integration_decision": "Presentation reference only; no 150/150 quality transfer.",
+    "lineage": "Training residual optimization is not product evidence.",
+    "license_state": "No visual/code assets copied; create original design.",
+    "access_date": "2026-09-11"
+  }
+]

@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "scope": "Local DOM-rendered HTML interaction reference only; CSS/PNG/report inlined from package. Initial localhost navigation blocked by browser administration policy. No live PDF.js/OCR, static-host navigation or production privacy proof.",
+  "environment": {
+    "python": "3.13.5",
+    "playwright": "1.57.0",
+    "chromium": "144.0.7559.96",
+    "sandbox": "container Chromium launched --no-sandbox; not a security isolation test"
+  },
+  "profiles": [
+    {
+      "profile": "desktop",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "outer_horizontal_overflow": false,
+      "mode_switches": true,
+      "keyboard_tabs": true,
+      "export_dialog_escape_focus": true,
+      "initial_crop_box": {
+        "x": 873.21875,
+        "y": 406.265625,
+        "width": 300,
+        "height": 154.3125
+      },
+      "initial_tab_box": {
+        "x": 741.46875,
+        "y": 235.28125,
+        "width": 66,
+        "height": 44
+      },
+      "initial_crop_and_tabs_in_view": true
+    },
+    {
+      "profile": "mobile",
+      "viewport": [
+        390,
+        844
+      ],
+      "outer_horizontal_overflow": false,
+      "mode_switches": true,
+      "keyboard_tabs": true,
+      "export_dialog_escape_focus": true,
+      "initial_crop_box": {
+        "x": 60,
+        "y": 543.71875,
+        "width": 270,
+        "height": 129.703125
+      },
+      "initial_tab_box": {
+        "x": 33,
+        "y": 398.734375,
+        "width": 60,
+        "height": 44
+      },
+      "initial_crop_and_tabs_in_view": true
+    },
+    {
+      "profile": "minimum",
+      "viewport": [
+        320,
+        844
+      ],
+      "outer_horizontal_overflow": false,
+      "mode_switches": true,
+      "keyboard_tabs": true,
+      "export_dialog_escape_focus": true,
+      "initial_crop_box": {
+        "x": 46,
+        "y": 609.578125,
+        "width": 228,
+        "height": 110.546875
+      },
+      "initial_tab_box": {
+        "x": 29,
+        "y": 445.75,
+        "width": 60,
+        "height": 44
+      },
+      "initial_crop_and_tabs_in_view": true
+    }
+  ],
+  "reduced_motion_transition": "0s",
+  "requests": [],
+  "page_errors": [],
+  "visual_inspection": "screenshots captured; separate human/model visual inspection required"
+}

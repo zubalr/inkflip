@@ -1,0 +1,1907 @@
+[
+  {
+    "id": "TEST-01",
+    "task_ids": [
+      "T01"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/bootstrap/test_bootstrap.py",
+    "commands": [
+      "python -m unittest discover -s tests/bootstrap -v"
+    ],
+    "fixture_ids": [
+      "F01"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I16"
+    ],
+    "assertions": [
+      "A clean checkout exposes documented commands",
+      "empty/missing test registration fails",
+      "old repository remains byte/Git-unchanged",
+      "no network action or generated achievement claim occurs."
+    ],
+    "evidence_artifact": "artifacts/tasks/T01/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-02",
+    "task_ids": [
+      "T02"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/build/test_dependency_lock.py",
+    "commands": [
+      "python scripts/check_dependencies.py --frozen && python -m unittest discover -s tests/build -v"
+    ],
+    "fixture_ids": [
+      "F20",
+      "F22"
+    ],
+    "invariant_ids": [
+      "I13",
+      "I16"
+    ],
+    "assertions": [
+      "Frozen install succeeds twice from a clean checkout",
+      "every bundled binary has source/hash/license",
+      "substituted model fails checksum",
+      "missing asset fails closed",
+      "no runtime CDN/download",
+      "action/OCI revisions are immutable and recorded."
+    ],
+    "evidence_artifact": "artifacts/tasks/T02/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-03",
+    "task_ids": [
+      "T03"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/contracts/contracts.test.mjs",
+    "commands": [
+      "node --test tests/contracts/*.test.mjs && uv run --project native python -m pytest native/tests/contracts -q"
+    ],
+    "fixture_ids": [
+      "F24",
+      "F25",
+      "F26"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I03",
+      "I05",
+      "I10",
+      "I13"
+    ],
+    "assertions": [
+      "All valid/invalid fixtures and expected failure codes pass in TS/Python",
+      "all hash vectors agree",
+      "type generation is deterministic",
+      "untrusted report never compiles a schema",
+      "array order and hash-excluded timestamps behave as specified."
+    ],
+    "evidence_artifact": "artifacts/tasks/T03/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-04",
+    "task_ids": [
+      "T04"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/geometry/geometry.test.mjs",
+    "commands": [
+      "node --test tests/geometry/*.test.mjs"
+    ],
+    "fixture_ids": [
+      "F07",
+      "F08",
+      "F09",
+      "F10"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04"
+    ],
+    "assertions": [
+      "All four rotations/nonzero origins/UserUnit worked examples pass <=1e-5pt",
+      "singular transforms rejected",
+      "estimated/page-only polygons obey schema",
+      "CSS/DPR tests verify correct page and p95<=2px, maximum 4 px once viewer integrates."
+    ],
+    "evidence_artifact": "artifacts/tasks/T04/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-05",
+    "task_ids": [
+      "T05"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/fixtures/test_fixtures.py",
+    "commands": [
+      "python scripts/make_fixtures.py --check && python -m unittest discover -s tests/fixtures -v"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02",
+      "F07",
+      "F08",
+      "F03"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I13",
+      "I16"
+    ],
+    "assertions": [
+      "Repeated generation is byte-identical or declared pinned asset-dependent",
+      "mapping/control render equal under same environment and actual extraction differs",
+      "no filename-conditioned app output",
+      "no embedded unlicensed font or private/challenge answer data.",
+      "An original legitimate searchable scan (F03) is generated and read without an alarm solely because its OCR text is invisible; this minimum control is present before G1."
+    ],
+    "evidence_artifact": "artifacts/tasks/T05/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-06",
+    "task_ids": [
+      "T06"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/visual/foundation.spec.ts",
+    "commands": [
+      "pnpm test:visual -- tests/visual/foundation.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I18"
+    ],
+    "assertions": [
+      "1440/1024/768/390/320 widths have no page overflow",
+      "page and disagreement dominate",
+      "contrast checks meet stated targets",
+      "reduced motion disables flips",
+      "screenshot evidence covers dark text, focus and partial states."
+    ],
+    "evidence_artifact": "artifacts/tasks/T06/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-07",
+    "task_ids": [
+      "T07"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/a11y/primitives.spec.ts",
+    "commands": [
+      "pnpm test:a11y -- tests/a11y/primitives.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I18"
+    ],
+    "assertions": [
+      "Keyboard can reach/operate all controls",
+      "Escape/focus return works",
+      "no focus trap outside modal",
+      "dynamic progress does not announce every OCR token",
+      "no serious/critical automated violations in primitives."
+    ],
+    "evidence_artifact": "artifacts/tasks/T07/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-08",
+    "task_ids": [
+      "T08"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/open.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/open.spec.ts"
+    ],
+    "fixture_ids": [
+      "F17",
+      "F18",
+      "F19",
+      "F21"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I07",
+      "I08",
+      "I17"
+    ],
+    "assertions": [
+      "20MiB/1000-page and mobile limits exercised without giant allocations",
+      "wrong MIME/header, encrypted and malformed are distinct",
+      "new file revokes old generation first",
+      "page selection never silently excludes a page",
+      "no document metadata in URL."
+    ],
+    "evidence_artifact": "artifacts/tasks/T08/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-09",
+    "task_ids": [
+      "T09"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/readers/pdfjs.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/readers/pdfjs.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02",
+      "F07",
+      "F08",
+      "F10",
+      "F11"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I13",
+      "I14",
+      "I17"
+    ],
+    "assertions": [
+      "Real mapping and clean PDFs processed through bytes",
+      "raw text not injected",
+      "occurrence geometry/rotation/UserUnit verified",
+      "no full glyph-paint provenance claim",
+      "render cancellation releases task/canvas",
+      "unavailable structure check is unsupported."
+    ],
+    "evidence_artifact": "artifacts/tasks/T09/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-10",
+    "task_ids": [
+      "T10"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/readers/tesseract.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/readers/tesseract.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F14",
+      "F15",
+      "F20"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Actual English crop OCR emitted with engine/settings/model identity",
+      "no default CDN",
+      "initialization failure != unreadable page",
+      "bounded raster/edge/pixel counts",
+      "cached/cold/offline distinguished",
+      "low confidence never asserted as ground truth."
+    ],
+    "evidence_artifact": "artifacts/tasks/T10/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-11",
+    "task_ids": [
+      "T11"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/runtime/runtime.test.mjs",
+    "commands": [
+      "node --test tests/runtime/*.test.mjs"
+    ],
+    "fixture_ids": [
+      "F20",
+      "F21",
+      "F22"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I07",
+      "I17"
+    ],
+    "assertions": [
+      "Stale results after replace/cancel cannot render",
+      "256-occurrence chunks and two unacked cap enforced",
+      "cancelled/partial/failed differ",
+      "empty success not retried",
+      "UI cancellation target of 100 ms and termination target of 500 ms measured in integration."
+    ],
+    "evidence_artifact": "artifacts/tasks/T11/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-12",
+    "task_ids": [
+      "T12"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/alignment/alignment.test.mjs",
+    "commands": [
+      "node --test tests/alignment/*.test.mjs"
+    ],
+    "fixture_ids": [
+      "F11",
+      "F12",
+      "F13",
+      "F14",
+      "F15"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I03",
+      "I04",
+      "I06",
+      "I11"
+    ],
+    "assertions": [
+      "Digits/currency/sign/negation/combining marks cannot disappear",
+      "four repeated equal values remain four occurrences",
+      "ambiguous ties abstain",
+      "page-only inputs never become exact regional highlights",
+      "no unbounded quadratic matching."
+    ],
+    "evidence_artifact": "artifacts/tasks/T12/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-13",
+    "task_ids": [
+      "T13"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/viewer.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/viewer.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F07",
+      "F09",
+      "F11"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I07",
+      "I14"
+    ],
+    "assertions": [
+      "Click/keyboard finding selects correct duplicate/page after zoom/rotation",
+      "two views sync without scroll loop",
+      "narrow screen stacks instead of squeezing",
+      "unknown geometry stays page-level",
+      "canvas has equivalent reachable content and limits."
+    ],
+    "evidence_artifact": "artifacts/tasks/T13/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-14",
+    "task_ids": [
+      "T14"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/findings.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/findings.spec.ts"
+    ],
+    "fixture_ids": [
+      "F03",
+      "F11",
+      "F16",
+      "F17",
+      "F20"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I06",
+      "I11",
+      "I18"
+    ],
+    "assertions": [
+      "Normal invisible scan has no warning solely for invisibility",
+      "timed-out/model-missing/unsupported are distinct",
+      "zero findings cannot display clean/safe",
+      "explanations come from deterministic templates and actual recorded evidence, not generated truth claims."
+    ],
+    "evidence_artifact": "artifacts/tasks/T14/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-15",
+    "task_ids": [
+      "T15"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/privacy/local.spec.ts",
+    "commands": [
+      "pnpm test:privacy -- tests/privacy/local.spec.ts"
+    ],
+    "fixture_ids": [
+      "F24",
+      "F22"
+    ],
+    "invariant_ids": [
+      "I08",
+      "I09",
+      "I10",
+      "I14"
+    ],
+    "assertions": [
+      "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
+      "only fixed allowlisted same-origin asset paths",
+      "telemetry/external-font absence proven",
+      "online/warm/offline modes documented",
+      "redact private test logs before public artifacts."
+    ],
+    "evidence_artifact": "artifacts/tasks/T15/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-16",
+    "task_ids": [
+      "T16"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/reports/export.test.mjs",
+    "commands": [
+      "node --test tests/reports/export.test.mjs"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F24",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I05",
+      "I09",
+      "I10",
+      "I13"
+    ],
+    "assertions": [
+      "Preview equals decoded contents",
+      "raw text/geometry/coverage survive",
+      "no source PDF without explicit opt-in",
+      "script-like strings escaped",
+      "missing bytes marked evidence-only",
+      "export is deterministic aside from excluded run timing fields."
+    ],
+    "evidence_artifact": "artifacts/tasks/T16/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-17",
+    "task_ids": [
+      "T17"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/amount.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/amount.spec.ts && pnpm test:fixtures"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I13",
+      "I18"
+    ],
+    "assertions": [
+      "Renamed identical bytes produce same reading",
+      "modified bytes cannot replay old prepared result",
+      "live and prepared paths label provenance correctly",
+      "real source downloadable",
+      "actual timing visible, not decorative scan animation",
+      "clean counterpart renders equal under same renderer."
+    ],
+    "evidence_artifact": "artifacts/tasks/T17/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-18",
+    "task_ids": [
+      "T18"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/gates/g1.spec.ts",
+    "commands": [
+      "pnpm exec playwright test tests/gates/g1.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F07",
+      "F21",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I04",
+      "I05",
+      "I07",
+      "I08",
+      "I09",
+      "I14"
+    ],
+    "assertions": [
+      "Every G1 assertion has committed source and fresh receipt",
+      "no mocked own-file processor, backend, stale screenshot or skipped privacy check. Defects reopen owning tasks",
+      "complete downstream plan remains required."
+    ],
+    "evidence_artifact": "artifacts/tasks/T18/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-19",
+    "task_ids": [
+      "T19"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/large-mobile.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/large-mobile.spec.ts"
+    ],
+    "fixture_ids": [
+      "F18",
+      "F19",
+      "F21"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I14",
+      "I17"
+    ],
+    "assertions": [
+      "1,000-page metadata plan does not render all pages",
+      "selected native/OCR limits visible",
+      "320px and touch controls usable",
+      "oversized edges rejected before allocation",
+      "cancellation leaves coherent partial result and next-file health."
+    ],
+    "evidence_artifact": "artifacts/tasks/T19/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-20",
+    "task_ids": [
+      "T20"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/browser/ambiguity.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/browser/ambiguity.spec.ts"
+    ],
+    "fixture_ids": [
+      "F11",
+      "F12",
+      "F13",
+      "F16"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I03",
+      "I04",
+      "I06"
+    ],
+    "assertions": [
+      "Four repeated amounts never jump to first string match",
+      "order-only differences remain order-only",
+      "incomplete extraction cannot be claimed missing visible text",
+      "keyboard selection returns to originating finding."
+    ],
+    "evidence_artifact": "artifacts/tasks/T20/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-21",
+    "task_ids": [
+      "T21"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/gallery/gallery.test.mjs",
+    "commands": [
+      "node --test tests/gallery/*.test.mjs && pnpm test:fixtures"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F04",
+      "F07",
+      "F12",
+      "F14"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I06",
+      "I13",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "Every card source/hash/output manifest validates",
+      "no unexecuted expectation presented as result",
+      "supported languages accurately labeled",
+      "gallery not padded with repetitive cases",
+      "all assets rights-cleared and <static limit."
+    ],
+    "evidence_artifact": "artifacts/tasks/T21/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-22",
+    "task_ids": [
+      "T22"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/reports/import.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/reports/import.spec.ts"
+    ],
+    "fixture_ids": [
+      "F24",
+      "F25",
+      "F26"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I05",
+      "I07",
+      "I09",
+      "I10"
+    ],
+    "assertions": [
+      "Real selected export reopens without upload",
+      "source omission and unavailable reader explicit",
+      "malicious report cannot fetch/execute/select profile",
+      "hash mismatch blocks replay",
+      "comparison asks for exact locally selected source reports."
+    ],
+    "evidence_artifact": "artifacts/tasks/T22/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-23",
+    "task_ids": [
+      "T23"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/reports/selection.spec.ts",
+    "commands": [
+      "pnpm test:browser -- tests/reports/selection.spec.ts"
+    ],
+    "fixture_ids": [
+      "F11",
+      "F24",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I09",
+      "I10"
+    ],
+    "assertions": [
+      "Default selected finding does not include unrelated text/name/PDF/notes",
+      "full-source warning requires explicit choice",
+      "crop is described as excerpt not safe redaction",
+      "selected omissions retain honest original produced_count and check coverage."
+    ],
+    "evidence_artifact": "artifacts/tasks/T23/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-24",
+    "task_ids": [
+      "T24"
+    ],
+    "gate": "G1",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/security/import/import.test.mjs",
+    "commands": [
+      "node --test tests/security/import/*.test.mjs && python scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000"
+    ],
+    "fixture_ids": [
+      "F24",
+      "F25",
+      "F26",
+      "F19"
+    ],
+    "invariant_ids": [
+      "I09",
+      "I10",
+      "I17"
+    ],
+    "assertions": [
+      "Controlled oversized/truncated/HTML/SVG/polyglot/prototype/path inputs fail before dangerous allocation or resource use",
+      "bounded fuzz receipts show no unexpected accepts/crashes/egress",
+      "HTML export opens script-free",
+      "no archive decompression surface."
+    ],
+    "evidence_artifact": "artifacts/tasks/T24/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-25",
+    "task_ids": [
+      "T25"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/privacy/cache.spec.ts",
+    "commands": [
+      "pnpm test:privacy -- tests/privacy/cache.spec.ts"
+    ],
+    "fixture_ids": [
+      "F20",
+      "F22",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I08",
+      "I13",
+      "I14",
+      "I17"
+    ],
+    "assertions": [
+      "Cold/offline without model reports unavailable",
+      "prepared offline own-file works without requests",
+      "model update cannot reuse wrong hash",
+      "clear terminates workers/revokes URLs/removes requested caches, with no forensic erasure promise."
+    ],
+    "evidence_artifact": "artifacts/tasks/T25/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-26",
+    "task_ids": [
+      "T26"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/readers/test_native.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/readers -q"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F02",
+      "F07",
+      "F08",
+      "F10",
+      "F11"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Mapping/control/covered actual outputs preserved",
+      "shared glyph boxes not split with guessed widths",
+      "pypdf text stays page-only",
+      "all rotations/origins map correctly",
+      "malformed/encrypted failures isolated",
+      "build/version manifest complete."
+    ],
+    "evidence_artifact": "artifacts/tasks/T26/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-27",
+    "task_ids": [
+      "T27"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/ocr/test_tesseract.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/ocr -q"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F14",
+      "F15",
+      "F20"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "No URL or runtime model fetch",
+      "missing model/binary/unreadable page differ",
+      "malicious filename cannot become an option",
+      "crop padding/resize inverses correct",
+      "native OCR retains raw punctuation and all occurrences."
+    ],
+    "evidence_artifact": "artifacts/tasks/T27/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-28",
+    "task_ids": [
+      "T28"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/structure/test_observations.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/structure -q"
+    ],
+    "fixture_ids": [
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07"
+    ],
+    "invariant_ids": [
+      "I04",
+      "I05",
+      "I06",
+      "I11"
+    ],
+    "assertions": [
+      "Invisible-over-border and white-on-dark controls cannot produce universal hidden/visible verdict",
+      "no false “all checked”",
+      "off-crop observation uses raw/native geometry while page display remains crop",
+      "unsupported compositing explicitly recorded."
+    ],
+    "evidence_artifact": "artifacts/tasks/T28/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-29",
+    "task_ids": [
+      "T29"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/runtime/test_supervisor.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/runtime -q"
+    ],
+    "fixture_ids": [
+      "F17",
+      "F18",
+      "F19",
+      "F20",
+      "F21"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I07",
+      "I17"
+    ],
+    "assertions": [
+      "Injected Python/native-like hang/crash/OOM/output flood gets classified and bounded",
+      "successful files remain byte-stable",
+      "one retry max within deadline",
+      "empty success not retried",
+      "Ctrl-C terminates descendants and leaves valid partial artifact."
+    ],
+    "evidence_artifact": "artifacts/tasks/T29/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-30",
+    "task_ids": [
+      "T30"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/cli/test_commands.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/cli -q"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F17",
+      "F20",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I05",
+      "I09",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Representative documented commands execute",
+      "exit0/2/3/4/6/130 cases correct",
+      "output validates/reopens",
+      "replay refuses mismatched source/hash/profile",
+      "no arbitrary imported executable or silent reader substitution."
+    ],
+    "evidence_artifact": "artifacts/tasks/T30/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-31",
+    "task_ids": [
+      "T31"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/bridge/bridge.test.mjs",
+    "commands": [
+      "node --test tests/bridge/*.test.mjs && uv run --project native python -m pytest native/tests/bridge -q"
+    ],
+    "fixture_ids": [
+      "F11",
+      "F12",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I03",
+      "I04",
+      "I10",
+      "I12",
+      "I13"
+    ],
+    "assertions": [
+      "Golden cross-language comparison cases agree exactly",
+      "missing Node yields clear capability error, not fallback algorithm",
+      "stdout bounded",
+      "no shell/plugin/profile selection from report",
+      "manifests retain comparator version."
+    ],
+    "evidence_artifact": "artifacts/tasks/T31/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-32",
+    "task_ids": [
+      "T32"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/corpus/test_corpus.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/corpus -q"
+    ],
+    "fixture_ids": [
+      "F17",
+      "F21",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I05",
+      "I12",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Duplicate filenames remain distinct corpus keys",
+      "traversal/symlink escape rejected",
+      "altered bytes invalidate resume",
+      "one crashing file cannot erase successful reports",
+      "deterministic index ordering and explicit partial counts survive interruption."
+    ],
+    "evidence_artifact": "artifacts/tasks/T32/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-33",
+    "task_ids": [
+      "T33"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/profiles/test_profiles.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/profiles -q"
+    ],
+    "fixture_ids": [
+      "F23",
+      "F24",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I10",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Old/new pypdf versions demonstrably loaded from distinct interpreters",
+      "reader version printed in outputs",
+      "missing version install blocks that profile",
+      "untrusted profile path/command refused",
+      "offline run makes no requests."
+    ],
+    "evidence_artifact": "artifacts/tasks/T33/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-34",
+    "task_ids": [
+      "T34"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/regression/regression.test.mjs",
+    "commands": [
+      "pnpm test:regression && uv run --project native python -m pytest native/tests/baselines -q"
+    ],
+    "fixture_ids": [
+      "F23",
+      "F25",
+      "F26"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I12",
+      "I13"
+    ],
+    "assertions": [
+      "Changed no-rule is informational",
+      "rule regression exits5",
+      "lost coverage cannot count improvement",
+      "incompatiblefiles/readerconfig marked",
+      "baseline overwrite/auto-refresh prohibited",
+      "new baseline requires explicit approval and new path."
+    ],
+    "evidence_artifact": "artifacts/tasks/T34/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-35",
+    "task_ids": [
+      "T35"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/examples/test_upgrade.py",
+    "commands": [
+      "python -m unittest discover -s tests/examples -v"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I12",
+      "I13",
+      "I18"
+    ],
+    "assertions": [
+      "Example runs end-to-end locally",
+      "before/after identities differ as intended",
+      "known rule-failing mutation exits5 without modifying baseline",
+      "output reopens in web viewer",
+      "README commands copied verbatim into test."
+    ],
+    "evidence_artifact": "artifacts/tasks/T35/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-36",
+    "task_ids": [
+      "T36"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/evaluation/test_evaluation.py",
+    "commands": [
+      "python -m unittest discover -s tests/evaluation -v"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F04",
+      "F11",
+      "F12",
+      "F14",
+      "F15",
+      "F23"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I12",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "No sibling leakage",
+      "skipped/failed pages remain coverage denominator",
+      "repeated OCR readings are not independent samples",
+      "targets reported as unmet until real run",
+      "small real incident data stays permissioned and out of public logs."
+    ],
+    "evidence_artifact": "artifacts/tasks/T36/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-37",
+    "task_ids": [
+      "T37"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/a11y/release.spec.ts",
+    "commands": [
+      "pnpm test:a11y && python scripts/check_manual_receipts.py accessibility"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F11",
+      "F17",
+      "F21"
+    ],
+    "invariant_ids": [
+      "I04",
+      "I06",
+      "I18"
+    ],
+    "assertions": [
+      "All core flows completed without mouse",
+      "focus restored",
+      "amount alternatives and partial coverage announced correctly",
+      "400% zoom usable",
+      "reduced motion honored",
+      "zero serious/critical automated and zero blocked manual critical flow."
+    ],
+    "evidence_artifact": "artifacts/tasks/T37/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-38",
+    "task_ids": [
+      "T38"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/visual/release.spec.ts",
+    "commands": [
+      "pnpm test:visual"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F17",
+      "F20",
+      "F21"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I18"
+    ],
+    "assertions": [
+      "Approved screenshots show no clipping/overlap/empty fake controls",
+      "all interactive actions work",
+      "source page remains focal",
+      "no intimidating metrics wall",
+      "mobile view meaningful without promising heavy OCR everywhere."
+    ],
+    "evidence_artifact": "artifacts/tasks/T38/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-39",
+    "task_ids": [
+      "T39"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/performance/budgets.spec.ts",
+    "commands": [
+      "python scripts/measure_performance.py --profile reference-desktop && pnpm test:browser -- tests/performance/budgets.spec.ts"
+    ],
+    "fixture_ids": [
+      "F18",
+      "F19",
+      "F20",
+      "F21",
+      "F22"
+    ],
+    "invariant_ids": [
+      "I05",
+      "I14",
+      "I17",
+      "I18"
+    ],
+    "assertions": [
+      "Reference targets either pass with raw receipts or block affected capability",
+      "no invented portable JS heap cap",
+      "job/raster/output budgets enforced",
+      "mobile fallback is visible",
+      "peak/tail timings and device identity reported, not synthetic elapsed animation."
+    ],
+    "evidence_artifact": "artifacts/tasks/T39/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-40",
+    "task_ids": [
+      "T40"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/security/test_containment.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/security -q && python tests/containment/run.py"
+    ],
+    "fixture_ids": [
+      "F17",
+      "F19",
+      "F20",
+      "F21",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I05",
+      "I10",
+      "I17"
+    ],
+    "assertions": [
+      "Source bytes unchanged",
+      "output cannot escape root",
+      "child/descendants terminated",
+      "successful unrelated files remain valid",
+      "unsupported OS limits reported",
+      "actual container no-network test uses owned synthetic files and records image digest."
+    ],
+    "evidence_artifact": "artifacts/tasks/T40/receipt.json",
+    "level": "integration",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-41",
+    "task_ids": [
+      "T41"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "experiments/P09/test_experiment.py",
+    "commands": [
+      "python experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09 && python experiments/P09/test_experiment.py"
+    ],
+    "fixture_ids": [
+      "F03",
+      "F04",
+      "F05",
+      "F06"
+    ],
+    "invariant_ids": [
+      "I04",
+      "I06",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "Zero hard-control false visibility",
+      "precision/coverage/runtime recorded",
+      "candidate gain measured without held-out leakage",
+      "negative result is complete",
+      "proposed merge has separate adapter capability review and full controls."
+    ],
+    "evidence_artifact": "artifacts/tasks/T41/receipt.json",
+    "level": "experiment",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-42",
+    "task_ids": [
+      "T42"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "experiments/P11/test_experiment.py",
+    "commands": [
+      "python experiments/P11/run.py --manifest evaluation/manifests/development.json --out artifacts/P11 && python experiments/P11/test_experiment.py"
+    ],
+    "fixture_ids": [
+      "F14",
+      "F15",
+      "F16"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I04",
+      "I16",
+      "I17"
+    ],
+    "assertions": [
+      ">=20% useful target gains at<=1ppprecision loss or reject",
+      "clean neighbor fields not corrupted",
+      "every accepted transform source-bound",
+      "failed/modelmissing jobs remain denominator",
+      "full raw receipt retained."
+    ],
+    "evidence_artifact": "artifacts/tasks/T42/receipt.json",
+    "level": "experiment",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-43",
+    "task_ids": [
+      "T43"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "experiments/P12/test_experiment.py",
+    "commands": [
+      "python experiments/P12/check_manifest.py && pnpm test:browser -- experiments/P12/browser.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F07",
+      "F10",
+      "F11"
+    ],
+    "invariant_ids": [
+      "I04",
+      "I13",
+      "I14",
+      "I16",
+      "I17"
+    ],
+    "assertions": [
+      "Useful complementary mechanism gain at fixed precision and bounded download/RSS or reject",
+      "API/geometry proven",
+      "every asset<24MiB",
+      "raw results, negative controls and rights included",
+      "default unavailable if candidate fails."
+    ],
+    "evidence_artifact": "artifacts/tasks/T43/receipt.json",
+    "level": "experiment",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-44",
+    "task_ids": [
+      "T44"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "experiments/P13/test_experiment.py",
+    "commands": [
+      "python experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13 && python experiments/P13/test_experiment.py"
+    ],
+    "fixture_ids": [
+      "F14",
+      "F15",
+      "F16"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I13",
+      "I16",
+      "I17"
+    ],
+    "assertions": [
+      "Complementary useful failures at fixed precision and memory budget or reject",
+      "explicit missing-model and OOV behavior",
+      "no runtime network",
+      "no consensus-as-truth",
+      "full raw and negative outcomes documented."
+    ],
+    "evidence_artifact": "artifacts/tasks/T44/receipt.json",
+    "level": "experiment",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-45",
+    "task_ids": [
+      "T45"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "experiments/P14/test_experiment.py",
+    "commands": [
+      "python experiments/P14/run.py --manifest evaluation/manifests/development.json --out artifacts/P14 && python experiments/P14/test_experiment.py"
+    ],
+    "fixture_ids": [
+      "F06",
+      "F07",
+      "F09",
+      "F15"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I04",
+      "I16"
+    ],
+    "assertions": [
+      "Any lost registration or clean corruption rejects",
+      "gain must transfer beyond the challenge generator",
+      "no generic reconstruction/search or PDF write path",
+      "negative result closes task with deleted production candidate."
+    ],
+    "evidence_artifact": "artifacts/tasks/T45/receipt.json",
+    "level": "experiment",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-46",
+    "task_ids": [
+      "T46"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/parity/parity.test.mjs",
+    "commands": [
+      "node --test tests/parity/*.test.mjs && python scripts/check_manual_receipts.py compatibility"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F07",
+      "F08",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I02",
+      "I03",
+      "I12",
+      "I13",
+      "I18"
+    ],
+    "assertions": [
+      "No unexplained difference in promised semantic equivalence",
+      "required hash vectors same everywhere",
+      "engine renders not forced equal",
+      "exact build/CPU/OS/model manifest and all failed/skipped profiles recorded."
+    ],
+    "evidence_artifact": "artifacts/tasks/T46/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-47",
+    "task_ids": [
+      "T47"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/release/test_distribution.py",
+    "commands": [
+      "python scripts/check_distribution.py --release && python -m unittest discover -s tests/release -v"
+    ],
+    "fixture_ids": [
+      "F20",
+      "F22",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I13",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "No unknown-license/hash asset",
+      "no unpatched reachable critical/high risk without explicit reasoned review and disabled affected feature",
+      "license summaries agree with bundled notices",
+      "no fonts copied from planning environment or private input included."
+    ],
+    "evidence_artifact": "artifacts/tasks/T47/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-48",
+    "task_ids": [
+      "T48"
+    ],
+    "gate": "G5",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/deployment/test_static.py",
+    "commands": [
+      "pnpm build && python scripts/check_static_dist.py apps/web/dist --config wrangler.json && python -m unittest discover -s tests/deployment -v"
+    ],
+    "fixture_ids": [
+      "F20",
+      "F22",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I08",
+      "I13",
+      "I15",
+      "I17"
+    ],
+    "assertions": [
+      "Actual build has only static assets",
+      "each asset<24MiB and rights and hash manifest complete",
+      "routes/deeplinks/missingassets expected",
+      "no third-party requests",
+      "wasm/CSP works without script unsafe-eval",
+      "default no COOP/COEP/SharedArrayBuffer requirement."
+    ],
+    "evidence_artifact": "artifacts/tasks/T48/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-49",
+    "task_ids": [
+      "T49"
+    ],
+    "gate": "G5",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/docs/test_docs.py",
+    "commands": [
+      "python -m unittest discover -s tests/docs -v && python scripts/check_claims.py"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I13",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "Clean-machine instructions and all commands exercised",
+      "no unsupported “safe/fraud/AI sees”/score/agent autonomy claims",
+      "repeated-reader workflow documented",
+      "any unknown rights and owner inputs plainly separated",
+      "links valid."
+    ],
+    "evidence_artifact": "artifacts/tasks/T49/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-50",
+    "task_ids": [
+      "T50"
+    ],
+    "gate": "G5",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/docs/test_launch_claims.py",
+    "commands": [
+      "python scripts/check_claims.py --surface launch && python -m unittest discover -s tests/docs -p test_launch_claims.py -v"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F23"
+    ],
+    "invariant_ids": [
+      "I06",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "Each launch claim has source commit/test receipt",
+      "clipped time labeled",
+      "no fabricated adoption/scores/manual contribution",
+      "no sensitive document in media",
+      "final direct-try/source/limits links supplied only after owner publishes."
+    ],
+    "evidence_artifact": "artifacts/tasks/T50/receipt.json",
+    "level": "unit_contract",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-51",
+    "task_ids": [
+      "T51"
+    ],
+    "gate": "G2",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/gates/g2.spec.ts",
+    "commands": [
+      "pnpm exec playwright test tests/gates/g2.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F07",
+      "F11",
+      "F14",
+      "F17",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I03",
+      "I04",
+      "I05",
+      "I06",
+      "I07",
+      "I08",
+      "I09",
+      "I10",
+      "I14"
+    ],
+    "assertions": [
+      "All mandatory public features work without native/backend",
+      "all controls functional",
+      "missing-model and unsupported results remain partial, never clean",
+      "tests run against built artifact with exact versions",
+      "defects reopen owners."
+    ],
+    "evidence_artifact": "artifacts/tasks/T51/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-52",
+    "task_ids": [
+      "T52"
+    ],
+    "gate": "G3",
+    "status": "specified_not_executed",
+    "implementation_test_path": "native/tests/gates/test_g3.py",
+    "commands": [
+      "uv run --project native python -m pytest native/tests/gates -q"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F07",
+      "F17",
+      "F21",
+      "F23",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I05",
+      "I10",
+      "I12",
+      "I13",
+      "I17"
+    ],
+    "assertions": [
+      "Baselines never update automatically.",
+      "Stated rules detect regressions and lost coverage.",
+      "The compared versions actually run in separate, recorded environments.",
+      "One failed file cannot erase successful results from other files.",
+      "Reader, source and configuration identities survive report transfer.",
+      "The documented local CI example executes without a hosted account."
+    ],
+    "evidence_artifact": "artifacts/tasks/T52/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-53",
+    "task_ids": [
+      "T53"
+    ],
+    "gate": "G4",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/gates/quality/test_g4.py",
+    "commands": [
+      "python -m unittest discover -s tests/gates/quality -v",
+      "python scripts/check_manual_receipts.py release"
+    ],
+    "fixture_ids": [
+      "F03",
+      "F04",
+      "F06",
+      "F11",
+      "F14",
+      "F19",
+      "F20",
+      "F21",
+      "F23",
+      "F24",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I04",
+      "I05",
+      "I06",
+      "I08",
+      "I09",
+      "I10",
+      "I12",
+      "I13",
+      "I16",
+      "I17",
+      "I18"
+    ],
+    "assertions": [
+      "Numeric quality targets and critical invariants have actual receipts",
+      "all required profiles covered",
+      "no missing-rights exception",
+      "no skipped required tests",
+      "any product limitation reflected consistently in UI/docs/claims."
+    ],
+    "evidence_artifact": "artifacts/tasks/T53/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-54",
+    "task_ids": [
+      "T54"
+    ],
+    "gate": "G5",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/deployment/public.spec.ts",
+    "commands": [
+      "pnpm exec playwright test tests/deployment/public.spec.ts"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F20",
+      "F22",
+      "F24"
+    ],
+    "invariant_ids": [
+      "I08",
+      "I13",
+      "I15",
+      "I16",
+      "I18"
+    ],
+    "assertions": [
+      "The public sample and own-file workflow work on the actual authorized origin.",
+      "Deployment configuration, request-path tests and available account metrics establish that application traffic does not invoke a dynamic Worker.",
+      "No upload endpoint or account-injected analytics script is present.",
+      "Rollback serves the previously archived artifact and its verified hashes.",
+      "The archived distribution, model manifest, SBOM, source, test receipts and public claims match the release.",
+      "The owner records explicit publication approval without disclosing secrets."
+    ],
+    "evidence_artifact": "artifacts/tasks/T54/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  },
+  {
+    "id": "TEST-55",
+    "task_ids": [
+      "T55"
+    ],
+    "gate": "G5",
+    "status": "specified_not_executed",
+    "implementation_test_path": "tests/gates/final/test_final.py",
+    "commands": [
+      "python -m unittest discover -s tests/gates/final -v"
+    ],
+    "fixture_ids": [
+      "F01",
+      "F03",
+      "F07",
+      "F11",
+      "F17",
+      "F20",
+      "F21",
+      "F23",
+      "F24",
+      "F25"
+    ],
+    "invariant_ids": [
+      "I01",
+      "I02",
+      "I03",
+      "I04",
+      "I05",
+      "I06",
+      "I07",
+      "I08",
+      "I09",
+      "I10",
+      "I11",
+      "I12",
+      "I13",
+      "I14",
+      "I15",
+      "I16",
+      "I17",
+      "I18"
+    ],
+    "assertions": [
+      "All G1–G4 receipts are fresh for the actual release candidate.",
+      "Static deployment preflight and documentation command checks pass.",
+      "No public claim exceeds its linked evidence.",
+      "The owner records visual approval of the working application.",
+      "Only owner-controlled publication inputs remain before T54. Any defect creates a specific corrective task and invalidates the affected gate receipts."
+    ],
+    "evidence_artifact": "artifacts/tasks/T55/receipt.json",
+    "level": "gate",
+    "release_blocking": true
+  }
+]

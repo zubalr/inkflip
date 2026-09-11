@@ -1,0 +1,12 @@
+[
+  {
+    "source_file": "probes/browser/index.html",
+    "target": "./node_modules/tesseract.js/dist/tesseract.min.js",
+    "kind": "explicit-install dependency, not a delivered package artifact",
+    "package": "tesseract.js",
+    "version": "7.0.0",
+    "status": "not_installed_registry_blocked",
+    "setup_instructions": "probes/browser/README.md",
+    "qualification": "The browser probe requires explicit pnpm installation first. The design reference and native/contract probes do not depend on this missing file."
+  }
+]

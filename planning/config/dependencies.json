@@ -1,0 +1,173 @@
+[
+  {
+    "name": "node",
+    "version": "22.16.0",
+    "role": "toolchain",
+    "evidence_status": "execution baseline",
+    "license_summary": "MIT and bundled notices",
+    "qualification": "Installed baseline; select patched compatible 22 LTS at bootstrap via lock-owner ADR, record exact patch.",
+    "source_id": "S29"
+  },
+  {
+    "name": "pnpm",
+    "version": "12.3.4",
+    "role": "toolchain",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "No registry installation executed.",
+    "source_id": "S31"
+  },
+  {
+    "name": "vite",
+    "version": "8.3.0",
+    "role": "web-build",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "Build-time only; verify Node engine and transitive lock.",
+    "source_id": "S29"
+  },
+  {
+    "name": "react",
+    "version": "19.2.8",
+    "role": "web",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "Paired react-dom exact same pin.",
+    "source_id": "S29"
+  },
+  {
+    "name": "react-dom",
+    "version": "19.2.8",
+    "role": "web",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "Client only; no RSC/SSR.",
+    "source_id": "S29"
+  },
+  {
+    "name": "typescript",
+    "version": "6.0.2",
+    "role": "build",
+    "evidence_status": "source-verified",
+    "license_summary": "Apache-2.0",
+    "qualification": "Typecheck all packages.",
+    "source_id": "S29"
+  },
+  {
+    "name": "@vitejs/plugin-react",
+    "version": "6.1.1",
+    "role": "web-build",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "No Cloudflare full-stack plugin.",
+    "source_id": "S29"
+  },
+  {
+    "name": "pdfjs-dist",
+    "version": "6.3.289",
+    "role": "web-and-node-reader",
+    "evidence_status": "source-verified",
+    "license_summary": "Apache-2.0 plus bundled assets",
+    "qualification": "Use paired legacy main/worker; redistribute complete selected bundle notices.",
+    "source_id": "S23"
+  },
+  {
+    "name": "tesseract.js",
+    "version": "7.0.0",
+    "role": "web-ocr",
+    "evidence_status": "source-verified",
+    "license_summary": "Apache-2.0",
+    "qualification": "Request blocks explicitly; no default CDN.",
+    "source_id": "S24"
+  },
+  {
+    "name": "tesseract.js-core",
+    "version": "7.0.0",
+    "role": "web-ocr",
+    "evidence_status": "source-verified",
+    "license_summary": "Apache-2.0 and binary notices",
+    "qualification": "Scalar/SIMD no threads; complete notices gate release.",
+    "source_id": "S24"
+  },
+  {
+    "name": "ajv",
+    "version": "8.17.1",
+    "role": "schema-build",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT",
+    "qualification": "Generate standalone validators; never compile untrusted schema.",
+    "source_id": "S32"
+  },
+  {
+    "name": "wrangler",
+    "version": "4.131.0",
+    "role": "deploy-only",
+    "evidence_status": "source-verified",
+    "license_summary": "MIT OR Apache-2.0",
+    "qualification": "No Worker main.",
+    "source_id": "S37"
+  },
+  {
+    "name": "python",
+    "version": "3.13.5",
+    "role": "native-toolchain",
+    "evidence_status": "execution baseline",
+    "license_summary": "PSF-2.0 and bundled notices",
+    "qualification": "Bootstrap owner selects patched compatible 3.13 build; freeze exact patch/digest before integration.",
+    "source_id": "S26"
+  },
+  {
+    "name": "pypdfium2",
+    "version": "5.8.0",
+    "role": "native",
+    "evidence_status": "executed",
+    "license_summary": "Apache-2.0 OR BSD-3-Clause; separate build licenses",
+    "qualification": "Installed PDFium 149.0.7825.0; build-specific full notice inventory mandatory.",
+    "source_id": "S26"
+  },
+  {
+    "name": "pypdf",
+    "version": "6.18.0",
+    "role": "native",
+    "evidence_status": "source-verified",
+    "license_summary": "BSD-3-Clause",
+    "qualification": "Native probe used 5.9.0 only; no selected-version runtime claim.",
+    "source_id": "S28"
+  },
+  {
+    "name": "Pillow",
+    "version": "12.3.0",
+    "role": "native-images",
+    "evidence_status": "executed",
+    "license_summary": "MIT-CMU; codec notices",
+    "qualification": "Reencode bounded PNG; no image URL inputs.",
+    "source_id": "S26"
+  },
+  {
+    "name": "jsonschema",
+    "version": "4.26.0",
+    "role": "native-and-planning-validation",
+    "evidence_status": "executed",
+    "license_summary": "MIT",
+    "qualification": "Draft 2020-12, local refs only.",
+    "source_id": "S32"
+  },
+  {
+    "name": "tesseract",
+    "version": "5.5.0",
+    "role": "native-ocr",
+    "evidence_status": "executed",
+    "license_summary": "Apache-2.0; linked libraries separately",
+    "qualification": "Known probe baseline; build from explicit source/image and audit before shipping.",
+    "source_id": "S25"
+  },
+  {
+    "name": "playwright",
+    "version": "1.57.0",
+    "role": "planning-visual-probe",
+    "evidence_status": "executed",
+    "license_summary": "Apache-2.0",
+    "qualification": "Actual available probe; product test browser revision reverified at bootstrap.",
+    "source_id": "S29"
+  }
+]

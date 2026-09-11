@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "scope": "small protocol model + one synthetic child timeout; not browser/parser watchdog proof",
+  "assertions": {
+    "stale_document_rejected": true,
+    "duplicate_sequence_rejected": true,
+    "cancelled_generation_rejected": true,
+    "empty_success_retained": true,
+    "synthetic_child_terminated": true
+  },
+  "child_elapsed_ms": 151.7,
+  "child_deadline_ms": 150,
+  "child_returncode": -9
+}

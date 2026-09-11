@@ -1,0 +1,499 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "c1961dc78b9c3412845a3c2f3dbca795ecd491ee7addd68f7d8e9f7aa28f7624",
+  "document": {
+    "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+    "byte_length": 1437,
+    "page_count": 1,
+    "display_name": null,
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "r_pdfium",
+      "name": "PDFium via pypdfium2",
+      "version": "5.8.0",
+      "build": "PDFium 149.0.7825.0",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "Recorded fixed probe only; product adapter is not implemented."
+          ]
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "This is an executed native fixture probe, not a browser benchmark."
+      ]
+    },
+    {
+      "id": "r_tesseract",
+      "name": "Tesseract",
+      "version": "5.5.0",
+      "build": "native CLI; English tessdata_fast",
+      "adapter_version": "1.0.0",
+      "method": "ocr",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": "eng",
+        "psm": 7,
+        "render_reader_id": "r_pdfium",
+        "raster_dpi": 144,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "ocr",
+          "support": "supported",
+          "limits": [
+            "Recorded fixed probe only; product adapter is not implemented."
+          ]
+        }
+      ],
+      "model_hashes": [
+        "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      ],
+      "limitations": [
+        "This is an executed native fixture probe, not a browser benchmark."
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "crop_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "effective_view_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "box_source": "Generated fixed source and native page metadata",
+      "user_unit": 1,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "raw_to_canonical_transform_id": "t_canonical",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_canonical",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "Fixed source geometry; API character extents"
+    },
+    {
+      "id": "t_raster",
+      "page_index": 0,
+      "from_space": "canonical:p0",
+      "to_space": "raster:amount",
+      "matrix": [
+        2,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "inverse": [
+        0.5,
+        0,
+        0,
+        0.5,
+        0,
+        0
+      ],
+      "operation": "raster_scale",
+      "precision": "exact",
+      "source": "PDFium page.render(scale=2)"
+    },
+    {
+      "id": "t_crop",
+      "page_index": 0,
+      "from_space": "raster:amount",
+      "to_space": "ocr:amount",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        -80,
+        -244
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        80,
+        244
+      ],
+      "operation": "crop_translation",
+      "precision": "exact",
+      "source": "Fixed selected input crop [80,244,400,390] pixels"
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "o_pdfium_amount",
+      "reader_id": "r_pdfium",
+      "page_index": 0,
+      "ordinal": 63,
+      "raw_text": "$1,000",
+      "normalized_text": "$1,000",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 6,
+          "normalized_start": 0,
+          "normalized_end": 6,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            49.535999,
+            142.799988
+          ],
+          [
+            152.927994,
+            142.799988
+          ],
+          [
+            152.927994,
+            185.472
+          ],
+          [
+            49.535999,
+            185.472
+          ]
+        ],
+        "transform_ids": [
+          "t_canonical"
+        ],
+        "basis": "Union of PDFium API character boxes for indices 63–68; expanded mapping characters share a box."
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "PDFium text-page character range [63,69)",
+      "limitations": [
+        "Region attribution is explicit; no automatic alignment was executed."
+      ]
+    },
+    {
+      "id": "o_tess_amount",
+      "reader_id": "r_tesseract",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "$100\n",
+      "normalized_text": "$100 ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 4,
+          "raw_end": 5,
+          "normalized_start": 4,
+          "normalized_end": 5,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            40,
+            122
+          ],
+          [
+            200,
+            122
+          ],
+          [
+            200,
+            195
+          ],
+          [
+            40,
+            195
+          ]
+        ],
+        "transform_ids": [
+          "t_canonical",
+          "t_raster",
+          "t_crop"
+        ],
+        "basis": "Whole selected OCR input region; no word-level OCR box was requested in this probe."
+      },
+      "engine_score": null,
+      "source_asset_id": "a_crop",
+      "raw_source_locator": "Tesseract stdout from fixed rendered crop",
+      "limitations": [
+        "Region attribution is explicit; no automatic alignment was executed."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "f_amount",
+      "kind": "reading_difference",
+      "title": "Two readings of the selected region differ",
+      "explanation": "PDFium returns $1,000. Tesseract returns $100 from the rendered crop. Neither output alone establishes document truth.",
+      "page_index": 0,
+      "occurrence_ids": [
+        "o_pdfium_amount",
+        "o_tess_amount"
+      ],
+      "check_ids": [
+        "c_native",
+        "c_ocr"
+      ],
+      "alignment": "page_level",
+      "region_id": "region_amount",
+      "priority": "selected",
+      "basis": "Actual recorded reader outputs; region manually selected from fixed synthetic fixture.",
+      "limitations": [
+        "Automatic alignment and the planned browser readers were not executed.",
+        "The source generator deliberately changes a character mapping; the report does not detect fraud."
+      ]
+    }
+  ],
+  "annotations": [],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [
+      {
+        "id": "region_amount",
+        "page_index": 0,
+        "geometry": {
+          "precision": "exact",
+          "space": "canonical_page",
+          "polygon": [
+            [
+              40,
+              122
+            ],
+            [
+              200,
+              122
+            ],
+            [
+              200,
+              195
+            ],
+            [
+              40,
+              195
+            ]
+          ],
+          "transform_ids": [
+            "t_canonical"
+          ],
+          "basis": "Selected crop boundary in canonical points"
+        },
+        "label": "Selected amount crop"
+      }
+    ],
+    "checks": [
+      {
+        "id": "c_native",
+        "page_index": 0,
+        "reader_ids": [
+          "r_pdfium"
+        ],
+        "capability": "native_text",
+        "region_id": "region_amount"
+      },
+      {
+        "id": "c_ocr",
+        "page_index": 0,
+        "reader_ids": [
+          "r_tesseract"
+        ],
+        "capability": "ocr",
+        "region_id": "region_amount"
+      },
+      {
+        "id": "c_alignment",
+        "page_index": 0,
+        "reader_ids": [
+          "r_pdfium",
+          "r_tesseract"
+        ],
+        "capability": "alignment",
+        "region_id": "region_amount"
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "native",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "c_native",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 118,
+      "retained_occurrence_ids": [
+        "o_pdfium_amount"
+      ]
+    },
+    {
+      "id": "c_ocr",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "o_tess_amount"
+      ]
+    },
+    {
+      "id": "c_alignment",
+      "status": "unsupported",
+      "reason": "Automatic product alignment is not implemented in the native proof probe.",
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    }
+  ],
+  "execution": {
+    "execution_id": "94b59f8e-32d9-474d-ae09-29dd07f7c4c7",
+    "run_key": "72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83",
+    "status": "partial",
+    "started_at": "2026-09-11T15:46:53.540512+00:00",
+    "duration_ms": 269,
+    "environment": "Python 3.13.5; Linux x86_64; Pillow 12.3.0",
+    "result_origin": "prepared_actual_run",
+    "errors": []
+  },
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "crops",
+      "document_hash",
+      "settings",
+      "coverage"
+    ],
+    "omissions": [
+      "Original PDF excluded.",
+      "Filename excluded.",
+      "Other extracted source occurrences excluded.",
+      "Reader runtime binaries and model bytes excluded."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  },
+  "assets": [
+    {
+      "id": "a_crop",
+      "media_type": "image/png",
+      "sha256": "1fdbf122de112444aec7883508aaaedacdf1d0d68a46a5909f0ebdb99ce3d388",
+      "byte_length": 6032,
+      "purpose": "crop",
+      "data_base64": "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",
+      "pixel_size": [
+        320,
+        146
+      ],
+      "page_index": 0,
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            40,
+            122
+          ],
+          [
+            200,
+            122
+          ],
+          [
+            200,
+            195
+          ],
+          [
+            40,
+            195
+          ]
+        ],
+        "transform_ids": [
+          "t_canonical"
+        ],
+        "basis": "Input crop boundary, not a word segmentation"
+      }
+    }
+  ],
+  "limitations": [
+    "Prepared from actual fixed native probe outputs. Not the planned public application.",
+    "A cropped view is not a safe redaction. Original bytes are required for replay."
+  ]
+}

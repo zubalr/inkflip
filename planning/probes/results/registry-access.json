@@ -1,0 +1,14 @@
+{
+  "command": [
+    "npm",
+    "view",
+    "pdfjs-dist@6.3.289",
+    "version",
+    "--fetch-retries=0",
+    "--fetch-timeout=5000"
+  ],
+  "exit_code": 1,
+  "duration_ms": 286,
+  "output": "\nnpm error code EAI_AGAIN\nnpm error syscall getaddrinfo\nnpm error errno EAI_AGAIN\nnpm error request to https://registry.npmjs.org/pdfjs-dist failed, reason: getaddrinfo EAI_AGAIN registry.npmjs.org",
+  "scope": "Bounded package-registry reachability check; not dependency installation or application execution."
+}

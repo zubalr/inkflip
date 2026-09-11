@@ -1,0 +1,13 @@
+{
+  "kind": "baseline",
+  "schema_version": "1.0.0",
+  "id": "2918a17115bb39f80dd5ea34f9db9ceb2e12bd9cf5dd1de2beb3f393324f4a35",
+  "corpus_manifest_sha256": "5ec19c1c21edea782e5c7bfb4585bef028f28176b123b030db283cc6233f17dc",
+  "profile_sha256": "3e2f7fe8c8f3a127303705b7a651da6b863df819cb056c82a58454b1a7a58c74",
+  "report_ids": [
+    "c1961dc78b9c3412845a3c2f3dbca795ecd491ee7addd68f7d8e9f7aa28f7624"
+  ],
+  "rules_sha256": "9428de301615d91b493b2b37fcd4564b373f74dcfc465f34133f8f542c149631",
+  "approved_by": "contract-example-not-an-owner-approval",
+  "rationale": "Illustrates immutable baseline schema; not an approved product baseline."
+}
