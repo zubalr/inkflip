@@ -147,9 +147,9 @@
   "no_acceptance_self_grant": true,
   "revalidation": {
     "worker": "codex-orchestrator",
-    "reason": "Native app setup and acceptance builder changed shared validation inputs; reran bootstrap and independent review.",
-    "evaluated_commit": "edeb82f2dce546560e346ac1859d06f68d765067",
-    "evaluated_at": "2026-09-11T21:50:57.321589+00:00",
+    "reason": "Typed native assignment fix verified through independent review, 30 coordination tests and actual disposable Git/Beads handoff. Re-ran all bootstrap acceptance after shared source changed.",
+    "evaluated_commit": "0b765fdf03c157677abc792fea329708673e822d",
+    "evaluated_at": "2026-09-11T22:01:55.752093+00:00",
     "tests": {
       "collected": 49,
       "passed": 49,
