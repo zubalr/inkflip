@@ -2,10 +2,28 @@
 
 Private repository: https://github.com/zubalr/inkflip
 
-Start **Devin Cloud first**, with this repository connected and SWE-2 Max selected.
-Paste `prompts/DEVIN.md`. Then start Antigravity in the prepared UI checkout and
-paste `prompts/ANTIGRAVITY.md`; start ZCode in the prepared native checkout and paste
-`prompts/ZCODE.md`. Each file is the complete entry prompt.
+Start **Devin Local first** in Devin Desktop, using the existing project directory
+and SWE-2 Max. Use Normal mode and enable Subagents (Preview). Paste
+`prompts/DEVIN.md`. Then paste `prompts/ANTIGRAVITY.md` in Antigravity and
+`prompts/ZCODE.md` in ZCode. Each file is the complete entry prompt.
+
+Prepared local folders (relative to the parent `pdf project` directory):
+
+| App | Folder | Starting branch |
+| --- | --- | --- |
+| Devin Local | `original` | `main` |
+| Antigravity | `worktrees/pdf-t06` | `session/antigravity` |
+| ZCode | `worktrees/pdf-t05` | `session/zcode` |
+
+Keep the Devin coordinator in the existing `original` folder. The session creates
+isolated task worktrees when needed; leave the canonical checkout available for
+integration. All three apps read the same Beads database. Use the current prompt
+files; previously copied Cloud prompts are superseded.
+
+The owner selected Local because the [SWE-2 promotion](https://devin.ai/pricing)
+applies to Desktop and CLI through October 10, 2026 (verified September 12 in
+Qatar). It does not authorize Cloud usage. Follow the model and subagent rules in
+`docs/NATIVE_PASSES.md`; recheck the offer if resuming after it expires.
 
 The app model, GitHub access and native Teamwork/goal confirmation are UI choices;
 prompt text cannot grant account access or bypass those dialogs. The sessions

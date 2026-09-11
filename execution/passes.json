@@ -12,7 +12,7 @@
   },
   "apps": {
     "devin": {
-      "role": "Cloud implementation and sole integration lead",
+      "role": "Local implementation and sole integration lead",
       "tasks": [
         "T02",
         "T03",

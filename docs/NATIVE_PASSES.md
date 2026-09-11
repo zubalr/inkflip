@@ -12,48 +12,79 @@ Native harnesses own execution. Do not create a second queue or mirror task
 status into Markdown/JSON. Immutable evidence is output, not a tracker. Do not
 run the frozen planning package's bootstrap helper.
 
-## Bootstrap and state
+## Local startup and state
 
-Code and Beads data travel through private `zubalr/inkflip`. Use GitHub access
-provided by the app; never put credentials in prompts, files, logs or URLs.
-Devin Cloud needs this repository enabled in its GitHub integration.
+All three sessions run on this Mac. Start the Devin Local coordinator in the
+canonical `original` checkout on clean, published `main`. Antigravity and ZCode
+use their prepared linked worktrees. Code and Beads backups travel through the
+private `zubalr/inkflip` remote using existing Git authentication. Never put
+credentials in prompts, files, logs or URLs.
 
-Run `python3 scripts/bootstrap_beads.py` to install pinned Beads 1.2.2 locally
-if needed (Linux amd64); matching existing installations are used. Python
-3.11+ and Git are required. Add the printed `.tools/bin` directory to PATH if
-installed. An independent clone bootstraps with the authenticated Git origin:
+Use the existing Beads 1.2.2 installation and canonical database. Linked
+worktrees share that database: never initialize or bootstrap another one there.
+`coordination.py` resolves the canonical root. Run
+`python3 scripts/native_pass.py status APP` for local reads, where APP is devin,
+antigravity or zcode. Workers omit `--sync` and never pull/push Beads; only the
+coordinator synchronizes its remote. A failed state read is a blocker, not an
+empty inbox.
 
-```sh
-BD_SYNC_REMOTE="$(git remote get-url origin)" bd bootstrap --yes
-```
+Only the **Devin Local integration session** writes Beads. Configure the canonical
+checkout with `git config inkflip.role integrator` and dispatch there on main.
+This local Git setting is shared by linked worktrees; it is an accident guard,
+not a per-worktree identity or security boundary. Workers must not dispatch or
+change it. Keep task writers off main and launch only one integration session.
 
-The verified BD_SYNC_REMOTE override lets a Cloud HTTPS clone use its existing
-GitHub authentication even when this Mac's tracked default uses SSH. Never
-insert credentials into that URL. A linked
-worktree uses its existing canonical checkout database; never initialize a
-second one there. `coordination.py` resolves the canonical root.
-
-T02 verifies and installs Bun, Node, uv and product dependencies, produces
-locks, and proves clean Linux installation. Until then,
-`python3 scripts/task_acceptance.py run verify` runs the stdlib bootstrap
-suites. Missing product commands deliberately fail. The application is still
-a scaffold; bootstrap success is not browser/native release evidence.
-
-Only the **Devin Cloud integration session** writes Beads. Configure its primary
-clone with `git config inkflip.role integrator`; worker clones must not set
-this. The flag is an accident guard, not a security boundary. Direct Beads
-writes run in that clone. Never launch a second integration session.
-
-Beads uses native Git-backed Dolt sync (`refs/dolt/data`). Git clone alone does
-not restore it: new clones bootstrap; existing replicas pull. The coordinator
+Beads uses native Git-backed Dolt sync (`refs/dolt/data`). The coordinator
 publishes every transition using `bd dolt commit -m 'Describe transition'`
-and `bd dolt push`. Workers never write/push Beads. Do not use the historical
-local-only `coordination.py start`/`start-review` admission commands here.
+and `bd dolt push`; dispatch already publishes its grant. Before another remote
+pull, commit/publish any pending local transition and resolve errors. Do not use
+the historical `coordination.py start`/`start-review` admission commands.
 
-`python3 scripts/native_pass.py status APP --sync` serializes the pull and read
-in the canonical checkout; APP is devin, antigravity or zcode. The Mac apps
-share this database/lock and must use this command to synchronize. A failed
-pull is a blocker, not an empty inbox. Do not continue silently on stale state.
+For an independently cloned reference environment only, run
+`python3 scripts/bootstrap_beads.py` if needed (its download supports Linux amd64;
+a matching existing installation is used). Python 3.11+ and Git are required.
+Add the printed `.tools/bin` directory to PATH if installed, then restore state
+with `BD_SYNC_REMOTE="$(git remote get-url origin)" bd bootstrap --yes`.
+This uses the clone's authenticated origin without embedding credentials.
+Read-only independent replicas may use `status APP --sync`; they never write
+Beads. This portability path does not authorize a Cloud agent session.
+
+T02 verifies and installs Bun, Node, uv and product dependencies, produces locks,
+and proves clean Linux installation in an available reference environment.
+macOS results cannot establish Linux support. Until then,
+`python3 scripts/task_acceptance.py run verify` runs the stdlib bootstrap suites.
+Missing product commands deliberately fail. The application is still a scaffold;
+bootstrap success is not browser/native release evidence.
+
+## Devin Local models and native execution
+
+Use Normal mode with SWE-2 Max selected and Subagents (Preview) enabled. Delegate
+with the built-in `subagent_general` profile, which inherits the parent's model.
+Supply each subagent its task, checkout, scope, budget and applicable repository
+instructions; it does not inherit the parent's conversation history. For research
+or independent review, give that general subagent a read-only assignment.
+
+The owner selected the free SWE-2 Desktop/CLI offer. Keep the parent and general
+subagents on SWE-2; do not use Cloud handoffs, paid fallback models, explore
+subagents, default custom profiles or Quick Review with an unverified model.
+The explore/default router can choose a different model. If SWE-2 or the required
+native capability is unavailable, preserve work and report the specific blocker.
+Prompt text cannot choose a model for a subagent or bypass provider permissions.
+
+Devin Local supports native foreground/background subagents and session resume;
+workflows are currently unsupported. Use native agent execution without claiming
+Dynamic Workflows were created. If a background subagent hits an unapproved
+permission, resume it in the foreground for the native approval rather than
+changing global permissions. The two-Devin-worker budget includes the parent
+while it implements/reviews and every active subagent.
+
+Policy checked September 12, 2026 in Qatar:
+[pricing](https://devin.ai/pricing) limits the SWE-2 offer to Desktop/CLI through
+October 10, 2026; [quota docs](https://docs.devin.ai/desktop/accounts/quota) say
+free models do not consume quota. The [Local agent docs](https://docs.devin.ai/desktop/devin-local)
+and [subagent docs](https://docs.devin.ai/cli/subagents) describe these capabilities
+and model routing. Recheck pricing when the offer expires; do not silently switch
+to a paid route.
 
 Capture the current pass at startup as this run's target. `pdf-pass1` through
 `pdf-pass3` are Beads checkpoints. Only the coordinator closes a checkpoint,
@@ -144,9 +175,8 @@ or use an old green run to avoid revalidation.
 
 When blocked on another app, do independent work first, then use bounded
 30–60 second waits and synchronize again. No tight polling. Preserve native
-resumability/compaction. In Devin Dynamic Workflows, filesystem/Git/Beads work
-belongs inside agent calls; deterministic workflow code cannot assume a
-persistent filesystem. Separate worker VMs clone and bootstrap Beads read-only.
+resumability/compaction. Local workers read the shared canonical Beads state
+without remote pulls; the coordinator handles remote synchronization.
 
 An app completes this run when all its tasks in the captured pass are accepted
 on origin/main with no requested corrections. The integration lead completes

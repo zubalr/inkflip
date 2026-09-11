@@ -20,16 +20,16 @@ once per session, then only the assigned task's inputs.
 
 - Beads owns live status, dependencies, claims, notes and acceptance. Product task
   T01 maps to pdf-t01. Static planning and passes.json are not live task state.
-- Devin Cloud is the sole integration lead and Beads writer. Antigravity and
-  ZCode consume assignments through `scripts/native_pass.py status APP --sync`.
-  Only the designated integration clone dispatches with `native_pass.py dispatch`.
+- Devin Local is the sole integration lead and Beads writer. Antigravity and
+  ZCode consume assignments through `scripts/native_pass.py status APP`.
+  Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
   Five active workers/reviewers maximum: Devin 2, Antigravity 2, ZCode 1. Active
   work by a lead counts; idle coordination does not. Writers yield for review.
 - One branch, one writer, one isolated checkout. Preserve existing work. Never
-  reset, clean, force-push or overwrite another checkout. Read-only replicas
-  synchronize through native Beads/Dolt Git transport; no separate task ledger.
+  reset, clean, force-push or overwrite another checkout. Local worktrees share
+  the canonical Beads database; only the coordinator pulls/pushes its remote.
 - The owner explicitly approved private GitHub access, source sharing with the
   selected three harnesses, commits, pushes, review and integration. Only Devin
   accepts/closes product tasks after independent review and real merged checks.
