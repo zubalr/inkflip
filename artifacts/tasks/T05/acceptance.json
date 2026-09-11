@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "task_id": "T05",
+  "beads_id": "pdf-t05",
+  "disposition": "accepted",
+  "evaluated_commit": "eeceecc318095b0b04f13773cf9dfa110195293a",
+  "evaluated_at": "2026-09-11T23:28:59.538034+00:00",
+  "contract_digest": "0b0c8c3743653b268e2b571586905b81dad38a4d4163557118ff15e48a72d67f",
+  "worker": "zcode-t05",
+  "commands": [
+    {
+      "segment": "python scripts/make_fixtures.py --check",
+      "argv": [
+        "python3",
+        "scripts/make_fixtures.py",
+        "--check"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/make_fixtures.py",
+        "--check"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    },
+    {
+      "segment": "python -m unittest discover -s tests/fixtures -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/fixtures",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/integrate/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/fixtures",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 38,
+        "passed": 38,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T05/commands.log": "e117b8815bd14498ddf6af27ab9b33cb4c96237566f0081237f119043efd557b",
+    "artifacts/tasks/T05/coordinator-commands.log": "cc7b2a695daae4886056e43c29fd8488eaa13dfd044c8fdc42f3391c2c362c5a",
+    "artifacts/tasks/T05/criteria-evidence.md": "0d09793717e986b633133ffeda4a639320d151ae2a08698dd98696a047607860",
+    "artifacts/tasks/T05/peer-review.md": "5d7e45367277f6c35f01c14deb7c287698c180c539bd2980fd0029bae6ba3d7c",
+    "artifacts/tasks/T05/receipt.json": "175d515ceb56b5db70defff80a9488371cc10605bf6607ac36a4fe5667489220",
+    "artifacts/tasks/T05/render-evidence/mapping-amount.pdf.png": "edebb8f6e60554b80b778cbd14fb1123a790a440f86073c3ee412b382c97f7bf",
+    "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png": "edebb8f6e60554b80b778cbd14fb1123a790a440f86073c3ee412b382c97f7bf",
+    "artifacts/tasks/T05/render-evidence/scan-correct.pdf.png": "193edbe52c97af2a25de82db7e647e44f1a82cfdbacf641309caeaea1537e9d8",
+    "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png": "193edbe52c97af2a25de82db7e647e44f1a82cfdbacf641309caeaea1537e9d8",
+    "artifacts/tasks/T05/review.md": "5d7e45367277f6c35f01c14deb7c287698c180c539bd2980fd0029bae6ba3d7c",
+    "artifacts/tasks/T05/run.json": "d4e6e759042e31afc8522d722d8488454c293d200f03bcc94c2da22976f76eee"
+  },
+  "criteria": {
+    "Repeated generation is byte-identical or declared pinned asset-dependent": [
+      "artifacts/tasks/T05/commands.log",
+      "artifacts/tasks/T05/criteria-evidence.md"
+    ],
+    "mapping/control render equal under same environment and actual extraction differs": [
+      "artifacts/tasks/T05/commands.log",
+      "artifacts/tasks/T05/criteria-evidence.md",
+      "artifacts/tasks/T05/render-evidence/mapping-amount.pdf.png",
+      "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png"
+    ],
+    "no filename-conditioned app output": [
+      "artifacts/tasks/T05/criteria-evidence.md",
+      "artifacts/tasks/T05/commands.log"
+    ],
+    "no embedded unlicensed font or private/challenge answer data.": [
+      "artifacts/tasks/T05/criteria-evidence.md",
+      "artifacts/tasks/T05/commands.log"
+    ],
+    "An original legitimate searchable scan (F03) is generated and read without an alarm solely because its OCR text is invisible; this minimum control is present before G1.": [
+      "artifacts/tasks/T05/criteria-evidence.md",
+      "artifacts/tasks/T05/commands.log",
+      "artifacts/tasks/T05/render-evidence/scan-correct.pdf.png",
+      "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "antigravity-peer-reviewer"
+    ],
+    "path": "artifacts/tasks/T05/review.md"
+  }
+}
