@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "files": 303,
+  "json_files": 76,
+  "yaml_files": 1,
+  "valid_contract_examples": 12,
+  "invalid_contract_examples": 30,
+  "tasks": 55,
+  "tests": 55,
+  "requirements": 102,
+  "gates": 5,
+  "sources": 48,
+  "experiments": 16,
+  "internal_package_links_checked": 701,
+  "declared_uninstalled_probe_dependencies": 1,
+  "checksums_verified": 301,
+  "dag_acyclic": true,
+  "first_ready_task": "T01",
+  "scope": "planning integrity, not implemented product acceptance"
+}
