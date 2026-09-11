@@ -5,8 +5,8 @@
     "python": "python3"
   },
   "collection_modes": {
-    "harness-unittest": "The harness counts unittest discovery itself before and after the run; zero collected or zero ran is a failure.",
-    "runner-exit": "The named runner exits nonzero on empty collections (playwright reports 'no tests found', pytest exits 5, node --test fails unmatched globs). The harness still treats exit 0 with zero matched tests as impossible for these runners."
+    "harness-unittest": "Structured unittest results: every collected case must pass; required skips and expected failures fail.",
+    "structured-report": "JUnit XML from pytest/Node/Playwright or an explicit custom count report. Zero, skipped, failed or missing results fail."
   },
   "commands": {
     "verify": {
@@ -38,11 +38,12 @@
       "description": "Native project boundary checks; stdlib only until T02 resolves dependencies."
     },
     "check:coordination": {
-      "kind": "check",
+      "kind": "test",
       "status": "active",
-      "argv": ["python3", "scripts/coordination.py", "check"],
+      "collection": "harness-unittest",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/coordination", "-v"],
       "owner_task": "coordinator",
-      "description": "Coordination admission/override tests; refuses empty collections itself."
+      "description": "Required coordination admission and override tests."
     },
     "build": {
       "kind": "group",
@@ -70,7 +71,7 @@
     "test:browser": {
       "kind": "test",
       "status": "declared",
-      "collection": "runner-exit",
+      "collection": "structured-report",
       "argv": ["bun", "x", "--no-install", "playwright", "test"],
       "requires": ["node_modules/.bin/playwright"],
       "owner_task": "T02",
@@ -79,7 +80,7 @@
     "test:privacy": {
       "kind": "test",
       "status": "declared",
-      "collection": "runner-exit",
+      "collection": "structured-report",
       "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/privacy"],
       "requires": ["node_modules/.bin/playwright", "tests/privacy/"],
       "owner_task": "T15",
@@ -88,7 +89,7 @@
     "test:a11y": {
       "kind": "test",
       "status": "declared",
-      "collection": "runner-exit",
+      "collection": "structured-report",
       "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/a11y"],
       "requires": ["node_modules/.bin/playwright", "tests/a11y/"],
       "owner_task": "T07",
@@ -97,7 +98,7 @@
     "test:visual": {
       "kind": "test",
       "status": "declared",
-      "collection": "runner-exit",
+      "collection": "structured-report",
       "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/visual"],
       "requires": ["node_modules/.bin/playwright", "tests/visual/"],
       "owner_task": "T06",
@@ -122,7 +123,7 @@
     "test:native": {
       "kind": "test",
       "status": "declared",
-      "collection": "runner-exit",
+      "collection": "structured-report",
       "argv": ["uv", "run", "--frozen", "--project", "native", "python", "-m", "pytest"],
       "requires": ["native/uv.lock"],
       "owner_task": "T02",

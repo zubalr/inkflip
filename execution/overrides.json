@@ -21,7 +21,10 @@
       "config/test-toolchain.json",
       "native/inkflip/__init__.py",
       "native/tests/bootstrap/",
-      "apps/web/src/styles/"
+      "apps/web/src/styles/",
+      "scripts/test_results.py",
+      "scripts/acceptance_receipts.py",
+      "docs/ACCEPTANCE.md"
     ],
     "T02": ["bunfig.toml", "tests/build/"],
     "T03": ["native/tests/contracts/"]

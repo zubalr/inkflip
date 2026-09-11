@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 from datetime import datetime, timezone
@@ -22,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import coordination  # noqa: E402
 import task_acceptance  # noqa: E402
+import acceptance_receipts  # noqa: E402
+import test_results  # noqa: E402
 
 GATES_FILE = ROOT / "planning/execution/gates.json"
 RUNNER_FILE = ROOT / "planning/execution/gate-runner.json"
@@ -35,20 +38,22 @@ def load_gates() -> dict:
     gates = {g["id"]: g for g in json.loads(GATES_FILE.read_text())}
     if not gates:
         raise GateError("gate manifest is empty")
+    pre = json.loads(RUNNER_FILE.read_text())["pre_release"]
+    gates["pre-release"] = {
+        "id": "pre-release", "title": "Final candidate review", "task": pre["owner_task"],
+        "required_task_ids": pre["required_task_ids"] + [gates[g]["task"] for g in pre["required_gate_ids"]],
+        "scenario_commands": pre["scenario_commands"],
+    }
     return gates
 
 
 def check_prerequisites(gate: dict, issues: dict, ref: str = "HEAD") -> tuple[list[dict], list[str]]:
-    """Every required task needs accepted disposition, ancestor commit and a committed receipt."""
+    """Validate committed commands, review evidence and candidate freshness."""
     verified, errors = [], []
     for task_id in gate["required_task_ids"]:
         issue = issues.get(coordination.bead_id(task_id), {})
         try:
-            commit, receipt = coordination.acceptance_reference(task_id, issue)
-            coordination.run(["git", "merge-base", "--is-ancestor", commit, ref])
-            if coordination.run(["git", "cat-file", "-t", f"{commit}:{receipt}"]) != "blob":
-                raise ValueError(f"{task_id}: accepted receipt is not a committed file")
-            verified.append({"task": task_id, "accepted_commit": commit, "receipt": receipt})
+            verified.append(acceptance_receipts.validate(task_id, issue, ref))
         except ValueError as error:
             errors.append(str(error))
     return verified, errors
@@ -65,32 +70,23 @@ def run_scenarios(gate: dict, overrides: dict, registry: dict) -> tuple[list[dic
         record = {"command": command, "adapted": adapted}
         try:
             argv = task_acceptance.resolve_interpreter(argv, registry)
-            suite_dir = task_acceptance.unittest_suite_dir(argv)
-            if suite_dir is not None:
-                collected = task_acceptance.unittest_collect_count(suite_dir)
-                record["collected"] = collected
-                if collected == 0:
-                    raise GateError(f"{command}: zero tests collected — empty scenarios fail gates")
-            record.update(task_acceptance.execute(argv, ROOT))
-            if suite_dir is not None:
-                ran = task_acceptance.unittest_ran_count(record["stderr"])
-                record["ran"] = ran
-                if record["exit"] == 0 and not ran:
-                    record["exit"] = 1
-                    errors.append(f"{command}: runner exited 0 with zero tests — treated as failure")
-                    records.append(record)
-                    continue
+            record.update(test_results.execute(argv, ROOT))
         except (task_acceptance.CommandError, GateError, OSError) as error:
             record.update({"exit": 1, "error": str(error)})
         if record["exit"] != 0:
             errors.append(f"{command}: exit {record['exit']}")
         records.append(record)
+    try:
+        test_results.validate_counts(test_results.total_counts(records))
+    except ValueError as error:
+        errors.append(str(error))
     return records, errors
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("gate_id", nargs="?", help="gate id G1..G5")
+    parser.add_argument("gate_id", nargs="?", help="gate id G1..G5 or pre-release")
+    parser.add_argument("--target", help="explicit deployed origin for read-only G5 checks")
     parser.add_argument("--check-prereqs", action="store_true",
                         help="verify accepted prerequisites only; do not run scenarios")
     parser.add_argument("--receipt", type=Path,
@@ -110,6 +106,14 @@ def main() -> int:
         gate = gates.get(args.gate_id)
         if gate is None:
             raise GateError(f"unknown gate {args.gate_id}; known: {', '.join(gates)}")
+        if gate["id"] == "G5":
+            from urllib.parse import urlsplit
+            target = urlsplit(args.target or "")
+            if target.scheme != "https" or not target.hostname or target.username or target.password:
+                raise GateError("G5 requires an explicit HTTPS origin via --target")
+            if target.path not in ("", "/") or target.query or target.fragment:
+                raise GateError("G5 target must be an origin, without a path, query or fragment")
+            os.environ["INKFLIP_PUBLIC_ORIGIN"] = args.target
 
         issues = coordination.issues_by_id()
         verified, errors = check_prerequisites(gate, issues)
@@ -121,6 +125,7 @@ def main() -> int:
             print(f"{gate['id']}: {len(verified)} prerequisites accepted")
             return 0
 
+        head = acceptance_receipts.require_clean_inputs()
         _, overrides = coordination.load_contracts()
         registry = task_acceptance.load_registry(task_acceptance.DEFAULT_REGISTRY)
         records, errors = run_scenarios(gate, overrides, registry)
@@ -128,20 +133,24 @@ def main() -> int:
             for error in errors:
                 print(f"scenario failed: {error}", file=sys.stderr)
             return 1
+        if acceptance_receipts.require_clean_inputs() != head:
+            raise GateError("HEAD changed while gate scenarios ran")
 
         receipt = args.receipt or ROOT / "artifacts/gates" / gate["id"] / "receipt.json"
         receipt.parent.mkdir(parents=True, exist_ok=True)
-        head = coordination.run(["git", "rev-parse", "HEAD"])
         receipt.write_text(json.dumps({
             "gate": gate["id"],
             "title": gate["title"],
             "evaluated_commit": head,
             "evaluated_at": datetime.now(timezone.utc).isoformat(),
+            "target": args.target,
+            "tests": test_results.total_counts(records),
             "prerequisites": verified,
             "scenarios": [
                 {k: v for k, v in r.items() if k not in ("stdout", "stderr")} for r in records
             ],
         }, indent=2) + "\n")
+        test_results.export_counts(test_results.total_counts(records))
         print(f"{gate['id']} passed; receipt: {receipt.relative_to(ROOT)}")
         return 0
     except (GateError, ValueError, OSError) as error:

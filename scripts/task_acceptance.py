@@ -14,19 +14,18 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import re
 import shlex
 import shutil
-import subprocess
 import sys
-import unittest
 from pathlib import Path
+
+import test_results
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY = ROOT / "config/acceptance-commands.json"
 KINDS = {"group", "test", "check", "build"}
 STATUSES = {"active", "declared"}
-COLLECTION_MODES = {"harness-unittest", "runner-exit"}
+COLLECTION_MODES = {"harness-unittest", "structured-report"}
 
 
 class CommandError(Exception):
@@ -80,42 +79,6 @@ def missing_requires(entry: dict) -> list[str]:
     return [p for p in entry.get("requires", []) if not (ROOT / p).exists()]
 
 
-def unittest_suite_dir(argv: list[str]) -> Path | None:
-    """Locate the `-s <dir>` discovery target of a unittest command."""
-    if "-m" in argv and "unittest" in argv and "discover" in argv:
-        for index, token in enumerate(argv):
-            if token == "-s" and index + 1 < len(argv):
-                return ROOT / argv[index + 1]
-        return ROOT
-    return None
-
-
-def unittest_collect_count(suite_dir: Path) -> int:
-    if not suite_dir.is_dir():
-        raise CommandError(f"unittest suite directory missing: {suite_dir.relative_to(ROOT)}")
-    return unittest.defaultTestLoader.discover(str(suite_dir)).countTestCases()
-
-
-def unittest_ran_count(output: str) -> int | None:
-    match = re.search(r"Ran (\d+) tests?", output)
-    return int(match.group(1)) if match else None
-
-
-def execute(argv: list[str], cwd: Path) -> dict:
-    result = subprocess.run(argv, cwd=cwd, text=True, capture_output=True, check=False)
-    if result.stdout:
-        print(result.stdout, end="")
-    if result.stderr:
-        print(result.stderr, end="", file=sys.stderr)
-    return {
-        "argv": argv,
-        "cwd": str(cwd),
-        "exit": result.returncode,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
-
-
 def run_leaf(name: str, entry: dict, registry: dict, tail: list[str]) -> dict:
     if entry.get("status") not in STATUSES:
         raise CommandError(f"{name}: unknown status {entry.get('status')!r}")
@@ -134,29 +97,11 @@ def run_leaf(name: str, entry: dict, registry: dict, tail: list[str]) -> dict:
     cwd = ROOT / entry.get("cwd", ".")
     full_argv = resolve_interpreter([*argv, *tail], registry)
 
-    collected = None
-    if entry.get("kind") == "test":
-        mode = entry.get("collection")
-        if mode == "harness-unittest":
-            suite_dir = unittest_suite_dir(full_argv)
-            if suite_dir is None:
-                raise CommandError(f"{name}: harness-unittest collection needs `-m unittest discover -s <dir>`")
-            collected = unittest_collect_count(suite_dir)
-            if collected == 0:
-                raise CommandError(f"{name}: zero tests collected in {suite_dir.relative_to(ROOT)} — empty suites fail")
-        elif mode != "runner-exit":
-            raise CommandError(f"{name}: unknown collection mode {mode!r}; cannot prove nonzero tests")
-
-    record = execute(full_argv, cwd)
+    required = entry.get("kind") == "test"
+    if required and entry.get("collection") not in COLLECTION_MODES:
+        raise CommandError(f"{name}: a structured test collection mode is required")
+    record = test_results.execute(full_argv, cwd, require_tests=required)
     record["command"] = name
-    record["collected"] = collected
-
-    if entry.get("kind") == "test" and entry.get("collection") == "harness-unittest":
-        ran = unittest_ran_count(record["stderr"])
-        record["ran"] = ran
-        if record["exit"] == 0 and not ran:
-            record["exit"] = 1
-            record["harness_override"] = "runner exited 0 but reported zero tests — treated as failure"
     return record
 
 
@@ -173,6 +118,8 @@ def run_command(name: str, registry: dict, tail: list[str]) -> dict:
             raise CommandError(f"{name}: group has no members")
         records = []
         for member in members:
+            if commands.get(member, {}).get("kind") == "group":
+                raise CommandError(f"{name}: nested groups are forbidden")
             record = run_command(member, registry, [])
             records.append(record)
             if record["exit"] != 0:
@@ -184,7 +131,7 @@ def run_command(name: str, registry: dict, tail: list[str]) -> dict:
             "exit": records[-1]["exit"],
             "stdout": "",
             "stderr": "",
-            "collected": sum(r.get("collected") or 0 for r in records),
+            "tests": test_results.total_counts(records),
             "members": records,
         }
     if kind not in KINDS:
@@ -193,67 +140,59 @@ def run_command(name: str, registry: dict, tail: list[str]) -> dict:
 
 
 def run_task(task_id: str, registry: dict, require_evidence: bool, report: Path | None) -> int:
+    import acceptance_receipts
+    from datetime import datetime, timezone
+    import os
+
     coordination = load_coordination()
     tasks, overrides = coordination.load_contracts()
     if task_id not in tasks:
         raise CommandError(f"unknown task {task_id}; use T01 through T55")
     task = coordination.effective_task(tasks[task_id], overrides)
-    records = []
-    failures = []
-    for command in task["commands"]:
-        for segment in [s.strip() for s in command.split("&&") if s.strip()]:
-            argv = shlex.split(segment)
-            record = {"segment": segment}
-            try:
-                argv = resolve_interpreter(argv, registry)
-                collected = None
-                suite_dir = unittest_suite_dir(argv)
-                if suite_dir is not None:
-                    collected = unittest_collect_count(suite_dir)
-                    if collected == 0:
-                        raise CommandError(f"zero tests collected in {suite_dir.relative_to(ROOT)}")
-                record.update(execute(argv, ROOT))
-                record["collected"] = collected
-                if suite_dir is not None:
-                    ran = unittest_ran_count(record["stderr"])
-                    record["ran"] = ran
-                    if record["exit"] == 0 and not ran:
-                        record["exit"] = 1
-                        record["harness_override"] = "zero tests ran — treated as failure"
-            except (CommandError, OSError) as error:
-                record.update({"argv": argv, "exit": 1, "error": str(error)})
-            records.append(record)
-            if record["exit"] != 0:
-                failures.append(segment)
-                break
-    evidence_missing = []
-    if require_evidence:
-        for artifact in task.get("evidence_artifacts", []):
-            path = ROOT / artifact
-            if not path.is_file():
-                evidence_missing.append(artifact)
-            elif path.suffix == ".json":
-                try:
-                    json.loads(path.read_text())
-                except json.JSONDecodeError:
-                    evidence_missing.append(f"{artifact} (invalid JSON)")
+    try:
+        commands = acceptance_receipts.segments(task)
+        head = acceptance_receipts.require_clean_inputs() if report else None
+    except ValueError as error:
+        raise CommandError(str(error)) from error
+    records, failures = [], []
+    for segment in commands:
+        argv = [os.path.expandvars(a) for a in shlex.split(segment)]
+        record = {"segment": segment}
+        try:
+            if any("$" in a for a in argv):
+                raise CommandError("required command environment variable is unset")
+            record.update(test_results.execute(resolve_interpreter(argv, registry), ROOT))
+        except (CommandError, OSError) as error:
+            record.update(argv=argv, exit=1, error=str(error))
+        records.append(record)
+        if record["exit"] != 0:
+            failures.append(segment)
+            break
+    evidence_errors = []
+    try:
+        test_results.validate_counts(test_results.total_counts(records))
+        if require_evidence:
+            acceptance_receipts.require_clean_inputs()
+            issues = coordination.issues_by_id()
+            acceptance_receipts.validate(task_id, issues.get(coordination.bead_id(task_id), {}))
+        if report and acceptance_receipts.require_clean_inputs() != head:
+            raise ValueError("HEAD changed while acceptance commands ran")
+    except ValueError as error:
+        evidence_errors.append(str(error))
     result = {
-        "task": task_id,
-        "beads_id": task.get("beads_id"),
-        "commands_run": len(records),
-        "failures": failures,
-        "evidence_missing": evidence_missing,
-        "records": [
-            {k: v for k, v in r.items() if k not in ("stdout", "stderr")} for r in records
-        ],
+        "task": task_id, "beads_id": task.get("beads_id"), "evaluated_commit": head,
+        "evaluated_at": datetime.now(timezone.utc).isoformat(),
+        "commands_run": len(records), "failures": failures,
+        "evidence_errors": evidence_errors, "tests": test_results.total_counts(records),
+        "records": records,
     }
-    print(json.dumps(result, indent=2))
+    print(json.dumps({**result, "records": [
+        {k: v for k, v in r.items() if k not in ("stdout", "stderr")} for r in records
+    ]}, indent=2))
     if report:
         report.parent.mkdir(parents=True, exist_ok=True)
-        report.write_text(json.dumps({**result, "records": records}, indent=2) + "\n")
-    if failures or evidence_missing:
-        return 1
-    return 0
+        report.write_text(json.dumps(result, indent=2) + "\n")
+    return int(bool(failures or evidence_errors))
 
 
 def self_check(registry: dict, registry_file: Path) -> list[str]:
@@ -324,7 +263,7 @@ def main() -> int:
     task_p = sub.add_parser("task", help="run a task's effective acceptance commands")
     task_p.add_argument("task_id")
     task_p.add_argument("--require-evidence", action="store_true",
-                        help="also verify the task's evidence_artifacts exist and parse")
+                        help="validate committed coordinator acceptance and its evidence")
     task_p.add_argument("--report", type=Path, help="write a JSON run record")
     sub.add_parser("list", help="list the documented command surface")
     sub.add_parser("self-check", help="validate the registry and script wiring")
@@ -345,6 +284,8 @@ def main() -> int:
             return run_task(args.task_id, registry, args.require_evidence, args.report)
         tail = args.tail[1:] if args.tail[:1] == ["--"] else args.tail
         record = run_command(args.name, registry, tail)
+        if record.get("tests", {}).get("collected"):
+            test_results.export_counts(record["tests"])
         return 0 if record["exit"] == 0 else 1
     except CommandError as error:
         print(f"blocked: {error}", file=sys.stderr)

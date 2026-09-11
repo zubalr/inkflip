@@ -10,10 +10,10 @@ $ python3 -m unittest discover -s tests/bootstrap -v
   test_root_manifest_declares_workspaces_without_install_side_effects (test_bootstrap.WorkspaceBoundaryTests.test_root_manifest_declares_workspaces_without_install_side_effects) ... ok
   test_styles_contract_uses_central_tokens (test_bootstrap.WorkspaceBoundaryTests.test_styles_contract_uses_central_tokens) ... ok
   test_web_entry_is_local_strict_port_and_egress_free (test_bootstrap.WorkspaceBoundaryTests.test_web_entry_is_local_strict_port_and_egress_free) ... ok
-  
+
   ----------------------------------------------------------------------
   Ran 24 tests in 1.170s
-  
+
   OK
   [exit 0]
 
@@ -21,10 +21,10 @@ $ python3 -m unittest discover -s tests/bootstrap -v
 $ python3 -m unittest discover -s native/tests/bootstrap -v
   test_inkflip_imports_without_third_party_dependencies (test_native_boundary.NativeBoundaryTests.test_inkflip_imports_without_third_party_dependencies) ... ok
   test_pyproject_declares_project_and_planned_pins (test_native_boundary.NativeBoundaryTests.test_pyproject_declares_project_and_planned_pins) ... ok
-  
+
   ----------------------------------------------------------------------
   Ran 2 tests in 0.001s
-  
+
   OK
   [exit 0]
 
@@ -56,10 +56,10 @@ $ python3 scripts/task_acceptance.py run verify
   test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
   test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
   test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
-  
+
   ----------------------------------------------------------------------
   Ran 20 tests in 0.018s
-  
+
   OK
   self-check: 16 commands in config/acceptance-commands.json
   Coordination checks passed. No product acceptance was executed.
@@ -72,10 +72,10 @@ $ bun run verify
   test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
   test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
   test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
-  
+
   ----------------------------------------------------------------------
   Ran 20 tests in 0.018s
-  
+
   OK
   self-check: 16 commands in config/acceptance-commands.json
   Coordination checks passed. No product acceptance was executed.
@@ -147,10 +147,10 @@ $ python3 scripts/coordination.py check
   test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
   test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
   test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
-  
+
   ----------------------------------------------------------------------
   Ran 20 tests in 0.020s
-  
+
   OK
   Coordination checks passed. No product acceptance was executed.
   [exit 0]
