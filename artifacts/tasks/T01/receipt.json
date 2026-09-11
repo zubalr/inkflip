@@ -147,9 +147,9 @@
   "no_acceptance_self_grant": true,
   "revalidation": {
     "worker": "codex-orchestrator",
-    "reason": "Typed native assignment fix verified through independent review, 30 coordination tests and actual disposable Git/Beads handoff. Re-ran all bootstrap acceptance after shared source changed.",
-    "evaluated_commit": "0b765fdf03c157677abc792fea329708673e822d",
-    "evaluated_at": "2026-09-11T22:01:55.752093+00:00",
+    "reason": "Owner selected Devin Local free SWE-2. Documentation and role label changed; AGENTS.md is a T01 validation input. Re-ran T01 acceptance at the committed Local candidate. Independent supplemental review is recorded in peer-review.md.",
+    "evaluated_commit": "52f6b920f0c870a9c34f92904aa6f17903435920",
+    "evaluated_at": "2026-09-11T22:21:55.846842+00:00",
     "tests": {
       "collected": 49,
       "passed": 49,
