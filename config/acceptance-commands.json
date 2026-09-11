@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Registry of the documented local command surface. `bun run <name>` delegates to scripts/task_acceptance.py, which reads this file. `active` commands must pass now; `declared` commands fail explicitly until their `requires` prerequisites and implementation exist, then run without further edits. Test commands must collect at least one test; zero collected tests is a failure, never a pass. Edits to this file are a root-manifest-owner change (T01 bootstrap, then T02).",
+  "interpreters": {
+    "python": "python3"
+  },
+  "collection_modes": {
+    "harness-unittest": "The harness counts unittest discovery itself before and after the run; zero collected or zero ran is a failure.",
+    "runner-exit": "The named runner exits nonzero on empty collections (playwright reports 'no tests found', pytest exits 5, node --test fails unmatched globs). The harness still treats exit 0 with zero matched tests as impossible for these runners."
+  },
+  "commands": {
+    "verify": {
+      "kind": "group",
+      "status": "active",
+      "members": ["self-check", "test:bootstrap", "test:native-bootstrap", "check:coordination"],
+      "description": "Every registered check that exists today. Later tasks extend members when their suites are implemented."
+    },
+    "self-check": {
+      "kind": "check",
+      "status": "active",
+      "argv": ["python3", "scripts/task_acceptance.py", "self-check"],
+      "description": "Registry consistency: scripts exist, groups resolve, declared commands fail honestly."
+    },
+    "test:bootstrap": {
+      "kind": "test",
+      "status": "active",
+      "collection": "harness-unittest",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/bootstrap", "-v"],
+      "owner_task": "T01",
+      "description": "Bootstrap contract tests (TEST-01)."
+    },
+    "test:native-bootstrap": {
+      "kind": "test",
+      "status": "active",
+      "collection": "harness-unittest",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "native/tests/bootstrap", "-v"],
+      "owner_task": "T01",
+      "description": "Native project boundary checks; stdlib only until T02 resolves dependencies."
+    },
+    "check:coordination": {
+      "kind": "check",
+      "status": "active",
+      "argv": ["python3", "scripts/coordination.py", "check"],
+      "owner_task": "coordinator",
+      "description": "Coordination admission/override tests; refuses empty collections itself."
+    },
+    "build": {
+      "kind": "group",
+      "status": "declared",
+      "members": ["build:packages", "build:web"],
+      "description": "Static and shared Node build only; no deployment."
+    },
+    "build:packages": {
+      "kind": "build",
+      "status": "declared",
+      "argv": ["bun", "x", "--no-install", "tsc", "-b", "tsconfig.json"],
+      "requires": ["node_modules/.bin/tsc"],
+      "owner_task": "T02",
+      "description": "Shared packages compile in declared project-reference order."
+    },
+    "build:web": {
+      "kind": "build",
+      "status": "declared",
+      "argv": ["bun", "x", "--no-install", "vite", "build"],
+      "cwd": "apps/web",
+      "requires": ["apps/web/node_modules/.bin/vite"],
+      "owner_task": "T02",
+      "description": "Static web artifact at apps/web/dist."
+    },
+    "test:browser": {
+      "kind": "test",
+      "status": "declared",
+      "collection": "runner-exit",
+      "argv": ["bun", "x", "--no-install", "playwright", "test"],
+      "requires": ["node_modules/.bin/playwright"],
+      "owner_task": "T02",
+      "description": "Playwright own-file/fixture/cancel/export flows; suite paths are passed after `--`."
+    },
+    "test:privacy": {
+      "kind": "test",
+      "status": "declared",
+      "collection": "runner-exit",
+      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/privacy"],
+      "requires": ["node_modules/.bin/playwright", "tests/privacy/"],
+      "owner_task": "T15",
+      "description": "Cold/warm/offline canary network and storage capture on the built site."
+    },
+    "test:a11y": {
+      "kind": "test",
+      "status": "declared",
+      "collection": "runner-exit",
+      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/a11y"],
+      "requires": ["node_modules/.bin/playwright", "tests/a11y/"],
+      "owner_task": "T07",
+      "description": "Automated accessible component checks; manual AT receipts remain separately required."
+    },
+    "test:visual": {
+      "kind": "test",
+      "status": "declared",
+      "collection": "runner-exit",
+      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/visual"],
+      "requires": ["node_modules/.bin/playwright", "tests/visual/"],
+      "owner_task": "T06",
+      "description": "Approved desktop/narrow/reduced-motion/error-state screenshots; baselines never auto-update."
+    },
+    "test:fixtures": {
+      "kind": "test",
+      "status": "declared",
+      "argv": null,
+      "requires": ["scripts/make_fixtures.py"],
+      "owner_task": "T05",
+      "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Implementation is registered by the fixture owner; no runner is assumed."
+    },
+    "test:regression": {
+      "kind": "test",
+      "status": "declared",
+      "argv": null,
+      "requires": ["tests/regression/"],
+      "owner_task": "T34",
+      "description": "Baseline immutability, coverage loss, invalid comparison and rule exit behavior."
+    },
+    "test:native": {
+      "kind": "test",
+      "status": "declared",
+      "collection": "runner-exit",
+      "argv": ["uv", "run", "--frozen", "--project", "native", "python", "-m", "pytest"],
+      "requires": ["native/uv.lock"],
+      "owner_task": "T02",
+      "description": "Native adapter/CLI/process/resource/import tests. Frozen run: never silently resolves a lockfile."
+    },
+    "check:static-dist": {
+      "kind": "check",
+      "status": "declared",
+      "argv": ["python3", "scripts/check_static_dist.py", "apps/web/dist", "--config", "wrangler.json"],
+      "requires": ["scripts/check_static_dist.py", "wrangler.json", "apps/web/dist/"],
+      "owner_task": "T48",
+      "description": "No dynamic server artifact or paid bindings; hashes/sizes/notices/external allowlist."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+[project]
+name = "inkflip"
+version = "0.0.0"
+description = "Inkflip native CLI: local PDF reader adapters, corpus and regression tools."
+requires-python = ">=3.13"
+# Planned pins copied from planning/config/dependencies.json (source-verified,
+# unresolved). T02 owns dependency resolution, native/uv.lock and this manifest.
+dependencies = [
+    "pypdfium2==5.8.0",
+    "pypdf==6.18.0",
+    "Pillow==12.3.0",
+    "jsonschema==4.26.0",
+]
+
+[dependency-groups]
+# Test/build dependencies are declared by T02 after audited resolution; an
+# empty group is honest — no frozen lock exists yet.
+dev = []
+
+[tool.uv]
+# Not packaged yet: uv sync installs dependencies only, keeping native/
+# importable via explicit sys.path in tests until a build backend is chosen.
+package = false

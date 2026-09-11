@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2022", "DOM", "WebWorker"]
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../contracts" },
+    { "path": "../geometry" },
+    { "path": "../runtime" }
+  ]
+}

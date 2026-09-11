@@ -1,0 +1,14 @@
+{
+  "name": "@inkflip/geometry",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure coordinate transforms and polygon helpers over the canonical page space.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -b"
+  }
+}

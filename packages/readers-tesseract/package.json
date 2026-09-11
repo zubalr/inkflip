@@ -1,0 +1,14 @@
+{
+  "name": "@inkflip/readers-tesseract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tesseract.js raster OCR reader adapter (browser), explicit asset blocks only.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -b"
+  }
+}

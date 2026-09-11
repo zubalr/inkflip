@@ -1,0 +1,103 @@
+.header {
+  max-width: var(--layout-max);
+  min-height: var(--layout-header);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1.2px;
+}
+
+.mark {
+  display: inline-flex;
+  width: 33px;
+  height: 33px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-control);
+  background: var(--color-teal);
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.descriptor {
+  margin-left: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-line);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.25px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.main {
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-6);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.headline {
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--text-heading-mobile);
+  font-weight: 400;
+  line-height: 1.07;
+  letter-spacing: -2px;
+}
+
+.headline em {
+  color: var(--color-rust);
+}
+
+.lede {
+  max-width: 680px;
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-body);
+  color: var(--color-muted);
+}
+
+.scaffold {
+  max-width: 680px;
+  padding: var(--space-5);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+}
+
+.scaffold h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-body);
+}
+
+.scaffold p {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+@media (min-width: 1100px) {
+  .headline {
+    font-size: var(--text-heading-desktop);
+  }
+}

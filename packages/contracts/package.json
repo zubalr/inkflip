@@ -1,0 +1,14 @@
+{
+  "name": "@inkflip/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical JSON Schema copy, generated TypeScript types and semantic validators.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -b"
+  }
+}

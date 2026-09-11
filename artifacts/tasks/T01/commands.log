@@ -1,0 +1,168 @@
+# T01 command log — captured 2026-09-11T19:17:35Z on macOS arm64 (Darwin 25.5.0)
+# Host: bun 1.4.0, node v26.7.0, python3 3.14.7, uv 0.9.5, bd 1.2.2; 'python' absent on PATH (harness maps to python3).
+
+============================================================
+$ python3 -m unittest discover -s tests/bootstrap -v
+  test_origin_license_is_byte_exact (test_bootstrap.OriginAndHonestyTests.test_origin_license_is_byte_exact) ... ok
+  test_planning_snapshot_is_byte_identical (test_bootstrap.OriginAndHonestyTests.test_planning_snapshot_is_byte_identical) ... ok
+  test_bunfig_uses_isolated_linker (test_bootstrap.WorkspaceBoundaryTests.test_bunfig_uses_isolated_linker) ... ok
+  test_package_boundaries_exist_and_match_root_references (test_bootstrap.WorkspaceBoundaryTests.test_package_boundaries_exist_and_match_root_references) ... ok
+  test_root_manifest_declares_workspaces_without_install_side_effects (test_bootstrap.WorkspaceBoundaryTests.test_root_manifest_declares_workspaces_without_install_side_effects) ... ok
+  test_styles_contract_uses_central_tokens (test_bootstrap.WorkspaceBoundaryTests.test_styles_contract_uses_central_tokens) ... ok
+  test_web_entry_is_local_strict_port_and_egress_free (test_bootstrap.WorkspaceBoundaryTests.test_web_entry_is_local_strict_port_and_egress_free) ... ok
+  
+  ----------------------------------------------------------------------
+  Ran 24 tests in 1.170s
+  
+  OK
+  [exit 0]
+
+============================================================
+$ python3 -m unittest discover -s native/tests/bootstrap -v
+  test_inkflip_imports_without_third_party_dependencies (test_native_boundary.NativeBoundaryTests.test_inkflip_imports_without_third_party_dependencies) ... ok
+  test_pyproject_declares_project_and_planned_pins (test_native_boundary.NativeBoundaryTests.test_pyproject_declares_project_and_planned_pins) ... ok
+  
+  ----------------------------------------------------------------------
+  Ran 2 tests in 0.001s
+  
+  OK
+  [exit 0]
+
+============================================================
+$ python3 scripts/task_acceptance.py self-check
+  self-check: 16 commands in config/acceptance-commands.json
+  [exit 0]
+
+============================================================
+$ python3 scripts/task_acceptance.py list
+  check:coordination       active    runnable    owner:coordinator
+  build                    declared  group [build:packages, build:web]
+  build:packages           declared  unavailable owner:T02
+  build:web                declared  unavailable owner:T02
+  test:browser             declared  unavailable owner:T02
+  test:privacy             declared  unavailable owner:T15
+  test:a11y                declared  unavailable owner:T07
+  test:visual              declared  unavailable owner:T06
+  test:fixtures            declared  unavailable owner:T05
+  test:regression          declared  unavailable owner:T34
+  test:native              declared  unavailable owner:T02
+  check:static-dist        declared  unavailable owner:T48
+  [exit 0]
+
+============================================================
+$ python3 scripts/task_acceptance.py run verify
+  test_rejection_cannot_complete_required_capability (test_coordination.CoordinationTests.test_rejection_cannot_complete_required_capability) ... ok
+  test_required_initial_test_and_token_paths_are_owned (test_coordination.CoordinationTests.test_required_initial_test_and_token_paths_are_owned) ... ok
+  test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
+  test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
+  test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
+  
+  ----------------------------------------------------------------------
+  Ran 20 tests in 0.018s
+  
+  OK
+  self-check: 16 commands in config/acceptance-commands.json
+  Coordination checks passed. No product acceptance was executed.
+  [exit 0]
+
+============================================================
+$ bun run verify
+  test_rejection_cannot_complete_required_capability (test_coordination.CoordinationTests.test_rejection_cannot_complete_required_capability) ... ok
+  test_required_initial_test_and_token_paths_are_owned (test_coordination.CoordinationTests.test_required_initial_test_and_token_paths_are_owned) ... ok
+  test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
+  test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
+  test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
+  
+  ----------------------------------------------------------------------
+  Ran 20 tests in 0.018s
+  
+  OK
+  self-check: 16 commands in config/acceptance-commands.json
+  Coordination checks passed. No product acceptance was executed.
+  [exit 0]
+
+============================================================
+$ python3 scripts/task_acceptance.py task T01
+          "discover",
+          "-s",
+          "tests/bootstrap",
+          "-v"
+        ],
+        "cwd": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t01",
+        "exit": 0,
+        "collected": 24,
+        "ran": 24
+      }
+    ]
+  }
+  [exit 0]
+
+============================================================
+$ bun run test:browser
+  $ python3 scripts/task_acceptance.py run test:browser
+  blocked: test:browser: prerequisites missing: node_modules/.bin/playwright (owner T02)
+  [exit 2]
+
+============================================================
+$ bun run build
+  $ python3 scripts/task_acceptance.py run build
+  blocked: build:packages: prerequisites missing: node_modules/.bin/tsc (owner T02)
+  [exit 2]
+
+============================================================
+$ python3 scripts/task_acceptance.py run test:fixtures
+  blocked: test:fixtures: no implementation registered (owner T05); declared commands fail until their suite lands
+  [exit 2]
+
+============================================================
+$ python3 scripts/gate.py --list
+  G1  Real browser own-file evidence loop  owner:T18  requires:19 tasks
+  G2  Complete public investigation surface  owner:T51  requires:5 tasks
+  G3  Complete local native and regression surface  owner:T52  requires:10 tasks
+  G4  Quality, security, accessibility and rights  owner:T53  requires:12 tasks
+  G5  Actual safe static release and rollback  owner:T54  requires:4 tasks
+  [exit 0]
+
+============================================================
+$ python3 scripts/gate.py G1
+  prerequisite unmet: T08: predecessor has not been accepted/closed
+  prerequisite unmet: T09: predecessor has not been accepted/closed
+  prerequisite unmet: T10: predecessor has not been accepted/closed
+  prerequisite unmet: T11: predecessor has not been accepted/closed
+  prerequisite unmet: T12: predecessor has not been accepted/closed
+  prerequisite unmet: T13: predecessor has not been accepted/closed
+  prerequisite unmet: T14: predecessor has not been accepted/closed
+  prerequisite unmet: T15: predecessor has not been accepted/closed
+  prerequisite unmet: T16: predecessor has not been accepted/closed
+  prerequisite unmet: T17: predecessor has not been accepted/closed
+  prerequisite unmet: T22: predecessor has not been accepted/closed
+  prerequisite unmet: T24: predecessor has not been accepted/closed
+  [exit 1]
+
+============================================================
+$ python3 scripts/coordination.py check
+  test_receipt_namespace_and_commit_are_checked (test_coordination.CoordinationTests.test_receipt_namespace_and_commit_are_checked) ... ok
+  test_rejection_cannot_complete_required_capability (test_coordination.CoordinationTests.test_rejection_cannot_complete_required_capability) ... ok
+  test_required_initial_test_and_token_paths_are_owned (test_coordination.CoordinationTests.test_required_initial_test_and_token_paths_are_owned) ... ok
+  test_review_and_product_claims_share_atomic_capacity_admission (test_coordination.CoordinationTests.test_review_and_product_claims_share_atomic_capacity_admission) ... ok
+  test_scope_check_handles_wildcards_and_unscoped_workers (test_coordination.CoordinationTests.test_scope_check_handles_wildcards_and_unscoped_workers) ... ok
+  test_unmerged_accepted_predecessor_is_blocked (test_coordination.CoordinationTests.test_unmerged_accepted_predecessor_is_blocked) ... ok
+  
+  ----------------------------------------------------------------------
+  Ran 20 tests in 0.020s
+  
+  OK
+  Coordination checks passed. No product acceptance was executed.
+  [exit 0]
+
+============================================================
+$ python3 scripts/coordination.py ready
+  No product task is ready with accepted predecessor evidence.
+  [exit 0]
+
+============================================================
+# Sibling origin repo immutability (before == after this task)
+$ git -C /Users/zubair/Code/Projects/mib-intake status --porcelain; git -C ... rev-parse HEAD
+   M Dockerfile
+  94f35ce9f9beb1640ddebdc2c72aa379ecebb004
+  (pre-existing ' M Dockerfile' was present before T01 started; no writes by this task)

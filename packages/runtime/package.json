@@ -1,0 +1,14 @@
+{
+  "name": "@inkflip/runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Worker messages, lifecycle and backpressure for bounded local runs.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -b"
+  }
+}

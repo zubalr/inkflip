@@ -1,0 +1,30 @@
+# Early CI: runs only checks that exist at bootstrap. No install step exists
+# until T02 freezes real locks, so nothing here resolves dependencies.
+# Action revisions are illustrative major tags (see planning example); T02
+# replaces them with reviewed commit SHAs before this workflow is hardened.
+name: verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap tests (unittest)
+        run: python3 -m unittest discover -s tests/bootstrap -v
+      - name: Native boundary tests (unittest)
+        run: python3 -m unittest discover -s native/tests/bootstrap -v
+      - name: Command harness self-check
+        run: python3 scripts/task_acceptance.py self-check
+      - name: Registered verify group
+        run: python3 scripts/task_acceptance.py run verify
+      - name: Declared suites fail explicitly
+        run: |
+          if python3 scripts/task_acceptance.py run test:browser; then
+            echo "test:browser must fail while playwright/specs are absent" >&2
+            exit 1
+          fi
+      - name: Coordination checks
+        run: python3 scripts/coordination.py check
