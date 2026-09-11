@@ -77,8 +77,10 @@ def dispatch(task_id: str, app: str) -> None:
         c.check_predecessors(task, issues, ref="HEAD")
         c.check_scope_ownership(task, workers, tasks, overrides)
         grant = assignment(config, task_id, app, base, stage["id"])
-        c.bd(["update", c.bead_id(task_id), "--claim", "--set-metadata",
-              "execution=" + json.dumps(grant)], write=True, actor=f"{app}-{task_id.lower()}")
+        metadata = dict(issues[c.bead_id(task_id)].get("metadata") or {})
+        metadata["execution"] = grant
+        c.bd(["update", c.bead_id(task_id), "--claim", "--metadata",
+              json.dumps(metadata)], write=True, actor=f"{app}-{task_id.lower()}")
         # A failed publication leaves a recoverable local claim. Never launch on failure.
         publish_state()
         print(json.dumps(grant, indent=2))

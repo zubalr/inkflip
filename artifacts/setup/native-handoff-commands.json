@@ -1,0 +1,464 @@
+{
+  "purpose": "Disposable local mirror; includes initial reproduced metadata failure and successful fix rerun",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "clone",
+        "--branch",
+        "main",
+        "/private/tmp/inkflip-handoff-lab.git",
+        "/private/tmp/inkflip-handoff-integrator"
+      ],
+      "cwd": "/private/tmp",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "core.hooksPath",
+        "/dev/null"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "user.name",
+        "Isolated handoff smoke"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "user.email",
+        "handoff-smoke@example.invalid"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "bootstrap",
+        "--yes"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "dolt",
+        "remote",
+        "list"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "add",
+        ".beads"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "commit",
+        "-m",
+        "Configure disposable local state transport"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "push",
+        "origin",
+        "main"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "inkflip.role",
+        "integrator"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/native_pass.py",
+        "dispatch",
+        "T02",
+        "--app",
+        "devin"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "clone",
+        "--branch",
+        "main",
+        "/private/tmp/inkflip-handoff-lab.git",
+        "/private/tmp/inkflip-handoff-worker"
+      ],
+      "cwd": "/private/tmp",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "core.hooksPath",
+        "/dev/null"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "user.name",
+        "Isolated handoff smoke"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "user.email",
+        "handoff-smoke@example.invalid"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "bootstrap",
+        "--yes"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "dolt",
+        "remote",
+        "list"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/native_pass.py",
+        "status",
+        "devin",
+        "--sync"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 1
+    },
+    {
+      "argv": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "dolt",
+        "remote",
+        "list"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "--readonly",
+        "show",
+        "pdf-t02",
+        "--json"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "update",
+        "pdf-t02",
+        "--status",
+        "open",
+        "--assignee",
+        "",
+        "--metadata",
+        "{\"planning_task_id\": \"T02\"}"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "add",
+        "scripts/native_pass.py",
+        ".beads/interactions.jsonl"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "commit",
+        "-m",
+        "Verify typed assignment fix in disposable handoff test"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "push",
+        "origin",
+        "main"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "dolt",
+        "push"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "config",
+        "inkflip.role",
+        "integrator"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/native_pass.py",
+        "dispatch",
+        "T02",
+        "--app",
+        "devin"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "fetch",
+        "origin",
+        "main"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "merge",
+        "--ff-only",
+        "origin/main"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/native_pass.py",
+        "status",
+        "devin",
+        "--sync"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "switch",
+        "-c",
+        "work/devin/t02",
+        "44990fb792a3c5534e968aa62d74fa286d25cb80"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "add",
+        "artifacts/tasks/T02/handoff.json"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "commit",
+        "-m",
+        "Synthetic handoff transport evidence"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "push",
+        "origin",
+        "work/devin/t02"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "fetch",
+        "origin",
+        "work/devin/t02"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "origin/work/devin/t02"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "show",
+        "5df9e72c8d2b030958dce298eb3713bddce2801b:artifacts/tasks/T02/handoff.json"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bd",
+        "--readonly",
+        "show",
+        "pdf-t02",
+        "--json"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-integrator",
+      "exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/native_pass.py",
+        "status",
+        "devin",
+        "--sync"
+      ],
+      "cwd": "/private/tmp/inkflip-handoff-worker",
+      "exit": 0
+    }
+  ]
+}

@@ -60,3 +60,27 @@ Base HEAD: `f62f183b77ef2db16670245b5b5fa5096f424a3f`. Candidate is HEAD plus th
 | `scripts/native_pass.py` | `d5a15d8763b1668f1e1c4ee776e506051cf2d7a28277a42d174c442ee9c5b5ff` |
 | `tests/bootstrap/test_receipts.py` | `757b334f86d9265032b7c28e57d19d1f5c28eac496ef189f3cbee29c34473123` |
 | `tests/coordination/test_native_pass.py` | `163fbf223f3ea5ee1b6155cbddb69a7335ef2ca8a6d85201411eebbb0637eabb` |
+
+---
+
+# Supplemental T01 independent review
+
+Reviewer: codex-sync-review; assigned Bead: pdf-native-sync-review (not mutated).
+Verdict: APPROVE bounded fix. No actionable findings.
+
+Scope: current HEAD diff in scripts/native_pass.py and tests/coordination/test_native_pass.py, in /Users/zubair/Code/Projects/pdf project/original. HEAD inspected: eaf6dad30ef314179e7f4c07b91e25f3c420d640. This supplements the previously approved candidate identified by the requester as edeb82f; it does not re-review that candidate or certify overall T01 acceptance.
+
+Exact reviewed Git blob hashes:
+- scripts/native_pass.py: c5dd866477cee9e8f7257fcc7eeb52c76247923d
+- tests/coordination/test_native_pass.py: 7c677ff6907eda3a45b578a66ff5aa1b219d5bb3
+
+The metadata copy retains all existing fields and nested JSON values, replacing only execution with the structured grant. The synchronized read and update remain inside the canonical admission lock. Full-object replacement is appropriate under the documented sole integration writer: this does not provide cross-clone concurrent-write merging, nor does the contract allow such writers. Integrator, published clean main, readiness, ownership, scope and capacity checks remain intact. The update retains --claim and the task-specific actor; publication still precedes printing the launch grant. No new dispatch bypass or broadened write authority was introduced.
+
+Independent verification:
+- Installed bd version 1.2.2 (6c124203e); inspected bd update --help.
+- Actual disposable embedded Beads database at /private/tmp/native-sync-review-cqhix694: reproduced --set-metadata execution=<JSON> storing a string, then confirmed --metadata JSON stores execution as an object, preserves nested metadata including false/null/list values and a sibling field, and --claim sets in_progress with assignee zcode-t05.
+- Independently inspected the new dispatch-to-status regression. All 30 coordination tests passed using PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/coordination -v.
+- Ran that regression against pre-fix HEAD source loaded in memory: reproduced precisely AttributeError: 'str' object has no attribute 'get'. The changed source passes it.
+- git diff --check passed.
+
+Limits: the parent's full local-mirror transport/branch/acceptance/resume rerun was still underway at review time and is not claimed here. This fix prevents newly dispatched malformed grants; it does not migrate already persisted string grants. No repository files, existing Beads state, network or production state were mutated by this reviewer. Only disposable temporary test state and this report were written.

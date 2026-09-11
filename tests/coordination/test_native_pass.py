@@ -1,4 +1,7 @@
 """Coverage and safety boundaries for cross-app pass dispatch."""
+from contextlib import redirect_stdout
+from io import StringIO
+import json
 from pathlib import Path
 import sys
 import unittest
@@ -73,6 +76,37 @@ class PassTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "designated"):
                 p.dispatch("T05", "zcode")
             bd.assert_not_called()
+
+    def test_dispatched_assignment_round_trips_as_an_object_without_losing_metadata(self):
+        # Beads 1.2.2 --set-metadata values are strings, even when they look like JSON.
+        issues = {"pdf-t02": {"status": "open", "metadata": {"existing": {"preserve": True}}}}
+        def git(argv):
+            if argv[1:3] == ["config", "--get"]:
+                return "integrator"
+            if argv[1:3] == ["branch", "--show-current"]:
+                return "main"
+            return "a" * 40 if argv[1] == "rev-parse" else ""
+        def bd(argv, **kwargs):
+            if argv[0] == "list":
+                return [{"id": "pdf-t02"}]
+            issue = issues[argv[1]]
+            if "--metadata" in argv:
+                issue["metadata"] = json.loads(argv[argv.index("--metadata") + 1])
+            else:
+                key, value = argv[argv.index("--set-metadata") + 1].split("=", 1)
+                issue["metadata"][key] = value
+            issue.update(status="in_progress", assignee=kwargs["actor"])
+        with patch.object(p.c, "run", side_effect=git), patch.object(p.c, "bd", side_effect=bd), \
+             patch.object(p.c, "issues_by_id", return_value=issues), patch.object(p.c, "admission_lock"), \
+             patch.object(p.c, "check_predecessors"), patch.object(p, "sync_state"), \
+             patch.object(p, "publish_state") as publish, redirect_stdout(StringIO()):
+            p.dispatch("T02", "devin")
+            publish.assert_called_once()
+            with redirect_stdout(StringIO()) as output:
+                p.status("devin", False)
+        inbox = json.loads(output.getvalue())
+        self.assertEqual(inbox["assignments"][0]["branch"], "work/devin/t02")
+        self.assertEqual(issues["pdf-t02"]["metadata"]["existing"], {"preserve": True})
 
 
 if __name__ == "__main__":

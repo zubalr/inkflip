@@ -1,0 +1,9 @@
+{
+  "result": "passed",
+  "all_mutations_confined_to": "/private/tmp/inkflip-handoff-lab.git",
+  "assignment_published_and_restored": true,
+  "branch_handoff_commit": "5df9e72c8d2b030958dce298eb3713bddce2801b",
+  "unfinished_task_acceptance_exit": 1,
+  "no_false_closure": true,
+  "assignment_survives_resync": true
+}
