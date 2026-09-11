@@ -1,0 +1,482 @@
+{
+  "purpose": "Cross-language parity goldens computed by planning/tools/contractlib.py (the delivered reference). Both the TS and Python ports must reproduce every value exactly.",
+  "digests": [
+    {
+      "value": null,
+      "canonical_hex": "4e",
+      "sha256": "8ce86a6ae65d3692e7305e2c58ac62eebd97d3d943e093f577da25c36988246b"
+    },
+    {
+      "value": true,
+      "canonical_hex": "54",
+      "sha256": "e632b7095b0bf32c260fa4c539e9fd7b852d0de454e9be26f24d0d6f91d069d3"
+    },
+    {
+      "value": false,
+      "canonical_hex": "46",
+      "sha256": "f67ab10ad4e4c53121b6a5fe4da9c10ddee905b978d3788d2723d7bfacbe28a9"
+    },
+    {
+      "value": 0,
+      "canonical_hex": "440000000000000000",
+      "sha256": "a45bff2be728c2a3bc8f717d63cf960b042edc6fed969d538c8fe87434b5b636"
+    },
+    {
+      "value": -0.0,
+      "canonical_hex": "440000000000000000",
+      "sha256": "a45bff2be728c2a3bc8f717d63cf960b042edc6fed969d538c8fe87434b5b636"
+    },
+    {
+      "value": 1,
+      "canonical_hex": "443ff0000000000000",
+      "sha256": "51af69ddbd70d5e059b525219907e53939d4a4a92747901f5eeba7561d31f19a"
+    },
+    {
+      "value": 1.0,
+      "canonical_hex": "443ff0000000000000",
+      "sha256": "51af69ddbd70d5e059b525219907e53939d4a4a92747901f5eeba7561d31f19a"
+    },
+    {
+      "value": 0.1,
+      "canonical_hex": "443fb999999999999a",
+      "sha256": "5418ea74080a880376394a3d4e3252d2b0971e1f0460dc40ebbcb70b30c3c97b"
+    },
+    {
+      "value": -123.456,
+      "canonical_hex": "44c05edd2f1a9fbe77",
+      "sha256": "4d4bcd4053fcd76f23566ed6345b724d29dcac836328005e33acf01f592acd03"
+    },
+    {
+      "value": 9007199254740991,
+      "canonical_hex": "44433fffffffffffff",
+      "sha256": "3f77d096170bf50a986bec557a940f97f1c3e2a1845e86fabf56184f791aee44"
+    },
+    {
+      "value": "",
+      "canonical_hex": "5300000000",
+      "sha256": "2e2818527e4a6cab6f3ade4fa04e2e972a3d16e6b7ab4ba5068dcc9e2ede5471"
+    },
+    {
+      "value": "a",
+      "canonical_hex": "530000000161",
+      "sha256": "90d0ba3823c53efeb97fa4d9cd87659cd5eaacaf72fd83b4c9399147e9275a6b"
+    },
+    {
+      "value": "$1,000",
+      "canonical_hex": "530000000624312c303030",
+      "sha256": "eb663b2d241a9b8fe347a40169d825885e4b6d519d05c65e7305edab72193ff6"
+    },
+    {
+      "value": "مرحبا 😀",
+      "canonical_hex": "530000000fd985d8b1d8add8a8d8a720f09f9880",
+      "sha256": "b06f029985f7b5c491b45af4d777820ecb44c076ef4ddd4f0818bc453bce87d6"
+    },
+    {
+      "value": "é",
+      "canonical_hex": "530000000365cc81",
+      "sha256": "2363d2cae981ebafeb449775d57fe6902792dac27b3483e32ef78b4378b80dd7"
+    },
+    {
+      "value": "ﬁle",
+      "canonical_hex": "5300000005efac816c65",
+      "sha256": "3da684306cc07716d673dbd7cc5d224825df412cec56222dec442d26df35f329"
+    },
+    {
+      "value": " A\n\tB ",
+      "canonical_hex": "530000000620410a094220",
+      "sha256": "bb0326f6812dc72120a14f1001f178711717104084c2823d4608ffc9904b77a6"
+    },
+    {
+      "value": [],
+      "canonical_hex": "4c00000000",
+      "sha256": "40238b937ef192de936eeb1b5e134e241ed2c205cfb8420df81fafe3d50352c5"
+    },
+    {
+      "value": [
+        {}
+      ],
+      "canonical_hex": "4c000000014f00000000",
+      "sha256": "3f9d05eb7164e928127fa85e70188083420398c817b68ca4bbcb6c27e45d6343"
+    },
+    {
+      "value": [
+        1,
+        [
+          2,
+          {
+            "x": null
+          }
+        ]
+      ],
+      "canonical_hex": "4c00000002443ff00000000000004c000000024440000000000000004f000000015300000001784e",
+      "sha256": "14d0a4c804016bf02781a75099c4e3e82e63046cb8fd2ac46fc597c6a979b282"
+    },
+    {
+      "value": {
+        "z": [
+          1,
+          2
+        ],
+        "a": "é"
+      },
+      "canonical_hex": "4f000000025300000001615300000002c3a953000000017a4c00000002443ff0000000000000444000000000000000",
+      "sha256": "f6522c496f80878eeb4703cf0c53760e34cc3659411f12ed76fc20ed57ca38c8"
+    },
+    {
+      "value": {
+        "nested": {
+          "list": [
+            true,
+            false,
+            null,
+            "x"
+          ],
+          "n": -0.0
+        }
+      },
+      "canonical_hex": "4f0000000153000000066e65737465644f0000000253000000046c6973744c0000000454464e53000000017853000000016e440000000000000000",
+      "sha256": "c8a3f85d989188eaa0c544599237b65f456491d7bd7a7c87622fe21b829a1e03"
+    }
+  ],
+  "normalize": [
+    {
+      "input": "$1,000",
+      "text": "$1,000",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 6,
+          "normalized_start": 0,
+          "normalized_end": 6,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "-$100",
+      "text": "-$100",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 5,
+          "normalized_start": 0,
+          "normalized_end": 5,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "not paid",
+      "text": "not paid",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 3,
+          "normalized_start": 0,
+          "normalized_end": 3,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 4,
+          "normalized_start": 3,
+          "normalized_end": 4,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 4,
+          "raw_end": 8,
+          "normalized_start": 4,
+          "normalized_end": 8,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "لا",
+      "text": "لا",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "ﬁle",
+      "text": "ﬁle",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 3,
+          "normalized_start": 0,
+          "normalized_end": 3,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "é",
+      "text": "é",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "😀",
+      "text": "😀",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": " A\n\tB ",
+      "text": " A B ",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 2,
+          "raw_end": 4,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 4,
+          "raw_end": 5,
+          "normalized_start": 3,
+          "normalized_end": 4,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 5,
+          "raw_end": 6,
+          "normalized_start": 4,
+          "normalized_end": 5,
+          "operation": "whitespace"
+        }
+      ]
+    },
+    {
+      "input": "a😀 b",
+      "text": "a😀 b",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 2,
+          "raw_end": 3,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 4,
+          "normalized_start": 3,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "x  y",
+      "text": "x y",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 3,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 4,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "\t",
+      "text": " ",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "whitespace"
+        }
+      ]
+    },
+    {
+      "input": "no whitespace",
+      "text": "no whitespace",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 2,
+          "raw_end": 3,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 13,
+          "normalized_start": 3,
+          "normalized_end": 13,
+          "operation": "identity"
+        }
+      ]
+    },
+    {
+      "input": "a  b\t\tc",
+      "text": "a b c",
+      "map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 3,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 4,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 4,
+          "raw_end": 6,
+          "normalized_start": 3,
+          "normalized_end": 4,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 6,
+          "raw_end": 7,
+          "normalized_start": 4,
+          "normalized_end": 5,
+          "operation": "identity"
+        }
+      ]
+    }
+  ],
+  "occurrence_ids": [
+    {
+      "run_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "reader_id": "r_pdfium",
+      "page_index": 0,
+      "ordinal": 63,
+      "raw_source_locator": "PDFium text-page character range [63,69)",
+      "id": "o_b4d1488547545e3c5c58a314a30a24fe"
+    },
+    {
+      "run_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "reader_id": "r_tesseract",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_source_locator": "tesseract word 0",
+      "id": "o_e009a4f1b7e121960c75fb5c58b85de3"
+    },
+    {
+      "run_key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "reader_id": "r_pdfium",
+      "page_index": 2,
+      "ordinal": 5,
+      "raw_source_locator": "locator",
+      "id": "o_d2e33cacd2ae8a0f03ab1d57fb93c131"
+    }
+  ],
+  "report_identities": {
+    "cancelled.json": {
+      "run_key": "69a978e4f87f0b5e5bb6dae05f7823fb60c445fbb10bd55a7317b9f1c6478668",
+      "report_id": "a1382813e3e45ad17d522f4bbc32d8b86873f067be12fd6b8189a7f36b221239",
+      "sealed_report_id": "a1382813e3e45ad17d522f4bbc32d8b86873f067be12fd6b8189a7f36b221239"
+    },
+    "empty-completed.json": {
+      "run_key": "69a978e4f87f0b5e5bb6dae05f7823fb60c445fbb10bd55a7317b9f1c6478668",
+      "report_id": "eea3ee625924247595cfbfec571bb663bf23bf25351b4686c68b489fa25e774b",
+      "sealed_report_id": "eea3ee625924247595cfbfec571bb663bf23bf25351b4686c68b489fa25e774b"
+    },
+    "failed.json": {
+      "run_key": "69a978e4f87f0b5e5bb6dae05f7823fb60c445fbb10bd55a7317b9f1c6478668",
+      "report_id": "573edaf295fc1db7531120d8bf7ee266cc171b5344bcd8f127a53bfe7bfe70ec",
+      "sealed_report_id": "573edaf295fc1db7531120d8bf7ee266cc171b5344bcd8f127a53bfe7bfe70ec"
+    },
+    "native-evidence.inkflip.json": {
+      "run_key": "72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83",
+      "report_id": "c1961dc78b9c3412845a3c2f3dbca795ecd491ee7addd68f7d8e9f7aa28f7624",
+      "sealed_report_id": "c1961dc78b9c3412845a3c2f3dbca795ecd491ee7addd68f7d8e9f7aa28f7624"
+    },
+    "native-replay.inkflip.json": {
+      "run_key": "72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83",
+      "report_id": "cd9cd9b902d1050d9553d31ad78e9fb4a100275ede7d8cee11c453c09393adc7",
+      "sealed_report_id": "cd9cd9b902d1050d9553d31ad78e9fb4a100275ede7d8cee11c453c09393adc7"
+    },
+    "repeated-occurrences.json": {
+      "run_key": "72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83",
+      "report_id": "e4979b256924b3d4be13597911cd00ce43074ef473feb05e589c3a451bceb324",
+      "sealed_report_id": "e4979b256924b3d4be13597911cd00ce43074ef473feb05e589c3a451bceb324"
+    }
+  }
+}
