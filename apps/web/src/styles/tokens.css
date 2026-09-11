@@ -52,3 +52,11 @@
   /* Breakpoints are consumed in media queries (custom properties do not
      apply there): 1100px desktop-min, 768px intermediate-min, 320px floor. */
 }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-state: 0ms;
+    --motion-panel: 0ms;
+  }
+}
+
