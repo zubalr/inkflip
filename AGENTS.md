@@ -39,7 +39,26 @@ once per session, then only the assigned task's inputs.
 - Preserve unrelated changes. Never reset, clean, force-push, or overwrite another
   worktree. Worktree isolation is not a permissions boundary for evaluation labels.
 
+## Implemented commands (T01)
+
+- `bun run verify` — registered bootstrap, native-bootstrap and coordination
+  suites plus registry checks. It tests existing behavior only.
+- `bun run <name>` for `test:browser`, `test:privacy`, `test:a11y`,
+  `test:visual`, `test:fixtures`, `test:regression`, `test:native`, `build`,
+  `check:static-dist` — declared commands that fail explicitly until their
+  `requires` prerequisites land (see `config/acceptance-commands.json`).
+- `python3 scripts/task_acceptance.py list|run <name>|task Txx|self-check`
+  — the command harness; an empty or missing test registration always fails.
+- `python3 scripts/gate.py G1..G5|pre-release` — nonrecursive gate runner; verifies Beads
+  acceptance receipts, executes adapted scenario commands, writes a fresh
+  receipt only on success.
+- `python3 -m unittest discover -s native/tests/bootstrap -v` — native boundary
+  checks; stdlib only until T02 resolves native dependencies.
+
 ## Verification and handoff
+
+See `docs/ACCEPTANCE.md` for structured test outcomes, committed acceptance
+receipts, manual evidence and freshness requirements.
 
 - Inspect the effective acceptance commands before editing. Execute real checks;
   missing tools, empty test collections, skipped required cases, and absent manual

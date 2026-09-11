@@ -1,0 +1,28 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "references": [
+    { "path": "packages/contracts" },
+    { "path": "packages/geometry" },
+    { "path": "packages/runtime" },
+    { "path": "packages/compare" },
+    { "path": "packages/reports" },
+    { "path": "packages/explanations" },
+    { "path": "packages/readers-pdfjs" },
+    { "path": "packages/readers-tesseract" }
+  ]
+}

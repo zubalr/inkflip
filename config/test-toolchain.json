@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_by": "T01",
+  "recorded_at": "2026-09-11",
+  "host": "macOS arm64 (Darwin 25.5.0)",
+  "note": "Observed local toolchain plus planned pins from planning/config/dependencies.json. Nothing here is a resolved lock: T02 owns bun.lock, native/uv.lock, audited test dependencies and model assets. Statuses: observed = present on this host, not a support claim; planned-pin = source-verified planning input, unresolved; declared-unresolved = required by an owner decision but not yet selected.",
+  "tools": {
+    "bun": {
+      "observed": "1.4.0",
+      "status": "observed",
+      "detail": "Workspace manager; linker=isolated via bunfig.toml."
+    },
+    "node": {
+      "observed": "v26.7.0",
+      "planned_baseline": "22.16.0",
+      "status": "mismatch",
+      "detail": "Comparison-runtime pin is a T02 decision; observed v26 is not a product claim."
+    },
+    "python3": {
+      "observed": "3.14.7",
+      "planned_baseline": "3.13.5",
+      "status": "observed",
+      "detail": "Bootstrap/coordination tests run on the host interpreter; T02 selects the product-native patch pin."
+    },
+    "python": {
+      "observed": null,
+      "status": "absent",
+      "detail": "Not on PATH. The acceptance harness resolves argv[0] `python` to `python3` per acceptance-commands.json interpreters."
+    },
+    "uv": {
+      "observed": "0.9.5",
+      "status": "observed",
+      "detail": "Native project runner; no uv.lock exists until T02 resolves it."
+    },
+    "typescript": {
+      "planned_pin": "6.0.2",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "vite": {
+      "planned_pin": "8.3.0",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "@vitejs/plugin-react": {
+      "planned_pin": "6.1.1",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "react": {
+      "planned_pin": "19.2.8",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "react-dom": {
+      "planned_pin": "19.2.8",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "playwright": {
+      "planned_pin": "1.57.0",
+      "status": "declared-unresolved",
+      "owner_task": "T02"
+    },
+    "oxlint": {
+      "status": "declared-unresolved",
+      "owner_task": "T02",
+      "detail": "Owner-selected linter; no planning pin exists, so no version is asserted."
+    },
+    "oxfmt": {
+      "status": "declared-unresolved",
+      "owner_task": "T02",
+      "detail": "Owner-selected formatter; no planning pin exists."
+    }
+  }
+}

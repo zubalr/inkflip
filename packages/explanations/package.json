@@ -1,0 +1,14 @@
+{
+  "name": "@inkflip/explanations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic, evidence-bound explanations over comparison results.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -b"
+  }
+}

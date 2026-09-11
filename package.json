@@ -1,0 +1,34 @@
+{
+  "name": "inkflip",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Inkflip — local-first PDF reading inspector (browser app plus local native/corpus tools). Scaffold: unfinished.",
+  "packageManager": "bun@1.4.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "trustedDependencies": [],
+  "scripts": {
+    "verify": "python3 scripts/task_acceptance.py run verify",
+    "self-check": "python3 scripts/task_acceptance.py self-check",
+    "build": "python3 scripts/task_acceptance.py run build",
+    "build:packages": "python3 scripts/task_acceptance.py run build:packages",
+    "build:web": "python3 scripts/task_acceptance.py run build:web",
+    "test:bootstrap": "python3 scripts/task_acceptance.py run test:bootstrap",
+    "test:native-bootstrap": "python3 scripts/task_acceptance.py run test:native-bootstrap",
+    "test:native": "python3 scripts/task_acceptance.py run test:native",
+    "test:browser": "python3 scripts/task_acceptance.py run test:browser",
+    "test:privacy": "python3 scripts/task_acceptance.py run test:privacy",
+    "test:a11y": "python3 scripts/task_acceptance.py run test:a11y",
+    "test:visual": "python3 scripts/task_acceptance.py run test:visual",
+    "test:fixtures": "python3 scripts/task_acceptance.py run test:fixtures",
+    "test:regression": "python3 scripts/task_acceptance.py run test:regression",
+    "check:coordination": "python3 scripts/task_acceptance.py run check:coordination",
+    "check:static-dist": "python3 scripts/task_acceptance.py run check:static-dist"
+  },
+  "devDependencies": {
+    "typescript": "6.0.2"
+  }
+}

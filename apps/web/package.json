@@ -1,0 +1,24 @@
+{
+  "name": "@inkflip/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Inkflip browser inspector — static Vite/React client. Scaffold: unfinished.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check ."
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "6.0.2",
+    "vite": "8.3.0"
+  }
+}

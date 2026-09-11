@@ -1,0 +1,54 @@
+/* Central semantic design tokens. Source: planning/product/design-tokens.json.
+   The only place raw color/spacing/type values are defined; components consume
+   these custom properties via var(--token). Ownership: T01 scaffold, then T06. */
+:root {
+  /* Color: warm paper/ink palette with restrained teal and rust accents. */
+  --color-canvas: #f6f3ec;
+  --color-paper: #fffdf8;
+  --color-ink: #172a2f;
+  --color-muted: #526368;
+  --color-teal: #006c67;
+  --color-rust: #934420;
+  --color-line: #c9d2cc;
+  --color-focus: #005fcc;
+  --color-mark: #f0ca69;
+
+  /* Spacing scale (px). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Corner radii. */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-stage: 20px;
+
+  /* Type. */
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --text-body: 16px;
+  --text-caption: 13px;
+  --text-heading-desktop: 64px;
+  --text-heading-mobile: 42px;
+  --line-body: 1.55;
+
+  /* Motion (ms). Honors prefers-reduced-motion via --motion-*. */
+  --motion-state: 120ms;
+  --motion-panel: 180ms;
+
+  /* Layout (px). */
+  --layout-max: 1280px;
+  --layout-header: 64px;
+  --layout-evidence-column: 360px;
+  --control-min-height: 44px;
+
+  /* Breakpoints are consumed in media queries (custom properties do not
+     apply there): 1100px desktop-min, 768px intermediate-min, 320px floor. */
+}
