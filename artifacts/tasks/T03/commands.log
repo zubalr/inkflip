@@ -470,3 +470,136 @@ self-check: 16 commands in config/acceptance-commands.json
 ============================================================
 $ git status --porcelain -- planning/ (must be empty)
 [exit 0] planning/ byte-identical
+
+############################################################
+# Post-review round 3 re-run — captured 2026-09-11T23:55:02Z
+# Addresses devin-review-t03 round-3 finding N3 (DUPLICATE_KEY
+# deferred to object close, matching pairs-hook timing) and adds
+# the bounded differential fuzz to flush the precedence genus.
+############################################################
+
+============================================================
+$ node --test tests/contracts/*.test.mjs
+✔ all delivered valid examples pass structural and semantic validation (16.245209ms)
+✔ all delivered invalid examples fail with the expected code (14.5235ms)
+✔ canonical hash vectors agree byte-for-byte (0.310833ms)
+✔ reference-computed goldens agree (digests, normalize, ids, identities) (5.191541ms)
+✔ strict parser rejects duplicate keys, nonfinite and unsafe values (0.22075ms)
+✔ strict parser rejects lone surrogates and excessive depth (0.213916ms)
+✔ strict parser accepts bytes and enforces UTF-8 (0.074791ms)
+✔ __proto__ keys parse as ordinary members (0.066458ms)
+✔ bounded() rejects unsafe values passed programmatically (0.1005ms)
+✔ canonical() rejects unsupported or unsafe values (0.143708ms)
+✔ canonical() TYPE-rejects non-plain objects (review F2) (0.869916ms)
+✔ integer-literal overflow reports NUMBER like Python (review F3) (0.15125ms)
+✔ non-string input reports TYPE like Python (review N1) (0.148292ms)
+✔ multi-fault precedence matches Python post-parse ordering (review N2) (0.125042ms)
+✔ duplicate keys are reported at object close like Python (review N3) (0.179625ms)
+✔ canonical() rejects lone surrogates in strings (0.056417ms)
+✔ object key order is canonical; array order is significant (0.919416ms)
+✔ report digest excludes execution_id, timestamps and asset bytes only (2.948334ms)
+✔ seal() computes run_key and report_id so a stale report revalidates (3.436666ms)
+✔ check_hashes=False skips digest verification only (3.38575ms)
+✔ readable imported occurrence ids and duplicates stay distinct (1.246417ms)
+✔ occurrenceId is positional, hash based and deterministic (0.241875ms)
+✔ normalization preserves meaning and maps raw indexes in code points (0.064ms)
+✔ unknown schema version fails closed (0.194625ms)
+✔ untrusted report validation never compiles a schema (6.141292ms)
+✔ type generation is deterministic and drift-free (39.503209ms)
+✔ vendored schemas are byte-identical to the authoritative schema (0.210333ms)
+✔ validateJson parses and validates untrusted input in one step (0.169959ms)
+✔ PNG asset with schema-legal null pixel_size reports ASSET (review F1) (0.766125ms)
+✔ differential fuzz: multi-fault precedence parity vs Python (review N3 genus) (150.215667ms)
+✔ local task fixture: comparison and worker semantics (0.461458ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 336.576708
+[exit 0]
+
+============================================================
+$ node tests/contracts/differential_fuzz.mjs
+# 948-case corpus: dup keys x nonfinite/unsafe/surrogate/bad-escape/
+# truncation/trailing/depth faults at varying positions and nesting.
+corpus: 948 cases
+parity: 948/948 codes agree
+[exit 0]
+
+============================================================
+$ uv run --project native python -m pytest native/tests/contracts -q
+/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t03/native/.venv/bin/python3: No module named pytest
+[exit 1]
+
+============================================================
+# Supplementary: real pytest via ephemeral uv overlay (T02 merged
+# pytest on main; branch predates that merge, not rebased mid-task).
+$ uv run --project native --with pytest python -m pytest native/tests/contracts -q
+............................. [100%]
+29 passed, 116 subtests passed in 0.16s
+[exit 0]
+
+============================================================
+$ uv run --project native python -m unittest discover -s native/tests/contracts -v
+test_pixel_size_null_reports_asset (test_contracts.AssetEdgeTests.test_pixel_size_null_reports_asset) ... ok
+test_reference_goldens (test_contracts.HashVectorTests.test_reference_goldens) ... ok
+test_vectors (test_contracts.HashVectorTests.test_vectors) ... ok
+test_check_hashes_false (test_contracts.IdentityTests.test_check_hashes_false) ... ok
+test_duplicate_text_distinct_ids (test_contracts.IdentityTests.test_duplicate_text_distinct_ids) ... ok
+test_key_order_canonical_array_order_significant (test_contracts.IdentityTests.test_key_order_canonical_array_order_significant) ... ok
+test_occurrence_id (test_contracts.IdentityTests.test_occurrence_id) ... ok
+test_report_digest_exclusions (test_contracts.IdentityTests.test_report_digest_exclusions) ... ok
+test_seal_roundtrip (test_contracts.IdentityTests.test_seal_roundtrip) ... ok
+test_code_point_indexes (test_contracts.NormalizationTests.test_code_point_indexes) ... ok
+test_meaning_preserved (test_contracts.NormalizationTests.test_meaning_preserved) ... ok
+test_bounded_programmatic (test_contracts.StrictParseTests.test_bounded_programmatic) ... ok
+test_bytes_input (test_contracts.StrictParseTests.test_bytes_input) ... ok
+test_canonical_rejects_non_plain_values (test_contracts.StrictParseTests.test_canonical_rejects_non_plain_values) ... ok
+test_duplicate_keys (test_contracts.StrictParseTests.test_duplicate_keys) ... ok
+test_duplicate_keys_reported_at_object_close (test_contracts.StrictParseTests.test_duplicate_keys_reported_at_object_close) ... ok
+test_integer_literal_overflow_reports_number (test_contracts.StrictParseTests.test_integer_literal_overflow_reports_number) ... ok
+test_malformed_json (test_contracts.StrictParseTests.test_malformed_json) ... ok
+test_multi_fault_precedence_matches_parse_order (test_contracts.StrictParseTests.test_multi_fault_precedence_matches_parse_order) ... ok
+test_non_string_input_reports_type (test_contracts.StrictParseTests.test_non_string_input_reports_type) ... ok
+test_nonfinite_and_unsafe (test_contracts.StrictParseTests.test_nonfinite_and_unsafe) ... ok
+test_pathological_inputs_raise_contract_error (test_contracts.StrictParseTests.test_pathological_inputs_raise_contract_error) ... ok
+test_surrogates_and_depth (test_contracts.StrictParseTests.test_surrogates_and_depth) ... ok
+test_all_invalid_examples (test_contracts.ValidInvalidFixtureTests.test_all_invalid_examples) ... ok
+test_all_valid_examples (test_contracts.ValidInvalidFixtureTests.test_all_valid_examples) ... ok
+test_generated_artifacts_deterministic (test_contracts.VersionAndCompileTests.test_generated_artifacts_deterministic) ... ok
+test_no_schema_compilation_on_untrusted_input (test_contracts.VersionAndCompileTests.test_no_schema_compilation_on_untrusted_input) ... ok
+test_unknown_version_fails_closed (test_contracts.VersionAndCompileTests.test_unknown_version_fails_closed) ... ok
+test_vendored_schema_byte_identical (test_contracts.VersionAndCompileTests.test_vendored_schema_byte_identical) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 0.125s
+
+OK
+[exit 0]
+
+============================================================
+$ python3 scripts/generate_contracts.py --check
+Generated contract artifacts match the authoritative schema
+[exit 0]
+
+============================================================
+# Strict typecheck (ephemeral pinned typescript@5.9.3; repo toolchain pending T02).
+$ npx -y -p typescript@5.9.3 tsc -b packages/contracts
+[exit 0]
+
+============================================================
+$ python3 scripts/task_acceptance.py run verify
+
+----------------------------------------------------------------------
+Ran 30 tests in 0.026s
+
+OK
+self-check: 16 commands in config/acceptance-commands.json
+[exit 0]
+
+============================================================
+$ git status --porcelain -- planning/ (must be empty)
+[exit 0] planning/ byte-identical

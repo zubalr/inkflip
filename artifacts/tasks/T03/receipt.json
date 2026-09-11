@@ -4,14 +4,14 @@
   "disposition": "implemented_pending_review",
   "branch": "work/devin/t03",
   "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
-  "implementation_commit": "e2295b8965f4070b3100735eb30beacd4cf90e4f",
+  "implementation_commit": "50acde899cb5d090259abbb37e56729a53d45f98",
   "actor": "devin-t03",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-11",
   "acceptance_criteria_evidence": {
     "All valid/invalid fixtures and expected failure codes pass in TS/Python": {
       "status": "executed",
-      "detail": "node --test tests/contracts/*.test.mjs: exit 0, 29 tests pass. The suite validates all 12 delivered valid examples (planning/contracts/examples/valid/) and all 30 delivered invalid examples (planning/contracts/examples/invalid-index.json) against their expected failure codes with zero mismatches. Python parity suite native/tests/contracts/test_contracts.py runs the same fixtures: 28 tests pass under python -m unittest (exit 0) and under real pytest via an ephemeral uv overlay (28 passed, 98 subtests passed, exit 0). The contract's pytest leg is blocked only by the missing T02-owned dev dependency, not by a suite failure.",
+      "detail": "node --test tests/contracts/*.test.mjs: exit 0, 31 tests pass. The suite validates all 12 delivered valid examples (planning/contracts/examples/valid/) and all 30 delivered invalid examples (planning/contracts/examples/invalid-index.json) against their expected failure codes with zero mismatches. Python parity suite native/tests/contracts/test_contracts.py runs the same fixtures: 29 tests pass under python -m unittest (exit 0) and under real pytest via an ephemeral uv overlay (29 passed, 116 subtests passed, exit 0). The contract's pytest leg is blocked only by the missing T02-owned dev dependency, not by a suite failure.",
       "evidence": [
         "artifacts/tasks/T03/commands.log",
         "tests/contracts/contracts.test.mjs",
@@ -80,12 +80,12 @@
       {
         "command": "node --test tests/contracts/*.test.mjs",
         "exit": 0,
-        "collected": 29,
-        "ran": 29,
-        "passed": 29,
+        "collected": 31,
+        "ran": 31,
+        "passed": 31,
         "failed": 0,
         "skipped": 0,
-        "note": "contract leg 1 (post-review round 2): 29 tests incl. N1/N2 regression cases"
+        "note": "contract leg 1 (post-review round 3): 31 tests incl. N3 regression cases and the 948-case differential fuzz"
       },
       {
         "command": "uv run --project native python -m pytest native/tests/contracts -q",
@@ -95,20 +95,20 @@
       {
         "command": "uv run --project native --with pytest python -m pytest native/tests/contracts -q",
         "exit": 0,
-        "collected": 28,
-        "ran": 28,
-        "passed": 28,
+        "collected": 29,
+        "ran": 29,
+        "passed": 29,
         "failed": 0,
         "skipped": 0,
-        "subtests_passed": 98,
+        "subtests_passed": 116,
         "note": "supplementary evidence: real pytest from an ephemeral uv overlay; no manifest or lockfile change"
       },
       {
         "command": "uv run --project native python -m unittest discover -s native/tests/contracts -v",
         "exit": 0,
-        "collected": 28,
-        "ran": 28,
-        "passed": 28,
+        "collected": 29,
+        "ran": 29,
+        "passed": 29,
         "failed": 0,
         "skipped": 0
       },
@@ -134,7 +134,7 @@
       {
         "command": "python3 scripts/task_acceptance.py task T03",
         "exit": 1,
-        "note": "node leg recorded passed 29/29; pytest leg fails on the missing dev-group dependency in this pre-T02-merge branch"
+        "note": "node leg recorded passed 31/31; pytest leg fails on the missing dev-group dependency in this pre-T02-merge branch"
       }
     ]
   },
@@ -184,5 +184,13 @@
     },
     "doc_hygiene": "stale commit refs and counts corrected",
     "cross_language_repro": "all 14 reviewer-flagged inputs return identical codes in TS and Python (commands.log round-2 section)"
+  },
+  "review_round_3": {
+    "reviewer": "devin-review-t03",
+    "verdict": "changes-needed",
+    "findings": {
+      "N3": "FIXED \u2014 DUPLICATE_KEY deferred to object close in parseObject, matching Python object_pairs_hook timing: parse faults inside the object win; inner-object dups fire at their own close beating outer-later faults.",
+      "genus_flush": "DONE \u2014 tests/contracts/differential_fuzz.mjs + fuzz_py_runner.py: deterministic 948-case multi-fault corpus, TS vs Python codes agree 948/948; fuzz runs as a node --test case."
+    }
   }
 }

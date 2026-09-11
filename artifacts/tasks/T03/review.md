@@ -2,8 +2,9 @@
 
 **Task:** T03 — Implement schema, strict validation, canonical identity and generated types
 **Branch:** `work/devin/t03` · **Beads:** `pdf-t03` · **Worker:** `devin-t03`
-**Implementation commit:** `e2295b8965f4070b3100735eb30beacd4cf90e4f`
-(rounds: initial `521c2fa`, review-1 fixes `28cefab`, review-2 fixes `e2295b8`)
+**Implementation commit:** `50acde899cb5d090259abbb37e56729a53d45f98`
+(rounds: initial `521c2fa`, review-1 fixes `28cefab`, review-2 fixes `e2295b8`,
+review-3 fix `50acde8`)
 
 This file satisfies the contract's `artifacts/tasks/T03/review.md` evidence
 slot with the worker's own review notes. Independent review is still owed
@@ -150,6 +151,38 @@ Counts after round-2 fixes: node `--test` 29/29; unittest 28/28; real
 pytest (ephemeral overlay) 28 passed + 98 subtests; `generate --check`
 exit 0; `tsc -b` exit 0; `task_acceptance.py run verify` 30/30.
 Cross-language repro of all 14 flagged inputs yields identical codes.
+
+## Post-review round-3 update (verdict changes-needed → addressed in `50acde8`)
+
+- **N3 (required):** `DUPLICATE_KEY` fired eagerly at the repeated key's
+  read — before that member's value parsed. Python's
+  `object_pairs_hook` reports repeats at object close, so parse-level
+  faults inside the object win. `parseObject` now records the first
+  repeated key and throws `DUPLICATE_KEY` at `}`, matching hook timing
+  exactly: `{"a":1,"a":}` → `JSON`, `{"a":1,"a":NaN}` → `NONFINITE`,
+  `{"a":1,"a":5,"b":NaN}` → `NONFINITE`, while an inner object's dup
+  still fires at its own close and beats outer-later faults
+  (`{"a":{"b":1,"b":2},"c":}` → `DUPLICATE_KEY`,
+  `{"a":1,"b":{"c":1,"c":2},"d":NaN}` → `DUPLICATE_KEY`). All reviewer
+  verification cases agree empirically.
+- **Genus flushed (required):** `tests/contracts/differential_fuzz.mjs`
+  builds a deterministic seeded corpus of 948 multi-fault documents —
+  duplicate keys × nonfinite tokens, unsafe/overflowing integers, lone
+  surrogates, bad escapes, truncation, trailing garbage and depth
+  violations at varying positions and nesting — and compares TS vs
+  Python failure codes via `tests/contracts/fuzz_py_runner.py`.
+  Result: **948/948 codes agree**, exit 0. The fuzz itself runs as a
+  `node --test` case so the class stays covered.
+- Documented edge (in the fuzz header): nesting deeper than CPython's
+  json scanner recursion limit (~1000) fails `DEPTH` in Python while
+  V8 still parses; an implementation limit, not a contract code path —
+  the corpus stays below it.
+- **pytest leg:** unchanged — T02 merged on main carries pytest; this
+  branch predates that merge and is not rebased mid-task.
+
+Counts after round-3 fixes: node `--test` 31/31; unittest 29/29; real
+pytest (ephemeral overlay) 29 passed + 116 subtests; `generate --check`
+exit 0; `tsc -b` exit 0; `task_acceptance.py run verify` 30/30.
 
 ## Suggested reviewer commands
 
