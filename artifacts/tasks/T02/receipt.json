@@ -6,71 +6,70 @@
     "063d04c56b51ba4ca43fc74ed80b2a8a029014fb"
   ],
   "acceptance_command": "python3 scripts/check_dependencies.py --frozen && python3 -m unittest discover -s tests/build -v",
-  "criteria": {
-    "frozen_install_succeeds_twice_from_clean_checkout": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/macos-frozen-install.log"
-      ],
-      "detail": "Twice on linux/arm64 in the pinned OCI image (bun install --frozen-lockfile -> 87 pkgs and uv sync --frozen -> 13 pkgs, each run twice after wiping dependency dirs, from a git-archive clean checkout of the implementation commit; ends PROOF-OK, docker exit 0). Also once on a macOS clean copy (84 pkgs darwin-arm64 + 13 pkgs)."
-    },
-    "every_bundled_binary_has_source_hash_license": {
-      "status": "executed",
-      "evidence": [
-        "config/resolved-assets.json",
-        "artifacts/tasks/T02/linux-frozen-install.log",
-        "docs/ATTRIBUTION.md"
-      ],
-      "detail": "212 staged files across 8 asset groups; each manifest entry carries source URL/commit, sha256, byte count and license. check_dependencies 'assets' check re-hashes all 212 and requires license+source (passes in both frozen-install logs). Provenance summarized in docs/ATTRIBUTION.md."
-    },
-    "substituted_model_fails_checksum": {
-      "status": "executed",
-      "evidence": [
-        "tests/build/test_prepare_assets.py",
-        "artifacts/tasks/T02/linux-frozen-install.log"
-      ],
-      "detail": "test_substituted_model_fails_checksum writes wrong bytes under the correct model path and asserts prepare_assets verify fails (ok in the 37-test run, also inside the Linux proof transcript)."
-    },
-    "missing_asset_fails_closed": {
-      "status": "executed",
-      "evidence": [
-        "tests/build/test_prepare_assets.py",
-        "artifacts/tasks/T02/browser-probe.json",
-        "artifacts/tasks/T02/linux-frozen-install.log"
-      ],
-      "detail": "test_missing_asset_fails_closed (verify refuses a missing staged file) ok in the 37-test run; the browser probe's missing-model scenario returned a closed failure in-browser ('missing model fails closed' check true in browser-probe.json)."
-    },
-    "no_runtime_cdn_or_download": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/browser-probe.json",
-        "tests/build/test_check_dependencies.py"
-      ],
-      "detail": "check_dependencies no-cdn.serve-paths + no-cdn.sources checks pass (all serve prefixes are /-paths; web sources carry no remote script/worker/fetch or CDN reference). Probe asserts every scenario-A request was same-origin in a real browser. tesseract.js jsDelivr defaults documented as unused; adapter contract requires explicit same-origin paths."
-    },
-    "action_and_oci_revisions_immutable_and_recorded": {
-      "status": "executed",
-      "evidence": [
-        "build/base-image.lock.json",
-        "tests/build/test_check_dependencies.py",
-        "artifacts/tasks/T02/linux-frozen-install.log"
-      ],
-      "detail": "python:3.13.15-slim-trixie recorded at index sha256:9d2e5553…e00285 with linux/amd64+arm64 manifest digests (arm64 digest c89921a0…44b0b4 executed by the proof); actions/checkout@v4 recorded at SHA 11d5960a326750d5838078e36cf38b85af677262. check_dependencies base-image.* checks reject mutable tags/digests and pass. Caveat recorded honestly: the workflow file itself still names the v4 tag because .github is outside T02 scope — see docs/proposals/T02.md P1 and handoff dependency_requests."
-    }
-  },
   "supplementary_evidence": {
     "browser_feasibility_probe": {
       "path": "artifacts/tasks/T02/browser-probe.json",
       "verdict": "PASS",
       "checks": "7/7",
-      "scope": "Feasibility only — staged assets load and function in a real browser; not product acceptance."
+      "scope": "Feasibility only \u2014 staged assets load and function in a real browser; not product acceptance."
     },
     "advisory_scans": {
       "bun_audit": "clean, 168 packages (after justified ajv 8.17.1 -> 8.18.0 substitution, GHSA-2g4f-4pwh-qvx6)",
       "pip_audit": "clean (uv export --frozen | pip-audit)"
     }
   },
-  "note": "Worker receipt only. Independent review and Beads acceptance are coordinator steps; nothing here claims accepted/merged status."
+  "note": "Worker receipt only. Independent review and Beads acceptance are coordinator steps; nothing here claims accepted/merged status.",
+  "acceptance_criteria_evidence": {
+    "Frozen install succeeds twice from a clean checkout": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/macos-frozen-install.log",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "Twice on linux/arm64 in the pinned OCI image (bun install --frozen-lockfile -> 87 pkgs and uv sync --frozen -> 13 pkgs, each run twice after wiping dependency dirs, from a git-archive clean checkout of the implementation commit; ends PROOF-OK, docker exit 0). Also once on a macOS clean copy (84 pkgs darwin-arm64 + 13 pkgs)."
+    },
+    "every bundled binary has source/hash/license": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "212 staged files across 8 asset groups; each manifest entry carries source URL/commit, sha256, byte count and license. check_dependencies 'assets' check re-hashes all 212 and requires license+source (passes in both frozen-install logs). Provenance summarized in docs/ATTRIBUTION.md."
+    },
+    "substituted model fails checksum": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "test_substituted_model_fails_checksum writes wrong bytes under the correct model path and asserts prepare_assets verify fails (ok in the 37-test run, also inside the Linux proof transcript)."
+    },
+    "missing asset fails closed": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/browser-probe.json",
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "test_missing_asset_fails_closed (verify refuses a missing staged file) ok in the 37-test run; the browser probe's missing-model scenario returned a closed failure in-browser ('missing model fails closed' check true in browser-probe.json)."
+    },
+    "no runtime CDN/download": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/browser-probe.json",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "check_dependencies no-cdn.serve-paths + no-cdn.sources checks pass (all serve prefixes are /-paths; web sources carry no remote script/worker/fetch or CDN reference). Probe asserts every scenario-A request was same-origin in a real browser. tesseract.js jsDelivr defaults documented as unused; adapter contract requires explicit same-origin paths."
+    },
+    "action/OCI revisions are immutable and recorded.": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T02/linux-frozen-install.log",
+        "artifacts/tasks/T02/commands.log"
+      ],
+      "detail": "python:3.13.15-slim-trixie recorded at index sha256:9d2e5553\u2026e00285 with linux/amd64+arm64 manifest digests (arm64 digest c89921a0\u202644b0b4 executed by the proof); actions/checkout@v4 recorded at SHA 11d5960a326750d5838078e36cf38b85af677262. check_dependencies base-image.* checks reject mutable tags/digests and pass. Caveat recorded honestly: the workflow file itself still names the v4 tag because .github is outside T02 scope \u2014 see docs/proposals/T02.md P1 and handoff dependency_requests."
+    }
+  }
 }
