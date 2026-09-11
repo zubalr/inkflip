@@ -1,76 +1,124 @@
 {
   "schema_version": "1.0.0",
-  "recorded_by": "T01",
-  "recorded_at": "2026-09-11",
+  "recorded_by": "T02",
+  "recorded_at": "2026-09-12",
   "host": "macOS arm64 (Darwin 25.5.0)",
-  "note": "Observed local toolchain plus planned pins from planning/config/dependencies.json. Nothing here is a resolved lock: T02 owns bun.lock, native/uv.lock, audited test dependencies and model assets. Statuses: observed = present on this host, not a support claim; planned-pin = source-verified planning input, unresolved; declared-unresolved = required by an owner decision but not yet selected.",
+  "note": "T02 freeze: planned pins resolved against registry.npmjs.org / pypi.org and locked in bun.lock + native/uv.lock (isolated linker, exact saves, frozen installs verified). Statuses: observed = present on this host, not a support claim; pinned = locked and verified by check_dependencies.py --frozen; pinned-external = recorded immutable revision outside the repo.",
   "tools": {
     "bun": {
       "observed": "1.4.0",
-      "status": "observed",
-      "detail": "Workspace manager; linker=isolated via bunfig.toml."
+      "pinned": "1.4.0",
+      "status": "pinned",
+      "detail": "packageManager field pins bun@1.4.0; linker=isolated, exact=true, minimumReleaseAge=604800 in bunfig.toml.",
+      "purpose": "workspace package manager"
     },
     "node": {
       "observed": "v26.7.0",
       "planned_baseline": "22.16.0",
-      "status": "mismatch",
-      "detail": "Comparison-runtime pin is a T02 decision; observed v26 is not a product claim."
+      "pinned": "22.23.2",
+      "status": "pinned",
+      "detail": "Latest 22 LTS (Jod) patch on 2026-09-12 per nodejs.org/dist/index.json; satisfies vite/plugin-react (^20.19||>=22.12), pdfjs-dist (>=22.13), playwright (>=18). Observed v26 is not a product claim. Pinned in .node-version.",
+      "purpose": "comparison runtime (node --test) and toolchain compatibility floor"
     },
     "python3": {
       "observed": "3.14.7",
       "planned_baseline": "3.13.5",
-      "status": "observed",
-      "detail": "Bootstrap/coordination tests run on the host interpreter; T02 selects the product-native patch pin."
-    },
-    "python": {
-      "observed": null,
-      "status": "absent",
-      "detail": "Not on PATH. The acceptance harness resolves argv[0] `python` to `python3` per acceptance-commands.json interpreters."
+      "pinned": "3.13.15",
+      "status": "pinned",
+      "detail": "Latest 3.13 patch on 2026-09-12; installable via uv standalone builds (release 20260901) and the pinned OCI image python:3.13.15-slim-trixie. Host 3.14.7 runs bootstrap/coordination only — it is a planning tool, not the audited native pin. Pinned in .python-version and native/pyproject.toml requires-python==3.13.15.",
+      "purpose": "native product interpreter and bootstrap tooling"
     },
     "uv": {
       "observed": "0.9.5",
-      "status": "observed",
-      "detail": "Native project runner; no uv.lock exists until T02 resolves it."
+      "pinned_minimum": "0.12.13",
+      "status": "pinned-external",
+      "detail": "Host 0.9.5 works once the managed 3.13.15 interpreter exists; uv >=0.12.13 required to resolve that interpreter's download index (0.9.5's index predates it). The Linux proof installs uv==0.12.13 from the pinned PyPI wheel.",
+      "purpose": "native project runner (uv run/sync --frozen --project native)"
     },
     "typescript": {
-      "planned_pin": "6.0.2",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+      "pinned": "6.0.2",
+      "status": "pinned",
+      "purpose": "typecheck all packages"
     },
     "vite": {
-      "planned_pin": "8.3.0",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+      "pinned": "8.3.0",
+      "status": "pinned",
+      "purpose": "static web build (build-time only)"
     },
     "@vitejs/plugin-react": {
-      "planned_pin": "6.1.1",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+      "pinned": "6.1.1",
+      "status": "pinned",
+      "purpose": "React fast-refresh/JSX transform for the Vite build"
     },
     "react": {
-      "planned_pin": "19.2.8",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+      "pinned": "19.2.8",
+      "status": "pinned",
+      "purpose": "web UI runtime; paired react-dom pin"
     },
     "react-dom": {
-      "planned_pin": "19.2.8",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+      "pinned": "19.2.8",
+      "status": "pinned",
+      "purpose": "web UI runtime; client only, no RSC/SSR"
     },
-    "playwright": {
-      "planned_pin": "1.57.0",
-      "status": "declared-unresolved",
-      "owner_task": "T02"
+    "pdfjs-dist": {
+      "pinned": "6.3.289",
+      "status": "pinned",
+      "purpose": "browser PDF reader/rendering; cmaps/standard_fonts/wasm/iccs staged same-origin via prepare_assets.py"
+    },
+    "tesseract.js": {
+      "pinned": "7.0.0",
+      "status": "pinned",
+      "purpose": "browser OCR wrapper; explicit workerPath/corePath/langPath only — CDN defaults are unused (workerBlobURL:false)"
+    },
+    "tesseract.js-core": {
+      "pinned": "7.0.0",
+      "status": "pinned",
+      "purpose": "WASM OCR engine; single-threaded scalar/SIMD/relaxed-SIMD wasm.js shims staged same-origin"
+    },
+    "ajv": {
+      "pinned": "8.17.1",
+      "status": "pinned",
+      "purpose": "schema-build tool: standalone validator generation for contracts (T03 consumer); never compiles untrusted schema"
+    },
+    "@playwright/test": {
+      "pinned": "1.57.0",
+      "status": "pinned",
+      "purpose": "test-only browser runner for test:browser/test:privacy/test:a11y/test:visual; browsers installed by explicit `playwright install`, never an install script"
+    },
+    "@axe-core/playwright": {
+      "pinned": "4.13.0",
+      "status": "pinned",
+      "purpose": "test-only browser accessibility audits (T07 a11y suite)"
     },
     "oxlint": {
-      "status": "declared-unresolved",
-      "owner_task": "T02",
-      "detail": "Owner-selected linter; no planning pin exists, so no version is asserted."
+      "pinned": "1.82.0",
+      "status": "pinned",
+      "purpose": "owner-selected linter (dev-only)"
     },
     "oxfmt": {
-      "status": "declared-unresolved",
-      "owner_task": "T02",
-      "detail": "Owner-selected formatter; no planning pin exists."
+      "pinned": "0.67.0",
+      "status": "pinned",
+      "purpose": "owner-selected formatter (dev-only)"
+    },
+    "wrangler": {
+      "pinned": "4.131.0",
+      "status": "pinned",
+      "purpose": "deploy-only static-assets publish (T48/T54); no Worker main, no runtime role"
+    },
+    "pytest": {
+      "pinned": "9.1.1",
+      "status": "pinned",
+      "purpose": "native test runner for `uv run --project native python -m pytest` (T03+); test-only dev group, never shipped"
     }
+  },
+  "blocked_install_scripts": {
+    "policy": "trustedDependencies is an explicit empty list; every install script is refused by default.",
+    "observed": [
+      {
+        "package": "opencollective-postinstall",
+        "via": "tesseract.js@7.0.0 dependency",
+        "assessment": "prints a donation message only; blocking it loses no capability. Deliberately left untrusted."
+      }
+    ]
   }
 }

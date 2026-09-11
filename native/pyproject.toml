@@ -2,7 +2,12 @@
 name = "inkflip"
 version = "0.0.0"
 description = "Inkflip native CLI: local PDF reader adapters, corpus and regression tools."
-requires-python = ">=3.13"
+# T02 freezes the exact product-native interpreter patch (planning baseline
+# 3.13.5 → selected patched build 3.13.15, installable via uv's standalone
+# CPython builds and mirrored by the root .python-version pin). `uv sync` and
+# `uv run --project native` resolve exactly this interpreter; an unavailable
+# patch fails closed instead of silently drifting.
+requires-python = "==3.13.15"
 # Planned pins copied from planning/config/dependencies.json (source-verified,
 # unresolved). T02 owns dependency resolution, native/uv.lock and this manifest.
 dependencies = [
@@ -13,9 +18,13 @@ dependencies = [
 ]
 
 [dependency-groups]
-# Test/build dependencies are declared by T02 after audited resolution; an
-# empty group is honest — no frozen lock exists yet.
-dev = []
+# Test-only dependencies (resolved and frozen by T02 in native/uv.lock):
+# - pytest: native test runner for `uv run --project native python -m pytest`;
+#   required by T03's acceptance command and later native suites. Test-only;
+#   never imported by shipped adapter code.
+dev = [
+    "pytest==9.1.1",
+]
 
 [tool.uv]
 # Not packaged yet: uv sync installs dependencies only, keeping native/
