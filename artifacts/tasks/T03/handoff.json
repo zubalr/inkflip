@@ -4,7 +4,7 @@
   "worker": "devin-t03",
   "branch": "work/devin/t03",
   "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
-  "implementation_commit": "521c2faceb5931f2f2190a6a0e3559a04a0469f4",
+  "implementation_commit": "28cefab9c260b0c05a10dc73ee30bbf4f85bb009",
   "evidence_commit": "this file is committed after the implementation commit; see git log",
   "disposition": "implemented_pending_review",
   "ready_for_review": true,
@@ -31,11 +31,11 @@
     {
       "command": "node --test tests/contracts/*.test.mjs",
       "exit": 0,
-      "collected": 24,
-      "passed": 24,
+      "collected": 27,
+      "passed": 27,
       "failed": 0,
       "skipped": 0,
-      "note": "contract leg 1; validates all 12 valid + 30 invalid delivered examples with expected codes"
+      "note": "contract leg 1 (post-review): includes F1/F2/F3 regression cases"
     },
     {
       "command": "uv run --project native python -m pytest native/tests/contracts -q",
@@ -43,23 +43,23 @@
       "collected": 0,
       "passed": 0,
       "failed": 0,
-      "note": "contract leg 2 BLOCKED: 'No module named pytest' — T02-owned dev dependency missing; see dependency_requests"
+      "note": "contract leg 2 BLOCKED: 'No module named pytest' \u2014 T02-owned dev dependency missing; see dependency_requests"
     },
     {
       "command": "uv run --project native --with pytest python -m pytest native/tests/contracts -q",
       "exit": 0,
-      "collected": 22,
-      "passed": 22,
+      "collected": 26,
+      "passed": 26,
       "failed": 0,
       "skipped": 0,
-      "subtests_passed": 88,
+      "subtests_passed": 92,
       "note": "supplementary: real pytest via ephemeral overlay; proves the suite passes under pytest itself once the dependency lands"
     },
     {
       "command": "uv run --project native python -m unittest discover -s native/tests/contracts -v",
       "exit": 0,
-      "collected": 22,
-      "passed": 22,
+      "collected": 26,
+      "passed": 26,
       "failed": 0,
       "skipped": 0
     },
@@ -98,7 +98,7 @@
     "No repo typescript/oxlint/oxfmt until T02; strict compile verified via ephemeral typescript@5.9.3 with no manifest changes.",
     "native/uv.lock is untracked and T02-owned; intentionally not committed.",
     "docs/ATTRIBUTION.md is outside T03 scope; port provenance is recorded in module docstrings and review.md.",
-    "Two deliberate, parity-kept refinements over the reference: malformed JSON -> ContractError('JSON'); invalid UTF-8 -> ContractError('UNICODE'). Everything else is behavior-identical to planning/tools/contractlib.py (function-level diff in commands.log)."
+    "Deliberate, parity-kept refinements over the reference: malformed JSON -> ContractError('JSON'); invalid UTF-8 -> ContractError('UNICODE'); and after review F4, programmatic callers get ContractError at the remaining raw-escape edges (bytes-like inputs decode; non-str input -> TYPE; lone surrogates -> UNICODE in canonical, JSON from loads_strict). No semantic accept/reject deviation on reachable JSON input; function-level diff recorded in commands.log."
   ],
   "dependency_requests": [
     {
@@ -114,7 +114,20 @@
     "T04_and_readers": "Import { loadsStrict, validate, validateJson, canonical, digest, runKey, reportDigest, seal, occurrenceId, normalize, checkSchema, ContractError } from '@inkflip/contracts' (source ESM with .ts specifiers). Python mirror: inkflip.contracts exposes the same names snake_cased via lazy attribute loading; importing inkflip stays dependency-free.",
     "occurrence_identity": "occurrenceId(runKey, readerId, pageIndex, ordinal, rawSourceLocator) -> 'o_'+32hex; production readers must generate ids this way; imported readable ids remain schema-valid under v1.",
     "report_identity": "seal(report) computes run_key and report_id in place; reportDigest excludes report_id, execution_id, started_at, duration_ms and each asset's data_base64 only.",
-    "validation_entry": "validateJson(textOrBytes) is the single entry for untrusted bytes: strict parse (duplicate keys, nonfinite/unsafe numbers, surrogates, depth/size) then structural (precompiled) then semantic validation. check_hashes=False exists for tooling that intentionally rewrites digests."
+    "validation_entry": "validateJson(textOrBytes) (TS) / validate_json(data) (PY) is the single entry for untrusted bytes: strict parse (duplicate keys, nonfinite/unsafe numbers, surrogates, depth/size) then structural (precompiled) then semantic validation. check_hashes=False exists for tooling that intentionally rewrites digests."
   },
-  "recorded_at": "2026-09-11"
+  "recorded_at": "2026-09-11",
+  "review_round": {
+    "reviewer": "devin-review-t03",
+    "verdict": "changes-needed",
+    "all_findings_addressed": true,
+    "findings": [
+      "F1 fixed",
+      "F2 fixed",
+      "F3 fixed",
+      "F4 fixed",
+      "F5 done"
+    ],
+    "review_ref": "origin/review/devin/t03:artifacts/tasks/T03/peer-review.md"
+  }
 }

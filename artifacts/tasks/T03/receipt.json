@@ -4,7 +4,7 @@
   "disposition": "implemented_pending_review",
   "branch": "work/devin/t03",
   "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
-  "implementation_commit": "521c2faceb5931f2f2190a6a0e3559a04a0469f4",
+  "implementation_commit": "28cefab9c260b0c05a10dc73ee30bbf4f85bb009",
   "actor": "devin-t03",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-11",
@@ -80,34 +80,35 @@
       {
         "command": "node --test tests/contracts/*.test.mjs",
         "exit": 0,
-        "collected": 24,
-        "ran": 24,
-        "passed": 24,
+        "collected": 27,
+        "ran": 27,
+        "passed": 27,
         "failed": 0,
-        "skipped": 0
+        "skipped": 0,
+        "note": "contract leg 1 (post-review): 27/24+3 regression tests pass"
       },
       {
         "command": "uv run --project native python -m pytest native/tests/contracts -q",
         "exit": 1,
-        "note": "blocked: 'No module named pytest' — pytest is not yet in the native dev group (T02-owned manifest/lock); suite itself is pytest-collectable"
+        "note": "blocked: 'No module named pytest' \u2014 pytest is not yet in the native dev group (T02-owned manifest/lock); suite itself is pytest-collectable"
       },
       {
         "command": "uv run --project native --with pytest python -m pytest native/tests/contracts -q",
         "exit": 0,
-        "collected": 22,
-        "ran": 22,
-        "passed": 22,
+        "collected": 26,
+        "ran": 26,
+        "passed": 26,
         "failed": 0,
         "skipped": 0,
-        "subtests_passed": 88,
+        "subtests_passed": 92,
         "note": "supplementary evidence: real pytest from an ephemeral uv overlay; no manifest or lockfile change"
       },
       {
         "command": "uv run --project native python -m unittest discover -s native/tests/contracts -v",
         "exit": 0,
-        "collected": 22,
-        "ran": 22,
-        "passed": 22,
+        "collected": 26,
+        "ran": 26,
+        "passed": 26,
         "failed": 0,
         "skipped": 0
       },
@@ -151,7 +152,7 @@
     "No repo-installed TypeScript/oxlint/oxfmt yet (T02 toolchain); strict compile verified with ephemeral typescript@5.9.3, formatting follows repository conventions manually.",
     "native/uv.lock exists in this worktree as an untracked T02-owned file and is deliberately uncommitted.",
     "docs/ATTRIBUTION.md is outside T03 allowed scope; the port's provenance (planning/tools/contractlib.py, generate_types.py) is documented in module docstrings and review.md for the coordinator to record.",
-    "Deliberate refinements over the reference, kept identical in both languages: malformed JSON reports ContractError('JSON') and invalid UTF-8 reports ContractError('UNICODE') where the reference let decode exceptions propagate. No other semantic deviation; function-level diff recorded in commands.log."
+    "Deliberate, parity-kept refinements over the reference: malformed JSON -> ContractError('JSON'); invalid UTF-8 -> ContractError('UNICODE'); and after review F4, programmatic callers get ContractError at the remaining raw-escape edges (bytes-like inputs decode; non-str input -> TYPE; lone surrogates -> UNICODE in canonical, JSON from loads_strict). No semantic accept/reject deviation on reachable JSON input; function-level diff recorded in commands.log."
   ],
   "dependency_requests": [
     "T02: add pytest to the native dev dependency group (native/pyproject.toml) and lock it in native/uv.lock so 'uv run --project native python -m pytest native/tests/contracts -q' runs without overlays.",
@@ -161,5 +162,17 @@
   "unverified": [
     "pytest leg of the contract command inside the real dev group (pending T02 dependency).",
     "Independent review has not run; this is worker evidence, not acceptance."
-  ]
+  ],
+  "review_round": {
+    "reviewer": "devin-review-t03",
+    "verdict": "changes-needed",
+    "review_ref": "origin/review/devin/t03:artifacts/tasks/T03/peer-review.md",
+    "findings": {
+      "F1": "FIXED \u2014 PNG asset pixel_size:null guarded; ContractError ASSET, no TypeError (core.ts).",
+      "F2": "FIXED \u2014 canonical() requires plain objects (prototype Object.prototype/null); Map/Set/Date/RegExp/Uint8Array/class instances TYPE-reject.",
+      "F3": "FIXED \u2014 pure-integer literals overflowing to Infinity report NUMBER; 1e999 stays NONFINITE.",
+      "F4": "FIXED \u2014 Python port wraps pathological escapes: bytes-like inputs decode, non-str input TYPE, lone surrogates UNICODE (canonical) / JSON (loads_strict); validate_json added for TS parity.",
+      "F5": "DONE \u2014 regression cases added in both suites for F1/F2/F3/F4 edges."
+    }
+  }
 }

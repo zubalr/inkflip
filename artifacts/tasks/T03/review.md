@@ -86,6 +86,38 @@ and remains the coordinator's step.
 - No repo tsc/oxlint/oxfmt yet (T02). No runtime schema compilation in
   either runtime — asserted by executable tests, not just inspection.
 
+## Post-review update (devin-review-t03, verdict changes-needed → addressed in `f5bfff1`)
+
+- **F1 (required):** `core.ts` PNG check indexed `a.pixel_size[0]` on
+  schema-legal `null` → uncaught `TypeError`. Now guarded
+  (`a.pixel_size !== null && …`), failing `ContractError('ASSET')`
+  exactly like the Python list-equality. Repro in commands.log.
+- **F2 (required):** `canonical()` hashed non-plain objects as records —
+  `digest(new Map([['a',1]])) === digest({})`, a silent identity
+  collision. The object branch now requires prototype
+  `Object.prototype`/`null` else `ContractError('TYPE')`, matching the
+  Python `dict` check.
+- **F3:** `'9'.repeat(400)` reported `NONFINITE`; Python's
+  arbitrary-precision int reports `NUMBER`. Pure-integer literals that
+  overflow to Infinity now report `NUMBER` in `parseNumber`; `1e999`
+  stays `NONFINITE` in both.
+- **F4:** Python port now wraps its remaining pathological escapes:
+  bytes-like inputs (`bytearray`/`memoryview`) decode like `bytes`,
+  non-str input raises `ContractError('TYPE')`, lone-surrogate
+  strings/dict keys raise `ContractError('UNICODE')` in `canonical` and
+  `ContractError('JSON')` from `loads_strict` (surrogatepass keeps the
+  size check defined; both match the TS codes). Also added
+  `validate_json` to mirror the TS `validateJson` surface.
+- **F5:** regression cases added in both suites: PNG `pixel_size:null` →
+  `ASSET`; `canonical`/`digest` on Map/Set/Date/RegExp/Uint8Array/class
+  instance → `TYPE`; integer-literal overflow → `NUMBER` with `1e999`
+  staying `NONFINITE`; Python pathological-input cases.
+
+Counts after fixes: node `--test` 27/27; unittest 26/26; real pytest
+(ephemeral overlay) 26 passed + 92 subtests; `generate --check` exit 0;
+`tsc -b` exit 0; `task_acceptance.py run verify` 30/30. The contract
+pytest leg remains blocked only by the missing T02 dev dependency.
+
 ## Suggested reviewer commands
 
 ```sh
