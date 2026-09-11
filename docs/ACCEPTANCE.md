@@ -36,7 +36,9 @@ and merged-branch checks. Its version 1 format contains:
 - `evaluated_commit` as a full Git commit, `evaluated_at` as the actual run time,
   and `contract_digest` from `acceptance_receipts.contract_digest(effective_task)`.
 - `commands`: the task run's ordered records. Each `segment` matches the
-  effective contract; every command exits zero and all recorded tests pass.
+  effective contract and executed `argv`; every command exits zero and every
+  required suite supplies passing counts. `cwd` is `.` relative to the absolute
+  recorded `checkout`, so receipts stay portable between prepared worktrees.
 - `evidence`: task-local paths mapped to their SHA-256 digests. Include the
   worker receipt, command log, independent review, run JSON and any manual
   evidence relied on by the review. Required artifacts must be nonempty.

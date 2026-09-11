@@ -20,6 +20,16 @@ COUNT_KEYS = ("collected", "passed", "failed", "skipped")
 REPORT_ENV = "INKFLIP_TEST_REPORT_FILE"
 
 
+def requires_tests(argv: list[str], registry: dict) -> bool:
+    if argv[:2] == ["bun", "run"] and len(argv) > 2:
+        commands = registry["commands"]
+        entry = commands.get(argv[2], {})
+        kinds = [entry.get("kind"), *(commands.get(m, {}).get("kind") for m in entry.get("members", []))]
+        return "test" in kinds
+    return any(a in ("unittest", "pytest", "playwright", "--test", "scripts/gate.py")
+               or Path(a).name.startswith("test_") or a.startswith("tests/") for a in argv)
+
+
 def validate_counts(counts: dict) -> None:
     if not isinstance(counts, dict):
         raise ValueError("test counts must be an object")

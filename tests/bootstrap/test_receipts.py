@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -39,8 +40,8 @@ class ReceiptTests(unittest.TestCase):
             schema_version=1, task_id="T01", beads_id="pdf-t01", disposition="accepted",
             evaluated_commit=self.evaluated, evaluated_at="2026-09-11T00:00:00Z",
             contract_digest=receipts.contract_digest(self.task), worker="worker-t01",
-            commands=[dict(segment=self.task["commands"][0], argv=["python3", "-m", "unittest"],
-                           cwd=str(self.root), exit=0,
+            commands=[dict(segment=self.task["commands"][0], argv=shlex.split(self.task["commands"][0]),
+                           cwd=".", checkout=str(self.root), exit=0,
                            tests=dict(collected=1, passed=1, failed=0, skipped=0))],
             evidence=evidence,
             criteria={c: ["artifacts/tasks/T01/review.md"] for c in self.task["acceptance_criteria"]},
@@ -88,6 +89,20 @@ class ReceiptTests(unittest.TestCase):
                 self.save(data)
                 with self.assertRaises(ValueError):
                     receipts.validate("T01", self.issue)
+
+    def test_a_matching_label_cannot_hide_a_different_executed_command(self):
+        self.data["commands"][0]["argv"] = ["echo", "success"]
+        self.save()
+        with self.assertRaisesRegex(ValueError, "executed argv"):
+            receipts.validate("T01", self.issue)
+
+    def test_each_required_suite_needs_its_own_counts(self):
+        task = coordination.effective_task(self.tasks["T17"], self.overrides)
+        records = [dict(segment=s, argv=shlex.split(s), cwd=".", checkout=str(self.root), exit=0)
+                   for s in receipts.segments(task)]
+        records[0]["tests"] = dict(collected=1, passed=1, failed=0, skipped=0)
+        with self.assertRaises(ValueError):
+            receipts.validate_commands(records, task)
 
     def test_missing_manual_evidence_or_independent_review_cannot_pass(self):
         for field in ("criteria", "evidence", "review"):

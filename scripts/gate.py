@@ -70,7 +70,7 @@ def run_scenarios(gate: dict, overrides: dict, registry: dict) -> tuple[list[dic
         record = {"command": command, "adapted": adapted}
         try:
             argv = task_acceptance.resolve_interpreter(argv, registry)
-            record.update(test_results.execute(argv, ROOT))
+            record.update(test_results.execute(argv, ROOT, require_tests=test_results.requires_tests(argv, registry)))
         except (task_acceptance.CommandError, GateError, OSError) as error:
             record.update({"exit": 1, "error": str(error)})
         if record["exit"] != 0:

@@ -161,7 +161,11 @@ def run_task(task_id: str, registry: dict, require_evidence: bool, report: Path 
         try:
             if any("$" in a for a in argv):
                 raise CommandError("required command environment variable is unset")
-            record.update(test_results.execute(resolve_interpreter(argv, registry), ROOT))
+            record.update(test_results.execute(resolve_interpreter(argv, registry), ROOT,
+                                               require_tests=test_results.requires_tests(argv, registry)))
+            record["checkout"], record["cwd"] = record["cwd"], "."
+            record["environment"] = {name: os.environ[name] for name in ("INKFLIP_PUBLIC_ORIGIN",)
+                                     if f"${name}" in segment}
         except (CommandError, OSError) as error:
             record.update(argv=argv, exit=1, error=str(error))
         records.append(record)

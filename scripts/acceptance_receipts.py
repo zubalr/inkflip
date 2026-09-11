@@ -8,6 +8,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shlex
+import string
 import subprocess
 from pathlib import Path, PurePosixPath
 
@@ -69,6 +71,7 @@ def check_freshness(evaluated: str, ref: str, scopes: list[str]) -> None:
 
 
 def validate_commands(records: list[dict], task: dict) -> None:
+    registry = json.loads((coordination.ROOT / "config/acceptance-commands.json").read_text())
     if not isinstance(records, list) or not all(isinstance(r, dict) for r in records):
         raise ValueError("receipt commands must be a list of result objects")
     if [r.get("segment") for r in records] != segments(task):
@@ -76,10 +79,18 @@ def validate_commands(records: list[dict], task: dict) -> None:
     for record in records:
         if type(record.get("exit")) is not int or record["exit"] != 0:
             raise ValueError("receipt contains an unsuccessful command")
-        if not record.get("argv") or not record.get("cwd"):
-            raise ValueError("receipt is missing the executed command or working directory")
-        if "tests" in record:
-            test_results.validate_counts(record["tests"])
+        environment = record.get("environment", {})
+        if set(environment) - {"INKFLIP_PUBLIC_ORIGIN"}:
+            raise ValueError("receipt contains an unsupported command environment")
+        expected = [string.Template(a).substitute(environment) for a in shlex.split(record["segment"])]
+        actual = record.get("argv", [])
+        mapped = registry.get("interpreters", {}).get(expected[0], expected[0])
+        if not actual or actual[1:] != expected[1:] or actual[0] not in (expected[0], mapped):
+            raise ValueError("executed argv does not match the effective command")
+        if record.get("cwd") != "." or not Path(record.get("checkout", "")).is_absolute():
+            raise ValueError("task commands must execute at the recorded repository root")
+        if test_results.requires_tests(actual, registry) or "tests" in record:
+            test_results.validate_counts(record.get("tests", {}))
     test_results.validate_counts(test_results.total_counts(records))
 
 
