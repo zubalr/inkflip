@@ -22,3 +22,9 @@ selection/privacy and final OSS publication review remain T55 work.
 
 This is a bounded scan plus review, not a guarantee that a repository contains
 no sensitive information. Only the approved private repository is published.
+
+Final rescan at source/evidence commit fc3c085 covered 397 tracked files and
+22 commits across all refs. It found the same 34 fixture run digests plus one
+new alert on native-portability.md: the publicly published, verified Beads
+release archive SHA-256. All 35 are accounted for; no credential was found.
+The scan used default rules with redacted reports and no allowlist.

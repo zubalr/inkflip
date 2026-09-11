@@ -49,5 +49,12 @@
   "local_checkouts": {
     "antigravity": "../worktrees/pdf-t06",
     "zcode": "../worktrees/pdf-t05"
+  },
+  "source_scan": {
+    "scanner": "Gitleaks 8.30.1",
+    "tracked_files": 397,
+    "history_commits": 22,
+    "alerts": 35,
+    "classification": "34 deterministic fixture run digests and 1 public Beads archive checksum; no credential found; no rules suppressed"
   }
 }
