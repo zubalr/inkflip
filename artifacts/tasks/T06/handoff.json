@@ -32,5 +32,12 @@
   "dependency_requests": [
     "T02: Provide Playwright test runner and dependency locks."
   ],
+  "cross_app_review_completed": {
+    "task": "T05",
+    "candidate": "f30b8705f41aa1d575498867a54483a9ce657c91",
+    "branch": "review/antigravity/t05",
+    "commit": "11c0f84",
+    "verdict": "approved"
+  },
   "ready_for_review": true
 }

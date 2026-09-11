@@ -34,3 +34,12 @@ In response to the independent peer review report (`request-changes`):
 - `bun run verify` -> exit 0 (81 tests pass).
 - `python3 scripts/task_acceptance.py self-check` -> exit 0 (16 commands in registry).
 - `python3 scripts/task_acceptance.py task T06` -> honest exit 1 awaiting T02 Playwright binary.
+
+## Cross-App Review Activity
+
+- **Reviewed Task:** T05 (Create original fixture foundation and rights manifest)
+- **Candidate Commit:** `f30b8705f41aa1d575498867a54483a9ce657c91` on `work/zcode/t05`
+- **Review Worktree & Branch:** Isolated checkout `worktrees/review-t05` on `review/antigravity/t05`
+- **Review Artifact:** `artifacts/tasks/T05/peer-review.md` committed (`11c0f84`) and pushed to `origin/review/antigravity/t05`
+- **Verdict:** `approved`
+
