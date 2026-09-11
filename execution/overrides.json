@@ -24,7 +24,8 @@
       "apps/web/src/styles/"
     ],
     "T02": ["bunfig.toml", "tests/build/"],
-    "T03": ["native/tests/contracts/"]
+    "T03": ["native/tests/contracts/"],
+    "T49": ["LICENSE", "CONTRIBUTING.md", "SECURITY.md"]
   },
   "reserved_paths": [
     "planning/",

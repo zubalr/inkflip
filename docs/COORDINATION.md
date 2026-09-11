@@ -141,6 +141,37 @@ work closes with `disposition: accepted`. Missing evidence blocks consumers.
 Material contract/dependency changes reopen affected tasks and invalidate their
 acceptance metadata. An unrelated old green receipt cannot certify changed code.
 
+## Repository and OSS quality
+
+Apply these checks at each task handoff and again to the T55 release candidate.
+
+- Prepare focused commits that explain the problem and resulting behavior. Stage
+  named paths after reviewing the diff. Consolidate temporary fixup commits only
+  after the writer yields, preserving meaningful history and actual attribution.
+- Review implementation and tests for unused dependencies, dead code, abandoned
+  scaffolding, speculative abstractions, copied boilerplate and unsupported claims.
+  Exercise the maintained format, lint, type, test and build commands. A passing
+  command alone does not establish readable code or a polished user experience.
+- Track source, reproducible configuration, lockfiles, tests, intentional fixtures,
+  required notices and selected documentation/evidence. Ignore regenerable caches,
+  local environments, coverage, scratch and private inputs. Keep ignore patterns
+  narrow: build provenance, fixtures and acceptance receipts can be source inputs.
+- Before the first GitHub publication, review both the tracked tree and history
+  for secrets, private documents, machine-specific paths, obsolete prompts and
+  incidental logs. Decide explicitly which planning and coordination files a
+  contributor needs. Preserve working acceptance commands and origin notices
+  when separating local orchestration material. Adding an ignore rule does not
+  remove already tracked files or historical content. Record the public source
+  selection and scan results in the T55 evidence; do not prune a running task.
+- T49 must provide a clear README and verified setup/development commands, project
+  license and retained third-party notices, contribution instructions and a real
+  security-reporting route. User-owned choices or contact details remain explicit
+  blockers until supplied; do not fabricate them. Use templates only where they
+  help contributors perform a concrete action.
+- Capture demos and screenshots from the working candidate. Document limitations
+  and link claims to measured behavior. T55 must review contributor onboarding,
+  the Git tree/history and the rendered product before release approval.
+
 ## Release and evidence boundaries
 
 G1 requires real browser own-file PDF/OCR, controls, geometry, cancellation,

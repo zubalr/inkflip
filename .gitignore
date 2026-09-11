@@ -22,3 +22,18 @@ test-results/
 playwright-report/
 artifacts/scratch/
 runs/
+
+# Regenerable TypeScript/Vite and Python tool output.
+*.tsbuildinfo
+.vite/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+*.egg-info/
+/native/build/
+coverage/
+htmlcov/
+.coverage
+.coverage.*
