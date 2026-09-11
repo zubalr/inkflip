@@ -1,0 +1,146 @@
+{
+  "probe": "T02 staged-asset browser feasibility",
+  "started_at": "2026-09-11T23:12:35.015Z",
+  "port": 59818,
+  "scenarios": {
+    "control": {
+      "result": {
+        "steps": [
+          "pdfjs imported: 6.3.289",
+          "pdfjs rendered page 1",
+          "tesseract recognized rendered page"
+        ],
+        "errors": [],
+        "pdfjsVersion": "6.3.289",
+        "pdfjsText": "HELLO INKFLIP  reading control",
+        "ocrText": "HELLO INKFLIP",
+        "status": "OK"
+      },
+      "console_errors": [],
+      "requests": [
+        {
+          "url": "/probe/probe.html",
+          "status": 200,
+          "bytes": 2748
+        },
+        {
+          "url": "/probe/vendor/pdf.min.mjs",
+          "status": 200,
+          "bytes": 518555
+        },
+        {
+          "url": "/probe/vendor/pdf.worker.min.mjs",
+          "status": 200,
+          "bytes": 1317034
+        },
+        {
+          "url": "/probe/fixture.pdf",
+          "status": 200,
+          "bytes": 641
+        },
+        {
+          "url": "/probe/vendor/tesseract.esm.min.js",
+          "status": 200,
+          "bytes": 63220
+        },
+        {
+          "url": "/assets/tesseract/7.0.0/worker.min.js",
+          "status": 200,
+          "bytes": 111307
+        },
+        {
+          "url": "/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
+          "status": 200,
+          "bytes": 3905767
+        },
+        {
+          "url": "/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+          "status": 200,
+          "bytes": 4113088
+        }
+      ],
+      "external_requests": []
+    },
+    "missing_model": {
+      "result": {
+        "status": "TIMEOUT",
+        "steps": [],
+        "errors": [
+          "no PROBE-RESULT emitted within 60s"
+        ]
+      },
+      "model_request": "http://127.0.0.1:59818/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+      "requests": [
+        {
+          "url": "/probe/probe.html",
+          "status": 200,
+          "bytes": 2748
+        },
+        {
+          "url": "/probe/vendor/pdf.min.mjs",
+          "status": 200,
+          "bytes": 518555
+        },
+        {
+          "url": "/probe/vendor/pdf.worker.min.mjs",
+          "status": 200,
+          "bytes": 1317034
+        },
+        {
+          "url": "/probe/fixture.pdf",
+          "status": 200,
+          "bytes": 641
+        },
+        {
+          "url": "/probe/vendor/tesseract.esm.min.js",
+          "status": 200,
+          "bytes": 63220
+        },
+        {
+          "url": "/assets/tesseract/7.0.0/worker.min.js",
+          "status": 200,
+          "bytes": 111307
+        },
+        {
+          "url": "/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
+          "status": 200,
+          "bytes": 3905767
+        }
+      ]
+    }
+  },
+  "node": "v26.7.0",
+  "playwright": "1.57.0",
+  "finished_at": "2026-09-11T23:13:35.554Z",
+  "checks": [
+    {
+      "name": "control status OK",
+      "pass": true
+    },
+    {
+      "name": "pdfjs text layer contains control",
+      "pass": true
+    },
+    {
+      "name": "OCR reads control string",
+      "pass": true
+    },
+    {
+      "name": "no console errors",
+      "pass": true
+    },
+    {
+      "name": "all scenario-A requests same-origin",
+      "pass": true
+    },
+    {
+      "name": "model fetched over same-origin",
+      "pass": true
+    },
+    {
+      "name": "missing model fails closed",
+      "pass": true
+    }
+  ],
+  "verdict": "PASS"
+}

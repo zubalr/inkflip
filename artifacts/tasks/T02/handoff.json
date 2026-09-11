@@ -1,0 +1,112 @@
+{
+  "task": "T02",
+  "worker": "devin-subagent-t02",
+  "implementation_commit": "063d04c56b51ba4ca43fc74ed80b2a8a029014fb",
+  "implementation_commits": [
+    "801ff42ece41b4f7a187542836337e40175d0c7b",
+    "063d04c56b51ba4ca43fc74ed80b2a8a029014fb"
+  ],
+  "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
+  "commands": [
+    {
+      "cmd": "python3 scripts/check_dependencies.py --frozen",
+      "exit_code": 0,
+      "counts": { "collected": 16, "passed": 16, "failed": 0, "skipped": 0 },
+      "note": "First segment of the effective T02 acceptance command; offline frozen-state verifier."
+    },
+    {
+      "cmd": "python3 -m unittest discover -s tests/build -v",
+      "exit_code": 0,
+      "counts": { "collected": 37, "passed": 37, "failed": 0, "skipped": 0 },
+      "note": "Second segment of the effective T02 acceptance command; includes substituted-model, missing-asset, CDN and mutable-reference negative controls."
+    },
+    {
+      "cmd": "docker run --rm -v /private/tmp/inkflip-t02-proof:/proof python@sha256:c89921a0c7b42f27338ed8c279fb370e69e941c92460f91895d08304e844b0b4 sh /proof/proof.sh",
+      "exit_code": 0,
+      "counts": { "collected": 53, "passed": 53, "failed": 0, "skipped": 0 },
+      "note": "Linux aarch64 frozen-install proof ×2 (bun 87 pkgs + uv 13 pkgs, twice) then check_dependencies 16/16 + unittest 37/37 in the pinned OCI image. Full transcript: linux-frozen-install.log (ends PROOF-OK)."
+    },
+    {
+      "cmd": "git archive HEAD | tar -x -C /private/tmp/inkflip-t02-macos && bun install --frozen-lockfile && uv sync --frozen --project native && python3 scripts/check_dependencies.py --frozen && python3 -m unittest discover -s tests/build",
+      "exit_code": 0,
+      "counts": { "collected": 53, "passed": 53, "failed": 0, "skipped": 0 },
+      "note": "macOS clean-copy frozen proof: bun 84 pkgs (darwin-arm64), uv 13 pkgs, 16 checks + 37 tests. Log: macos-frozen-install.log."
+    },
+    {
+      "cmd": "node tests/build/probe/probe.mjs",
+      "exit_code": 0,
+      "counts": { "collected": 7, "passed": 7, "failed": 0, "skipped": 0 },
+      "note": "Same-origin browser feasibility probe (Playwright 1.57.0, Chromium 143.0.7499.4): pdfjs 6.3.289 legacy renders fixture, tesseract.js 7.0.0 OCRs via staged worker/core/lang; every request same-origin; missing model fails closed. Feasibility evidence, not product acceptance. JSON+PNG recorded."
+    },
+    {
+      "cmd": "bun audit",
+      "exit_code": 0,
+      "note": "No vulnerabilities found (168 packages) after the justified ajv 8.17.1 → 8.18.0 substitution (GHSA-2g4f-4pwh-qvx6)."
+    },
+    {
+      "cmd": "uv export --project native --frozen --format requirements-txt --no-hashes | uvx pip-audit -r /dev/stdin",
+      "exit_code": 0,
+      "note": "No known vulnerabilities found across the frozen native dependency set."
+    },
+    {
+      "cmd": "uv run --frozen --project native python -m pytest --version",
+      "exit_code": 0,
+      "note": "pytest 9.1.1 resolves from the frozen lock (also shown inside the Linux proof)."
+    },
+    {
+      "cmd": "bun run verify",
+      "exit_code": 1,
+      "counts": { "collected": 49, "passed": 48, "failed": 1, "skipped": 0 },
+      "note": "One T01-owned bootstrap assertion is stale post-T02 (see dependency_requests/proposal P2): test:browser's prerequisite is now installed so it fails at the next honest layer instead of printing 'prerequisites missing'."
+    }
+  ],
+  "evidence_paths": [
+    "artifacts/tasks/T02/commands.log",
+    "artifacts/tasks/T02/handoff.json",
+    "artifacts/tasks/T02/receipt.json",
+    "artifacts/tasks/T02/linux-frozen-install.log",
+    "artifacts/tasks/T02/macos-frozen-install.log",
+    "artifacts/tasks/T02/browser-probe.json",
+    "artifacts/tasks/T02/browser-probe.png",
+    "config/resolved-assets.json",
+    "config/test-toolchain.json",
+    "build/base-image.lock.json",
+    "docs/ATTRIBUTION.md",
+    "docs/proposals/T02.md"
+  ],
+  "limitations": [
+    "Linux proof ran on linux/arm64 (host Docker is aarch64); the linux/amd64 platform digest of python:3.13.15-slim-trixie is recorded in build/base-image.lock.json but was not executed.",
+    ".github/workflows/ci.yml still references actions/checkout@v4 (mutable tag): the immutable SHA 11d5960a326750d5838078e36cf38b85af677262 is recorded and enforced by check_dependencies, but the in-file pin is outside T02's write scope (proposal P1).",
+    "bun run verify is red by one stale T01 bootstrap assertion caused by T02 installing the playwright prerequisite (proposal P2); the declared-command invariant still holds — test:browser fails explicitly.",
+    "Playwright's Chromium/headless-shell archives were fetched via the npmmirror after the default Google CDN stalled; the binaries are test-only, version-verified (143.0.7499.4), and are not product assets.",
+    "The browser probe is feasibility evidence only: it exercises the staged same-origin assets in a real browser, but asserts nothing about the product UI, contracts, or acceptance of later tasks.",
+    "test:native (declared, owner = future native test task) reaches pytest but collects byte-frozen planning/tools modules when invoked from the repo root; rootdir/argv scoping recorded as proposal P3."
+  ],
+  "dependency_requests": [
+    {
+      "id": "P1",
+      "to": "coordinator / .github owner",
+      "request": "Apply the recorded SHA pin `uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0` in .github/workflows/ci.yml, or extend T02 scope. Details: docs/proposals/T02.md.",
+      "blocks_acceptance": false
+    },
+    {
+      "id": "P2",
+      "to": "T01/bootstrap owner",
+      "request": "Repoint tests/bootstrap::test_declared_suite_with_missing_runner_fails at a still-declared command whose prerequisites are absent (e.g. test:visual → tests/visual/), or assert explicit failure without pinning one stderr string. T02 cannot edit the file.",
+      "blocks_acceptance": false
+    },
+    {
+      "id": "P3",
+      "to": "future native test task (test:native owner)",
+      "request": "Scope pytest collection to native/tests for repo-root invocation — e.g. `uv run --frozen --directory native python -m pytest` in the registry, or a root-level pytest ini — so byte-frozen planning/tools modules are never collected.",
+      "blocks_acceptance": false
+    },
+    {
+      "id": "consumer-assets",
+      "to": "T09 (PDF.js adapter) and OCR adapter task",
+      "request": "Consume only the staged same-origin paths: pdfjs legacy build + worker pair at /assets/pdfjs/6.3.289/ (legacy pair required — modern build needs Map.getOrInsertComputed absent in Chromium 143); tesseract worker/core/lang under /assets/tesseract(-core)/7.0.0/ and /models/tessdata-fast-eng/7d4322bd/ with workerBlobURL:false and explicit workerPath/corePath/langPath. Never rely on the packages' jsDelivr CDN defaults.",
+      "blocks_acceptance": false
+    }
+  ],
+  "ready_for_review": true
+}
