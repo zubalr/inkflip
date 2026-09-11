@@ -231,6 +231,11 @@ function parseJson(text: string): unknown {
   function parseObject(): Record<string, unknown> {
     i++; // consume '{'
     const out: Record<string, unknown> = {};
+    // Python's object_pairs_hook reports repeats only when the object
+    // closes: defer the throw until '}' so a parse-level fault anywhere
+    // inside the object (even after the repeated key) wins, while the
+    // report still precedes any post-parse bounded() checks (N3).
+    let duplicateKey = false;
     ws();
     if (text[i] === '}') {
       i++;
@@ -241,7 +246,7 @@ function parseJson(text: string): unknown {
       if (text[i] !== '"') fail('Expected object key');
       const key = parseString();
       if (Object.prototype.hasOwnProperty.call(out, key)) {
-        throw new ContractError('DUPLICATE_KEY', 'Repeated JSON member');
+        duplicateKey = true;
       }
       ws();
       if (text[i] !== ':') fail('Expected ":"');
@@ -265,6 +270,9 @@ function parseJson(text: string): unknown {
       }
       if (text[i] === '}') {
         i++;
+        if (duplicateKey) {
+          throw new ContractError('DUPLICATE_KEY', 'Repeated JSON member');
+        }
         return out;
       }
       fail('Expected "," or "}"');

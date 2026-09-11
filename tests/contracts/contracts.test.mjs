@@ -266,6 +266,33 @@ test('multi-fault precedence matches Python post-parse ordering (review N2)', ()
   assert.equal(code(() => loadsStrict('1e999')), 'NONFINITE');
 });
 
+test('duplicate keys are reported at object close like Python (review N3)', () => {
+  // Parse-level faults inside the object win over the deferred dup check.
+  for (const [doc, expected] of [
+    ['{"a":1,"a":}', 'JSON'],
+    ['{"a":1,"a":NaN}', 'NONFINITE'],
+    ['{"a":1,"a":-Infinity}', 'NONFINITE'],
+    ['{"a":1,"a":5,"b":NaN}', 'NONFINITE'],
+    ['{"a":1,"a":5,"b":}', 'JSON'],
+    ['{"a":{"b":1,"b":NaN}}', 'NONFINITE'],
+    ['{"a":{"b":1,"b":}}', 'JSON'],
+    ['{"a":{"b":1,"b":2},"c":}', 'DUPLICATE_KEY'],
+    ['{"x":},{"a":1,"a":2}', 'JSON'],
+    ['{"a":{"b":1,"b":2},"a":}', 'DUPLICATE_KEY'],
+    ['{"a":1,"a":2}x', 'DUPLICATE_KEY'],
+    ['{"a":1,"a":2,}', 'JSON'],
+    ['[{"a":1,"a":2},bad', 'DUPLICATE_KEY'],
+    ['{"a":{"b":1,"b":2}}x', 'DUPLICATE_KEY'],
+    ['{"a":1,"b":{"c":1,"c":2},"d":NaN}', 'DUPLICATE_KEY'],
+    // Bounded-level faults lose to the dup check fired at close.
+    ['{"a":1,"a":' + '9'.repeat(400) + '}', 'DUPLICATE_KEY'],
+    ['{"a":1,"a":"\\ud800"}', 'DUPLICATE_KEY'],
+    ['["\\ud800",{"a":1,"a":2}]', 'DUPLICATE_KEY'],
+  ]) {
+    assert.equal(code(() => loadsStrict(doc)), expected, doc);
+  }
+});
+
 test('canonical() rejects lone surrogates in strings', () => {
   const lone = String.fromCharCode(0xd800);
   assert.equal(code(() => canonical(lone)), 'UNICODE');
@@ -465,6 +492,18 @@ test('PNG asset with schema-legal null pixel_size reports ASSET (review F1)', ()
   assert.ok(png, 'fixture must carry a PNG asset');
   png.pixel_size = null;
   assert.equal(code(() => validate(r)), 'ASSET');
+});
+
+test('differential fuzz: multi-fault precedence parity vs Python (review N3 genus)', () => {
+  // The corpus and Python codes are produced by
+  // tests/contracts/differential_fuzz.mjs + fuzz_py_runner.py; this test
+  // re-runs the deterministic generator end-to-end.
+  const out = execFileSync(
+    'node',
+    [join(ROOT, 'tests', 'contracts', 'differential_fuzz.mjs')],
+    { encoding: 'utf8' },
+  );
+  assert.match(out, /parity: (\d+)\/\1 codes agree/);
 });
 
 test('local task fixture: comparison and worker semantics', () => {

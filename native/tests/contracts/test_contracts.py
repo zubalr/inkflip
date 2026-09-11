@@ -209,6 +209,31 @@ class StrictParseTests(unittest.TestCase):
         self.assertEqual(code(lambda: loads_strict(big)), 'NUMBER')
         self.assertEqual(code(lambda: loads_strict('1e999')), 'NONFINITE')
 
+    def test_duplicate_keys_reported_at_object_close(self):
+        cases = [
+            ('{"a":1,"a":}', 'JSON'),
+            ('{"a":1,"a":NaN}', 'NONFINITE'),
+            ('{"a":1,"a":-Infinity}', 'NONFINITE'),
+            ('{"a":1,"a":5,"b":NaN}', 'NONFINITE'),
+            ('{"a":1,"a":5,"b":}', 'JSON'),
+            ('{"a":{"b":1,"b":NaN}}', 'NONFINITE'),
+            ('{"a":{"b":1,"b":}}', 'JSON'),
+            ('{"a":{"b":1,"b":2},"c":}', 'DUPLICATE_KEY'),
+            ('{"x":},{"a":1,"a":2}', 'JSON'),
+            ('{"a":{"b":1,"b":2},"a":}', 'DUPLICATE_KEY'),
+            ('{"a":1,"a":2}x', 'DUPLICATE_KEY'),
+            ('{"a":1,"a":2,}', 'JSON'),
+            ('[{"a":1,"a":2},bad', 'DUPLICATE_KEY'),
+            ('{"a":{"b":1,"b":2}}x', 'DUPLICATE_KEY'),
+            ('{"a":1,"b":{"c":1,"c":2},"d":NaN}', 'DUPLICATE_KEY'),
+            ('{"a":1,"a":' + '9' * 400 + '}', 'DUPLICATE_KEY'),
+            ('{"a":1,"a":"\\ud800"}', 'DUPLICATE_KEY'),
+            ('["\\ud800",{"a":1,"a":2}]', 'DUPLICATE_KEY'),
+        ]
+        for doc, expected in cases:
+            with self.subTest(doc=doc[:40]):
+                self.assertEqual(code(lambda: loads_strict(doc)), expected)
+
 
 class IdentityTests(unittest.TestCase):
     def test_key_order_canonical_array_order_significant(self):
