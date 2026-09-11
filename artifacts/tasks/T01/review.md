@@ -84,3 +84,27 @@ Independent verification:
 - git diff --check passed.
 
 Limits: the parent's full local-mirror transport/branch/acceptance/resume rerun was still underway at review time and is not claimed here. This fix prevents newly dispatched malformed grants; it does not migrate already persisted string grants. No repository files, existing Beads state, network or production state were mutated by this reviewer. Only disposable temporary test state and this report were written.
+
+---
+
+# Supplemental exact-candidate review
+
+Reviewer: `codex-local-review`
+Candidate: `52f6b920f0c870a9c34f92904aa6f17903435920`
+Base: `ed50b1d07b8e21b650cb34b43051767ac164473f`
+Repository: `/Users/zubair/Code/Projects/pdf project/original`
+
+**Verdict: APPROVE the bounded Local coordinator change. No material findings.** This is independent supplemental review of the exact committed candidate, not provider execution evidence or T01 closure.
+
+The eight-file diff preserves the existing dispatcher contract: local status uses canonical read-only Beads access and the shared admission lock without remote pulls; only the coordinator dispatches from clean, published main and publishes grants. The shared Git role flag is accurately documented as an accident guard. Existing readiness, ownership, capacity, predecessor-receipt and publication checks are unchanged. Local task worktrees leave canonical main available for integration.
+
+The routing instructions match current [Local documentation](https://docs.devin.ai/desktop/devin-local) and [subagent documentation](https://docs.devin.ai/cli/subagents): general inherits the parent model, explore/default routing is separate, conversation history is not inherited, workflows are unsupported, and foreground resume permits native approval. Cloud and paid fallback remain explicitly unauthorized. The [pricing page](https://devin.ai/pricing) confirms the Desktop/CLI SWE-2 offer through October 10, 2026; [quota documentation](https://docs.devin.ai/desktop/accounts/quota) excludes free models from quota consumption. These pages were fetched during this review; account configuration and actual provider routing were not exercised.
+
+Checks actually performed:
+
+- Inspected the complete committed diff, repository guidance, `native_pass.py`, canonical Beads access, acceptance freshness implementation, existing T01 independent reviews, receipt and origin-revalidation record.
+- Ran `PYTHONDONTWRITEBYTECODE=1 python3 scripts/task_acceptance.py run verify`: 49 bootstrap, 2 native-bootstrap and 30 coordination tests passed; registry self-check covered 16 commands. Log: `/private/tmp/inkflip-local-review-checks.log`. The nested one-test skipped output is an intentional harness negative-case fixture, not a skipped required suite test.
+- `git diff --check ed50b1d..52f6b92` passed. Independently verified all 301 planning manifest hashes. No committed changes to planning or retained origin notices/license in this candidate; historical original-repository preservation remains supported by the existing evidence, not a newly claimed historical measurement.
+- Direct freshness check of the candidate's existing T01 acceptance receipt rejects it with `stale receipt: validation inputs changed (AGENTS.md)`. The changed guidance is reviewed and approved here; the coordinator must finish its already-planned fresh run/receipt binding before dispatch relies on T01 acceptance. This report does not make the old receipt current.
+
+Repository and Beads were not mutated by this reviewer. Concurrent coordinator edits to T01 run/receipt evidence were observed and excluded from the committed review scope. No applications, Cloud sessions, external-provider reviews, commits, pushes, or live Beads transport were launched. Prepared app folders and provider execution remain the coordinator's separate verification responsibility.

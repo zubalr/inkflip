@@ -3,8 +3,8 @@
   "task_id": "T01",
   "beads_id": "pdf-t01",
   "disposition": "accepted",
-  "evaluated_commit": "0b765fdf03c157677abc792fea329708673e822d",
-  "evaluated_at": "2026-09-11T22:01:55.752093+00:00",
+  "evaluated_commit": "52f6b920f0c870a9c34f92904aa6f17903435920",
+  "evaluated_at": "2026-09-11T22:21:55.846842+00:00",
   "contract_digest": "fd3e59901cb14dbd1927d2d071c8a90af74d90c8fa8294ff2643e0dd4f3fc727",
   "worker": "codex-orchestrator",
   "commands": [
@@ -42,12 +42,12 @@
   ],
   "evidence": {
     "artifacts/tasks/T01/commands.log": "dfb215d768e97e0180fcb21a7c82e8b706696e994514c6667d97b2120f177d10",
-    "artifacts/tasks/T01/coordinator-commands.log": "8a6d73fc5addb6ca11c505a80cd7b3ffc939dfe33100a7f6ad01cb0a857d12a8",
+    "artifacts/tasks/T01/coordinator-commands.log": "16dbb88fed42dc9ff42ac9b302078db6f1b30d5c98db451558a3e4e951d14a4b",
     "artifacts/tasks/T01/origin-revalidation.json": "733a97ae3ae31f90f718bb1f4e3456ae378a968546899091c5f876e0aa45baa3",
-    "artifacts/tasks/T01/peer-review.md": "5fa760c5c0c1e8ce4ee24d3c7746788ea9c278d2d77547c0370e75537b9225ae",
-    "artifacts/tasks/T01/receipt.json": "6c7ca8ab674db7d4ffc6dfa93ab6da3dde136437f1be3db8710bb342dd12e452",
-    "artifacts/tasks/T01/review.md": "5fa760c5c0c1e8ce4ee24d3c7746788ea9c278d2d77547c0370e75537b9225ae",
-    "artifacts/tasks/T01/run.json": "52814b4f75e8300c2d39b6b909f65fad6432450e9059fe09ecc910709b66ec27"
+    "artifacts/tasks/T01/peer-review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
+    "artifacts/tasks/T01/receipt.json": "20667190f73e6c9b0fbfc40bc149220c0962c8ed17c868f424c2a210716dead0",
+    "artifacts/tasks/T01/review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
+    "artifacts/tasks/T01/run.json": "f6510e41c20ecb7f6751aa8872ebc25d53c5c4469952f2c084cd196ffb8fd7fb"
   },
   "criteria": {
     "A clean checkout exposes documented commands": [
@@ -71,8 +71,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "codex-native-review",
-      "codex-sync-review"
+      "codex-local-review"
     ],
     "path": "artifacts/tasks/T01/review.md"
   }
