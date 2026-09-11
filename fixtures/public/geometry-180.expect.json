@@ -1,0 +1,16 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "public/geometry-control.pdf",
+  "family": "origins-rotation",
+  "fixture_id": "F07",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "origin": true,
+    "rotation": 180,
+    "unit": 2
+  },
+  "observation": "transforms and actual pixel anchors through nonzero/negative origins, rotation and UserUnit 2",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "public"
+}

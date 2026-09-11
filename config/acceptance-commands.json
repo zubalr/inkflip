@@ -106,11 +106,12 @@
     },
     "test:fixtures": {
       "kind": "test",
-      "status": "declared",
-      "argv": null,
+      "status": "active",
+      "collection": "harness-unittest",
+      "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/fixtures", "-v"],
       "requires": ["scripts/make_fixtures.py"],
       "owner_task": "T05",
-      "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Implementation is registered by the fixture owner; no runner is assumed."
+      "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Registered by the fixture owner (T05): the suite includes the generator --check determinism pass plus the TEST-05 structural contract."
     },
     "test:regression": {
       "kind": "test",

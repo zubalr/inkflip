@@ -1,0 +1,67 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 520 400] /CropBox [0 0 520 400] /Rotate 0 /UserUnit 0.5 /Resources << /Font << /F0 4 0 R /F1 6 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 265 >>
+stream
+BT /F0 16 Tf 48 352 Td (SYNTHETIC EXAMPLE) Tj ET
+BT /F0 12 Tf 48 320 Td (No real transaction. Reader behavior only.) Tj ET
+BT /F1 48 Tf 48 220 Td ($100) Tj ET
+0.5 w 372 250 100 100 re S
+BT /F0 12 Tf 48 130 Td (Rendered marks and extracted text are separate.) Tj ET
+
+endstream
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding /ToUnicode 7 0 R >>
+endobj
+7 0 obj
+<< /Length 352 >>
+stream
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def
+/CMapName /InkflipExample def
+/CMapType 2 def
+1 begincodespacerange
+<00> <FF>
+endcodespacerange
+3 beginbfchar
+<24> <0024>
+<30> <0030>
+<31> <0031>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+
+endstream
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000304 00000 n 
+0000000401 00000 n 
+0000000717 00000 n 
+0000000831 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+1234
+%%EOF

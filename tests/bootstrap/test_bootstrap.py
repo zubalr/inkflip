@@ -88,9 +88,17 @@ class EmptyRegistrationFailsTests(unittest.TestCase):
         self.assertIn("prerequisites missing", result.stderr)
 
     def test_declared_suite_with_no_implementation_fails(self):
-        result = run_tool(HARNESS, "run", "test:fixtures")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("no implementation registered", result.stderr)
+        # The registry reserves per-owner registration (T05 registered
+        # test:fixtures when its suite landed), so pin this guarantee to a
+        # synthetic null-argv entry instead of another task's lifecycle.
+        with tempfile.TemporaryDirectory() as tmp:
+            reg = Path(tmp) / "reg.json"
+            reg.write_text(json.dumps({"commands": {"x": {
+                "kind": "test", "status": "active", "collection": "harness-unittest",
+                "argv": None}}}))
+            result = run_tool(HARNESS, "--registry", str(reg), "run", "x")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("no implementation registered", result.stderr)
 
     def test_zero_collected_unittest_suite_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

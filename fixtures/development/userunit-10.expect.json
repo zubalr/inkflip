@@ -1,0 +1,15 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/userunit-1.pdf",
+  "family": "userunit",
+  "fixture_id": "F08",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "fiducial": "100x100pt stroke square at 372 250",
+    "unit": 10
+  },
+  "observation": "no double scaling; physical-size equivalents with known fiducials",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}
