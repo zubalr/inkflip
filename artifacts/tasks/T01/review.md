@@ -1,68 +1,62 @@
-# T01 independent review and integration
+# Independent native setup and T01 peer review
 
-Disposition: approved for T01 bootstrap acceptance.
+Reviewer: `codex-native-review` (independent read-only review). Verdict: **approved for the reviewed candidate; no remaining actionable findings**. Prior P1 is resolved. This review covers native setup changes and revalidates T01 bootstrap behavior; it does not itself close T01 or grant product/release acceptance.
 
-The implementation worker was `swe2-t01` (reported SWE-2 Max). Independent
-reviewers were `codex-t01-standards` (Hume, agent
-`01a09214-3fac-7fb3-8a29-d712a637c561`) and `codex-t01-spec` (Ampere, agent
-`01a09214-3f56-7e12-bf15-6984c7cfdcd0`). Both reviewed the original T01 handoff,
-requested changes, and approved the repaired candidate
-`672731c1d67f90c027c3199869a2c83ae82e0e4f` without remaining actionable findings.
+## P1 resolution
 
-The coordinator integrated it with the existing OSS and coordination guidance
-in `a92f9db1575542b3b919fde0ad8328a2dae1b81e`. Git merged the scope additions
-without conflicts. The historical worker commits and source license remain
-intact. The incomplete earlier file merge was preserved in a local recovery
-stash before integration; it is not part of the accepted source.
+`criterion_evidence` now requires nonempty explicit path lists and validates task namespaces. `evidence_digests` reads and rejects absent/empty files. The builder hashes the union of criterion-specific evidence and preserves each criterion’s references. Executed regression coverage rejects narrative, missing, empty and cross-task evidence; an extra manual artifact is bound and later tampering invalidates acceptance. Documentation consistently separates narrative `detail` from evidence paths.
 
-## Findings resolved
+## Fresh checks
 
-- Required skipped tests previously passed. Structured unittest results and
-  JUnit/custom reports now require every collected case to pass. Expected
-  failures, empty suites and absent reports fail required tests.
-- Empty task command lists previously succeeded. The task runner now rejects
-  empty registration and requires nonempty passing test evidence.
-- Gates previously accepted any committed receipt blob. They now validate the
-  task, disposition, effective contract, evaluated commit, ordered command
-  results, independent review, criterion coverage and evidence hashes.
-- A follow-up found command labels could hide different executed commands and
-  one suite's counts could conceal another suite's missing results. Executed
-  argv must now match the effective command, and every required suite needs
-  its own counts. Positive and negative T01/T17/G5 probes confirmed this.
-- Source or evidence changes invalidate old receipts. Tests use actual
-  temporary Git histories to prove acceptance, stale-code rejection,
-  stale-evidence rejection and preservation across unrelated evidence commits.
+- `PYTHONDONTWRITEBYTECODE=1 python3 scripts/task_acceptance.py task T01`: exit 0; collected/passed 49, failed/skipped 0. This executes the effective T01 command through the recorded interpreter mapping. No `--report` or acceptance receipt was generated.
+- Native-bootstrap: 2/2 passed. Coordination: 29/29 passed. Registry self-check: 16 commands, exit 0. `git diff HEAD --check`: exit 0.
+- Full candidate file hashes remained unchanged during and after these checks (excluding concurrent Beads audit data).
 
-## Acceptance evidence
+## T01 criteria and scope
 
-The coordinator ran these checks on the merged candidate. Exact output is in
-`coordinator-commands.log`, with structured records in `run.json` and
-`integration-checks.json`.
+1. **Documented command surface:** manifests, package boundaries, isolated Bun configuration, bootstrap entry and registry checks pass. Scaffold remains explicitly unfinished. Dependency installation, Linux product builds and real browser/native feature acceptance belong to later tasks.
+2. **Missing/empty runners fail:** tests exercise missing/empty registry, unknown commands, absent Playwright prerequisite, unimplemented fixtures, zero collected tests and required skips/failures; a positive temporary suite confirms the harness does not simply reject everything.
+3. **Origin/planning preservation:** independently verified all 301 files in planning/SHA256SUMS.txt; no planning diff from HEAD. Retained license bytes equal the original Git blob at `94f35ce9f9beb1640ddebdc2c72aa379ecebb004`, SHA-256 `3f1e48ee93685ecf2c49f768ad888dc47859b057f3b90c9f04f132315edf0c6d`. Original checkout HEAD and pre-existing modified Dockerfile status match the historical T01 evidence. Current Dockerfile/diff hashes are in the supplementary origin record. This review made no writes there; historical byte preservation beyond the recorded evidence cannot be reconstructed retrospectively.
+4. **No unintended network/achievement actions:** inspected registry, harness and CI. No dependency install, remote publishing or deployment commands occur in acceptance/CI; `bun x` uses `--no-install`. GitHub CI necessarily downloads its checkout action and repository, so “no network” here means no extra application/dependency/publishing network action, not zero network traffic. The separately invoked native setup/bootstrap tools intentionally fetch/push under owner approval and are not acceptance registry entries. Missing application runners remain honest failures; bootstrap success is not release evidence.
 
-| Check | Result |
+## Parent handoff
+
+The parent may commit this review as `artifacts/tasks/T01/peer-review.md` and setup evidence after matching the candidate hashes below. Refresh the T01 worker receipt to explicit task-local evidence path lists (its existing narrative format correctly fails the new builder). Commit implementation/review, run fresh committed T01 acceptance with `--report`, bind actual task-local logs/origin evidence, and generate/validate the receipt. This uncommitted-candidate check is review evidence, not a replacement for that post-commit run. No repository edits, Beads writes, commits, network calls or receipt generation were performed by this reviewer.
+
+Native provider execution, Linux binary installation and live Dolt roundtrip were not independently rerun; those remain the parent’s separately gathered setup evidence. Prompt-owned budgets/resume/scope/review rules are sufficient; no daemon enforcement requested.
+
+## Evidence outputs
+
+- `/private/tmp/inkflip-native-rereview-check-1.log` through `-5.log`: actual check output.
+- `/private/tmp/inkflip-t01-origin-revalidation.json`: direct origin and planning measurements.
+- `/private/tmp/inkflip-native-rereview-manifest.json`: complete checked candidate file SHA-256 manifest and commands.
+
+## Exact candidate
+
+Repository: `/Users/zubair/Code/Projects/pdf project/original`
+
+Base HEAD: `f62f183b77ef2db16670245b5b5fa5096f424a3f`. Candidate is HEAD plus the listed worktree files; no candidate commit yet.
+
+| File | SHA-256 |
 | --- | --- |
-| `bun run verify` | 66 passed, 0 failed, 0 skipped: 44 bootstrap, 2 native boundary, 20 coordination |
-| `python3 scripts/task_acceptance.py task T01 --report artifacts/tasks/T01/run.json` | 44 passed, 0 failed, 0 skipped |
-| Full diff whitespace check from `20543a3` | Passed |
-| Current origin checkout | HEAD remained `94f35ce9f9beb1640ddebdc2c72aa379ecebb004`; the previously logged Dockerfile modification remains |
-
-All four T01 criteria have evidence: the command registry is exposed through
-Bun scripts; missing/empty/skipped required suites fail; the origin license is
-byte-exact and the sibling repository was only read; no install, publication or
-product achievement is implied by the scaffold. The planning checksum test
-passes. The coordinator normalized trailing whitespace in the worker command
-log; the original bytes remain in worker evidence commit `182a3a8`.
-
-## Limits and next owner
-
-This acceptance covers bootstrap and the command/evidence harness. No browser
-PDF/OCR product flow or release gate passed. The worker's screenshot remains a
-labelled static approximation. T02 owns dependency resolution, locks and the
-first real build. Pytest and Playwright reporter interfaces were checked against
-their official documentation; live adapter verification awaits those resolved
-tools. The installed Node v26.7.0 adapter was exercised directly: one passing
-test passed, and a passing test plus a skipped required test failed. That does
-not certify the planned Node version. T02 must verify the selected runtime.
-
-Acceptance structure and conservative freshness rules are documented in
-`docs/ACCEPTANCE.md`. Manual evidence remains a reviewer responsibility.
+| `.beads/README.md` | `e186327b16af3ec9aa2dc6fb4871ba177176a34cb446b49e9750f95537f3a4e1` |
+| `.beads/interactions.jsonl` | `668f2ae28853b4d47470657ba5d933ad301c3a301c14b55a3ccdf7b9b7b82945` |
+| `AGENTS.md` | `e4ea978b7aba1bb229469b6bacb85991324c0cb993030c8ec0349d39c58f8fd0` |
+| `START_HERE.md` | `46c131df5b99c91acf392c44a06f6d0b4d1395f0d793198023118558b7fb3237` |
+| `docs/ACCEPTANCE.md` | `503cf51e20ee472cd6fef5d0e814745069e8e5e16c1850ca3dc63d3ebd0a2633` |
+| `docs/COORDINATION.md` | `7111278d91e9672fa92269677f7ee0db8ab047a4cfc769a87cfb0e4517f65559` |
+| `docs/NATIVE_PASSES.md` | `c673f932d1d1b7db5edc8c9f837c4957579a140203d5f51fbaea12d7068e5a9e` |
+| `execution/passes.json` | `c6422bc374f260499be118fea44d87fdd49641ac49d69bd44c4adc5753db41c1` |
+| `prompts/ANTIGRAVITY.md` | `3ae796dadd1351ba9f97985726d18058dfe8270f9ec599dab85e752b3cb20cc4` |
+| `prompts/DEVIN.md` | `d6366b62914118e0437298e14307e39b6cb8214d7f5872df623f3801436a2e78` |
+| `prompts/T01.md` | `5b5ec615eaf9e329dc42a78181ab7073ee3b0dc2685f5d5fef5d4d4e99edf014` |
+| `prompts/T02.md` | `fc0bde77f667583d32fa520e04ea1e5b393da602fc27f45d983382f655eee73b` |
+| `prompts/T03.md` | `938ff9b2792f60be449728352e8bec6405f7204cdf9383ed22362289454b3505` |
+| `prompts/T05.md` | `716852a0a448fe896c971446f6e4776e840a76083321b0f43c9d2cde71fb7b88` |
+| `prompts/T06.md` | `967876ed8cf85efdbb7951af0f67cd708a3b4f4fb3759c59c24bd672a620e946` |
+| `prompts/ZCODE.md` | `e1f332e3f704559f573de06796fff5275a88a3ab4654164dadeb308b9421c326` |
+| `scripts/acceptance_receipts.py` | `0fed79999d09273d29c540756ebd51c16595ee9968eef5009b4a486e11e51d93` |
+| `scripts/bootstrap_beads.py` | `99d6213ee6bda9a5311d9f22544383ace017e5cf5994f364ea27b028eb5fa491` |
+| `scripts/native_pass.py` | `d5a15d8763b1668f1e1c4ee776e506051cf2d7a28277a42d174c442ee9c5b5ff` |
+| `tests/bootstrap/test_receipts.py` | `757b334f86d9265032b7c28e57d19d1f5c28eac496ef189f3cbee29c34473123` |
+| `tests/coordination/test_native_pass.py` | `163fbf223f3ea5ee1b6155cbddb69a7335ef2ca8a6d85201411eebbb0637eabb` |
