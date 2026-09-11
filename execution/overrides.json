@@ -20,9 +20,11 @@
       "config/acceptance-commands.json",
       "config/test-toolchain.json",
       "native/inkflip/__init__.py",
-      "native/tests/bootstrap/"
+      "native/tests/bootstrap/",
+      "apps/web/src/styles/"
     ],
-    "T02": ["bunfig.toml"]
+    "T02": ["bunfig.toml", "tests/build/"],
+    "T03": ["native/tests/contracts/"]
   },
   "reserved_paths": [
     "planning/",

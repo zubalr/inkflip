@@ -23,9 +23,11 @@ once per session, then only the assigned task's inputs.
   its `planned` fields are not current status. Do not create `execution/state.json`.
 - Run `python3 scripts/coordination.py ready` for dispatch candidates. Run
   `python3 scripts/coordination.py start Txx --actor <unique-session-name>` before
-  editing. This checks the branch, clean/fresh base, accepted dependencies, and
+  editing. This checks the branch, clean/fresh base, accepted dependencies, owned scopes, and
   the five-worker limit, then claims the Beads task under a shared admission lock.
-  The coordinator also claims review tasks with the `execution:worker` label.
+  The coordinator admits read-only reviews through `start-review`, using both
+  `execution:worker` and `execution:review` labels. Never claim workers or
+  reviewers directly with `bd update --claim`; both use the shared admission lock.
 - One task, one branch, one writer. Multiple sessions may use the same model.
   Every writer gets its own worktree. Keep `original` on the integration branch.
 - Only the coordinator merges, closes product tasks, changes acceptance metadata,

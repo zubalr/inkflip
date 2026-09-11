@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import unittest
+from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,7 +116,7 @@ def admission_errors(task_id: str, issue: dict, *, branch: str, dirty: bool,
     checks = [
         (branch != f"work/{bead_id(task_id)}", "Use the assigned worktree and task branch"),
         (dirty, "Preserve existing changes; ask the coordinator for a reviewed resume"),
-        (not fresh, "Task branch is behind main; the coordinator must refresh its clean base"),
+        (not fresh, "Task branch differs from main; the coordinator must prepare its reviewed starting point"),
         (issue.get("status") != "open", "Task is already claimed or unavailable; do not start another writer"),
         (bool(issue.get("assignee")), "Task already has an assignee; coordinate the handoff"),
         (active >= maximum, "Five product-worker slots are occupied; wait for coordinator admission"),
@@ -128,27 +129,82 @@ def validate_actor(actor: str) -> None:
         raise ValueError("Use a unique lowercase session label for --actor")
 
 
-def start(task: dict, actor: str, overrides: dict) -> None:
-    validate_actor(actor)
+@contextmanager
+def admission_lock():
     lock_path = canonical_root() / ".beads/coordination-admission.lock"
     with lock_path.open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        issues = issues_by_id()
+        yield issues_by_id()
+
+
+def active_workers(issues: dict) -> list[dict]:
+    return [i for i in issues.values()
+            if "execution:worker" in i.get("labels", []) and i.get("status") == "in_progress"]
+
+
+def scopes_overlap(left: str, right: str) -> bool:
+    # Wildcards conservatively reserve their literal directory prefix.
+    a, b = (re.split(r"[*?\[]", scope, maxsplit=1)[0].rstrip("/") for scope in (left, right))
+    return not a or not b or a == b or a.startswith(b + "/") or b.startswith(a + "/")
+
+
+def check_scope_ownership(task: dict, workers: list[dict], tasks: dict, overrides: dict) -> None:
+    known = {bead_id(tid): effective_task(t, overrides) for tid, t in tasks.items()}
+    for issue in workers:
+        if "execution:review" in issue.get("labels", []):
+            continue
+        owner = known.get(issue["id"])
+        if owner is None:
+            raise ValueError(f"{issue['id']} has no known writer scope; coordinator must resolve it")
+        conflicts = [(a, b) for a in task["allowed_scope"] for b in owner["allowed_scope"]
+                     if scopes_overlap(a, b)]
+        if conflicts:
+            raise ValueError(f"Writer scope overlaps {issue['id']}: {conflicts[0]}; finish its ownership first")
+
+
+def start(task: dict, actor: str, overrides: dict) -> None:
+    validate_actor(actor)
+    with admission_lock() as issues:
         ready_ids = {i["id"] for i in bd(["list", "--ready", "--limit", "0"])}
         if not task_ready(task, issues, ready_ids):
             raise ValueError(f"{task['id']} is not ready in Beads")
         branch = run(["git", "branch", "--show-current"])
         dirty = bool(run(["git", "status", "--porcelain"]))
-        ancestry = subprocess.run(["git", "merge-base", "--is-ancestor", "main", "HEAD"], cwd=ROOT)
-        active = sum("execution:worker" in i.get("labels", []) and i.get("status") == "in_progress" for i in issues.values())
+        fresh = run(["git", "rev-parse", "HEAD"]) == run(["git", "rev-parse", "main"])
+        workers = active_workers(issues)
         errors = admission_errors(task["id"], issues.get(bead_id(task["id"]), {}), branch=branch,
-                                  dirty=dirty, fresh=ancestry.returncode == 0, active=active,
+                                  dirty=dirty, fresh=fresh, active=len(workers),
                                   maximum=overrides["max_product_workers"])
         if errors:
             raise ValueError("; ".join(errors))
         check_predecessors(task, issues, ref="HEAD")
+        tasks, _ = load_contracts()
+        check_scope_ownership(task, workers, tasks, overrides)
         bd(["update", bead_id(task["id"]), "--claim"], write=True, actor=actor)
         print(f"Claimed {task['id']} as {actor}; write only the effective task scope.")
+
+
+def start_review(issue_id: str, actor: str, overrides: dict) -> None:
+    validate_actor(actor)
+    if ROOT != canonical_root():
+        raise ValueError("The coordinator admits reviewers from the canonical checkout")
+    with admission_lock() as issues:
+        issue = issues.get(issue_id, {})
+        labels = set(issue.get("labels", []))
+        ready_ids = {i["id"] for i in bd(["list", "--ready", "--limit", "0"])}
+        checks = [
+            (not {"execution:worker", "execution:review"} <= labels, "Review needs both execution labels"),
+            (bool(re.fullmatch(r"pdf-t\d+", issue_id)), "Product tasks cannot use review admission"),
+            (issue_id not in ready_ids, "Review is not ready in Beads"),
+            (issue.get("status") != "open", "Review is already claimed or unavailable"),
+            (bool(issue.get("assignee")), "Review already has an assignee"),
+            (len(active_workers(issues)) >= overrides["max_product_workers"], "Five worker slots are occupied"),
+        ]
+        errors = [message for failed, message in checks if failed]
+        if errors:
+            raise ValueError("; ".join(errors))
+        bd(["update", issue_id, "--claim"], write=True, actor=actor)
+        print(f"Claimed review {issue_id} as {actor}; read-only review scope.")
 
 
 def ready(tasks: dict) -> None:
@@ -202,7 +258,8 @@ locks, audited test dependencies and model assets. Make unavailable tooling
 explicit; do not create fabricated lockfiles or dependency digests.
 
 Establish the CSS Modules contract and central token location in the initial
-scaffold, following the supplied visual direction. Read AGENTS.md again if
+scaffold, following the supplied visual direction. T06 takes ownership of
+apps/web/src/styles/ after this bootstrap is accepted. Read AGENTS.md again if
 the automatic product contract updates it. Discover and run the repository's
 actual engineering gates. Preserve the exact historical origin license under
 the package's required path without importing the old runtime. Do not modify
@@ -363,12 +420,17 @@ def main() -> None:
     begin = sub.add_parser("start")
     begin.add_argument("task_id")
     begin.add_argument("--actor", required=True)
+    review = sub.add_parser("start-review")
+    review.add_argument("issue_id")
+    review.add_argument("--actor", required=True)
     args = parser.parse_args()
     tasks, overrides = load_contracts()
     if args.command == "ready":
         ready(tasks)
     elif args.command == "check":
         check()
+    elif args.command == "start-review":
+        start_review(args.issue_id, args.actor, overrides)
     else:
         if args.task_id not in tasks:
             raise ValueError("Unknown planning task ID; use T01 through T55")

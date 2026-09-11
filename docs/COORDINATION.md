@@ -35,10 +35,13 @@ called from a linked worktree. Do not initialize another database in a worker.
 The canonical checkout is `original`; worker checkouts are siblings under
 `worktrees/<beads-id>`, on `work/<beads-id>` branches. Folder names identify work,
 not providers. At most five product workers, including reviewers, may run at
-once. Completed/blocked sessions must yield. The coordinator claims review tasks
-with the `execution:worker` label before dispatching read-only reviewers. The CLI
-counts in-progress issues carrying that label and serializes new claims with a local file
-lock; that lock contains no task database.
+once. Completed/blocked sessions must yield. The coordinator creates review tasks
+with both `execution:worker` and `execution:review` labels, then admits them from
+`original` with `python3 scripts/coordination.py start-review <beads-id> --actor <session>`.
+Workers and reviewers must use these admission commands; direct `bd update --claim`
+would bypass the shared lock and is not an approved dispatch path. The CLI counts
+in-progress issues carrying `execution:worker` and serializes all admission with
+a local file lock; that lock contains no task database.
 
 For a newly assigned task, enter its checkout, inspect Git status, and run:
 
@@ -47,8 +50,9 @@ python3 scripts/coordination.py start T01 --actor swe2-t01
 ```
 
 Replace both values for the assigned task/session. The command requires a clean
-task branch containing current `main`, an unclaimed ready Beads issue, accepted
-predecessor evidence, and capacity. It changes only the task claim, never Git
+task branch equal to current `main`, an unclaimed ready Beads issue, accepted
+predecessor evidence, disjoint active writer scopes, and capacity. Even a clean
+branch with additional commits requires a coordinator-reviewed resume. It changes only the task claim, never Git
 branches. Repeated starts fail; for an interrupted in-progress task, ask the
 coordinator to verify the existing claim and assign the resume explicitly.
 
@@ -56,6 +60,14 @@ When a future seed branch needs refreshing, the coordinator first confirms it
 has no changes or task commits, then fast-forwards it to `main`. Branches with
 implementation commits require deliberate rebase/integration and new checks.
 Workers may not refresh another task's checkout or silently reset a stale branch.
+
+Admission compares directory/file scope prefixes, conservatively reserving the
+literal prefix of wildcard scopes. Overlapping writers wait for the current
+owner to finish and integrate. For example, T09's reader package and T33's nested
+Node adapter cannot be written concurrently even though the original DAG does
+not directly order them. A changed ownership agreement needs a coordinator
+contract update and a Beads handoff before dispatch; an informal lease does not
+bypass this guard. Read-only reviewers reserve a worker slot without a write scope.
 
 Use the development port `5180 + task number`; the canonical viewer uses 5173.
 Enable strict-port behavior so a collision fails visibly. Test servers request
@@ -83,7 +95,7 @@ release, not just the demonstration.
 | Canonical schema, generated types, identity semantics | T03 |
 | Coordinate transforms | T04 |
 | Fixture generator and public manifest | T05; T21 after explicit handover |
-| Initial tokens/primitives | T06/T07, then an explicit UI-owner handover |
+| Initial tokens/primitives | T01 establishes the styles location; T06 takes styles after T01 acceptance, then T07/primitives and an explicit UI-owner handover |
 | Root application composition | T01 initially, then T13 |
 | Routing, cache rules, CSP/deployment | T25/T48 under explicit, non-overlapping leases |
 | Held-out labels, baselines, acceptance, integration | Coordinator and independent evaluator |
@@ -94,8 +106,9 @@ may be edited inside its owned module, but versions/install changes require the
 lock owner's coordination. The common fixture setup needed by a test remains
 the fixture owner's work, not parallel edits from every reader session.
 
-Scope additions in the override file enable T01's required bootstrap tests and
-monorepo manifests. They do not authorize changes to the coordination CLI,
+Scope additions in the override file enable T01's required bootstrap tests,
+monorepo manifests, and initial styles location, T02's build tests, and T03's
+native contract tests. They do not authorize changes to the coordination CLI,
 its tests, the frozen planning snapshot, or acceptance policy. Propose any such
 change to the coordinator with a reproducer and impact.
 

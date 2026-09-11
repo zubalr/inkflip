@@ -1,0 +1,3 @@
+# Preserve fixture bytes, including required PDF cross-reference row spacing.
+*.pdf binary
+*.png binary
