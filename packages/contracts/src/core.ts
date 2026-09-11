@@ -69,6 +69,15 @@ const JSON_WS = new Set([' ', '\t', '\n', '\r']);
 const NUMBER_RE = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 const NONFINITE_TOKENS = ['NaN', 'Infinity', '-Infinity'];
 
+/**
+ * Internal marker for a pure-integer literal that overflowed to Infinity.
+ * Python parses arbitrary-precision integers, so these must report NUMBER
+ * from bounded() in document traversal order — not mid-parse (structural
+ * errors like DUPLICATE_KEY/trailing data win there) and not NONFINITE
+ * (reserved for non-integer literals like 1e999).
+ */
+const UNSAFE_INTEGER = Symbol('unsafe-integer');
+
 /** Parse untrusted JSON text/bytes with duplicate-key and bound checks. */
 export function loadsStrict(data: string | Uint8Array): unknown {
   let text: string;
@@ -78,8 +87,15 @@ export function loadsStrict(data: string | Uint8Array): unknown {
     } catch {
       throw new ContractError('UNICODE', 'Invalid UTF-8 input');
     }
-  } else {
+  } else if (typeof data === 'string') {
     text = data;
+  } else {
+    // Programmatic callers get ContractError like the Python port, never
+    // a raw TypeError from the parser.
+    throw new ContractError(
+      'TYPE',
+      'JSON input must be string or Uint8Array',
+    );
   }
   require(
     TE.encode(text).length <= MAX_JSON_BYTES,
@@ -172,7 +188,7 @@ function parseJson(text: string): unknown {
     }
   }
 
-  function parseNumber(): number {
+  function parseNumber(): unknown {
     NUMBER_RE.lastIndex = i;
     const m = NUMBER_RE.exec(text);
     if (!m) return fail('Invalid number');
@@ -181,8 +197,10 @@ function parseJson(text: string): unknown {
     // Python parses arbitrary-precision integers, so a pure-integer
     // literal that overflows to Infinity is an unsafe integer (NUMBER)
     // there; non-integer literals like 1e999 stay nonfinite in both.
+    // The sentinel defers the report to bounded() so structural parse
+    // errors still win, matching Python's post-parse bound checking.
     if (!Number.isFinite(v) && /^-?\d+$/.test(m[0])) {
-      throw new ContractError('NUMBER', 'Unsafe integer');
+      return UNSAFE_INTEGER;
     }
     return v;
   }
@@ -293,6 +311,11 @@ function parseJson(text: string): unknown {
 /** Enforce depth/size/string/number bounds on a decoded JSON value. */
 export function bounded(value: unknown, depth = 0): void {
   require(depth <= MAX_DEPTH, 'DEPTH', 'Nesting exceeds 24');
+  if (value === UNSAFE_INTEGER) {
+    // Integer literal that overflowed to Infinity at parse time;
+    // reported here so document-order traversal matches Python.
+    throw new ContractError('NUMBER', 'Unsafe integer');
+  }
   if (typeof value === 'string') {
     require(
       codePoints(value) <= MAX_STRING_LENGTH,

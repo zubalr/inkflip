@@ -27,6 +27,7 @@ from inkflip.contracts import (  # noqa: E402
     run_key,
     seal,
     validate,
+    validate_json,
 )
 
 PLANNING = ROOT / 'planning'
@@ -183,6 +184,30 @@ class StrictParseTests(unittest.TestCase):
         self.assertEqual(loads_strict(bytearray(b'{}')), {})
         self.assertEqual(loads_strict(memoryview(b'[]')), [])
         self.assertEqual(code(lambda: loads_strict(5)), 'TYPE')
+
+    def test_non_string_input_reports_type(self):
+        for v in (5, None, True, [1], {}, 1.5):
+            with self.subTest(value=repr(v)):
+                self.assertEqual(code(lambda: loads_strict(v)), 'TYPE')
+                self.assertEqual(code(lambda: validate_json(v)), 'TYPE')
+
+    def test_multi_fault_precedence_matches_parse_order(self):
+        big = '9' * 400
+        self.assertEqual(
+            code(lambda: loads_strict('{"a":' + big + ',"a":1}')),
+            'DUPLICATE_KEY',
+        )
+        self.assertEqual(code(lambda: loads_strict('[' + big + ']x')), 'JSON')
+        self.assertEqual(code(lambda: loads_strict('[' + big + ',bad')), 'JSON')
+        # Traversal order: earlier surrogate beats later unsafe integer.
+        self.assertEqual(
+            code(lambda: loads_strict('["\\ud800",' + big + ']')), 'UNICODE'
+        )
+        self.assertEqual(
+            code(lambda: loads_strict('[' + big + ',"\\ud800"]')), 'NUMBER'
+        )
+        self.assertEqual(code(lambda: loads_strict(big)), 'NUMBER')
+        self.assertEqual(code(lambda: loads_strict('1e999')), 'NONFINITE')
 
 
 class IdentityTests(unittest.TestCase):

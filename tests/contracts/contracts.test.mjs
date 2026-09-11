@@ -235,6 +235,37 @@ test('integer-literal overflow reports NUMBER like Python (review F3)', () => {
   assert.equal(code(() => loadsStrict('-1e999')), 'NONFINITE');
 });
 
+test('non-string input reports TYPE like Python (review N1)', () => {
+  for (const v of [5, null, undefined, true, [1], {}, new Date(0), 1.5]) {
+    assert.equal(code(() => loadsStrict(v)), 'TYPE', String(v));
+    assert.equal(code(() => validateJson(v)), 'TYPE', String(v));
+  }
+  // Preserved behaviors: boxed String is not a primitive; Buffer decodes.
+  assert.equal(code(() => loadsStrict(new String('{"a":1}'))), 'TYPE');
+  assert.deepEqual(
+    loadsStrict(new TextEncoder().encode('{"a":1}')),
+    { a: 1 },
+  );
+});
+
+test('multi-fault precedence matches Python post-parse ordering (review N2)', () => {
+  const big = '9'.repeat(400);
+  // Structural faults detected during parse win over the unsafe integer.
+  assert.equal(
+    code(() => loadsStrict(`{"a":${big},"a":1}`)),
+    'DUPLICATE_KEY',
+  );
+  assert.equal(code(() => loadsStrict(`[${big}]x`)), 'JSON');
+  assert.equal(code(() => loadsStrict(`[${big},bad`)), 'JSON');
+  // Traversal-order parity: an earlier lone surrogate beats a later
+  // unsafe integer, exactly as Python bounded() reports.
+  assert.equal(code(() => loadsStrict(`["\\ud800",${big}]`)), 'UNICODE');
+  assert.equal(code(() => loadsStrict(`[${big},"\\ud800"]`)), 'NUMBER');
+  // Single-fault cases unchanged.
+  assert.equal(code(() => loadsStrict(big)), 'NUMBER');
+  assert.equal(code(() => loadsStrict('1e999')), 'NONFINITE');
+});
+
 test('canonical() rejects lone surrogates in strings', () => {
   const lone = String.fromCharCode(0xd800);
   assert.equal(code(() => canonical(lone)), 'UNICODE');
