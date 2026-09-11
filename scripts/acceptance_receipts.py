@@ -155,3 +155,113 @@ def require_clean_inputs() -> str:
     if changed:
         raise ValueError("commit implementation changes before recording acceptance evidence")
     return git("rev-parse", "HEAD").decode().strip()
+
+
+def verified_run(task: dict, run_path: Path) -> dict:
+    run = json.loads(run_path.read_text())
+    if run.get("task") != task["id"] or run.get("failures") != [] or run.get("evidence_errors") != []:
+        raise ValueError("run report must identify this task and contain no failures or evidence errors")
+    validate_commands(run.get("records"), task)
+    if run.get("tests") != test_results.total_counts(run["records"]):
+        raise ValueError("run totals do not match the per-command counts")
+    tasks, overrides = coordination.load_contracts()
+    check_freshness(run.get("evaluated_commit"), "HEAD", validation_scopes(task["id"], tasks, overrides))
+    return run
+
+
+def criterion_evidence(task: dict, pending: dict) -> dict[str, list[str]]:
+    proofs = pending.get("acceptance_criteria_evidence", {})
+    normalized = {key.rstrip("."): value for key, value in proofs.items()}
+    criteria = {}
+    for criterion in task["acceptance_criteria"]:
+        proof = normalized.get(criterion.rstrip("."), {})
+        paths = proof.get("evidence")
+        if proof.get("status") != "executed" or not isinstance(paths, list) or not paths:
+            raise ValueError(f"worker evidence needs executed criterion and explicit evidence paths: {criterion}")
+        criteria[criterion] = [evidence_path(path, task["id"]) for path in paths]
+    return criteria
+
+
+def evidence_digests(paths: list[str], task_id: str) -> dict[str, str]:
+    result = {}
+    for path in sorted(set(paths)):
+        evidence_path(path, task_id)
+        content = (ROOT / path).read_bytes()
+        if not content.strip():
+            raise ValueError(f"evidence is empty: {path}")
+        result[path] = hashlib.sha256(content).hexdigest()
+    return result
+
+
+def record_acceptance(task: dict, run_path: Path, worker: str, reviewer: str,
+                      review_commit: str, review_path: str, disposition: str) -> Path:
+    require_clean_inputs()
+    if not worker or not reviewer or worker == reviewer:
+        raise ValueError("distinct worker and independent reviewer identities are required")
+    allowed = {"accepted", *({"rejected_experiment"} if task["id"] in coordination.EXPERIMENTS else set())}
+    if disposition not in allowed:
+        raise ValueError("this task cannot close with that disposition")
+    run = verified_run(task, run_path)
+    evidence_path(review_path, task["id"])
+    git("merge-base", "--is-ancestor", review_commit, "HEAD")
+    review = git("show", f"{review_commit}:{review_path}")
+    if not review.strip():
+        raise ValueError("committed independent review is empty")
+    folder = ROOT / "artifacts/tasks" / task["id"]
+    pending = json.loads((folder / "receipt.json").read_text())
+    criteria = criterion_evidence(task, pending)
+    (folder / "review.md").write_bytes(review)
+    transcript = "\n\n".join(shlex.join(r["argv"]) + "\n" + r.get("stdout", "") + r.get("stderr", "")
+                              + f"\nExit: {r['exit']}" for r in run["records"])
+    (folder / "coordinator-commands.log").write_text(transcript.rstrip() + "\n")
+    paths = [*task["evidence_artifacts"], review_path, str(run_path.relative_to(ROOT)),
+             f"artifacts/tasks/{task['id']}/coordinator-commands.log"]
+    paths.extend(path for bound in criteria.values() for path in bound)
+    evidence = evidence_digests(paths, task["id"])
+    result = dict(schema_version=1, task_id=task["id"], beads_id=coordination.bead_id(task["id"]),
+                  disposition=disposition, evaluated_commit=run["evaluated_commit"], evaluated_at=run["evaluated_at"],
+                  contract_digest=contract_digest(task), worker=worker,
+                  commands=[{k: v for k, v in r.items() if k not in ("stdout", "stderr")} for r in run["records"]],
+                  evidence=evidence, criteria=criteria,
+                  review=dict(disposition="approved", reviewers=[reviewer], path=f"artifacts/tasks/{task['id']}/review.md"))
+    target = folder / "acceptance.json"
+    target.write_text(json.dumps(result, indent=2) + "\n")
+    return target
+
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("verify-run", "record", "verify"))
+    parser.add_argument("task")
+    parser.add_argument("--run", type=Path)
+    parser.add_argument("--worker")
+    parser.add_argument("--reviewer")
+    parser.add_argument("--review-commit")
+    parser.add_argument("--review-path")
+    parser.add_argument("--commit")
+    parser.add_argument("--disposition", default="accepted")
+    args = parser.parse_args()
+    tasks, overrides = coordination.load_contracts()
+    task = coordination.effective_task(tasks[args.task], overrides)
+    path = args.run or ROOT / "artifacts/tasks" / args.task / "run.json"
+    path = path if path.is_absolute() else ROOT / path
+    if args.command == "verify-run":
+        print(json.dumps({"verified": args.task, "tests": verified_run(task, path)["tests"]}))
+    elif args.command == "record":
+        print(record_acceptance(task, path, args.worker, args.reviewer,
+                                args.review_commit, args.review_path, args.disposition))
+    else:
+        commit = args.commit or git("rev-parse", "HEAD").decode().strip()
+        receipt = f"artifacts/tasks/{args.task}/acceptance.json"
+        data = json.loads(git("show", f"{commit}:{receipt}"))
+        issue = {"status": "closed", "metadata": {"disposition": data["disposition"],
+                 "accepted_commit": commit, "accepted_receipt": receipt}}
+        print(json.dumps(validate(args.task, issue)))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, KeyError, TypeError, OSError) as error:
+        raise SystemExit(f"Acceptance evidence incomplete: {error}")

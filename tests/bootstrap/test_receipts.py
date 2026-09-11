@@ -146,6 +146,80 @@ class ReceiptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "commit implementation"):
             receipts.require_clean_inputs()
 
+    def run_fixture(self):
+        path = self.root / "artifacts/tasks/T01/run.json"
+        path.write_text(json.dumps(dict(task="T01", failures=[], evidence_errors=[],
+            evaluated_commit=self.evaluated, evaluated_at="2026-09-12T00:00:00Z",
+            tests=self.data["commands"][0]["tests"], records=self.data["commands"])))
+        pending = dict(task_id="T01", acceptance_criteria_evidence={
+            key: dict(status="executed", evidence=["artifacts/tasks/T01/commands.log"])
+            for key in self.task["acceptance_criteria"]})
+        (self.root / "artifacts/tasks/T01/receipt.json").write_text(json.dumps(pending))
+        review_commit = self.commit()
+        return path, review_commit
+
+    def test_record_builder_produces_a_valid_bound_receipt_from_a_reviewed_run(self):
+        path, review_commit = self.run_fixture()
+        target = receipts.record_acceptance(self.task, path, "worker-t01", "independent-reviewer",
+                                            review_commit, "artifacts/tasks/T01/review.md", "accepted")
+        self.issue["metadata"]["accepted_commit"] = self.commit()
+        self.assertEqual(target.name, "acceptance.json")
+        self.assertEqual(receipts.validate("T01", self.issue)["task"], "T01")
+
+    def test_record_builder_rejects_an_unexecuted_criterion(self):
+        path, review_commit = self.run_fixture()
+        pending = self.root / "artifacts/tasks/T01/receipt.json"
+        data = json.loads(pending.read_text())
+        data["acceptance_criteria_evidence"][self.task["acceptance_criteria"][0]]["status"] = "pending"
+        pending.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError, "needs executed criterion"):
+            receipts.record_acceptance(self.task, path, "worker-t01", "independent-reviewer",
+                                       review_commit, "artifacts/tasks/T01/review.md", "accepted")
+
+    def test_record_builder_rejects_code_that_changed_after_the_recorded_run(self):
+        path, review_commit = self.run_fixture()
+        (self.root / "package.json").write_text('{"new_code": true}\n')
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "stale receipt"):
+            receipts.record_acceptance(self.task, path, "worker-t01", "independent-reviewer",
+                                       review_commit, "artifacts/tasks/T01/review.md", "accepted")
+
+    def test_record_builder_requires_real_criterion_specific_files(self):
+        path, review_commit = self.run_fixture()
+        pending = self.root / "artifacts/tasks/T01/receipt.json"
+        data = json.loads(pending.read_text())
+        proof = data["acceptance_criteria_evidence"][self.task["acceptance_criteria"][0]]
+        for value in ("Manual check passed", ["artifacts/tasks/T01/missing-device-check.png"],
+                      ["artifacts/tasks/T02/other.png"], ["artifacts/tasks/T01/empty.png"]):
+            with self.subTest(evidence=value):
+                (self.root / "artifacts/tasks/T01/empty.png").write_bytes(b"")
+                proof["evidence"] = value
+                pending.write_text(json.dumps(data))
+                with self.assertRaises((ValueError, FileNotFoundError)):
+                    receipts.record_acceptance(self.task, path, "worker-t01", "independent-reviewer",
+                                               review_commit, "artifacts/tasks/T01/review.md", "accepted")
+
+    def test_record_builder_binds_extra_manual_evidence_and_detects_later_changes(self):
+        path, review_commit = self.run_fixture()
+        manual = "artifacts/tasks/T01/device-check.md"
+        (self.root / manual).write_text("Synthetic independently assessed device evidence\n")
+        pending = self.root / "artifacts/tasks/T01/receipt.json"
+        data = json.loads(pending.read_text())
+        criterion = self.task["acceptance_criteria"][0]
+        data["acceptance_criteria_evidence"][criterion]["evidence"] = [manual]
+        pending.write_text(json.dumps(data))
+        target = receipts.record_acceptance(self.task, path, "worker-t01", "independent-reviewer",
+                                           review_commit, "artifacts/tasks/T01/review.md", "accepted")
+        recorded = json.loads(target.read_text())
+        self.assertEqual(recorded["criteria"][criterion], [manual])
+        self.assertIn(manual, recorded["evidence"])
+        self.issue["metadata"]["accepted_commit"] = self.commit()
+        receipts.validate("T01", self.issue)
+        (self.root / manual).write_text("Changed evidence\n")
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "stale evidence"):
+            receipts.validate("T01", self.issue)
+
 
 if __name__ == "__main__":
     unittest.main()

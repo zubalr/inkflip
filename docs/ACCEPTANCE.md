@@ -69,3 +69,24 @@ gate writes its own candidate receipt. `pre-release` checks accepted G1–G4
 owner tasks and T48–T50, then runs the final-review scenarios. G5 requires an
 explicit HTTPS origin through `--target`; it runs checks only. Publication,
 deployment and rollback remain separately authorized runbook operations.
+
+## Building receipts after native app review
+
+The coordinator may generate the version 1 receipt from actual evidence:
+
+```sh
+python3 scripts/acceptance_receipts.py verify-run Txx
+python3 scripts/acceptance_receipts.py record Txx --worker ACTUAL_WORKER --reviewer ACTUAL_REVIEWER --review-commit FULL_REVIEW_COMMIT --review-path artifacts/tasks/Txx/peer-review.md
+```
+
+The run is `artifacts/tasks/Txx/run.json`. Commit source and peer review first.
+Every exact criterion in receipt.json needs status `executed` and `evidence` as
+a nonempty list of repository-relative, task-local evidence paths. Put narrative
+in a separate `detail` field. Each cited file must exist and be nonempty; the
+builder includes it in that criterion’s references and hashes its exact bytes.
+The builder checks run identity, executed commands/counts, freshness and a
+committed distinct review. It cannot decide whether the review's reasoning or
+manual evidence is sound: the independent reviewer and coordinator must do so.
+Commit generated evidence, then run `python3 scripts/acceptance_receipts.py
+verify Txx --commit FULL_RECEIPT_COMMIT`. Push code before setting acceptance
+metadata/closure in Beads, and then publish Beads with native Dolt sync.

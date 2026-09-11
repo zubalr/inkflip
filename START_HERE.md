@@ -1,62 +1,32 @@
-# Run an assigned implementation task
+# Start one session in each app
 
-This repository contains the planning snapshot, implementation and coordination
-tools. Beads owns current task readiness and acceptance. Check it before starting:
+Private repository: https://github.com/zubalr/inkflip
 
-```sh
-python3 scripts/coordination.py ready
-```
+Start **Devin Cloud first**, with this repository connected and SWE-2 Max selected.
+Paste `prompts/DEVIN.md`. Then start Antigravity in the prepared UI checkout and
+paste `prompts/ANTIGRAVITY.md`; start ZCode in the prepared native checkout and paste
+`prompts/ZCODE.md`. Each file is the complete entry prompt.
 
-Open each session in its assigned worktree below and use its prompt. A task that
-is already claimed needs a coordinator-approved resume. Do not create another
-worktree through the harness; the prepared checkout already has the correct
-branch and shared Beads database. For the bootstrap assignment, T01 uses
-`../worktrees/pdf-t01` and `prompts/T01.md`.
+The app model, GitHub access and native Teamwork/goal confirmation are UI choices;
+prompt text cannot grant account access or bypass those dialogs. The sessions
+arrange their own branches, delegation, handoffs, reviews, commits and integration.
+You do not paste a prompt for each T-number. See `docs/NATIVE_PASSES.md`.
 
-## First parallel pass, after T01 is accepted
+| Pass | Result | Tasks after accepted T01 |
+| --- | --- | --- |
+| 1 | Browser investigation through G1, plus native foundations | 25 |
+| 2 | Complete browser experience and native regression through G2/G3 | 12 |
+| 3 | Quality, experiments and pre-release review | 16 |
 
-| Session | Task | Worktree | Prompt | Development port |
-| --- | --- | --- | --- | --- |
-| SWE2 A | T02 dependencies, assets, provenance | `../worktrees/pdf-t02` | `prompts/T02.md` | 5182 |
-| SWE2 B | T03 schema, validation, identity | `../worktrees/pdf-t03` | `prompts/T03.md` | 5183 |
-| SWE2 C | T05 fixtures and clean controls | `../worktrees/pdf-t05` | `prompts/T05.md` | 5185 |
-| Gemini | T06 visual foundations | `../worktrees/pdf-t06` | `prompts/T06.md` | 5186 |
+T54 is the separate publication/deployment decision. These are intended work
+boundaries, not guarantees within a provider quota/session limit. Reuse the same
+prompt to resume; Beads determines where to continue. Do not use historical
+T01/T02/T03/T05/T06 entry prompts.
 
-These four task scopes do not overlap. T02 owns shared dependency installation;
-the others can implement concurrently but need its usable toolchain for the
-relevant validation. None may modify its lockfiles. Use the fifth worker slot
-for a bounded independent review or newly ready task. A further SWE2 session
-can take T06 if Gemini's allowance is unavailable. GLM is available for later
-long experiments, fixture extensions, and documentation that do not delay the
-critical path. These are planned assignments, not running sessions.
-
-The coordinator refreshes clean, unclaimed task branches from accepted `main`
-before dispatch. The startup guard refuses stale bases and unaccepted dependencies.
-Return implementation commit IDs and actual test evidence to the coordinator.
-A harness merge action is not Beads acceptance: review, Git integration,
-merged-branch checks, a committed acceptance receipt and task closure must all
-finish before dependents can start. See `docs/ACCEPTANCE.md` for the evidence
-format. Workers stop after their own handoff.
-
-## Coordination commands
+The current implementation is the accepted T01 scaffold. Product work begins at
+T02. Check the existing scaffold with:
 
 ```sh
-python3 scripts/coordination.py ready
-python3 scripts/coordination.py task T01
-python3 scripts/coordination.py check
+python3 scripts/task_acceptance.py run verify
+python3 scripts/coordination.py task T02
 ```
-
-`ready` uses the single Beads database in the canonical checkout and verifies
-accepted predecessor commit/receipt references. `check` tests this coordination
-code only. It is not an application acceptance command.
-
-The planning environment lives only in `original/.tools/planning`. From the
-canonical checkout, its existing package checks are:
-
-```sh
-PYTHONDONTWRITEBYTECODE=1 .tools/planning/bin/python planning/tools/validate_package.py --json
-PYTHONDONTWRITEBYTECODE=1 .tools/planning/bin/python planning/tools/test_validators.py
-```
-
-Read `docs/COORDINATION.md` for admission, review, merge, and resume rules.
-All 55 product task IDs, dependencies and acceptance dispositions are in Beads.

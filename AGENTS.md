@@ -1,6 +1,6 @@
 # PDF inspector implementation
 
-Read `docs/COORDINATION.md` before starting, resuming, reviewing, or integrating a task.
+Read `docs/NATIVE_PASSES.md` before starting, resuming, reviewing, or integrating a task.
 Read `planning/PROJECT_BRIEF.md` and `planning/architecture/GLOSSARY_AND_INVARIANTS.md`
 once per session, then only the assigned task's inputs.
 
@@ -18,26 +18,25 @@ once per session, then only the assigned task's inputs.
 
 ## Work ownership
 
-- Beads owns live task status, dependencies, claims, and handoff notes. T01 maps
-  to `pdf-t01`, and so on. The planning task list describes the original spec;
-  its `planned` fields are not current status. Do not create `execution/state.json`.
-- Run `python3 scripts/coordination.py ready` for dispatch candidates. Run
-  `python3 scripts/coordination.py start Txx --actor <unique-session-name>` before
-  editing. This checks the branch, clean/fresh base, accepted dependencies, owned scopes, and
-  the five-worker limit, then claims the Beads task under a shared admission lock.
-  The coordinator admits read-only reviews through `start-review`, using both
-  `execution:worker` and `execution:review` labels. Never claim workers or
-  reviewers directly with `bd update --claim`; both use the shared admission lock.
-- One task, one branch, one writer. Multiple sessions may use the same model.
-  Every writer gets its own worktree. Keep `original` on the integration branch.
-- Only the coordinator merges, closes product tasks, changes acceptance metadata,
-  approves baselines, and resolves shared-file ownership. Workers hand off local
-  commits and evidence; they do not approve their own work.
-- Local implementation commits and coordinator integration are owner-authorized.
-  Remote creation, pushes, PRs, publication, deployment, and messages to other
-  people require separate explicit authorization.
-- Preserve unrelated changes. Never reset, clean, force-push, or overwrite another
-  worktree. Worktree isolation is not a permissions boundary for evaluation labels.
+- Beads owns live status, dependencies, claims, notes and acceptance. Product task
+  T01 maps to pdf-t01. Static planning and passes.json are not live task state.
+- Devin Cloud is the sole integration lead and Beads writer. Antigravity and
+  ZCode consume assignments through `scripts/native_pass.py status APP --sync`.
+  Only the designated integration clone dispatches with `native_pass.py dispatch`.
+  Do not use the historical local-only `coordination.py start`/`start-review`.
+- Native apps own execution. Use their own delegation and resume facilities.
+  Five active workers/reviewers maximum: Devin 2, Antigravity 2, ZCode 1. Active
+  work by a lead counts; idle coordination does not. Writers yield for review.
+- One branch, one writer, one isolated checkout. Preserve existing work. Never
+  reset, clean, force-push or overwrite another checkout. Read-only replicas
+  synchronize through native Beads/Dolt Git transport; no separate task ledger.
+- The owner explicitly approved private GitHub access, source sharing with the
+  selected three harnesses, commits, pushes, review and integration. Only Devin
+  accepts/closes product tasks after independent review and real merged checks.
+  T54 public publication/deployment and messages to people require approval.
+- Continue ready work within the captured pass; do not stop at each ticket.
+  Beads pass checkpoints require listed tasks and actual gate evidence.
+- Worktrees are not an access boundary for held-out evaluation labels.
 
 ## Implemented commands (T01)
 
