@@ -1,5 +1,5 @@
 # T06 Command Execution Log
-# Timestamp: 2026-09-11T22:44:06.697174+00:00
+# Timestamp: 2026-09-11T22:52:47.074019+00:00
 # Worker: antigravity-t06
 # Task: T06 (Translate selected composition into tokens and visual foundations)
 # Branch: work/antigravity/t06
@@ -34,17 +34,18 @@ $ python3 scripts/task_acceptance.py run test:visual tests/visual/foundation.spe
 blocked: test:visual: prerequisites missing: node_modules/.bin/playwright (owner T06)
 exit 1 (honest prerequisite failure: playwright binary pending from T02)
 
-$ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --window-size=1440,900 --screenshot=artifacts/tasks/T06/desktop-1440.png "file://$(pwd)/planning/reference/index.html"
-exit 0: Captured desktop-1440.png (124891 bytes)
+# Authentic DocumentStage Component Verification via Chrome DevTools Protocol (CDP):
+# Target: apps/web/src/components/DocumentStage/preview.html
+# Emulation: Emulation.setDeviceMetricsOverride with mobile: true/false
 
-$ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --window-size=1024,768 --screenshot=artifacts/tasks/T06/intermediate-1024.png "file://$(pwd)/planning/reference/index.html"
-exit 0: Captured intermediate-1024.png (76584 bytes)
-
-$ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --window-size=768,1024 --screenshot=artifacts/tasks/T06/intermediate-768.png "file://$(pwd)/planning/reference/index.html"
-exit 0: Captured intermediate-768.png (91333 bytes)
-
-$ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --window-size=390,844 --screenshot=artifacts/tasks/T06/mobile-390.png "file://$(pwd)/planning/reference/index.html"
-exit 0: Captured mobile-390.png (64097 bytes)
-
-$ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --window-size=320,568 --screenshot=artifacts/tasks/T06/mobile-320.png "file://$(pwd)/planning/reference/index.html"
-exit 0: Captured mobile-320.png (40293 bytes)
+[desktop-1440.png] 1440x900 -> innerWidth: 1440, scrollWidth: 1440, clientWidth: 1440, hasOverflow: false (68107 bytes)
+[intermediate-1024.png] 1024x768 -> innerWidth: 1024, scrollWidth: 1009, clientWidth: 1009, hasOverflow: false (58266 bytes)
+[intermediate-768.png] 768x1024 -> innerWidth: 768, scrollWidth: 768, clientWidth: 768, hasOverflow: false (64280 bytes)
+[mobile-390.png] 390x844 (mobile) -> innerWidth: 390, scrollWidth: 390, clientWidth: 390, hasOverflow: false (60040 bytes)
+[mobile-320.png] 320x568 (mobile) -> innerWidth: 320, scrollWidth: 320, clientWidth: 320, hasOverflow: false (32861 bytes)
+[focus-state.png] 1024x768 (?focus=tab) -> active focus outline on tab-page: 3px solid #005FCC with 2px offset (58648 bytes)
+[compare-mode.png] 1440x900 (?mode=compare) -> side-by-side synchronized paper and reading view (82350 bytes)
+[detail-expanded.png] 1024x768 (?detail=open) -> expanded finding accordion with Invariant I06 disclaimer (67912 bytes)
+[state-loading.png] 1024x768 (?state=loading) -> loading state indicator (44978 bytes)
+[state-failed.png] 1024x768 (?state=failed) -> failed state error notice (51701 bytes)
+[state-empty.png] 1024x768 (?state=empty) -> empty state notice (47218 bytes)

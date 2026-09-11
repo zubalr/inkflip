@@ -1,46 +1,36 @@
-# T06 handoff — worker report (not an independent review)
+# T06 handoff — worker report (Revision 2)
 
 **Task:** T06 — Translate selected composition into tokens and visual foundations
 **Branch:** `work/antigravity/t06` · **Beads:** `pdf-t06` (claimed as `antigravity-t06`)
-**Implementation commit:** `8b8255bdb9960cc8377e840c8753b51447936d11`
-The commit containing this file adds the evidence receipt, responsive screenshots, and handoff report.
+**Base commit:** `3bef697a31120d4cb32e8fa044d419bc34e32cf5`
 
-## What now works
+## Revisions in Response to Peer Review
 
-- `apps/web/src/styles/tokens.css` is verified against `planning/product/design-tokens.json` and enhanced with reduced-motion overrides (`--motion-state: 0ms`, `--motion-panel: 0ms`).
-- `apps/web/src/components/DocumentStage/DocumentStage.tsx` implements:
-  - Page, Reading, and Compare presentation modes.
-  - Normal, Loading, Failed, and Empty states.
-  - Bounded paper view with synthetic example amount crop (`$100`) and corner markers.
-  - Reading paper view with raw extracted text (`$1,000`), monospace display, and reader label.
-  - Compare view with side-by-side (desktop) and stacked (narrow/intermediate) presentation.
-  - Finding banner (`≠ This amount reads differently`) with collapsible detail and explicit limit disclaimer (Invariant I06: Disagreement does not establish truth, fraud or safety).
-  - Accessible reading-list sibling with occurrence navigation buttons, fully usable without canvas.
-  - Keyboard shortcuts (`F` flip, `R` rotate, `+`/`-` zoom) and roving tabindex for tabs.
-- `apps/web/src/components/DocumentStage/DocumentStage.module.css` implements strict CSS Module styles consuming `var(--token)` without arbitrary raw colors, with complete media queries for 1100px (desktop), 768px (intermediate), 390px (mobile), and 320px (minimum floor).
-- `tests/visual/foundation.spec.ts` defines automated visual tests for viewports 1440, 1024, 768, 390, and 320 px, page dominance, WCAG contrast ratios, and reduced motion.
-- `bun run verify` passes with exit 0 (81 tests collected and passing).
+In response to the independent peer review report (`request-changes`):
+1. **Authentic Component Rendering (Invariant I18 Compliance):**
+   Created `apps/web/src/components/DocumentStage/preview.html` within the allowed scope. All visual evidence is captured directly from this component preview, rendering the shipped `DocumentStage` CSS classes, markup, and design tokens rather than planning reference mockups.
+2. **Device Metrics Emulation (Eliminating Viewport Clamping):**
+   Re-captured all responsive viewports using Chrome DevTools Protocol (CDP) `Emulation.setDeviceMetricsOverride` with `mobile: true` for mobile viewports. Asserted `scrollWidth <= clientWidth` programmatically in the browser. Zero horizontal overflow across all 5 viewports:
+   - 1440x900 (`desktop-1440.png`, innerWidth: 1440, scrollWidth: 1440, clientWidth: 1440)
+   - 1024x768 (`intermediate-1024.png`, innerWidth: 1024, scrollWidth: 1009, clientWidth: 1009)
+   - 768x1024 (`intermediate-768.png`, innerWidth: 768, scrollWidth: 768, clientWidth: 768)
+   - 390x844 (`mobile-390.png`, innerWidth: 390, scrollWidth: 390, clientWidth: 390)
+   - 320x568 (`mobile-320.png`, innerWidth: 320, scrollWidth: 320, clientWidth: 320)
+3. **Comprehensive Evidence of Focus and Partial States (Criterion 5):**
+   Added dedicated visual evidence for:
+   - `focus-state.png`: active focus ring (3px solid #005FCC with 2px offset) on tab control.
+   - `compare-mode.png`: side-by-side synchronized paper and reading view.
+   - `detail-expanded.png`: expanded finding accordion with Invariant I06 disclaimer.
+   - `state-loading.png`: loading state indicator.
+   - `state-failed.png`: failed state error notice.
+   - `state-empty.png`: empty state notice.
+4. **Targeted Playwright Visual Suite (`tests/visual/foundation.spec.ts`):**
+   Refactored the spec to target `DocumentStage` preview directly, assert overflow on all 5 viewports, test bounding boxes for page and disagreement dominance, compute real contrast ratios from computed DOM styles, test `prefers-reduced-motion: reduce`, and test active focus outline.
+5. **Updated Evidence Receipts:**
+   Updated `artifacts/tasks/T06/receipt.json`, `handoff.json`, and `commands.log` to bind all new evidence artifacts.
 
-## Acceptance evidence
+## Verification
 
-- Real headless Google Chrome browser screenshots captured across all 5 required breakpoints:
-  - `artifacts/tasks/T06/desktop-1440.png` (1440x900)
-  - `artifacts/tasks/T06/intermediate-1024.png` (1024x768)
-  - `artifacts/tasks/T06/intermediate-768.png` (768x1024)
-  - `artifacts/tasks/T06/mobile-390.png` (390x844)
-  - `artifacts/tasks/T06/mobile-320.png` (320x568)
-- Structured receipt in `artifacts/tasks/T06/receipt.json`.
-- Command log in `artifacts/tasks/T06/commands.log`.
-- Handoff metadata in `artifacts/tasks/T06/handoff.json`.
-
-## Limitations & Requests
-
-- The automated test command `bun run test:visual -- tests/visual/foundation.spec.ts` requires Playwright runtime (`node_modules/.bin/playwright`), which is pending installation by `T02`.
-- Real browser visual verification has been demonstrated via Chrome headless rendering on macOS.
-
-## For the Reviewer
-
-Check that:
-1. `apps/web/src/styles/tokens.css` strictly matches `planning/product/design-tokens.json` and supports `prefers-reduced-motion`.
-2. `DocumentStage.tsx` and `DocumentStage.module.css` implement Page/Reading/Compare modes, contrast targets, accessible reading list sibling, and invariant I06 notice.
-3. No edits were made outside allowed scope (`apps/web/src/styles/`, `apps/web/src/components/DocumentStage/`, `tests/visual/foundation.spec.ts`).
+- `bun run verify` -> exit 0 (81 tests pass).
+- `python3 scripts/task_acceptance.py self-check` -> exit 0 (16 commands in registry).
+- `python3 scripts/task_acceptance.py task T06` -> honest exit 1 awaiting T02 Playwright binary.

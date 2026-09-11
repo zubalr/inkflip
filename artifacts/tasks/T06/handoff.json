@@ -1,14 +1,14 @@
 {
   "task": "T06",
   "worker": "antigravity-t06",
-  "implementation_commit": "8b8255bdb9960cc8377e840c8753b51447936d11",
+  "implementation_commit": "fc0cbafe6a62abe00c4ac8f87064172c7bd18fb8",
   "branch": "work/antigravity/t06",
   "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
   "executed_commands": [
     "bun run verify",
     "python3 scripts/task_acceptance.py self-check",
     "python3 scripts/task_acceptance.py task T06",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless ... (viewports 1440, 1024, 768, 390, 320)"
+    "CDP Emulation.setDeviceMetricsOverride & Page.captureScreenshot across viewports 1440, 1024, 768, 390, 320, focus state, compare mode, detail expanded, loading, failed, empty"
   ],
   "evidence_paths": [
     "artifacts/tasks/T06/receipt.json",
@@ -17,11 +17,17 @@
     "artifacts/tasks/T06/intermediate-1024.png",
     "artifacts/tasks/T06/intermediate-768.png",
     "artifacts/tasks/T06/mobile-390.png",
-    "artifacts/tasks/T06/mobile-320.png"
+    "artifacts/tasks/T06/mobile-320.png",
+    "artifacts/tasks/T06/focus-state.png",
+    "artifacts/tasks/T06/compare-mode.png",
+    "artifacts/tasks/T06/detail-expanded.png",
+    "artifacts/tasks/T06/state-loading.png",
+    "artifacts/tasks/T06/state-failed.png",
+    "artifacts/tasks/T06/state-empty.png"
   ],
   "limitations": [
     "Playwright runner binary is pending T02 dependency installation; foundation.spec.ts is implemented and ready.",
-    "Responsive screenshot verification executed directly via Google Chrome headless across 1440, 1024, 768, 390, and 320 px viewports."
+    "Responsive screenshot verification executed directly on DocumentStage preview via Chrome DevTools Protocol with exact device metrics emulation."
   ],
   "dependency_requests": [
     "T02: Provide Playwright test runner and dependency locks."
