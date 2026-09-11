@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "task_id": "T02",
+  "beads_id": "pdf-t02",
+  "disposition": "accepted",
+  "evaluated_commit": "fd9f4370957819b9c3442d1a802de283a6f28263",
+  "evaluated_at": "2026-09-11T23:39:09.218215+00:00",
+  "contract_digest": "1fd04d5bcd9669b3fb66398bb3c4598608ee25b03bdb2327d4c3670685365cc1",
+  "worker": "devin-subagent-t02",
+  "commands": [
+    {
+      "segment": "python scripts/check_dependencies.py --frozen",
+      "argv": [
+        "python3",
+        "scripts/check_dependencies.py",
+        "--frozen"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/check_dependencies.py",
+        "--frozen"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    },
+    {
+      "segment": "python -m unittest discover -s tests/build -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/build",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/integrate/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/build",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 37,
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T02/browser-probe.json": "1087711c3cba846ed07663469f6d3db2bd8f29e6f61c5163a9aa88ac821f8a5a",
+    "artifacts/tasks/T02/commands.log": "5c8844f1075ba93245136e9add523b31feeed896c7f706db86a32ed040c94606",
+    "artifacts/tasks/T02/coordinator-commands.log": "7b82f62d317b17a864ffca03d21d744f6912bd0201bdf18b35c3529e7687613b",
+    "artifacts/tasks/T02/linux-frozen-install.log": "dff726cb2c3e747473b7ce6fb671dc083457d9a8e1f1514d01e4df76adbd9e60",
+    "artifacts/tasks/T02/macos-frozen-install.log": "9b4708cb96470d06786c5990407ff978ee47743969f981437ef8c317a198b971",
+    "artifacts/tasks/T02/peer-review.md": "cfabf8468e3a8490c07906524e9302c6a29bf2c34964776a39057e75b42a4de3",
+    "artifacts/tasks/T02/receipt.json": "57848fb62a192131ceded4d898ec812e88252a3b46921c4df5a14d0bf70d7285",
+    "artifacts/tasks/T02/review.md": "cfabf8468e3a8490c07906524e9302c6a29bf2c34964776a39057e75b42a4de3",
+    "artifacts/tasks/T02/run.json": "c95b2c78632a53dc87c17b468c2c857a79979f06ebec49896a5c042cf602964c"
+  },
+  "criteria": {
+    "Frozen install succeeds twice from a clean checkout": [
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/macos-frozen-install.log",
+      "artifacts/tasks/T02/commands.log"
+    ],
+    "every bundled binary has source/hash/license": [
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/commands.log"
+    ],
+    "substituted model fails checksum": [
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/commands.log"
+    ],
+    "missing asset fails closed": [
+      "artifacts/tasks/T02/browser-probe.json",
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/commands.log"
+    ],
+    "no runtime CDN/download": [
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/browser-probe.json",
+      "artifacts/tasks/T02/commands.log"
+    ],
+    "action/OCI revisions are immutable and recorded.": [
+      "artifacts/tasks/T02/linux-frozen-install.log",
+      "artifacts/tasks/T02/commands.log"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-review-t02"
+    ],
+    "path": "artifacts/tasks/T02/review.md"
+  }
+}
