@@ -204,6 +204,37 @@ test('canonical() rejects unsupported or unsafe values', () => {
   assert.equal(code(() => canonical({ 1: 'x' })), null);
 });
 
+test('canonical() TYPE-rejects non-plain objects (review F2)', () => {
+  class Box {
+    constructor(x) {
+      this.x = x;
+    }
+  }
+  for (const v of [
+    new Map([['a', 1]]),
+    new Set([1]),
+    new Date(0),
+    /re/,
+    new Uint8Array([1]),
+    new Box(1),
+  ]) {
+    assert.equal(code(() => canonical(v)), 'TYPE', String(v));
+    assert.equal(code(() => digest(v)), 'TYPE', String(v));
+  }
+  // The review's silent collision is now unreachable: a Map is rejected
+  // rather than hashing identically to an empty object.
+  assert.equal(code(() => digest(new Map())), 'TYPE');
+});
+
+test('integer-literal overflow reports NUMBER like Python (review F3)', () => {
+  assert.equal(code(() => loadsStrict('9'.repeat(400))), 'NUMBER');
+  assert.equal(code(() => loadsStrict('-' + '9'.repeat(400))), 'NUMBER');
+  assert.equal(code(() => loadsStrict('[' + '9'.repeat(400) + ']')), 'NUMBER');
+  // Non-integer literals that overflow stay NONFINITE in both languages.
+  assert.equal(code(() => loadsStrict('1e999')), 'NONFINITE');
+  assert.equal(code(() => loadsStrict('-1e999')), 'NONFINITE');
+});
+
 test('canonical() rejects lone surrogates in strings', () => {
   const lone = String.fromCharCode(0xd800);
   assert.equal(code(() => canonical(lone)), 'UNICODE');
@@ -395,6 +426,14 @@ test('validateJson parses and validates untrusted input in one step', () => {
     code(() => validateJson('{"kind":"report","schema_version":"1.0.0"}')),
     'SCHEMA',
   );
+});
+
+test('PNG asset with schema-legal null pixel_size reports ASSET (review F1)', () => {
+  const r = loadValid('native-evidence.inkflip.json');
+  const png = r.assets.find((a) => a.media_type === 'image/png');
+  assert.ok(png, 'fixture must carry a PNG asset');
+  png.pixel_size = null;
+  assert.equal(code(() => validate(r)), 'ASSET');
 });
 
 test('local task fixture: comparison and worker semantics', () => {

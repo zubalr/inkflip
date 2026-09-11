@@ -22,6 +22,7 @@ _LAZY = {
     'inverse',
     'unique',
     'validate',
+    'validate_json',
     'validate_report',
     'WS',
     'SCHEMA',

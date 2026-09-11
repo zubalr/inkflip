@@ -159,6 +159,31 @@ class StrictParseTests(unittest.TestCase):
         with self.assertRaises(ContractError):
             canonical({1: 'non-string key'})
 
+    def test_canonical_rejects_non_plain_values(self):
+        import datetime
+
+        for v in ({1, 2}, datetime.datetime(2020, 1, 1), object(), memoryview(b'x')):
+            with self.subTest(value=type(v).__name__):
+                self.assertEqual(code(lambda: canonical(v)), 'TYPE')
+                self.assertEqual(code(lambda: digest(v)), 'TYPE')
+
+    def test_integer_literal_overflow_reports_number(self):
+        self.assertEqual(code(lambda: loads_strict('9' * 400)), 'NUMBER')
+        self.assertEqual(code(lambda: loads_strict('-' + '9' * 400)), 'NUMBER')
+        self.assertEqual(code(lambda: loads_strict('[' + '9' * 400 + ']')), 'NUMBER')
+        self.assertEqual(code(lambda: loads_strict('1e999')), 'NONFINITE')
+        self.assertEqual(code(lambda: loads_strict('-1e999')), 'NONFINITE')
+
+    def test_pathological_inputs_raise_contract_error(self):
+        # Lone-surrogate str input: the parse reports JSON like TypeScript.
+        self.assertEqual(code(lambda: loads_strict('\ud800')), 'JSON')
+        self.assertEqual(code(lambda: canonical('x\ud800')), 'UNICODE')
+        self.assertEqual(code(lambda: canonical({'k\ud800': 1})), 'UNICODE')
+        # bytes-like inputs decode like bytes; other types report TYPE.
+        self.assertEqual(loads_strict(bytearray(b'{}')), {})
+        self.assertEqual(loads_strict(memoryview(b'[]')), [])
+        self.assertEqual(code(lambda: loads_strict(5)), 'TYPE')
+
 
 class IdentityTests(unittest.TestCase):
     def test_key_order_canonical_array_order_significant(self):
@@ -223,6 +248,16 @@ class IdentityTests(unittest.TestCase):
         self.assertEqual(
             len({o['id'] for o in r['occurrences']}), len(r['occurrences'])
         )
+
+
+class AssetEdgeTests(unittest.TestCase):
+    def test_pixel_size_null_reports_asset(self):
+        r = load_valid('native-evidence.inkflip.json')
+        png = next(
+            a for a in r['assets'] if a['media_type'] == 'image/png'
+        )
+        png['pixel_size'] = None
+        self.assertEqual(code(lambda: validate(r)), 'ASSET')
 
 
 class NormalizationTests(unittest.TestCase):

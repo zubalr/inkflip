@@ -177,7 +177,14 @@ function parseJson(text: string): unknown {
     const m = NUMBER_RE.exec(text);
     if (!m) return fail('Invalid number');
     i += m[0].length;
-    return Number(m[0]);
+    const v = Number(m[0]);
+    // Python parses arbitrary-precision integers, so a pure-integer
+    // literal that overflows to Infinity is an unsafe integer (NUMBER)
+    // there; non-integer literals like 1e999 stay nonfinite in both.
+    if (!Number.isFinite(v) && /^-?\d+$/.test(m[0])) {
+      throw new ContractError('NUMBER', 'Unsafe integer');
+    }
+    return v;
   }
 
   function parseArray(): unknown[] {
@@ -382,6 +389,15 @@ export function canonical(value: unknown): Uint8Array {
     return concat(parts);
   }
   if (typeof value === 'object' && value !== null) {
+    // Only plain objects are hashable, mirroring the Python dict check:
+    // Map/Set/Date/RegExp/Uint8Array/class instances must TYPE-reject,
+    // never hash silently as {} and collide in an identity function.
+    const proto: unknown = Object.getPrototypeOf(value);
+    require(
+      proto === Object.prototype || proto === null,
+      'TYPE',
+      'Unsupported canonical type',
+    );
     const record = value as Record<string, unknown>;
     const keys = Object.keys(record);
     require(
@@ -1166,8 +1182,11 @@ export function validateReport(r: Report, checkHashes = true): void {
       const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
       const wh = [dv.getUint32(16), dv.getUint32(20)];
       require(
-        wh[0] === a.pixel_size![0] &&
-          wh[1] === a.pixel_size![1] &&
+        // List-equality with Python: schema-legal pixel_size:null must
+        // fail as ASSET, never crash on a null index.
+        a.pixel_size !== null &&
+          wh[0] === a.pixel_size[0] &&
+          wh[1] === a.pixel_size[1] &&
           wh[0] * wh[1] <= MAX_PNG_PIXELS,
         'ASSET',
         'PNG size mismatch',

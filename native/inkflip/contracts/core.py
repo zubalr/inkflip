@@ -7,13 +7,19 @@ by ``scripts/generate_contracts.py``; it is a trusted static resource compiled
 once at module import. Untrusted report data is never used to build a schema.
 
 Error surface: every rejection is a :class:`ContractError` carrying a stable
-``code``. Two deliberate refinements over the reference module, which let the
+``code``. Deliberate refinements over the reference module, which let the
 underlying ``ValueError`` subclasses escape instead:
 
 * malformed JSON syntax raises ``ContractError('JSON')`` (the reference lets
   ``json.JSONDecodeError`` propagate);
 * invalid UTF-8 bytes raise ``ContractError('UNICODE')`` (the reference lets
-  ``UnicodeDecodeError`` propagate).
+  ``UnicodeDecodeError`` propagate);
+* pathological programmatic inputs also surface as ``ContractError``:
+  ``bytearray``/``memoryview`` inputs decode like ``bytes``, non-str input
+  raises ``ContractError('TYPE')``, and lone-surrogate strings raise
+  ``ContractError('UNICODE')`` inside ``canonical`` or ``ContractError('JSON')``
+  from ``loads_strict`` (the reference leaked ``UnicodeEncodeError``/
+  ``AttributeError``; the TypeScript port reports the same codes).
 
 Format checkers match the pinned ``jsonschema==4.26.0`` ``FormatChecker``
 without format extras: ``uuid`` is enforced, ``date-time`` is unregistered
@@ -63,14 +69,24 @@ def require(condition: bool, code: str, message: str) -> None:
         raise ContractError(code, message)
 
 
-def loads_strict(data: str | bytes) -> Any:
+def loads_strict(data: str | bytes | bytearray | memoryview) -> Any:
     """Parse untrusted JSON bytes/text with duplicate-key and bound checks."""
-    if isinstance(data, bytes):
+    if isinstance(data, (bytes, bytearray, memoryview)):
         try:
-            data = data.decode('utf-8', errors='strict')
+            data = bytes(data).decode('utf-8', errors='strict')
         except UnicodeDecodeError as exc:
             raise ContractError('UNICODE', 'Invalid UTF-8 input') from exc
-    require(len(data.encode('utf-8')) <= MAX_JSON_BYTES, 'SIZE', 'JSON too large')
+    require(
+        isinstance(data, str), 'TYPE', 'JSON input must be str or bytes-like'
+    )
+    # surrogatepass keeps the byte-size check defined on strings that still
+    # carry lone surrogates; the parse itself then reports JSON (matching
+    # the TypeScript port) or bounded() reports UNICODE downstream.
+    require(
+        len(data.encode('utf-8', 'surrogatepass')) <= MAX_JSON_BYTES,
+        'SIZE',
+        'JSON too large',
+    )
 
     def pairs(items):
         out = {}
@@ -152,7 +168,10 @@ def canonical(value: Any) -> bytes:
         )
         return b'D' + struct.pack('>d', 0.0 if value == 0 else float(value))
     if isinstance(value, str):
-        raw = value.encode('utf-8', 'strict')
+        try:
+            raw = value.encode('utf-8', 'strict')
+        except UnicodeError as exc:
+            raise ContractError('UNICODE', 'Unpaired surrogate') from exc
         return b'S' + struct.pack('>I', len(raw)) + raw
     if isinstance(value, list):
         return b'L' + struct.pack('>I', len(value)) + b''.join(
@@ -164,7 +183,10 @@ def canonical(value: Any) -> bytes:
             'TYPE',
             'Object keys must be strings',
         )
-        keys = sorted(value, key=lambda s: s.encode('utf-8'))
+        try:
+            keys = sorted(value, key=lambda s: s.encode('utf-8'))
+        except UnicodeError as exc:
+            raise ContractError('UNICODE', 'Unpaired surrogate') from exc
         return b'O' + struct.pack('>I', len(keys)) + b''.join(
             canonical(k) + canonical(value[k]) for k in keys
         )
@@ -288,6 +310,15 @@ def unique(items, code):
     ids = [x['id'] for x in items]
     require(len(ids) == len(set(ids)), code, 'Duplicate identifiers')
     return {x['id']: x for x in items}
+
+
+def validate_json(
+    data: str | bytes | bytearray | memoryview, check_hashes: bool = True
+) -> Any:
+    """Parse untrusted JSON then run full contract validation (validateJson parity)."""
+    value = loads_strict(data)
+    validate(value, check_hashes)
+    return value
 
 
 def validate(value: dict, check_hashes: bool = True) -> None:
