@@ -2,7 +2,8 @@
 
 **Task:** T03 — Implement schema, strict validation, canonical identity and generated types
 **Branch:** `work/devin/t03` · **Beads:** `pdf-t03` · **Worker:** `devin-t03`
-**Implementation commit:** `521c2faceb5931f2f2190a6a0e3559a04a0469f4`
+**Implementation commit:** `e2295b8965f4070b3100735eb30beacd4cf90e4f`
+(rounds: initial `521c2fa`, review-1 fixes `28cefab`, review-2 fixes `e2295b8`)
 
 This file satisfies the contract's `artifacts/tasks/T03/review.md` evidence
 slot with the worker's own review notes. Independent review is still owed
@@ -86,7 +87,7 @@ and remains the coordinator's step.
 - No repo tsc/oxlint/oxfmt yet (T02). No runtime schema compilation in
   either runtime — asserted by executable tests, not just inspection.
 
-## Post-review update (devin-review-t03, verdict changes-needed → addressed in `f5bfff1`)
+## Post-review update (devin-review-t03, verdict changes-needed → addressed in `28cefab9`)
 
 - **F1 (required):** `core.ts` PNG check indexed `a.pixel_size[0]` on
   schema-legal `null` → uncaught `TypeError`. Now guarded
@@ -117,6 +118,38 @@ Counts after fixes: node `--test` 27/27; unittest 26/26; real pytest
 (ephemeral overlay) 26 passed + 92 subtests; `generate --check` exit 0;
 `tsc -b` exit 0; `task_acceptance.py run verify` 30/30. The contract
 pytest leg remains blocked only by the missing T02 dev dependency.
+
+## Post-review round-2 update (verdict changes-needed → addressed in `e2295b8`)
+
+- **N1 (required):** `loadsStrict`/`validateJson` leaked raw `TypeError`
+  on non-string input (`5`, `null`, `undefined`, `true`, `[1]`, `{}`,
+  boxed `String`). The decode branch now requires
+  `typeof data === 'string'` else `ContractError('TYPE')`, matching the
+  Python port; `Buffer`/`Uint8Array` still decode, boxed `String` still
+  reports `TYPE`. Verified identical codes for all flagged inputs.
+- **N2 (required):** the F3 fix threw `NUMBER` mid-parse, pre-empting
+  structural errors Python detects first (`{"a":9×400,"a":1}` →
+  `DUPLICATE_KEY`; `[9×400]x` / `[9×400,bad` → `JSON`). A pure-integer
+  literal overflowing to Infinity now produces a module-private
+  `UNSAFE_INTEGER` sentinel that `bounded()` reports as `NUMBER` **in
+  document traversal order** — matching Python's post-parse bound
+  checking on every flagged case and additionally preserving the finer
+  surrogate-vs-unsafe ordering (`["\ud800",9×400]` → `UNICODE`,
+  `[9×400,"\ud800"]` → `NUMBER`), which a post-parse flag throw would
+  not. Single-fault cases unchanged: `'9'×400` → `NUMBER`,
+  `1e999` → `NONFINITE`.
+- **Doc hygiene:** stale commit references and counts corrected in this
+  file and `handoff.json`/`receipt.json`.
+- **Note on pytest:** T02 merged on main now carries pytest in the native
+  dev group; this branch predates that merge and is not rebased mid-task
+  (integration lead's call). The contract pytest leg still exits 1 here;
+  `--with pytest` overlay + unittest remain the parity evidence and the
+  leg is expected to run post-integration.
+
+Counts after round-2 fixes: node `--test` 29/29; unittest 28/28; real
+pytest (ephemeral overlay) 28 passed + 98 subtests; `generate --check`
+exit 0; `tsc -b` exit 0; `task_acceptance.py run verify` 30/30.
+Cross-language repro of all 14 flagged inputs yields identical codes.
 
 ## Suggested reviewer commands
 

@@ -4,14 +4,14 @@
   "disposition": "implemented_pending_review",
   "branch": "work/devin/t03",
   "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
-  "implementation_commit": "28cefab9c260b0c05a10dc73ee30bbf4f85bb009",
+  "implementation_commit": "e2295b8965f4070b3100735eb30beacd4cf90e4f",
   "actor": "devin-t03",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-11",
   "acceptance_criteria_evidence": {
     "All valid/invalid fixtures and expected failure codes pass in TS/Python": {
       "status": "executed",
-      "detail": "node --test tests/contracts/*.test.mjs: exit 0, 24 tests pass. The suite validates all 12 delivered valid examples (planning/contracts/examples/valid/) and all 30 delivered invalid examples (planning/contracts/examples/invalid-index.json) against their expected failure codes with zero mismatches. Python parity suite native/tests/contracts/test_contracts.py runs the same fixtures: 22 tests pass under python -m unittest (exit 0) and under real pytest via an ephemeral uv overlay (22 passed, 88 subtests passed, exit 0). The contract's pytest leg is blocked only by the missing T02-owned dev dependency, not by a suite failure.",
+      "detail": "node --test tests/contracts/*.test.mjs: exit 0, 29 tests pass. The suite validates all 12 delivered valid examples (planning/contracts/examples/valid/) and all 30 delivered invalid examples (planning/contracts/examples/invalid-index.json) against their expected failure codes with zero mismatches. Python parity suite native/tests/contracts/test_contracts.py runs the same fixtures: 28 tests pass under python -m unittest (exit 0) and under real pytest via an ephemeral uv overlay (28 passed, 98 subtests passed, exit 0). The contract's pytest leg is blocked only by the missing T02-owned dev dependency, not by a suite failure.",
       "evidence": [
         "artifacts/tasks/T03/commands.log",
         "tests/contracts/contracts.test.mjs",
@@ -80,35 +80,35 @@
       {
         "command": "node --test tests/contracts/*.test.mjs",
         "exit": 0,
-        "collected": 27,
-        "ran": 27,
-        "passed": 27,
+        "collected": 29,
+        "ran": 29,
+        "passed": 29,
         "failed": 0,
         "skipped": 0,
-        "note": "contract leg 1 (post-review): 27/24+3 regression tests pass"
+        "note": "contract leg 1 (post-review round 2): 29 tests incl. N1/N2 regression cases"
       },
       {
         "command": "uv run --project native python -m pytest native/tests/contracts -q",
         "exit": 1,
-        "note": "blocked: 'No module named pytest' \u2014 pytest is not yet in the native dev group (T02-owned manifest/lock); suite itself is pytest-collectable"
+        "note": "blocked: 'No module named pytest' in this branch's native env. T02 merged on main now carries pytest in the dev group; this branch predates that merge and is not rebased mid-task \u2014 the leg runs post-integration."
       },
       {
         "command": "uv run --project native --with pytest python -m pytest native/tests/contracts -q",
         "exit": 0,
-        "collected": 26,
-        "ran": 26,
-        "passed": 26,
+        "collected": 28,
+        "ran": 28,
+        "passed": 28,
         "failed": 0,
         "skipped": 0,
-        "subtests_passed": 92,
+        "subtests_passed": 98,
         "note": "supplementary evidence: real pytest from an ephemeral uv overlay; no manifest or lockfile change"
       },
       {
         "command": "uv run --project native python -m unittest discover -s native/tests/contracts -v",
         "exit": 0,
-        "collected": 26,
-        "ran": 26,
-        "passed": 26,
+        "collected": 28,
+        "ran": 28,
+        "passed": 28,
         "failed": 0,
         "skipped": 0
       },
@@ -134,7 +134,7 @@
       {
         "command": "python3 scripts/task_acceptance.py task T03",
         "exit": 1,
-        "note": "node leg recorded passed 24/24; pytest leg fails on the missing dependency as above"
+        "note": "node leg recorded passed 29/29; pytest leg fails on the missing dev-group dependency in this pre-T02-merge branch"
       }
     ]
   },
@@ -148,7 +148,7 @@
     "typescript": "5.9.3 (ephemeral npx; repo toolchain pending T02)"
   },
   "limitations": [
-    "pytest is absent from the native uv environment (T02 owns native/pyproject.toml dev group and uv.lock); the contract command's pytest leg exits 1 with 'No module named pytest'. The suite is unittest.TestCase-based and passes identically under real pytest (ephemeral overlay) and unittest discovery.",
+    "pytest is absent from this branch's native uv environment (the branch predates the T02 merge that added it on main); the contract command's pytest leg exits 1 with 'No module named pytest'. The suite is unittest.TestCase-based and passes identically under real pytest (ephemeral overlay) and unittest discovery; the leg is expected to run post-integration.",
     "No repo-installed TypeScript/oxlint/oxfmt yet (T02 toolchain); strict compile verified with ephemeral typescript@5.9.3, formatting follows repository conventions manually.",
     "native/uv.lock exists in this worktree as an untracked T02-owned file and is deliberately uncommitted.",
     "docs/ATTRIBUTION.md is outside T03 allowed scope; the port's provenance (planning/tools/contractlib.py, generate_types.py) is documented in module docstrings and review.md for the coordinator to record.",
@@ -174,5 +174,15 @@
       "F4": "FIXED \u2014 Python port wraps pathological escapes: bytes-like inputs decode, non-str input TYPE, lone surrogates UNICODE (canonical) / JSON (loads_strict); validate_json added for TS parity.",
       "F5": "DONE \u2014 regression cases added in both suites for F1/F2/F3/F4 edges."
     }
+  },
+  "review_round_2": {
+    "reviewer": "devin-review-t03",
+    "verdict": "changes-needed",
+    "findings": {
+      "N1": "FIXED \u2014 loadsStrict/validateJson require string-or-Uint8Array; all non-string inputs report ContractError TYPE like Python (boxed String still TYPE, Buffer still decodes).",
+      "N2": "FIXED \u2014 integer-literal overflow now yields a sentinel that bounded() reports as NUMBER in traversal order; DUPLICATE_KEY/JSON structural faults win as in Python; surrogate-vs-unsafe ordering preserved ([\"\\ud800\",big] -> UNICODE)."
+    },
+    "doc_hygiene": "stale commit refs and counts corrected",
+    "cross_language_repro": "all 14 reviewer-flagged inputs return identical codes in TS and Python (commands.log round-2 section)"
   }
 }
