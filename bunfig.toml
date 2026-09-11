@@ -6,3 +6,13 @@ exact = true
 # Refuse to auto-trust install scripts; root package.json keeps trustedDependencies empty.
 # 7-day minimum release age: newly published versions are not auto-selected.
 minimumReleaseAge = 604800
+# Documented exemptions for the exact T02-frozen pins that were published less
+# than 7 days before the freeze (verified 2026-09-12 against registry.npmjs.org
+# `time` fields): vite@8.3.0 (2026-09-10), wrangler@4.131.0 (2026-09-10),
+# oxlint@1.82.0 (2026-09-07), oxfmt@0.67.0 (2026-09-07). workerd and miniflare
+# are exempted only because the recorded wrangler@4.131.0 pin resolves to their
+# same-day releases (workerd@1.20260910.1, miniflare@5.20260910.0-alpha); they
+# are not direct dependencies. The gate still applies to every other package
+# and to all other transitive resolution. These exclusions cover only the
+# recorded pins (bunfig exact = true + bun.lock); revisit once they age out.
+minimumReleaseAgeExcludes = ["vite", "wrangler", "oxlint", "oxfmt", "workerd", "miniflare"]
