@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>T02 staged-asset probe</title></head>
+  <body>
+    <canvas id="page"></canvas>
+    <pre id="result">RUNNING</pre>
+    <script type="module">
+      const out = document.getElementById("result");
+      const record = { steps: [], errors: [] };
+      const emit = (key, value) => { record[key] = value; };
+
+      try {
+        // --- PDF.js: render the bundled control through the staged assets ---
+        const pdfjs = await import("/probe/vendor/pdf.min.mjs");
+        pdfjs.GlobalWorkerOptions.workerPort = new Worker(
+          "/probe/vendor/pdf.worker.min.mjs", { type: "module" });
+        record.steps.push("pdfjs imported: " + pdfjs.version);
+
+        const doc = await pdfjs.getDocument({
+          url: "/probe/fixture.pdf",
+          cMapUrl: "/assets/pdfjs/6.3.289/cmaps/",
+          cMapPacked: true,
+          standardFontDataUrl: "/assets/pdfjs/6.3.289/standard_fonts/",
+          wasmUrl: "/assets/pdfjs/6.3.289/wasm/",
+          iccUrl: "/assets/pdfjs/6.3.289/iccs/",
+          isEvalSupported: false,
+          disableFontFace: false,
+        }).promise;
+        const page = await doc.getPage(1);
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.getElementById("page");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        const text = (await page.getTextContent()).items.map((i) => i.str).join(" ");
+        record.steps.push("pdfjs rendered page 1");
+        emit("pdfjsVersion", pdfjs.version);
+        emit("pdfjsText", text);
+
+        // --- Tesseract.js: OCR the rendered pixels with staged assets only ---
+        const { default: tesseract } = await import("/probe/vendor/tesseract.esm.min.js");
+        const worker = await tesseract.createWorker("eng", tesseract.OEM.LSTM_ONLY, {
+          workerPath: "/assets/tesseract/7.0.0/worker.min.js",
+          corePath: "/assets/tesseract-core/7.0.0/",
+          langPath: "/models/tessdata-fast-eng/7d4322bd/",
+          workerBlobURL: false,
+          gzip: false,
+          cacheMethod: "none",
+        });
+        const recognized = await worker.recognize(canvas);
+        await worker.terminate();
+        record.steps.push("tesseract recognized rendered page");
+        emit("ocrText", recognized.data.text.trim());
+
+        emit("status", "OK");
+      } catch (error) {
+        record.errors.push(String(error && (error.stack || error.message || error)));
+        emit("status", "FAILED");
+      }
+      out.textContent = "PROBE-RESULT:" + JSON.stringify(record);
+      document.title = record.status;
+    </script>
+  </body>
+</html>

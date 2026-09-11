@@ -76,8 +76,9 @@
       "purpose": "WASM OCR engine; single-threaded scalar/SIMD/relaxed-SIMD wasm.js shims staged same-origin"
     },
     "ajv": {
-      "pinned": "8.17.1",
+      "pinned": "8.18.0",
       "status": "pinned",
+      "detail": "Justified substitution: plan pin 8.17.1 → 8.18.0 clears GHSA-2g4f-4pwh-qvx6 ($data ReDoS). bun audit: clean, 168 packages.",
       "purpose": "schema-build tool: standalone validator generation for contracts (T03 consumer); never compiles untrusted schema"
     },
     "@playwright/test": {

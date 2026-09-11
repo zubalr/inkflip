@@ -26,6 +26,16 @@ dev = [
     "pytest==9.1.1",
 ]
 
+[tool.pytest.ini_options]
+# When pytest is invoked with native/ as rootdir it must only collect the
+# native suite — never byte-frozen planning/tools modules (which import
+# planning-tool deps like PyYAML that are deliberately not product
+# dependencies). NOTE: `uv run --frozen --project native python -m pytest`
+# invoked from the repo ROOT still rootdirs at the root; the declared
+# test:native command's collection scoping is owned by the native test
+# task that lands the suite (see docs/proposals/T02.md).
+testpaths = ["tests"]
+
 [tool.uv]
 # Not packaged yet: uv sync installs dependencies only, keeping native/
 # importable via explicit sys.path in tests until a build backend is chosen.

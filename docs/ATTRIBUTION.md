@@ -27,7 +27,7 @@ still applies to everything else.
 | pdfjs-dist | 6.3.289 | Apache-2.0 + bundled asset notices | Browser PDF reader; runtime assets staged same-origin |
 | tesseract.js | 7.0.0 | Apache-2.0 | Browser OCR wrapper; CDN defaults unused |
 | tesseract.js-core | 7.0.0 | Apache-2.0 + binary notices | WASM OCR engine (single-threaded scalar/SIMD) |
-| ajv | 8.17.1 | MIT | Schema-build validator generation (test/build tool) |
+| ajv | 8.18.0 | MIT | Schema-build validator generation (test/build tool). **Justified substitution:** plan pin 8.17.1 → 8.18.0 (patch bump, 2026-02-14) to clear GHSA-2g4f-4pwh-qvx6 (`$data` ReDoS); the option is unused — zero `$data` in the inkflip schema — but the advisory-free pin removes the class entirely |
 | @playwright/test | 1.57.0 | Apache-2.0 | Test-only browser runner |
 | @axe-core/playwright | 4.13.0 | MIT (wrapper; axe-core MPL-2.0) | Test-only accessibility audits |
 | oxlint / oxfmt | 1.82.0 / 0.67.0 | MIT | Owner-selected lint/format tools |
