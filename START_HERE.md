@@ -1,13 +1,17 @@
-# Start the implementation
+# Run an assigned implementation task
 
-This repository contains the verified planning snapshot and local coordination
-setup. The application and T01 command harness are still implementation work.
+This repository contains the planning snapshot, implementation and coordination
+tools. Beads owns current task readiness and acceptance. Check it before starting:
 
-## Start now
+```sh
+python3 scripts/coordination.py ready
+```
 
-Open one **SWE2** session in `../worktrees/pdf-t01` and paste `prompts/T01.md`
-from this repository. It owns the bootstrap only. Bring its completion report
-back to the coordinator for independent review and integration.
+Open each session in its assigned worktree below and use its prompt. A task that
+is already claimed needs a coordinator-approved resume. Do not create another
+worktree through the harness; the prepared checkout already has the correct
+branch and shared Beads database. For the bootstrap assignment, T01 uses
+`../worktrees/pdf-t01` and `prompts/T01.md`.
 
 ## First parallel pass, after T01 is accepted
 
@@ -26,9 +30,13 @@ can take T06 if Gemini's allowance is unavailable. GLM is available for later
 long experiments, fixture extensions, and documentation that do not delay the
 critical path. These are planned assignments, not running sessions.
 
-Before the parallel pass, the coordinator refreshes the four clean task branches
-from the accepted `main`. The startup guard refuses the current seed-only bases
-after `main` advances; it will not silently execute future tasks early.
+The coordinator refreshes clean, unclaimed task branches from accepted `main`
+before dispatch. The startup guard refuses stale bases and unaccepted dependencies.
+Return implementation commit IDs and actual test evidence to the coordinator.
+A harness merge action is not Beads acceptance: review, Git integration,
+merged-branch checks, a committed acceptance receipt and task closure must all
+finish before dependents can start. See `docs/ACCEPTANCE.md` for the evidence
+format. Workers stop after their own handoff.
 
 ## Coordination commands
 
@@ -51,4 +59,4 @@ PYTHONDONTWRITEBYTECODE=1 .tools/planning/bin/python planning/tools/test_validat
 ```
 
 Read `docs/COORDINATION.md` for admission, review, merge, and resume rules.
-All 55 product task IDs and dependencies are in Beads. No product gate has passed.
+All 55 product task IDs, dependencies and acceptance dispositions are in Beads.

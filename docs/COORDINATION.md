@@ -128,6 +128,11 @@ Only after that review and the merged-branch checks does the coordinator:
    `accepted_receipt` (its repository-relative path) in the Beads issue metadata.
 3. Close the issue with the review/evidence rationale.
 
+Then refresh clean, unclaimed dependent worktrees from `main` before resuming
+their sessions. Copying files into `original` or clicking a harness merge action
+does not establish Beads acceptance. The coordinator verifies the worker commits
+are integrated in Git and validates the acceptance receipt before closure.
+
 The coordination guard checks closed status, ancestry, and that the named receipt
 exists at the accepted commit. It is a prerequisite guard, not the implementation
 of product acceptance. T01's task/gate harness must validate actual commands,
