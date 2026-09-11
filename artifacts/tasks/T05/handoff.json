@@ -1,0 +1,65 @@
+{
+  "task": "T05",
+  "beads_id": "pdf-t05",
+  "title": "Create original fixture foundation and rights manifest",
+  "worker": "zcode-t05 (ZCode app, single active ZCode worker)",
+  "app": "zcode",
+  "pass": 1,
+  "branch": "work/zcode/t05",
+  "base": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
+  "implementation_commit": "36bff8f407666b87f649a25d056cf9d4522f87cf",
+  "ready_for_review": true,
+  "review_scope": "implementation_commit 36bff8f407666b87f649a25d056cf9d4522f87cf plus evidence commits on this branch",
+  "executed_commands": [
+    {"command": "python3 scripts/make_fixtures.py --check", "exit": 0},
+    {"command": "python3 -m unittest discover -s tests/fixtures -v", "exit": 0, "counts": {"collected": 38, "passed": 38, "failed": 0, "skipped": 0}},
+    {"command": "python3 scripts/task_acceptance.py task T05", "exit": 0, "counts": {"collected": 38, "passed": 38, "failed": 0, "skipped": 0}},
+    {"command": "bun run verify", "exit": 0}
+  ],
+  "evidence_paths": [
+    "artifacts/tasks/T05/receipt.json",
+    "artifacts/tasks/T05/commands.log",
+    "artifacts/tasks/T05/criteria-evidence.md",
+    "artifacts/tasks/T05/render-evidence/mapping-amount.pdf.png",
+    "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png",
+    "artifacts/tasks/T05/render-evidence/covered-amount.pdf.png",
+    "artifacts/tasks/T05/render-evidence/covered-control.pdf.png",
+    "artifacts/tasks/T05/render-evidence/scan-correct.pdf.png",
+    "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png",
+    "docs/proposals/T05.md"
+  ],
+  "deliverables": {
+    "scripts/make_fixtures.py": "deterministic stdlib generator; F01/F02/F03/F07/F08; --check mode",
+    "fixtures/public/": "F01 mapping-amount + control, F02 covered-amount + uncovered control, F07 geometry 0/90/180/270 + zero-origin control (with expectation files)",
+    "fixtures/development/": "F08 userunit 0.5/1/2/10 (1 = control), F03 scan correct/raster-only/shifted (with expectation files)",
+    "fixtures/manifest.json": "generator source hash, recipes, rights, splits, controls, SHA-256 per file",
+    "tests/fixtures/test_fixtures.py": "TEST-05 suite, 38 cases, stdlib-only PDF byte parsing"
+  },
+  "measured_decisions": [
+    {
+      "decision": "Scan raster uses self-encoded PDF RunLength filtering instead of zlib/Flate",
+      "reason": "Byte determinism across hosts: zlib-ng and zlib produce different deflate bytes for identical input, which would break byte-identical regeneration between macOS and the Linux reference environment. RLE keeps every manifest entry byte-identical without the pinned-asset escape.",
+      "tradeoff": "Slightly larger raster streams (fixtures tree totals 192K, acceptable)."
+    },
+    {
+      "decision": "F03 page raster is printed by the generator's own 5x7 bitmap table rather than an external renderer",
+      "reason": "T05 depends only on accepted T01; renderer dependencies belong to T02. The owned bitmap print keeps the family deterministic and dependency-free while preserving the mechanism (raster page + correct invisible layer + clean/displaced siblings). Legibility was visually verified at 1:1 pixels.",
+      "tradeoff": "Raster glyph shapes are simple; OCR quality confirmation belongs to T27 with the real recognizer."
+    }
+  ],
+  "review_attention": [
+    "config/acceptance-commands.json: test:fixtures activated per the file's own delegation to the fixture owner; TEST-01 example decoupled in tests/bootstrap/test_bootstrap.py (T01-owned, one test). Full rationale, reproducer and fallback: docs/proposals/T05.md. If the coordinator rejects, revert the registry entry to argv null; T05 acceptance commands do not depend on the registry.",
+    "Criterion 5 'read without an alarm': fixture-side control is complete; the reading half binds at T26/T27/G1 evidence.",
+    "Criterion 2 render/extraction measurements: structural proof + macOS-local render observation executed; reader-side confirmation requested via T02 dependency (pypdfium2/pypdf)."
+  ],
+  "limitations": [
+    "No Linux, device, OCR or reader-output evidence was produced or claimed; none can be produced in this checkout until T02 freezes reader dependencies.",
+    "Render evidence is macOS QuickLook, environment-labeled, repeatable, archived under render-evidence/."
+  ],
+  "dependency_requests": [
+    "T02: pin pypdfium2 (or equivalent renderer) and pypdf for native reader confirmation of fixture expectations (consumed by T26/T27)."
+  ],
+  "attribution": "No external material reused or inspiring this task; the generator ports this project's own planning probe (planning/probes/make_fixtures.py) with provenance recorded in fixtures/manifest.json. No docs/ATTRIBUTION.md entry required.",
+  "state_note": "Worker does not write Beads; coordinator is the sole state owner. Requested transition on review approval: in_review -> accepted after merged-branch acceptance per docs/ACCEPTANCE.md.",
+  "evidence_commit_note": "Evidence files were written after implementation_commit and are bound by SHA-256 in acceptance via the coordinator's run/receipt flow."
+}

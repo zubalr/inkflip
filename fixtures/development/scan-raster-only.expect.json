@@ -1,0 +1,38 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "searchable-scan",
+  "fixture_id": "F03",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "layer": "raster-only",
+    "raster": "owned 5x7 bitmap print, 680x880 gray",
+    "shift_pt": null
+  },
+  "observation": "clean sibling with no text layer at all",
+  "raster": {
+    "bits_per_component": 8,
+    "colorspace": "DeviceGray",
+    "filter": "RunLengthDecode",
+    "font": "generated 5x7 bitmap table; no PDF font resource",
+    "height_px": 880,
+    "lines": [
+      "QUARTERLY SUMMARY",
+      "INVOICE 2026-0417",
+      "AMOUNT DUE $100.00",
+      "ISSUED 2026-09-01",
+      "PAGE 1 OF 1"
+    ],
+    "width_px": 680
+  },
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development",
+  "text_layer": {
+    "displacement_pt": null,
+    "font": "Helvetica base-14 (no program embedded)",
+    "font_size_pt": 26,
+    "mode": "absent",
+    "words": []
+  }
+}

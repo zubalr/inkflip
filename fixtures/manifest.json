@@ -1,0 +1,306 @@
+{
+  "determinism": "byte-identical on every platform; no timestamps or random IDs",
+  "entries": [
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1437,
+      "control": "public/mapping-control.pdf",
+      "expectations": "public/mapping-amount.expect.json",
+      "expectations_sha256": "891a8078513a7fcc579fb6d10d85b873d4642244c465c2f12982b786772f79cc",
+      "family": "mapping-amount",
+      "fixture_id": "F01",
+      "observation": "native text differs from identical raster",
+      "path": "public/mapping-amount.pdf",
+      "recipe": {
+        "amount_map": true
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1429,
+      "control": null,
+      "expectations": "public/mapping-control.expect.json",
+      "expectations_sha256": "aac075aac77c6bb4a465ae06c11892155af1e628d1165796a4244d76039d6acb",
+      "family": "mapping-amount",
+      "fixture_id": "F01",
+      "observation": "identity mapping control; renders and extracts $100",
+      "path": "public/mapping-control.pdf",
+      "recipe": {
+        "amount_map": false
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1504,
+      "control": "public/covered-control.pdf",
+      "expectations": "public/covered-amount.expect.json",
+      "expectations_sha256": "22e17b6ff7a0eb5f8685dd7140b5f09e28fa9cce14909d39f71bb4969f7664e2",
+      "family": "covered-text",
+      "fixture_id": "F02",
+      "observation": "actual extraction kept, mechanism limited; reader-dependent concatenation is retained as observed behavior",
+      "path": "public/covered-amount.pdf",
+      "recipe": {
+        "covered": true
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1429,
+      "control": null,
+      "expectations": "public/covered-control.expect.json",
+      "expectations_sha256": "d4ea69efef08e72f22a8a1f839bb5850067561b3a524d9fd3e6c08eeb3318a52",
+      "family": "covered-text",
+      "fixture_id": "F02",
+      "observation": "clean twin: final visible amount painted once, never covered",
+      "path": "public/covered-control.pdf",
+      "recipe": {
+        "covered_control": true
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "cf003f5a746ace7ea6efab9c86733b267159cd8f6bc0343f6a09f0233d95d03d",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1435,
+      "control": "public/geometry-control.pdf",
+      "expectations": "public/geometry-0.expect.json",
+      "expectations_sha256": "1684ade91eb322fc77bcc3fe4fb493b0607fd929ebbfcbcb5b4921a16d49f944",
+      "family": "origins-rotation",
+      "fixture_id": "F07",
+      "observation": "transforms and actual pixel anchors through nonzero/negative origins, rotation and UserUnit 2",
+      "path": "public/geometry-0.pdf",
+      "recipe": {
+        "origin": true,
+        "rotation": 0,
+        "unit": 2
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1436,
+      "control": "public/geometry-control.pdf",
+      "expectations": "public/geometry-90.expect.json",
+      "expectations_sha256": "71ecc6c1335677ae68799a87ba5385042b7f205d0d6db10d3a1b887130fc3829",
+      "family": "origins-rotation",
+      "fixture_id": "F07",
+      "observation": "transforms and actual pixel anchors through nonzero/negative origins, rotation and UserUnit 2",
+      "path": "public/geometry-90.pdf",
+      "recipe": {
+        "origin": true,
+        "rotation": 90,
+        "unit": 2
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1437,
+      "control": "public/geometry-control.pdf",
+      "expectations": "public/geometry-180.expect.json",
+      "expectations_sha256": "74ffc48d3d740692b573c052ad52dbd68a64b0b22f8f3aae63dfacbdb34b93ff",
+      "family": "origins-rotation",
+      "fixture_id": "F07",
+      "observation": "transforms and actual pixel anchors through nonzero/negative origins, rotation and UserUnit 2",
+      "path": "public/geometry-180.pdf",
+      "recipe": {
+        "origin": true,
+        "rotation": 180,
+        "unit": 2
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1437,
+      "control": "public/geometry-control.pdf",
+      "expectations": "public/geometry-270.expect.json",
+      "expectations_sha256": "6f012e6a63fe08cbc256078d3fd7de296c5e74a25649ecdc3a5a2dfa0f0f6d9a",
+      "family": "origins-rotation",
+      "fixture_id": "F07",
+      "observation": "transforms and actual pixel anchors through nonzero/negative origins, rotation and UserUnit 2",
+      "path": "public/geometry-270.pdf",
+      "recipe": {
+        "origin": true,
+        "rotation": 270,
+        "unit": 2
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1429,
+      "control": null,
+      "expectations": "public/geometry-control.expect.json",
+      "expectations_sha256": "3a04a93410445d21eafeb86cae2d139315ea3b9a1c5b138ec88532fbb4fe1422",
+      "family": "origins-rotation",
+      "fixture_id": "F07",
+      "observation": "zero-origin rotation 0 UserUnit 1 control",
+      "path": "public/geometry-control.pdf",
+      "recipe": {
+        "origin": false,
+        "rotation": 0,
+        "unit": 1
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1458,
+      "control": "development/userunit-1.pdf",
+      "expectations": "development/userunit-0.5.expect.json",
+      "expectations_sha256": "744d57d113cef34c66f2da7a3215446b6278d188d3963948e78c972a12e8e3fb",
+      "family": "userunit",
+      "fixture_id": "F08",
+      "observation": "no double scaling; physical-size equivalents with known fiducials",
+      "path": "development/userunit-0.5.pdf",
+      "recipe": {
+        "fiducial": "100x100pt stroke square at 372 250",
+        "unit": 0.5
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "839f5fff3aee1c8a8530eb9f9b1ebdce4685ac503fd6f75da324f45f2fffb306",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1456,
+      "control": null,
+      "expectations": "development/userunit-1.expect.json",
+      "expectations_sha256": "e79770f42e7bba1f4d40897deb3a1b2ccf540bccbcf08c02610e2e668f70a264",
+      "family": "userunit",
+      "fixture_id": "F08",
+      "observation": "no double scaling; physical-size equivalents with known fiducials",
+      "path": "development/userunit-1.pdf",
+      "recipe": {
+        "fiducial": "100x100pt stroke square at 372 250",
+        "unit": 1
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "6f6201cebc34505d6af8ffc3bc555cf16ac94f874e5d674b11c451bb8f0d09cb",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1456,
+      "control": "development/userunit-1.pdf",
+      "expectations": "development/userunit-2.expect.json",
+      "expectations_sha256": "eb6a7c8303bd7bad7a0ad0eacd9d14d24e8bc954fadf2c3715216ac355d2bb54",
+      "family": "userunit",
+      "fixture_id": "F08",
+      "observation": "no double scaling; physical-size equivalents with known fiducials",
+      "path": "development/userunit-2.pdf",
+      "recipe": {
+        "fiducial": "100x100pt stroke square at 372 250",
+        "unit": 2
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "48c1dc90e5228de82771d9a274a6eb2f103681c1f2fc8159dee0910d944b9295",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1457,
+      "control": "development/userunit-1.pdf",
+      "expectations": "development/userunit-10.expect.json",
+      "expectations_sha256": "2a067d692ea59eb6583163eeaad90cd0514ebf82f8554a388f82a4e7abc77bff",
+      "family": "userunit",
+      "fixture_id": "F08",
+      "observation": "no double scaling; physical-size equivalents with known fiducials",
+      "path": "development/userunit-10.pdf",
+      "recipe": {
+        "fiducial": "100x100pt stroke square at 372 250",
+        "unit": 10
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "40827308fc88b2a1f8f88de746af74a0314ab1f5b3d01894d115544850042d8a",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 18686,
+      "control": "development/scan-raster-only.pdf",
+      "expectations": "development/scan-correct.expect.json",
+      "expectations_sha256": "2525ec941c34723fa7b12fcf9b4bb264a93218413088fe5d980ec71e98af081a",
+      "family": "searchable-scan",
+      "fixture_id": "F03",
+      "observation": "legitimate searchable scan: invisible layer matches the raster words and anchors; no alarm solely because its OCR text is invisible",
+      "path": "development/scan-correct.pdf",
+      "recipe": {
+        "layer": "correct",
+        "raster": "owned 5x7 bitmap print, 680x880 gray",
+        "shift_pt": null
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "86a17f4a2ee4c4e75bd2eb406266b20ed3f960f644631841c5fad8b0e7ff4f5f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 18236,
+      "control": null,
+      "expectations": "development/scan-raster-only.expect.json",
+      "expectations_sha256": "8c859ac2f4a45caab8094b2df5084f121b5fa46091ede546aa4995e1ac85ce14",
+      "family": "searchable-scan",
+      "fixture_id": "F03",
+      "observation": "clean sibling with no text layer at all",
+      "path": "development/scan-raster-only.pdf",
+      "recipe": {
+        "layer": "raster-only",
+        "raster": "owned 5x7 bitmap print, 680x880 gray",
+        "shift_pt": null
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 18691,
+      "control": null,
+      "expectations": "development/scan-shifted.expect.json",
+      "expectations_sha256": "732f8f0e95fa9220871480d892ecb78578440d1e17612c6f5e53c6bcb76b8123",
+      "family": "searchable-scan",
+      "fixture_id": "F03",
+      "observation": "deliberately displaced layer; layer words do not match raster word anchors",
+      "path": "development/scan-shifted.pdf",
+      "recipe": {
+        "layer": "shifted",
+        "raster": "owned 5x7 bitmap print, 680x880 gray",
+        "shift_pt": [
+          90.0,
+          72.0
+        ]
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "2b855c7ee27d22c71696d3be9f63758f61b8449e51e03cdfa80272afc4d62158",
+      "split": "development"
+    }
+  ],
+  "generator": "scripts/make_fixtures.py",
+  "generator_sha256": "f64e98e88544705cbfcdfbc9333b08330ab689b12a840dfe96296f834aacfbce",
+  "generator_version": "1.0.0",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "schema_version": "1.0.0",
+  "seed": "none; recipes are fully deterministic"
+}
