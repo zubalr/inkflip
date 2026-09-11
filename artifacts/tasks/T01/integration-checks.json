@@ -1,0 +1,36 @@
+{
+  "evaluated_commit": "a92f9db1575542b3b919fde0ad8328a2dae1b81e",
+  "checks": [
+    {
+      "command": [
+        "bun",
+        "run",
+        "verify"
+      ],
+      "exit": 0,
+      "tests": {
+        "collected": 66,
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/task_acceptance.py",
+        "task",
+        "T01",
+        "--report",
+        "artifacts/tasks/T01/run.json"
+      ],
+      "exit": 0,
+      "tests": {
+        "collected": 44,
+        "passed": 44,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ]
+}

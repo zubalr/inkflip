@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "task_id": "T01",
+  "beads_id": "pdf-t01",
+  "disposition": "accepted",
+  "evaluated_commit": "a92f9db1575542b3b919fde0ad8328a2dae1b81e",
+  "evaluated_at": "2026-09-11T20:35:33.102007+00:00",
+  "contract_digest": "fd3e59901cb14dbd1927d2d071c8a90af74d90c8fa8294ff2643e0dd4f3fc727",
+  "worker": "swe2-t01",
+  "commands": [
+    {
+      "segment": "python -m unittest discover -s tests/bootstrap -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/bootstrap",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/original/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/bootstrap",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 44,
+        "passed": 44,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T01/receipt.json": "649becc9b1eba24a92266b46a92b3966abad945b7aa0ca657c5d830918ff5aa7",
+    "artifacts/tasks/T01/commands.log": "dfb215d768e97e0180fcb21a7c82e8b706696e994514c6667d97b2120f177d10",
+    "artifacts/tasks/T01/review.md": "967a85d1f7ba819584327be5fa25336179798eaf52daddb062a8953c4b254bd2",
+    "artifacts/tasks/T01/run.json": "ba3a761d910e2ee20dc5cd4821f54056474e335885e543b5a3a9115635e7401d",
+    "artifacts/tasks/T01/integration-checks.json": "5637ed7330fbfa418c1dddd55244dd16c53e1265f865b065873c706798e55fea",
+    "artifacts/tasks/T01/coordinator-commands.log": "67412d73a17690c039841ba3647980ebbac2908938d9494accf925a59d9ab5dc"
+  },
+  "criteria": {
+    "A clean checkout exposes documented commands": [
+      "artifacts/tasks/T01/run.json",
+      "artifacts/tasks/T01/integration-checks.json"
+    ],
+    "empty/missing test registration fails": [
+      "artifacts/tasks/T01/run.json",
+      "artifacts/tasks/T01/review.md"
+    ],
+    "old repository remains byte/Git-unchanged": [
+      "artifacts/tasks/T01/commands.log",
+      "artifacts/tasks/T01/review.md"
+    ],
+    "no network action or generated achievement claim occurs.": [
+      "artifacts/tasks/T01/receipt.json",
+      "artifacts/tasks/T01/review.md",
+      "artifacts/tasks/T01/run.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "codex-t01-standards",
+      "codex-t01-spec"
+    ],
+    "path": "artifacts/tasks/T01/review.md"
+  }
+}
