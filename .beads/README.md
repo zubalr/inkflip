@@ -6,7 +6,8 @@ writes and publishes this database. Worker replicas synchronize through
 `python3 scripts/native_pass.py status APP --sync`.
 
 An independent clone restores native Git-backed Dolt data using
-`bd bootstrap --yes` with Beads 1.2.2. A linked worktree uses its canonical
+`BD_SYNC_REMOTE="$(git remote get-url origin)" bd bootstrap --yes` with Beads
+1.2.2; this uses the clone’s already authenticated SSH or HTTPS origin. A linked worktree uses its canonical
 checkout database. Do not initialize another one there. The coordinator
 publishes with `bd dolt commit` and `bd dolt push`; workers never push Beads.
 The Git code branch and Beads database are separate, ordered publications.

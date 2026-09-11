@@ -21,7 +21,15 @@ Devin Cloud needs this repository enabled in its GitHub integration.
 Run `python3 scripts/bootstrap_beads.py` to install pinned Beads 1.2.2 locally
 if needed (Linux amd64); matching existing installations are used. Python
 3.11+ and Git are required. Add the printed `.tools/bin` directory to PATH if
-installed. An independent clone then runs `bd bootstrap --yes`. A linked
+installed. An independent clone bootstraps with the authenticated Git origin:
+
+```sh
+BD_SYNC_REMOTE="$(git remote get-url origin)" bd bootstrap --yes
+```
+
+The verified BD_SYNC_REMOTE override lets a Cloud HTTPS clone use its existing
+GitHub authentication even when this Mac's tracked default uses SSH. Never
+insert credentials into that URL. A linked
 worktree uses its existing canonical checkout database; never initialize a
 second one there. `coordination.py` resolves the canonical root.
 
