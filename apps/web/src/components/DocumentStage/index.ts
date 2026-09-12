@@ -5,4 +5,4 @@ export type {
   OccurrenceItem,
   DocumentStageProps,
 } from "./DocumentStage";
-export default DocumentStage;
+export { default } from "./DocumentStage";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import styles from "./DocumentStage.module.css";
 
 export type StageMode = "page" | "reading" | "compare";
@@ -58,8 +58,8 @@ export function DocumentStage({
   errorMessage,
   pageNumber = 1,
   totalPages = 1,
-  imageSrc = "/probes/results/amount-crop.png",
-  imageAlt = "Actual rendered crop of the generated PDF, visibly showing $100.",
+  imageSrc,
+  imageAlt = "Visibly rendered $100 amount",
   rawReadingText = "$1,000",
   readerName = "PDFium 149.0.7825.0",
   findingTitle = "This amount reads differently",
@@ -151,6 +151,7 @@ export function DocumentStage({
   return (
     <div
       ref={stageRef}
+      id="stage"
       className={styles.stage}
       onKeyDown={handleStageKeyDown}
       tabIndex={0}
@@ -186,7 +187,7 @@ export function DocumentStage({
                 role="tab"
                 id={`tab-${m}`}
                 aria-selected={isSelected}
-                aria-controls="evidence-panel"
+                aria-controls={status === "normal" ? "evidence-panel" : undefined}
                 tabIndex={isSelected ? 0 : -1}
                 className={`${styles.tab} ${isSelected ? styles.tabSelected : ""}`}
                 onClick={() => handleModeSelect(m, idx)}
@@ -198,7 +199,7 @@ export function DocumentStage({
             );
           })}
         </div>
-        <span className={styles.pageLabel} aria-label={`Page ${pageNumber} of ${totalPages}`}>
+        <span id="page-label" className={styles.pageLabel} aria-label={`Page ${pageNumber} of ${totalPages}`}>
           Page {pageNumber} / {totalPages}
           {rotation > 0 ? ` · ${rotation}°` : ""}
           {zoom !== 100 ? ` · ${zoom}%` : ""}
@@ -242,23 +243,48 @@ export function DocumentStage({
         >
           {/* Paper View (Rendered raster / crop) */}
           {(mode === "page" || mode === "compare") && (
-            <div className={styles.paper}>
+            <div className={styles.paper} id="paper-view">
               <p className={styles.paperKicker}>SYNTHETIC EXAMPLE</p>
               <p className={styles.paperSub}>No real transaction. Reader behavior only.</p>
               <div
                 className={styles.amountCrop}
+                id="amount-crop"
                 style={{
                   transform: `rotate(${rotation}deg) scale(${zoom / 100})`,
                   transformOrigin: "center center",
                 }}
               >
-                <img
-                  src={imageSrc}
-                  alt={imageAlt}
-                  className={styles.amountImage}
-                  width="280"
-                  height="100"
-                />
+                {imageSrc ? (
+                  <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    className={styles.amountImage}
+                    width="240"
+                    height="70"
+                  />
+                ) : (
+                  <svg
+                    width="240"
+                    height="70"
+                    viewBox="0 0 240 70"
+                    className={styles.amountImage}
+                    aria-label={imageAlt}
+                    role="img"
+                  >
+                    <rect width="240" height="70" fill="var(--color-paper-pure, #ffffff)" />
+                    <text
+                      x="50%"
+                      y="60%"
+                      dominantBaseline="middle"
+                      textAnchor="middle"
+                      fontFamily="Georgia, serif"
+                      fontSize="44"
+                      fill="var(--color-ink, #172A2F)"
+                    >
+                      $100
+                    </text>
+                  </svg>
+                )}
                 <span className={`${styles.corner} ${styles.cornerA}`} aria-hidden="true" />
                 <span className={`${styles.corner} ${styles.cornerB}`} aria-hidden="true" />
                 <span className={`${styles.corner} ${styles.cornerC}`} aria-hidden="true" />
@@ -271,7 +297,7 @@ export function DocumentStage({
 
           {/* Reading View (Extracted text) */}
           {(mode === "reading" || mode === "compare") && (
-            <div className={styles.readingPaper}>
+            <div className={styles.readingPaper} id="reading-view">
               <p className={styles.paperKicker}>EXTRACTED READING</p>
               <p className={styles.paperSub}>
                 Reader: <bdi>{readerName}</bdi>
@@ -291,6 +317,7 @@ export function DocumentStage({
       {/* Finding Banner */}
       <button
         type="button"
+        id="finding-btn"
         className={styles.finding}
         onClick={toggleFindingDetail}
         aria-expanded={isDetailOpen}
@@ -303,7 +330,7 @@ export function DocumentStage({
           <strong className={styles.findingTitle}>{findingTitle}</strong>
           <small className={styles.findingSubtitle}>{findingSubtitle}</small>
         </span>
-        <span className={styles.findingChevron} aria-hidden="true">
+        <span id="finding-chevron" className={styles.findingChevron} aria-hidden="true">
           {isDetailOpen ? "▲" : "▼"}
         </span>
       </button>
@@ -376,8 +403,9 @@ export function DocumentStage({
         <span className={styles.coverageText}>{coverageText}</span>
         <button
           type="button"
+          id="coverage-btn"
           className={styles.coverageButton}
-          onClick={() => setIsDetailOpen((prev) => !prev)}
+          onClick={() => setIsDetailOpen((prev: boolean) => !prev)}
         >
           {isDetailOpen ? "Hide details" : "Details"}
         </button>

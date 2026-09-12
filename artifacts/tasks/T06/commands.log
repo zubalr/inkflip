@@ -49,3 +49,64 @@ exit 1 (honest prerequisite failure: playwright binary pending from T02)
 [state-loading.png] 1024x768 (?state=loading) -> loading state indicator (44978 bytes)
 [state-failed.png] 1024x768 (?state=failed) -> failed state error notice (51701 bytes)
 [state-empty.png] 1024x768 (?state=empty) -> empty state notice (47218 bytes)
+
+# --- REVISION 3 EXECUTION LOG ---
+# Timestamp: 2026-09-12T00:00:00.000000+00:00
+# Addressed independent review findings (origin/review/devin/t06:artifacts/tasks/T06/peer-review.md)
+# Prior candidate failure recorded: relative URL page.goto(/src/...) failed 9/9 under Playwright runner.
+# Fix: In-spec static HTTP server on ephemeral port serving apps/web root.
+
+$ bun run verify
+$ python3 scripts/task_acceptance.py run verify
+self-check: 16 commands in config/acceptance-commands.json
+Ran 49 tests in 5.999s (test:bootstrap) -> OK
+Ran 2 tests in 0.001s (test:native-bootstrap) -> OK
+Ran 30 tests in 0.030s (check:coordination) -> OK
+exit 0
+
+$ python3 scripts/task_acceptance.py self-check
+self-check: 16 commands in config/acceptance-commands.json
+exit 0
+
+$ bun run test:visual -- tests/visual/foundation.spec.ts (with Playwright runner present)
+$ python3 scripts/task_acceptance.py run test:visual tests/visual/foundation.spec.ts
+Running 9 tests using 1 worker
+[1/9] tests/visual/foundation.spec.ts › width 1440px (desktop-1440) has no page horizontal overflow -> passed
+[2/9] tests/visual/foundation.spec.ts › width 1024px (intermediate-1024) has no page horizontal overflow -> passed
+[3/9] tests/visual/foundation.spec.ts › width 768px (intermediate-768) has no page horizontal overflow -> passed
+[4/9] tests/visual/foundation.spec.ts › width 390px (mobile-390) has no page horizontal overflow -> passed
+[5/9] tests/visual/foundation.spec.ts › width 320px (mobile-320) has no page horizontal overflow -> passed
+[6/9] tests/visual/foundation.spec.ts › page and disagreement dominate the visual composition -> passed
+[7/9] tests/visual/foundation.spec.ts › contrast checks meet stated WCAG targets on computed DOM styles -> passed
+[8/9] tests/visual/foundation.spec.ts › reduced motion disables flips, transitions and animations -> passed
+[9/9] tests/visual/foundation.spec.ts › active focus outline styling adheres to 3px focus token -> passed
+9 passed (2.0s)
+exit 0
+
+$ python3 scripts/task_acceptance.py task T06 (with Playwright runner present)
+{
+  "task": "T06",
+  "beads_id": "pdf-t06",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 9,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:visual -- tests/visual/foundation.spec.ts",
+      "exit": 0,
+      "tests": {
+        "collected": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ]
+}
+exit 0

@@ -13,6 +13,19 @@
   --color-focus: #005fcc;
   --color-mark: #f0ca69;
 
+  /* Semantic surfaces and component tokens */
+  --color-paper-pure: #ffffff;
+  --color-surface-muted: #edf0e8;
+  --color-surface-subtle: #f8f9f4;
+  --color-badge-text: #3e5750;
+  --color-badge-bg: #edf2e8;
+  --color-badge-border: #dce6d9;
+  --color-warning-surface: #fcf5df;
+  --color-warning-border: #e6cf8f;
+  --color-warning-surface-hover: #faefce;
+  --color-warning-border-hover: #d8be74;
+  --color-warning-text: #746444;
+
   /* Spacing scale (px). */
   --space-1: 4px;
   --space-2: 8px;
