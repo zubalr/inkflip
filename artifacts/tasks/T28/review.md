@@ -1,5 +1,54 @@
 # T28 independent review — bounded native structural observations
 
+## ROUND 3 — candidate `28eb932` (impl `cf01857` + evidence `28eb932`), merged into this checkout as `080e76f`
+
+- **Reviewer:** Devin Local SWE-2 (independent reviewer subagent), macOS arm64 checkout `review-devin-t28`. Replacement reviewer for the crashed round-2 subagent; work resumed from preserved checkout/branch.
+- **Candidate reviewed:** `28eb9326bbb4ddff1db605ebeafb9a2e1ef9075b` on `work/zcode/t28`, fetched from origin and merged cleanly (merge `080e76f`); delta touches only `native/inkflip/checks/structure.py`, `native/tests/structure/test_structure.py` and `artifacts/tasks/T28/*` — inside allowed scope plus task artifacts.
+- **Verdict: APPROVED** — all four round-2 findings verified resolved with live evidence. Two residual P3 documentation nits carried below (neither reaches the machine-consumed acceptance record).
+
+### Round-3 reproduced counts (macOS arm64, merged head `080e76f`)
+
+| Command | Worker claim (Linux) | Reproduced here |
+|---|---|---|
+| `uv run --project native python -m pytest native/tests/structure -q` | 20 + 14 subtests | **20 passed, 14 subtests** ✓ |
+| `uv run --project native python -m pytest native/tests -q` | 131 + 160 subtests | **130 passed, 1 failed**, 160 subtests — same pre-existing T27 OCR macOS `/var`→`/private/var` failure (`test_ocr.py:847`), not introduced by this diff |
+| `python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json` | exit 0, 20/20 | exit 0, collected 20 / passed 20, `run.json` rebound to `evaluated_commit=080e76f` ✓ |
+| `python3 scripts/acceptance_receipts.py verify-run T28` | — | **verified**; `{"verified": "T28", "tests": {collected 20, passed 20}}` ✓ |
+| `acceptance_receipts.criterion_evidence(task, receipt.json)` | resolves | **RESOLVED** — returns all four criteria mapped to `artifacts/tasks/T28/`-namespaced paths only ✓ |
+
+### Round-2 finding verification
+
+**1. P1 evidence namespace — RESOLVED.** `acceptance_criteria_evidence` keeps byte-exact contract keys (verified through `criterion_evidence` normalization incl. curly-quote `“all checked”` and trailing-period keys) and every `evidence` list now cites only `artifacts/tasks/T28/criterion-evidence-current.md`, `commands.log`, `run.json`. Live import of `scripts/acceptance_receipts.py::criterion_evidence` returns the four-criterion map with no `ValueError`; `verify-run` passes. New `criterion-evidence-current.md` itemizes per-criterion proof points (test names + module behavior) — real, checkable citations.
+
+**2. P2(b) /BM prose — RESOLVED in all operative locations.** Corrected claim verified in: module docstring ("`FPDFPageObj_HasTransparency` flags … alpha fills, soft masks AND non-Normal blend modes (empirically verified: /BM /Multiply and /Screen objects are flagged)"), manifest `limitations` ("per-occurrence compositing flags cover transparency and non-Normal blend modes (HasTransparency)"), receipt `limitations` (same, with /OC as the stated residual), and handoff `review_revision_round_2.bm_claim_correction`. My probes confirm the corrected claim is *true*: `/BM /Multiply` object flags per-occurrence, `/BM /Normal` and q/Q-scoped plain sibling do not. New pinning test `test_non_normal_blend_mode_is_flagged_per_occurrence` passes. **Residual nit:** the `detail` narrative of receipt criterion "unsupported compositing explicitly recorded." (receipt.json) still contains one copy of the retracted "…/BM not detectable per object (setter-only)" sentence — contradicted by the receipt's own limitation five lines up. Carried as P3: `record_acceptance` propagates only criterion *evidence paths* into `acceptance.json` (acceptance_receipts.py:212–225), so the stale sentence never reaches the consumed record. Historical `handoff.review_revision_round_1a00561` and round-1 `commands.log` entries legitimately keep the old claim as history.
+
+**3. P2(c) /CA stroking alpha — RESOLVED.** `structure.py:440–443` now applies the symmetric check `stroke[3] < 255` (stroke RGBA fetched only for stroke-involving modes 1/2/5/6 — correct, since `/CA` only affects stroking). Independent probes on the merged build:
+
+| Context | Flag? |
+|---|---|
+| `/CA 0.5` + `1 Tr` stroke text | **YES** — "stroke alpha compositing not inspected; stroke alpha below 255", basis records `stroke=0,0,0,128` |
+| `/CA 0.5` + `2 Tr` fill+stroke | YES — stroke flag fires |
+| `/CA 0.5` + `0 Tr` fill-only | correctly NO — stroke is `None` for non-stroking modes; `/CA` is irrelevant to fills, no false positive |
+| `/ca 0.5 + /CA 0.5` + `2 Tr` | all three flags (fill alpha + stroke alpha + HasTransparency) |
+| `/BM /Multiply` | YES (HasTransparency non-Normal-blend limitation) |
+| `/BM /Normal` | no (correct) |
+| `/OC /OCG BDC` membership | no — now the sole explicitly documented residual (receipt limitation + docstring), per round-2 condition |
+
+Pinning test `test_stroking_alpha_is_flagged_symmetrically` passes; `HasTransparency` indeed does not fire for `/CA` on this build, so the symmetric check is the actual mechanism — verified, not just test-trusted.
+
+**4. P3 stale fields — RESOLVED.** `worker.implementation_commit` = `cf01857` (receipt + handoff); receipt `commands` table refreshed to 20/131(+160 subtests)/20 which matches both the worker's Linux claim and my macOS reproduction (130+1 pre-existing T27 env failure); handoff top-level `executed_commands` and `review_revision_round_2.executed_commands_linux` consistent at 20/131.
+
+### Residual P3 nits (carried, non-blocking)
+
+1. receipt.json criterion "unsupported compositing explicitly recorded." `detail` retains one stale copy of the retracted /BM-setter-only sentence (see finding 2) — narrative only; fix on next touch of the receipt.
+2. `commands.log` round-2 summary line reads "counts 20/129" while the transcript lines below it correctly record 131 full-native — summary typo only.
+
+### Resolution
+
+All round-2 requests satisfied: task-namespaced criterion evidence resolves through the real pipeline function; the /BM claim is corrected and pinned by test + independent probe; the /CA gap is closed by a verified symmetric check; stale fields refreshed. **APPROVED.** Coordinator may proceed to `record`/`verify` (review path `artifacts/tasks/T28/review.md`, this commit).
+
+---
+
 ## ROUND 2 — revision `faa365a` (impl `3863dde`), merged into this checkout as `8823e09`
 
 - **Reviewer:** Devin Local SWE-2 (independent reviewer subagent), macOS arm64 checkout `review-devin-t28`
