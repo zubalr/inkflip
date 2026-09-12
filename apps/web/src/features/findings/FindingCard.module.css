@@ -1,0 +1,232 @@
+.card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-paper);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color var(--motion-state);
+}
+
+.card:focus-within {
+  border-color: var(--color-teal);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--space-4);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+
+.badgeMaterial {
+  background: var(--color-rust-soft);
+  color: var(--color-rust);
+  border-color: var(--color-rust);
+  font-weight: 600;
+}
+
+.badgeAmbiguous {
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+  border-color: var(--color-warning-border);
+}
+
+.explanation {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.readingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  background: var(--color-canvas);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-line);
+}
+
+.readingBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.readerLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+}
+
+.readingValue {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  padding: var(--space-2);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-line);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.readingAlt {
+  border-color: var(--color-rust);
+  color: var(--color-rust);
+}
+
+.disclaimer {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-style: italic;
+  margin: 0;
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--color-line);
+}
+
+.detailsContent {
+  font-size: 13px;
+  color: var(--color-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.limitationsList {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.notesSection {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.noteLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+}
+
+.noteCard {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.noteText {
+  font-size: 13px;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.noteAuthor {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.noteDisclosure {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.addNoteBtn {
+  background: transparent;
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.addNoteBtn:hover {
+  border-color: var(--color-ink);
+}
+
+.noteInputArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.noteInput {
+  width: 100%;
+  padding: var(--space-2);
+  font-size: 13px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-sizing: border-box;
+}

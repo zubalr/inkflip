@@ -1,0 +1,216 @@
+.panel {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-paper);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: var(--space-2);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--space-5);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.summaryText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.pagesText {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+
+.statCard {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--space-4);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statCompleted .statValue {
+  color: var(--color-teal);
+}
+
+.statTimeout .statValue {
+  color: var(--color-warning-text);
+}
+
+.statModelMissing .statValue {
+  color: var(--color-error-text);
+}
+
+.statUnsupported .statValue {
+  color: var(--color-muted);
+}
+
+.statFailed .statValue {
+  color: var(--color-error-text);
+}
+
+.statCancelled .statValue {
+  color: var(--color-muted);
+}
+
+.statSkipped .statValue {
+  color: var(--color-muted);
+}
+
+.statusList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  font-size: 13px;
+}
+
+.statusRowContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statusDescription {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.statusReason {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.statusCheckId {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.statusBadge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeTimeout {
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badgeModelMissing {
+  background: var(--color-error-surface);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
+.badgeUnsupported {
+  background: var(--color-canvas);
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+
+.badgeFailed {
+  background: var(--color-error-surface);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
+.badgeCancelled {
+  background: var(--color-surface-subtle);
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+
+.badgeSkipped {
+  background: var(--color-surface-subtle);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+
+.scanNotice {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-teal);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+  font-size: 14px;
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+.agreementNotice {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.agreementTitle {
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.agreementDisclaimer {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+}
