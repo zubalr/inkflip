@@ -764,6 +764,7 @@ test('10,000 deterministic samples round-trip within 1e-5pt', () => {
   const uniform = (lo, hi) => lo + (hi - lo) * rng();
   const choice = (xs) => xs[Math.floor(rng() * xs.length)];
   let maxErr = 0;
+  let sampledPoints = 0;
   const N = 10000;
   for (let i = 0; i < N; i++) {
     const cx = uniform(-100, 100);
@@ -790,14 +791,14 @@ test('10,000 deterministic samples round-trip within 1e-5pt', () => {
     const back = apply(inv, apply(m, p));
     const err = Math.max(Math.abs(back[0] - p[0]), Math.abs(back[1] - p[1]));
     maxErr = Math.max(maxErr, err);
+    sampledPoints++;
     assert.ok(
       err <= TOL,
       `sample ${i} round-trip error ${err}pt exceeds ${TOL}pt`,
     );
   }
-  // Sanity: the sweep must actually exercise the space. Measured max on
-  // this run was 4.7e-13pt (see commands.log for the executed output).
-  assert.ok(maxErr >= 0, 'round-trip executed');
+  assert.equal(sampledPoints, 10000, 'full deterministic population executed');
+  assert.ok(Number.isFinite(maxErr) && maxErr <= TOL, 'maximum error within budget');
 });
 
 test('composed chains and their stored inverses agree within bounds', () => {

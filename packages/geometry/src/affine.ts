@@ -142,10 +142,16 @@ export function inversePairError(
   inv: Matrix,
   points: Point[],
 ): number {
+  require(
+    Array.isArray(points) && points.length > 0,
+    'TRANSFORM',
+    'Inverse check extent must contain at least one point',
+  );
   let worst = 0;
   const fwd = compose2(m, inv);
   const bwd = compose2(inv, m);
   for (const p of points) {
+    assertVector(p, 2, 'extent point');
     const a = apply(fwd, p);
     const b = apply(bwd, p);
     worst = Math.max(
