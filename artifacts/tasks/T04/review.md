@@ -1,113 +1,42 @@
-# T04 Implementer Verification Notes — canonical geometry and transform conformance
+# Independent Peer Review — T04 (approved)
 
-**Status:** implemented, pending independent review. This file is the
-implementer's own verification record, not an approval; the coordinator
-replaces it with the committed independent review at acceptance time.
+**Reviewer:** devin-review-t04 (SWE-2 subagent, independent — did not write this code)
+**Candidate reviewed:** `e414d85` on `work/devin/t04` (implementation `7cda7a671c82e563e9bcc18f17dd63f6acb71f95`, base `c12e680`)
+**Date:** 2026-09-12 · **Verdict: approved**
 
-**Candidate:** `7cda7a671c82e563e9bcc18f17dd63f6acb71f95` on
-`work/devin/t04` (base `c12e680`).
+## Per-criterion verdicts — all PASS
 
-## What was built
+- All four rotations/nonzero origins/UserUnit worked examples ≤1e-5pt: F07 (geometry-0/90/180/270 + control), F08 (UserUnit 0.5/1/2/10), 10k-point deterministic round-trip. `near()`/`nearMat()` assert the real bound on every anchor and matrix component. Reviewer hand-recomputed canonical/D/C⁻¹/recover matrices, geometry-270 below_crop chain, geometry-90 text anchor, skew parallelogram — all match golden exactly. Negative-origin MediaBox exercised; UserUnit applied exactly once.
+- Singular transforms rejected: det≤1e-12 → `TRANSFORM` (0 and 1e-13 rejected, 1e-11 accepted); nonfinite/malformed → `NONFINITE`/`TYPE`.
+- estimated/page-only polygons obey schema: `polygon===null` iff page_only/unknown enforced at construction; 3..64-vertex non-degenerate otherwise; emitted records pass real `validate()`; 13 invalid constructions rejected with correct codes.
+- CSS/DPR criterion: sanctioned deferral per the criterion's own "once viewer integrates" clause; viewport zoom/pan vs independent goldens, page-bound records, DPR only at backingScale verified now.
 
-`packages/geometry/` (5 modules, ~1,150 LOC) over the T03 contract
-types — nothing redefines `Matrix`/`Point`/`Box`/`Page`/`Transform`/
-`Geometry`/`apply`/`inverse`/`ContractError`:
+## Substantiation
 
-- `affine.ts` — six-component `[a,b,c,d,e,f]` composition
-  (right-to-left, column vectors), determinant, contract `inverse`
-  (|det| <= 1e-12 -> `ContractError('TRANSFORM')`), 6-decimal storage
-  rounding with finite-only and -0 -> 0, and `checkedInverse` enforcing
-  the 1e-5pt pair bound on a caller-supplied extent.
-- `page.ts` — space ids (`pdf_user:pN`, `canonical:pN`, `display:pN`,
-  `raster:<id>`, `ocr:<id>`, `css:<viewport>`); `effectiveViewBox`
-  (CropBox ∩ MediaBox, crop defaults to media, empty intersection
-  rejected); `canonicalTransform` C = [u,0,0,-u,-u·cx0,u·cy1] — UserUnit
-  and the effective box enter exactly once; `displayRotation` for all
-  four quarter-turns; raster scale, OCR crop/resize, viewport
-  (zoom/pan) and `backingScale` (DPR only at the backing canvas);
-  contract record builders for every step plus composed math helpers
-  (D = R·C, P = S·R·C, O = K·T·S·R·C, recovery C·O⁻¹) and
-  page-checked chain composition.
-- `geometry.ts` — `makeTransform`/`makeGeometry` emitting
-  schema-shaped records with semantics enforced at construction:
-  stored matrix/inverse both rounded to 6dp, stored inverse within
-  1e-5/component of the exact inverse (the contract validator's rule),
-  storage-amplification guard (max|inverse|·5e-7 <= 2pt overlay
-  budget), `polygon === null` iff `page_only`/`unknown`, degenerate
-  polygons rejected, page binding via `ensurePage`/`ensureGeometryPage`.
-- `polygon.ts` — shoelace area, bounds, transform, point-in-polygon,
-  Sutherland–Hodgman `clipToView` returning honest
-  inside/partial/outside metadata with the untouched `source` polygon
-  always preserved (clipping is display metadata, never destructive).
+- Compose/inverse order verified by hand vs COORDINATES.md (`O = K·T·S·R·C`; `C·O⁻¹ = R⁻¹·S⁻¹·T⁻¹·K⁻¹`); stepwise chain equals composed output; ~200k randomized M·M⁻¹=I worst deviation 2.3e-10.
+- Independent expectations genuine: `derive_expectations.py` uses `fractions.Fraction` + closed-form per-rotation equations, two derivation paths asserted equal — never executes the TS. `expected.json` regenerates byte-identical (`--check` exit 0). Anchored on published worked example + PDFium probe grids + fixture sha256/manifest.
+- Clip honesty: inside/partial/outside correct on golden cases; source polygon deep-copied/untouched.
+- Schema parity: ID pattern, ≤16 transform_ids, operation enum, field limits match `inkflip.schema.json`.
+- Rerun reproduction: node 32/32 · task_acceptance T04 32/32 · pytest 6/6 · tsc -b exit 0 · derive --check fresh — all match commands.log.
 
-## How the tests derive expectations independently
+## Worker caveats adjudicated
 
-`tests/geometry/derive_expectations.py` builds `expected.json` with
-exact `fractions.Fraction` arithmetic AND separate closed-form
-per-rotation equations (the two paths are asserted to agree on a wide
-grid), anchored on the published COORDINATES.md worked example. The
-node suite additionally anchors display sizes on the executed PDFium
-probe's rendered pixel grids — expected values are never produced by
-inverting this package's own output.
+- `bun run verify` 1/49 failure confirmed T04-INDEPENDENT (T02 playwright install changed `test:browser` failure mode; identical without T04; documented in T02 commands.log:79-85 + proposal P2; fixed on main @7128350).
+- oxlint env-blocked confirmed (missing platform binding; not in registered acceptance).
+- Node 26.7.0 vs pinned 22.23.2 disclosed accurately; deterministic.
 
-`tests/geometry/report_helper.mjs` builds a minimal report so emitted
-geometry runs through the real contract `validate()`.
+## Scope & evidence
 
-## Executed results (see commands.log)
+15 files, all inside `packages/geometry/` + `tests/geometry/` + `artifacts/tasks/T04/`; planning/ untouched; no lockfile/manifest changes; receipt criteria cite only task-local paths.
 
-- `node --test tests/geometry/*.test.mjs`: 32/32, exit 0 (the
-  registered acceptance command; `task_acceptance.py task T04`
-  re-confirms 32/32 with no failures/evidence errors).
-- `uv run --project native python -m pytest tests/geometry -q`: 6/6.
-- `bun x --no-install tsc -b tsconfig.json --force`: whole
-  project-reference graph compiles clean.
-- `python3 tests/geometry/derive_expectations.py --check`: golden fresh.
-- `bun run verify`: 48/49 — sole failure is the pre-existing base issue
-  below.
-- `planning/` byte-identical; `bun.lock`/`native/uv.lock` untouched;
-  all changes inside `packages/geometry/` + `tests/geometry/` +
-  `artifacts/tasks/T04/`.
+## Non-blocking findings (follow-up to geometry owner)
 
-## Known limitations (honest, none blocking the criteria)
+1. LOW `clipToView` zero-area contact → `partial` + degenerate clipped polygon (`polygon.ts:183-199`); suggest treating zero-area clips as `outside`.
+2. LOW `extent ?? DEFAULT_EXTENT` lets `[]` bypass the inverse-pair check (`affine.ts:168-177`, `geometry.ts:154`); `require(extent.length>0)` closes it.
+3. INFO degenerate-area threshold 2× stricter than validator (conservative direction).
+4. INFO vacuous `assert.ok(maxErr >= 0)` at `geometry.test.mjs:800` (real bound asserted separately).
+5. INFO `pointInPolygon`/`mapPoint` exported but untested directly (probed correct; worth pinning).
 
-1. **Pre-existing base failure, not T04-caused:**
-   `tests/bootstrap` `test_declared_suite_with_missing_runner_fails`
-   expects `run test:browser` -> "prerequisites missing". Since T02
-   installed `@playwright/test`, the command now runs and fails at
-   "zero tests collected" instead. T02's commands.log documents the
-   identical effect with repoint proposal P2 (T01-owned file).
-   Confirmed identical with all T04 changes removed. The playwright
-   default glob incidentally also loads `*.test.mjs` files (contracts'
-   and geometry's) — the failure predates and is independent of them.
-2. **CSS/DPR criterion tail:** "p95<=2px, maximum 4px" is a
-   viewer-integrated measurement; no viewer exists yet (the criterion
-   itself says "once viewer integrates"). Executed now: viewport math,
-   page-bound viewport records, DPR-only-at-backing-canvas, and the
-   storage-rounding overlay bound (~1e-4pt ≪ 2pt). The integrated pixel
-   measurement remains deferred — not fabricated.
-3. **oxlint/oxfmt unavailable:** the bun isolated linker did not
-   materialize `@oxlint/binding-darwin-arm64` in this environment
-   (reproduced: `Cannot find module`); not part of registered
-   acceptance.
-4. **Node runtime:** tests ran on system Node v26.7.0; the repo pins
-   22.23.2 which is not installed here.
-5. **Probe coverage:** `native-probe.json` has no `geometry-control`
-   record, so the pixel-grid cross-check is gated on record presence;
-   the closed-form and Fraction-derived anchors cover it.
-6. **Stored-inverse chain bound:** chained 6dp-rounded inverses
-   accumulate ~2.3e-4pt on the exercised extent; asserted at a
-   documented 1e-3pt bound (≪ 2pt overlay budget). Per-record pairs and
-   exact-inverse chains hold the contract's 1e-5pt bound — the two
-   quantities are asserted separately, never conflated.
+## Verdict: approved
 
-## Suggested review focus
-
-- `geometry.ts` `makeTransform` extent/default-extent design and the
-  amplification guard constants.
-- `page.ts` `buildPage` explicit-view agreement check (1e-5) and the
-  pdf_user→canonical sign conventions against COORDINATES.md.
-- `polygon.ts` `clipToView` edge-inclusive semantics and the
-  inside/partial/outside classification rules.
-- `derive_expectations.py` — confirm the closed-form equations are
-  genuinely independent of `page.ts` (different code path, exact
-  arithmetic).
+All acceptance criteria substantiated with genuine independently-derived evidence; counts reproduce exactly; verify failure provably pre-existing and already fixed on main; scope and evidence honesty clean.

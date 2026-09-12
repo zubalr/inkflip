@@ -1,0 +1,3 @@
+node --test 'tests/geometry/*.test.mjs'
+
+Exit: 0
