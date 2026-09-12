@@ -74,6 +74,12 @@ export interface CropPlan {
   readonly paddingPx: number;
   /** Recorded OCR resize factor (post-crop downscale; 1 = none). */
   readonly resizeK: number;
+  /**
+   * Fractional-destination clipping in output px `[right, bottom]`,
+   * each in [0,1): the drawn destination is crop*resizeK while the
+   * integer canvas is outW x outH. [0,0] when nothing is clipped.
+   */
+  readonly resizeClipPx: readonly [number, number];
   /** OCR input size entering the engine after resize. */
   readonly outWidthPx: number;
   readonly outHeightPx: number;
@@ -115,13 +121,14 @@ export function canonicalToRaster(page: Page, scalePxPerPt: number): Matrix {
  * CropPlan.resizeK is the same stored value, so the recorded factor
  * must already be a six-decimal value.
  *
- * In-interval candidates are ordered nearest the midpoint and verified
- * against the floor products (a grid value can straddle lo/hi by an
- * ulp). When the interval is narrower than storage precision and holds
- * no representable value, the adjacent grid values — below, then above
- * — are returned instead; the caller re-derives the realized size from
- * the accepted factor, so the record and the realized output stay
- * consistent by construction.
+ * Exactly three constant candidates at the interval's lower edge
+ * (independent review, T10 arithmetic pass): `m = ceil(lo * 1e6)` is
+ * the smallest representable value not below the floor-realization
+ * lower bound; `m + 1` covers downward product rounding at a boundary;
+ * `m - 1` allows a bounded smaller realization when the upward
+ * candidates would push the output past a cap. The caller re-derives
+ * and re-verifies the realized size for each candidate, so the record
+ * and the realized output stay consistent by construction.
  */
 function recordedResizeK(
   cropW: number,
@@ -130,40 +137,8 @@ function recordedResizeK(
   outH: number,
 ): number[] {
   const lo = Math.max(outW / cropW, outH / cropH);
-  const hi = Math.min((outW + 1) / cropW, (outH + 1) / cropH);
-  const fits = (r: number): boolean =>
-    r > 0 &&
-    Math.floor(cropW * r) === outW &&
-    Math.floor(cropH * r) === outH;
-  const candidates: number[] = [];
-  // Representable grid: integer m with m/1e6 inside [lo, hi). The 1e-9
-  // tolerance keeps FP roundoff at exact multiples from dropping a
-  // valid grid value; the floor check is the real arbiter.
-  const mLo = Math.ceil(lo * 1e6 - 1e-9);
-  const mHi = Math.ceil(hi * 1e6 - 1e-9) - 1;
-  if (mLo <= mHi) {
-    const mMid = Math.min(
-      Math.max(Math.round(((lo + hi) / 2) * 1e6), mLo),
-      mHi,
-    );
-    for (let d = 0; mMid - d >= mLo || mMid + d <= mHi; d += 1) {
-      if (mMid + d <= mHi) {
-        const r = (mMid + d) / 1e6;
-        if (fits(r)) candidates.push(r);
-      }
-      if (d > 0 && mMid - d >= mLo) {
-        const r = (mMid - d) / 1e6;
-        if (fits(r)) candidates.push(r);
-      }
-    }
-  }
-  // Fallbacks for a sub-precision interval (or every in-interval grid
-  // value straddling an ulp boundary): below the interval the realized
-  // output only shrinks — caps still hold — while above it may grow by
-  // at most a pixel per axis and is re-checked against the caps.
-  candidates.push(Math.max(mLo - 1, 1) / 1e6);
-  candidates.push((mHi + 1) / 1e6);
-  return candidates;
+  const m = Math.ceil(lo * 1e6);
+  return [m / 1e6, (m + 1) / 1e6, (m - 1) / 1e6];
 }
 
 /**
@@ -259,8 +234,8 @@ export function planCrop(input: {
     'crop rectangle is empty after clipping to the raster',
   );
 
-  let cropW = x1 - x0;
-  let cropH = y1 - y0;
+  const cropW = x1 - x0;
+  const cropH = y1 - y0;
 
   // Bounded OCR input: downscale when the crop exceeds pixel or edge
   // caps; the actual factor is recorded in the ocr_resize transform
@@ -276,6 +251,8 @@ export function planCrop(input: {
   }
   let outW = cropW;
   let outH = cropH;
+  /** Fractional-destination clipping in output px: [right, bottom]. */
+  let resizeClip: readonly [number, number] = [0, 0];
   if (k < 1) {
     outW = Math.max(1, Math.floor(cropW * k));
     outH = Math.max(1, Math.floor(cropH * k));
@@ -287,15 +264,16 @@ export function planCrop(input: {
     );
     // The recorded factor maps recorded-space output pixels back to the
     // crop grid; it must floor-reproduce the realized integer output on
-    // both axes and survive the contract's storage rounding. Candidates
-    // inside the feasible interval keep the ideal size; a fallback
-    // candidate shifts the realized size by at most a pixel per axis,
-    // re-derived here so the record stays exact.
+    // both axes and survive the contract's storage rounding. The
+    // realized size is re-derived from each candidate so the record
+    // stays exact; zero-dimension outputs are rejected, never clamped.
     let matched = false;
     for (const r of recordedResizeK(cropW, cropH, outW, outH)) {
       const w = Math.floor(cropW * r);
       const h = Math.floor(cropH * r);
       if (
+        Number.isFinite(r) &&
+        r > 0 &&
         w >= 1 &&
         h >= 1 &&
         w * h <= bounds.maxRasterPixels &&
@@ -318,8 +296,21 @@ export function planCrop(input: {
       `downsampled: crop ${cropW}x${cropH}px exceeds caps; ` +
         `actual OCR scale ${round6(k)} (recorded in ocr_resize)`,
     );
-    cropW = outW;
-    cropH = outH;
+    // The renderer draws the source crop to the fractional destination
+    // cropW*k x cropH*k output px on the integer outW x outH canvas;
+    // the right/bottom remainder is clipped. Presence is decided on the
+    // actual computed difference (never storage rounding); each amount
+    // is in [0,1) output px — in source/page units the clipped content
+    // can be far larger under extreme downscale.
+    resizeClip = [cropW * k - outW, cropH * k - outH];
+    if (resizeClip[0] > 0 || resizeClip[1] > 0) {
+      limitations.push(
+        `ocr_resize_clipped: fractional destination ` +
+          `${cropW * k}x${cropH * k} exceeds integer OCR input ` +
+          `${outW}x${outH}; clipped right=${resizeClip[0]} ` +
+          `bottom=${resizeClip[1]} output px`,
+      );
+    }
   }
 
   const ocrId = `ocr_${checkId}`;
@@ -337,6 +328,7 @@ export function planCrop(input: {
     regionPx,
     paddingPx: pad,
     resizeK: round6(k),
+    resizeClipPx: resizeClip,
     outWidthPx: outW,
     outHeightPx: outH,
     ocrId,

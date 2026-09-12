@@ -182,6 +182,8 @@ export interface OcrCheckOutput {
     readonly regionPx: readonly [number, number, number, number] | null;
     readonly paddingPx: number;
     readonly resizeK: number;
+    /** Fractional-destination clipping, output px [right, bottom]. */
+    readonly resizeClipPx: readonly [number, number];
     readonly outWidthPx: number;
     readonly outHeightPx: number;
     readonly ocrId: string;
@@ -250,6 +252,13 @@ export interface OcrReaderConfig {
   readonly rasterSource: RasterSource;
   readonly budget?: Partial<OcrBudget>;
   readonly hooks?: OcrReaderHooks;
+  /**
+   * Test seam: canvas image smoothing for the crop drawImage. Default
+   * true (the canvas default); tests set false to make nearest-
+   * neighbor sampling of the recorded resize factor deterministic.
+   * Production callers leave it unset — quality defaults unchanged.
+   */
+  readonly imageSmoothingEnabled?: boolean;
 }
 
 const VALID_CHECK_ID = /^[a-z][a-z0-9_-]{0,95}$/;
@@ -258,6 +267,7 @@ const VALID_CHECK_ID = /^[a-z][a-z0-9_-]{0,95}$/;
 async function cropToBlob(
   raster: PageRaster,
   plan: CropPlan,
+  imageSmoothing: boolean,
 ): Promise<Blob> {
   const useOffscreen = typeof OffscreenCanvas !== 'undefined';
   const makeCanvas = (w: number, h: number): {
@@ -284,7 +294,14 @@ async function cropToBlob(
   };
 
   const { canvas, ctx } = makeCanvas(plan.outWidthPx, plan.outHeightPx);
+  ctx.imageSmoothingEnabled = imageSmoothing;
   const image = raster.image;
+  // The recorded ocr_resize factor IS the real destination scale: the
+  // source crop is drawn to crop*resizeK x crop*resizeK output pixels
+  // (fractional) on the integer canvas, which clips the sub-pixel
+  // right/bottom remainder — the same mapping the transform records.
+  const destW = plan.cropWidthPx * plan.resizeK;
+  const destH = plan.cropHeightPx * plan.resizeK;
   if (image instanceof ImageData) {
     const src = makeCanvas(image.width, image.height);
     src.ctx.putImageData(image, 0, 0);
@@ -296,8 +313,8 @@ async function cropToBlob(
       plan.cropHeightPx,
       0,
       0,
-      plan.outWidthPx,
-      plan.outHeightPx,
+      destW,
+      destH,
     );
   } else {
     ctx.drawImage(
@@ -308,8 +325,8 @@ async function cropToBlob(
       plan.cropHeightPx,
       0,
       0,
-      plan.outWidthPx,
-      plan.outHeightPx,
+      destW,
+      destH,
     );
   }
   if (useOffscreen) {
@@ -614,6 +631,7 @@ export class TesseractOcrReader {
         regionPx: null,
         paddingPx: 0,
         resizeK: 1,
+        resizeClipPx: [0, 0],
         outWidthPx: 0,
         outHeightPx: 0,
         ocrId: `ocr_${check.id}`,
@@ -759,7 +777,11 @@ export class TesseractOcrReader {
     this.runOcrPixels += pixelsOcr;
 
     // 4) Crop to an owned PNG blob (no external image URLs, ever).
-    const blob = await cropToBlob(raster, plan);
+    const blob = await cropToBlob(
+      raster,
+      plan,
+      this.cfg.imageSmoothingEnabled ?? true,
+    );
 
     // 5) Recognize with the recorded PSM; bounded by the check deadline.
     const worker = await this.ensureWorker();
@@ -874,6 +896,7 @@ export class TesseractOcrReader {
         regionPx: plan.regionPx,
         paddingPx: plan.paddingPx,
         resizeK: plan.resizeK,
+        resizeClipPx: plan.resizeClipPx,
         outWidthPx: plan.outWidthPx,
         outHeightPx: plan.outHeightPx,
         ocrId: plan.ocrId,
