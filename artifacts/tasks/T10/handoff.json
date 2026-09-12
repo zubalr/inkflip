@@ -43,7 +43,7 @@
       "merge_main_500abfc": "a5a270f",
       "implementation": "831e0a1",
       "tests": "567b482",
-      "evidence": "SEE_ARTIFACTS_COMMIT"
+      "evidence": "8fb1cee"
     },
     "evidence_paths": [
       "artifacts/tasks/T10/handoff.json",
