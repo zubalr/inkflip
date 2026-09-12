@@ -1,0 +1,5 @@
+uv run --project native python -m pytest native/tests/readers -q
+......................                                         [100%]
+22 passed, 10 subtests passed in 3.37s
+
+Exit: 0

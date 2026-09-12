@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "task_id": "T26",
+  "beads_id": "pdf-t26",
+  "disposition": "accepted",
+  "evaluated_commit": "d5856f1b58a1f88e81055a945e1b4adc8a267ffc",
+  "evaluated_at": "2026-09-12T01:48:10.353311+00:00",
+  "contract_digest": "6e0e8a8a4ae625a18c25019cf0c68451785b6dd2c3b1a51dcc5005d47e535f3a",
+  "worker": "zcode-t26",
+  "commands": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/readers -q",
+      "argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/readers",
+        "-q"
+      ],
+      "executed_argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/readers",
+        "-q",
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-zw0cx_cl/results"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 22,
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T26/commands.log": "e27df34d48e8e4e0e6cbf0c308c3ccf08804627fc5ff57b69950fdccb2588fea",
+    "artifacts/tasks/T26/coordinator-commands.log": "e96474d7deaf7faa4586309882ab46c817c8a20d6d4b00c48a1ca60433c05996",
+    "artifacts/tasks/T26/peer-review.md": "3fda6c032cb341e54c68c20cadb1e02fa67174b258dce8a5a9e553f5f84e5f89",
+    "artifacts/tasks/T26/receipt.json": "e08ab722a2016cfcfdbb947e270864913cbd0c5a7321d1e7835eca7a1731a065",
+    "artifacts/tasks/T26/review.md": "3fda6c032cb341e54c68c20cadb1e02fa67174b258dce8a5a9e553f5f84e5f89",
+    "artifacts/tasks/T26/run.json": "d115b2ee032eb8494bde3bafa35a798d36a08c493ddef5a0343764441bd37024"
+  },
+  "criteria": {
+    "Mapping/control/covered actual outputs preserved": [
+      "artifacts/tasks/T26/commands.log"
+    ],
+    "shared glyph boxes not split with guessed widths": [
+      "artifacts/tasks/T26/commands.log"
+    ],
+    "pypdf text stays page-only": [
+      "artifacts/tasks/T26/commands.log"
+    ],
+    "all rotations/origins map correctly": [
+      "artifacts/tasks/T26/commands.log"
+    ],
+    "malformed/encrypted failures isolated": [
+      "artifacts/tasks/T26/commands.log"
+    ],
+    "build/version manifest complete.": [
+      "artifacts/tasks/T26/commands.log"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "antigravity-review-t26"
+    ],
+    "path": "artifacts/tasks/T26/review.md"
+  }
+}
