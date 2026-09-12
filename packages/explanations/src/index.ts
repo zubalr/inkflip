@@ -36,6 +36,9 @@ export const COPY = {
   "finding.structural": "A supported structural check found this property",
   "finding.hypothesis": "Possible explanation · not established by this check",
   "finding.details": "How this was checked",
+  "finding.note": "Add a local note",
+  "finding.note.label": "Your interpretation (not a reader result)",
+  "finding.note.disclosure": "Notes remain local and are included in exports only when selected.",
   "coverage.title": "What was checked",
   "coverage.summary": "{completed} checks completed · {incomplete} incomplete or unsupported",
   "coverage.pages": "{selected} of {total} pages included in this run",
@@ -44,9 +47,12 @@ export const COPY = {
     "No localized differences were found in completed comparisons. This is not a document safety or correctness check.",
   "coverage.ocr.notrun":
     "Extracted text is ready. The rendered page has not been compared with OCR.",
+  "coverage.empty": "This reader returned no text from the checked page.",
   "coverage.normal_scan":
     "Searchable scans can contain invisible OCR text. That alone is not a problem.",
   "coverage.unsupported": "Not supported by this reader",
+  "coverage.unchecked": "Not checked",
+  "coverage.skipped": "Not run: {reason}",
   "progress.timeout": "This check reached its local time limit. Other completed results are kept.",
   "model.failure": "OCR could not start. This is a reader error, not an unreadable-page result.",
   "model.offline": "OCR data is not available offline yet. Extracted text remains available.",
@@ -64,22 +70,30 @@ export type TerminalStatusCategory =
   | "skipped";
 
 export interface StatusDetail {
+  checkId?: string;
   category: TerminalStatusCategory;
   label: string;
   description: string;
+  reason?: string | null;
   isError: boolean;
   isIncomplete: boolean;
 }
 
-export function categorizeCheckStatus(status: string, reason?: string | null): StatusDetail {
+export function categorizeCheckStatus(
+  status: string,
+  reason?: string | null,
+  checkId?: string,
+): StatusDetail {
   const normStatus = status.toLowerCase();
   const reasonText = (reason || "").toLowerCase();
 
   if (normStatus === "completed") {
     return {
+      checkId,
       category: "completed",
       label: "Completed",
       description: "Requested check finished successfully.",
+      reason: null,
       isError: false,
       isIncomplete: false,
     };
@@ -87,9 +101,11 @@ export function categorizeCheckStatus(status: string, reason?: string | null): S
 
   if (normStatus === "timeout") {
     return {
+      checkId,
       category: "timeout",
       label: "Timed out",
       description: COPY["progress.timeout"],
+      reason: reason || null,
       isError: true,
       isIncomplete: true,
     };
@@ -97,9 +113,11 @@ export function categorizeCheckStatus(status: string, reason?: string | null): S
 
   if (normStatus === "unsupported") {
     return {
+      checkId,
       category: "unsupported",
       label: "Unsupported",
       description: COPY["coverage.unsupported"],
+      reason: reason || null,
       isError: false,
       isIncomplete: true,
     };
@@ -107,9 +125,11 @@ export function categorizeCheckStatus(status: string, reason?: string | null): S
 
   if (normStatus === "cancelled") {
     return {
+      checkId,
       category: "cancelled",
       label: "Cancelled",
       description: COPY["progress.cancelled"],
+      reason: reason || null,
       isError: false,
       isIncomplete: true,
     };
@@ -117,9 +137,13 @@ export function categorizeCheckStatus(status: string, reason?: string | null): S
 
   if (normStatus === "skipped") {
     return {
+      checkId,
       category: "skipped",
       label: "Skipped",
-      description: reason ? `Not run: ${reason}` : "Check was not run.",
+      description: reason
+        ? COPY["coverage.skipped"].replace("{reason}", reason)
+        : COPY["coverage.unchecked"],
+      reason: reason || null,
       isError: false,
       isIncomplete: true,
     };
@@ -134,18 +158,22 @@ export function categorizeCheckStatus(status: string, reason?: string | null): S
     reasonText.includes("checksum")
   ) {
     return {
+      checkId,
       category: "model_missing",
       label: "Model missing",
       description: reasonText.includes("offline") ? COPY["model.offline"] : COPY["model.failure"],
+      reason: reason || null,
       isError: true,
       isIncomplete: true,
     };
   }
 
   return {
+    checkId,
     category: "failed",
     label: "Failed",
     description: reason || COPY["progress.failed"],
+    reason: reason || null,
     isError: true,
     isIncomplete: true,
   };
@@ -174,8 +202,35 @@ export interface FindingExplanation {
 
 const MATERIAL_TOKEN_RE = /[$€£¥₹\d+-]/;
 
-export function isMaterialTokenDifference(readings: ReadingItem[]): boolean {
-  return readings.some((r) => MATERIAL_TOKEN_RE.test(r.readingText));
+export function isMaterialTokenDifference(
+  readings: ReadingItem[],
+  findingPriority?: string,
+): boolean {
+  if (findingPriority) {
+    return findingPriority === "material_token";
+  }
+  if (readings.length < 2) return false;
+  // Inspect only the tokens that actually differ between comparative readings
+  const text0 = readings[0].readingText;
+  const differing = readings.slice(1).some((r) => r.readingText !== text0);
+  if (!differing) return false;
+
+  const tokens0 = new Set(text0.split(/\s+/));
+  for (let i = 1; i < readings.length; i++) {
+    const tokensI = readings[i].readingText.split(/\s+/);
+    for (const t of tokensI) {
+      if (!tokens0.has(t) && MATERIAL_TOKEN_RE.test(t)) {
+        return true;
+      }
+    }
+    const setI = new Set(tokensI);
+    for (const t of tokens0) {
+      if (!setI.has(t) && MATERIAL_TOKEN_RE.test(t)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export function explainFinding(
@@ -213,7 +268,9 @@ export function explainFinding(
     };
   });
 
-  const isMaterial = finding.priority === "material_token" || isMaterialTokenDifference(readings);
+  const isMaterial =
+    finding.priority === "material_token" ||
+    (finding.priority !== "ordinary" && isMaterialTokenDifference(readings, finding.priority));
 
   let title = finding.title;
   let explanation = finding.explanation;
@@ -330,7 +387,7 @@ export function explainCoverage(
   const statusDetails: StatusDetail[] = [];
 
   for (const chk of checks) {
-    const detail = categorizeCheckStatus(chk.status, chk.reason);
+    const detail = categorizeCheckStatus(chk.status, chk.reason, chk.id);
     statusDetails.push(detail);
     breakdown[detail.category] = (breakdown[detail.category] || 0) + 1;
   }

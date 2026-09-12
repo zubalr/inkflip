@@ -86,6 +86,18 @@
   color: var(--color-muted);
 }
 
+.statFailed .statValue {
+  color: var(--color-error-text);
+}
+
+.statCancelled .statValue {
+  color: var(--color-muted);
+}
+
+.statSkipped .statValue {
+  color: var(--color-muted);
+}
+
 .statusList {
   display: flex;
   flex-direction: column;
@@ -96,11 +108,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-control);
   background: var(--color-canvas);
   border: 1px solid var(--color-line);
   font-size: 13px;
+}
+
+.statusRowContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statusDescription {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.statusReason {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.statusCheckId {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted);
 }
 
 .statusBadge {
@@ -109,6 +144,7 @@
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badgeTimeout {
@@ -126,6 +162,24 @@
 .badgeUnsupported {
   background: var(--color-canvas);
   color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+
+.badgeFailed {
+  background: var(--color-error-surface);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
+.badgeCancelled {
+  background: var(--color-surface-subtle);
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+
+.badgeSkipped {
+  background: var(--color-surface-subtle);
+  color: var(--color-ink);
   border: 1px solid var(--color-line);
 }
 

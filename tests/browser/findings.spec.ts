@@ -117,6 +117,12 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
     expect(joined).toContain("Model missing");
     expect(joined).toContain("Unsupported");
 
+    // Verify check identity and recorded reason are rendered distinctly (P2-2)
+    expect(joined).toContain("chk-2");
+    expect(joined).toContain("chk-3");
+    expect(joined).toContain("chk-4");
+    expect(joined).toContain("Page 0 timed out after 10000ms");
+
     await page.screenshot({
       path: "artifacts/tasks/T14/screenshots/incomplete-statuses.png",
       fullPage: true,
@@ -224,5 +230,63 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
     );
 
     expect(seriousOrCritical).toEqual([]);
+  });
+
+  test("criterion 7: failed, cancelled, and skipped checks have distinct stat cards and badges (P2-1, P2-2)", async ({
+    page,
+  }) => {
+    await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=all-terminal-statuses`);
+    await page.waitForSelector('[role="group"][aria-label="Check statistics"]');
+
+    // All terminal categories have distinct stat cards
+    await expect(page.locator("#stat-timeout")).toBeVisible();
+    await expect(page.locator("#stat-model-missing")).toBeVisible();
+    await expect(page.locator("#stat-unsupported")).toBeVisible();
+    await expect(page.locator("#stat-failed")).toBeVisible();
+    await expect(page.locator("#stat-cancelled")).toBeVisible();
+    await expect(page.locator("#stat-skipped")).toBeVisible();
+
+    // Check distinct badge styling in status list
+    const failedRow = page.locator("#check-status-failed-chk-failed");
+    await expect(failedRow).toBeVisible();
+    expect(await failedRow.textContent()).toContain("Failed");
+    expect(await failedRow.textContent()).toContain("chk-failed");
+    expect(await failedRow.textContent()).toContain("Decoder crashed with syntax error");
+
+    const cancelledRow = page.locator("#check-status-cancelled-chk-cancelled");
+    await expect(cancelledRow).toBeVisible();
+    expect(await cancelledRow.textContent()).toContain("Cancelled");
+    expect(await cancelledRow.textContent()).toContain("chk-cancelled");
+
+    const skippedRow = page.locator("#check-status-skipped-chk-skipped");
+    await expect(skippedRow).toBeVisible();
+    expect(await skippedRow.textContent()).toContain("Skipped");
+    expect(await skippedRow.textContent()).toContain("chk-skipped");
+    expect(await skippedRow.textContent()).toContain("Not run: Feature flag disabled");
+  });
+
+  test("criterion 8: local notes and annotations render distinctly with non-reader label (P2-3)", async ({
+    page,
+  }) => {
+    await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=normal-scan`);
+    await page.waitForSelector("#note-note-1");
+
+    const noteCard = page.locator("#note-note-1");
+    await expect(noteCard).toBeVisible();
+    expect(await noteCard.textContent()).toContain(
+      "Verified manual ledger entry matches PDFium amount.",
+    );
+    expect(await noteCard.textContent()).toContain("Reviewer Audit");
+
+    // Must carry the clear disclaimer that it's human interpretation, not reader result
+    const notesSection = page.locator('[role="region"][aria-label="Local notes"]');
+    expect(await notesSection.textContent()).toContain("Your interpretation (not a reader result)");
+    expect(await notesSection.textContent()).toContain(
+      "Notes remain local and are included in exports only when selected.",
+    );
+
+    // Add note affordance exists
+    const addNoteBtn = page.locator("#btn-add-note-f-amount-1");
+    await expect(addNoteBtn).toBeVisible();
   });
 });

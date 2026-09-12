@@ -4,7 +4,7 @@
   "disposition": "implemented_pending_review",
   "branch": "work/antigravity/t14",
   "base_commit": "546accd220a09e0fa071850671b532918d67f8b5",
-  "implementation_commit": "2cf02941f12b4e208e7de7a5dc55cadaf3854d36",
+  "implementation_commit": "e1566ea5e564742fcef088132194c29faf68ebef",
   "actor": "antigravity-t14",
   "model": "Gemini 3.8 Flash via Antigravity",
   "contract_version": "1.0.0",
@@ -21,7 +21,7 @@
     },
     "timed-out/model-missing/unsupported are distinct": {
       "status": "executed",
-      "detail": "Verified by Playwright test (tests/browser/findings.spec.ts: test 2) and CoveragePanel/explainCoverage implementation. The terminal check categories timeout, model_missing, and unsupported are strictly segregated into distinct numeric breakdown cards (#stat-timeout, #stat-model-missing, #stat-unsupported) and itemized status rows with distinct badges and non-conflated descriptions (Invariant I05).",
+      "detail": "Verified by Playwright tests (tests/browser/findings.spec.ts: tests 2 and 7) and CoveragePanel/explainCoverage implementation. The terminal check categories timeout, model_missing, unsupported, failed, cancelled, and skipped are strictly segregated into distinct numeric breakdown cards (#stat-timeout, #stat-model-missing, #stat-unsupported, #stat-failed, #stat-cancelled, #stat-skipped) and itemized status rows with distinct badges, check ids, and non-conflated recorded reasons (Invariant I05, P2-1, P2-2).",
       "evidence": [
         "artifacts/tasks/T14/commands.log",
         "artifacts/tasks/T14/screenshots/incomplete-statuses.png",
@@ -39,7 +39,7 @@
     },
     "explanations come from deterministic templates and actual recorded evidence, not generated truth claims.": {
       "status": "executed",
-      "detail": "Verified by Playwright tests (tests/browser/findings.spec.ts: tests 4 and 5) and packages/explanations engine. Explanations derive strictly from frozen copy templates and actual recorded occurrence text/coordinates without generative guessing or truth adjudication. Comparative readings render reader names, versions, occurrence ordinals, and verbatim text readings side-by-side with expandable 'How this was checked' disclosures and review priority sorting (selected > material_token > ordinary > informational).",
+      "detail": "Verified by Playwright tests (tests/browser/findings.spec.ts: tests 4, 5, 8) and packages/explanations engine. Explanations derive strictly from frozen copy templates and actual recorded occurrence text/coordinates without generative guessing or truth adjudication. Priority classification respects recorded priority (ordinary vs material_token) and only flags differing currency/digit tokens (P1-1). Comparative readings render reader names, versions, occurrence ordinals, and verbatim text readings side-by-side with expandable 'How this was checked' disclosures and review priority sorting (selected > material_token > ordinary > informational). Local notes render distinctly with non-reader disclaimer (P2-3).",
       "evidence": [
         "artifacts/tasks/T14/commands.log",
         "artifacts/tasks/T14/screenshots/findings-card.png",
@@ -52,19 +52,14 @@
     "log": "artifacts/tasks/T14/commands.log",
     "key_results": [
       {
-        "command": "bun run build:packages",
-        "exit": 0,
-        "detail": "Clean package compilation"
-      },
-      {
         "command": "bun run build:web",
         "exit": 0,
-        "detail": "Clean static build in 159ms"
+        "detail": "Clean static build in 198ms"
       },
       {
         "command": "bun run test:browser -- tests/browser/findings.spec.ts",
         "exit": 0,
-        "detail": "6 collected, 6 passed, 0 failed, 0 skipped against live mounted React features via Vite"
+        "detail": "8 collected, 8 passed, 0 failed, 0 skipped against live mounted React features via Vite in 2.7s"
       },
       {
         "command": "bun run verify",
@@ -74,7 +69,7 @@
       {
         "command": "python3 scripts/task_acceptance.py task T14 --report artifacts/tasks/T14/run.json",
         "exit": 0,
-        "detail": "Evaluated commit 2cf02941f12b4e208e7de7a5dc55cadaf3854d36 with 6 collected, 6 passed, 0 failures, 0 evidence errors"
+        "detail": "Evaluated commit e1566ea5e564742fcef088132194c29faf68ebef with 8 collected, 8 passed, 0 failures, 0 evidence errors"
       },
       {
         "command": "python3 scripts/acceptance_receipts.py verify-run T14",

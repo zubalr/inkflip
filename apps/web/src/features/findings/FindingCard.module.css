@@ -147,6 +147,86 @@
 .actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--space-2);
   margin-top: var(--space-1);
+}
+
+.notesSection {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.noteLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+}
+
+.noteCard {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.noteText {
+  font-size: 13px;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.noteAuthor {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.noteDisclosure {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.addNoteBtn {
+  background: transparent;
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.addNoteBtn:hover {
+  border-color: var(--color-ink);
+}
+
+.noteInputArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.noteInput {
+  width: 100%;
+  padding: var(--space-2);
+  font-size: 13px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-sizing: border-box;
 }

@@ -1,23 +1,21 @@
 {
   "task": "T14",
   "worker": "antigravity-t14",
-  "implementation_commit": "2cf02941f12b4e208e7de7a5dc55cadaf3854d36",
+  "implementation_commit": "e1566ea5e564742fcef088132194c29faf68ebef",
   "branch": "work/antigravity/t14",
   "base_commit": "546accd220a09e0fa071850671b532918d67f8b5",
   "status": "implemented_pending_review",
   "executed_commands": [
-    "bun run build:packages (clean)",
-    "bun run build:web (clean in 159ms)",
-    "bun run test:browser -- tests/browser/findings.spec.ts (6 passed, exit 0)",
+    "bun run build:web (clean in 198ms)",
+    "bun run test:browser -- tests/browser/findings.spec.ts (8 passed in 2.7s, exit 0)",
     "bun run verify (116/116 passed, exit 0)",
     "python3 scripts/task_acceptance.py task T14 --report artifacts/tasks/T14/run.json (exit 0)",
     "python3 scripts/acceptance_receipts.py verify-run T14 (exit 0)"
   ],
-  "failures": "None in final run. (Initial test run encountered missing element IDs on FindingsList; added id='findings-noalert' and id='findings-list', after which all 6 tests passed cleanly).",
+  "failures": "None in final run.",
   "evidence_paths": [
     "artifacts/tasks/T14/receipt.json",
     "artifacts/tasks/T14/commands.log",
-    "artifacts/tasks/T14/review.md",
     "artifacts/tasks/T14/run.json",
     "artifacts/tasks/T14/handoff.json",
     "artifacts/tasks/T14/handoff.md",
@@ -28,7 +26,7 @@
     "artifacts/tasks/T14/screenshots/amount-diff.png"
   ],
   "next_steps": [
-    "Independent peer review by Devin Local on work/antigravity/t14 (implementation commit 2cf02941f12b4e208e7de7a5dc55cadaf3854d36).",
+    "Independent peer review by Devin Local on work/antigravity/t14 (implementation commit e1566ea5e564742fcef088132194c29faf68ebef).",
     "Devin Local coordinator records merged-branch acceptance receipt and closes pdf-t14 in Beads.",
     "Merge work/antigravity/t14 into canonical main."
   ],

@@ -67,6 +67,27 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({
             <span className={styles.statLabel}>Unsupported</span>
           </div>
         )}
+
+        {breakdown.failed > 0 && (
+          <div className={`${styles.statCard} ${styles.statFailed}`} id="stat-failed">
+            <span className={styles.statValue}>{breakdown.failed}</span>
+            <span className={styles.statLabel}>Failed</span>
+          </div>
+        )}
+
+        {breakdown.cancelled > 0 && (
+          <div className={`${styles.statCard} ${styles.statCancelled}`} id="stat-cancelled">
+            <span className={styles.statValue}>{breakdown.cancelled}</span>
+            <span className={styles.statLabel}>Cancelled</span>
+          </div>
+        )}
+
+        {breakdown.skipped > 0 && (
+          <div className={`${styles.statCard} ${styles.statSkipped}`} id="stat-skipped">
+            <span className={styles.statValue}>{breakdown.skipped}</span>
+            <span className={styles.statLabel}>Skipped</span>
+          </div>
+        )}
       </div>
 
       {/* Normal Invisible Scan Notice (I11: informative, never a warning solely for invisibility) */}
@@ -94,27 +115,40 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({
         <div className={styles.statusList} role="list" aria-label="Incomplete checks detail">
           {coverage.statusDetails
             .filter((d) => d.isIncomplete)
-            .map((detail, idx) => (
-              <div
-                key={idx}
-                className={styles.statusRow}
-                role="listitem"
-                id={`check-status-${detail.category}-${idx}`}
-              >
-                <span>{detail.description}</span>
-                <span
-                  className={`${styles.statusBadge} ${
-                    detail.category === "timeout"
-                      ? styles.badgeTimeout
-                      : detail.category === "model_missing"
-                      ? styles.badgeModelMissing
-                      : styles.badgeUnsupported
-                  }`}
+            .map((detail, idx) => {
+              const badgeClass =
+                detail.category === "timeout"
+                  ? styles.badgeTimeout
+                  : detail.category === "model_missing"
+                    ? styles.badgeModelMissing
+                    : detail.category === "unsupported"
+                      ? styles.badgeUnsupported
+                      : detail.category === "failed"
+                        ? styles.badgeFailed
+                        : detail.category === "cancelled"
+                          ? styles.badgeCancelled
+                          : styles.badgeSkipped;
+
+              return (
+                <div
+                  key={detail.checkId || idx}
+                  className={styles.statusRow}
+                  role="listitem"
+                  id={`check-status-${detail.category}-${detail.checkId || idx}`}
                 >
-                  {detail.label}
-                </span>
-              </div>
-            ))}
+                  <div className={styles.statusRowContent}>
+                    <span className={styles.statusDescription}>{detail.description}</span>
+                    {detail.reason && detail.description !== detail.reason && (
+                      <span className={styles.statusReason}>{detail.reason}</span>
+                    )}
+                    {detail.checkId && (
+                      <span className={styles.statusCheckId}>{detail.checkId}</span>
+                    )}
+                  </div>
+                  <span className={`${styles.statusBadge} ${badgeClass}`}>{detail.label}</span>
+                </div>
+              );
+            })}
         </div>
       )}
     </section>
