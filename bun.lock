@@ -63,6 +63,9 @@
       "version": "0.0.0",
     },
   },
+  "patchedDependencies": {
+    "tesseract.js@7.0.0": "patches/tesseract.js@7.0.0.patch",
+  },
   "packages": {
     "@axe-core/playwright": ["@axe-core/playwright@4.13.0", "", { "dependencies": { "axe-core": "~4.13.0" }, "peerDependencies": { "playwright-core": ">= 1.0.0" } }, "sha512-6YLx+kxXu5GJceG4ozFg+33a2EMTdjYwWGloJ3sb9Kta5pp+ZNS53uxGVog5JetIY8s++P5UrtX+cri+u0VAVg=="],
 

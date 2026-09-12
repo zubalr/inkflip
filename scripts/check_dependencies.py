@@ -382,6 +382,51 @@ def check_no_runtime_download() -> None:
             "web sources carry no remote script/worker/fetch or CDN reference")
 
 
+def check_file_digest(path: Path, expected: str, name: str) -> None:
+    try:
+        actual, _ = prepare_assets.sha256_file(path)
+    except OSError as error:
+        fail(name, f"cannot read {path.name}: {error.strerror}")
+        return
+    require(actual == expected, name, f"SHA-256 mismatch for {path.name}",
+            f"{path.name} SHA-256 matches recorded provenance")
+
+
+def check_dependency_patch() -> None:
+    """Bind the installed client constructor and Bun declarations to its patch."""
+    record = load_json(ROOT / "config/dependency-patches.json", "patch.provenance") or {}
+    entry = record.get("tesseract.js@7.0.0")
+    if not isinstance(entry, dict):
+        fail("patch.provenance", "missing pinned tesseract.js@7.0.0 patch record")
+        return
+    patch_path = "patches/tesseract.js@7.0.0.patch"
+    expected = {"tesseract.js@7.0.0": patch_path}
+    package = load_json(ROOT / "package.json", "patch.package") or {}
+    try:
+        lock = json.loads(jsonc_to_json((ROOT / "bun.lock").read_text()))
+        installed = prepare_assets.package_root("tesseract.js")
+    except (OSError, json.JSONDecodeError, prepare_assets.AssetError) as error:
+        fail("patch.install", str(error))
+        return
+    for label, actual in [("manifest", package.get("patchedDependencies")),
+                          ("lock", lock.get("patchedDependencies"))]:
+        require(actual == expected, f"patch.{label}", "patch declaration missing or different",
+                "exact pinned patch declaration matches")
+    installed_meta = load_json(installed / "package.json", "patch.installed-package") or {}
+    require((installed_meta.get("name"), installed_meta.get("version")) == ("tesseract.js", "7.0.0"),
+            "patch.version", "installed package identity differs", "installed package is tesseract.js@7.0.0")
+    require(entry.get("patch_path") == patch_path, "patch.path",
+            "unexpected patch path", "patch path matches provenance")
+    check_file_digest(ROOT / patch_path, entry.get("patch_sha256"), "patch.bytes")
+    files = entry.get("files", {})
+    required_files = {"src/createWorker.js", "src/index.d.ts"}
+    require(set(files) == required_files, "patch.files", "unexpected patched file set",
+            "constructor and public types are the complete patched file set")
+    for relative in sorted(required_files):
+        check_file_digest(installed / relative, files.get(relative, {}).get("patched_sha256"),
+                          f"patch.installed.{relative}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -391,6 +436,7 @@ def main() -> int:
 
     check_toolchain()
     check_bun_lock()
+    check_dependency_patch()
     check_uv_lock()
     check_assets()
     check_base_image_lock()

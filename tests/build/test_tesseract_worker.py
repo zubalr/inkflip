@@ -1,0 +1,25 @@
+"""Run the installed pinned constructor's lifecycle regressions in TEST-02."""
+from pathlib import Path
+import subprocess
+import re
+import unittest
+
+
+class TesseractWorkerTests(unittest.TestCase):
+    def test_installed_constructor_lifecycle(self):
+        self.run_node("tests/build/tesseract-worker.test.mjs")
+
+    def test_real_browser_worker_lifecycle(self):
+        self.run_node("tests/build/tesseract-browser.test.mjs")
+
+    def run_node(self, path):
+        root = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            ["node", "--test", "--test-reporter=tap", path],
+            cwd=root, text=True, capture_output=True, timeout=90,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        counts = dict(re.findall(r"^# (tests|pass|fail|cancelled|skipped) (\d+)$", result.stdout, re.M))
+        self.assertGreater(int(counts["tests"]), 0)
+        self.assertEqual(counts["tests"], counts["pass"])
+        self.assertEqual([counts[key] for key in ("fail", "cancelled", "skipped")], ["0"] * 3)

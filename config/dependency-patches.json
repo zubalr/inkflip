@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "tesseract.js@7.0.0": {
+    "patch_path": "patches/tesseract.js@7.0.0.patch",
+    "patch_sha256": "0b986b30a78d337f1f1b9392b23364bfab2029477e7034a761429f027fce4c35",
+    "upstream_source": "https://github.com/naptha/tesseract.js/tree/v7.0.0",
+    "license": "Apache-2.0",
+    "purpose": "AbortSignal lifetime cancellation of the existing worker constructor, including initialization rejection and outstanding jobs. Existing protocol and staged worker/core/model assets are unchanged. Source package entry must be bundled; unpatched prebuilt client dist is unsupported.",
+    "files": {
+      "src/createWorker.js": {
+        "upstream_sha256": "730c82036c801416256cdbf4bf36df934b0f25f2dcb3913454bccd9e2cfdb857",
+        "patched_sha256": "11d687cf60deee6cdf428d16ee1f5e83a3f906aa6825b0c2da3781840cc96c9c"
+      },
+      "src/index.d.ts": {
+        "upstream_sha256": "d09a2a53da56d20aeac85e4f0b69f2ef799d73f1186b3abf93d32388ab431fe1",
+        "patched_sha256": "ff8d1a31718dc333af583f89e081488f209ca3ba867813e64f582eef84633dd1"
+      }
+    }
+  }
+}
