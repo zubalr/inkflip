@@ -9,13 +9,20 @@ with fixed argv and ``shell=False`` ..."), ``planning/architecture/COORDINATES.m
 Discipline implemented here:
 
 * Fixed argv, ``shell=False``: ``[tesseract, <private>/input.png, stdout,
-  --psm <n>, tsv]``. The caller never names files: the crop is written under a
-  neutral name inside a private temporary directory, and ``language`` is
-  validated against ``^[a-z0-9_-]{1,32}$`` so no option injection is possible.
-* No URL or runtime model fetch: the traineddata file is located on disk next
-  to the binary (or via ``TESSDATA_PREFIX``) and hashed. A missing model is a
-  distinct typed failure from a missing binary, an undecodable raster
-  (``unreadable_pixels``) or a wall-time timeout.
+  --psm <n>, -l <language>, --tessdata-dir <resolved>, tsv]``. The caller never
+  names files: the crop is written under a neutral name inside a private
+  temporary directory, and ``language`` is validated against
+  ``^[a-z0-9_-]{1,32}$`` so no option injection is possible. The language and
+  tessdata directory are selected explicitly in argv, so the recorded manifest
+  identity is exactly what the invoked engine loads.
+* No URL or runtime model fetch: the traineddata file is located on disk and
+  hashed. An explicit ``TESSDATA_PREFIX`` is authoritative (the engine reads
+  the same variable) and is never silently overridden or supplemented;
+  without it, candidate directories next to the (symlink-resolved) binary are
+  probed per language, so a directory is only used when it actually holds
+  ``<language>.traineddata``. A missing model is a distinct typed failure from
+  a missing binary, an undecodable raster (``unreadable_pixels``) or a
+  wall-time timeout.
 * Context padding is 8 raster pixels or 10 % of the region height (larger),
   clipped to the raster. Original region and padded crop are kept separately;
   the crop/resize transform ``O`` is recorded with its explicit inverse so TSV
@@ -46,12 +53,17 @@ from typing import Callable
 from PIL import Image
 
 READER_ID = "tesseract-native"
+# Pinned by the shared contract schema ($defs/Reader.adapter_version const);
+# behavior changes are documented in the task evidence instead.
 ADAPTER_VERSION = "1.0.0"
 DEFAULT_LANGUAGE = "eng"
-# Measured on the T05 fixtures: PSM 6 (uniform block) drops the isolated
-# '$100' amount line on the F01 render; the native full-page default is
-# tesseract's own automatic segmentation (PSM 3). A deliberately single-line
-# user region uses PSM 7; the choice is recorded on the emitted occurrences.
+# Measured on the T05 fixtures (macOS implementation run): PSM 6 (uniform
+# block) dropped the isolated '$100' amount line there; the native full-page
+# default is tesseract's own automatic segmentation (PSM 3). The Linux amd64
+# spot-check of 2026-09-12 (artifacts/tasks/T27/psm6-spotcheck.log) read the
+# line under PSM 6 as well, so the default is kept pending the coordinator's
+# contract decision. A deliberately single-line user region uses PSM 7; the
+# choice is recorded on the emitted occurrences.
 DEFAULT_PSM = 3
 SINGLE_LINE_PSM = 7
 CONTEXT_PADDING_MIN_PX = 8
@@ -131,33 +143,49 @@ def _binary_path(explicit: str | os.PathLike | None) -> Path:
     return Path(found)
 
 
-def _tessdata_dir(binary: Path) -> Path | None:
+def _tessdata_candidates(binary: Path) -> list[Path]:
+    """Ordered tessdata candidates. An explicit ``TESSDATA_PREFIX`` is
+    authoritative — tesseract itself reads the same variable — so it is never
+    silently overridden or supplemented: a model missing there is a missing
+    model, full stop. Without it, directories next to the (symlink-resolved)
+    binary are probed, mirroring the engine's relative fallback."""
     env = os.environ.get("TESSDATA_PREFIX")
-    candidates = []
     if env:
-        candidates.append(Path(env))
-    candidates.extend(
-        [
-            binary.parent.parent / "share" / "tessdata",
-            binary.parent / "tessdata",
-        ]
-    )
+        return [Path(env)]
+    resolved = binary.resolve()
+    candidates = [
+        resolved.parent.parent / "share" / "tessdata",
+        resolved.parent / "tessdata",
+        binary.parent.parent / "share" / "tessdata",
+        binary.parent / "tessdata",
+    ]
+    unique: list[Path] = []
     for candidate in candidates:
-        if candidate.is_dir():
+        if candidate not in unique:
+            unique.append(candidate)
+    return unique
+
+
+def _tessdata_dir(binary: Path, language: str) -> Path | None:
+    """The directory whose ``<language>.traineddata`` the engine will load:
+    candidates are probed per language, not first-existing-directory-wins
+    (a directory without the requested model never shadows a later one)."""
+    for candidate in _tessdata_candidates(binary):
+        if (candidate / f"{language}.traineddata").is_file():
             return candidate
     return None
 
 
 def model_digest(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> tuple[str | None, Path | None]:
-    """Exact local traineddata hash; located on disk, never fetched."""
+    """Exact local traineddata hash; located on disk, never fetched. The
+    returned path is the file whose bytes are hashed and the exact file the
+    engine is pointed at via ``--tessdata-dir``."""
     if not LANGUAGE_PATTERN.match(language):
         raise AdapterError("unsupported", "invalid language identifier")
-    tessdata = _tessdata_dir(_binary_path(binary))
+    tessdata = _tessdata_dir(_binary_path(binary), language)
     if tessdata is None:
         return None, None
     trained = tessdata / f"{language}.traineddata"
-    if not trained.is_file():
-        return None, tessdata
     return hashlib.sha256(trained.read_bytes()).hexdigest(), trained
 
 
@@ -175,7 +203,7 @@ def _version(binary: Path) -> str:
 def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> dict:
     """Complete reader manifest (schema $defs/Reader + ReaderManifest)."""
     binary = _binary_path(binary)
-    digest, _ = model_digest(binary, language)
+    digest, trained = model_digest(binary, language)
     version_line = _version(binary)
     version = version_line.split()[-1] if version_line else ""
     return {
@@ -208,7 +236,16 @@ def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> di
                         "crop padding is 8 raster px or 10% of region height (larger), "
                         "clipped to the raster; original region and padded crop are "
                         "kept separately",
-                    ],
+                    ]
+                    + (
+                        [
+                            "model identity: engine is invoked with -l "
+                            f"{language} --tessdata-dir {trained.parent}; the hashed "
+                            "model file is the exact file the engine loads"
+                        ]
+                        if trained
+                        else []
+                    ),
                 }
             ],
             "model_hashes": [digest] if digest else [],
@@ -239,12 +276,16 @@ def open_raster(
         raise AdapterError("parser_error", "raster digest mismatch")
     try:
         with Image.open(BytesIO(data)) as image:
-            image.load()
+            # Budget check on the declared size BEFORE decode: a hostile or
+            # accidental oversized header must not allocate first (F6).
             width, height = image.size
+            if width * height > MAX_RASTER_PIXELS:
+                raise AdapterError("resource_limit", "raster exceeds pixel budget")
+            image.load()
+    except AdapterError:
+        raise
     except Exception as error:
         raise AdapterError("unreadable_pixels", "raster is not a decodable image") from error
-    if width * height > MAX_RASTER_PIXELS:
-        raise AdapterError("resource_limit", "raster exceeds pixel budget")
     if render_meta is not None:
         scale = render_meta.get("raster_scale_px_per_pt")
         if scale is not None and (not isinstance(scale, (int, float)) or scale <= 0):
@@ -259,6 +300,50 @@ def open_raster(
     )
 
 
+def _validate_rect(rect: object, handle: RasterHandle, label: str) -> tuple[int, int, int, int]:
+    """A crop rectangle is a 4-sequence of integers inside the raster; every
+    violation is a typed geometry_unavailable, never a raw unpack error."""
+    if isinstance(rect, tuple) or isinstance(rect, list):
+        if len(rect) != 4:
+            raise AdapterError("geometry_unavailable", f"{label} must have exactly 4 values")
+        values = tuple(rect)
+    else:
+        raise AdapterError("geometry_unavailable", f"{label} must be a (x0, y0, x1, y1) sequence")
+    for value in values:
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise AdapterError("geometry_unavailable", f"{label} coordinates must be integers")
+    x0, y0, x1, y1 = values
+    if not (0 <= x0 < x1 <= handle.width and 0 <= y0 < y1 <= handle.height):
+        raise AdapterError("geometry_unavailable", f"{label} outside the recorded raster")
+    return (x0, y0, x1, y1)
+
+
+def _validate_crop_plan(crop: CropPlan, handle: RasterHandle) -> None:
+    """Caller-built CropPlans get the same discipline as plan_crop output."""
+    if crop.psm not in VALID_PSM:
+        raise AdapterError("unsupported", "PSM not in the declared set")
+    _validate_rect(crop.region, handle, "region")
+    _validate_rect(crop.padded, handle, "padded crop")
+    kx, ky = crop.resize
+    for label, factor in (("kx", kx), ("ky", ky)):
+        if (
+            isinstance(factor, bool)
+            or not isinstance(factor, (int, float))
+            or not math.isfinite(factor)
+            or factor <= 0
+        ):
+            raise AdapterError("geometry_unavailable", "resize factors must be positive finite numbers")
+    if crop.raster_scale is not None:
+        scale = crop.raster_scale
+        if (
+            isinstance(scale, bool)
+            or not isinstance(scale, (int, float))
+            or not math.isfinite(scale)
+            or scale <= 0
+        ):
+            raise AdapterError("geometry_unavailable", "recorded raster scale must be positive")
+
+
 def plan_crop(
     handle: RasterHandle,
     region: tuple[int, int, int, int] | None,
@@ -270,12 +355,7 @@ def plan_crop(
         raise AdapterError("unsupported", "PSM not in the declared set")
     if region is None:
         region = (0, 0, handle.width, handle.height)
-    x0, y0, x1, y1 = region
-    for value in (x0, y0, x1, y1):
-        if not isinstance(value, int) or value != value:
-            raise AdapterError("geometry_unavailable", "region coordinates must be integers")
-    if not (0 <= x0 < x1 <= handle.width and 0 <= y0 < y1 <= handle.height):
-        raise AdapterError("geometry_unavailable", "region outside the recorded raster")
+    x0, y0, x1, y1 = _validate_rect(region, handle, "region")
     kx, ky = resize
     if not (isinstance(kx, (int, float)) and kx > 0 and isinstance(ky, (int, float)) and ky > 0):
         raise AdapterError("geometry_unavailable", "resize factors must be positive")
@@ -299,8 +379,10 @@ def plan_crop(
     )
 
 
-def _occurrence_id(digest: str, ordinal: int) -> str:
-    base = f"{READER_ID}-{digest[:12]}-ocr-{ordinal}"
+def _occurrence_id(digest: str, page_index: int, ordinal: int) -> str:
+    # Page-scoped like the sibling pdfium adapter: byte-identical rasters from
+    # two pages of one document must not collide on occurrence id.
+    base = f"{READER_ID}-{digest[:12]}-p{page_index}-ocr-{ordinal}"
     return re.sub(r"[^a-z0-9_-]", "-", base.lower())[:96]
 
 
@@ -365,25 +447,43 @@ def extract(
         return result("unsupported", error.detail, 0, [])
 
     if crop is None:
-        region = plan.get("region")
-        region_tuple = tuple(region) if isinstance(region, list) else region
+        if plan.get("region_id") is not None:
+            # A region-scoped plan needs an explicitly resolved crop; silently
+            # widening it to full-page OCR would misstate coverage.
+            return result(
+                "unsupported",
+                "region-scoped OCR requires an explicitly resolved crop for this adapter path",
+                0,
+                [],
+            )
         try:
-            crop = plan_crop(handle, region_tuple, psm=DEFAULT_PSM)
+            crop = plan_crop(handle, None, psm=DEFAULT_PSM)
         except AdapterError as error:
             return result("failed", f"{error.reason}: {error.detail}", 0, [])
+    else:
+        try:
+            _validate_crop_plan(crop, handle)
+        except AdapterError as error:
+            return result(
+                "unsupported" if error.reason == "unsupported" else "failed",
+                f"{error.reason}: {error.detail}",
+                0,
+                [],
+            )
     psm = crop.psm
     try:
-        digest_or_none, _ = model_digest(binary, language)
+        digest_or_none, trained = model_digest(binary, language)
     except AdapterError as error:
         # Includes option-injection attempts via the language identifier.
         return result("unsupported", error.detail, 0, [])
     if digest_or_none is None:
         return result(
             "failed",
-            f"missing_model: {language}.traineddata not found next to the binary",
+            f"missing_model: {language}.traineddata not found for the resolved tessdata directory",
             0,
             [],
         )
+    tessdata_dir = trained.parent
     try:
         with Image.open(BytesIO(handle.data)) as image:
             image.load()
@@ -396,17 +496,27 @@ def extract(
     except Exception as error:
         return result("failed", "unreadable_pixels: raster could not be cropped", 0, [])
 
-    workdir = Path(tempfile.mkdtemp(prefix="inkflip-ocr-"))
+    try:
+        workdir = Path(tempfile.mkdtemp(prefix="inkflip-ocr-"))
+    except OSError as error:
+        return result("failed", "parser_error: could not create the private OCR workdir", 0, [])
     try:
         # Neutral, adapter-generated filename: caller data cannot become an option.
         input_png = workdir / "input.png"
-        cropped.save(input_png, format="PNG")
+        try:
+            cropped.save(input_png, format="PNG")
+        except OSError as error:
+            return result("failed", "parser_error: could not write the cropped raster", 0, [])
         argv = [
             str(binary),
             str(input_png),
             "stdout",
             "--psm",
             str(psm),
+            "-l",
+            language,
+            "--tessdata-dir",
+            str(tessdata_dir),
             "tsv",
         ]
         try:
@@ -435,6 +545,15 @@ def extract(
         for text, conf, left, top, width, height in _parse_tsv(completed.stdout or ""):
             if cancellation is not None and cancellation():
                 return result("cancelled", "cancelled by request", produced, retained)
+            if ordinal >= MAX_WORD_OCCURRENCES:
+                # The budget bounds what is emitted: word 5001 terminates the
+                # check as resource_limit with exactly the capped 5000 kept.
+                if chunk:
+                    emit_chunk(chunk)
+                    retained.extend(o["id"] for o in chunk)
+                    produced += len(chunk)
+                    chunk = []
+                return result("failed", "resource_limit: word budget exceeded", produced, retained)
             raster_tl = crop.crop_to_raster(left, top)
             raster_br = crop.crop_to_raster(left + width, top + height)
             canonical_tl = crop.raster_to_canonical(*raster_tl)
@@ -459,7 +578,7 @@ def extract(
                 transform_ids = []
                 basis = "no recorded raster scale; raw text retained without geometry"
             occurrence = {
-                "id": _occurrence_id(handle.digest, ordinal),
+                "id": _occurrence_id(handle.digest, int(plan.get("page_index", 0)), ordinal),
                 "reader_id": READER_ID,
                 "page_index": int(plan.get("page_index", 0)),
                 "ordinal": ordinal,
@@ -498,13 +617,6 @@ def extract(
                 retained.extend(o["id"] for o in chunk)
                 produced += len(chunk)
                 chunk = []
-            if ordinal > MAX_WORD_OCCURRENCES:
-                if chunk:
-                    emit_chunk(chunk)
-                    retained.extend(o["id"] for o in chunk)
-                    produced += len(chunk)
-                    chunk = []
-                return result("failed", "resource_limit: word budget exceeded", produced, retained)
         if chunk:
             emit_chunk(chunk)
             retained.extend(o["id"] for o in chunk)
