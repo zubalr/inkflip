@@ -3,8 +3,8 @@
   "task_id": "T01",
   "beads_id": "pdf-t01",
   "disposition": "accepted",
-  "evaluated_commit": "52f6b920f0c870a9c34f92904aa6f17903435920",
-  "evaluated_at": "2026-09-11T22:21:55.846842+00:00",
+  "evaluated_commit": "f25d3ee3ddfdc1dc6bd20f1e21b6b7bf17cd7419",
+  "evaluated_at": "2026-09-12T19:40:19.536480+00:00",
   "contract_digest": "fd3e59901cb14dbd1927d2d071c8a90af74d90c8fa8294ff2643e0dd4f3fc727",
   "worker": "codex-orchestrator",
   "commands": [
@@ -21,7 +21,7 @@
       ],
       "executed_argv": [
         "python3",
-        "/Users/zubair/Code/Projects/pdf project/original/scripts/test_results.py",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a/scripts/test_results.py",
         "--unittest",
         "discover",
         "-s",
@@ -36,36 +36,58 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T01/commands.log": "dfb215d768e97e0180fcb21a7c82e8b706696e994514c6667d97b2120f177d10",
-    "artifacts/tasks/T01/coordinator-commands.log": "16dbb88fed42dc9ff42ac9b302078db6f1b30d5c98db451558a3e4e951d14a4b",
+    "artifacts/tasks/T01/coordinator-commands.log": "075f85a6660d982af407caa29290b6431b21c1d3bcd813914e3497204464d19a",
     "artifacts/tasks/T01/origin-revalidation.json": "733a97ae3ae31f90f718bb1f4e3456ae378a968546899091c5f876e0aa45baa3",
     "artifacts/tasks/T01/peer-review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
-    "artifacts/tasks/T01/receipt.json": "20667190f73e6c9b0fbfc40bc149220c0962c8ed17c868f424c2a210716dead0",
+    "artifacts/tasks/T01/receipt.json": "5e6990cc87037f3eacee3ae4bbea4dd2fc4a2be3b1a4e7f088364772f6039e69",
+    "artifacts/tasks/T01/refresh-20260912/commands.log": "074a4448ada087bbff6bf429a5d264d2d522be7dc0ffbbc9200fbfb30571208d",
+    "artifacts/tasks/T01/refresh-20260912/origin-revalidation.json": "61865ef6ca5b059581111dd7c31a42afb25d0e6dbbb84bfb8c7ad2989f073a86",
+    "artifacts/tasks/T01/refresh-20260912/prior-review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
+    "artifacts/tasks/T01/refresh-20260912/review-inputs.json": "d6ab5525ae5ebd87edcf1dafd8e5827845fccad59810e71f241c91e62435769c",
+    "artifacts/tasks/T01/refresh-20260912/run.json": "fe60a180fda62340bfee9755d0a7ac8e69886b3e946c81b819789551ff697500",
     "artifacts/tasks/T01/review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
-    "artifacts/tasks/T01/run.json": "f6510e41c20ecb7f6751aa8872ebc25d53c5c4469952f2c084cd196ffb8fd7fb"
+    "artifacts/tasks/T01/run.json": "01c4c376065b2a70b321ce0a2783a07199d1d7c852b6f960e6b887469164503d"
   },
   "criteria": {
     "A clean checkout exposes documented commands": [
       "artifacts/tasks/T01/run.json",
-      "artifacts/tasks/T01/peer-review.md"
+      "artifacts/tasks/T01/peer-review.md",
+      "artifacts/tasks/T01/refresh-20260912/run.json",
+      "artifacts/tasks/T01/refresh-20260912/commands.log",
+      "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
     ],
     "empty/missing test registration fails": [
       "artifacts/tasks/T01/run.json",
-      "artifacts/tasks/T01/peer-review.md"
+      "artifacts/tasks/T01/peer-review.md",
+      "artifacts/tasks/T01/refresh-20260912/run.json",
+      "artifacts/tasks/T01/refresh-20260912/commands.log",
+      "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
     ],
     "old repository remains byte/Git-unchanged": [
       "artifacts/tasks/T01/run.json",
       "artifacts/tasks/T01/peer-review.md",
-      "artifacts/tasks/T01/origin-revalidation.json"
+      "artifacts/tasks/T01/origin-revalidation.json",
+      "artifacts/tasks/T01/refresh-20260912/run.json",
+      "artifacts/tasks/T01/refresh-20260912/commands.log",
+      "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T01/refresh-20260912/review-inputs.json",
+      "artifacts/tasks/T01/refresh-20260912/origin-revalidation.json"
     ],
     "no network action or generated achievement claim occurs.": [
       "artifacts/tasks/T01/run.json",
-      "artifacts/tasks/T01/peer-review.md"
+      "artifacts/tasks/T01/peer-review.md",
+      "artifacts/tasks/T01/refresh-20260912/run.json",
+      "artifacts/tasks/T01/refresh-20260912/commands.log",
+      "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
     ]
   },
   "review": {

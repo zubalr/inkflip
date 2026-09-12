@@ -56,7 +56,7 @@ test_node_unmatched_pattern_cannot_fall_back_to_all_tests (test_result_reports.R
 test_pre_release_checks_accepted_prior_gate_owners (test_result_reports.ResultReportTests.test_pre_release_checks_accepted_prior_gate_owners) ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 5.132s
+Ran 49 tests in 7.845s
 
 OK
 
