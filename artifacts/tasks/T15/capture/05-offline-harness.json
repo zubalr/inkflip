@@ -3,7 +3,7 @@
   "label": "offline-harness",
   "mode": "offline",
   "surface": "/privacy.html",
-  "origin": "http://127.0.0.1:53866",
+  "origin": "http://127.0.0.1:58699",
   "legs": [
     {
       "name": "offline-ocr-extract",
@@ -20,21 +20,39 @@
   ],
   "requests": [
     {
-      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
-      "post_body": null
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US"
+      }
     },
     {
-      "url": "http://127.0.0.1:53866/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "method": "GET",
       "resource_type": "fetch",
       "is_navigation": false,
-      "post_body": null
+      "post_body": null,
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "referer": ""
+      }
     }
   ],
   "request_failures": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "status": 200
+    }
+  ],
   "websockets": [],
   "egress": [
     {
@@ -43,7 +61,7 @@
     },
     {
       "kind": "worker",
-      "target": "http://127.0.0.1:53866/assets/tesseract/7.0.0/worker.min.js"
+      "target": "http://127.0.0.1:58699/assets/tesseract/7.0.0/worker.min.js"
     },
     {
       "kind": "worker",
@@ -52,6 +70,7 @@
   ],
   "console": [],
   "page_errors": [],
+  "dialogs": [],
   "downloads": [],
   "server_log": [],
   "_logStart": 21,

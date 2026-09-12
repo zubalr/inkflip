@@ -2,55 +2,72 @@
   "schema_version": 1,
   "tool": "scripts/inspect_network_receipt.py",
   "task": "T15",
-  "generated_at": "2026-09-12T14:41:22.934012+00:00",
-  "origin": "http://127.0.0.1:53866",
+  "generated_at": "2026-09-12T15:14:37.234636+00:00",
+  "origin": "http://127.0.0.1:58699",
   "canary": {
     "document_sha256_16": "c383a44b3cebd27f",
     "byte_length": 810,
     "markers": [
       {
         "id": "filename",
-        "sha256_16": "5877bf3df6436082"
+        "sha256_16": "5877bf3df6436082",
+        "allowed_channels": []
       },
       {
         "id": "visible_text",
-        "sha256_16": "8bdb0865d94b2715"
+        "sha256_16": "8bdb0865d94b2715",
+        "allowed_channels": []
       },
       {
         "id": "hidden_text",
-        "sha256_16": "490e61495ef1e2a0"
+        "sha256_16": "490e61495ef1e2a0",
+        "allowed_channels": []
       },
       {
         "id": "note",
-        "sha256_16": "b9bde3f3d3c31a84"
+        "sha256_16": "b9bde3f3d3c31a84",
+        "allowed_channels": []
       },
       {
         "id": "note_token",
-        "sha256_16": "675a69fdbb146509"
+        "sha256_16": "675a69fdbb146509",
+        "allowed_channels": []
       },
       {
         "id": "doc_sha256",
-        "sha256_16": "c383a44b3cebd27f"
+        "sha256_16": "c383a44b3cebd27f",
+        "allowed_channels": []
       },
       {
         "id": "pdf_b64_head",
-        "sha256_16": "61e4bdd11107b596"
+        "sha256_16": "61e4bdd11107b596",
+        "allowed_channels": []
       },
       {
         "id": "raster_sha256",
-        "sha256_16": "1759d5c1609d24f8"
+        "sha256_16": "1759d5c1609d24f8",
+        "allowed_channels": []
       },
       {
         "id": "report_id",
-        "sha256_16": "653d642ac6973b0f"
+        "sha256_16": "653d642ac6973b0f",
+        "allowed_channels": [
+          "downloads"
+        ]
       },
       {
         "id": "run_key",
-        "sha256_16": "d679a5e4514f0eb3"
+        "sha256_16": "d679a5e4514f0eb3",
+        "allowed_channels": [
+          "downloads"
+        ]
       },
       {
         "id": "export_filename",
-        "sha256_16": "bf0a0960e7c71d2b"
+        "sha256_16": "bf0a0960e7c71d2b",
+        "allowed_channels": [
+          "downloads"
+        ]
       }
     ]
   },
@@ -61,9 +78,11 @@
       "mode": "cold",
       "surface": "/index.html",
       "requests": 4,
+      "responses": 4,
       "websockets": 0,
       "egress_records": 0,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-index",
@@ -77,9 +96,11 @@
       "mode": "cold",
       "surface": "/src/features/open/preview.html",
       "requests": 14,
+      "responses": 14,
       "websockets": 0,
       "egress_records": 4,
       "console_messages": 1,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-open-mount",
@@ -117,9 +138,11 @@
       "mode": "cold",
       "surface": "/privacy.html",
       "requests": 8,
+      "responses": 8,
       "websockets": 0,
       "egress_records": 3,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-harness",
@@ -169,9 +192,11 @@
       "mode": "cold",
       "surface": "/src/features/import/preview.html",
       "requests": 7,
+      "responses": 7,
       "websockets": 0,
       "egress_records": 0,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-import-mount",
@@ -189,9 +214,11 @@
       "mode": "warm",
       "surface": "/privacy.html",
       "requests": 7,
+      "responses": 7,
       "websockets": 0,
       "egress_records": 2,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-harness",
@@ -229,9 +256,11 @@
       "mode": "offline",
       "surface": "/privacy.html",
       "requests": 2,
+      "responses": 2,
       "websockets": 0,
       "egress_records": 3,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "offline-ocr-extract",
@@ -250,12 +279,14 @@
     {
       "file": "06-offline-cold-nav.json",
       "label": "offline-cold-nav",
-      "mode": "offline",
+      "mode": "online",
       "surface": "/privacy.html",
       "requests": 3,
+      "responses": 3,
       "websockets": 0,
       "egress_records": 0,
       "console_messages": 0,
+      "dialogs": 0,
       "legs": [
         {
           "name": "navigate-harness",
@@ -269,9 +300,11 @@
       "mode": "offline",
       "surface": "/privacy.html",
       "requests": 2,
+      "responses": 0,
       "websockets": 0,
       "egress_records": 1,
       "console_messages": 1,
+      "dialogs": 0,
       "legs": [
         {
           "name": "cold-offline-model-fails",
@@ -374,7 +407,7 @@
       "id": "no_canary_material_outbound",
       "criterion": "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
       "status": "pass",
-      "detail": "no marker (filename, visible/hidden text, document hash, raster pixels, note, report id/name \u2014 in raw, percent, base64 or hex spellings) appears in any captured request URL, body, websocket, egress attempt, console payload, storage value or server path",
+      "detail": "no marker (filename, visible/hidden text, document hash, raster pixels, note, report id/name \u2014 in raw, percent, base64, hex, cross-channel-split or base64-wrapped spellings) appears in any captured request URL/header/body, response, websocket, egress attempt, console payload, leg detail, dialog, storage value or server path/header",
       "counts": {
         "markers": 11
       },
@@ -384,7 +417,7 @@
       "id": "no_websocket_beacon_serviceworker",
       "criterion": "telemetry/external-font absence proven",
       "status": "pass",
-      "detail": "zero websockets, zero sendBeacon/EventSource/window.open attempts, zero service-worker registrations; worker/fetch/XHR tripwire targets all stay inside the same-origin allowlist",
+      "detail": "zero websockets, zero sendBeacon/EventSource/window.open/WebRTC/WebTransport/form.submit attempts, zero unexpected dialogs, zero service-worker registrations; fetch/XHR/worker tripwire targets all stay inside the same-origin allowlist; unrecognized egress kinds fail closed",
       "counts": {
         "websockets": 0
       },
@@ -413,6 +446,16 @@
       "violations": []
     },
     {
+      "id": "capture_evidence_present",
+      "criterion": "online/warm/offline modes documented",
+      "status": "pass",
+      "detail": "every capture carries the full channel key set, nonempty named legs, a storage snapshot and captured request headers; every non-offline capture recorded at least one request; the union of legs covers open/error/render/OCR/export/reopen/clear \u2014 absent or emptied evidence can never pass",
+      "counts": {
+        "journey_legs_seen": 28
+      },
+      "violations": []
+    },
+    {
       "id": "journey_legs_completed",
       "criterion": "online/warm/offline modes documented",
       "status": "pass",
@@ -421,8 +464,20 @@
         "modes": {
           "cold": 4,
           "warm": 1,
-          "offline": 3
+          "offline": 2,
+          "online": 1
         }
+      },
+      "violations": []
+    },
+    {
+      "id": "model_fetch_provenance",
+      "criterion": "online/warm/offline modes documented",
+      "status": "pass",
+      "detail": "cold mode fetched the staged model over the wire exactly once (network provenance), warm mode reused the verified cache with zero model requests, offline captures served zero model paths \u2014 derived from request and server-log evidence, not in-page assertions",
+      "counts": {
+        "cold_model_requests": 1,
+        "model_paths_served": 1
       },
       "violations": []
     },
@@ -477,6 +532,8 @@
   "limitations": [
     "App composition (T13) is not landed: the journey drives the real built feature mounts plus a test-owned harness page in sequence \u2014 the same production code paths the composed shell will call.",
     "Browser automation cannot see every OS/browser process channel; per planning, release-profile proof additionally needs a proxy/firewall capture.",
-    "No service worker ships: offline support means an already-loaded page with prepared assets, verified here; cold offline navigation has no app shell to load and is not claimed."
+    "No service worker ships: offline support means an already-loaded page with prepared assets, verified here; cold offline navigation has no app shell to load and is not claimed.",
+    "WebRTC/WebTransport are tripwired (construction is recorded) and asserted unused across the whole journey \u2014 verified absent from the built bundles; an already-open data channel's inner frames are not separately captured, so the guarantee is constructor-level.",
+    "Log-channel scans are bounded by capture truncation (console/page-error 2000 chars, leg/egress/dialog details 1000, ws frames 1000); network carriers are closed by method/query/allowlist/header checks, so the residual escape window is log-text only \u2014 the inspector additionally scans joined and base64-decoded payloads to shrink it."
   ]
 }

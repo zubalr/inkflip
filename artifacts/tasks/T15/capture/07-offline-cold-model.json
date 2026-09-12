@@ -3,7 +3,7 @@
   "label": "offline-cold-model",
   "mode": "offline",
   "surface": "/privacy.html",
-  "origin": "http://127.0.0.1:53866",
+  "origin": "http://127.0.0.1:58699",
   "legs": [
     {
       "name": "cold-offline-model-fails",
@@ -16,32 +16,65 @@
   ],
   "requests": [
     {
-      "url": "http://127.0.0.1:53866/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+      "url": "http://127.0.0.1:58699/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
       "method": "GET",
       "resource_type": "fetch",
       "is_navigation": false,
-      "post_body": null
+      "post_body": null,
+      "headers": {
+        "sec-ch-ua-platform": "\"macOS\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0"
+      }
     },
     {
-      "url": "http://127.0.0.1:53866/",
+      "url": "http://127.0.0.1:58699/",
       "method": "GET",
       "resource_type": "document",
       "is_navigation": true,
-      "post_body": null
+      "post_body": null,
+      "headers": {
+        "accept-language": "en-US",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
     }
   ],
   "request_failures": [
     {
-      "url": "http://127.0.0.1:53866/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+      "url": "http://127.0.0.1:58699/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
       "method": "GET",
-      "error": "net::ERR_INTERNET_DISCONNECTED"
+      "error": "net::ERR_INTERNET_DISCONNECTED",
+      "headers": {
+        "sec-ch-ua-platform": "\"macOS\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0"
+      }
     },
     {
-      "url": "http://127.0.0.1:53866/",
+      "url": "http://127.0.0.1:58699/",
       "method": "GET",
-      "error": "net::ERR_INTERNET_DISCONNECTED"
+      "error": "net::ERR_INTERNET_DISCONNECTED",
+      "headers": {
+        "accept-language": "en-US",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
     }
   ],
+  "responses": [],
   "websockets": [],
   "egress": [
     {
@@ -57,6 +90,7 @@
     }
   ],
   "page_errors": [],
+  "dialogs": [],
   "downloads": [],
   "server_log": [],
   "_logStart": 24,
