@@ -76,3 +76,34 @@ the current environment: /usr/sbin/tesseract resolves ../share/tessdata =
 /usr/share/tessdata and the suite passes 20/20 with and without TESSDATA_PREFIX;
 the local model-hash test passes in both runs.
 ================================================================================
+
+================================================================================
+POST FONT-ORACLE-FIX ROUND (Astra follow-up grant, 2026-09-12)
+Merge: published main cd79351 (f8dc228 approved T26 portable font geometry
+assertions, independently reviewed) -> merged as 45821e6; clean, no T27
+source/schema/fixture change. Original pre-fix failed-run baseline remains
+verbatim in native-tests-linux-baseline.log (committed a6f6b1d).
+================================================================================
+$ uv run --project native python -m pytest native/tests -q
+  -> 73 passed, 126 subtests passed (exit 0) - all 5 former T26 Linux geometry
+  failures RESOLVED by the approved test-only fix
+$ bun run test:native
+  -> 73 passed (exit 0) - first full-suite exit 0 on Linux amd64 for this branch
+$ uv run --project native python -m pytest native/tests/ocr -q
+  -> 20 passed (exit 0)
+$ python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json
+  -> exit 0; collected 20 / passed 20 / failed 0 / skipped 0 (fresh report on
+  the post-fix merged tree)
+$ bun run verify
+  -> exit 1: ONLY the 17 relay-guard environment failures remain (6 failures +
+  11 errors, all tests/coordination/test_homebase_relay.py, 'Relay cannot run
+  in a linked worktree'); bootstrap 49/49 OK; native-bootstrap 2/2 OK.
+  Attribution note: the 'skipped=1' text visible in the log is the intentional
+  inner subprocess of the PASSING integrity test
+  test_all_skipped_gate_scenarios_fail (its gate-under-test correctly rejects
+  an all-skipped scenario); no required test was actually skipped.
+$ psm6 spot-check rerun on the post-fix tree (psm6-spotcheck.log)
+  psm=3: words=16 '$100' present=True
+  psm=6: words=16 '$100' present=True
+  psm=11: words=16 '$100' present=True   (identical to the pre-fix round)
+================================================================================

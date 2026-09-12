@@ -9,7 +9,7 @@
   "base": "726d61c0c",
   "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merge ca2dbb1b3ad314b69b15b3a33c0835ebecfa3ed7 of published main 65e84da + evidence commits); final review must bind to this new exact candidate",
+  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merges ca2dbb1 (main 65e84da) and 45821e6 (main cd79351 with approved T26 font-oracle fix) + evidence commits); final review must bind to this new exact candidate",
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -52,6 +52,20 @@
       "Partial review's low-sev tessdata observation does not reproduce in the current environment: suite passes 20/20 with and without TESSDATA_PREFIX; local model-hash test passes in both runs."
     ],
     "t27_scoped_fixes_applied": "None required: no confirmed T27-scoped code finding from the partial review (verdict was 'incomplete - run stopped', scope audit clean) or from the Linux verification. T27 source is byte-identical to reviewed 394e65c.",
+    "post_font_oracle_fix_round": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra follow-up: merge latest published main (approved T26 font-oracle test-only correction, independently reviewed by Euler) and rerun real checks; keep the original failed-run evidence; add fresh post-fix results",
+      "merge": "Published main cd79351 merged as 45821e6347a888c52e05a5ef7d5a79a40d79851d; clean merge; no T27 source/schema/fixture change",
+      "executed_commands_linux": [
+        {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126, "failed": 0}, "note": "All 5 former T26 Linux geometry failures RESOLVED by the approved fix"},
+        {"command": "bun run test:native", "exit": 0, "note": "73 passed; first exit 0 on Linux amd64 for this branch"},
+        {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20, "failed": 0}},
+        {"command": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}},
+        {"command": "bun run verify", "exit": 1, "note": "only the 17 relay-guard worktree environment failures remain (all in tests/coordination/test_homebase_relay.py); bootstrap 49/49, native-bootstrap 2/2; the 'skipped=1' text in the log is the intentional inner subprocess of the PASSING integrity test, not a skipped required case"},
+        {"command": "psm6 spot-check rerun", "exit": 0, "note": "identical: PSM 3/6/11 all read '$100' (16 words) on Linux"}
+      ],
+      "evidence_freshness": "Pre-fix failed-run baseline preserved verbatim (artifacts/tasks/T27/native-tests-linux-baseline.log, committed a6f6b1d); post-fix run.json regenerated on this exact merged tree; psm6-spotcheck.log regenerated."
+    },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [

@@ -170,7 +170,22 @@
       "artifacts/tasks/T27/run.json",
       "artifacts/tasks/T27/native-tests-linux-baseline.log",
       "artifacts/tasks/T27/psm6-spotcheck.log"
-    ]
+    ],
+    "post_font_oracle_fix_round": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra: merge latest published main with the independently approved T26 font-oracle correction (test-only) and rerun real checks; preserve original failed-run evidence and add fresh post-fix results",
+      "merged_main": "cd79351 (f8dc228 Merge reviewed T26 portable font geometry assertions)",
+      "merge_commit": "45821e6347a888c52e05a5ef7d5a79a40d79851d",
+      "commands": [
+        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126, "failed": 0}, "detail": "The 5 former T26 Linux geometry failures are RESOLVED by the approved test-only font-oracle fix; zero failures remain in the full native suite."},
+        {"segment": "bun run test:native", "exit": 0, "detail": "73 passed; exit 0 on Linux amd64 for the first time on this branch."},
+        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20, "failed": 0}},
+        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}, "detail": "Fresh report regenerated on the post-fix merged candidate."},
+        {"segment": "bun run verify", "exit": 1, "detail": "Unchanged environment finding: the only failures are the 17 relay-guard tests (6+11, all tests/coordination/test_homebase_relay.py) caused by running the suite inside a linked task worktree; bootstrap 49/49 and native-bootstrap 2/2 pass; the 'skipped=1' text in the log is the intentional inner subprocess of the PASSING integrity test test_all_skipped_gate_scenarios_fail, not a skipped required case."},
+        {"segment": "psm6 spot-check rerun on the post-fix tree (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "detail": "Identical result: PSM 3, 6 and 11 all read the same 16 words including '$100'."}
+      ],
+      "note": "The original pre-fix failed-run baseline remains verbatim in artifacts/tasks/T27/native-tests-linux-baseline.log (committed at a6f6b1d); it documents the Linux platform drift that the approved T26 correction resolves. No T27 source, schema or fixture changed in this round."
+    }
   },
   "ready_for_review": true
 }
