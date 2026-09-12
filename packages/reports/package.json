@@ -6,7 +6,8 @@
   "description": "Evidence projection and portable JSON / script-free HTML report serialization.",
   "exports": {
     ".": "./validation/index.ts",
-    "./validation": "./validation/index.ts"
+    "./validation": "./validation/index.ts",
+    "./export": "./export/index.ts"
   },
   "types": "./validation/index.ts",
   "scripts": {

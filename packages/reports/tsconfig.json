@@ -13,7 +13,8 @@
     ]
   },
   "include": [
-    "validation/**/*.ts"
+    "validation/**/*.ts",
+    "export/**/*.ts"
   ],
   "references": [
     {
