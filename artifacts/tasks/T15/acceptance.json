@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "task_id": "T15",
+  "beads_id": "pdf-t15",
+  "disposition": "accepted",
+  "evaluated_commit": "b668a1b198aa60284941f42308adad18bcc601d4",
+  "evaluated_at": "2026-09-12T15:25:08.476858+00:00",
+  "contract_digest": "0c4843b694a9d79e6d52423b2f5c9c997aa0c8f5d8326217d2507f27ecd67c86",
+  "worker": "devin-swe-4b09fb92",
+  "commands": [
+    {
+      "segment": "bun run test:privacy -- tests/privacy/local.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:privacy",
+        "--",
+        "tests/privacy/local.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:privacy",
+        "--",
+        "tests/privacy/local.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T15/capture/00-cold-boot-index.json": "b91d65229955929612f8c74b7b837e615caa30fe0e9c750bbccb8a0e6ee962b8",
+    "artifacts/tasks/T15/capture/01-cold-open-mount.json": "0ed3b6997b0b96f2afbe4acd135c5f896e10af6f6c6a7f2d8ede54fabd0c7760",
+    "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json": "8cd7647b0e351484beb6e4e5d59758721f94e4fe930ea347bd2ccd3209ea41f4",
+    "artifacts/tasks/T15/capture/03-cold-import-reopen.json": "8399337a708dfae9004e8871b5f7c36c8f5d8ed543551bce93531fb9047462cf",
+    "artifacts/tasks/T15/capture/04-warm-harness.json": "bedca8bb29d875cafbf28306ead51cce36d6756125f2be030f8196e19fae2776",
+    "artifacts/tasks/T15/capture/05-offline-harness.json": "baccd5f2076d6e39ecd4cb96aaeef78519a9957440803acffb846d933e45cd2c",
+    "artifacts/tasks/T15/capture/06-offline-cold-nav.json": "3866f7732d3b87a7fff60defc486b9af1de8d0a1d4390049433d9332613074ab",
+    "artifacts/tasks/T15/capture/07-offline-cold-model.json": "6b6e21b2eb09d6774f403229993f41e69d4b7c8b07a38d45daa8ba38d5871e75",
+    "artifacts/tasks/T15/commands.log": "ea4d85842c1481cacc7e0fc26fbe84316099a409d469795e2c157d5f29611eaa",
+    "artifacts/tasks/T15/coordinator-commands.log": "53d9716f584f7584d8b55d101c8f75b944a71a3bd5fc60dc81a94cab1c82a48c",
+    "artifacts/tasks/T15/network-receipt.json": "08845bf23eb79b310dd773438c4bd8e56cd7be340669b602eca8fded8c700bd1",
+    "artifacts/tasks/T15/receipt.json": "b54cfd0df946f99716b7bdffb9b65c9f8c4ae49756b08f5cf576702ac1bde0ce",
+    "artifacts/tasks/T15/review.md": "ce5dd5d4ef0891be9190b78a9d48feada486d4412631ad144e37b30b69fb6630",
+    "artifacts/tasks/T15/run.json": "49c1e9b28b226359db67b0c36c227f391194c5a1b2c2cccac74b5efc005e0a1f"
+  },
+  "criteria": {
+    "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs": [
+      "artifacts/tasks/T15/commands.log",
+      "artifacts/tasks/T15/network-receipt.json",
+      "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+      "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+      "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+      "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+      "artifacts/tasks/T15/capture/04-warm-harness.json",
+      "artifacts/tasks/T15/capture/05-offline-harness.json",
+      "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+      "artifacts/tasks/T15/capture/07-offline-cold-model.json",
+      "artifacts/tasks/T15/run.json"
+    ],
+    "only fixed allowlisted same-origin asset paths": [
+      "artifacts/tasks/T15/commands.log",
+      "artifacts/tasks/T15/network-receipt.json"
+    ],
+    "telemetry/external-font absence proven": [
+      "artifacts/tasks/T15/commands.log",
+      "artifacts/tasks/T15/network-receipt.json"
+    ],
+    "online/warm/offline modes documented": [
+      "artifacts/tasks/T15/commands.log",
+      "artifacts/tasks/T15/network-receipt.json",
+      "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+      "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+      "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+      "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+      "artifacts/tasks/T15/capture/04-warm-harness.json",
+      "artifacts/tasks/T15/capture/05-offline-harness.json",
+      "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+      "artifacts/tasks/T15/capture/07-offline-cold-model.json",
+      "artifacts/tasks/T15/run.json"
+    ],
+    "redact private test logs before public artifacts.": [
+      "artifacts/tasks/T15/commands.log",
+      "artifacts/tasks/T15/network-receipt.json",
+      "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+      "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+      "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+      "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+      "artifacts/tasks/T15/capture/04-warm-harness.json",
+      "artifacts/tasks/T15/capture/05-offline-harness.json",
+      "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+      "artifacts/tasks/T15/capture/07-offline-cold-model.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-swe-42b01b27"
+    ],
+    "path": "artifacts/tasks/T15/review.md"
+  }
+}
