@@ -1,0 +1,60 @@
+/* Disclosure styles. Consumes central semantic design tokens from tokens.css.
+   Ownership: T07. */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--control-min-height);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: var(--space-3);
+  transition: background var(--motion-state);
+}
+
+.trigger:hover {
+  background: var(--color-surface-subtle);
+}
+
+.trigger:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.chevron {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  transition: transform var(--motion-state);
+}
+
+.trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.panel {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: var(--line-body);
+  background: var(--color-paper-pure);
+}

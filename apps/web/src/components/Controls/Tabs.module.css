@@ -1,0 +1,70 @@
+/* Tabs styles. Consumes central semantic design tokens from tokens.css.
+   Ownership: T07. */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tablist {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-paper);
+  padding: 0 var(--space-2);
+  min-height: var(--control-min-height);
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-min-height);
+  min-width: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--motion-state), border-color var(--motion-state);
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--color-ink);
+}
+
+.tab:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--color-ink);
+  font-weight: 600;
+  border-bottom-color: var(--color-teal);
+}
+
+.tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tabpanel {
+  padding: var(--space-4) 0;
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  line-height: var(--line-body);
+}
+
+.tabpanel:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
