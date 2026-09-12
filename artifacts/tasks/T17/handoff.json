@@ -1,0 +1,37 @@
+{
+  "task": "T17",
+  "worker": "antigravity-t17",
+  "implementation_commit": "d39e607feda6f8d6c3443c678ac013435c5533b1",
+  "branch": "work/antigravity/t17",
+  "base_commit": "b2b5db3ad497c27ca7988dffcfdec618e697b89a",
+  "status": "implemented_pending_review",
+  "executed_commands": [
+    "python3 scripts/prepare_examples.py --check (exit 0)",
+    "bun run test:browser -- tests/browser/amount.spec.ts && bun run test:fixtures (57/57 passed in 3.9s, exit 0)",
+    "bun run build:web (clean in 560ms, exit 0)",
+    "bun run oxlint (0 errors, exit 0)",
+    "bun run oxfmt --check tests/browser/amount.spec.ts (exit 0)",
+    "bun run verify (116/116 passed, exit 0)",
+    "python3 scripts/task_acceptance.py task T17 --report artifacts/tasks/T17/run.json (exit 0)",
+    "python3 scripts/acceptance_receipts.py verify-run T17 (exit 0)"
+  ],
+  "failures": "None in final run.",
+  "evidence_paths": [
+    "artifacts/tasks/T17/receipt.json",
+    "artifacts/tasks/T17/commands.log",
+    "artifacts/tasks/T17/criteria-evidence.md",
+    "artifacts/tasks/T17/run.json",
+    "artifacts/tasks/T17/review.md",
+    "artifacts/tasks/T17/handoff.json",
+    "artifacts/tasks/T17/handoff.md",
+    "artifacts/tasks/T17/screenshots/amount-demo-card.png",
+    "artifacts/tasks/T17/screenshots/pixel-match.png",
+    "artifacts/tasks/T17/screenshots/live-intake.png"
+  ],
+  "next_steps": [
+    "Independent peer review by Devin Local on work/antigravity/t17 (implementation commit d39e607feda6f8d6c3443c678ac013435c5533b1).",
+    "Devin Local coordinator records merged-branch acceptance receipt and closes pdf-t17 in Beads.",
+    "Merge work/antigravity/t17 into canonical main."
+  ],
+  "ready_for_review": true
+}
