@@ -15,6 +15,7 @@ export interface OccurrenceItem {
 
 export interface DocumentStageProps {
   initialMode?: StageMode;
+  initialDetailOpen?: boolean;
   status?: StageStatus;
   errorMessage?: string;
   pageNumber?: number;
@@ -54,6 +55,7 @@ const DEFAULT_OCCURRENCES: OccurrenceItem[] = [
 
 export function DocumentStage({
   initialMode = "page",
+  initialDetailOpen = false,
   status = "normal",
   errorMessage,
   pageNumber = 1,
@@ -72,7 +74,7 @@ export function DocumentStage({
   onModeChange,
 }: DocumentStageProps) {
   const [mode, setMode] = useState<StageMode>(initialMode);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(initialDetailOpen);
   const [rotation, setRotation] = useState<number>(0);
   const [zoom, setZoom] = useState<number>(100);
   const [activeTabIdx, setActiveTabIdx] = useState<number>(
@@ -121,6 +123,8 @@ export function DocumentStage({
       if (
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
+        target.tagName === "BUTTON" ||
+        Boolean(target.closest("button")) ||
         target.isContentEditable
       ) {
         return;
@@ -271,7 +275,7 @@ export function DocumentStage({
                     aria-label={imageAlt}
                     role="img"
                   >
-                    <rect width="240" height="70" fill="var(--color-paper-pure, #ffffff)" />
+                    <rect width="240" height="70" fill="var(--color-paper-pure)" />
                     <text
                       x="50%"
                       y="60%"
@@ -279,7 +283,7 @@ export function DocumentStage({
                       textAnchor="middle"
                       fontFamily="Georgia, serif"
                       fontSize="44"
-                      fill="var(--color-ink, #172A2F)"
+                      fill="var(--color-ink)"
                     >
                       $100
                     </text>
@@ -321,7 +325,7 @@ export function DocumentStage({
         className={styles.finding}
         onClick={toggleFindingDetail}
         aria-expanded={isDetailOpen}
-        aria-controls="finding-detail"
+        aria-controls={isDetailOpen ? "finding-detail" : undefined}
       >
         <span className={styles.findingSymbol} aria-hidden="true">
           ≠
@@ -405,6 +409,8 @@ export function DocumentStage({
           type="button"
           id="coverage-btn"
           className={styles.coverageButton}
+          aria-expanded={isDetailOpen}
+          aria-controls={isDetailOpen ? "finding-detail" : undefined}
           onClick={() => setIsDetailOpen((prev: boolean) => !prev)}
         >
           {isDetailOpen ? "Hide details" : "Details"}

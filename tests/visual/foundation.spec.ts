@@ -1,6 +1,5 @@
-import http from "node:http";
-import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { test, expect } from "@playwright/test";
 
 /**
@@ -23,68 +22,30 @@ const VIEWPORTS = [
   { width: 320, height: 568, name: "mobile-320" },
 ];
 
-const MIME_TYPES: Record<string, string> = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".js": "application/javascript; charset=utf-8",
-  ".ts": "application/javascript; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".json": "application/json",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-};
-
 const WEB_ROOT = path.resolve(process.cwd(), "apps/web");
 
-let server: http.Server;
+let viteServer: any;
 let baseUrl: string;
 
 test.beforeAll(async () => {
-  await new Promise<void>((resolve, reject) => {
-    server = http.createServer((req, res) => {
-      try {
-        const parsedUrl = new URL(req.url ?? "/", "http://127.0.0.1");
-        const safePath = path.normalize(parsedUrl.pathname).replace(/^(\.\.[/\\])+/, "");
-        const filePath = path.join(WEB_ROOT, safePath);
-
-        if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-          res.statusCode = 404;
-          res.end(`Not found: ${safePath}`);
-          return;
-        }
-
-        const ext = path.extname(filePath).toLowerCase();
-        res.setHeader("Content-Type", MIME_TYPES[ext] || "application/octet-stream");
-        fs.createReadStream(filePath).pipe(res);
-      } catch (err) {
-        res.statusCode = 500;
-        res.end(String(err));
-      }
-    });
-
-    server.listen(0, "127.0.0.1", () => {
-      const addr = server.address();
-      if (addr && typeof addr === "object") {
-        baseUrl = `http://127.0.0.1:${addr.port}`;
-        resolve();
-      } else {
-        reject(new Error("Failed to obtain server address"));
-      }
-    });
+  const viteModulePath = path.resolve(WEB_ROOT, "node_modules/vite/dist/node/index.js");
+  const { createServer } = await import(pathToFileURL(viteModulePath).href);
+  viteServer = await createServer({
+    root: WEB_ROOT,
+    server: {
+      port: 0,
+      strictPort: false,
+    },
+    logLevel: "silent",
   });
+  await viteServer.listen();
+  baseUrl = viteServer.resolvedUrls.local[0].replace(/\/$/, "");
 });
 
 test.afterAll(async () => {
-  await new Promise<void>((resolve) => {
-    if (server) {
-      server.close(() => resolve());
-    } else {
-      resolve();
-    }
-  });
+  if (viteServer) {
+    await viteServer.close();
+  }
 });
 
 test.describe("T06: Visual Foundations & Responsive Layout", () => {
@@ -138,6 +99,7 @@ test.describe("T06: Visual Foundations & Responsive Layout", () => {
 
   test("contrast checks meet stated WCAG targets on computed DOM styles", async ({ page }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+    await page.waitForSelector('[role="region"][aria-label="Document examination stage"]');
 
     function rgbStringToLuminance(rgbStr: string): number {
       const match = rgbStr.match(/\d+/g);
@@ -160,7 +122,7 @@ test.describe("T06: Visual Foundations & Responsive Layout", () => {
       const paper = document.querySelector("#paper-view") || body;
       const bodyStyle = getComputedStyle(body);
       const paperStyle = getComputedStyle(paper);
-      const kicker = document.querySelector(".paperKicker");
+      const kicker = document.querySelector("[class*='paperKicker']") || document.querySelector(".paperKicker");
       const kickerStyle = kicker ? getComputedStyle(kicker) : bodyStyle;
 
       return {
@@ -182,6 +144,7 @@ test.describe("T06: Visual Foundations & Responsive Layout", () => {
   test("reduced motion disables flips, transitions and animations", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+    await page.waitForSelector('[role="region"][aria-label="Document examination stage"]');
 
     const motionValues = await page.evaluate(() => {
       const rootStyle = getComputedStyle(document.documentElement);
@@ -211,5 +174,6 @@ test.describe("T06: Visual Foundations & Responsive Layout", () => {
     });
 
     expect(outline.outlineStyle).toBe("solid");
+    expect(outline.outlineWidth).toBe("3px");
   });
 });

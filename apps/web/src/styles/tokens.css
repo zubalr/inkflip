@@ -37,10 +37,12 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  /* Corner radii. */
+  /* Corner radii and shadows. */
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-stage: 20px;
+  --shadow-stage: 0 12px 32px rgba(23, 42, 47, 0.06);
+  --shadow-paper: 0 5px 10px rgba(30, 56, 44, 0.04);
 
   /* Type. */
   --font-display: Georgia, "Times New Roman", serif;
