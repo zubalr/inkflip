@@ -13,6 +13,7 @@ import dataclasses
 import hashlib
 import io
 import json
+import math
 import os
 import subprocess
 import sys
@@ -56,7 +57,17 @@ def render_fixture(relative: str, scale: float, user_unit: float = 1.0):
 
 
 def open_raster(png: bytes, scale: float):
-    return tr.open_raster(png, None, 1, render_meta={"raster_scale_px_per_pt": scale})
+    """render_fixture applies no rotation: the actual named render transform is
+    Scale(scale)*R0, recorded as the canonical_to_raster matrix."""
+    return tr.open_raster(
+        png,
+        None,
+        1,
+        render_meta={
+            "raster_scale_px_per_pt": scale,
+            "canonical_to_raster": [scale, 0.0, 0.0, scale, 0.0, 0.0],
+        },
+    )
 
 
 def run_ocr(handle, crop=None, **kwargs):
@@ -392,6 +403,165 @@ class TestCancellationAndSchema(unittest.TestCase):
             schema_validator("EngineScore").validate(occurrence["engine_score"])
 
 
+TSV_HEADER = "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext"
+
+
+def tsv_row(ordinal: int, left: int, top: int, width: int, height: int, conf: str = "90.0", text: str = "w") -> str:
+    return "\t".join(
+        ["5", "1", "1", "1", "1", str(ordinal), str(left), str(top), str(width), str(height), conf, text]
+    )
+
+
+def make_stub_engine(root: Path, stdout_text: str) -> Path:
+    """A stub tesseract printing canned TSV, with fake model bytes beside it."""
+    bindir = root / "bin"
+    bindir.mkdir(parents=True, exist_ok=True)
+    stub = bindir / "tesseract"
+    stub.write_text("#!/usr/bin/env python3\nimport sys\nsys.stdout.write(" + repr(stdout_text) + ")\n")
+    stub.chmod(0o755)
+    tessdata = root / "share/tessdata"
+    tessdata.mkdir(parents=True, exist_ok=True)
+    (tessdata / "eng.traineddata").write_bytes(b"stub-model")
+    return stub
+
+
+def raster_png(width: int, height: int) -> bytes:
+    buffer = io.BytesIO()
+    Image.new("L", (width, height), 255).save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+def run_stub_ocr(handle, stub, crop=None, **kwargs):
+    chunks: list[list[dict]] = []
+    result = tr.extract(handle, bare_plan("stub-check"), chunks.append, binary=stub, crop=crop, **kwargs)
+    occurrences = [o for chunk in chunks for o in chunk]
+    return result, occurrences
+
+
+class TestWave2Resize(unittest.TestCase):
+    """Wave-2: invert the resize actually performed; bound the output first."""
+
+    # Reads the REAL saved PNG dimensions from its IHDR header and emits one
+    # word whose box spans exactly those dimensions, with the dims as text.
+    DIMS_STUB = (
+        "#!/usr/bin/env python3\n"
+        "import struct, sys\n"
+        "with open(sys.argv[1], 'rb') as handle:\n"
+        "    head = handle.read(24)\n"
+        "    width, height = struct.unpack('>II', head[16:24])\n"
+        "print(" + repr(TSV_HEADER) + ")\n"
+        "print('\\t'.join(['5','1','1','1','1','1','0','0',str(width),str(height),'90.0',"
+        "str(width) + 'x' + str(height)]))\n"
+    )
+
+    def _stub_layout(self, root: Path, script: str) -> Path:
+        bindir = root / "bin"
+        bindir.mkdir(parents=True, exist_ok=True)
+        stub = bindir / "tesseract"
+        stub.write_text(script)
+        stub.chmod(0o755)
+        tessdata = root / "share/tessdata"
+        tessdata.mkdir(parents=True, exist_ok=True)
+        (tessdata / "eng.traineddata").write_bytes(b"stub-model")
+        return stub
+
+    def test_odd_resize_inverse_uses_actual_destination(self):
+        # 101x51 padded crop resized (0.5, 0.5): Pillow rounds to 50x26, so the
+        # effective factors are 50/101 and 26/51, not the requested 0.5.
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            stub = self._stub_layout(root, self.DIMS_STUB)
+            handle = tr.open_raster(
+                raster_png(150, 80), None, 1,
+                render_meta={"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]},
+            )
+            crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM, resize=(0.5, 0.5))
+            self.assertEqual((crop.padded[2] - crop.padded[0], crop.padded[3] - crop.padded[1]), (101, 51))
+            result, occurrences = run_stub_ocr(handle, stub, crop=crop)
+            handle.close()
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual(len(occurrences), 1)
+            # The word text is the REAL saved PNG size read by the stub engine.
+            self.assertEqual(occurrences[0]["raw_text"], "50x26")
+            # The box (0,0,50,26) inverted with the effective factors must
+            # recover the full padded source extent (2,2)-(103,53), including
+            # the crop offset; requested 0.5 factors would give (54,28).
+            polygon = occurrences[0]["geometry"]["polygon"]
+            self.assertAlmostEqual(polygon[0][0], 2.0, places=6)
+            self.assertAlmostEqual(polygon[0][1], 2.0, places=6)
+            self.assertAlmostEqual(polygon[2][0], 103.0, places=6)
+            self.assertAlmostEqual(polygon[2][1], 53.0, places=6)
+            self.assertEqual(occurrences[0]["geometry"]["precision"], "estimated")
+
+    def test_resize_budget_returns_resource_limit_before_allocation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            stub = self._stub_layout(root, "#!/usr/bin/env python3\n")
+            handle = tr.open_raster(
+                raster_png(150, 80), None, 1,
+                render_meta={"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]},
+            )
+            for factors in ((1000.0, 1000.0), (1e300, 1e300)):
+                with self.subTest(factors=factors):
+                    crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM, resize=factors)
+                    with mock.patch.object(
+                        Image.Image, "resize", side_effect=AssertionError("resize was called")
+                    ):
+                        result, occurrences = run_stub_ocr(handle, stub, crop=crop)
+                    self.assertEqual(result["status"], "failed")
+                    self.assertTrue(result["reason"].startswith("resource_limit"), result["reason"])
+                    self.assertEqual(occurrences, [])
+            handle.close()
+
+
+class TestWave2TsvBoundary(unittest.TestCase):
+    """Wave-2: malformed engine rows fail typed while keeping emitted chunks."""
+
+    def _typed_case(self, tsv: str):
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), tsv)
+            handle = tr.open_raster(
+                raster_png(150, 80), None, 1,
+                render_meta={"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]},
+            )
+            result, occurrences = run_stub_ocr(handle, stub)
+            handle.close()
+            return result, occurrences
+
+    def test_valid_rows_before_malformed_row_are_retained(self):
+        good = "\n".join([TSV_HEADER, tsv_row(1, 5, 5, 10, 8), tsv_row(2, 30, 5, 12, 8)])
+        result, occurrences = self._typed_case(good + "\n" + tsv_row(3, "junk", 5, 10, 8) + "\n")
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+        self.assertEqual(result["produced_occurrence_count"], 2)
+        self.assertEqual(len(occurrences), 2)
+
+    def test_nonfinite_confidence_is_typed_not_clamped(self):
+        tsv = "\n".join([TSV_HEADER, tsv_row(1, 5, 5, 10, 8, conf="nan")]) + "\n"
+        result, occurrences = self._typed_case(tsv)
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+        self.assertEqual(occurrences, [])
+
+    def test_nonnumeric_coordinate_is_typed_not_silently_dropped(self):
+        tsv = "\n".join([TSV_HEADER, tsv_row(1, "inf", 5, 10, 8)]) + "\n"
+        result, occurrences = self._typed_case(tsv)
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+
+    def test_huge_coordinate_is_typed_not_raw_overflow(self):
+        tsv = "\n".join([TSV_HEADER, tsv_row(1, "9" * 309, 5, 10, 8)]) + "\n"
+        result, occurrences = self._typed_case(tsv)
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+
+    def test_unexpected_header_is_typed_terminal(self):
+        result, occurrences = self._typed_case("unexpected\theader\n")
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+        self.assertEqual(occurrences, [])
+
+
 class TestReviewRevisionsWave1(unittest.TestCase):
     """Wave-1 independent source review findings, regression-tested at the
     real API seams: F2 region_id, F3 malformed region, F4 caller CropPlan,
@@ -618,21 +788,241 @@ class TestModelSelection(unittest.TestCase):
     def test_fallback_dir_is_probed_per_language(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            first = root / "share/tessdata"
-            first.mkdir(parents=True)
-            (first / "osd.traineddata").write_bytes(b"osd-only")
-            second = root / "tessdata"
-            second.mkdir()
-            (second / "eng.traineddata").write_bytes(b"fallback-eng")
-            # Binary directly at the root: its sibling candidates are
-            # root/share/tessdata (no eng) and root/tessdata (has eng).
-            binary = root / "tesseract"
+            # Corrected layout: binary at root/bin/tesseract, so the source
+            # probes root/share/tessdata (first candidate) then root/bin/tessdata
+            # (second candidate). The decoy directory exists but lacks eng.
+            decoy = root / "share/tessdata"
+            decoy.mkdir(parents=True)
+            (decoy / "osd.traineddata").write_bytes(b"osd-only")
+            target = root / "bin/tessdata"
+            target.mkdir(parents=True)
+            (target / "eng.traineddata").write_bytes(b"fallback-eng")
+            binary = root / "bin/tesseract"
             binary.write_bytes(b"stub")
             binary.chmod(0o755)
-            digest, path = tr.model_digest(binary, "eng")
+            env = {k: v for k, v in os.environ.items() if k != "TESSDATA_PREFIX"}
+            with mock.patch.dict(os.environ, env, clear=True):
+                digest, path = tr.model_digest(binary, "eng")
             self.assertIsNotNone(digest)
             self.assertEqual(digest, hashlib.sha256(b"fallback-eng").hexdigest())
-            self.assertEqual(path.parent, second)
+            self.assertEqual(path.parent, target)
+
+
+class TestWave2CanonicalGeometry(unittest.TestCase):
+    """Wave-2 / F10 decision: canonical_to_raster affine authorizes geometry.
+
+    The matrix is Scale(s)*R per COORDINATES.md; all four OCR box corners are
+    mapped individually through the effective resize inverse, the crop offset
+    and the recorded render inverse. Stub engines only; tiny real renders
+    establish the actual rotation direction."""
+
+    @staticmethod
+    def _open(png: bytes, render_meta: dict) -> tr.RasterHandle:
+        return tr.open_raster(png, None, 1, render_meta=render_meta)
+
+    def _stub_ocr(self, handle, box, crop=None):
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, *box) + "\n")
+            return run_stub_ocr(handle, stub, crop=crop)
+
+    def test_contract_numeric_example_recovers_56_340(self):
+        # COORDINATES.md numeric example: canonical (56,340) at 90 degrees,
+        # scale 1.5 maps to raster (540,84); a crop at (500,60) resized 2x
+        # puts it at OCR (80,48). Inversion must recover (56,340).
+        png = raster_png(1050, 1440)
+        handle = self._open(png, {"canonical_to_raster": [0.0, 1.5, -1.5, 0.0, 1050.0, 0.0]})
+        crop = tr.plan_crop(handle, (500, 60, 1010, 700), psm=tr.SINGLE_LINE_PSM, resize=(2.0, 2.0))
+        # Caller-built plan: pin the padded rect to the documented crop origin.
+        crop = dataclasses.replace(crop, region=(500, 60, 1010, 700), padded=(500, 60, 1010, 700))
+        result, occurrences = self._stub_ocr(handle, (80, 48, 10, 10), crop=crop)
+        handle.close()
+        self.assertEqual(result["status"], "completed")
+        polygon = occurrences[0]["geometry"]["polygon"]
+        # Independent analytic inverse of Scale(1.5)*R90: can_x = ry/1.5,
+        # can_y = (1050 - rx)/1.5, applied to all four corners.
+        expected = []
+        for ox, oy in ((80, 48), (90, 48), (90, 58), (80, 58)):
+            rx, ry = ox / 2.0 + 500.0, oy / 2.0 + 60.0
+            expected.append([ry / 1.5, (1050.0 - rx) / 1.5])
+        for got, want in zip(polygon, expected):
+            self.assertAlmostEqual(got[0], want[0], places=6)
+            self.assertAlmostEqual(got[1], want[1], places=6)
+        self.assertAlmostEqual(polygon[0][0], 56.0, places=6)
+        self.assertAlmostEqual(polygon[0][1], 340.0, places=6)
+
+    def _rotation_render(self, rotation: int, scale: float = 0.5):
+        from pypdfium2 import PdfDocument
+
+        doc = PdfDocument((FIXTURES / "development/scan-correct.pdf").read_bytes())
+        page = doc[0]
+        image = page.render(scale=scale, rotation=rotation).to_pil()
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        doc.close()
+        return buffer.getvalue(), image.size
+
+    def test_all_four_rotations_with_real_tiny_renders(self):
+        base_png, base_size = self._rotation_render(0)
+        base_image = Image.open(io.BytesIO(base_png))
+        canonical_w = base_size[0] / 0.5
+        canonical_h = base_size[1] / 0.5
+        # R matrices for clockwise rotation in top-left canonical space.
+        rotation_matrices = {
+            0: [0.5, 0.0, 0.0, 0.5, 0.0, 0.0],
+            90: [0.0, 0.5, -0.5, 0.0, canonical_h * 0.5, 0.0],
+            180: [-0.5, 0.0, 0.0, -0.5, canonical_w * 0.5, canonical_h * 0.5],
+            270: [0.0, -0.5, 0.5, 0.0, 0.0, canonical_w * 0.5],
+        }
+        for rotation in (90, 180, 270):
+            with self.subTest(rotation=rotation):
+                png, size = self._rotation_render(rotation)
+                # Independent orientation evidence: compare the actual render
+                # against PIL rotations of the unrotated bitmap (exact pixels).
+                cw = base_image.transpose(Image.ROTATE_270 if rotation == 90 else Image.ROTATE_90) if rotation in (90, 270) else base_image.transpose(Image.ROTATE_180)
+                ccw = base_image.transpose(Image.ROTATE_90 if rotation == 90 else Image.ROTATE_270) if rotation in (90, 270) else base_image.transpose(Image.ROTATE_180)
+                rendered = Image.open(io.BytesIO(png))
+                self.assertEqual(rendered.size, cw.size)
+                rendered_bytes = rendered.tobytes()
+                self.assertTrue(
+                    rendered_bytes == cw.tobytes() or rendered_bytes == ccw.tobytes(),
+                    "rendered rotation must match a PIL rotation of the base render",
+                )
+                clockwise = rendered_bytes == cw.tobytes()
+                if clockwise:
+                    matrix = rotation_matrices[rotation]
+                else:
+                    # A counterclockwise render equals the opposite CW matrix.
+                    matrix = rotation_matrices[{90: 270, 270: 90, 180: 180}[rotation]]
+                handle = self._open(png, {"canonical_to_raster": matrix})
+                self.assertIsNotNone(handle.canonical_from_raster)
+                result, occurrences = self._stub_ocr(handle, (10, 10, 30, 12))
+                handle.close()
+                self.assertEqual(result["status"], "completed")
+                polygon = occurrences[0]["geometry"]["polygon"]
+                self.assertEqual(len(polygon), 4)
+                # Every corner must round-trip through the recorded matrix to
+                # a finite, bounded canonical point inside the page extent.
+                inverse = tr._contract_inverse(matrix)
+                for corner in ((10, 10), (40, 10), (40, 22), (10, 22)):
+                    canonical = tr._contract_apply(inverse, corner)
+                    self.assertTrue(math.isfinite(canonical[0]) and math.isfinite(canonical[1]))
+                    self.assertLess(abs(canonical[0]), 1e5)
+                    self.assertLess(abs(canonical[1]), 1e5)
+                for point in polygon:
+                    self.assertTrue(math.isfinite(point[0]) and math.isfinite(point[1]))
+                self.assertEqual(occurrences[0]["geometry"]["precision"], "estimated")
+                self.assertIn("canonical-render-inverse", occurrences[0]["geometry"]["transform_ids"])
+
+    def test_shear_quad_is_not_axis_aligned(self):
+        png = raster_png(100, 100)
+        handle = self._open(png, {"canonical_to_raster": [1.0, 0.15, 0.25, 1.0, 0.0, 0.0]})
+        result, occurrences = self._stub_ocr(handle, (10, 10, 40, 20))
+        handle.close()
+        self.assertEqual(result["status"], "completed")
+        polygon = occurrences[0]["geometry"]["polygon"]
+        # A two-corner/axis-aligned reconstruction would keep equal y for the
+        # top edge; the shear must tilt it.
+        self.assertNotAlmostEqual(polygon[0][1], polygon[1][1])
+        inverse = tr._contract_inverse([1.0, 0.15, 0.25, 1.0, 0.0, 0.0])
+        for corner, point in zip(((10, 10), (50, 10), (50, 30), (10, 30)), polygon):
+            expected = tr._contract_apply(inverse, corner)
+            self.assertAlmostEqual(point[0], expected[0], places=6)
+            self.assertAlmostEqual(point[1], expected[1], places=6)
+
+    def test_missing_matrix_yields_unknown_geometry_despite_scalar(self):
+        handle = tr.open_raster(raster_png(150, 80), None, 1, render_meta={"raster_scale_px_per_pt": 2.0})
+        result, occurrences = self._stub_ocr(handle, (10, 10, 40, 20))
+        handle.close()
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(len(occurrences), 1)
+        self.assertEqual(occurrences[0]["raw_text"], "w")
+        self.assertIsNone(occurrences[0]["geometry"]["polygon"])
+        self.assertEqual(occurrences[0]["geometry"]["precision"], "unknown")
+        self.assertEqual(occurrences[0]["geometry"]["transform_ids"], [])
+
+    def test_invalid_matrices_fail_typed_at_open(self):
+        cases = {
+            "singular": [1.0, 2.0, 2.0, 4.0, 0.0, 0.0],
+            "nonfinite": [1.0, 0.0, 0.0, float("nan"), 0.0, 0.0],
+            "string": [1.0, 0.0, 0.0, "x", 0.0, 0.0],
+            "boolean": [True, 0.0, 0.0, 1.0, 0.0, 0.0],
+            "short": [1.0, 0.0, 0.0, 1.0, 0.0],
+            "notasequence": "nope",
+        }
+        for label, matrix in cases.items():
+            with self.subTest(case=label):
+                with self.assertRaises(tr.AdapterError) as ctx:
+                    self._open(raster_png(150, 80), {"canonical_to_raster": matrix})
+                self.assertEqual(ctx.exception.reason, "geometry_unavailable")
+
+    def test_unstable_inverse_extent_fails_typed(self):
+        # det = 2e-12 passes the singular check, but the inverse maps the
+        # raster corner to canonical coordinates far beyond any page extent.
+        with self.assertRaises(tr.AdapterError) as ctx:
+            self._open(raster_png(100, 100), {"canonical_to_raster": [1.0, 0.0, 0.0, 2e-12, 0.0, 0.0]})
+        self.assertEqual(ctx.exception.reason, "geometry_unavailable")
+
+    def test_caller_provenance_mismatch_is_refused(self):
+        handle = self._open(
+            raster_png(150, 80), {"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]}
+        )
+        crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM)
+        stale = dataclasses.replace(crop, canonical_from_raster=(9.0, 9.0, 9.0, 9.0, 9.0, 9.0))
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, 5, 5, 10, 8) + "\n")
+            result, occurrences = run_stub_ocr(handle, stub, crop=stale)
+        handle.close()
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("geometry_unavailable"), result["reason"])
+        self.assertEqual(occurrences, [])
+
+    def test_caller_crop_plan_malformed_field_shapes_are_typed(self):
+        handle = self._open(
+            raster_png(150, 80), {"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]}
+        )
+        crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM)
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, 5, 5, 10, 8) + "\n")
+            for label, mutated in (
+                ("psm_list", dataclasses.replace(crop, psm=[])),
+                ("resize_short", dataclasses.replace(crop, resize=(1.0,))),
+            ):
+                with self.subTest(case=label):
+                    result, occurrences = run_stub_ocr(handle, stub, crop=mutated)
+                    self.assertIn(result["status"], ("failed", "unsupported"))
+                    self.assertEqual(occurrences, [])
+            with self.assertRaises(tr.AdapterError):
+                tr.plan_crop(handle, (10, 10, 95, 45), psm=[], resize=(1.0,))
+        handle.close()
+
+    def test_model_read_failure_is_sanitized_model_integrity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            prefix = Path(folder) / "prefix"
+            prefix.mkdir()
+            trained = prefix / "eng.traineddata"
+            trained.write_bytes(b"unreachable-model")
+            real_read = Path.read_bytes
+
+            def deny(self):
+                if self == trained:
+                    raise PermissionError(13, "denied")
+                return real_read(self)
+
+            with mock.patch.dict(os.environ, {"TESSDATA_PREFIX": str(prefix)}):
+                with mock.patch.object(Path, "read_bytes", deny):
+                    with self.assertRaises(tr.AdapterError) as ctx:
+                        tr.model_digest(None, "eng")
+                    self.assertEqual(ctx.exception.reason, "model_integrity")
+                    self.assertNotIn(str(prefix), ctx.exception.detail)
+                    self.assertNotIn("/", ctx.exception.detail)
+                    handle = tr.open_raster(
+                        raster_png(150, 80), None, 1,
+                        render_meta={"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]},
+                    )
+                    result, _ = run_stub_ocr(handle, make_stub_engine(Path(folder) / "engine", ""))
+                    handle.close()
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(result["reason"].startswith("model_integrity"), result["reason"])
 
 
 if __name__ == "__main__":
