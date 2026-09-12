@@ -4,7 +4,7 @@
  "worker": "devin-local-swe2-t10 (Devin Local SWE-2 subagent, coordinator Astra); session 1 was devin-cloud-t10",
  "branch": "work/devin/t10",
  "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
- "state": "wave3-revision-light-checks-green",
+ "state": "green-checkpoint",
  "ready_for_review": true,
  "checkpoint": {
   "completed": [
@@ -23,11 +23,9 @@
   ],
   "limitations": [
    "resizeClipPx measures output-pixel fractions only; the corresponding source/page-area content is proportionally larger under extreme downscale (stated in the limitation text).",
-   "receipt.json is the worker-side criterion->evidence mapping only (acceptance_criteria_evidence, status executed, task-local paths); it is NOT the coordinator's acceptance.json and asserts no review approval \u2014 review.md/acceptance.json come from the independent reviewer (Pauli) and coordinator.",
    "oxfmt --check remains non-conforming package-wide (pre-existing at 61dbc3d); no reformat applied to avoid unrelated churn.",
    "crop pixel regressions now run with the browser-default smoothing (no public knob); the 5x9 decode is still all-black because the sampled centers land inside the black region under default low-quality interpolation.",
-   "deadline/cancellation in this revision implements the adjudicated pdf-ebz boundary (WorkerOptions.signal + prepared-Uint8Array input + absolute op deadline + after-await guards); upstream URL/Blob input loaders remain out of scope by design.",
-   "receipt.json still maps criteria to the pre-wave3 evidence (11/11 at 567b482); the heavy suite has not been rerun on this revision."
+   "deadline/cancellation in this revision implements the adjudicated pdf-ebz boundary (WorkerOptions.signal + prepared-Uint8Array input + absolute op deadline + after-await guards); upstream URL/Blob input loaders remain out of scope by design."
   ],
   "executed_commands": [
    {
@@ -105,6 +103,37 @@
     "cmd": "bun x --no-install playwright test tests/readers/tesseract.spec.ts --list",
     "exit": 0,
     "note": "35 collected: 11 real OCR + 24 light in the registered file"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts",
+    "exit": 0,
+    "collected": 35,
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "note": "FULL heavy run at fa59348 \u2014 11 real-OCR + 24 light; first attempt 33/2 fixed by fa59348 harness binding"
+   },
+   {
+    "cmd": "python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json",
+    "exit": 0,
+    "collected": 35,
+    "passed": 35,
+    "failed": 0,
+    "note": "evaluated_commit fa59348"
+   },
+   {
+    "cmd": "bun run verify",
+    "exit": 0,
+    "collected": 115,
+    "passed": 115,
+    "failed": 0,
+    "skipped": 1,
+    "note": "49 bootstrap + 2 native + 64 coordination; 1 pre-existing meta-test skip"
+   },
+   {
+    "cmd": "bun run build:web",
+    "exit": 0,
+    "note": "vite 8.3.0, 205ms, index-DLl647JV.js 191.77kB"
    }
   ],
   "commits": {
@@ -114,7 +143,8 @@
    "evidence": "8fb1cee",
    "wave3_wip_impl": "d4caea5",
    "wave3_wip_tests": "c757be7",
-   "wave3_wip_evidence": "f221660"
+   "wave3_wip_evidence": "f221660",
+   "wave3_test_binding_fix": "fa59348"
   },
   "evidence_paths": [
    "artifacts/tasks/T10/handoff.json",
@@ -147,8 +177,15 @@
     "playwright -g light: tesseract.spec.ts": "24/24 (~6s)",
     "playwright --list tesseract.spec.ts": "35 collected (11 real + 24 light)"
    },
-   "not_run": "real Tesseract recognize() \u2014 heavy reservation yielded"
+   "heavy_run": {
+    "reservation": "sole holder (port 5191 grant); pdf-ebz precondition merged as e6ab3b5; harness bundles patched src/index.js entry",
+    "bun run test:browser -- tests/readers/tesseract.spec.ts": "exit 0 \u2014 35/35 (11 real-OCR + 24 light), ~10.5s, at fa59348",
+    "task_acceptance.py task T10 --report run.json": "exit 0 \u2014 evaluated fa59348, 35/35, failures []",
+    "bun run verify": "exit 0 \u2014 115 checks",
+    "bun run build:web": "exit 0 \u2014 vite 8.3.0, 205ms",
+    "first_pass_failures": "2 real-OCR legs failed render_error on first heavy attempt \u2014 harness fed synthetic-harness rasters to pdfjs-bound readers (product behaved correctly); fixed fa59348, rerun green"
+   }
   }
  },
- "disposition": "WAVE-3 REVISION IMPLEMENTED \u2014 Astra-rejected candidate 87e2073 reworked (review: /private/tmp/inkflip-t10-wave2-review.md). All six authorized fixes applied plus the adjudicated pdf-ebz deadline/cancellation boundary (T02-approved WorkerOptions.signal consumed by this reader). LIGHT checks green on the revision: tsc -b 0, crop-math 13/13, oxlint 0/0, playwright -g \"light:\" 24/24 (stub engine + worker-init-only real engine \u2014 NO real recognize). Spec collects 35 tests (11 real OCR + 24 light). HEAVY: the real OCR suite was NOT rerun on this revision \u2014 reservation remains yielded to Astra; nothing running or queued. NOT accepted \u2014 independent review + coordinator acceptance remain. No push, no Beads writes from this worktree."
+ "disposition": "WAVE-3 REVISION GREEN \u2014 Astra-rejected candidate 87e2073 reworked (review: /private/tmp/inkflip-t10-wave2-review.md). All six authorized fixes applied plus the adjudicated pdf-ebz deadline/cancellation boundary. Full registered suite executed by the sole heavy-OCR reservation holder at fa59348: bun run test:browser -- tests/readers/tesseract.spec.ts -> 35/35 (11 real-OCR incl. real patched worker init, verified-bytes payload, real recognize; 24 light). task_acceptance.py task T10 -> run.json, exit 0, failures none. bun run verify exit 0 (115 checks). bun run build:web exit 0. Two first-pass failures were a test-harness provenance defect (synthetic-harness rasters fed to pdfjs-bound readers -> correct render_error); fixed in fa59348 by binding consumers to the actual producer, no assertion weakened. READY FOR REVIEW \u2014 independent review + coordinator acceptance receipt remain; NOT accepted. No push, no Beads writes. Reservation released: nothing running or queued."
 }

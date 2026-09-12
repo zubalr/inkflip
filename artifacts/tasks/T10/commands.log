@@ -326,3 +326,55 @@ exit 0 — 35 tests collected in the registered file: 11 real-OCR +
 # them (verified-byte engine input, deadline/cancellation, renderer
 # identity, utf-8 budget). The heavy reservation remains yielded to
 # Astra; nothing heavy is running or queued.
+
+# ============================================================
+# WAVE-3 HEAVY RUN — sole reservation holder (grant on port 5191;
+# pdf-ebz merge precondition satisfied: c1f82bd merged as e6ab3b5;
+# harness bundles the patched tesseract.js src/index.js entry).
+# ============================================================
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts   [attempt 1]
+exit 1 — 33 passed / 2 failed (10.7s), both real-OCR legs:
+  'worker init failure ... never unreadable_pixels': blank run ->
+    check.status 'failed', reason 'render_error'.
+  'word boxes map back ...': noise run -> 'failed'/'render_error'.
+  CLASSIFICATION: test-harness defect, not product. The wave-3
+  extract-time re-validation correctly rejects rasters whose
+  renderReaderId differs from the reader's configured renderer —
+  the harness labels blank/noise rasters 'synthetic-harness' while
+  the consuming readers were configured 'pdfjs-6_3_289-render'.
+  FIX (fa59348, no assertion weakened): test 825 binds the healthy
+  reader to 'synthetic-harness'; test 1147 runs the noise leg on a
+  second reader bound to 'synthetic-harness' (same page slot) —
+  provenance stays honest; a pdfjs-bound reader never re-identifies.
+
+$ bun x --no-install playwright test tests/readers/tesseract.spec.ts \
+    -g 'worker init failure is a terminal|word boxes map back'
+exit 0 — 2/2 pass (2.7s) after the binding fix.
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts   [attempt 2]
+exit 0 — 35/35 pass (10.1s): 11 real-OCR + 24 light, one worker.
+  Real-OCR leg exercised on this revision: real patched worker init,
+  verified model payload (object-language + readOnly cache slot),
+  real recognize() over prepared Uint8Array PNG, worker reuse,
+  retry on fresh worker, cancel->terminate, cold/memory/cached model
+  states, bounded pixel/edge caps, diagnostic confidence.
+
+$ python3 scripts/task_acceptance.py task T10 \
+    --report artifacts/tasks/T10/run.json
+exit 0 — evaluated_commit fa5934824361045520eeb32c2a76ff37b3ae9d13;
+  commands_run 1; failures []; tests 35 collected / 35 passed /
+  0 failed / 0 skipped.
+  (First invocation refused: "commit implementation changes before
+  recording acceptance evidence" — test fix committed as fa59348.)
+
+$ bun run verify
+exit 0 — 115 tests total (49 bootstrap/acceptance + 2 native-boundary
+  + 64 coordination/homebase), 1 pre-existing skip inside the
+  skip-detection meta-test; self-check: 16 commands.
+
+$ bun run build:web
+exit 0 — vite 8.3.0, 18 modules, dist/assets/index-DLl647JV.js
+  191.77 kB gzip 60.54 kB, built in 205ms.
+
+# RELEASE: no heavy command in flight or queued after this block.
