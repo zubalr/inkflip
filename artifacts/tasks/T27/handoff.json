@@ -115,6 +115,19 @@
       "resource_state": "Worker holds no heavy run and claims no slot change in Beads; T10 HOLDS the reservation per Astra.",
       "handoff_state": "ready_for_review=true (source revision 12bc8ac); worker yields and stays on light work only."
     },
+    "wave2_checkpoint": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra wave-2 revision/geometry decision: fix all wave-2 findings within T27 (light source/stub/tiny-render work only, no real OCR while T10 holds the slot); document the approved F10 decision; commit/push checkpoint; final candidate binding and OCR rerun follow after T10 yields",
+      "revision_commit": "5ba110b (source + tests + docs/proposals/T27.md)",
+      "addressed_findings_map": "See receipt.json linux_verification.wave2_revision_round.addressed_findings: W2-1 effective-resize inversion, W2-2 pre-allocation output budget, W2-3 completed typed boundary (psm/resize shapes, sanitized model_integrity, typed malformed TSV with retained chunks, nonfinite/overflow rejection), W2-4 canonical_to_raster quad geometry per the approved F10 decision, W2-5 corrected fallback fixture layout.",
+      "executed_commands_linux": [
+        {"command": "uv run --project native python -m pytest native/tests/ocr --collect-only -q", "exit": 0, "counts": {"collected": 52}},
+        {"command": "uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine selection>'", "exit": 0, "counts": {"passed": 40, "subtests_passed": 13, "failed": 0, "deselected_real_engine": 12}},
+        {"command": "bun run verify", "exit": 0, "note": "115 tests, no OCR involved"}
+      ],
+      "honest_gaps": "Final OCR verification bound to the ultimate candidate pending the heavy slot; T27 remains unaccepted; worker yields on light-only discipline.",
+      "handoff_state": "ready_for_review=true (source revision wave-2 5ba110b); worker yields; Astra owns acceptance"
+    },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [

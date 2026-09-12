@@ -186,3 +186,28 @@ after the handshake. Light work only:
   (Mac review-codex-t27-wave2); final binding + OCR rerun follow after T10
   yields. T27 remains unaccepted. Worker yields; no Beads writes.
 ================================================================================
+
+================================================================================
+WAVE-2 REVISION ROUND (Astra wave-2 grant, 2026-09-12; T10 holds heavy slot)
+Review inputs: Codex source review df902a1 (review/codex/t27-wave2, verdict
+'changes requested' on c14e4b0) + Astra F10 geometry decision.
+Revision commit: 5ba110b (source + tests + docs/proposals/T27.md)
+Fixes: W2-1 effective-resize inversion from actual dest dims (101x51->50x26
+proven via stub reading real PNG IHDR); W2-2 output budget before Pillow
+allocation (resource_limit, resize provably never called for (1000,1000) and
+1e300); W2-3 typed boundary completed (psm type before membership, resize
+2-sequence shape, sanitized model_integrity with no paths, typed malformed
+TSV with retained chunks, nonfinite confidence rejected, 309-digit/inf
+coordinates typed); W2-4 canonical_to_raster = Scale(s)*R implemented per the
+approved F10 decision (validation+snapshot+inverse at open, round-trip and
+extent bounds, scale-only demoted to diagnostic, provenance check, four-corner
+quad mapping, docs/proposals/T27.md); W2-5 fallback fixture layout corrected.
+NO real OCR/model-load/full native suite runs this round (heavy hold).
+================================================================================
+$ uv run --project native python -m pytest native/tests/ocr --collect-only -q
+  -> 52 tests collected (36 prior + 16 wave-2)
+$ uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine selection>'
+  -> 40 passed, 13 subtests passed, 12 deselected (real-engine tests) (exit 0)
+$ bun run verify
+  -> exit 0 (bootstrap + native-bootstrap + coordination 64/64; no OCR)
+================================================================================
