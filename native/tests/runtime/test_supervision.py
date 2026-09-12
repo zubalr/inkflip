@@ -229,6 +229,47 @@ class TestSpawnAndClassification(unittest.TestCase):
             self.assertEqual(record.failure_kind, "output_limit")
             self.assertIn("stderr", record.reason)
 
+    def test_post_reap_output_overflow_is_classified(self):
+        # Regression for the post-reap drain hole (review F1): sibling A
+        # leaves a SIGTERM-ignoring stray, so _cleanup_strays blocks the
+        # parent loop for ~kill_grace while sibling B writes over-cap stdout
+        # and exits 0. B's bytes are only drained by _drain_until_eof AFTER
+        # B is reaped — killed_cause is never set — yet the cap violation
+        # must still classify failed/output_limit, never "completed" with
+        # recorded stdout_bytes over the cap.
+        with tempfile.TemporaryDirectory() as tmp:
+            pids_file = Path(tmp) / "pids.json"
+            admission = ParallelAdmission(
+                cpu_count=max(2, os.cpu_count() or 2), memory_bytes=64 << 30
+            )
+            result = Supervisor(
+                Path(tmp) / "run",
+                limits(jobs=2, max_stdout_bytes=8 << 10, kill_grace_seconds=0.8),
+                parallel_admission=admission,
+            ).run(
+                [
+                    spec(
+                        "file-a", "leak-stubborn-grandchild",
+                        "--pids-file", str(pids_file),
+                        produces="report.json",
+                    ),
+                    # Delayed burst: writes land inside A's cleanup window
+                    # and are drained only after B is reaped.
+                    spec("file-b", "delayed-flood", "--seconds", "0.6", "--bytes", "12288"),
+                    spec("file-c", "report", produces="report.json"),
+                ]
+            )
+            a, b, c = result.jobs["file-a"], result.jobs["file-b"], result.jobs["file-c"]
+            self.assertEqual(b.status, "failed")
+            self.assertEqual(b.failure_kind, "output_limit")
+            self.assertGreater(b.stdout_bytes, 8 << 10)
+            self.assertEqual(b.attempts, 1)  # output violations are never retried
+            self.assertEqual(a.status, "completed")
+            self.assertTrue(a.stray_descendants)
+            self.assertEqual(c.status, "completed")  # under-cap output unaffected
+            pids = json.loads(pids_file.read_text())
+            self.assertTrue(wait_pid_dead(pids["grandchild"]), "stubborn stray survived")
+
     def test_memory_growth_is_bounded_and_classified(self):
         with tempfile.TemporaryDirectory() as tmp:
             started = time.monotonic()
@@ -434,6 +475,36 @@ class TestByteStabilityAndResume(unittest.TestCase):
             self.assertEqual((out / "index.json").read_bytes(), index_before)
             self.assertEqual((out / "journal.jsonl").read_bytes(), journal_before)
 
+    def test_resume_binds_declared_env_values(self):
+        # Review F3: the config digest must bind declared env names AND
+        # values — a changed value under identical key names must not
+        # silently reuse prior completed evidence (old code hashed only the
+        # key names, so a changed value resumed as "skipped"). Identical
+        # env still verifies and skips.
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "run"
+            jobs_one = [
+                spec("file-a", "env-report", produces="report.json",
+                     env={"INKFLIP_EXTRA": "value-one"})
+            ]
+            first = Supervisor(out, limits()).run(jobs_one)
+            self.assertEqual(first.jobs["file-a"].status, "completed")
+            index_before = (out / "index.json").read_bytes()
+            journal_before = (out / "journal.jsonl").read_bytes()
+            # Changed env VALUE, identical key names -> changed identity ->
+            # refused BEFORE any writes (old code would have skipped).
+            with self.assertRaises(SupervisionError):
+                Supervisor(out, limits(), resume=True).run(
+                    [
+                        spec("file-a", "env-report", produces="report.json",
+                             env={"INKFLIP_EXTRA": "value-two"})
+                    ]
+                )
+            self.assertEqual((out / "index.json").read_bytes(), index_before)
+            self.assertEqual((out / "journal.jsonl").read_bytes(), journal_before)
+            second = Supervisor(out, limits(), resume=True).run(jobs_one)
+            self.assertEqual(second.jobs["file-a"].status, "skipped")
+
 
 class TestCancellation(unittest.TestCase):
     """Ctrl-C terminates descendants and leaves a valid partial artifact."""
@@ -575,6 +646,29 @@ class TestEnvironmentAndThreads(unittest.TestCase):
             )
             self.assertIn("INKFLIP_EXTRA", spawn["env_keys"])
             self.assertNotIn("INKFLIP_PARENT_SECRET", spawn["env_keys"])
+
+    def test_env_extra_cannot_redeclare_fixed_allowlist(self):
+        # Review F2: a spec-level TMPDIR override would escape the scratch
+        # bound and a *_NUM_THREADS override would defeat the thread pin,
+        # invisibly (the journal records only key names). Refused outright.
+        with tempfile.TemporaryDirectory() as tmp:
+            for key in ("TMPDIR", "OMP_NUM_THREADS", "LANG"):
+                with self.subTest(key=key):
+                    with self.assertRaises(SupervisionError):
+                        Supervisor(Path(tmp) / "run", limits()).run(
+                            [
+                                spec(
+                                    "file-a", "env-report",
+                                    produces="report.json",
+                                    env={key: "override"},
+                                )
+                            ]
+                        )
+            # Adding a NEW name alongside the fixed set is still allowed.
+            result = Supervisor(Path(tmp) / "run2", limits()).run(
+                [spec("file-a", "env-report", produces="report.json", env={"INKFLIP_EXTRA": "ok"})]
+            )
+            self.assertEqual(result.jobs["file-a"].status, "completed")
 
     def test_supervision_uses_processes_not_threads(self):
         before = len(threading.enumerate())

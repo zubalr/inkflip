@@ -126,6 +126,43 @@ def scenario_leak_grandchild(argv: list) -> int:
     return 0
 
 
+def scenario_leak_stubborn_grandchild(argv: list) -> int:
+    # Spawn a same-group descendant that IGNORES SIGTERM, wait for it to
+    # install its handler, then exit 0. The post-reap stray probe must
+    # escalate to SIGKILL — and the ~kill_grace window it spends doing so
+    # blocks the parent loop, which is what the post-reap output-overflow
+    # regression test needs.
+    pids_file = argv[argv.index("--pids-file") + 1]
+    grandchild = subprocess.Popen(
+        [
+            sys.executable, "-c",
+            "import signal, time\n"
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+            "while True: time.sleep(60)",
+        ]
+    )
+    Path(pids_file).write_text(
+        json.dumps({"child": os.getpid(), "grandchild": grandchild.pid})
+    )
+    time.sleep(0.3)  # let the grandchild install SIG_IGN before we exit
+    _write_report({"kind": "worker-report", "text": "stubborn-leaker"})
+    return 0
+
+
+def scenario_delayed_flood(argv: list) -> int:
+    # Sleep, then emit a single bounded burst and exit 0. With a sibling
+    # blocking the parent loop (leak-stubborn-grandchild), the burst is only
+    # drained by _drain_until_eof AFTER this child is reaped — exercising the
+    # post-reap output-limit classification path.
+    seconds = float(argv[argv.index("--seconds") + 1])
+    count = int(argv[argv.index("--bytes") + 1])
+    stream = sys.stderr if "--stderr" in argv else sys.stdout
+    time.sleep(seconds)
+    stream.write("y" * count)
+    stream.flush()
+    return 0
+
+
 def scenario_fail_once(argv: list) -> int:
     # Fail attempt 1, succeed attempt 2: exercises the one bounded retry.
     state = Path(argv[argv.index("--state") + 1])
@@ -161,6 +198,8 @@ SCENARIOS = {
     "oom": scenario_oom,
     "hang-grandchild": scenario_hang_grandchild,
     "leak-grandchild": scenario_leak_grandchild,
+    "leak-stubborn-grandchild": scenario_leak_stubborn_grandchild,
+    "delayed-flood": scenario_delayed_flood,
     "fail-once": scenario_fail_once,
     "slow-report": scenario_slow_report,
     "env-report": scenario_env_report,

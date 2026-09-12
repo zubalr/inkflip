@@ -1,40 +1,57 @@
 # T29 executed command transcript
-date: 2026-09-12T14:12Z  host: macOS arm64 (Darwin 25.x)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7)
+date: 2026-09-12T14:12Z (original round) / 2026-09-12T14:39Z (review-fix round)
+host: macOS arm64 (Darwin 25.x)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7)
 worktree: /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t29  branch: work/devin/t29  base: 21be4c9
-HEAD under test: e06744223f53a00975ae33b0b2da8e4ca3828420 (607a0f7 impl + 07c6d24 tests + e067442 probe fix)
+
+## Review-fix round (HEAD under test: 601b3707be61d2f78060299da7df5683cb52c10c)
+## = 057430e impl fixes (review 8c479d2 F1-F4) + 601b370 regression tests
 
 $ uv run --project native python -m pytest native/tests/runtime -q   (T29 contract command)
-..................................                                   [100%]
-34 passed, 4 subtests passed in 9.66s
+.....................................                             [100%]
+37 passed, 7 subtests passed in 11.58s
 exit: 0
 
 $ uv run --project native python -m pytest native/tests/runtime -q -W error::DeprecationWarning
-..................................                                   [100%]
-34 passed, 4 subtests passed in 10.40s
+.....................................                             [100%]
+37 passed, 7 subtests passed in 11.68s
 exit: 0
-(no DeprecationWarning: probe_rlimits runs the setrlimit probe in a fresh
-interpreter subprocess, never os.fork from a possibly-threaded parent)
 
 $ python3 scripts/task_acceptance.py task T29 --report artifacts/tasks/T29/run.json
 exit: 0
-run.json binds evaluated_commit e06744223f53a00975ae33b0b2da8e4ca3828420;
-tests: collected 34, passed 34, failed 0, skipped 0
+run.json binds evaluated_commit 601b3707be61d2f78060299da7df5683cb52c10c;
+tests: collected 37, passed 37, failed 0, skipped 0
 
 $ uv run --project native python -m pytest native/tests -q   (whole native suite, regression check)
-1 failed, 144 passed, 153 subtests passed in 25.98s
+1 failed, 147 passed, 156 subtests passed in 22.83s
 exit: 1
-FAILURE ANALYSIS: the single failure is
+FAILURE ANALYSIS: the single failure is unchanged -
 native/tests/ocr/test_ocr.py::TestModelSelection::test_fallback_dir_is_probed_per_language
-- a T27-owned test comparing PosixPath('/private/var/...tessdata') to
-  PosixPath('/var/...tessdata'): the macOS /var -> /private/var symlink
-  differs from tempfile's canonicalized path. T29 diff (git diff 21be4c9..HEAD)
-  touches zero bytes under native/tests/ocr/ or native/inkflip/readers/, so
-  the failure is pre-existing/environmental on this host, not introduced here.
-  Recorded as a limitation/environment finding; not weakened, not touched.
+(T27-owned macOS /var -> /private/var symlink path-equality issue; T29's
+diff still touches zero bytes under native/tests/ocr/ or
+native/inkflip/readers/). Recorded, not hidden.
+
+# Red/green verification of the F1 regression test:
+# the post-reap mirror in _classify_attempt was temporarily disabled
+# (if False and ...); test_post_reap_output_overflow_is_classified then
+# FAILED with 'completed' != 'failed' - reproducing review F1 exactly
+# (exit-0 flooder recorded completed with stdout_bytes=12288 > cap 8192).
+# Mirror restored -> test green.
 
 # Process hygiene after the suite:
 $ pgrep -fl fault_worker        -> exit 1 (no stray workers/descendants)
-$ find $TMPDIR -name '*-a[0-9]-*' -> no leftover per-attempt scratch dirs
+
+## Original round (HEAD under test: e06744223f53a00975ae33b0b2da8e4ca3828420)
+
+$ uv run --project native python -m pytest native/tests/runtime -q
+34 passed, 4 subtests passed in 9.66s
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T29 --report artifacts/tasks/T29/run.json
+exit: 0 (run.json bound evaluated_commit e067442; 34/34/0/0)
+
+$ uv run --project native python -m pytest native/tests -q
+1 failed, 144 passed, 153 subtests passed (same single T27 OCR failure)
+exit: 1
 
 # Manual smoke (pre-test debugging evidence, all scenarios real children):
 # file-a report -> completed, reports/file-a.json committed byte-verbatim
