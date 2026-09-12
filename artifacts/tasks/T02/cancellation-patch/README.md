@@ -70,3 +70,7 @@ coordination/bootstrap checks pass. The constructor bytes remain identical to
 Bun1.4.0/Node22.23.2 install, eight installed-patch checks, eleven constructor
 cases and no Git drift. This evidence binds to68d31df before the type-comment
 and test-binding revision. No real OCR is claimed by this repair.
+
+## Reviewed integration
+
+Pauli (`01a093db-42d8-79d3-befb-0b7680c3e405`) approved exact `185d51d` for the documented constructor, transport and posted-job scope; see `review-final-185d51d.md`. Merging current main changed only Beads audit entries and produced `cb24f8ab802ea688b941f914a2dddf6c421880d0`. On that merged candidate, Node 22.23.2/Bun 1.4.0 frozen install passed without lock drift, 25 frozen dependency checks passed, 48 Python build tests passed (including the 11 constructor and 5 browser cases), and 115 verify tests passed. The `merged-*.log` files preserve actual output. These checks establish this repair, not fresh T02 or T10 task acceptance. Existing product receipts still require the planned integrated revalidation. Git whitespace inspection is clean for source; raw TAP failure logs and the generated patch retain their original whitespace and valid context markers.
