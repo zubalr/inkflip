@@ -1,8 +1,39 @@
 # T13 independent review — page/text/compare viewer & root app composition
 
 - **Reviewer:** independent reviewer (Devin Local subagent, coordinator-requested); not the writer (worker: `antigravity-t13`)
-- **Candidate:** `5d681931cc3d3653dbb65d0515a1657ddc2e3034` (impl `5f644ca`, evidence HEAD) on `review/devin/t13`
+- **Round-2 candidate:** `af685aa` evidence on `ab38b9e` fix (merged into this branch as `d1f8583`); round-1 candidate was `5d68193`
 - **Checkout:** `original/worktrees/review-devin-t13` (path differs from dispatch text; canonical worktree confirmed via `git worktree list`)
+- **Round-2 verdict: changes-required** — the report-import entry is now real and most round-1 findings are fixed, but the same fix introduced a **fabricated PDF-open path** (canned findings shown under the user's filename), the overflow fix did not cover the Home page, and malformed import JSON crashes the whole app.
+
+## Round-2 verification (`ab38b9e` + `af685aa`)
+
+| Check | Result |
+|---|---|
+| `bun run test:browser -- tests/browser/viewer.spec.ts` | **6/6 pass (3.1s)** — new "document open and report import entry integration" test included |
+| `run.json` binding | binds `ab38b9e5…` (the fix commit), 6/6, exit 0 |
+| `acceptance_criteria_evidence` | all 5 keys still resolve via `criterion_evidence()` |
+| Scope `96ab535..af685aa` | only the five sanctioned files + viewer dir + 2 sanctioned page CSS modules + artifacts — **no new out-of-scope files** |
+| Report import (P1-F1) | **REAL**: canonical `native-evidence.inkflip.json` mounts `ViewerStage` with its own data ("native-evidence.inkflip.json · 1 pages · 1 findings") via `#input-import-report` **and** via real `FileDrop` drag-drop; invalid JSON → clean `#import-error` `role=alert`, no viewer mounted; "Open saved report" entries on Home hero, workspace header and empty state |
+| Toolbar wrap (P2-F2) | `.toolbarGroup` now `flex-wrap:wrap` + `max-width:100%`/media query; criterion-3 spec now asserts `scrollWidth ≤ clientWidth` at 360px and passes in compare mode |
+| P3-F4/F5 | keyboard assertions (n/p/Enter) added to criterion-1 test; default-page fabrication → `clampedPageIndex`; honest "0 of N" counter; `findingCard`/`findingCardSelected` split fixed; all `occurrence_ids` of a finding now co-highlight |
+
+### Round-2 findings
+
+- **P1 — PDF open path fabricates analysis (P1-F1 partially fixed, regression).** Dropping or choosing any PDF mounts `EXAMPLE_DOC` under the user's real filename: probe dropped `my-tax-return.pdf` → header reads `my-tax-return.pdf · 2 pages · 3 findings` listing the canned invoice findings ("Amount reads differently #1/#2", "Font metadata…"). The file's bytes are never read (`handlePdfFileChange`/`handleFileCandidate` only call `setDocTitle(file.name)` + `setDoc(EXAMPLE_DOC clone)`); T08's `validate.ts` size/MIME/`%PDF-`/encrypted checks are bypassed entirely, so a 50 MB `.exe` named `x.pdf` also "opens". Meanwhile `FileDrop` copy claims "Your file is processed in this browser." For an evidence inspector this is a fabricated-result presentation — worse than the round-1 dead affordance. Fix: either wire T08's `OpenController` genuinely, show an explicit "received — inspection pipeline unavailable" state without canned findings, or remove the PDF affordance (keep `FileDrop` for JSON import only and fix its copy).
+- **P2 — Home page still overflows 154px at 360px (P2-F2 incomplete).** `.navLinks` (nav cluster, 307px, right=514) can't wrap/shrink; spec calls for a compact header/menu below 390px. Workspace is fixed; the landing is not.
+- **P2 — Import robustness: degenerate JSON crashes the entire app.** `{"pages":[],"findings":[]}` passes the shallow `Array.isArray` gate → `ViewerStage` hits `currentPage === undefined` → `TypeError: …reading 'limitations'` → React unmounts the whole tree (`#root` children = 0, white screen, no error boundary). Same for occurrences missing `geometry` (`occ.geometry.polygon` throws) or finding objects missing fields ("Page NaN" misrenders). The import gate must validate required shapes (nonempty pages, per-occurrence geometry object) or wrap the mount in an error boundary and fail closed into `#import-error`.
+- **P3 — Import is duck-typed, not canonical-schema validated.** Any JSON with `pages`+`findings` arrays mounts. Acceptable as an interim entry since T22's strict importer isn't in this base and will mount through the lease — but it must not crash or misrender (see P2 above). `docTitle` also ignores `document.display_name` (fixture shows filename fallback — minor).
+- **P3 — FileDrop copy vs behavior.** Drop zone says "Drop one PDF here" but JSON is also accepted (good behavior, stale copy); `onOpenFile`/`onImportReport` props are defined but `App.tsx` passes neither — dead API surface for now.
+
+### Round-2 verdict rationale
+
+Criteria remain green (6/6 reproduced, including the new import-mount test), the report-import **entry** is real, scope is clean, and run.json binds the fix commit. Blocked on: the fabricated PDF path (P1), incomplete overflow fix on Home (P2), and the import crash (P2). Probe spec preserved at `artifacts/tasks/T13/independent-review-probe-r2.spec.ts` (run under `tests/browser/` during review).
+
+---
+
+## Round 1 (superseded — kept for the record)
+
+- **Candidate:** `5d681931cc3d3653dbb65d0515a1657ddc2e3034` (impl `5f644ca`, evidence HEAD) on `review/devin/t13`
 - **Verdict: changes-required** — all five acceptance criteria independently reproduced and probed (the geometry/sync/a11y machinery is genuinely sound), but the composition half of the contract purpose is unmet: there is **no report-import entry and no document-open path at all**, plus a real narrow-screen layout violation and a scope deviation.
 
 ## Reproduced commands (this worktree, real counts)
