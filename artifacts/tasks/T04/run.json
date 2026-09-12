@@ -1,14 +1,14 @@
 {
   "task": "T04",
   "beads_id": "pdf-t04",
-  "evaluated_commit": "6ac16266c20584f6a70c0a065d68c4d9318b9f0d",
-  "evaluated_at": "2026-09-12T00:41:22.028301+00:00",
+  "evaluated_commit": "abbe8939c4547618a3bf35795159330c1b51358f",
+  "evaluated_at": "2026-09-12T22:03:58.386249+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 32,
-    "passed": 32,
+    "collected": 47,
+    "passed": 47,
     "failed": 0,
     "skipped": 0
   },
@@ -23,8 +23,9 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-qvfaeomw/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-bwmp8f9h/results",
         "--test",
+        "tests/geometry/followup-iy2.test.mjs",
         "tests/geometry/geometry.test.mjs"
       ],
       "cwd": ".",
@@ -32,12 +33,12 @@
       "stdout": "",
       "stderr": "",
       "tests": {
-        "collected": 32,
-        "passed": 32,
+        "collected": 47,
+        "passed": 47,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     }
   ]

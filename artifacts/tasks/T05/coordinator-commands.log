@@ -1,9 +1,21 @@
 python3 scripts/make_fixtures.py --check
-check ok: 33 files in /Users/zubair/Code/Projects/pdf project/worktrees/integrate/fixtures match deterministic regeneration
+check ok: 91 files in /Users/zubair/Code/Projects/pdf project/worktrees/refresh-a/fixtures match deterministic regeneration
 
 Exit: 0
 
 python3 -m unittest discover -s tests/fixtures -v
+test_completed_failure_crash_stale_preserve_first_result (test_catalog_followup.TestFaultDoubles.test_completed_failure_crash_stale_preserve_first_result) ... ok
+test_hang_and_cancel_are_reaped_with_prior_result (test_catalog_followup.TestFaultDoubles.test_hang_and_cancel_are_reaped_with_prior_result) ... ok
+test_canary_channels_bind_actual_source (test_catalog_followup.TestPriorityCatalog.test_canary_channels_bind_actual_source) ... ok
+test_contrast_control_has_white_text_and_dark_background (test_catalog_followup.TestPriorityCatalog.test_contrast_control_has_white_text_and_dark_background) ... ok
+test_duplicates_keep_four_positions (test_catalog_followup.TestPriorityCatalog.test_duplicates_keep_four_positions) ... ok
+test_extreme_geometry_has_tiny_bytes_and_explicit_render_limit (test_catalog_followup.TestPriorityCatalog.test_extreme_geometry_has_tiny_bytes_and_explicit_render_limit) ... ok
+test_invalid_and_encrypted_are_bounded_distinct_cases (test_catalog_followup.TestPriorityCatalog.test_invalid_and_encrypted_are_bounded_distinct_cases) ... ok
+test_mapping_absence_and_malformed_are_not_missing_ink (test_catalog_followup.TestPriorityCatalog.test_mapping_absence_and_malformed_are_not_missing_ink) ... ok
+test_original_pdfs_and_expectations_are_unchanged (test_catalog_followup.TestPriorityCatalog.test_original_pdfs_and_expectations_are_unchanged) ... ok
+test_paint_order_changes_only_sequence (test_catalog_followup.TestPriorityCatalog.test_paint_order_changes_only_sequence) ... ok
+test_partial_and_nonrectangular_clip_are_distinct (test_catalog_followup.TestPriorityCatalog.test_partial_and_nonrectangular_clip_are_distinct) ... ok
+test_unreadable_has_no_native_text_or_plausible_default (test_catalog_followup.TestPriorityCatalog.test_unreadable_has_no_native_text_or_plausible_default) ... ok
 test_control_paints_final_amount_once (test_fixtures.TestCoveredText.test_control_paints_final_amount_once) ... ok
 test_cover_is_opaque_white_fill (test_fixtures.TestCoveredText.test_cover_is_opaque_white_fill) ... ok
 test_cover_paint_order_is_text_cover_replacement (test_fixtures.TestCoveredText.test_cover_paint_order_is_text_cover_replacement) ... ok
@@ -44,7 +56,7 @@ test_family_shares_identical_fiducial_content (test_fixtures.TestUserUnitFamily.
 test_unit_one_is_the_manifest_control (test_fixtures.TestUserUnitFamily.test_unit_one_is_the_manifest_control) ... ok
 
 ----------------------------------------------------------------------
-Ran 38 tests in 0.466s
+Ran 50 tests in 0.776s
 
 OK
 
