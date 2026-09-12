@@ -27,10 +27,12 @@ Grant T28 to Homebase ZCode after predecessor validation. Devin owns native
 supervision, CLI, version comparison, security, integration and difficult defects;
 Antigravity owns the browser interface path. Later passes require actual gates.
 
-Use up to five concurrent workers, including native descendants, and honor any
-lower harness limit. Every writer has a named scope and isolated checkout. Keep
-review capacity available and retire completed workers. Existing grants retain
-their saved app and branch when the static future allocation changes.
+Use native descendants without a fixed numeric project ceiling; honor any
+configured finite budget and lower harness limit. Allocate by disjoint
+scope, memory/load and review throughput. Every writer has a named scope
+and isolated checkout. Keep review capacity available and retire completed
+workers. Existing grants retain their saved app and branch when the static
+future allocation changes.
 
 Run one heavy OCR/corpus/performance job at a time, recording its holder in the
 task's Beads note. Linux review uses a separate checkout from ZCode and shares

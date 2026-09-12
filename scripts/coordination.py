@@ -119,7 +119,7 @@ def admission_errors(task_id: str, issue: dict, *, branch: str, dirty: bool,
         (not fresh, "Task branch differs from main; the coordinator must prepare its reviewed starting point"),
         (issue.get("status") != "open", "Task is already claimed or unavailable; do not start another writer"),
         (bool(issue.get("assignee")), "Task already has an assignee; coordinate the handoff"),
-        (active >= maximum, "Five product-worker slots are occupied; wait for coordinator admission"),
+        (active >= maximum, f"Configured worker capacity is occupied ({active}/{maximum}); wait for coordinator admission"),
     ]
     return [message for failed, message in checks if failed]
 
@@ -163,48 +163,19 @@ def check_scope_ownership(task: dict, workers: list[dict], tasks: dict, override
 
 
 def start(task: dict, actor: str, overrides: dict) -> None:
-    validate_actor(actor)
-    with admission_lock() as issues:
-        ready_ids = {i["id"] for i in bd(["list", "--ready", "--limit", "0"])}
-        if not task_ready(task, issues, ready_ids):
-            raise ValueError(f"{task['id']} is not ready in Beads")
-        branch = run(["git", "branch", "--show-current"])
-        dirty = bool(run(["git", "status", "--porcelain"]))
-        fresh = run(["git", "rev-parse", "HEAD"]) == run(["git", "rev-parse", "main"])
-        workers = active_workers(issues)
-        errors = admission_errors(task["id"], issues.get(bead_id(task["id"]), {}), branch=branch,
-                                  dirty=dirty, fresh=fresh, active=len(workers),
-                                  maximum=overrides["max_product_workers"])
-        if errors:
-            raise ValueError("; ".join(errors))
-        check_predecessors(task, issues, ref="HEAD")
-        tasks, _ = load_contracts()
-        check_scope_ownership(task, workers, tasks, overrides)
-        bd(["update", bead_id(task["id"]), "--claim"], write=True, actor=actor)
-        print(f"Claimed {task['id']} as {actor}; write only the effective task scope.")
+    raise ValueError(
+        "Deprecated local admission is refused: the coordinator admits work only "
+        "through 'python3 scripts/native_pass.py dispatch' from the canonical "
+        "integration checkout, which records the grant in Beads. Workers never "
+        "self-claim; ask the coordinator for a grant or a reviewed resume.")
 
 
 def start_review(issue_id: str, actor: str, overrides: dict) -> None:
-    validate_actor(actor)
-    if ROOT != canonical_root():
-        raise ValueError("The coordinator admits reviewers from the canonical checkout")
-    with admission_lock() as issues:
-        issue = issues.get(issue_id, {})
-        labels = set(issue.get("labels", []))
-        ready_ids = {i["id"] for i in bd(["list", "--ready", "--limit", "0"])}
-        checks = [
-            (not {"execution:worker", "execution:review"} <= labels, "Review needs both execution labels"),
-            (bool(re.fullmatch(r"pdf-t\d+", issue_id)), "Product tasks cannot use review admission"),
-            (issue_id not in ready_ids, "Review is not ready in Beads"),
-            (issue.get("status") != "open", "Review is already claimed or unavailable"),
-            (bool(issue.get("assignee")), "Review already has an assignee"),
-            (len(active_workers(issues)) >= overrides["max_product_workers"], "Five worker slots are occupied"),
-        ]
-        errors = [message for failed, message in checks if failed]
-        if errors:
-            raise ValueError("; ".join(errors))
-        bd(["update", issue_id, "--claim"], write=True, actor=actor)
-        print(f"Claimed review {issue_id} as {actor}; read-only review scope.")
+    raise ValueError(
+        "Deprecated local review admission is refused: the coordinator assigns "
+        "independent reviews through 'python3 scripts/native_pass.py dispatch' "
+        "from the canonical integration checkout. Workers never self-claim; "
+        "ask the coordinator for the review grant.")
 
 
 def ready(tasks: dict) -> None:
@@ -338,17 +309,21 @@ thresholds remain mandatory. Leave planning/ unchanged.
 
 1. Open the assigned checkout and inspect Git status. You are not alone in this
    repository: preserve other work and edit only your assigned files.
-2. Read AGENTS.md and docs/COORDINATION.md, then run:
+2. Read AGENTS.md and docs/COORDINATION.md, then inspect the effective
+   contract:
 
 ```sh
 python3 scripts/coordination.py task {tid}
-python3 scripts/coordination.py start {tid} --actor {actor}
 ```
 
-3. Start editing only if admission succeeds. A blocked future task, stale base,
-   dirty checkout, occupied claim, or full worker pool needs a coordinator
-   handoff. Do not reset, force-refresh, reinitialize Beads, or work around it.
-   For a resumed session, ask the coordinator to confirm its existing claim.
+3. Start editing only inside a coordinator-granted checkout. The coordinator
+   admits work through `scripts/native_pass.py dispatch`, which records the
+   claim in Beads and prepares the task branch; workers never self-claim and
+   the historical `coordination.py start`/`start-review` commands refuse.
+   A blocked future task, stale base, dirty checkout, occupied claim, or
+   absent grant needs a coordinator handoff. Do not reset, force-refresh,
+   reinitialize Beads, or work around it. For a resumed session, ask the
+   coordinator to confirm its existing claim.
 4. Read the task record and the following relevant inputs; do not ingest the
    entire package or any held-out labels:
 

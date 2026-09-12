@@ -27,9 +27,12 @@ once per session, then only the assigned task's inputs.
   Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
-  Admit useful independent work with disjoint ownership and review capacity,
-  up to five concurrent workers including native descendants. Honor lower
-  harness limits. Record allocations in Beads; writers yield before review.
+  Admit useful independent work with disjoint ownership and review capacity;
+  the project has no fixed numeric worker ceiling. Allocate by independent
+  scope, memory/load, review throughput and actual running descendants, not
+  historical cards. Configured finite budgets still bound their app (codex
+  stays zero); honor lower harness limits. Record allocations in Beads;
+  writers yield before review. Do not spawn idle recursive supervisors.
 - One branch, one writer, one isolated checkout. Preserve existing work. Never
   reset, clean, force-push or overwrite another checkout. Mac worktrees share
   the canonical Beads database. Homebase pulls a native read replica through

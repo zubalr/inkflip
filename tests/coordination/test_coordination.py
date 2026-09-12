@@ -2,7 +2,6 @@ import copy
 import importlib.util
 import json
 import tempfile
-import threading
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -134,93 +133,29 @@ class CoordinationTests(unittest.TestCase):
         issue["labels"].append("execution:review")
         c.check_scope_ownership(self.tasks["T01"], [issue], self.tasks, self.overrides)
 
-    def test_clean_branch_ahead_of_main_is_not_a_fresh_assignment(self):
-        values = {("git", "branch", "--show-current"): "work/pdf-t01",
-                  ("git", "status", "--porcelain"): "",
-                  ("git", "rev-parse", "HEAD"): "b" * 40,
-                  ("git", "rev-parse", "main"): "a" * 40}
+    def test_stale_base_is_rejected_by_the_admission_helper(self):
+        # The retired CLI refuses before git inspection; the surviving generic
+        # helper still encodes the stale-base rule for any coordinator reuse.
+        errors = c.admission_errors("T01", {"status": "open"}, branch="work/pdf-t01",
+                                    dirty=False, fresh=False, active=0, maximum=5)
+        self.assertTrue(any("starting point" in e for e in errors), errors)
+
+    def test_deprecated_local_admission_refuses_without_beads_write(self):
+        # The historical worker self-claim path is retired: start/start-review
+        # must fail closed with native_pass coordinator guidance and never
+        # reach the admission lock or a Beads mutation, regardless of state.
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / ".beads").mkdir()
-            with patch.object(c, "canonical_root", return_value=root), \
-                 patch.object(c, "issues_by_id", return_value={"pdf-t01": {"status": "open"}}), \
-                 patch.object(c, "bd", return_value=[{"id": "pdf-t01"}]) as beads, \
-                 patch.object(c, "run", side_effect=lambda argv: values[tuple(argv)]):
-                with self.assertRaisesRegex(ValueError, "main"):
-                    c.start(c.effective_task(self.tasks["T01"], self.overrides), "test-worker", self.overrides)
-                self.assertFalse(any(call.kwargs.get("write") for call in beads.call_args_list))
-
-    def test_review_and_product_claims_share_atomic_capacity_admission(self):
-        issues = {f"pdf-active-{n}": {"id": f"pdf-active-{n}", "status": "in_progress",
-                  "labels": ["execution:worker", "execution:review"]} for n in range(4)}
-        issues["pdf-t01"] = {"id": "pdf-t01", "status": "open", "labels": ["execution:worker"]}
-        issues["pdf-review"] = {"id": "pdf-review", "status": "open",
-                                "labels": ["execution:worker", "execution:review"]}
-        product_snapshot = threading.Event()
-        review_attempt = threading.Event()
-        release_product = threading.Event()
-        outcomes = []
-        real_flock = c.fcntl.flock
-
-        def flock(handle, operation):
-            if threading.current_thread().name == "review":
-                review_attempt.set()
-            return real_flock(handle, operation)
-
-        def snapshot():
-            current = copy.deepcopy(issues)
-            if threading.current_thread().name == "product":
-                product_snapshot.set()
-                if not release_product.wait(5):
-                    raise RuntimeError("Test did not release product admission")
-            return current
-
-        def beads(argv, **kwargs):
-            if argv[0] == "list":
-                return [i for i in issues.values() if i["status"] == "open"]
-            self.assertTrue(kwargs["write"])
-            issues[argv[1]]["status"] = "in_progress"
-            return [issues[argv[1]]]
-
-        def admit(kind):
-            try:
-                if kind == "product":
-                    c.start(c.effective_task(self.tasks["T01"], self.overrides), "product", self.overrides)
-                else:
-                    c.start_review("pdf-review", "reviewer", self.overrides)
-                outcomes.append((kind, "claimed"))
-            except ValueError as error:
-                outcomes.append((kind, str(error)))
-
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            (root / ".beads").mkdir()
-            values = {("git", "branch", "--show-current"): "work/pdf-t01",
-                      ("git", "status", "--porcelain"): "",
-                      ("git", "rev-parse", "HEAD"): "a" * 40,
-                      ("git", "rev-parse", "main"): "a" * 40}
             with patch.object(c, "ROOT", root), patch.object(c, "canonical_root", return_value=root), \
-                 patch.object(c, "load_contracts", return_value=(self.tasks, self.overrides)), \
-                 patch.object(c, "issues_by_id", side_effect=snapshot), patch.object(c, "bd", side_effect=beads), \
-                 patch.object(c.fcntl, "flock", side_effect=flock), \
-                 patch.object(c, "run", side_effect=lambda argv: values[tuple(argv)]), redirect_stdout(StringIO()):
-                product = threading.Thread(target=admit, args=("product",), name="product")
-                review = threading.Thread(target=admit, args=("review",), name="review")
-                product.start()
-                try:
-                    self.assertTrue(product_snapshot.wait(5))
-                    review.start()
-                    self.assertTrue(review_attempt.wait(5))
-                finally:
-                    release_product.set()
-                    product.join(5)
-                    if review.ident is not None:
-                        review.join(5)
-                self.assertFalse(product.is_alive())
-                self.assertFalse(review.is_alive())
-        self.assertIn(("product", "claimed"), outcomes)
-        self.assertEqual(sum(i["status"] == "in_progress" for i in issues.values()), 5)
-        self.assertTrue(any(kind == "review" and "slots" in result for kind, result in outcomes))
+                 patch.object(c, "issues_by_id", return_value={"pdf-t01": {"status": "open"}}), \
+                 patch.object(c, "bd") as beads, patch.object(c, "run") as git:
+                with self.assertRaisesRegex(ValueError, "native_pass.py dispatch"):
+                    c.start(c.effective_task(self.tasks["T01"], self.overrides), "worker", self.overrides)
+                with self.assertRaisesRegex(ValueError, "native_pass.py dispatch"):
+                    c.start_review("pdf-review", "reviewer", self.overrides)
+                self.assertFalse(any(call.kwargs.get("write") for call in beads.call_args_list))
+                self.assertFalse(git.called)
 
     def test_all_original_tasks_and_gates_are_retained(self):
         self.assertEqual(set(self.tasks), {f"T{n:02}" for n in range(1, 56)})
@@ -234,7 +169,9 @@ class CoordinationTests(unittest.TestCase):
                 actor = "worker-" + tid.lower()
                 prompt = c.render_prompt(c.effective_task(self.tasks[tid], self.overrides), actor, self.overrides)
                 self.assertIn(str(ROOT.parent / "worktrees" / c.bead_id(tid)), prompt)
-                self.assertIn(f"start {tid} --actor {actor}", prompt)
+                self.assertIn(f"task {tid}", prompt)
+                self.assertIn("native_pass.py dispatch", prompt)
+                self.assertNotIn(f"start {tid} --actor", prompt)
                 self.assertIn(f"work/{c.bead_id(tid)}", prompt)
                 self.assertIn("Then stop for independent review", prompt)
 

@@ -4,7 +4,7 @@
   "default_branch": "main",
   "state_authority": "Beads",
   "integration_owner": "devin",
-  "max_active_workers": 5,
+  "max_active_workers": null,
   "worker_budgets": {
     "codex": 0,
     "devin": null,

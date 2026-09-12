@@ -36,8 +36,9 @@ Dispatch only from clean, published canonical Mac main with
 `git config inkflip.role integrator`. Homebase's role is `worker`. These settings
 are accident guards, not security identities. Keep writers in isolated task
 checkouts. Before publishing Beads, commit pending native Dolt transitions and
-resolve any sync error. Do not use historical `coordination.py start`/`start-review`
-for native admission.
+resolve any sync error. The historical `coordination.py start`/`start-review`
+self-claim commands are retired and refuse; native admission runs only
+through `native_pass.py dispatch` from the canonical integration checkout.
 
 Use the exact T02 toolchain and frozen locks; dependency installation and Linux
 support require actual execution on the target platform. Read current Beads
@@ -102,11 +103,14 @@ relay alone handles native Git storage rollover for `refs/dolt/data` with an
 exact observed-SHA lease; see `docs/HOMEBASE.md`. Publish each ZCode grant
 to the Homebase relay before expecting its worker to see it.
 
-Admit up to five concurrent workers across the project, including native
-children, subject to lower harness limits. A null per-app budget allows Devin
-to allocate that shared capacity; it does not remove the global limit. Account
-for every active native descendant in Beads, reserve independent review capacity,
-and close finished workers. Historical native UI cards are not a live count.
+Admit independent workers across the project, including native children,
+with no fixed numeric project ceiling; native provider and session limits
+still apply. Allocate by disjoint scope, memory/load, independent review
+throughput and actual running descendants. A null per-app budget imposes no
+app cap — do not invent one; a configured finite budget still bounds its
+app. Account for every active native descendant in Beads, reserve
+independent review capacity, and close finished workers. Do not spawn idle
+recursive supervisors. Historical native UI cards are not a live count.
 Use native general SWE-2 subagents and Antigravity's installed native facilities.
 ZCode uses its existing Goal on Homebase. Codex stays inactive after this transfer.
 Only one heavy OCR/corpus/performance run may execute at a time; record its holder

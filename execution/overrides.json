@@ -1,6 +1,5 @@
 {
   "version": 1,
-  "max_product_workers": 5,
   "development_port_base": 5180,
   "path_replacements": {
     "pnpm-workspace.yaml": "bunfig.toml",
