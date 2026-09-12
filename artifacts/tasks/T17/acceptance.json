@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "task_id": "T17",
+  "beads_id": "pdf-t17",
+  "disposition": "accepted",
+  "evaluated_commit": "dc43675eff7a99de247834df311289b584c117ff",
+  "evaluated_at": "2026-09-12T18:24:23.364899+00:00",
+  "contract_digest": "1fc3e51abaf65acc66840646542bdbe3acef8657aada22a43a5c5c3deeca151a",
+  "worker": "antigravity-t17",
+  "commands": [
+    {
+      "segment": "bun run test:browser -- tests/browser/amount.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/amount.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/amount.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    },
+    {
+      "segment": "bun run test:fixtures",
+      "argv": [
+        "bun",
+        "run",
+        "test:fixtures"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:fixtures"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 50,
+        "passed": 50,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T17/commands.log": "d8f686bcb866545c754412e8bb0306b4f9befaf4ec77708cb7594dc1f7d1d341",
+    "artifacts/tasks/T17/coordinator-commands.log": "92ce8dac9e15a1ccdc72a03b0958a823dedd3b3080b795ef9d0a2993b760badb",
+    "artifacts/tasks/T17/criteria-evidence.md": "f97b4c0c08bad30dfd7627d3ee918142ca26099f85dbcb7e71b8c7848c3d30f4",
+    "artifacts/tasks/T17/receipt.json": "051b52d22bb6e3b1ec3c8148be565838299d976daf44822a679c4a414f20aad2",
+    "artifacts/tasks/T17/review.md": "bde595a487b25508ba79e804ad388b6f0ce9924f4b15eb1937dc245cc8004d0c",
+    "artifacts/tasks/T17/run.json": "9f9e49d088610bd22ea5cd1a97ed199b9cbe0bbd4288049bd694fe92eaaf3e12"
+  },
+  "criteria": {
+    "Renamed identical bytes produce same reading": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ],
+    "modified bytes cannot replay old prepared result": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ],
+    "live and prepared paths label provenance correctly": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ],
+    "real source downloadable": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ],
+    "actual timing visible, not decorative scan animation": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ],
+    "clean counterpart renders equal under same renderer.": [
+      "artifacts/tasks/T17/commands.log",
+      "artifacts/tasks/T17/run.json",
+      "artifacts/tasks/T17/criteria-evidence.md"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "review/devin/t17"
+    ],
+    "path": "artifacts/tasks/T17/review.md"
+  }
+}
