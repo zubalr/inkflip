@@ -1,0 +1,17 @@
+{
+  "events": [
+    {
+      "generation": 2,
+      "job": "completed-first",
+      "state": "completed"
+    }
+  ],
+  "expected_terminal": "completed",
+  "generation": 2,
+  "max_wall_ms": 1000,
+  "preserved_result": {
+    "job": "completed-first",
+    "text": "$100"
+  },
+  "scenario": "stale"
+}

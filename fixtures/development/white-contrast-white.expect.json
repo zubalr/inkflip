@@ -1,0 +1,21 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/white-contrast-control.pdf",
+  "family": "white-contrast",
+  "fixture_id": "F04",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F04",
+    "intent": {
+      "contrast": "white on white",
+      "native_intent": "$100",
+      "visible": ""
+    },
+    "variant": "white",
+    "version": "g78.1"
+  },
+  "observation": "contrast heuristic controlled",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

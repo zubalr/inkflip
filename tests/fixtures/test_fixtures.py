@@ -24,19 +24,11 @@ FIXTURES = ROOT / "fixtures"
 GENERATOR = ROOT / "scripts" / "make_fixtures.py"
 REGISTRY = ROOT / "config" / "acceptance-commands.json"
 
-EXPECTED_SPLITS = {
-    "F01": "public",
-    "F02": "public",
-    "F07": "public",
-    "F08": "development",
-    "F03": "development",
-}
+CATALOG = json.loads((ROOT / "planning/quality/fixture-catalog.json").read_text())
+EXPECTED_SPLITS = {e["id"]: e["split"].replace("public_demo", "public") for e in CATALOG}
 EXPECTED_FAMILIES = {
-    "F01": "mapping-amount",
-    "F02": "covered-text",
-    "F07": "origins-rotation",
-    "F08": "userunit",
-    "F03": "searchable-scan",
+    e["id"]: e["family"] for e in CATALOG
+    if e["id"] in {"F01", "F02", "F03", "F07", "F08", "F04", "F05", "F06", "F10", "F11", "F17", "F18", "F19", "F20", "F21"}
 }
 PRIVATE_MARKERS = (
     b"begin private key",

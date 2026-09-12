@@ -1,0 +1,25 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "duplicates",
+  "fixture_id": "F11",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F11",
+    "intent": {
+      "occurrences": [
+        [
+          48,
+          120
+        ]
+      ],
+      "text": "$100"
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "no value-only dedupe/first-match binding",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

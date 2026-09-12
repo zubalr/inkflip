@@ -1,0 +1,19 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "bad-pdf",
+  "fixture_id": "F18",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F18",
+    "intent": {
+      "load": "valid"
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "typed failure, no all-clear",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

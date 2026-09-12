@@ -1,4 +1,5 @@
 {
+  "catalog_sha256": "9ef514d8ba5007204a3f8bbad90da091cabd0b47fd3101cc705c1b0508ca9c0b",
   "determinism": "byte-identical on every platform; no timestamps or random IDs",
   "entries": [
     {
@@ -295,10 +296,734 @@
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
       "sha256": "2b855c7ee27d22c71696d3be9f63758f61b8449e51e03cdfa80272afc4d62158",
       "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 657,
+      "control": null,
+      "expectations": "development/white-contrast-control.expect.json",
+      "expectations_sha256": "07d2f9724c9dbf7267f77480b0af3457d67eda639db7d13b1e6f3d559b539343",
+      "family": "white-contrast",
+      "fixture_id": "F04",
+      "observation": "contrast heuristic controlled",
+      "path": "development/white-contrast-control.pdf",
+      "recipe": {
+        "group_id": "F04",
+        "intent": {
+          "contrast": "white on black",
+          "visible": "$100"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 630,
+      "control": "development/white-contrast-control.pdf",
+      "expectations": "development/white-contrast-white.expect.json",
+      "expectations_sha256": "81d3f6019efef0fe82bfac1f3730bd78a2bab93936069ee91b2e58ab254eabca",
+      "family": "white-contrast",
+      "fixture_id": "F04",
+      "observation": "contrast heuristic controlled",
+      "path": "development/white-contrast-white.pdf",
+      "recipe": {
+        "group_id": "F04",
+        "intent": {
+          "contrast": "white on white",
+          "native_intent": "$100",
+          "visible": ""
+        },
+        "variant": "white",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 657,
+      "control": null,
+      "expectations": "development/paint-order-control.expect.json",
+      "expectations_sha256": "04c9eaa798b1cef2e68f771d6f0f42443aa9fa373b7e5cf8a0980a97e718e92e",
+      "family": "paint-order",
+      "fixture_id": "F05",
+      "observation": "observed order not universal visibility",
+      "path": "development/paint-order-control.pdf",
+      "recipe": {
+        "group_id": "F05",
+        "intent": {
+          "order": [
+            "fill",
+            "text"
+          ]
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "db606229b121784e8e28d0ef33ed01a1f5135dc3b9c6d958b650991ae15ffe84",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 648,
+      "control": "development/paint-order-control.pdf",
+      "expectations": "development/paint-order-after.expect.json",
+      "expectations_sha256": "3d8d170513ce1f6c5d909c0a5a72f2314e8eab3dda11d45e2c694bab981a5b7b",
+      "family": "paint-order",
+      "fixture_id": "F05",
+      "observation": "observed order not universal visibility",
+      "path": "development/paint-order-after.pdf",
+      "recipe": {
+        "group_id": "F05",
+        "intent": {
+          "order": [
+            "text",
+            "fill"
+          ]
+        },
+        "variant": "after",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "3c474638423b2b9b9fa45c79b39abce40105fba5d20566ca9d231ae41fb9955d",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 621,
+      "control": null,
+      "expectations": "development/partial-clip-control.expect.json",
+      "expectations_sha256": "aca331468debf54d75701800d4f9fc340e6f8c980a337054cf67b7a2b7516ff0",
+      "family": "partial-clip",
+      "fixture_id": "F06",
+      "observation": "approximate/unavailable stated",
+      "path": "development/partial-clip-control.pdf",
+      "recipe": {
+        "group_id": "F06",
+        "intent": {
+          "visibility": "full"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 648,
+      "control": "development/partial-clip-control.pdf",
+      "expectations": "development/partial-clip-partial.expect.json",
+      "expectations_sha256": "a0a7ae92e04bb9ee3ca96044a325c6260bb93778bb1ea07c1974f0f38dca177f",
+      "family": "partial-clip",
+      "fixture_id": "F06",
+      "observation": "approximate/unavailable stated",
+      "path": "development/partial-clip-partial.pdf",
+      "recipe": {
+        "group_id": "F06",
+        "intent": {
+          "cover": [
+            78,
+            110,
+            24,
+            36
+          ],
+          "visibility": "partial cover"
+        },
+        "variant": "partial",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 660,
+      "control": "development/partial-clip-control.pdf",
+      "expectations": "development/partial-clip-triangle.expect.json",
+      "expectations_sha256": "c3ec650ac592aefc51bc310e259551727deafe25cb42deb3e52a6e0492d4be75",
+      "family": "partial-clip",
+      "fixture_id": "F06",
+      "observation": "approximate/unavailable stated",
+      "path": "development/partial-clip-triangle.pdf",
+      "recipe": {
+        "group_id": "F06",
+        "intent": {
+          "visibility": "nonrectangular clip; bounding-box approximation insufficient"
+        },
+        "variant": "triangle",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 621,
+      "control": null,
+      "expectations": "development/duplicates-control.expect.json",
+      "expectations_sha256": "c2856ac710935c9c5d2b26eab0916e15bfae5b334615257e454e795a8b8ab824",
+      "family": "duplicates",
+      "fixture_id": "F11",
+      "observation": "no value-only dedupe/first-match binding",
+      "path": "development/duplicates-control.pdf",
+      "recipe": {
+        "group_id": "F11",
+        "intent": {
+          "occurrences": [
+            [
+              48,
+              120
+            ]
+          ],
+          "text": "$100"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 754,
+      "control": "development/duplicates-control.pdf",
+      "expectations": "development/duplicates-four.expect.json",
+      "expectations_sha256": "003887381cfcbd71f91732a96c7e17fcfbde24f9ab923075ae4454d1c7acccaf",
+      "family": "duplicates",
+      "fixture_id": "F11",
+      "observation": "no value-only dedupe/first-match binding",
+      "path": "development/duplicates-four.pdf",
+      "recipe": {
+        "group_id": "F11",
+        "intent": {
+          "occurrences": [
+            [
+              48,
+              180
+            ],
+            [
+              200,
+              180
+            ],
+            [
+              48,
+              60
+            ],
+            [
+              200,
+              60
+            ]
+          ],
+          "text": "$100"
+        },
+        "variant": "four",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "036db55ee2f8c320252c7c9fb220daa38699387800e8a3bbf8c6bb73463feb1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1052,
+      "control": null,
+      "expectations": "development/mapping-missing-control.expect.json",
+      "expectations_sha256": "85c0e89bd40132afc8c7f029ac30966265fd430b040a96abd2565625f287af95",
+      "family": "mapping-missing",
+      "fixture_id": "F10",
+      "observation": "preserve raw API output/missingness",
+      "path": "development/mapping-missing-control.pdf",
+      "recipe": {
+        "group_id": "F10",
+        "intent": {
+          "mapping": "control",
+          "painted": "$100",
+          "raw_output": "record reader API verbatim, including fallback or failure"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "d4ab5ca3fd6a993cf18f86c1ffc7fdbd1a4da09bc4ba2ab117c5511312675a24",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 621,
+      "control": "development/mapping-missing-control.pdf",
+      "expectations": "development/mapping-missing-absent.expect.json",
+      "expectations_sha256": "5970f959276c4adcc013afd4130716383862e74191ca1d145880891a52793498",
+      "family": "mapping-missing",
+      "fixture_id": "F10",
+      "observation": "preserve raw API output/missingness",
+      "path": "development/mapping-missing-absent.pdf",
+      "recipe": {
+        "group_id": "F10",
+        "intent": {
+          "mapping": "absent",
+          "painted": "$100",
+          "raw_output": "record reader API verbatim, including fallback or failure"
+        },
+        "variant": "absent",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 762,
+      "control": "development/mapping-missing-control.pdf",
+      "expectations": "development/mapping-missing-malformed.expect.json",
+      "expectations_sha256": "0c71f3fcc940eb96072eed3884a7c0d489a7e9156e25dd4767c28166ad0615d1",
+      "family": "mapping-missing",
+      "fixture_id": "F10",
+      "observation": "preserve raw API output/missingness",
+      "path": "development/mapping-missing-malformed.pdf",
+      "recipe": {
+        "group_id": "F10",
+        "intent": {
+          "mapping": "malformed",
+          "painted": "$100",
+          "raw_output": "record reader API verbatim, including fallback or failure"
+        },
+        "variant": "malformed",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "81b2ec12234d97d755ad2d7c1744e453246e6f303bfb4728eb4634e31a5884c4",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 18236,
+      "control": null,
+      "expectations": "development/unreadable-control.expect.json",
+      "expectations_sha256": "d4cd5fc753b850f5fcf233ed058c4a6c43ee32b3cc43c099b1410e0d52db6a1f",
+      "family": "unreadable",
+      "fixture_id": "F17",
+      "observation": "no plausible missing-value defaults",
+      "path": "development/unreadable-control.pdf",
+      "recipe": {
+        "group_id": "F17",
+        "intent": {
+          "raster_text": [
+            "QUARTERLY SUMMARY",
+            "INVOICE 2026-0417",
+            "AMOUNT DUE $100.00",
+            "ISSUED 2026-09-01",
+            "PAGE 1 OF 1"
+          ]
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 960,
+      "control": "development/unreadable-control.pdf",
+      "expectations": "development/unreadable-blank.expect.json",
+      "expectations_sha256": "de0d99eac4730a43a3ec8ae2bbc9384ca399fd8039574c8ae45f0b908c0a41b8",
+      "family": "unreadable",
+      "fixture_id": "F17",
+      "observation": "no plausible missing-value defaults",
+      "path": "development/unreadable-blank.pdf",
+      "recipe": {
+        "group_id": "F17",
+        "intent": {
+          "raster_text": null,
+          "region": "blank; no default value"
+        },
+        "variant": "blank",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "32a8e848f84ed53c6953e9f7ab6075908fe65fe7c8ecef801bea9f2f10eaec9e",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 9088,
+      "control": "development/unreadable-control.pdf",
+      "expectations": "development/unreadable-noise.expect.json",
+      "expectations_sha256": "ded07664fedc7639de766b4e15683998be4bf9ea3f9aa86eb9bad4c1d73c1047",
+      "family": "unreadable",
+      "fixture_id": "F17",
+      "observation": "no plausible missing-value defaults",
+      "path": "development/unreadable-noise.pdf",
+      "recipe": {
+        "group_id": "F17",
+        "intent": {
+          "raster_text": null,
+          "region": "unreadable deterministic pattern"
+        },
+        "variant": "noise",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "97d638325fb23e1e6a840257dc2cc54122a1ec2db8c437d3a6bc494ec39ca7c1",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 621,
+      "control": null,
+      "expectations": "development/bad-pdf-control.expect.json",
+      "expectations_sha256": "b224e48b118e35e44455be54603cdde6676f618b997dcbcc42045e909613344d",
+      "family": "bad-pdf",
+      "fixture_id": "F18",
+      "observation": "typed failure, no all-clear",
+      "path": "development/bad-pdf-control.pdf",
+      "recipe": {
+        "group_id": "F18",
+        "intent": {
+          "load": "valid"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 938,
+      "control": "development/bad-pdf-control.pdf",
+      "expectations": "development/bad-pdf-encrypted.expect.json",
+      "expectations_sha256": "8e03a5c1b66167071aecf49a76966285ffa120cc961bd198e51778333e2c31cb",
+      "family": "bad-pdf",
+      "fixture_id": "F18",
+      "observation": "typed failure, no all-clear",
+      "path": "development/bad-pdf-encrypted.pdf",
+      "recipe": {
+        "group_id": "F18",
+        "intent": {
+          "encryption": "Standard R2 RC4-40; synthetic only",
+          "load": "locked without credential",
+          "test_credential": "fixture"
+        },
+        "variant": "encrypted",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "00b01a2ec4c391bc840a06633addd50a43d4f64fd33cd619d4aced80ee580a58",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 80,
+      "control": "development/bad-pdf-control.pdf",
+      "expectations": "development/bad-pdf-truncated.expect.json",
+      "expectations_sha256": "810d2b710f1418c6fd7afd060668495e1d2c71c34b98f90f10877e7313e99ad4",
+      "family": "bad-pdf",
+      "fixture_id": "F18",
+      "observation": "typed failure, no all-clear",
+      "path": "development/bad-pdf-truncated.pdf",
+      "recipe": {
+        "group_id": "F18",
+        "intent": {
+          "load": "incomplete header/page tree; failure"
+        },
+        "variant": "truncated",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "90cb16af88588b5cba36331eee0ad55447c50337ffa1ee2fba8e9921feea4af5",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 206,
+      "control": "development/bad-pdf-control.pdf",
+      "expectations": "development/bad-pdf-malformed.expect.json",
+      "expectations_sha256": "20442369cea9b4570dba2b028c59ab4961c2ac81a601655628a72eefdc65f44b",
+      "family": "bad-pdf",
+      "fixture_id": "F18",
+      "observation": "typed failure, no all-clear",
+      "path": "development/bad-pdf-malformed.pdf",
+      "recipe": {
+        "group_id": "F18",
+        "intent": {
+          "load": "invalid page tree; reader-specific failure, never all-clear"
+        },
+        "variant": "malformed",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e19de710b8323c5d85d02796d33c1f3c542f85213f0c2ce56fac8af4a02de9c9",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 621,
+      "control": null,
+      "expectations": "development/huge-page-control.expect.json",
+      "expectations_sha256": "03f3f8f47a04620fd04d9c3ffc26e6ce06799f0a30780a3c24313c52eea958aa",
+      "family": "huge-page",
+      "fixture_id": "F19",
+      "observation": "limit before raster allocation",
+      "path": "development/huge-page-control.pdf",
+      "recipe": {
+        "group_id": "F19",
+        "intent": {
+          "box": [
+            0,
+            0,
+            320,
+            240
+          ],
+          "render_max_edge": 512
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 635,
+      "control": "development/huge-page-control.pdf",
+      "expectations": "development/huge-page-extreme.expect.json",
+      "expectations_sha256": "6c40b0a6fd58afefd7bef5da9cfa0f2f9102675f2b1a9f4832f1fc1d332f1255",
+      "family": "huge-page",
+      "fixture_id": "F19",
+      "observation": "limit before raster allocation",
+      "path": "development/huge-page-extreme.pdf",
+      "recipe": {
+        "group_id": "F19",
+        "intent": {
+          "box": [
+            0,
+            0,
+            1000000000,
+            1000000000
+          ],
+          "render_max_edge": 512,
+          "requested_pixels_at_72dpi": 1000000000000000000,
+          "unbounded_render_forbidden": true
+        },
+        "variant": "extreme",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "d50c2befa32ccf07e92946daaea270223aa034cb980e0699379163909e8c32f6",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 297,
+      "control": null,
+      "expectations": "development/worker-fault-control.expect.json",
+      "expectations_sha256": "868715f540042f9319efaf5074d819bcc7e772d34034e03c5e958d8de5f9179a",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-control.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "completed"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "cfe032b35708e068e8a346e9374576d74775fd7801f50f74f936b7e82dc46ea8",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 300,
+      "control": "development/worker-fault-control.json",
+      "expectations": "development/worker-fault-model-failure.expect.json",
+      "expectations_sha256": "13468919c06b1f2182b4391596ec92fac61a3a9d8f14412db81f844165b95f90",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-model-failure.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "failed"
+        },
+        "variant": "model-failure",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e236290d7fd46d192a7c1b9acab252093a4939466605d2557f9a745a64e5638b",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 292,
+      "control": "development/worker-fault-control.json",
+      "expectations": "development/worker-fault-crash.expect.json",
+      "expectations_sha256": "65d4e49b67e51264dbadb5c3a7c2f1f6607db4b7ebed4e2b280b3129f83f199a",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-crash.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "failed"
+        },
+        "variant": "crash",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "66a25c04e798cbe1a14e63a4658e9e0f55ea641f5714e7e1e9501ffd28b266a0",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 294,
+      "control": "development/worker-fault-control.json",
+      "expectations": "development/worker-fault-hang.expect.json",
+      "expectations_sha256": "6e91a2144674e379b1e13500f93aa8d4edbf8dd9a9fec958b6934e151caafb69",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-hang.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "timed_out"
+        },
+        "variant": "hang",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "46fc983b39b39396faa9753bd1551f6df130d421310579be2aef66d69c3d6546",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 296,
+      "control": "development/worker-fault-control.json",
+      "expectations": "development/worker-fault-cancel.expect.json",
+      "expectations_sha256": "c4707d2914fdd1f80dc5d651d9af3ba504fb40b59005e24c334f9e62833ab81d",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-cancel.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "cancelled"
+        },
+        "variant": "cancel",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "2bb56c212b763e6a8298c6840f2c24da006a1a19b4abbcb6281901520df0cf5e",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 295,
+      "control": "development/worker-fault-control.json",
+      "expectations": "development/worker-fault-stale.expect.json",
+      "expectations_sha256": "b10546f23b7a494caa11563116bebf003b0b84f0a6010228500bd4f6057213b1",
+      "family": "worker-fault",
+      "fixture_id": "F20",
+      "observation": "bounded shutdown and preserved results",
+      "path": "development/worker-fault-stale.json",
+      "recipe": {
+        "group_id": "F20",
+        "intent": {
+          "kind": "bounded fake process/event input",
+          "terminal": "completed"
+        },
+        "variant": "stale",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "cf63b2be3b2da4cfcdba64498a55c8f26551b608d2516af0ebed64430f2f2a4a",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 576,
+      "control": null,
+      "expectations": "development/network-canary-control.expect.json",
+      "expectations_sha256": "b6e073686b1b6502045e47b5fc68b9d0beefd482b8f0d8099bcf344c2b879da9",
+      "family": "network-canary",
+      "fixture_id": "F21",
+      "observation": "zero content egress/storage",
+      "path": "development/network-canary-control.pdf",
+      "recipe": {
+        "group_id": "F21",
+        "intent": {
+          "actions": "same local actions with no document content",
+          "egress": "none"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "5b4471a6fbfc6a38053c4fe797bbd4c7a205b23a6eb4f323267923a28b1ae578",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 947,
+      "control": "development/network-canary-control.pdf",
+      "expectations": "development/network-canary-channels.expect.json",
+      "expectations_sha256": "dbe6c63e635dfb8354c0d3250e1bf100e70450f3432353594fe5e12b6a20f81b",
+      "family": "network-canary",
+      "fixture_id": "F21",
+      "observation": "zero content egress/storage",
+      "path": "development/network-canary-channels.pdf",
+      "recipe": {
+        "group_id": "F21",
+        "intent": {
+          "channels": {
+            "annotation": "INKFLIP-CANARY-ANNOTATION-9D4",
+            "crop": "rendered text marker pixels",
+            "filename": "network-canary-channels.pdf",
+            "hash": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
+            "metadata": "INKFLIP-CANARY-METADATA-8C3",
+            "report": "actual report containing text marker",
+            "text": "INKFLIP-CANARY-TEXT-7B2"
+          },
+          "egress": "none",
+          "storage": "no document-derived persistence"
+        },
+        "variant": "channels",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
+      "split": "development"
     }
   ],
   "generator": "scripts/make_fixtures.py",
-  "generator_sha256": "f64e98e88544705cbfcdfbc9333b08330ab689b12a840dfe96296f834aacfbce",
+  "generator_sha256": "aa2b463fe1fe67441fac0906be3d4732a3802b036527a5d605f40ffe3b03d689",
   "generator_version": "1.0.0",
   "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
   "schema_version": "1.0.0",

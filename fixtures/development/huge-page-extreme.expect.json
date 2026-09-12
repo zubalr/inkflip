@@ -1,0 +1,27 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/huge-page-control.pdf",
+  "family": "huge-page",
+  "fixture_id": "F19",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F19",
+    "intent": {
+      "box": [
+        0,
+        0,
+        1000000000,
+        1000000000
+      ],
+      "render_max_edge": 512,
+      "requested_pixels_at_72dpi": 1000000000000000000,
+      "unbounded_render_forbidden": true
+    },
+    "variant": "extreme",
+    "version": "g78.1"
+  },
+  "observation": "limit before raster allocation",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}
