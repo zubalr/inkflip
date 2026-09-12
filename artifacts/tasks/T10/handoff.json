@@ -1,0 +1,15 @@
+{
+  "task": "T10",
+  "beads_id": "pdf-t10",
+  "worker": "devin-subagent-t10 (canceled at handoff request)",
+  "branch": "work/devin/t10",
+  "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
+  "state": "wip-checkpoint",
+  "ready_for_review": false,
+  "checkpoint": {
+    "completed": "packages/readers-tesseract/ implementation drafted (7 modules, ~2.3k lines) + tests/readers/tesseract.spec.ts (1215 lines); package typechecks clean (tsc -b exit 0)",
+    "remaining": "spec never executed under the playwright runner (fails trivially under node --test — wrong harness); no acceptance run, no receipt.json, no commands.log; initialization/cached/cold/offline and low-confidence criteria unverified; review never started",
+    "next_steps": "run suite under the registered harness (check config/acceptance-commands.json test:browser wiring), fix failures, produce receipt.json/commands.log with real counts, then independent review"
+  },
+  "disposition": "NOT a review candidate — partial checkpoint for resume, per coordinator handoff request"
+}
