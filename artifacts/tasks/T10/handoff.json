@@ -4,7 +4,7 @@
  "worker": "devin-local-swe2-t10 (Devin Local SWE-2 subagent, coordinator Astra); session 1 was devin-cloud-t10",
  "branch": "work/devin/t10",
  "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
- "state": "wave4-revision-green-checkpoint",
+ "state": "wave5-review-fixes-green-checkpoint",
  "ready_for_review": true,
  "checkpoint": {
   "completed": [
@@ -231,6 +231,54 @@
     "cmd": "bun run build:web",
     "exit": 0,
     "note": "vite 8.3.0, 174ms, index-DLl647JV.js 191.77kB"
+   },
+   {
+    "cmd": "bun run tsc -b",
+    "exit": 0,
+    "note": "post wave-5 mint fixes"
+   },
+   {
+    "cmd": "node --test tests/readers/crop-math.mjs",
+    "exit": 0,
+    "collected": 13,
+    "passed": 13,
+    "failed": 0
+   },
+   {
+    "cmd": "node artifacts/tasks/T10/repro-planCrop.mjs",
+    "exit": 0,
+    "note": "6/6 ALL OK"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts",
+    "exit": 0,
+    "collected": 44,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0,
+    "note": "41 prior + 3 promoted reviewer probes (2 stub + 1 real zombie cross-talk) at af80d15"
+   },
+   {
+    "cmd": "python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json",
+    "exit": 0,
+    "collected": 44,
+    "passed": 44,
+    "failed": 0,
+    "note": "evaluated_commit af80d15e05b8c907aa588329770cafd3ef72a4a5"
+   },
+   {
+    "cmd": "bun run verify",
+    "exit": 0,
+    "collected": 115,
+    "passed": 115,
+    "failed": 0,
+    "skipped": 1,
+    "note": "49 bootstrap + 2 native + 64 coordination; 1 pre-existing meta-test skip"
+   },
+   {
+    "cmd": "bun run build:web",
+    "exit": 0,
+    "note": "vite 8.3.0, 187ms, index-DLl647JV.js 191.77kB"
    }
   ],
   "commits": {
@@ -241,7 +289,12 @@
    "wave3_wip_impl": "d4caea5",
    "wave3_wip_tests": "c757be7",
    "wave3_wip_evidence": "f221660",
-   "wave3_test_binding_fix": "fa59348"
+   "wave3_test_binding_fix": "fa59348",
+   "wave4_impl": "c08849e",
+   "wave4_tests": "8e567e5+1a655a1",
+   "wave4_evidence": "c1cc743+66655e1",
+   "wave5_impl": "75ac92d",
+   "wave5_tests": "af80d15"
   },
   "evidence_paths": [
    "artifacts/tasks/T10/handoff.json",
@@ -284,7 +337,7 @@
    }
   }
  },
- "disposition": "WAVE-4 REVISION GREEN - Pauli's wave-3 findings reworked per Astra direction on merged q38: verified model bytes ride the {code,data} engine payload with cacheMethod 'none' (real FS-hash probes prove engine bytes == reported hash under same-origin cache replacement); OpScope terminal signals + WorkerLease lifetimes close the stale-cleanup, close-wakeup, late-model and callback-admission holes; the four stub probes and the real provenance pair are registered and executed. Full sequence by the sole heavy holder at 1a655a1: test:browser 41/41, task_acceptance exit 0 (evaluated 1a655a1), verify 115/115, build:web exit 0. One first-attempt failure was a racy test gate (warm init beat the poll->evaluate lag) fixed deterministically in 1a655a1 with no assertion weakened. READY FOR REVIEW - independent review + coordinator acceptance receipt remain; NOT accepted. No push, no Beads writes. Reservation released: nothing running or queued.",
+ "disposition": "WAVE-5 REVIEW-FIX ROUND GREEN - independent review 03e34cd (review/devin/t10-wave4) returned CHANGES-REQUIRED on two bounded defects after verifying all five wave-3 findings resolved; both are fixed and verified: F1 (P1) minted userJobId was j_<check>_<attempt> shared by every op of the same check, letting a superseded zombie recognize on a reused worker resolve the live op's promise upstream of jobScopes gating -> now j_<scope.op>_<check>_<attempt>, per-operation unique; F2 (P2) OcrHandle.id ocrh_<gen>_<floor(now)> collided for same-generation opens inside 1 ms, defeating every .id guard -> now ocrh_<gen>_<now>_<scope.op>. The reviewer's three reproductions are promoted into the registered suite (2 stub lifecycle probes + 1 real-engine cross-talk probe, faithful assertions incl. distinct-jobId invariant). Full sequence by the sole heavy holder at af80d15: tsc -b exit 0; crop-math 13/13; repro-planCrop 6/6; test:browser 44/44 (11.1s, real engine incl. ZOMBIE_JOB_CROSSTALK showing per-op ids and op2 honestly unreadable on blank); task_acceptance exit 0 (evaluated af80d15, 44/44); verify 115/115; build:web exit 0. READY FOR REVIEW - a second independent review round + coordinator acceptance receipt remain; NOT accepted. No push, no Beads writes. Reservation released: nothing running or queued.",
  "wave4": {
   "review_of": "7699f9752d82f97251c86f53e15407b5b087668d (Pauli wave-3 review, changes required)",
   "direction": "/private/tmp/inkflip-t10-wave4.txt",
@@ -316,6 +369,34 @@
    "bun run verify": "exit 0 - 115 checks",
    "bun run build:web": "exit 0 - vite 8.3.0, 174ms",
    "real_provenance_result": "both probes passed - engine FS /eng.traineddata sha256 == reported sha256 even with same-origin cache replacement on createWorker entry; exactly one model request"
+  }
+ },
+ "wave5": {
+  "review_of": "66655e1 wave-4 checkpoint",
+  "review": "03e34cd on review/devin/t10-wave4 - CHANGES-REQUIRED (F1 P1 zombie-job collision, F2 P2 handle-id collision); all 5 wave-3 findings verified resolved and preserved",
+  "probe_harness": "/private/tmp/inkflip-t10-wave4-review/probes.spec.ts",
+  "fixes_applied": [
+   "F1: reader.ts recognize jobId = j_<scope.op>_<check>_<attempt> - engine-internal routing key now per-operation unique; a superseded op's zombie job can never share upstream's ${action}-${jobId} key with a live op's job; its late response resolves only its own orphaned entry and its events map to a deleted scope (jobScopes admission preserved)",
+   "F2: reader.ts OcrHandle.id = ocrh_<gen>_<floor(now)>_<scope.op> - clock-independent uniqueness component; all .id admission guards unchanged; format stays contract-valid [A-Za-z0-9._-]+"
+  ],
+  "tests_promoted": [
+   "stub: 'a superseded job id cannot collide with or admit events to a newer job' - captures minted jobIds, asserts op1!=op2, zombie+foreign progress dropped, r1 user_cancel, r2 completed",
+   "stub: 'same-millisecond opens mint distinct handle ids; stale close/extract refused' - now:()=>1000 deterministic collision clock, ids differ, close(stale) no-op, live extract completes, stale extract -> unsupported",
+   "real engine: 'zombie recognize on the reused worker cannot deliver its result to a newer job' - pdf.js invoice raster then blank repaint same-check; recogCalls j_2_/j_3_/j_4_ocr_0_0_0 unique; r1 user_cancel; r2 completed unreadable_pixels empty text 0 occurrences on synthetic_blank_0; r3 completes; pageerrors []",
+   "api seam: peekRaster(docId,pageIndex) exposes produced raster objects for in-page rasterSource alternation"
+  ],
+  "results": {
+   "tsc -b": "exit 0",
+   "crop-math.mjs": "13/13",
+   "repro-planCrop.mjs": "6/6 ALL OK",
+   "bun run test:browser -- tests/readers/tesseract.spec.ts": "exit 0 - 44/44 (11.1s)",
+   "task_acceptance task T10 --report run.json": "exit 0 - evaluated af80d15, 44/44, failures [], evidence_errors []",
+   "bun run verify": "exit 0 - 115 checks (49 bootstrap + 2 native + 64 coordination; 1 pre-existing meta-test skip)",
+   "bun run build:web": "exit 0 - vite 8.3.0, 187ms"
+  },
+  "commits": {
+   "impl": "75ac92d",
+   "tests": "af80d15"
   }
  }
 }
