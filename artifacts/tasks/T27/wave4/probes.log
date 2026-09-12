@@ -1,0 +1,20 @@
+PASS 257 then short parser_error: truncated TSV row retained 257
+PASS 257 then zero width parser_error: nonpositive TSV word extent retained 257
+PASS 257 then zero height parser_error: nonpositive TSV word extent retained 257
+PASS 257 then negative width parser_error: nonpositive TSV word extent retained 257
+PASS 257 then negative height parser_error: nonpositive TSV word extent retained 257
+PASS inverse42 geometry_unavailable: crop transform must be a 6-component sequence retained 0
+PASS inverse bigint geometry_unavailable: crop transform components must be finite numbers retained 0
+PASS resize bigint geometry_unavailable: resize factors must be positive finite numbers retained 0
+PASS scale bigint geometry_unavailable: recorded raster scale must be positive retained 0
+PASS matrix bigint geometry_unavailable
+PASS scale bigint at open geometry_unavailable
+PASS resize OSError unreadable_pixels: resized raster could not be produced retained 0
+PASS resize MemoryError resource_limit: resize allocation exceeded the pixel budget retained 0
+Independent cases passed: 13
+CONTROL F08 all four tests 1 failures 0 errors 0 skips 0
+MUTANT +10000pt F08 KILLED tests 1 failures 4 errors 0 skips 0
+MUTANT bbox shear KILLED tests 1 failures 1 errors 0 skips 0
+MUTANT requested resize KILLED tests 1 failures 1 errors 0 skips 0
+All light probes and intended mutant kills verified
+exit_code=0
