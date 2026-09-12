@@ -72,6 +72,26 @@ def run_pdfium(data: bytes, page_index: int = 0, cancellation=None):
         handle.close()
 
 
+def raw_dollar_box(data: bytes):
+    """Read font-dependent bounds directly, without adapter geometry helpers."""
+    from pypdfium2 import PdfDocument
+
+    with PdfDocument(data) as doc:
+        page = doc[0]
+        try:
+            textpage = page.get_textpage()
+            try:
+                index = next(
+                    i for i in range(textpage.count_chars())
+                    if textpage.get_text_range(i, 1) == "$"
+                )
+                return textpage.get_charbox(index, loose=True)
+            finally:
+                textpage.close()
+        finally:
+            page.close()
+
+
 def run_pypdf(data: bytes, page_index: int = 0):
     handle = pypdf_reader.open_document(data, None, 1)
     try:
@@ -185,18 +205,32 @@ class TestPdfiumGeometry(unittest.TestCase):
     def test_rotations_store_identical_canonical_anchors(self):
         anchors = []
         for rotation in (0, 90, 180, 270):
-            _, occurrences = run_pdfium(fixture_bytes(f"public/geometry-{rotation}.pdf"))
+            data = fixture_bytes(f"public/geometry-{rotation}.pdf")
+            _, occurrences = run_pdfium(data)
             dollar = next(o for o in occurrences if o["raw_text"] == "$")
-            anchors.append(dollar["geometry"]["polygon"])
+            polygon = dollar["geometry"]["polygon"]
+            anchors.append(polygon)
+            # The fixtures use unembedded Helvetica: Arial and Chrom Sans OTF
+            # substitutes have different bounds even with the same PDFium pin.
+            # Apply fixture crop [20,40,500,390] and UserUnit 2 independently
+            # to the engine's raw box; rotation affects display, not storage.
+            left, bottom, right, top = raw_dollar_box(data)
+            expected = [
+                [2 * (left - 20), 2 * (390 - top)],
+                [2 * (right - 20), 2 * (390 - top)],
+                [2 * (right - 20), 2 * (390 - bottom)],
+                [2 * (left - 20), 2 * (390 - bottom)],
+            ]
+            self.assertEqual(len(polygon), 4)
+            for point, reference in zip(polygon, expected):
+                self.assertAlmostEqual(point[0], reference[0], delta=1e-3)
+                self.assertAlmostEqual(point[1], reference[1], delta=1e-3)
         for polygon in anchors[1:]:
             for point, base in zip(polygon, anchors[0]):
                 self.assertAlmostEqual(point[0], base[0], delta=1e-3)
                 self.assertAlmostEqual(point[1], base[1], delta=1e-3)
-        # Analytic anchor: '$' paints at (48, 209.87..263.44) in user space with
-        # crop [20,40,500,390] and UserUnit 2 -> top-left (56, 2*(390-263.44)).
-        # PDFium reports float32 boxes, so expectations carry that quantization.
+        # The text origin remains an independent fixture anchor.
         self.assertAlmostEqual(anchors[0][0][0], 56.0, delta=1e-3)
-        self.assertAlmostEqual(anchors[0][0][1], 2 * (390 - 263.44), delta=1e-3)
 
     def test_userunit_scales_exactly_once(self):
         for unit in ("0.5", "1", "2", "10"):
@@ -209,11 +243,21 @@ class TestPdfiumGeometry(unittest.TestCase):
                 handle.close()
                 _, occurrences = run_pdfium(data)
                 dollar = next(o for o in occurrences if o["raw_text"] == "$")
-                top_left = dollar["geometry"]["polygon"][0]
-                self.assertAlmostEqual(top_left[0], 48 * float(unit), delta=1e-2 * float(unit))
-                self.assertAlmostEqual(
-                    top_left[1], (400 - 263.44) * float(unit), delta=1e-2 * float(unit)
-                )
+                polygon = dollar["geometry"]["polygon"]
+                u = float(unit)
+                # Fixture crop [0,0,520,400]; scale raw engine bounds once.
+                left, bottom, right, top = raw_dollar_box(data)
+                expected = [
+                    [left * u, (400 - top) * u],
+                    [right * u, (400 - top) * u],
+                    [right * u, (400 - bottom) * u],
+                    [left * u, (400 - bottom) * u],
+                ]
+                self.assertEqual(len(polygon), 4)
+                self.assertAlmostEqual(polygon[0][0], 48 * u, delta=1e-2 * u)
+                for point, reference in zip(polygon, expected):
+                    self.assertAlmostEqual(point[0], reference[0], delta=1e-2 * u)
+                    self.assertAlmostEqual(point[1], reference[1], delta=1e-2 * u)
 
     def test_missing_mapping_output_passes_through_unchanged(self):
         """F10 mechanism: with no ToUnicode CMap the engine's raw output is
