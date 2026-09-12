@@ -2,14 +2,17 @@ test_evaluate_stdout_and_report_carry_no_label_content (test_custody.TestCliCust
 test_evaluate_without_label_root_fails_closed (test_custody.TestCliCustody.test_evaluate_without_label_root_fails_closed) ... ok
 test_status_is_unmet_and_exit_nonzero (test_custody.TestCliCustody.test_status_is_unmet_and_exit_nonzero) ... ok
 test_digest_mismatch_refused (test_custody.TestLabelGate.test_digest_mismatch_refused) ... ok
+test_inside_git_worktree_helper (test_custody.TestLabelGate.test_inside_git_worktree_helper) ... ok
 test_label_count_mismatch_refused (test_custody.TestLabelGate.test_label_count_mismatch_refused) ... ok
 test_label_file_traversal_refused (test_custody.TestLabelGate.test_label_file_traversal_refused) ... ok
+test_label_root_inside_any_git_worktree_refused (test_custody.TestLabelGate.test_label_root_inside_any_git_worktree_refused) ... ok
 test_label_root_inside_repository_refused (test_custody.TestLabelGate.test_label_root_inside_repository_refused) ... ok
 test_label_root_inside_worktree_sibling_refused (test_custody.TestLabelGate.test_label_root_inside_worktree_sibling_refused) ... ok
 test_labels_outside_repo_resolve_with_pinned_digest (test_custody.TestLabelGate.test_labels_outside_repo_resolve_with_pinned_digest) ... ok
 test_missing_label_root_fails_closed (test_custody.TestLabelGate.test_missing_label_root_fails_closed) ... ok
 test_permissioned_labels_require_consent_ref (test_custody.TestLabelGate.test_permissioned_labels_require_consent_ref) ... ok
 test_unpinned_label_store_fails_closed (test_custody.TestLabelGate.test_unpinned_label_store_fails_closed) ... ok
+test_key_scan_splits_camelcase_tokens (test_custody.TestNoLabelContentInArtifacts.test_key_scan_splits_camelcase_tokens) ... ok
 test_label_secrets_collection_catches_nested_content (test_custody.TestNoLabelContentInArtifacts.test_label_secrets_collection_catches_nested_content) ... ok
 test_report_contains_no_label_values (test_custody.TestNoLabelContentInArtifacts.test_report_contains_no_label_values) ... ok
 test_report_has_no_per_page_truth_or_label_keys (test_custody.TestNoLabelContentInArtifacts.test_report_has_no_per_page_truth_or_label_keys) ... ok
@@ -23,6 +26,7 @@ test_unsupported_mechanism_outside_supported_recall_inside_full (test_denominato
 test_dropped_duplicate_is_lost_not_averaged (test_denominators.TestOccurrencePreservation.test_dropped_duplicate_is_lost_not_averaged) ... ok
 test_flaky_rereads_use_minimum_not_best (test_denominators.TestOccurrencePreservation.test_flaky_rereads_use_minimum_not_best) ... ok
 test_unread_declared_page_counts_as_lost (test_denominators.TestOccurrencePreservation.test_unread_declared_page_counts_as_lost) ... ok
+test_zero_expected_still_needs_a_measurement (test_denominators.TestOccurrencePreservation.test_zero_expected_still_needs_a_measurement) ... ok
 test_duplicated_corpus_matches_single_read_metrics (test_denominators.TestRepeatedReadingsDedup.test_duplicated_corpus_matches_single_read_metrics) ... ok
 test_five_rereads_of_twenty_pages_is_twenty_samples (test_denominators.TestRepeatedReadingsDedup.test_five_rereads_of_twenty_pages_is_twenty_samples) ... ok
 test_rereads_cannot_erase_a_failed_first_attempt (test_denominators.TestRepeatedReadingsDedup.test_rereads_cannot_erase_a_failed_first_attempt) ... ok
@@ -71,6 +75,8 @@ test_identical_bytes_in_two_splits_is_flagged (test_splits.TestSplitAudit.test_i
 test_moved_sibling_is_flagged (test_splits.TestSplitAudit.test_moved_sibling_is_flagged) ... ok
 test_public_siblings_cannot_enter_evaluation_denominator (test_splits.TestSplitAudit.test_public_siblings_cannot_enter_evaluation_denominator) ... ok
 test_unknown_split_is_rejected (test_splits.TestSplitAudit.test_unknown_split_is_rejected) ... ok
+test_alignment_sample_count_is_pages_not_readings (test_targets.TestAlignmentSamplingUnit.test_alignment_sample_count_is_pages_not_readings) ... ok
+test_rereading_good_pages_cannot_flip_verdict (test_targets.TestAlignmentSamplingUnit.test_rereading_good_pages_cannot_flip_verdict) ... ok
 test_nonterminal_status_rejected (test_targets.TestRunValidation.test_nonterminal_status_rejected) ... ok
 test_run_without_frozen_candidate_rejected (test_targets.TestRunValidation.test_run_without_frozen_candidate_rejected) ... ok
 test_self_attested_resolution_rejected (test_targets.TestRunValidation.test_self_attested_resolution_rejected) ... ok
@@ -79,11 +85,12 @@ test_committed_plan_reports_every_target_unmet (test_targets.TestStatusIsUnmetBy
 test_plan_format_cannot_carry_a_verdict (test_targets.TestStatusIsUnmetByDefault.test_plan_format_cannot_carry_a_verdict) ... ok
 test_below_target_is_unmet_with_observed (test_targets.TestVerdictsFromRealRuns.test_below_target_is_unmet_with_observed) ... ok
 test_missing_label_or_stray_label_fails_closed (test_targets.TestVerdictsFromRealRuns.test_missing_label_or_stray_label_fails_closed) ... ok
+test_pinned_candidate_freeze_enforced (test_targets.TestVerdictsFromRealRuns.test_pinned_candidate_freeze_enforced) ... ok
 test_real_run_produces_met_verdicts (test_targets.TestVerdictsFromRealRuns.test_real_run_produces_met_verdicts) ... ok
 test_run_bound_to_other_corpus_rejected (test_targets.TestVerdictsFromRealRuns.test_run_bound_to_other_corpus_rejected) ... ok
 test_zero_findings_is_not_a_vacuous_precision_pass (test_targets.TestVerdictsFromRealRuns.test_zero_findings_is_not_a_vacuous_precision_pass) ... ok
 
 ----------------------------------------------------------------------
-Ran 84 tests in 0.356s
+Ran 91 tests in 1.596s
 
 OK
