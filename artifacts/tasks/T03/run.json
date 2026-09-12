@@ -1,8 +1,8 @@
 {
   "task": "T03",
   "beads_id": "pdf-t03",
-  "evaluated_commit": "216ae2f56e30c79829be0f69160396b8fbc389bd",
-  "evaluated_at": "2026-09-11T23:59:01.297018+00:00",
+  "evaluated_commit": "5cfa64e64242d464eee4dc15b4f8408f49e7971d",
+  "evaluated_at": "2026-09-12T22:03:39.698666+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-5wvecjho/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-4u5c6z9d/results",
         "--test",
         "tests/contracts/contracts.test.mjs"
       ],
@@ -37,7 +37,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     },
     {
@@ -63,11 +63,11 @@
         "pytest",
         "native/tests/contracts",
         "-q",
-        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-h36rssjw/results"
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-d3a7kcss/results"
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "............................. [100%]\n29 passed, 116 subtests passed in 0.29s\n",
+      "stdout": "............................. [100%]\n29 passed, 116 subtests passed in 0.17s\n",
       "stderr": "",
       "tests": {
         "collected": 29,
@@ -75,7 +75,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     }
   ]
