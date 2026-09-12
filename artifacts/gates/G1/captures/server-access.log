@@ -7,11 +7,11 @@ GET /assets/index-DqWh_6tP.css
 GET /assets/OpenWorkspace-BU79svrc.js
 GET /src/features/open/preview.html
 GET /assets/open-JETCs3h-.js
+GET /assets/global-DfmOeXL7.js
 GET /assets/App-C4AOSm7-.css
 GET /assets/App.module-BjVINIo4.js
-GET /assets/global-DfmOeXL7.js
-GET /assets/global-CqVzJXWZ.css
 GET /assets/OpenWorkspace-BU79svrc.js
+GET /assets/global-CqVzJXWZ.css
 GET /assets/OpenWorkspace-BR1IQLrW.css
 GET /assets/pdf.worker-DTrjDNvb.mjs
 GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf
@@ -38,9 +38,9 @@ GET /assets/open-JETCs3h-.js
 GET /assets/global-DfmOeXL7.js
 GET /assets/global-CqVzJXWZ.css
 GET /assets/OpenWorkspace-BR1IQLrW.css
-GET /assets/App.module-BjVINIo4.js
 GET /assets/App-C4AOSm7-.css
 GET /assets/OpenWorkspace-BU79svrc.js
+GET /assets/App.module-BjVINIo4.js
 GET /assets/pdf.worker-DTrjDNvb.mjs
 GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf
 GET /privacy.html

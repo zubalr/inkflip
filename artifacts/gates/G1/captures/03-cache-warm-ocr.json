@@ -4,11 +4,11 @@
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/privacy.html"
+      "url": "http://127.0.0.1:62097/privacy.html"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/privacy.html",
+      "url": "http://127.0.0.1:62097/privacy.html",
       "status": 200,
       "headers": {
         "cache-control": "no-cache",
@@ -16,7 +16,7 @@
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "content-type": "text/html; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
-        "date": "Sat, 12 Sep 2026 23:45:48 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "keep-alive": "timeout=5",
         "referrer-policy": "no-referrer",
         "transfer-encoding": "chunked",
@@ -26,16 +26,16 @@
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/privacy-DCMiPyHv.js"
+      "url": "http://127.0.0.1:62097/assets/privacy-DCMiPyHv.js"
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/privacy-DSXHGIdZ.css"
+      "url": "http://127.0.0.1:62097/assets/privacy-DSXHGIdZ.css"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/privacy-DSXHGIdZ.css",
+      "url": "http://127.0.0.1:62097/assets/privacy-DSXHGIdZ.css",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -46,13 +46,13 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:48 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "text/css"
       }
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/privacy-DCMiPyHv.js",
+      "url": "http://127.0.0.1:62097/assets/privacy-DCMiPyHv.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -63,18 +63,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:48 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/pdf.worker-DTrjDNvb.mjs"
+      "url": "http://127.0.0.1:62097/assets/pdf.worker-DTrjDNvb.mjs"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:62097/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -85,18 +85,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:48 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
+      "url": "http://127.0.0.1:62097/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:62097/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -107,18 +107,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:49 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "font/ttf"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/tesseract/7.0.0/worker.min.js"
+      "url": "http://127.0.0.1:62097/assets/tesseract/7.0.0/worker.min.js"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/tesseract/7.0.0/worker.min.js",
+      "url": "http://127.0.0.1:62097/assets/tesseract/7.0.0/worker.min.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -129,18 +129,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:49 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:61615/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
+      "url": "http://127.0.0.1:62097/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:61615/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
+      "url": "http://127.0.0.1:62097/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -151,7 +151,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sat, 12 Sep 2026 23:45:49 GMT",
+        "date": "Sat, 12 Sep 2026 23:46:49 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },

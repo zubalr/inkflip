@@ -57,7 +57,15 @@
  *   data legitimately leaves the page (the local export downloads).
  */
 import { test, expect, type BrowserContext, type Page, type Download } from "@playwright/test";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createHash } from "node:crypto";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
@@ -178,7 +186,11 @@ function ext(name: string): string {
 
 /** Every spelling a marker could take on the wire (raw, percent, base64). */
 function spellings(m: Marker): string[] {
-  const out = [m.value, encodeURIComponent(m.value), Buffer.from(m.value, "utf8").toString("base64")];
+  const out = [
+    m.value,
+    encodeURIComponent(m.value),
+    Buffer.from(m.value, "utf8").toString("base64"),
+  ];
   if (/^[0-9a-f]{64}$/.test(m.value)) {
     out.push(Buffer.from(m.value, "hex").toString("base64"));
   }
@@ -186,7 +198,12 @@ function spellings(m: Marker): string[] {
 }
 
 /** Scan one captured carrier for every marker spelling. */
-function scanInto(cap: Capture, channel: string, where: string, body: string | undefined | null): void {
+function scanInto(
+  cap: Capture,
+  channel: string,
+  where: string,
+  body: string | undefined | null,
+): void {
   if (!body) return;
   for (const m of MARKERS) {
     for (const s of spellings(m)) {
@@ -247,10 +264,18 @@ function armEgress(context: BrowserContext): void {
     });
   });
   context.on("pageerror", (err) => {
-    activeCapture?.records.push({ channel: "page_errors", url: "", data: String(err).slice(0, 4000) });
+    activeCapture?.records.push({
+      channel: "page_errors",
+      url: "",
+      data: String(err).slice(0, 4000),
+    });
   });
   context.on("dialog", (dlg) => {
-    activeCapture?.records.push({ channel: "dialogs", url: "", data: `${dlg.type()}:${dlg.message()}` });
+    activeCapture?.records.push({
+      channel: "dialogs",
+      url: "",
+      data: `${dlg.type()}:${dlg.message()}`,
+    });
     void dlg.dismiss();
   });
 }
@@ -266,7 +291,10 @@ async function recordDownload(cap: Capture, download: Download, destName: string
     channel: "downloads",
     url: `download:${download.suggestedFilename()}`,
     data: bytes.toString("utf8").slice(0, 400_000),
-    headers: { sha256: createHash("sha256").update(bytes).digest("hex"), bytes: String(bytes.length) },
+    headers: {
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+      bytes: String(bytes.length),
+    },
   });
   return dest;
 }
@@ -320,7 +348,11 @@ async function storageDump(page: Page): Promise<Rec[]> {
     return r;
   });
   for (const d of dbs) {
-    out.push({ channel: "storage:indexeddb", url: d.name, data: `count=${d.count} keys=${d.keys.join(",")}` });
+    out.push({
+      channel: "storage:indexeddb",
+      url: d.name,
+      data: `count=${d.count} keys=${d.keys.join(",")}`,
+    });
   }
   const caches = await page.evaluate(async () => {
     const names = await caches.keys();
@@ -338,13 +370,24 @@ async function storageDump(page: Page): Promise<Rec[]> {
 }
 
 function beginCapture(label: string, offline = false): Capture {
-  const cap: Capture = { label, records: [], violations: [], offline, serverLogStart: accessLog.length, serverLog: [] };
+  const cap: Capture = {
+    label,
+    records: [],
+    violations: [],
+    offline,
+    serverLogStart: accessLog.length,
+    serverLog: [],
+  };
   activeCapture = cap;
   return cap;
 }
 
 /** End the capture: storage dump, server log slice, then the marker scan. */
-async function endCapture(page: Page, cap: Capture, opts: { skipStorage?: boolean } = {}): Promise<Capture> {
+async function endCapture(
+  page: Page,
+  cap: Capture,
+  opts: { skipStorage?: boolean } = {},
+): Promise<Capture> {
   try {
     if (!opts.skipStorage) cap.records.push(...(await storageDump(page)));
   } catch {
@@ -363,7 +406,11 @@ async function endCapture(page: Page, cap: Capture, opts: { skipStorage?: boolea
   mkdirSync(CAPTURES, { recursive: true });
   writeFileSync(
     join(CAPTURES, `${String(captureSeq++).padStart(2, "0")}-${cap.label}.json`),
-    JSON.stringify({ ...cap, records: cap.records.map((r) => ({ ...r, data: r.data?.slice(0, 4000) })) }, null, 2),
+    JSON.stringify(
+      { ...cap, records: cap.records.map((r) => ({ ...r, data: r.data?.slice(0, 4000) })) },
+      null,
+      2,
+    ),
   );
   if (activeCapture === cap) activeCapture = null;
   return cap;
@@ -412,12 +459,21 @@ function assertCaptureClean(cap: Capture): void {
 
 async function openMount(page: Page): Promise<void> {
   await page.goto(`${baseURL}/src/features/open/preview.html`);
-  await page.waitForFunction(() => (window as never as Record<string, unknown>).__t08 !== undefined);
+  await page.waitForFunction(
+    () => (window as never as Record<string, unknown>).__t08 !== undefined,
+  );
 }
 
 /** Offer a real file through the T08 mount's real <input type=file>. */
-async function offerFile(page: Page, name: string, bytes: Uint8Array, confirmReplace = false): Promise<void> {
-  await page.locator("[data-testid=file-input]").setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(bytes) });
+async function offerFile(
+  page: Page,
+  name: string,
+  bytes: Uint8Array,
+  confirmReplace = false,
+): Promise<void> {
+  await page
+    .locator("[data-testid=file-input]")
+    .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(bytes) });
   if (confirmReplace) {
     const dlg = page.locator("[role=dialog]");
     await expect(dlg).toBeVisible();
@@ -429,7 +485,11 @@ async function offerFile(page: Page, name: string, bytes: Uint8Array, confirmRep
 
 async function harness(page: Page): Promise<void> {
   await page.goto(`${baseURL}/privacy.html`);
-  await page.waitForFunction(() => (window as never as Record<string, unknown>).__t15 !== undefined, undefined, { timeout: 30_000 });
+  await page.waitForFunction(
+    () => (window as never as Record<string, unknown>).__t15 !== undefined,
+    undefined,
+    { timeout: 30_000 },
+  );
 }
 
 /* ------------------------------ the gate ------------------------------- */
@@ -456,8 +516,12 @@ test.beforeAll(async () => {
   // `bun run build:web`, plus the real T08 open / T22 import feature mounts.
   // Vite is resolved through its installed file URL (it is not resolvable
   // as a bare specifier from tests/, same approach as tests/privacy).
-  const viteEntry = pathToFileURL(join(WEB, "node_modules", "vite", "dist", "node", "index.js")).href;
-  const vite = (await import(viteEntry)) as { build: (opts: Record<string, unknown>) => Promise<unknown> };
+  const viteEntry = pathToFileURL(
+    join(WEB, "node_modules", "vite", "dist", "node", "index.js"),
+  ).href;
+  const vite = (await import(viteEntry)) as {
+    build: (opts: Record<string, unknown>) => Promise<unknown>;
+  };
   await vite.build({
     root: WEB,
     configFile: join(WEB, "vite.config.ts"),
@@ -511,7 +575,9 @@ test.beforeAll(async () => {
       res.writeHead(404, headers).end("not found");
       return;
     }
-    res.writeHead(200, { ...headers, "Content-Type": MIME[ext(file)] ?? "application/octet-stream" }).end(body);
+    res
+      .writeHead(200, { ...headers, "Content-Type": MIME[ext(file)] ?? "application/octet-stream" })
+      .end(body);
   });
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   baseURL = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
@@ -526,9 +592,21 @@ test.afterAll(async () => {
     JSON.stringify(
       {
         documents: {
-          canary: { filename: "network-canary-channels.pdf", sha256: CANARY_SHA256, byte_length: canaryBytes.length },
-          amount: { filename: "mapping-amount.pdf", sha256: AMOUNT_SHA256, byte_length: amountBytes.length },
-          control: { filename: "mapping-control.pdf", sha256: CONTROL_SHA256, byte_length: controlBytes.length },
+          canary: {
+            filename: "network-canary-channels.pdf",
+            sha256: CANARY_SHA256,
+            byte_length: canaryBytes.length,
+          },
+          amount: {
+            filename: "mapping-amount.pdf",
+            sha256: AMOUNT_SHA256,
+            byte_length: amountBytes.length,
+          },
+          control: {
+            filename: "mapping-control.pdf",
+            sha256: CONTROL_SHA256,
+            byte_length: controlBytes.length,
+          },
         },
         markers: MARKERS.map((m) => ({
           name: m.name,
@@ -569,7 +647,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
   await offerFile(page, "mapping-amount.pdf", amountBytes);
   const amountMeta = await page.locator("[data-testid=doc-meta]").innerText();
   expect(amountMeta).toContain("1 page");
-  expect(await page.evaluate(() => (window as any).__t08.controller.currentDocument.sha256)).toBe(AMOUNT_SHA256);
+  expect(await page.evaluate(() => (window as any).__t08.controller.currentDocument.sha256)).toBe(
+    AMOUNT_SHA256,
+  );
 
   // Real PDF.js native-text extraction through the mounted adapter — the
   // same plan/extract calls a dispatched worker makes.
@@ -578,16 +658,25 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const handle = t08.controller.currentHandle;
     const checks = t08.adapter.plan(handle, { pages: [0], capabilities: ["native_text"] });
     const emitted: unknown[] = [];
-    const outcome = await t08.adapter.extract(handle, checks[0], (chunk: unknown[]) => emitted.push(...chunk));
+    const outcome = await t08.adapter.extract(handle, checks[0], (chunk: unknown[]) =>
+      emitted.push(...chunk),
+    );
     return {
       checkId: checks[0].id,
       status: outcome.result.status,
-      occurrences: (emitted as { id: string; raw_text: string; normalized_text: string; geometry: { precision: string; polygon: [number, number][] | null } }[]),
+      occurrences: emitted as {
+        id: string;
+        raw_text: string;
+        normalized_text: string;
+        geometry: { precision: string; polygon: [number, number][] | null };
+      }[],
     };
   });
   expect(amountText.checkId).toBe("chk_p0_native_text");
   expect(amountText.status).toBe("completed");
-  const amountOcc = amountText.occurrences.find((o) => o.normalized_text === "$1,000" || o.raw_text === "$1,000");
+  const amountOcc = amountText.occurrences.find(
+    (o) => o.normalized_text === "$1,000" || o.raw_text === "$1,000",
+  );
   expect(amountOcc, "real extracted occurrences must contain the amount").toBeTruthy();
   expect(amountOcc!.geometry.polygon!.length).toBeGreaterThan(2);
   // pdf.js TextItem extents are honestly marked `estimated` — the adapter
@@ -600,7 +689,13 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const handle = t08.controller.currentHandle;
     const adapter = t08.adapter;
     const render = adapter.plan(handle, { pages: [0], capabilities: ["render"] });
-    const rOut = await adapter.extract(handle, render[0], () => undefined, {}, { renderScalePxPerPt: 2 });
+    const rOut = await adapter.extract(
+      handle,
+      render[0],
+      () => undefined,
+      {},
+      { renderScalePxPerPt: 2 },
+    );
     const un = adapter.plan(handle, { pages: [0], capabilities: ["forms"] });
     const uOut = await adapter.extract(handle, un[0], () => undefined);
     const ac = new AbortController();
@@ -608,7 +703,13 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const text = adapter.plan(handle, { pages: [0], capabilities: ["native_text"] });
     const cOut = await adapter.extract(handle, text[0], () => undefined, { signal: ac.signal });
     return {
-      render: { status: rOut.result.status, w: rOut.raster?.widthPx, h: rOut.raster?.heightPx, scale: rOut.raster?.scalePxPerPt, verified: rOut.raster?.viewportVerified },
+      render: {
+        status: rOut.result.status,
+        w: rOut.raster?.widthPx,
+        h: rOut.raster?.heightPx,
+        scale: rOut.raster?.scalePxPerPt,
+        verified: rOut.raster?.viewportVerified,
+      },
       unsupported: { status: uOut.result.status, reason: uOut.result.reason },
       cancelled: { status: cOut.result.status, reason: cOut.result.reason },
     };
@@ -647,7 +748,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
   // region bound to exactly the OCR check.
   await page.locator("[data-testid=start-run]").click();
   await expect(page.locator("[data-testid=plan]")).toBeVisible();
-  expect(await page.evaluate(() => (window as any).__t08.coordinator.snapshot().fileState)).toBe("running");
+  expect(await page.evaluate(() => (window as any).__t08.coordinator.snapshot().fileState)).toBe(
+    "running",
+  );
   const planChecks = await page.locator("[data-testid=plan-checks] li").evaluateAll((els) =>
     els.map((el) => ({
       id: el.getAttribute("data-check-id"),
@@ -655,7 +758,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
       region: el.getAttribute("data-region"),
     })),
   );
-  expect(planChecks.map((c) => c.capability).sort()).toEqual(["native_text", "ocr", "render"].sort());
+  expect(planChecks.map((c) => c.capability).sort()).toEqual(
+    ["native_text", "ocr", "render"].sort(),
+  );
   const regionBound = planChecks.filter((c) => c.region);
   expect(regionBound.length).toBe(1); // exactly the OCR check binds the region
   expect(regionBound[0]!.capability).toBe("ocr");
@@ -678,10 +783,19 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const gen = snap.generation;
     const sha = snap.documentSha256;
     const runKey = snap.run.runKey;
-    const lis = [...document.querySelectorAll("[data-testid=plan-dispatched] li")].map((li) => li.textContent ?? "");
+    const lis = [...document.querySelectorAll("[data-testid=plan-dispatched] li")].map(
+      (li) => li.textContent ?? "",
+    );
     const jobFor = (checkId: string) =>
-      lis.find((t) => t.includes(`dispatched ${checkId} on `))?.split(" on ")[1]?.trim() ??
-      coordinator.drainOutbox().find((i: { type: string; checkId?: string }) => i.type === "dispatch" && i.checkId === checkId)?.jobId ??
+      lis
+        .find((t) => t.includes(`dispatched ${checkId} on `))
+        ?.split(" on ")[1]
+        ?.trim() ??
+      coordinator
+        .drainOutbox()
+        .find(
+          (i: { type: string; checkId?: string }) => i.type === "dispatch" && i.checkId === checkId,
+        )?.jobId ??
       null;
     const handle = t08.controller.currentHandle;
     const res: { msg: string; ok: boolean; code?: string }[] = [];
@@ -695,21 +809,38 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
       if (chk.capability === "native_text" || chk.capability === "render") {
         // Re-plan the same check id through the adapter so the plan carries
         // the real reader bindings (reader_ids) the extract path requires.
-        const real = adapter.plan(handle, { pages: [chk.pageIndex], capabilities: [chk.capability] })[0];
+        const real = adapter.plan(handle, {
+          pages: [chk.pageIndex],
+          capabilities: [chk.capability],
+        })[0];
         const emitted: unknown[] = [];
         await adapter.extract(handle, real, (chunk: unknown[]) => emitted.push(...chunk));
         for (let i = 0; i < emitted.length; i += 256) {
-          res.push({ msg: `chunk:${chk.id}:${i}`, ...coordinator.receive(mf.chunk(chk.id, emitted.slice(i, i + 256))) });
+          res.push({
+            msg: `chunk:${chk.id}:${i}`,
+            ...coordinator.receive(mf.chunk(chk.id, emitted.slice(i, i + 256))),
+          });
         }
-        res.push({ msg: `terminal:${chk.id}`, ...coordinator.receive(mf.checkTerminal(chk.id, "completed")) });
+        res.push({
+          msg: `terminal:${chk.id}`,
+          ...coordinator.receive(mf.checkTerminal(chk.id, "completed")),
+        });
       } else {
         // `unsupported` is a never-retry reason — the check settles
         // terminally in one step (a transient reason would redispatch).
-        res.push({ msg: `terminal:${chk.id}`, ...coordinator.receive(mf.checkTerminal(chk.id, "failed", "unsupported")) });
+        res.push({
+          msg: `terminal:${chk.id}`,
+          ...coordinator.receive(mf.checkTerminal(chk.id, "failed", "unsupported")),
+        });
       }
     }
     const after = coordinator.snapshot();
-    return { res, status: after.run?.status, occurrences: after.occurrences.length, checks: after.run?.checks.map((c) => ({ id: c.id, status: c.status })) };
+    return {
+      res,
+      status: after.run?.status,
+      occurrences: after.occurrences.length,
+      checks: after.run?.checks.map((c) => ({ id: c.id, status: c.status })),
+    };
   });
   for (const r of fed.res) expect(r.ok, `${r.msg} → ${r.code}`).toBe(true);
   expect(fed.status).toBe("partial");
@@ -723,7 +854,10 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const { coordinator, adapter, MessageFactory } = t08;
     coordinator.prepareNewRun();
     const runKey = "b".repeat(64);
-    const checks = adapter.plan(t08.controller.currentHandle, { pages: [0], capabilities: ["native_text"] });
+    const checks = adapter.plan(t08.controller.currentHandle, {
+      pages: [0],
+      capabilities: ["native_text"],
+    });
     coordinator.startRun({ runKey, checks, selectedPagesTotal: 1 });
     const liveGen = coordinator.snapshot().generation;
     const receipt = coordinator.requestCancel();
@@ -739,7 +873,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
       generation: snap.generation,
       liveGen,
       cleanupFailures: receipt.cleanupFailures.length,
-      cancelledChecks: snap.run?.checks.filter((c: { status: string | null }) => c.status === "cancelled").length,
+      cancelledChecks: snap.run?.checks.filter(
+        (c: { status: string | null }) => c.status === "cancelled",
+      ).length,
       staleMessage: stale,
     };
   });
@@ -755,7 +891,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const handle = t08.controller.currentHandle;
     const checks = t08.adapter.plan(handle, { pages: [0], capabilities: ["native_text"] });
     const emitted: { raw_text: string }[] = [];
-    await t08.adapter.extract(handle, checks[0], (chunk: { raw_text: string }[]) => emitted.push(...chunk));
+    await t08.adapter.extract(handle, checks[0], (chunk: { raw_text: string }[]) =>
+      emitted.push(...chunk),
+    );
     return { sha: t08.controller.currentDocument.sha256, texts: emitted.map((o) => o.raw_text) };
   });
   expect(renameProbe.sha).toBe(AMOUNT_SHA256); // byte identity, not filename
@@ -769,7 +907,11 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const handle = t08.controller.currentHandle;
     const checks = t08.adapter.plan(handle, { pages: [0], capabilities: ["native_text"] });
     const emitted: { raw_text: string; normalized_text: string }[] = [];
-    await t08.adapter.extract(handle, checks[0], (chunk: { raw_text: string; normalized_text: string }[]) => emitted.push(...chunk));
+    await t08.adapter.extract(
+      handle,
+      checks[0],
+      (chunk: { raw_text: string; normalized_text: string }[]) => emitted.push(...chunk),
+    );
     return { sha: t08.controller.currentDocument.sha256, texts: emitted.map((o) => o.raw_text) };
   });
   expect(controlProbe.sha).toBe(CONTROL_SHA256);
@@ -786,7 +928,9 @@ test("G1 leg 1: real own-file open/read/select/plan/cancel/replace", async ({ br
     const handle = t08.controller.currentHandle;
     const checks = adapter.plan(handle, { pages: [0], capabilities: ["native_text"] });
     const emitted: { raw_text: string }[] = [];
-    await adapter.extract(handle, checks[0], (chunk: { raw_text: string }[]) => emitted.push(...chunk));
+    await adapter.extract(handle, checks[0], (chunk: { raw_text: string }[]) =>
+      emitted.push(...chunk),
+    );
     return {
       rejected: r,
       texts: emitted.map((o) => o.raw_text),
@@ -830,14 +974,27 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
     if (!text.ok) return { step: "text", text };
     const r1 = await t15.rasterize(docId, 0, 1);
     const r2 = await t15.rasterize(docId, 0, 2);
-    return { step: "done", doc: opened.value, pages: pages.value, text: text.value, r1: r1.ok ? r1.value : r1, r2: r2.ok ? r2.value : r2 };
+    return {
+      step: "done",
+      doc: opened.value,
+      pages: pages.value,
+      text: text.value,
+      r1: r1.ok ? r1.value : r1,
+      r2: r2.ok ? r2.value : r2,
+    };
   }, Array.from(canaryBytes));
   expect(canary.step).toBe("done");
   const canaryDoc = (canary as any).doc as { docId: string; sha256: string; pageCount: number };
   expect(canaryDoc.sha256).toBe(CANARY_SHA256);
-  const canaryPages = (canary as any).pages as { pages: { canonical_size_pt: [number, number]; rotation: number }[] };
+  const canaryPages = (canary as any).pages as {
+    pages: { canonical_size_pt: [number, number]; rotation: number }[];
+  };
   expect(canaryPages.pages[0]!.canonical_size_pt).toEqual([320, 240]);
-  const canaryEmitted = (canary as any).text.emitted as { id: string; raw_text: string; geometry: { precision: string; polygon: [number, number][] } }[];
+  const canaryEmitted = (canary as any).text.emitted as {
+    id: string;
+    raw_text: string;
+    geometry: { precision: string; polygon: [number, number][] };
+  }[];
   const canaryOcc = canaryEmitted.find((o) => o.raw_text.includes("INKFLIP-CANARY-TEXT-7B2"));
   expect(canaryOcc).toBeTruthy();
   expect(canaryOcc!.geometry.precision).toBe("estimated");
@@ -847,7 +1004,12 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
     expect(px).toBeLessThanOrEqual(320);
     expect(py).toBeLessThanOrEqual(240);
   }
-  const r1v = (canary as any).r1 as { widthPx: number; heightPx: number; scalePxPerPt: number; pixelSha256: string };
+  const r1v = (canary as any).r1 as {
+    widthPx: number;
+    heightPx: number;
+    scalePxPerPt: number;
+    pixelSha256: string;
+  };
   const r2v = (canary as any).r2 as { widthPx: number; heightPx: number };
   expect(r1v.widthPx).toBeGreaterThan(0);
   expect(r2v.widthPx).toBe(r1v.widthPx * 2);
@@ -866,7 +1028,11 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
       const opened = await t15.ocrOpen(reader.readerId, args.sha, 1);
       if (!opened.ok) return { step: "open", opened };
       const plan = await t15.ocrPlan(reader.readerId, [
-        { pageIndex: 0, purpose: "region", region: { id: "region_p0_canary", polygon: args.polygon, label: "canary region" } },
+        {
+          pageIndex: 0,
+          purpose: "region",
+          region: { id: "region_p0_canary", polygon: args.polygon, label: "canary region" },
+        },
       ]);
       if (!plan.ok) return { step: "plan", plan };
       const out = await t15.ocrExtract(reader.readerId, plan.value[0].id);
@@ -879,10 +1045,13 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
         modelProvenance: out.value.output.model.provenance,
         status: out.value.output.check.status,
         occCount: out.value.output.occurrences.length,
-        words: out.value.output.occurrences.map((o: { raw_text: string }) => o.raw_text).slice(0, 8),
+        words: out.value.output.occurrences
+          .map((o: { raw_text: string }) => o.raw_text)
+          .slice(0, 8),
         precision: out.value.output.occurrences[0]?.geometry.precision,
-        polyInside: out.value.output.occurrences.every((o: { geometry: { polygon: [number, number][] | null } }) =>
-          (o.geometry.polygon ?? []).every(([x, y]) => x >= 0 && y >= 0 && x <= 320 && y <= 240),
+        polyInside: out.value.output.occurrences.every(
+          (o: { geometry: { polygon: [number, number][] | null } }) =>
+            (o.geometry.polygon ?? []).every(([x, y]) => x >= 0 && y >= 0 && x <= 320 && y <= 240),
         ),
       };
     },
@@ -891,7 +1060,9 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
   expect(ocr.step).toBe("done");
   expect(ocr.state).toBe("ready_memory");
   expect(ocr.provenance).toBe("network"); // cold leg fetched the staged model once
-  const modelFetches = cap.records.filter((r) => r.channel === "requests" && r.url.includes("/models/tessdata-fast-eng/"));
+  const modelFetches = cap.records.filter(
+    (r) => r.channel === "requests" && r.url.includes("/models/tessdata-fast-eng/"),
+  );
   expect(modelFetches.length).toBe(1);
   expect(ocr.modelSha).toBe("7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2");
   expect(ocr.status).toBe("completed");
@@ -913,15 +1084,26 @@ test("G1 leg 2: OCR + source geometry on the real reader stack", async ({ browse
     const text = await t15.extractText(docId, 0, "region_p0_geo");
     if (!text.ok) return { step: "text", text };
     const raster = await t15.rasterize(docId, 0, 1);
-    return { step: "done", pages: pages.value, text: text.value, raster: raster.ok ? raster.value : raster };
+    return {
+      step: "done",
+      pages: pages.value,
+      text: text.value,
+      raster: raster.ok ? raster.value : raster,
+    };
   }, Array.from(geoBytes));
   expect(geo.step).toBe("done");
-  const geoPage = (geo as any).pages.pages[0] as { canonical_size_pt: [number, number]; rotation: number; user_unit: number };
+  const geoPage = (geo as any).pages.pages[0] as {
+    canonical_size_pt: [number, number];
+    rotation: number;
+    user_unit: number;
+  };
   expect(geoPage.rotation).toBe(90);
   expect(geoPage.user_unit).toBe(2);
   // CropBox [20 40 500 390] × UserUnit 2 → 960×700 pt canonical extent.
   expect(geoPage.canonical_size_pt).toEqual([960, 700]);
-  const geoEmitted = (geo as any).text.emitted as { geometry: { polygon: [number, number][] | null } }[];
+  const geoEmitted = (geo as any).text.emitted as {
+    geometry: { polygon: [number, number][] | null };
+  }[];
   expect(geoEmitted.length).toBeGreaterThan(0);
   for (const o of geoEmitted) {
     for (const [px, py] of o.geometry.polygon ?? []) {
@@ -988,127 +1170,141 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
   // Rebuild the canary run inside the export context — real open, text,
   // raster, OCR — then assemble + seal the report in-page (same shape the
   // accepted T15 suite seals) and mount the REAL T16 ExportPanel.
-  const run = await page.evaluate(async (args: { bytes: number[] }) => {
-    const t15 = (window as any).__t15;
-    const opened = await t15.openDoc(args.bytes);
-    if (!opened.ok) return { step: "open", opened };
-    const docId = opened.value.docId;
-    const sha = opened.value.sha256;
-    const pages = await t15.contractPages(docId);
-    if (!pages.ok) return { step: "pages", pages };
-    const text = await t15.extractText(docId, 0, "region_p0_canary");
-    if (!text.ok) return { step: "text", text };
-    const raster = await t15.rasterize(docId, 0, 1);
-    if (!raster.ok) return { step: "raster", raster };
-    const reader = t15.makeOcrReader(docId, "g1-run-leg3");
-    const prep = await t15.ocrPrepare(reader.readerId);
-    if (!prep.ok) return { step: "prepare", prep };
-    const ocropen = await t15.ocrOpen(reader.readerId, sha, 1);
-    if (!ocropen.ok) return { step: "ocr-open", ocropen };
-    const occ = text.value.emitted.find((o: { raw_text: string }) => o.raw_text.includes("INKFLIP-CANARY-TEXT-7B2"));
-    const plan = await t15.ocrPlan(reader.readerId, [
-      { pageIndex: 0, purpose: "region", region: { id: "region_p0_canary", polygon: occ.geometry.polygon, label: "canary" } },
-    ]);
-    if (!plan.ok) return { step: "ocr-plan", plan };
-    const ocrOut = await t15.ocrExtract(reader.readerId, plan.value[0].id);
-    if (!ocrOut.ok) return { step: "ocr-extract", ocrOut };
+  const run = await page.evaluate(
+    async (args: { bytes: number[] }) => {
+      const t15 = (window as any).__t15;
+      const opened = await t15.openDoc(args.bytes);
+      if (!opened.ok) return { step: "open", opened };
+      const docId = opened.value.docId;
+      const sha = opened.value.sha256;
+      const pages = await t15.contractPages(docId);
+      if (!pages.ok) return { step: "pages", pages };
+      const text = await t15.extractText(docId, 0, "region_p0_canary");
+      if (!text.ok) return { step: "text", text };
+      const raster = await t15.rasterize(docId, 0, 1);
+      if (!raster.ok) return { step: "raster", raster };
+      const reader = t15.makeOcrReader(docId, "g1-run-leg3");
+      const prep = await t15.ocrPrepare(reader.readerId);
+      if (!prep.ok) return { step: "prepare", prep };
+      const ocropen = await t15.ocrOpen(reader.readerId, sha, 1);
+      if (!ocropen.ok) return { step: "ocr-open", ocropen };
+      const occ = text.value.emitted.find((o: { raw_text: string }) =>
+        o.raw_text.includes("INKFLIP-CANARY-TEXT-7B2"),
+      );
+      const plan = await t15.ocrPlan(reader.readerId, [
+        {
+          pageIndex: 0,
+          purpose: "region",
+          region: { id: "region_p0_canary", polygon: occ.geometry.polygon, label: "canary" },
+        },
+      ]);
+      if (!plan.ok) return { step: "ocr-plan", plan };
+      const ocrOut = await t15.ocrExtract(reader.readerId, plan.value[0].id);
+      if (!ocrOut.ok) return { step: "ocr-extract", ocrOut };
 
-    const rep = {
-      kind: "report",
-      schema_version: "1.0.0",
-      report_id: "0".repeat(64),
-      document: {
-        sha256: sha,
-        byte_length: args.bytes.length,
-        page_count: 1,
-        display_name: "network-canary-channels.pdf",
-        source_asset_id: null,
-      },
-      readers: [
-        t15.adapter.readers.text,
-        t15.adapter.readers.render,
-        ocrOut.value.output.reader,
-      ],
-      pages: pages.value.pages,
-      transforms: [
-        ...new Map(
-          [...pages.value.transforms, ...raster.value.transforms, ...ocrOut.value.output.transforms].map((t) => [t.id, t]),
-        ).values(),
-      ],
-      occurrences: [...text.value.emitted, ...ocrOut.value.output.occurrences],
-      findings: [
-        {
-          id: "f_canary",
-          kind: "reading_difference",
-          title: "Text-layer marker present on rendered page",
-          explanation:
-            "The named text reader and the OCR reader produced different raw strings for the same selected region; neither output alone establishes document truth.",
-          page_index: 0,
-          occurrence_ids: [occ.id, ocrOut.value.output.occurrences[0].id],
-          check_ids: [text.value.plan.id, ocrOut.value.output.check.id],
-          alignment: "page_level",
-          region_id: "region_p0_canary",
-          priority: "selected",
-          basis: "Actual recorded reader outputs of the generated canary document.",
-          limitations: ["Synthetic single-line canary text."],
+      const rep = {
+        kind: "report",
+        schema_version: "1.0.0",
+        report_id: "0".repeat(64),
+        document: {
+          sha256: sha,
+          byte_length: args.bytes.length,
+          page_count: 1,
+          display_name: "network-canary-channels.pdf",
+          source_asset_id: null,
         },
-      ],
-      annotations: [
-        {
-          id: "a_canary",
-          finding_id: "f_canary",
-          page_index: 0,
-          text: "Both readings agree at this region.",
-          author_label: "g1-gate",
-          origin: "human_entered",
-        },
-      ],
-      plan: {
-        version: "1.0.0",
-        selected_pages: [0],
-        regions: [
-          { id: "region_p0_canary", page_index: 0, geometry: occ.geometry, label: "canary" },
+        readers: [t15.adapter.readers.text, t15.adapter.readers.render, ocrOut.value.output.reader],
+        pages: pages.value.pages,
+        transforms: [
+          ...new Map(
+            [
+              ...pages.value.transforms,
+              ...raster.value.transforms,
+              ...ocrOut.value.output.transforms,
+            ].map((t) => [t.id, t]),
+          ).values(),
         ],
-        checks: [text.value.plan, raster.value.plan, plan.value[0]],
-        normalization_version: "scalar-whitespace-v1",
-        alignment_version: "region-match-v1",
-        profile: "desktop",
-        budget: { max_raster_pixels: 4_000_000, max_run_ocr_pixels: 20_000_000, timeout_ms: 120_000, max_retries: 1 },
-      },
-      checks: [text.value.result, raster.value.check, ocrOut.value.output.check],
-      execution: {
-        execution_id: crypto.randomUUID(),
-        run_key: "0".repeat(64),
-        status: "complete",
-        started_at: new Date().toISOString(),
-        duration_ms: 1,
-        environment: "Chromium (Playwright) · g1 gate",
-        result_origin: "live",
-        errors: [],
-      },
-      export: {
-        mode: "evidence",
-        scope: "selection",
-        included: [],
-        omissions: [],
-        replay: "requires_original",
-        origin_report_id: null,
-      },
-      assets: [],
-      limitations: [
-        "G1 gate: report assembled in-page from the actual pdf.js/tesseract readings of the canary document.",
-      ],
-    };
-    const report = t15.seal(rep);
-    await t15.showExportPanel(report, args.bytes);
-    return {
-      step: "done",
-      reportId: report.report_id,
-      runKey: report.execution.run_key,
-      report,
-      prepProvenance: prep.value.provenance,
-    };
-  }, { bytes: Array.from(canaryBytes) });
+        occurrences: [...text.value.emitted, ...ocrOut.value.output.occurrences],
+        findings: [
+          {
+            id: "f_canary",
+            kind: "reading_difference",
+            title: "Text-layer marker present on rendered page",
+            explanation:
+              "The named text reader and the OCR reader produced different raw strings for the same selected region; neither output alone establishes document truth.",
+            page_index: 0,
+            occurrence_ids: [occ.id, ocrOut.value.output.occurrences[0].id],
+            check_ids: [text.value.plan.id, ocrOut.value.output.check.id],
+            alignment: "page_level",
+            region_id: "region_p0_canary",
+            priority: "selected",
+            basis: "Actual recorded reader outputs of the generated canary document.",
+            limitations: ["Synthetic single-line canary text."],
+          },
+        ],
+        annotations: [
+          {
+            id: "a_canary",
+            finding_id: "f_canary",
+            page_index: 0,
+            text: "Both readings agree at this region.",
+            author_label: "g1-gate",
+            origin: "human_entered",
+          },
+        ],
+        plan: {
+          version: "1.0.0",
+          selected_pages: [0],
+          regions: [
+            { id: "region_p0_canary", page_index: 0, geometry: occ.geometry, label: "canary" },
+          ],
+          checks: [text.value.plan, raster.value.plan, plan.value[0]],
+          normalization_version: "scalar-whitespace-v1",
+          alignment_version: "region-match-v1",
+          profile: "desktop",
+          budget: {
+            max_raster_pixels: 4_000_000,
+            max_run_ocr_pixels: 20_000_000,
+            timeout_ms: 120_000,
+            max_retries: 1,
+          },
+        },
+        checks: [text.value.result, raster.value.check, ocrOut.value.output.check],
+        execution: {
+          execution_id: crypto.randomUUID(),
+          run_key: "0".repeat(64),
+          status: "complete",
+          started_at: new Date().toISOString(),
+          duration_ms: 1,
+          environment: "Chromium (Playwright) · g1 gate",
+          result_origin: "live",
+          errors: [],
+        },
+        export: {
+          mode: "evidence",
+          scope: "selection",
+          included: [],
+          omissions: [],
+          replay: "requires_original",
+          origin_report_id: null,
+        },
+        assets: [],
+        limitations: [
+          "G1 gate: report assembled in-page from the actual pdf.js/tesseract readings of the canary document.",
+        ],
+      };
+      const report = t15.seal(rep);
+      await t15.showExportPanel(report, args.bytes);
+      return {
+        step: "done",
+        reportId: report.report_id,
+        runKey: report.execution.run_key,
+        report,
+        prepProvenance: prep.value.provenance,
+      };
+    },
+    { bytes: Array.from(canaryBytes) },
+  );
   expect(run.step).toBe("done");
   MARKERS.push(
     { name: "report_id", value: run.reportId!, allowed_channels: ["downloads"] },
@@ -1120,7 +1316,11 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
   await expect(page.getByText("Preview what you will export")).toBeVisible();
   await expect(page.getByText("Selected evidence")).toBeVisible();
   await expect(page.getByText(/Original PDF not included/)).toBeVisible();
-  for (const label of ["Include the original PDF", "Include original filename", "Include my notes"]) {
+  for (const label of [
+    "Include the original PDF",
+    "Include original filename",
+    "Include my notes",
+  ]) {
     await expect(page.getByLabel(label)).not.toBeChecked();
   }
   await expect(page.getByText("Findings")).toBeVisible();
@@ -1155,34 +1355,56 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
 
   // Local reopen through the real T22 import mount — same file input path.
   await page.goto(`${baseURL}/src/features/import/preview.html`);
-  await page.waitForFunction(() => (window as never as Record<string, unknown>).__t22 !== undefined, undefined, { timeout: 30_000 });
+  await page.waitForFunction(
+    () => (window as never as Record<string, unknown>).__t22 !== undefined,
+    undefined,
+    { timeout: 30_000 },
+  );
   const exportJsonBytes = readFileSync(jsonPath);
-  await page.locator("[data-testid=import-file-input]").setInputFiles({ name: jsonDl.suggestedFilename(), mimeType: "application/json", buffer: exportJsonBytes });
+  await page
+    .locator("[data-testid=import-file-input]")
+    .setInputFiles({
+      name: jsonDl.suggestedFilename(),
+      mimeType: "application/json",
+      buffer: exportJsonBytes,
+    });
   await expect(page.locator("[data-testid=import-report]")).toBeVisible({ timeout: 30_000 });
-  await expect(page.locator("[data-testid=finding-f_canary]")).toContainText("Text-layer marker present on rendered page");
-  await expect(page.locator("[data-testid=source-missing]")).toContainText("original PDF is not included");
-  await expect(page.locator("[data-testid=replay-state]")).toContainText("replay requires the matching original");
+  await expect(page.locator("[data-testid=finding-f_canary]")).toContainText(
+    "Text-layer marker present on rendered page",
+  );
+  await expect(page.locator("[data-testid=source-missing]")).toContainText(
+    "original PDF is not included",
+  );
+  await expect(page.locator("[data-testid=replay-state]")).toContainText(
+    "replay requires the matching original",
+  );
 
   // Replay limitations, asserted through the real T22 import engine.
-  const replay = await page.evaluate(async (args: { report: number[]; src: number[] }) => {
-    const t22 = (window as any).__t22;
-    const opened = t22.engine.openReport(Uint8Array.from(args.report));
-    if (!opened.ok) return { step: "open", opened };
-    const availability = t22.engine.readerAvailability(opened.imported.report, t22.installed);
-    const view = t22.engine.replayView(opened.imported, availability, false);
-    const src = Uint8Array.from(args.src);
-    const match = t22.engine.verifySource(opened.imported.report, src);
-    const wrong = t22.engine.verifySource(opened.imported.report, Uint8Array.from([0x25, 0x50, 0x44, 0x46, 0x00]));
-    return {
-      step: "done",
-      sourceKind: opened.imported.source.kind,
-      viewSource: view.source,
-      ready: view.ready,
-      readersMissing: view.readersMissing,
-      match,
-      wrong,
-    };
-  }, { report: Array.from(exportJsonBytes), src: Array.from(canaryBytes) });
+  const replay = await page.evaluate(
+    async (args: { report: number[]; src: number[] }) => {
+      const t22 = (window as any).__t22;
+      const opened = t22.engine.openReport(Uint8Array.from(args.report));
+      if (!opened.ok) return { step: "open", opened };
+      const availability = t22.engine.readerAvailability(opened.imported.report, t22.installed);
+      const view = t22.engine.replayView(opened.imported, availability, false);
+      const src = Uint8Array.from(args.src);
+      const match = t22.engine.verifySource(opened.imported.report, src);
+      const wrong = t22.engine.verifySource(
+        opened.imported.report,
+        Uint8Array.from([0x25, 0x50, 0x44, 0x46, 0x00]),
+      );
+      return {
+        step: "done",
+        sourceKind: opened.imported.source.kind,
+        viewSource: view.source,
+        ready: view.ready,
+        readersMissing: view.readersMissing,
+        match,
+        wrong,
+      };
+    },
+    { report: Array.from(exportJsonBytes), src: Array.from(canaryBytes) },
+  );
   expect(replay.step).toBe("done");
   expect(replay.sourceKind).toBe("required"); // source PDF absent from export
   expect(replay.viewSource).toBe("missing"); // until the user attaches bytes
@@ -1194,9 +1416,19 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
   await page.goto(baseURL);
   await page.locator("#btn-open-report").click();
   await expect(page).toHaveURL(/#\/workspace/);
-  await page.locator("#input-import-report").setInputFiles({ name: "reopened.inkflip-report.json", mimeType: "application/json", buffer: exportJsonBytes });
-  await expect(page.locator("#finding-item-f_canary")).toContainText("Text-layer marker present on rendered page");
-  await expect(page.locator("#evidence-slip")).toContainText("Text-layer marker present on rendered page");
+  await page
+    .locator("#input-import-report")
+    .setInputFiles({
+      name: "reopened.inkflip-report.json",
+      mimeType: "application/json",
+      buffer: exportJsonBytes,
+    });
+  await expect(page.locator("#finding-item-f_canary")).toContainText(
+    "Text-layer marker present on rendered page",
+  );
+  await expect(page.locator("#evidence-slip")).toContainText(
+    "Text-layer marker present on rendered page",
+  );
 
   await endCapture(page, cap);
   // The downloads legitimately contain the report id/run key/canary text —
@@ -1209,31 +1441,48 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
   const warm = await ctx.newPage();
   const capWarm = beginCapture("cache-warm-ocr");
   await harness(warm);
-  const warmPrep = await warm.evaluate(async (args: { bytes: number[] }) => {
-    const t15 = (window as any).__t15;
-    const opened = await t15.openDoc(args.bytes);
-    if (!opened.ok) return { step: "open", opened };
-    const docId = opened.value.docId;
-    const text = await t15.extractText(docId, 0, "region_p0_warm");
-    if (!text.ok) return { step: "text", text };
-    const raster = await t15.rasterize(docId, 0, 1);
-    if (!raster.ok) return { step: "raster", raster };
-    const reader = t15.makeOcrReader(docId, "g1-run-warm");
-    const prep = await t15.ocrPrepare(reader.readerId);
-    if (!prep.ok) return { step: "prepare", prep };
-    const ocropen = await t15.ocrOpen(reader.readerId, opened.value.sha256, 1);
-    if (!ocropen.ok) return { step: "ocr-open", ocropen };
-    const occ = text.value.emitted.find((o: { raw_text: string }) => o.raw_text.includes("INKFLIP-CANARY-TEXT-7B2"));
-    const plan = await t15.ocrPlan(reader.readerId, [
-      { pageIndex: 0, purpose: "region", region: { id: "region_p0_warm", polygon: occ.geometry.polygon, label: "warm" } },
-    ]);
-    if (!plan.ok) return { step: "plan", plan };
-    return { step: "done", provenance: prep.value.provenance, state: prep.value.state, readerId: reader.readerId, checkId: plan.value[0].id };
-  }, { bytes: Array.from(canaryBytes) });
+  const warmPrep = await warm.evaluate(
+    async (args: { bytes: number[] }) => {
+      const t15 = (window as any).__t15;
+      const opened = await t15.openDoc(args.bytes);
+      if (!opened.ok) return { step: "open", opened };
+      const docId = opened.value.docId;
+      const text = await t15.extractText(docId, 0, "region_p0_warm");
+      if (!text.ok) return { step: "text", text };
+      const raster = await t15.rasterize(docId, 0, 1);
+      if (!raster.ok) return { step: "raster", raster };
+      const reader = t15.makeOcrReader(docId, "g1-run-warm");
+      const prep = await t15.ocrPrepare(reader.readerId);
+      if (!prep.ok) return { step: "prepare", prep };
+      const ocropen = await t15.ocrOpen(reader.readerId, opened.value.sha256, 1);
+      if (!ocropen.ok) return { step: "ocr-open", ocropen };
+      const occ = text.value.emitted.find((o: { raw_text: string }) =>
+        o.raw_text.includes("INKFLIP-CANARY-TEXT-7B2"),
+      );
+      const plan = await t15.ocrPlan(reader.readerId, [
+        {
+          pageIndex: 0,
+          purpose: "region",
+          region: { id: "region_p0_warm", polygon: occ.geometry.polygon, label: "warm" },
+        },
+      ]);
+      if (!plan.ok) return { step: "plan", plan };
+      return {
+        step: "done",
+        provenance: prep.value.provenance,
+        state: prep.value.state,
+        readerId: reader.readerId,
+        checkId: plan.value[0].id,
+      };
+    },
+    { bytes: Array.from(canaryBytes) },
+  );
   expect(warmPrep.step).toBe("done");
   expect(warmPrep.provenance).toBe("cache"); // verified IDB slot — no fetch
   expect(warmPrep.state).toBe("ready_cached");
-  const warmModelFetches = capWarm.records.filter((r) => r.channel === "requests" && r.url.includes("/models/tessdata-fast-eng/"));
+  const warmModelFetches = capWarm.records.filter(
+    (r) => r.channel === "requests" && r.url.includes("/models/tessdata-fast-eng/"),
+  );
   expect(warmModelFetches, "warm prepare must not refetch the model").toEqual([]);
   await endCapture(warm, capWarm);
   assertCaptureClean(capWarm);
@@ -1241,18 +1490,23 @@ test("G1 leg 3: selected export → local reopen → offline OCR", async ({ brow
   const capOff = beginCapture("offline-warm", true);
   await ctx.setOffline(true);
   try {
-    const offline = await warm.evaluate(async (args: { readerId: string; checkId: string }) => {
-      const t15 = (window as any).__t15;
-      const out = await t15.ocrExtract(args.readerId, args.checkId);
-      if (!out.ok) return { step: "extract", out };
-      return {
-        step: "done",
-        status: out.value.output.check.status,
-        occ: out.value.output.occurrences.length,
-        provenance: out.value.output.model.provenance,
-        words: out.value.output.occurrences.map((o: { raw_text: string }) => o.raw_text).slice(0, 6),
-      };
-    }, { readerId: warmPrep.readerId!, checkId: warmPrep.checkId! });
+    const offline = await warm.evaluate(
+      async (args: { readerId: string; checkId: string }) => {
+        const t15 = (window as any).__t15;
+        const out = await t15.ocrExtract(args.readerId, args.checkId);
+        if (!out.ok) return { step: "extract", out };
+        return {
+          step: "done",
+          status: out.value.output.check.status,
+          occ: out.value.output.occurrences.length,
+          provenance: out.value.output.model.provenance,
+          words: out.value.output.occurrences
+            .map((o: { raw_text: string }) => o.raw_text)
+            .slice(0, 6),
+        };
+      },
+      { readerId: warmPrep.readerId!, checkId: warmPrep.checkId! },
+    );
     expect(offline.step).toBe("done");
     expect(offline.status).toBe("completed");
     expect(offline.occ).toBeGreaterThan(0);
