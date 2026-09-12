@@ -135,7 +135,7 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(capabilities["paint_overlap"], "approximate")
         # Explicit unsupported-compositing record lives in the manifest.
         joined = " ".join(reader["limitations"])
-        self.assertIn("not inspected", joined)
+        self.assertIn("is not performed", joined)
         self.assertIn("no universal hidden/visible verdict", joined)
 
     def test_no_verdict_fields_anywhere_in_the_module_output(self):
@@ -377,6 +377,51 @@ class UnsupportedCompositingTests(unittest.TestCase):
         self.assertNotIn("transparency compositing", opaque_limits)
         schema_validator("Occurrence").validate(by_text["ALPHA"])
         schema_validator("Occurrence").validate(by_text["OPAQUE"])
+
+    def test_non_normal_blend_mode_is_flagged_per_occurrence(self):
+        """P2 correction: HasTransparency DOES flag non-Normal blend modes
+        (/BM Multiply, /Screen) — blend compositing is per-occurrence
+        coverage, not an undetectable context. Kills a wrong-claim mutant."""
+        content = (
+            "q /G0 gs BT /F0 12 Tf 0 Tr 1 0 0 1 60 300 Tm (MUL) Tj ET Q\n"
+            "BT /F0 12 Tf 0 Tr 1 0 0 1 60 260 Tm (PLAIN) Tj ET\n"
+        )
+        data = build_pdf(
+            content,
+            extra_resources=" /ExtGState << /G0 6 0 R >>",
+            extra_objects={6: "<< /Type /ExtGState /BM /Multiply >>"},
+        )
+        result, occurrences = run_extract(data, "object_render_mode")
+        self.assertEqual(result["status"], "completed")
+        by_text = {o["raw_text"]: o for o in occurrences if o["raw_text"]}
+        self.assertIn("MUL", by_text)
+        self.assertIn("PLAIN", by_text)
+        mul_limits = " ".join(by_text["MUL"]["limitations"])
+        self.assertIn("non-Normal", mul_limits)
+        self.assertIn("unsupported compositing recorded", mul_limits)
+        self.assertNotIn("non-Normal", " ".join(by_text["PLAIN"]["limitations"]))
+
+    def test_stroking_alpha_is_flagged_symmetrically(self):
+        """P2 residual: /CA (stroking alpha) alone does not trip
+        HasTransparency on stroke-mode text; the stroke alpha check must
+        catch it. Tr 1 (stroke) under CA 0.5 -> stroke-alpha limitation."""
+        content = (
+            "/G0 gs\nBT /F0 12 Tf 1 Tr 1 0 0 1 60 300 Tm (S) Tj ET\n"
+            "BT /F0 12 Tf 0 Tr 1 0 0 1 60 260 Tm (F) Tj ET\n"
+        )
+        data = build_pdf(
+            content,
+            extra_resources=" /ExtGState << /G0 6 0 R >>",
+            extra_objects={6: "<< /Type /ExtGState /CA 0.5 >>"},
+        )
+        result, occurrences = run_extract(data, "object_render_mode")
+        self.assertEqual(result["status"], "completed")
+        by_text = {o["raw_text"]: o for o in occurrences if o["raw_text"]}
+        self.assertIn("S", by_text)
+        self.assertIn("F", by_text)
+        stroke_limits = " ".join(by_text["S"]["limitations"])
+        self.assertIn("stroke alpha compositing not inspected", stroke_limits)
+        self.assertNotIn("stroke alpha compositing", " ".join(by_text["F"]["limitations"]))
 
     def test_nested_form_xobject_is_not_traversed_and_recorded(self):
         # A Form XObject draws the text; the page content only invokes it.
