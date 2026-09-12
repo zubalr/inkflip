@@ -84,3 +84,23 @@ manifest; `scripts/prepare_assets.py verify` re-hashes them. Sources:
 - No code was copied from upstream sources in T02; `scripts/prepare_assets.py`
   and `scripts/check_dependencies.py` are original implementations. RapidOCR
   and browser-PDFium candidates remain controlled experiments and are absent.
+
+## T12 — comparison normalization and alignment (2026-09-12)
+
+`packages/compare/normalization/` and `packages/compare/alignment/` are
+original implementations written against `planning/architecture/
+ALIGNMENT_AND_FINDINGS.md` (contract 1.0.0). No third-party code was
+copied or adapted:
+
+- The whitespace-collapse itself reuses the contract package's own
+  `normalize`/`WS` (T03) so normalized views are byte-for-byte the
+  contract views; the Unicode `White_Space` membership table originates
+  there, not in this module.
+- Standard textbook techniques are used without vendored source: scalar
+  Levenshtein dynamic programming (`alignment/text.ts`), a bounded
+  non-crossing interval assignment (`alignment/match.ts`), segment
+  intersection/point-in-polygon tests (`alignment/spatial.ts`) built on
+  the project geometry package's predicates (T04).
+- The frozen cost weights (0.65/0.20/0.15), acceptance thresholds
+  (0.45/0.12), span cap (4) and component cap (64) are specified by the
+  planning document, not tuned against fixtures.
