@@ -91,7 +91,9 @@ def occurrence_preservation(pages: dict[str, dict], labels: dict) -> dict:
     The denominator is every labeled page declaring ``expected_occurrences``;
     the conservative observed count is the minimum across completed readings
     (a flaky reader that sometimes drops a duplicate did not preserve it).
-    A page never read, or read only unsuccessfully, counts as lost.
+    A page whose readings never reported an occurrence count — unread,
+    failed, or silent — counts as lost: silence cannot confirm preservation,
+    even when the declared expectation is zero.
     """
     declared = sorted(
         k for k, v in labels["pages"].items()
@@ -101,8 +103,7 @@ def occurrence_preservation(pages: dict[str, dict], labels: dict) -> dict:
     for key in declared:
         expected = labels["pages"][key]["expected_occurrences"]
         counts = pages.get(key, {}).get("occurrence_counts")
-        observed = min(counts) if counts else 0
-        if observed != expected:
+        if not counts or min(counts) != expected:
             lost.append(key)
     preserved = len(declared) - len(lost)
     return {
