@@ -3,8 +3,8 @@
   "task_id": "T14",
   "beads_id": "pdf-t14",
   "disposition": "accepted",
-  "evaluated_commit": "4d9733131111b27dd795f4926ce8d68b86d720cf",
-  "evaluated_at": "2026-09-12T17:16:16.631383+00:00",
+  "evaluated_commit": "8192139e691c8f21cd04d2b63efab27f97c1cf01",
+  "evaluated_at": "2026-09-12T19:42:30.810698+00:00",
   "contract_digest": "fa6248a4105b6c9d05c62605485881de4d4ea8d02e37c53d60d0e21a84399f1c",
   "worker": "antigravity-t14",
   "commands": [
@@ -32,16 +32,16 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T14/commands.log": "f5739824d6cee3e1c8841a967cba313f7658d379a194ce49e7233e0916792a24",
-    "artifacts/tasks/T14/coordinator-commands.log": "92d511f353a6426badb041e74da731f5ba74e97cf2f2f772747153d4606f4ebd",
+    "artifacts/tasks/T14/coordinator-commands.log": "8fb4e852cd2031f6256d1e9cb045653bac1ce0578531ae1464340d6ec3b8050e",
     "artifacts/tasks/T14/receipt.json": "d9a50cd92baf7359d3ecfbb3eb15ac5ac7a26fb61538d757bce9492fa7f6823c",
     "artifacts/tasks/T14/review.md": "39263f2c0a03f1f3e9f56145342a9d4d1c5a784d3fae02a054dd9b95be9e9117",
-    "artifacts/tasks/T14/run.json": "6e9ffdd041d8fa2556311e421808ad08574c365c5f95de0e20370bd06a0a8371",
+    "artifacts/tasks/T14/run.json": "dc4690d39178bcc55ad356c8236978a8892b3cb2444ef96c7db038d8b1500175",
     "artifacts/tasks/T14/screenshots/amount-diff.png": "2bc14de4fdb7578fe42c0ca10cba5b89f0992213d309cbb7631b02ae6742cfec",
     "artifacts/tasks/T14/screenshots/findings-card.png": "f9103512dea18437751be0802f44b5fcfde51b341b242a7ca23f8265c98927a6",
     "artifacts/tasks/T14/screenshots/incomplete-statuses.png": "16f20933ec2cdbb0d586308b65a2e623478bef801f3ffcbfc53fac0af44552b4",
