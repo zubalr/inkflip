@@ -1,0 +1,23 @@
+{
+  "document": {
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "runs": [
+    {
+      "checks": [
+        {
+          "id": "check-native-text",
+          "occurrences": 1,
+          "status": "completed"
+        },
+        {
+          "id": "check-ocr",
+          "occurrences": 2,
+          "status": "completed"
+        }
+      ],
+      "reader": "pdfium-native"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

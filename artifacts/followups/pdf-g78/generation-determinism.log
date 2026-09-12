@@ -1,0 +1,15 @@
+=== pdf-g78 implementation (g78.2): generation + determinism proof ===
+=== worker: zcode (work/zcode/t05 channel) | 2026-09-13 ===
+=== generation run 1 (in place into fixtures/) ===
+generated 161 files under /home/wertyp/.local/share/homebase-factory/worktrees/inkflip/g78-audit/fixtures
+=== generation runs 2+3 (independent temp dirs) ===
+generated 161 files under /tmp/g78d1
+generated 161 files under /tmp/g78d2
+=== determinism: run2 vs run3 ===
+DETERMINISM OK: independent generations byte-identical
+=== in-place fixtures/ vs fresh regeneration ===
+IN-PLACE OK: committed tree matches regeneration exactly
+=== make_fixtures.py --check ===
+check ok: 161 files in /home/wertyp/.local/share/homebase-factory/worktrees/inkflip/g78-audit/fixtures match deterministic regeneration
+=== new-family file count ===
+70

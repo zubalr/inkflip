@@ -656,6 +656,391 @@ def followup_entries() -> list[dict]:
     return structural_entries() + missing_map_entries() + failure_entries() + fault_entries() + canary_entries()
 
 
+# ---------------------------------------------------------------------------
+# g78.2 catalog follow-up: F09, F12-F16, F22-F26 (audit-derived recipes)
+# ---------------------------------------------------------------------------
+
+def transform_entries() -> list[dict]:
+    """F09: skew/rotation text matrices with registration crosshairs; the
+    unskewed page is the control. Consumers must map polygons through the
+    full text matrix — an axis-only bounding box cannot match the anchors."""
+    crosshair = b"0.5 w 30 210 m 290 210 l S 160 30 m 160 230 l S\n"
+    skew = "0.9 0.25 0 1 60 120"
+    rotate = "0 1 -1 0 220 80"
+    definitions = [
+        ("F09", "control", crosshair + fixed_text(matrix="1 0 0 1 60 120"),
+         {"matrices": ["1 0 0 1 60 120"], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+        ("F09", "skew", crosshair + fixed_text(matrix=skew),
+         {"matrices": [skew], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+        ("F09", "rotated", crosshair + fixed_text(matrix=rotate),
+         {"matrices": [rotate], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+    ]
+    return [catalog_entry(fid, variant, pdf(fixed_page(body)), intent)
+            for fid, variant, body, intent in definitions]
+
+
+def reading_order_entries() -> list[dict]:
+    """F12: identical two-column layout; the variant reorders the content
+    stream (right column painted first). Recorded stream order and visual
+    order differ; no accessibility verdict exists anywhere."""
+    left = [fixed_text("LEFT-1", "1 0 0 1 40 180"), fixed_text("LEFT-2", "1 0 0 1 40 120")]
+    right = [fixed_text("RIGHT-1", "1 0 0 1 180 180"), fixed_text("RIGHT-2", "1 0 0 1 180 120")]
+    ordered = b"".join(left + right)
+    reordered = b"".join(right + left)
+    intent = {
+        "visual_columns": {"left": ["LEFT-1", "LEFT-2"], "right": ["RIGHT-1", "RIGHT-2"]},
+        "stream_order": None,
+        "note": "reading order differs; no accessibility verdict",
+    }
+    control = dict(intent, stream_order=["LEFT-1", "LEFT-2", "RIGHT-1", "RIGHT-2"])
+    variant = dict(intent, stream_order=["RIGHT-1", "RIGHT-2", "LEFT-1", "LEFT-2"])
+    return [
+        catalog_entry("F12", "control", pdf(fixed_page(ordered)), control),
+        catalog_entry("F12", "reordered", pdf(fixed_page(reordered)), variant),
+    ]
+
+
+def _cmap_font_page(body: bytes, cmap: bytes, font_obj_index: int = 3) -> list[bytes]:
+    objects = fixed_page(body)
+    objects[font_obj_index] = objects[font_obj_index].replace(
+        b" >>", b" /ToUnicode 6 0 R >>")
+    objects.append(stream(cmap))
+    return objects
+
+
+def ligature_entries() -> list[dict]:
+    """F13: one painted code whose ToUnicode map expands to the multi-scalar
+    'fi' sequence, against a literal 'fi' control. Painted glyphs stay
+    constant; only the map and the painted codes differ."""
+    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+            b"/CMapName /Owned def /CMapType 2 def\n"
+            b"1 begincodespacerange <00> <FF> endcodespacerange\n"
+            b"1 beginbfchar <A1> <00660069> endbfchar\n"
+            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
+    ligature = pdf(_cmap_font_page(
+        b"BT /F0 24 Tf 1 0 0 1 48 120 Tm (\241) Tj ET\n", cmap))
+    literal = pdf(fixed_page(b"BT /F0 24 Tf 1 0 0 1 48 120 Tm (fi) Tj ET\n"))
+    return [
+        catalog_entry("F13", "ligature", ligature,
+                      {"painted_codes": ["A1"], "extraction_intent": "fi",
+                       "map": "single code expands to two Unicode scalars",
+                       "raw_output": "expansion and map relation preserved verbatim"}),
+        catalog_entry("F13", "control", literal,
+                      {"painted_codes": ["66", "69"], "extraction_intent": "fi",
+                       "map": "identity; literal f+i control",
+                       "raw_output": "record reader API verbatim"}),
+    ]
+
+
+def unicode_entries() -> list[dict]:
+    """F14: Arabic/CJK/emoji logical strings carried by an Identity-H Type0
+    font whose ToUnicode CMap holds the real Unicode; no font program is
+    embedded (glyph appearance is not asserted, logical values are)."""
+    type0 = (b"<< /Type /Font /Subtype /Type0 /BaseFont /Helvetica "
+             b"/Encoding /Identity-H /DescendantFonts [6 0 R] /ToUnicode 7 0 R >>")
+    descendant = (b"<< /Type /Font /Subtype /CIDFontType0 /BaseFont /Helvetica "
+                  b"/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> "
+                  b"/DW 1000 >>")
+    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+            b"/CMapName /Owned def /CMapType 2 def\n"
+            b"1 begincodespacerange <0000> <FFFF> endcodespacerange\n"
+            b"4 beginbfchar\n<0001> <002400310030>\n<0002> <06270644>\n"
+            b"<0003> <4E2D6587>\n<0004> <D83DDE00>\nendbfchar\n"
+            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
+    content = (b"BT /F0 24 Tf 1 0 0 1 40 180 Tm <0002> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 140 Tm <0003> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 100 Tm <0004> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 60 Tm <0001> Tj ET\n")
+    objects = fixed_page(content)
+    objects[3] = type0
+    objects.append(descendant)
+    objects.append(stream(cmap))
+    unicode_page = pdf(objects)
+    latin = pdf(fixed_page(b"BT /F0 24 Tf 1 0 0 1 40 60 Tm (LATIN-$100) Tj ET\n"))
+    intent = {
+        "logical_strings": ["\u0627\u0644", "\u4e2d\u6587", "\U0001f600", "$100"],
+        "encoding": "Identity-H hex strings; ToUnicode carries the Unicode",
+        "font": "no font program embedded; glyph appearance not asserted",
+        "geometry": "conservative; complex-script alignment not claimed",
+        "observed_extraction": "PDFium 149.0.7825.0 returns no characters for the "
+        "non-embedded complex-script runs (Latin ToUnicode line extracts); "
+        "extraction completeness is reader-dependent and never asserted — "
+        "consumers preserve whatever the reader returns verbatim, including "
+        "empty (I11), and never normalize toward the declared logical strings",
+    }
+    return [
+        catalog_entry("F14", "native", unicode_page, intent),
+        catalog_entry("F14", "control", latin, {**intent, "logical_strings": ["LATIN-$100"],
+                                                "note": "Latin control"}),
+    ]
+
+
+def ocr_material_entries() -> list[dict]:
+    """F15: fixed-seed raster ambiguity pairs around the owned bitmap amount
+    print. Material differences (sign, digit shape) must survive OCR without
+    normalization; every pixel is deterministic."""
+    strings = {
+        "control": "AMOUNT -$100.00",
+        "sign-ambiguity": "AMOUNT  $100.00",   # minus lost to print defect
+        "digit-ambiguity": "AMOUNT -$1O0.00",  # letter O in place of zero
+    }
+    result = []
+
+    def material_raster(line: str, noise_phase: int) -> bytes:
+        buf = bytearray(b"\xff" * (SCAN_WIDTH // 2 * SCAN_HEIGHT // 2))
+        width = SCAN_WIDTH // 2
+        margin, top = 40, 200
+        for row in range(7):
+            bits_row = []
+            for ch in line:
+                bits_row.append(BITMAP_FONT[ch])
+            cursor = margin
+            for ch_index, ch in enumerate(line):
+                glyph = bits_row[ch_index]
+                for r in range(7):
+                    bits = glyph[r]
+                    for col in range(5):
+                        if bits & (0x10 >> col):
+                            x0 = cursor + col * 4
+                            y0 = top + r * 4
+                            for dy in range(4):
+                                for dx in range(4):
+                                    offset = (y0 + dy) * width + x0 + dx
+                                    if 0 <= offset < len(buf):
+                                        buf[offset] = 0
+                cursor += 6 * 4
+        # Fixed-seed speckle: deterministic function of pixel index + phase.
+        for i in range(len(buf)):
+            if buf[i] == 255 and ((i * 31 + noise_phase * 17 + i // 97 * 7) % 53) == 0:
+                buf[i] = 96
+        return bytes(buf)
+
+    for variant, line in strings.items():
+        pixels = material_raster(line, noise_phase={"control": 1, "sign-ambiguity": 2, "digit-ambiguity": 3}[variant])
+        page = raster_page(pixels, SCAN_WIDTH // 2, SCAN_HEIGHT // 2)
+        result.append(catalog_entry(
+            "F15", variant, page,
+            {"printed_line": line, "material_difference": variant,
+             "noise": "fixed-seed speckle; deterministic",
+             "raw_output": "OCR reading recorded verbatim; never normalized toward intent"}))
+    return result
+
+
+def adjacent_entries() -> list[dict]:
+    """F16: neighboring amounts and a crop-clipped glyph; the control scopes
+    the crop correctly. Wrong-neighbor selection must be rejectable from the
+    recorded boxes alone."""
+    two_amounts = (fixed_text("$100", "1 0 0 1 40 120")
+                   + fixed_text("$200", "1 0 0 1 135 120"))
+
+    def with_crop(data_objects: list[bytes], box: str) -> bytes:
+        data_objects[2] = data_objects[2].replace(
+            b"/MediaBox [0 0 320 240]", f"/MediaBox [0 0 320 240] /CropBox [{box}]".encode())
+        return pdf(data_objects)
+
+    control = with_crop(fixed_page(two_amounts), "30 100 240 140")
+    adjacent = with_crop(fixed_page(two_amounts), "30 100 150 140")
+    clipped = with_crop(fixed_page(two_amounts), "50 100 100 140")
+    return [
+        catalog_entry("F16", "control", control,
+                      {"crop": [30, 100, 240, 140], "in_crop": ["$100", "$200"],
+                       "selection": "both amounts fully inside; unambiguous"}),
+        catalog_entry("F16", "adjacent", adjacent,
+                      {"crop": [30, 100, 150, 140], "in_crop": ["$100"],
+                       "neighbor": "$200 begins at x=135, inside the crop edge",
+                       "selection": "wrong-neighbor selection must be rejectable"}),
+        catalog_entry("F16", "clipped", clipped,
+                      {"crop": [50, 100, 100, 140], "in_crop": [],
+                       "clipped_glyph": "$100 cut by the crop edge at x=100",
+                       "selection": "partial glyph must not be read as a full amount"}),
+    ]
+
+
+def import_security_entries() -> list[dict]:
+    """F22: strict-import JSON variants plus fixed PNG header cases; every
+    hostile variant must be rejected before active interpretation."""
+    valid_report = {
+        "schema_version": "1.0.0",
+        "document": {"sha256": "a" * 64, "pages": 1},
+        "checks": [{"id": "check-native-text", "status": "completed",
+                    "produced_occurrence_count": 1}],
+    }
+
+    def report(**overrides):
+        value = json.loads(json.dumps(valid_report))
+        value.update(overrides)
+        return value
+
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\x0dIHDR" + b"\x7f\xff\xff\xff" + b"\x08\x00\x00\x00" + b"\x00" * 8
+    truncated_png = png[:12]
+    entries = [
+        catalog_entry("F22", "control", json_payload(valid_report),
+                      {"variant": "valid report", "expected": "accepted"},
+                      "json"),
+        catalog_entry("F22", "unknown-key", json_payload(report(unknown_top_level={"evil": True})),
+                      {"variant": "unknown top-level key", "expected": "rejected: closed schema"},
+                      "json"),
+        catalog_entry("F22", "digest-mismatch", json_payload(report(document={"sha256": "b" * 64, "pages": 1})),
+                      {"variant": "document digest does not match source", "expected": "rejected before use"},
+                      "json"),
+        catalog_entry("F22", "script-string", json_payload(report(note="<script>alert(1)</script>")),
+                      {"variant": "script text in a string field", "expected": "escaped inert text; never executed"},
+                      "json"),
+        catalog_entry("F22", "png-oversized", png,
+                      {"variant": "PNG header declares 2147483647 px", "expected": "rejected by pixel budget",
+                       "control": "development/import-security-control.json"},
+                      "png"),
+        catalog_entry("F22", "png-truncated", truncated_png,
+                      {"variant": "PNG header truncated mid-IHDR", "expected": "rejected: undecodable",
+                       "control": "development/import-security-control.json"},
+                      "png"),
+    ]
+    # The hostile PNG variants share the valid-report control (a JSON report):
+    # catalog_entry's same-extension default would point at a nonexistent file.
+    for entry in entries:
+        if entry["name"].endswith(".png"):
+            entry["control"] = "development/import-security-control.json"
+    return entries
+
+
+def baseline_entries() -> list[dict]:
+    """F23: mutated canonical stored runs for the regression rules; the
+    identical-run control must stay accepted."""
+    stored = {
+        "schema_version": "1.0.0",
+        "document": {"sha256": "a" * 64},
+        "runs": [{"reader": "pdfium-native", "checks": [
+            {"id": "check-native-text", "status": "completed", "occurrences": 1},
+            {"id": "check-ocr", "status": "completed", "occurrences": 2},
+        ]}],
+    }
+
+    def mutate(**changes):
+        value = json.loads(json.dumps(stored))
+        value.update(changes)
+        return value
+
+    coverage_loss = mutate(runs=[{"reader": "pdfium-native", "checks": [
+        {"id": "check-native-text", "status": "completed", "occurrences": 1}]}])
+    mismatched = mutate(document={"sha256": "c" * 64})
+    silent_refresh = mutate(runs=[{"reader": "pdfium-native", "checks": [
+        {"id": "check-native-text", "status": "completed", "occurrences": 1},
+        {"id": "check-ocr", "status": "completed", "occurrences": 9},
+    ]}])
+    return [
+        catalog_entry("F23", "control", json_payload(stored),
+                      {"scenario": "identical stored run", "expected": "accepted unchanged"},
+                      "json"),
+        catalog_entry("F23", "coverage-loss", json_payload(coverage_loss),
+                      {"scenario": "baseline lost the check-ocr entry",
+                       "expected": "regression comparison cannot improve by losing checks"},
+                      "json"),
+        catalog_entry("F23", "mismatched-doc", json_payload(mismatched),
+                      {"scenario": "baseline belongs to a different document digest",
+                       "expected": "comparison refused; not silently re-based"},
+                      "json"),
+        catalog_entry("F23", "silent-refresh", json_payload(silent_refresh),
+                      {"scenario": "baseline occurrence count edited to match new output",
+                       "expected": "silent baseline refresh forbidden; declared rule fires"},
+                      "json"),
+    ]
+
+
+def overlap_entries() -> list[dict]:
+    """F24: invisible-mode text whose box crosses a stroked border; the
+    visible control paints the same text in the same place. Ink-in-box never
+    proves glyph visibility, and invisibility is never a verdict."""
+    border = b"0.5 w 40 100 160 40 re S\n"
+    invisible = border + b"BT /F0 24 Tf 3 Tr 1 0 0 1 50 110 Tm ($100) Tj ET\n"
+    visible = border + b"BT /F0 24 Tf 0 Tr 1 0 0 1 50 110 Tm ($100) Tj ET\n"
+    intent_base = {"border_rect": [40, 100, 160, 40], "text_box": [50, 110, 97, 128],
+                   "overlap": "text box intersects the stroked border",
+                   "no_verdict": "ink-in-box does not prove glyph visibility"}
+    return [
+        catalog_entry("F24", "control", pdf(fixed_page(visible)),
+                      {**intent_base, "render_mode": 0}),
+        catalog_entry("F24", "invisible", pdf(fixed_page(invisible)),
+                      {**intent_base, "render_mode": 3}),
+    ]
+
+
+def annotation_entries() -> list[dict]:
+    """F25: a static appearance-stream annotation plus an inert unsupported
+    form widget; the plain page is the control. Static appearance may be
+    recorded; actions/forms stay unsupported and inert."""
+    appearance = stream(b"0 0 0 rg 2 2 36 16 re f\n")
+    objects = fixed_page(b"BT /F0 12 Tf 1 0 0 1 40 180 Tm (ANNOTATED) Tj ET\n")
+    objects[2] = objects[2].replace(b" /Contents", b" /Annots [6 0 R 7 0 R] /Contents")
+    objects.append(
+        b"<< /Type /Annot /Subtype /Square /Rect [30 160 90 190] /F 4 "
+        b"/AP << /N 8 0 R >> >>")
+    objects.append(
+        b"<< /Type /Annot /Subtype /Widget /Rect [30 100 150 130] /FT /Tx "
+        b"/T /InkflipField /F 68 >>")
+    objects.append(appearance)
+    annotated = pdf(objects)
+    plain = pdf(fixed_page(b"BT /F0 12 Tf 1 0 0 1 40 180 Tm (PLAIN) Tj ET\n"))
+    return [
+        catalog_entry("F25", "control", plain,
+                      {"annotations": [], "expected": "plain page; nothing recorded beyond text"}),
+        catalog_entry("F25", "annotated", annotated,
+                      {"annotations": [
+                          {"subtype": "Square", "appearance": "static AP stream; static appearance may be recorded"},
+                          {"subtype": "Widget", "form": "Tx field; form actions and XFA unsupported and inert"},
+                      ],
+                       "expected": "render mode and unsupported behavior recorded, never executed"}),
+    ]
+
+
+def cache_entries() -> list[dict]:
+    """F26: cache/manifest fault scenarios for the asset pipeline; none may
+    silently fall back, fetch, or serve a document cache. JSON like F20."""
+    def scenario(cache_state: str, expected: str) -> dict:
+        return {"kind": "asset cache fault scenario", "cache_state": cache_state,
+                "expected": expected,
+                "network": "none; offline always", "fallback": "forbidden"}
+
+    scenarios = {
+        "control": ("verified_complete", "cache verified; proceed"),
+        "corrupt-model": ("model bytes hash mismatch", "typed unavailable; no silent fallback"),
+        "stale-worker": ("worker digest older than manifest", "refresh required; explicit, never silent"),
+        "stale-core": ("core digest older than manifest", "refresh required; explicit, never silent"),
+        "offline-cold": ("no cache present", "explicit unavailable; nothing fetched"),
+        "offline-warm": ("complete cache present", "proceed offline"),
+    }
+    return [
+        catalog_entry("F26", variant, json_payload(scenario(state, expected)),
+                      scenario(state, expected), "json")
+        for variant, (state, expected) in scenarios.items()
+    ]
+
+
+def g78_2_entries() -> list[dict]:
+    return (
+        transform_entries()
+        + reading_order_entries()
+        + ligature_entries()
+        + unicode_entries()
+        + ocr_material_entries()
+        + adjacent_entries()
+        + import_security_entries()
+        + baseline_entries()
+        + overlap_entries()
+        + annotation_entries()
+        + cache_entries()
+    )
+
+
+def followup_entries() -> list[dict]:
+    return (structural_entries() + missing_map_entries() + failure_entries()
+            + fault_entries() + canary_entries() + g78_2_entries())
+
+
 def entry_payload(entry: dict) -> bytes:
     if "payload" in entry:
         return entry["payload"]

@@ -1,0 +1,7 @@
+{
+  "cache_state": "verified_complete",
+  "expected": "cache verified; proceed",
+  "fallback": "forbidden",
+  "kind": "asset cache fault scenario",
+  "network": "none; offline always"
+}

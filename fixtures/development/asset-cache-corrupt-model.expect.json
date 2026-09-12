@@ -1,0 +1,23 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/asset-cache-control.json",
+  "family": "asset-cache",
+  "fixture_id": "F26",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F26",
+    "intent": {
+      "cache_state": "model bytes hash mismatch",
+      "expected": "typed unavailable; no silent fallback",
+      "fallback": "forbidden",
+      "kind": "asset cache fault scenario",
+      "network": "none; offline always"
+    },
+    "variant": "corrupt-model",
+    "version": "g78.1"
+  },
+  "observation": "no silent fallback/CDN/document cache",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

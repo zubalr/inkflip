@@ -1,0 +1,7 @@
+{
+  "cache_state": "worker digest older than manifest",
+  "expected": "refresh required; explicit, never silent",
+  "fallback": "forbidden",
+  "kind": "asset cache fault scenario",
+  "network": "none; offline always"
+}

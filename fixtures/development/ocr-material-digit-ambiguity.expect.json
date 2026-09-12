@@ -1,0 +1,22 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/ocr-material-control.pdf",
+  "family": "ocr-material",
+  "fixture_id": "F15",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F15",
+    "intent": {
+      "material_difference": "digit-ambiguity",
+      "noise": "fixed-seed speckle; deterministic",
+      "printed_line": "AMOUNT -$1O0.00",
+      "raw_output": "OCR reading recorded verbatim; never normalized toward intent"
+    },
+    "variant": "digit-ambiguity",
+    "version": "g78.1"
+  },
+  "observation": "do not normalize away material differences",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

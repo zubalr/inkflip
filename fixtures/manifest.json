@@ -1020,10 +1020,990 @@
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
       "sha256": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
       "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 669,
+      "control": null,
+      "expectations": "development/text-transform-control.expect.json",
+      "expectations_sha256": "5a4ed215e57df244ed341263f8a7fe1ec3ca0a75bd6f0e5b425d9036ab13f8b2",
+      "family": "text-transform",
+      "fixture_id": "F09",
+      "observation": "polygon transform not axis-only box",
+      "path": "development/text-transform-control.pdf",
+      "recipe": {
+        "group_id": "F09",
+        "intent": {
+          "crosshair": [
+            30,
+            210,
+            290,
+            210,
+            160,
+            30,
+            160,
+            230
+          ],
+          "matrices": [
+            "1 0 0 1 60 120"
+          ],
+          "text": "$100"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "d70636d4e402f7e4dd70ecb89a2e14680e42eb19e80493f2ea80e1b68e82708e",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 674,
+      "control": "development/text-transform-control.pdf",
+      "expectations": "development/text-transform-skew.expect.json",
+      "expectations_sha256": "a793e782c89aaa0f6009e1a1e4d657ddabf2850d96c5632895685b67817e36e9",
+      "family": "text-transform",
+      "fixture_id": "F09",
+      "observation": "polygon transform not axis-only box",
+      "path": "development/text-transform-skew.pdf",
+      "recipe": {
+        "group_id": "F09",
+        "intent": {
+          "crosshair": [
+            30,
+            210,
+            290,
+            210,
+            160,
+            30,
+            160,
+            230
+          ],
+          "matrices": [
+            "0.9 0.25 0 1 60 120"
+          ],
+          "text": "$100"
+        },
+        "variant": "skew",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "8e6b6ae59cd4d5e9de239707c67a63945acf75bfc0c378e0202e08a0327b4587",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 670,
+      "control": "development/text-transform-control.pdf",
+      "expectations": "development/text-transform-rotated.expect.json",
+      "expectations_sha256": "d3639a0f208a9fd72ab447ecef28660a39e34a25021d050320b6726a977107b2",
+      "family": "text-transform",
+      "fixture_id": "F09",
+      "observation": "polygon transform not axis-only box",
+      "path": "development/text-transform-rotated.pdf",
+      "recipe": {
+        "group_id": "F09",
+        "intent": {
+          "crosshair": [
+            30,
+            210,
+            290,
+            210,
+            160,
+            30,
+            160,
+            230
+          ],
+          "matrices": [
+            "0 1 -1 0 220 80"
+          ],
+          "text": "$100"
+        },
+        "variant": "rotated",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "0e38534ecf6deacbb2009fcec3b44d1b03a816c070da1b59d2e0b6735636cddb",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 766,
+      "control": null,
+      "expectations": "public/reading-order-control.expect.json",
+      "expectations_sha256": "82dec47a23d86fee2b47f487b2c2bfc51d8e6132cfa9b1c51a5bd1f3e79e408d",
+      "family": "reading-order",
+      "fixture_id": "F12",
+      "observation": "order differs, no accessibility verdict",
+      "path": "public/reading-order-control.pdf",
+      "recipe": {
+        "group_id": "F12",
+        "intent": {
+          "note": "reading order differs; no accessibility verdict",
+          "stream_order": [
+            "LEFT-1",
+            "LEFT-2",
+            "RIGHT-1",
+            "RIGHT-2"
+          ],
+          "visual_columns": {
+            "left": [
+              "LEFT-1",
+              "LEFT-2"
+            ],
+            "right": [
+              "RIGHT-1",
+              "RIGHT-2"
+            ]
+          }
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "41a20c6a460fd9e7c91ffc500573a2ae32e97f9bb6ee5410a33d256b23ba9db4",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 766,
+      "control": "public/reading-order-control.pdf",
+      "expectations": "public/reading-order-reordered.expect.json",
+      "expectations_sha256": "4994bf01c15a76aa20c63e956055423df9e1d869506b0282d5e4c024bff6fe4c",
+      "family": "reading-order",
+      "fixture_id": "F12",
+      "observation": "order differs, no accessibility verdict",
+      "path": "public/reading-order-reordered.pdf",
+      "recipe": {
+        "group_id": "F12",
+        "intent": {
+          "note": "reading order differs; no accessibility verdict",
+          "stream_order": [
+            "RIGHT-1",
+            "RIGHT-2",
+            "LEFT-1",
+            "LEFT-2"
+          ],
+          "visual_columns": {
+            "left": [
+              "LEFT-1",
+              "LEFT-2"
+            ],
+            "right": [
+              "RIGHT-1",
+              "RIGHT-2"
+            ]
+          }
+        },
+        "variant": "reordered",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "cdedafa22cf2a54386998ebea5e7d8c597f541fcd2c702f7909e16d43c2499df",
+      "split": "public"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1029,
+      "control": "development/ligatures-control.pdf",
+      "expectations": "development/ligatures-ligature.expect.json",
+      "expectations_sha256": "9a0b74bccf287270e2cd0d9ff1c61dbaf87dc2eb35d17b21ceb4d88b7881a07a",
+      "family": "ligatures",
+      "fixture_id": "F13",
+      "observation": "raw values/maps preserved",
+      "path": "development/ligatures-ligature.pdf",
+      "recipe": {
+        "group_id": "F13",
+        "intent": {
+          "extraction_intent": "fi",
+          "map": "single code expands to two Unicode scalars",
+          "painted_codes": [
+            "A1"
+          ],
+          "raw_output": "expansion and map relation preserved verbatim"
+        },
+        "variant": "ligature",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "c4776ab90cf5d1f2ff0037d4cfd0f6f7733164653b74018e6e9067d1b512027c",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 619,
+      "control": null,
+      "expectations": "development/ligatures-control.expect.json",
+      "expectations_sha256": "280cf31b3fac793c1fe8a731209ec1b61a071088e8b976e3d0bc9a7160d51aed",
+      "family": "ligatures",
+      "fixture_id": "F13",
+      "observation": "raw values/maps preserved",
+      "path": "development/ligatures-control.pdf",
+      "recipe": {
+        "group_id": "F13",
+        "intent": {
+          "extraction_intent": "fi",
+          "map": "identity; literal f+i control",
+          "painted_codes": [
+            "66",
+            "69"
+          ],
+          "raw_output": "record reader API verbatim"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "e455767b0d2b86656e68a0d4389dd043f62a7e6e7eda46109473d6979f095862",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 1429,
+      "control": "development/native-unicode-control.pdf",
+      "expectations": "development/native-unicode-native.expect.json",
+      "expectations_sha256": "721dee04d5eeb781989de12475a94d850c2b66598c28a7111ff7c1be5e0ab7ee",
+      "family": "native-unicode",
+      "fixture_id": "F14",
+      "observation": "preserve logical values, conservative geometry",
+      "path": "development/native-unicode-native.pdf",
+      "recipe": {
+        "group_id": "F14",
+        "intent": {
+          "encoding": "Identity-H hex strings; ToUnicode carries the Unicode",
+          "font": "no font program embedded; glyph appearance not asserted",
+          "geometry": "conservative; complex-script alignment not claimed",
+          "logical_strings": [
+            "\u0627\u0644",
+            "\u4e2d\u6587",
+            "\ud83d\ude00",
+            "$100"
+          ],
+          "observed_extraction": "PDFium 149.0.7825.0 returns no characters for the non-embedded complex-script runs (Latin ToUnicode line extracts); extraction completeness is reader-dependent and never asserted \u2014 consumers preserve whatever the reader returns verbatim, including empty (I11), and never normalize toward the declared logical strings"
+        },
+        "variant": "native",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "22d7d26248f2cb8fd5f3c1e881dc3ce26d6dfaa6c59c497bf8e4d5e314151b2f",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 626,
+      "control": null,
+      "expectations": "development/native-unicode-control.expect.json",
+      "expectations_sha256": "e5638994dc34c13425ca32b1365fa277e5fc5dc8a7e500eb0f3615a7ee6877f2",
+      "family": "native-unicode",
+      "fixture_id": "F14",
+      "observation": "preserve logical values, conservative geometry",
+      "path": "development/native-unicode-control.pdf",
+      "recipe": {
+        "group_id": "F14",
+        "intent": {
+          "encoding": "Identity-H hex strings; ToUnicode carries the Unicode",
+          "font": "no font program embedded; glyph appearance not asserted",
+          "geometry": "conservative; complex-script alignment not claimed",
+          "logical_strings": [
+            "LATIN-$100"
+          ],
+          "note": "Latin control",
+          "observed_extraction": "PDFium 149.0.7825.0 returns no characters for the non-embedded complex-script runs (Latin ToUnicode line extracts); extraction completeness is reader-dependent and never asserted \u2014 consumers preserve whatever the reader returns verbatim, including empty (I11), and never normalize toward the declared logical strings"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "3456ae2c3cd0bac03c76656f7f0150b9e1be92ad384006d4b158a39feef7b421",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 13975,
+      "control": null,
+      "expectations": "development/ocr-material-control.expect.json",
+      "expectations_sha256": "469f24b5a9f6a8639e7a1c993287c318ebce8b7ddb5d828c580ac53ad4ba5dfe",
+      "family": "ocr-material",
+      "fixture_id": "F15",
+      "observation": "do not normalize away material differences",
+      "path": "development/ocr-material-control.pdf",
+      "recipe": {
+        "group_id": "F15",
+        "intent": {
+          "material_difference": "control",
+          "noise": "fixed-seed speckle; deterministic",
+          "printed_line": "AMOUNT -$100.00",
+          "raw_output": "OCR reading recorded verbatim; never normalized toward intent"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "42cf93f108d6ae37e06b1c6f96f1ea743d90025226052ac56c6ac71db22c7425",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 13939,
+      "control": "development/ocr-material-control.pdf",
+      "expectations": "development/ocr-material-sign-ambiguity.expect.json",
+      "expectations_sha256": "d685cfc13332fa08c8d6dc02cbaf8cc8cb5711d4fbf1b83afe6e7f99372887b2",
+      "family": "ocr-material",
+      "fixture_id": "F15",
+      "observation": "do not normalize away material differences",
+      "path": "development/ocr-material-sign-ambiguity.pdf",
+      "recipe": {
+        "group_id": "F15",
+        "intent": {
+          "material_difference": "sign-ambiguity",
+          "noise": "fixed-seed speckle; deterministic",
+          "printed_line": "AMOUNT  $100.00",
+          "raw_output": "OCR reading recorded verbatim; never normalized toward intent"
+        },
+        "variant": "sign-ambiguity",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "f929997e1995cb703eaf6f1779735223779bb1b82c086eaef48a4f04a1ed30aa",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 13958,
+      "control": "development/ocr-material-control.pdf",
+      "expectations": "development/ocr-material-digit-ambiguity.expect.json",
+      "expectations_sha256": "4fe8920c976de01996c9d2b594fa05fb6cfdcb6d1eeb5d5276c03b02ba9d892b",
+      "family": "ocr-material",
+      "fixture_id": "F15",
+      "observation": "do not normalize away material differences",
+      "path": "development/ocr-material-digit-ambiguity.pdf",
+      "recipe": {
+        "group_id": "F15",
+        "intent": {
+          "material_difference": "digit-ambiguity",
+          "noise": "fixed-seed speckle; deterministic",
+          "printed_line": "AMOUNT -$1O0.00",
+          "raw_output": "OCR reading recorded verbatim; never normalized toward intent"
+        },
+        "variant": "digit-ambiguity",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "071e322e7988727ef35958d1934e5a064784de903a8742e74e845bc5cd059847",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 692,
+      "control": null,
+      "expectations": "development/adjacent-crop-control.expect.json",
+      "expectations_sha256": "c76d348c96138538227942fb0cabf0cc9240f51ccb3ae1461eb0fe247f147030",
+      "family": "adjacent-crop",
+      "fixture_id": "F16",
+      "observation": "wrong-neighbor selection rejected",
+      "path": "development/adjacent-crop-control.pdf",
+      "recipe": {
+        "group_id": "F16",
+        "intent": {
+          "crop": [
+            30,
+            100,
+            240,
+            140
+          ],
+          "in_crop": [
+            "$100",
+            "$200"
+          ],
+          "selection": "both amounts fully inside; unambiguous"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "4722b3e2cf2af24facc0ab5849020aab371547f2dfde5e6e9d984035371033fe",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 692,
+      "control": "development/adjacent-crop-control.pdf",
+      "expectations": "development/adjacent-crop-adjacent.expect.json",
+      "expectations_sha256": "4c51ee461ffdb9623a39915dc36dfd4bd1458e4aa0d4ec0ae570a207918e9af6",
+      "family": "adjacent-crop",
+      "fixture_id": "F16",
+      "observation": "wrong-neighbor selection rejected",
+      "path": "development/adjacent-crop-adjacent.pdf",
+      "recipe": {
+        "group_id": "F16",
+        "intent": {
+          "crop": [
+            30,
+            100,
+            150,
+            140
+          ],
+          "in_crop": [
+            "$100"
+          ],
+          "neighbor": "$200 begins at x=135, inside the crop edge",
+          "selection": "wrong-neighbor selection must be rejectable"
+        },
+        "variant": "adjacent",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "a9146267e96fdf25c457ead6a4bf4e3f71f69e01c6f9164bfcbd91fd38e47ab3",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 692,
+      "control": "development/adjacent-crop-control.pdf",
+      "expectations": "development/adjacent-crop-clipped.expect.json",
+      "expectations_sha256": "96d14e4fb488d568bde6c226bbcf2cd0b6e37b69d2168e9a383ad0fed34bb69b",
+      "family": "adjacent-crop",
+      "fixture_id": "F16",
+      "observation": "wrong-neighbor selection rejected",
+      "path": "development/adjacent-crop-clipped.pdf",
+      "recipe": {
+        "group_id": "F16",
+        "intent": {
+          "clipped_glyph": "$100 cut by the crop edge at x=100",
+          "crop": [
+            50,
+            100,
+            100,
+            140
+          ],
+          "in_crop": [],
+          "selection": "partial glyph must not be read as a full amount"
+        },
+        "variant": "clipped",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "aa8374c302294899c9818eff4af8a8118c816e26c0843e7b5234a7cfd23707f3",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 280,
+      "control": null,
+      "expectations": "development/import-security-control.expect.json",
+      "expectations_sha256": "7b13bb3f7089f35e61050de6a6ded60e2e1b755f9745e0268fd5d2ddb2fe723c",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-control.json",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "expected": "accepted",
+          "variant": "valid report"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "bee2e864f5849b785a435e0d1774e4f77fb6ed0debb5bc6a1be9863a53d7a495",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 327,
+      "control": "development/import-security-control.json",
+      "expectations": "development/import-security-unknown-key.expect.json",
+      "expectations_sha256": "000f32f866908fdd9cd3732941d180d6d2581190164d3b06cf13bee349cd9433",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-unknown-key.json",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "expected": "rejected: closed schema",
+          "variant": "unknown top-level key"
+        },
+        "variant": "unknown-key",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "82edb203aade493d02e09b1cd30fa71df0e2f4fb0f6fbe9e59d059f4e4f4bd55",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 280,
+      "control": "development/import-security-control.json",
+      "expectations": "development/import-security-digest-mismatch.expect.json",
+      "expectations_sha256": "f02950c9874caebd363e866702de57868d58782df129d3b1a7455abb8162792f",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-digest-mismatch.json",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "expected": "rejected before use",
+          "variant": "document digest does not match source"
+        },
+        "variant": "digest-mismatch",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "4c14eeba8aa9472c0c6a295d70c1d62beeb208ca1c1d06b0f2e112e132be9004",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 319,
+      "control": "development/import-security-control.json",
+      "expectations": "development/import-security-script-string.expect.json",
+      "expectations_sha256": "96198c21f8cf3b7aa576687ddffd3fe85961bdcabcd9f1a35ce36739c8510aad",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-script-string.json",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "expected": "escaped inert text; never executed",
+          "variant": "script text in a string field"
+        },
+        "variant": "script-string",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "af49d1b176a2851d36c741027802830954465082fcf8f0d3de90507d6ee23051",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 32,
+      "control": "development/import-security-control.json",
+      "expectations": "development/import-security-png-oversized.expect.json",
+      "expectations_sha256": "97d258e2b4037f73b70e542bbf12dd8d5da55fc330f275deead4ffff6d856ab7",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-png-oversized.png",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "control": "development/import-security-control.json",
+          "expected": "rejected by pixel budget",
+          "variant": "PNG header declares 2147483647 px"
+        },
+        "variant": "png-oversized",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "25bd1cbcbe1a12c204262059befcb584bc54d59db5fb998a868d0f37df294423",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 12,
+      "control": "development/import-security-control.json",
+      "expectations": "development/import-security-png-truncated.expect.json",
+      "expectations_sha256": "65202a1a7765dc19893c328ba98eecf65ebb4d61d4f242e56f41448b78c96be0",
+      "family": "import-security",
+      "fixture_id": "F22",
+      "observation": "reject before active interpretation",
+      "path": "development/import-security-png-truncated.png",
+      "recipe": {
+        "group_id": "F22",
+        "intent": {
+          "control": "development/import-security-control.json",
+          "expected": "rejected: undecodable",
+          "variant": "PNG header truncated mid-IHDR"
+        },
+        "variant": "png-truncated",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "218ad85a233eff829618a6865ab681222b734c62d35a32b3eabd5c37d8945f86",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 449,
+      "control": null,
+      "expectations": "development/baseline-misuse-control.expect.json",
+      "expectations_sha256": "f9ca435eba13dad66bdadb60628473ba5c0e86f148286c9a2163a9cf56380380",
+      "family": "baseline-misuse",
+      "fixture_id": "F23",
+      "observation": "not improved due to missing checks",
+      "path": "development/baseline-misuse-control.json",
+      "recipe": {
+        "group_id": "F23",
+        "intent": {
+          "expected": "accepted unchanged",
+          "scenario": "identical stored run"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "77dcf885c06ee40e2ea9dccb8f64b0be6cc0d3c6b13266a9e65b8502cf512744",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 339,
+      "control": "development/baseline-misuse-control.json",
+      "expectations": "development/baseline-misuse-coverage-loss.expect.json",
+      "expectations_sha256": "357327431fc4d1b8501ac6c1f867826c0332cc9a43220de2d8e3c657cb75317d",
+      "family": "baseline-misuse",
+      "fixture_id": "F23",
+      "observation": "not improved due to missing checks",
+      "path": "development/baseline-misuse-coverage-loss.json",
+      "recipe": {
+        "group_id": "F23",
+        "intent": {
+          "expected": "regression comparison cannot improve by losing checks",
+          "scenario": "baseline lost the check-ocr entry"
+        },
+        "variant": "coverage-loss",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "7397e747623618bd974edf16b8038b3c00ae2bd4b0a6021ba1b2eb2de5a2f2bd",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 449,
+      "control": "development/baseline-misuse-control.json",
+      "expectations": "development/baseline-misuse-mismatched-doc.expect.json",
+      "expectations_sha256": "2d5e083ca30161fe3add10a1fd010e72fbce5e9f859134ba0cecde2c38344c85",
+      "family": "baseline-misuse",
+      "fixture_id": "F23",
+      "observation": "not improved due to missing checks",
+      "path": "development/baseline-misuse-mismatched-doc.json",
+      "recipe": {
+        "group_id": "F23",
+        "intent": {
+          "expected": "comparison refused; not silently re-based",
+          "scenario": "baseline belongs to a different document digest"
+        },
+        "variant": "mismatched-doc",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "76f5ed313c11040bd4861334362abe27e924e0c0e07c2ea259d337148ef2c4ed",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 449,
+      "control": "development/baseline-misuse-control.json",
+      "expectations": "development/baseline-misuse-silent-refresh.expect.json",
+      "expectations_sha256": "2d8f9d99de96bcf77e85e8c33cb5441341e9c051558ff9a6c123ede0e4edad0a",
+      "family": "baseline-misuse",
+      "fixture_id": "F23",
+      "observation": "not improved due to missing checks",
+      "path": "development/baseline-misuse-silent-refresh.json",
+      "recipe": {
+        "group_id": "F23",
+        "intent": {
+          "expected": "silent baseline refresh forbidden; declared rule fires",
+          "scenario": "baseline occurrence count edited to match new output"
+        },
+        "variant": "silent-refresh",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "8b3099530eaaaa036e8780e74c606229f494a946ed6696d78e1061830ba059a7",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 651,
+      "control": null,
+      "expectations": "development/overlap-ink-control.expect.json",
+      "expectations_sha256": "cb4d0bfc45e087aa80ff2a0f6645bd3868e1bac46ad876461ccf33dced17a5c2",
+      "family": "overlap-ink",
+      "fixture_id": "F24",
+      "observation": "ink-in-box does not prove glyph visibility",
+      "path": "development/overlap-ink-control.pdf",
+      "recipe": {
+        "group_id": "F24",
+        "intent": {
+          "border_rect": [
+            40,
+            100,
+            160,
+            40
+          ],
+          "no_verdict": "ink-in-box does not prove glyph visibility",
+          "overlap": "text box intersects the stroked border",
+          "render_mode": 0,
+          "text_box": [
+            50,
+            110,
+            97,
+            128
+          ]
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "2374d83fe3ca6e03938b3774182ce207bedc7afeb932dbda12ea5c6505e8d1c2",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 651,
+      "control": "development/overlap-ink-control.pdf",
+      "expectations": "development/overlap-ink-invisible.expect.json",
+      "expectations_sha256": "0027e73c75989054c5b431efbceb59629990003aef49960f56dbfeba3a08d911",
+      "family": "overlap-ink",
+      "fixture_id": "F24",
+      "observation": "ink-in-box does not prove glyph visibility",
+      "path": "development/overlap-ink-invisible.pdf",
+      "recipe": {
+        "group_id": "F24",
+        "intent": {
+          "border_rect": [
+            40,
+            100,
+            160,
+            40
+          ],
+          "no_verdict": "ink-in-box does not prove glyph visibility",
+          "overlap": "text box intersects the stroked border",
+          "render_mode": 3,
+          "text_box": [
+            50,
+            110,
+            97,
+            128
+          ]
+        },
+        "variant": "invisible",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "ae3433fe39efce05ecf9953829cf0dd758e5f8f634361d4ded17f8f57aa99a5a",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 622,
+      "control": null,
+      "expectations": "development/annotation-mode-control.expect.json",
+      "expectations_sha256": "d96faeb6ac12eb2656f5dad937419afbacadeb077421228db9d21541ad2d40c1",
+      "family": "annotation-mode",
+      "fixture_id": "F25",
+      "observation": "render mode/unsupported behavior recorded",
+      "path": "development/annotation-mode-control.pdf",
+      "recipe": {
+        "group_id": "F25",
+        "intent": {
+          "annotations": [],
+          "expected": "plain page; nothing recorded beyond text"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "3657c6f1f083654e2ce02f55a2b406ab2527d3de05b5c7ad25ee082afcd856d5",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 984,
+      "control": "development/annotation-mode-control.pdf",
+      "expectations": "development/annotation-mode-annotated.expect.json",
+      "expectations_sha256": "6f98d167c64dcf3fc3beffbe52584073b979e414eede069cb6b2bcd07376a312",
+      "family": "annotation-mode",
+      "fixture_id": "F25",
+      "observation": "render mode/unsupported behavior recorded",
+      "path": "development/annotation-mode-annotated.pdf",
+      "recipe": {
+        "group_id": "F25",
+        "intent": {
+          "annotations": [
+            {
+              "appearance": "static AP stream; static appearance may be recorded",
+              "subtype": "Square"
+            },
+            {
+              "form": "Tx field; form actions and XFA unsupported and inert",
+              "subtype": "Widget"
+            }
+          ],
+          "expected": "render mode and unsupported behavior recorded, never executed"
+        },
+        "variant": "annotated",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "44be4503c352f817ca496773ceb4274652d7880930fb27aa0349f83cf20fbddb",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 186,
+      "control": null,
+      "expectations": "development/asset-cache-control.expect.json",
+      "expectations_sha256": "72e6893bf354079c0b48aa3f837d60536fbfdde9daa345bb0c4dac297ccfd56a",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-control.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "verified_complete",
+          "expected": "cache verified; proceed",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "control",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "ce462081ef536423807186231b13ab7d0e3ad47f64ffc83d6d92eb1a6f13e678",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 208,
+      "control": "development/asset-cache-control.json",
+      "expectations": "development/asset-cache-corrupt-model.expect.json",
+      "expectations_sha256": "d3b44c549d9dba1ca61bd4c1d10c0d0f0cf226a5e77075d7972010fd4e3cfc5d",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-corrupt-model.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "model bytes hash mismatch",
+          "expected": "typed unavailable; no silent fallback",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "corrupt-model",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "3ec97cb83adb706659f5a3322b1c9f9ee9b7a9b2795bd587b63ba8a7d22abce3",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 219,
+      "control": "development/asset-cache-control.json",
+      "expectations": "development/asset-cache-stale-worker.expect.json",
+      "expectations_sha256": "5f2e69c5cd68bd48878a948325ce9adc20168b6b5378419f70e6213125ce6689",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-stale-worker.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "worker digest older than manifest",
+          "expected": "refresh required; explicit, never silent",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "stale-worker",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "1278d30c02570792e25f5f1942294ec9a55fadc606eef7cf7d65197b30ce7415",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 217,
+      "control": "development/asset-cache-control.json",
+      "expectations": "development/asset-cache-stale-core.expect.json",
+      "expectations_sha256": "f7d7196d7a0c00acbe12ba93c313e7f9fb6e8b56587615bc62444c89771fc35d",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-stale-core.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "core digest older than manifest",
+          "expected": "refresh required; explicit, never silent",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "stale-core",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "9e94c9f06c838d264ddf4bbc6885e6acf27920df1bcd17d7a99c518f2ade3ea7",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 199,
+      "control": "development/asset-cache-control.json",
+      "expectations": "development/asset-cache-offline-cold.expect.json",
+      "expectations_sha256": "ff0c113324b3defcce1e94ba5a908ef097db0769d5a2ed8755e08e5008890626",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-offline-cold.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "no cache present",
+          "expected": "explicit unavailable; nothing fetched",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "offline-cold",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "a2e80fa46caf5155c9c6092fd2cd44be4911cbf8cbde127b125f1cd66fb6d935",
+      "split": "development"
+    },
+    {
+      "byte_stability": "byte-identical",
+      "bytes": 183,
+      "control": "development/asset-cache-control.json",
+      "expectations": "development/asset-cache-offline-warm.expect.json",
+      "expectations_sha256": "be4408bdbfefabdde670e57ed65e5728aab6fc3a7980455fc786fe50850bf740",
+      "family": "asset-cache",
+      "fixture_id": "F26",
+      "observation": "no silent fallback/CDN/document cache",
+      "path": "development/asset-cache-offline-warm.json",
+      "recipe": {
+        "group_id": "F26",
+        "intent": {
+          "cache_state": "complete cache present",
+          "expected": "proceed offline",
+          "fallback": "forbidden",
+          "kind": "asset cache fault scenario",
+          "network": "none; offline always"
+        },
+        "variant": "offline-warm",
+        "version": "g78.1"
+      },
+      "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+      "sha256": "d3b122aef2d3a3e01eb2654fb4d045071e3de96a2c440f2a6f45f26ac4ef3045",
+      "split": "development"
     }
   ],
   "generator": "scripts/make_fixtures.py",
-  "generator_sha256": "aa2b463fe1fe67441fac0906be3d4732a3802b036527a5d605f40ffe3b03d689",
+  "generator_sha256": "6e2a49b8bbfd23fe43839570bc2fa19c0c30a4ed6f64c32600ceb7562f1ecc48",
   "generator_version": "1.0.0",
   "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
   "schema_version": "1.0.0",

@@ -1,0 +1,14 @@
+{
+  "checks": [
+    {
+      "id": "check-native-text",
+      "produced_occurrence_count": 1,
+      "status": "completed"
+    }
+  ],
+  "document": {
+    "pages": 1,
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "schema_version": "1.0.0"
+}

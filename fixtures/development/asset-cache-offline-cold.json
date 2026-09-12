@@ -1,0 +1,7 @@
+{
+  "cache_state": "no cache present",
+  "expected": "explicit unavailable; nothing fetched",
+  "fallback": "forbidden",
+  "kind": "asset cache fault scenario",
+  "network": "none; offline always"
+}

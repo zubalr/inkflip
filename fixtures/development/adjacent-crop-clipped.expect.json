@@ -1,0 +1,27 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/adjacent-crop-control.pdf",
+  "family": "adjacent-crop",
+  "fixture_id": "F16",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F16",
+    "intent": {
+      "clipped_glyph": "$100 cut by the crop edge at x=100",
+      "crop": [
+        50,
+        100,
+        100,
+        140
+      ],
+      "in_crop": [],
+      "selection": "partial glyph must not be read as a full amount"
+    },
+    "variant": "clipped",
+    "version": "g78.1"
+  },
+  "observation": "wrong-neighbor selection rejected",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

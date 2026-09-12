@@ -1,0 +1,26 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "native-unicode",
+  "fixture_id": "F14",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F14",
+    "intent": {
+      "encoding": "Identity-H hex strings; ToUnicode carries the Unicode",
+      "font": "no font program embedded; glyph appearance not asserted",
+      "geometry": "conservative; complex-script alignment not claimed",
+      "logical_strings": [
+        "LATIN-$100"
+      ],
+      "note": "Latin control",
+      "observed_extraction": "PDFium 149.0.7825.0 returns no characters for the non-embedded complex-script runs (Latin ToUnicode line extracts); extraction completeness is reader-dependent and never asserted \u2014 consumers preserve whatever the reader returns verbatim, including empty (I11), and never normalize toward the declared logical strings"
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "preserve logical values, conservative geometry",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

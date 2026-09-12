@@ -1,0 +1,32 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/text-transform-control.pdf",
+  "family": "text-transform",
+  "fixture_id": "F09",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F09",
+    "intent": {
+      "crosshair": [
+        30,
+        210,
+        290,
+        210,
+        160,
+        30,
+        160,
+        230
+      ],
+      "matrices": [
+        "0 1 -1 0 220 80"
+      ],
+      "text": "$100"
+    },
+    "variant": "rotated",
+    "version": "g78.1"
+  },
+  "observation": "polygon transform not axis-only box",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

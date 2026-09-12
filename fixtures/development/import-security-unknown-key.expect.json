@@ -1,0 +1,20 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/import-security-control.json",
+  "family": "import-security",
+  "fixture_id": "F22",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F22",
+    "intent": {
+      "expected": "rejected: closed schema",
+      "variant": "unknown top-level key"
+    },
+    "variant": "unknown-key",
+    "version": "g78.1"
+  },
+  "observation": "reject before active interpretation",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}
