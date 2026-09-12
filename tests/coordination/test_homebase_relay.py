@@ -291,6 +291,19 @@ class RelayTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "canonical"):
             relay.collect("T27")
 
+    def test_real_linked_checkout_is_rejected_with_matching_config(self):
+        self.assertEqual(relay.c.canonical_root(), self.mac.resolve())
+        linked = self.mac.parent / "linked"
+        self.run_git(self.mac, "worktree", "add", "-b", "linked-review", str(linked))
+        self.settings["canonical_root"] = str(linked)
+        with patch.object(relay.c, "ROOT", linked):
+            self.assertEqual(relay.c.canonical_root(), self.mac.resolve())
+            with self.assertRaisesRegex(ValueError, "linked worktree"):
+                relay.publish()
+            with self.assertRaisesRegex(ValueError, "linked worktree"):
+                relay.collect("T27")
+        self.assertEqual(self.refs(self.homebase), {})
+
     def test_publish_atomic_rejection_and_json_failure(self):
         # A receiving hook rejects state: no branch is published by atomic push.
         hook = self.homebase / "hooks/update"

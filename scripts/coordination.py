@@ -25,7 +25,7 @@ def run(argv: list[str], cwd: Path = ROOT) -> str:
 
 
 def canonical_root() -> Path:
-    common = Path(run(["git", "rev-parse", "--git-common-dir"]))
+    common = Path(run(["git", "rev-parse", "--git-common-dir"], cwd=ROOT))
     return (ROOT / common).resolve().parent
 
 
