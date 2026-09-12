@@ -84,7 +84,8 @@ No product source, schemas, planning documents, lockfiles, or dependencies were 
 ### H. Actual Gates Retained
 - **Status:** **PASS**
 - **Evidence:**
-  - Gate runners (`scripts/gate.py G1..G5|pre-release`) and task acceptance verifications (`scripts/task_acceptance.py`) remain completely intact. No tests or checks were relaxed, suppressed, or weakened.
+  - Gate runners (`scripts/gate.py G1..G5|pre-release`) and task acceptance verifications (`scripts/task_acceptance.py`) remain completely intact in configuration and code.
+  - *Note on scope:* Product gates G1–G5 were not run for this transfer review (which is strictly scoped to orchestration, coordination, and harness transfer verification). No gate checks or tests were relaxed, suppressed, or weakened.
 
 ### I. Contradictions Assessment
 - **Status:** **PASS**
@@ -103,15 +104,21 @@ Executed from `/Users/zubair/Code/Projects/pdf project/worktrees/review-agy-devi
    - **Result:** Exit code 0 (16/16 registered commands valid).
 
 2. `python3 scripts/task_acceptance.py run verify`:
-   - **Result:** Exit code 0 (65/65 tests passed in 25.5s; test:bootstrap, test:native-bootstrap, check:coordination, test:homebase-pre-push, test:homebase-relay, test:native-pass).
+   - **Result:** Exit code 0 across all registered bootstrap and coordination suites:
+     - `test:bootstrap`: 49 tests passed
+     - `test:native-bootstrap`: 2 tests passed
+     - `check:coordination`: 65 tests passed
+     - Total: **116 tests collected and passed** (plus 16/16 self-check commands).
 
 3. `python3 -m unittest discover -s tests/coordination -v`:
-   - **Result:** Exit code 0 (65/65 tests passed in 26.9s).
+   - **Result:** Exit code 0 (65 tests in coordination suite passed in 26.9s).
+
+*Note on command logging:* Execution transcript in `artifacts/setup/devin-transfer-20260912/commands.log` is documented as an execution summary of the verification commands executed during this review.
 
 ---
 
 ## 4. Conclusion
 
-Candidate `0f90b9e1be0898482b22baf2a51a587fd22b02a7` faithfully and comprehensively implements the owner-directed transfer to Devin Local orchestration, restores Antigravity as the Mac interface and review worker, preserves existing grants and worktrees, enforces the 5-worker global ceiling, and passes all repository gates and test suites.
+Candidate `0f90b9e1be0898482b22baf2a51a587fd22b02a7` faithfully implements the owner-directed transfer to Devin Local orchestration, restores Antigravity as the Mac interface and review worker, preserves existing grants and worktrees, enforces the 5-worker global ceiling, retains all repository gates intact (product gates G1–G5 were not run as this transfer review is scoped to harness and coordination setup), and passes the complete 116-test verification suite (49 bootstrap + 2 native bootstrap + 65 coordination).
 
 **Disposition:** **APPROVED**
