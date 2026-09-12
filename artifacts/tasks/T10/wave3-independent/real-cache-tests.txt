@@ -1,0 +1,53 @@
+test.describe('independent real cache provenance', () => {
+  for (const mutate of [false, true]) {
+    test(mutate ? 'cache replacement after verification cannot change engine bytes' : 'unchanged cache control preserves exact engine bytes', async ({page}) => {
+      let modelRequests = 0;
+      page.on('request', r => {if (r.url().endsWith('/eng.traineddata')) modelRequests++;});
+      const {docId} = await loadScanDoc(page, 2);
+      const out = await page.evaluate(async ({docId,mutate,region}) => {
+        const g = globalThis as any;
+        const api = g.__t10;
+        const actualEngine = g.__tesseract;
+        const hash = (bytes: Uint8Array) => Array.from(api.contracts.sha256(bytes), (b:any)=>b.toString(16).padStart(2,'0')).join('');
+        const evidence: any = {};
+        g.__tesseract = {...actualEngine, createWorker: async (langs:any,oem:any,options:any,config:any) => {
+          // Entry is after prepareForEngine() has finished its read-back.
+          // Emulate another same-origin client writing the shared cache.
+          const store = new api.adapter.KeyvalStore(indexedDB);
+          const key = options.cachePath+'/eng.traineddata';
+          const before = await store.get(key);
+          evidence.verifiedSlot = {length:before.length,sha256:hash(before)};
+          if(mutate) {
+            const replacement = new Uint8Array(before.length+1);
+            replacement.set(before); // Valid traineddata with one extra zero byte.
+            await store.set(key,replacement);
+            evidence.replacement = {length:replacement.length,sha256:hash(replacement)};
+          }
+          const worker = await actualEngine.createWorker(langs,oem,options,config);
+          // Read the real worker's WASM filesystem after Init(). This is
+          // the file the pinned loadLanguage wrote and Init consumed.
+          const file = await worker.FS('readFile',['/eng.traineddata']);
+          evidence.engineFile = {length:file.data.length,sha256:hash(file.data)};
+          return worker;
+        }};
+        const {readerId} = api.makeReader({docId});
+        let open,run;
+        try {
+          open = await api.open(readerId,'review-doc',1);
+          if(open.ok) {
+            const checks = await api.plan(readerId,[{pageIndex:0,purpose:'line',region}]);
+            run = await api.extract(readerId,checks.value[0].id);
+          }
+        } finally {await api.close(readerId);g.__tesseract=actualEngine;}
+        return {mutate,evidence,open,check:run?.value?.output?.check,reportedModel:run?.value?.output?.model,
+          rawText:run?.value?.output?.raw?.text,expectedSha:api.MODEL.sha256};
+      },{docId,mutate,region:AMOUNT_LINE_REGION});
+      console.log('REAL_MODEL_PROVENANCE',JSON.stringify({...out,modelRequests}));
+      expect(out.open.ok).toBe(true);
+      expect(out.check.status).toBe('completed');
+      expect(modelRequests).toBe(1);
+      expect(out.evidence.verifiedSlot.sha256).toBe(out.expectedSha);
+      expect(out.evidence.engineFile.sha256).toBe(out.reportedModel.sha256);
+    });
+  }
+});

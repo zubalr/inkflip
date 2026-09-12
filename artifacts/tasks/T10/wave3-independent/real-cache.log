@@ -1,0 +1,39 @@
+
+Running 2 tests using 1 worker
+
+[1A[2K(node:501) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:501) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[1/2] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › unchanged cache control preserves exact engine bytes
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › unchanged cache control preserves exact engine bytes
+REAL_MODEL_PROVENANCE {"mutate":false,"evidence":{"verifiedSlot":{"length":4113088,"sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"},"engineFile":{"length":4113088,"sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"}},"open":{"ok":true,"value":{"id":"ocrh_1_1789197578374","documentSha256":"review-doc","generation":1,"openedAt":1789197578374,"model":{"state":"ready_memory","provenance":"network","sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","limitations":[]}}},"check":{"id":"ocr_0_0","status":"completed","reason":null,"produced_occurrence_count":4,"retained_occurrence_ids":["o_fa00e75825e45f5fb2e4bd73b7be057f","o_81055422ed07f49f088794ecfb4cb2de","o_63abbd2820905c1bfed837bc85b0bc43","o_37b95840fbfee02220d6c5088565c7d8"]},"reportedModel":{"id":"tessdata-fast-eng","version":"65727574dfcd264acbb0c3e07860e4e9e9b22185","sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","state":"ready_memory","provenance":"network"},"rawText":"AMOUNT DUE $108, a\n","expectedSha":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","modelRequests":1}
+
+[1A[2K[2/2] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › cache replacement after verification cannot change engine bytes
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › cache replacement after verification cannot change engine bytes
+REAL_MODEL_PROVENANCE {"mutate":true,"evidence":{"verifiedSlot":{"length":4113088,"sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"},"replacement":{"length":4113089,"sha256":"ed260abd301d3b849ccd94cd794b6250c0eaaffd7ba0836506a79ee2389b6752"},"engineFile":{"length":4113089,"sha256":"ed260abd301d3b849ccd94cd794b6250c0eaaffd7ba0836506a79ee2389b6752"}},"open":{"ok":true,"value":{"id":"ocrh_1_1789197578889","documentSha256":"review-doc","generation":1,"openedAt":1789197578889,"model":{"state":"ready_memory","provenance":"network","sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","limitations":[]}}},"check":{"id":"ocr_0_0","status":"completed","reason":null,"produced_occurrence_count":4,"retained_occurrence_ids":["o_fa00e75825e45f5fb2e4bd73b7be057f","o_81055422ed07f49f088794ecfb4cb2de","o_63abbd2820905c1bfed837bc85b0bc43","o_37b95840fbfee02220d6c5088565c7d8"]},"reportedModel":{"id":"tessdata-fast-eng","version":"65727574dfcd264acbb0c3e07860e4e9e9b22185","sha256":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","state":"ready_memory","provenance":"network"},"rawText":"AMOUNT DUE $108, a\n","expectedSha":"7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2","modelRequests":1}
+
+[1A[2K  1) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › cache replacement after verification cannot change engine bytes 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"[7m7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b[27m2"[39m
+    Received: [31m"[7med260abd301d3b849ccd94cd794b6250c0eaaffd7ba0836506a79ee2389b675[27m2"[39m
+
+      2014 |       expect(modelRequests).toBe(1);
+      2015 |       expect(out.evidence.verifiedSlot.sha256).toBe(out.expectedSha);
+    > 2016 |       expect(out.evidence.engineFile.sha256).toBe(out.reportedModel.sha256);
+           |                                              ^
+      2017 |     });
+      2018 |   }
+      2019 | });
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:2016:46
+
+
+[1A[2K  1 failed
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1969:9 › independent real cache provenance › cache replacement after verification cannot change engine bytes 
+  1 passed (2.0s)

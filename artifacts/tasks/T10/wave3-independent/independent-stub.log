@@ -1,0 +1,139 @@
+
+Running 4 tests using 1 worker
+
+[1A[2K(node:95431) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:95431) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[1/4] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1889:7 › independent stub probes › close settles a stalled raster without waiting for the deadline
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1889:7 › independent stub probes › close settles a stalled raster without waiting for the deadline
+CLOSE_STALLED_RASTER {"settledAfterClose":false,"elapsedMs":802.5999999940395,"check":{"id":"ocr_0_0","status":"timeout","reason":"timeout","produced_occurrence_count":0,"retained_occurrence_ids":[]}}
+
+[1A[2K  1) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1889:7 › independent stub probes › close settles a stalled raster without waiting for the deadline 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      1901 |     });
+      1902 |     console.log('CLOSE_STALLED_RASTER',JSON.stringify(out));
+    > 1903 |     expect(out.settledAfterClose).toBe(true);
+           |                                   ^
+      1904 |     expect(out.check.reason).toBe('user_cancel');
+      1905 |   });
+      1906 |
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:1903:35
+
+
+[1A[2K(node:95482) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:95482) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[2/4] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1907:7 › independent stub probes › late model preparation cannot publish or recreate deleted data after close
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1907:7 › independent stub probes › late model preparation cannot publish or recreate deleted data after close
+LATE_MODEL {"statesAtClose":["downloading","not_prepared"],"statesAfterClose":["verifying","ready_memory"],"modelState":"ready_memory","cacheExists":true,"result":{"ok":false,"reason":"user_cancel","message":"user_cancel: OCR open: user_cancel: reader closed"}}
+
+[1A[2K  2) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1907:7 › independent stub probes › late model preparation cannot publish or recreate deleted data after close 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 4[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   "verifying",[39m
+    [31m+   "ready_memory",[39m
+    [31m+ ][39m
+
+      1923 |     });
+      1924 |     console.log('LATE_MODEL',JSON.stringify(out));
+    > 1925 |     expect(out.statesAfterClose).toEqual([]);
+           |                                  ^
+      1926 |     expect(out.cacheExists).toBe(false);
+      1927 |   });
+      1928 |
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:1925:34
+
+
+[1A[2K(node:95557) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:95557) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[3/4] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker
+STALE_OPEN_CLEANUP {"firstResult":{"ok":false,"reason":"user_cancel","message":"user_cancel: OCR open: user_cancel: operation superseded"},"secondOk":true,"plan":{"ok":false,"reason":"unsupported","message":"unsupported: plan() requires this reader’s open handle"},"terminated":[true]}
+
+[1A[2K  3) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      1944 |     console.log('STALE_OPEN_CLEANUP',JSON.stringify(out));
+      1945 |     expect(out.secondOk).toBe(true);
+    > 1946 |     expect(out.plan.ok).toBe(true);
+           |                         ^
+      1947 |     expect(out.terminated).toEqual([false]);
+      1948 |   });
+      1949 |
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:1946:25
+
+
+[1A[2K(node:95607) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:95607) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[4/4] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1950:7 › independent stub probes › late init progress and error callbacks are dropped after timeout
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1950:7 › independent stub probes › late init progress and error callbacks are dropped after timeout
+LATE_CALLBACKS {"result":{"ok":false,"reason":"timeout","message":"timeout: OCR open: timeout: OCR worker init: timeout: operation deadline 1789197311571"},"progress":[{"checkId":null,"status":"late init progress","progress":0.9}],"errors":["late init error"],"aborted":true}
+
+[1A[2K  4) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1950:7 › independent stub probes › late init progress and error callbacks are dropped after timeout 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 7[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "checkId": null,[39m
+    [31m+     "progress": 0.9,[39m
+    [31m+     "status": "late init progress",[39m
+    [31m+   },[39m
+    [31m+ ][39m
+
+      1961 |     console.log('LATE_CALLBACKS',JSON.stringify(out));
+      1962 |     expect(out.aborted).toBe(true);
+    > 1963 |     expect(out.progress).toEqual([]);
+           |                          ^
+      1964 |     expect(out.errors).toEqual([]);
+      1965 |   });
+      1966 | });
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:1963:26
+
+
+[1A[2K  4 failed
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1889:7 › independent stub probes › close settles a stalled raster without waiting for the deadline 
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1907:7 › independent stub probes › late model preparation cannot publish or recreate deleted data after close 
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker 
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1950:7 › independent stub probes › late init progress and error callbacks are dropped after timeout 

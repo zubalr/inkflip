@@ -1,0 +1,34 @@
+
+Running 1 test using 1 worker
+
+[1A[2K(node:849) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:849) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[1/1] ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker
+[1A[2K../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker
+STALE_OPEN_CLEANUP {"firstResult":{"ok":false,"reason":"user_cancel","message":"user_cancel: OCR open: user_cancel: operation superseded"},"secondOk":true,"plan":{"ok":false,"reason":"unsupported","message":"unsupported: plan() requires this reader’s open handle"},"terminated":[true]}
+
+[1A[2K  1) ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      1944 |     console.log('STALE_OPEN_CLEANUP',JSON.stringify(out));
+      1945 |     expect(out.secondOk).toBe(true);
+    > 1946 |     expect(out.plan.ok).toBe(true);
+           |                         ^
+      1947 |     expect(out.terminated).toEqual([false]);
+      1948 |   });
+      1949 |
+        at /private/tmp/inkflip-t10-wave3/probes.spec.ts:1946:25
+
+
+[1A[2K  1 failed
+    ../../../../../../../private/tmp/inkflip-t10-wave3/probes.spec.ts:1929:7 › independent stub probes › superseded open cannot clear the newer handle and worker 

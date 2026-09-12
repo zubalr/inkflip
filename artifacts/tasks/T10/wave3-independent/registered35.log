@@ -1,0 +1,56 @@
+$ python3 scripts/task_acceptance.py run test:browser tests/readers/tesseract.spec.ts "--workers=1"
+[1A[2K(node:99973) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1A[2K(node:99973) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 35 tests using 1 worker
+
+
+
+
+
+[1A[2K[1/35] tests/readers/tesseract.spec.ts:636:1 › real English crop OCR via staged same-origin assets (PSM 7)
+[1A[2Ktests/readers/tesseract.spec.ts:636:1 › real English crop OCR via staged same-origin assets (PSM 7)
+PSM7 crop raw_text: AMOUNT DUE $108, a
+
+[1A[2Kengine reported: psm=null oem=null version=5.1.0-288-g2a9c1
+
+[1A[2K[2/35] tests/readers/tesseract.spec.ts:756:1 › full-page PSM-6 OCR, reusable worker, deterministic occurrence ids
+[1A[2Ktests/readers/tesseract.spec.ts:756:1 › full-page PSM-6 OCR, reusable worker, deterministic occurrence ids
+PSM6 page raw_text: QUARTERLY’ SUMMARY INVOICE 2a26-8417 AMOUNT CUE $168. 6 ISSUED 2426-89-81 PAGE 1 OF 1
+
+[1A[2K[3/35] tests/readers/tesseract.spec.ts:810:1 › worker init failure is a terminal failure, never unreadable_pixels
+[1A[2K[4/35] tests/readers/tesseract.spec.ts:869:1 › model integrity failure and corrupted cache are rejected
+[1A[2K[5/35] tests/readers/tesseract.spec.ts:910:1 › offline-unavailable is a distinct asset state, not an unreadable page
+[1A[2K[6/35] tests/readers/tesseract.spec.ts:940:1 › bounded raster/edge/pixel counts enforced and recorded
+[1A[2K[7/35] tests/readers/tesseract.spec.ts:1001:1 › run OCR pixel budget bounds later checks honestly
+[1A[2K[8/35] tests/readers/tesseract.spec.ts:1039:1 › word boxes map back through the recorded chain; confidence is diagnostic
+[1A[2K[9/35] tests/readers/tesseract.spec.ts:1140:1 › cold, memory, and cached model states are distinct; removal is explicit
+[1A[2K[10/35] tests/readers/tesseract.spec.ts:1186:1 › one transient retry on a fresh worker; cancel terminates the worker
+[1A[2K[11/35] tests/readers/tesseract.spec.ts:1264:1 › check-level transient retry rebuilds the worker once and succeeds
+[1A[2K[12/35] tests/readers/tesseract.spec.ts:1302:3 › light: crop pixel regressions — recorded factor is the drawn factor (stub engine) › ImageData source branch
+[1A[2K[13/35] tests/readers/tesseract.spec.ts:1311:3 › light: crop pixel regressions — recorded factor is the drawn factor (stub engine) › CanvasImageSource branch
+[1A[2K[14/35] tests/readers/tesseract.spec.ts:1320:3 › light: crop pixel regressions — recorded factor is the drawn factor (stub engine) › no-resize control: k=1 full crop, exact bytes, no clipping limitation
+[1A[2K[15/35] tests/readers/tesseract.spec.ts:1327:3 › light: crop pixel regressions — recorded factor is the drawn factor (stub engine) › crop-offset region: nonzero source origin restored, no padding artifacts
+[1A[2K[16/35] tests/readers/tesseract.spec.ts:1350:3 › light: configured renderer identity (stub engine) › plan/extract/describe identities agree on the configured renderer
+[1A[2K[17/35] tests/readers/tesseract.spec.ts:1368:3 › light: configured renderer identity (stub engine) › a raster produced by a different renderer fails render_error, never re-identified
+[1A[2K[18/35] tests/readers/tesseract.spec.ts:1385:3 › light: configured renderer identity (stub engine) › missing or malformed configured ids are rejected at construction
+[1A[2K[19/35] tests/readers/tesseract.spec.ts:1426:3 › light: occurrence geometry and assembled report (stub engine) › word polygon is TL,TR,BR,BL with nonzero signed area
+[1A[2K[20/35] tests/readers/tesseract.spec.ts:1460:3 › light: occurrence geometry and assembled report (stub engine) › an assembled evidence report with OCR geometry passes contract validation
+[1A[2K[21/35] tests/readers/tesseract.spec.ts:1544:3 › light: UTF-8 raw-text run budget (stub engine) › raw text cap counts UTF-8 bytes, not UTF-16 units
+[1A[2K[22/35] tests/readers/tesseract.spec.ts:1577:3 › light: verified model bytes reach the engine › worker init payload: object language + readOnly verified cache slot (stub)
+[1A[2K[23/35] tests/readers/tesseract.spec.ts:1608:3 › light: verified model bytes reach the engine › a stale or corrupt cache slot is replaced before the engine sees it
+[1A[2K[24/35] tests/readers/tesseract.spec.ts:1633:3 › light: verified model bytes reach the engine › the engine consumes the verified slot — never a second divergent copy
+[1A[2K[25/35] tests/readers/tesseract.spec.ts:1672:3 › light: verified model bytes reach the engine › unavailable model cache fails honestly before any engine work
+[1A[2K[26/35] tests/readers/tesseract.spec.ts:1683:3 › light: verified model bytes reach the engine › a failed cache write fails honestly before any engine work
+[1A[2K[27/35] tests/readers/tesseract.spec.ts:1696:3 › light: operation deadline and cancellation lifecycle › a stalled raster resolves to timeout inside one deadline
+[1A[2K[28/35] tests/readers/tesseract.spec.ts:1714:3 › light: operation deadline and cancellation lifecycle › cancel during a stalled raster returns user_cancel, fast
+[1A[2K[29/35] tests/readers/tesseract.spec.ts:1728:3 › light: operation deadline and cancellation lifecycle › a hung engine init at extract time fails timeout and terminates
+[1A[2K[30/35] tests/readers/tesseract.spec.ts:1748:3 › light: operation deadline and cancellation lifecycle › cancel during engine init returns user_cancel and aborts the engine signal
+[1A[2K[31/35] tests/readers/tesseract.spec.ts:1767:3 › light: operation deadline and cancellation lifecycle › a late init success terminates its own worker and installs nothing
+[1A[2K[32/35] tests/readers/tesseract.spec.ts:1785:3 › light: operation deadline and cancellation lifecycle › a retry runs inside the operation deadline, not a fresh budget
+[1A[2K[33/35] tests/readers/tesseract.spec.ts:1803:3 › light: operation deadline and cancellation lifecycle › a hung recognize is terminated at the deadline
+[1A[2K[34/35] tests/readers/tesseract.spec.ts:1815:3 › light: operation deadline and cancellation lifecycle › cancel before extract never touches the engine
+[1A[2K[35/35] tests/readers/tesseract.spec.ts:1824:3 › light: operation deadline and cancellation lifecycle › close during a real open aborts the raw worker init
+[1A[2K  35 passed (10.5s)

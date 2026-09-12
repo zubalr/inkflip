@@ -1,0 +1,112 @@
+test.describe('independent stub probes', () => {
+  test.beforeEach(async ({page}) => {
+    await page.evaluate(() => {
+      const g = globalThis as any;
+      const {adapter, geom} = g.__t10;
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      const wrap = async (promise: Promise<any>) => {
+        try { return {ok: true, value: await promise}; }
+        catch (e: any) { return {ok: false, reason: e.reason, message: e.message}; }
+      };
+      g.__review = {delay, wrap, make(extra: any = {}) {
+        const model = g.__px.model();
+        const events: any = {states: [], progress: [], errors: [], workers: []};
+        const canvas = new OffscreenCanvas(32,32);
+        const raster = {rasterId: 'review_raster', renderReaderId: 'review_renderer',
+          scalePxPerPt: 1, widthPx: 32, heightPx: 32, image: canvas,
+          built: geom.buildPage({index:0,viewBox:[0,0,32,32],userUnit:1,rotation:0,boxSource:'review'})};
+        const engine = {createWorker: async (_langs: any, _oem: any, opts: any) => {
+          const worker: any = {opts, terminated: false, async terminate() {worker.terminated = true;},
+            recognize: async () => ({jobId:'stub', data:{text:'',blocks:[],confidence:null,psm:'6',oem:'LSTM_ONLY',version:'stub'}})};
+          events.workers.push(worker);
+          return worker;
+        }, OEM:{LSTM_ONLY:1},PSM:{}};
+        const cfg = {engine,engineVersion:'stub',model, paths:g.__px.paths(),assetHashes:[],
+          renderReaderId:'review_renderer',profile:'desktop',runKey:'review',rasterSource:async()=>raster,
+          budget:{openTimeoutMs:600,checkTimeoutMs:600,maxRetries:0}, ...extra,
+          hooks:{fetchImpl:async()=>new Response(model._bytes.slice()),
+            onModelState:(s: string)=>events.states.push(s), onProgress:(e: any)=>events.progress.push(e),
+            onError:(e: any)=>events.errors.push(e), ...extra.hooks}};
+        return {reader:new adapter.TesseractOcrReader(cfg),events,model,cfg,raster,engine};
+      }};
+    });
+  });
+
+  test('close settles a stalled raster without waiting for the deadline', async ({page}) => {
+    const out = await page.evaluate(async () => {
+      const {make,delay} = (globalThis as any).__review;
+      const x = make({rasterSource:()=>new Promise(()=>{}),budget:{checkTimeoutMs:800,openTimeoutMs:800}});
+      const h = await x.reader.open({documentSha256:'review',generation:1});
+      const c = x.reader.plan(h,[{pageIndex:0,purpose:'page'}])[0];
+      const t = performance.now(); let settled = false;
+      const p = x.reader.extract(h,c,()=>{}).then((r: any)=>{settled=true;return r;});
+      await delay(20); await x.reader.close(h); await delay(100);
+      const settledAfterClose = settled;
+      const result = await p;
+      return {settledAfterClose,elapsedMs:performance.now()-t,check:result.check};
+    });
+    console.log('CLOSE_STALLED_RASTER',JSON.stringify(out));
+    expect(out.settledAfterClose).toBe(true);
+    expect(out.check.reason).toBe('user_cancel');
+  });
+
+  test('late model preparation cannot publish or recreate deleted data after close', async ({page}) => {
+    const out = await page.evaluate(async () => {
+      const {make,delay,wrap} = (globalThis as any).__review;
+      let release: any, fetched = false;
+      const x = make({hooks:{fetchImpl:()=>{fetched=true;return new Promise(r=>{release=r;});}}});
+      const open = wrap(x.reader.open({documentSha256:'review',generation:1}));
+      while(!fetched) await delay(1);
+      await x.reader.close();
+      await x.reader.removeModelData();
+      const statesAtClose = x.events.states.slice();
+      release(new Response(x.model._bytes.slice()));
+      const result = await open; await delay(30);
+      const store = new (globalThis as any).__t10.adapter.KeyvalStore(indexedDB);
+      const bytes = await store.get(x.model.cachePath+'/eng.traineddata');
+      return {statesAtClose,statesAfterClose:x.events.states.slice(statesAtClose.length),
+        modelState:x.reader.modelState,cacheExists:bytes instanceof Uint8Array, result};
+    });
+    console.log('LATE_MODEL',JSON.stringify(out));
+    expect(out.statesAfterClose).toEqual([]);
+    expect(out.cacheExists).toBe(false);
+  });
+
+  test('superseded open cannot clear the newer handle and worker', async ({page}) => {
+    const out = await page.evaluate(async () => {
+      const {make,delay,wrap} = (globalThis as any).__review;
+      let release: any, calls = 0;
+      let x: any;
+      x = make({hooks:{fetchImpl:()=>{calls++;return calls===1?new Promise(r=>{release=r;}):Promise.resolve(new Response(x.model._bytes.slice()));}}});
+      const first = wrap(x.reader.open({documentSha256:'same-document',generation:1}));
+      while(calls===0) await delay(1);
+      const second = await wrap(x.reader.open({documentSha256:'same-document',generation:1}));
+      release(new Response(x.model._bytes.slice()));
+      const firstResult = await first;
+      const plan = await wrap(Promise.resolve().then(()=>x.reader.plan(second.value,[{pageIndex:0,purpose:'page'}])));
+      const out = {firstResult,secondOk:second.ok,plan,terminated:x.events.workers.map((w: any)=>w.terminated)};
+      await x.reader.close(); return out;
+    });
+    console.log('STALE_OPEN_CLEANUP',JSON.stringify(out));
+    expect(out.secondOk).toBe(true);
+    expect(out.plan.ok).toBe(true);
+    expect(out.terminated).toEqual([false]);
+  });
+
+  test('late init progress and error callbacks are dropped after timeout', async ({page}) => {
+    const out = await page.evaluate(async () => {
+      const {make,delay,wrap} = (globalThis as any).__review;
+      let saved: any;
+      const x = make({budget:{openTimeoutMs:80},engine:{OEM:{LSTM_ONLY:1},PSM:{},createWorker:(_l:any,_o:any,opts:any)=>{saved=opts;return new Promise(()=>{});}}});
+      const result = await wrap(x.reader.open({documentSha256:'review',generation:1}));
+      saved.logger({status:'late init progress',progress:0.9,userJobId:'upstream-init'});
+      saved.errorHandler('late init error');
+      const out={result,progress:x.events.progress,errors:x.events.errors,aborted:saved.signal.aborted};
+      await x.reader.close();return out;
+    });
+    console.log('LATE_CALLBACKS',JSON.stringify(out));
+    expect(out.aborted).toBe(true);
+    expect(out.progress).toEqual([]);
+    expect(out.errors).toEqual([]);
+  });
+});
