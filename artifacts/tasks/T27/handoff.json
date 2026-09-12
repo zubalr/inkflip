@@ -7,9 +7,10 @@
   "pass": 1,
   "branch": "work/zcode/t27",
   "base": "726d61c0c",
-  "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
+  "implementation_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57",
+  "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 was the original wave-0 implementation (macOS); 12bc8ac is the current source revision after the wave-1 review fixes (Linux); both are preserved in branch history with their dated evidence rounds.",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merges ca2dbb1 (main 65e84da) and 45821e6 (main cd79351 with approved T26 font-oracle fix) + wave-1 revision 12bc8ac + evidence commits); final review must bind this new exact candidate",
+  "review_scope": "branch head work/zcode/t27 at push time (= source revision 12bc8ac + merges ca2dbb1 (main 65e84da), 45821e6 (main cd79351 font-oracle fix) and 442f3cd (main 500abfc shared verify fix) + evidence commits); T27 sources are byte-identical since 12bc8ac; final candidate binding and OCR rerun follow after the heavy slot returns",
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -101,6 +102,19 @@
       "resource_handshake_acknowledgement": "Worker acknowledges (2026-09-12): no heavy OCR/corpus/performance run in flight or queued; all registered verification complete; no NEW heavy OCR/corpus suites until Astra returns the reservation; light source/stub regression work may continue; reservation state not touched by the worker; ready for Astra's T10 browser-OCR verification turn.",
       "handoff_state": "ready_for_review=true; worker yields; final review binds branch head at push time (442f3cd + evidence commits); Astra owns acceptance"
     },
+    "light_checkpoint_wave2": {
+      "recorded_at": "2026-09-12 (after Astra collection 04:57 UTC)",
+      "collected_candidate": "c14e4b0313fcb614f3a85aa50df045b55c7bdd55 (source revision 12bc8ac)",
+      "source_unchanged": "Verified: git diff 12bc8ac..HEAD -- native/ is empty; T27 sources are byte-identical since the wave-1 revision. Later commits on this branch are main merges (45821e6 font-oracle fix, 442f3cd shared verify fix) and dated evidence only.",
+      "current_counts": {"ocr_contract_suite": "36/36 passed", "native_suite": "89 passed + 126 subtests", "verify": "115/115 (bootstrap 49 + native-bootstrap 2 + coordination 64), exit 0 in the linked worktree", "test_native": "exit 0", "t26_baseline": "RESOLVED by the approved font-oracle fix; original failed-run log preserved as dated history (native-tests-linux-baseline.log, commit a6f6b1d)"},
+      "honest_gaps": [
+        "Final OCR verification bound to the ULTIMATE candidate is NOT rerun while T10 holds the heavy OCR reservation; no real OCR/model/corpus suite will run until Astra grants the slot back.",
+        "run.json freshness: the committed run.json binds to evaluated_commit 442f3cd (regenerated there); older run.json contents from earlier rounds were replaced in-place by these fresh runs, and superseded results live as dated history in commands.log, receipt.json rounds and this handoff.",
+        "T27 remains unaccepted; the independent Codex wave-2 review is SOURCE-only on immutable c14e4b0 (disjoint Mac checkout review-codex-t27-wave2); final candidate binding and the actual OCR rerun follow after T10 yields."
+      ],
+      "resource_state": "Worker holds no heavy run and claims no slot change in Beads; T10 HOLDS the reservation per Astra.",
+      "handoff_state": "ready_for_review=true (source revision 12bc8ac); worker yields and stays on light work only."
+    },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [
@@ -120,8 +134,8 @@
     "native/tests/ocr/test_ocr.py"
   ],
   "deliverables": {
-    "native/inkflip/readers/tesseract.py": "rendered-region OCR adapter: fixed argv, shell=False, neutral private filenames, validated language identifiers, local model hashing, padded-crop planning with recorded inverse transforms, verbatim raw words with diagnostic confidence, distinct typed failure terminals",
-    "native/tests/ocr/test_ocr.py": "TEST-27 suite: 20 tests over real tesseract 5.5.3 runs on T05 fixture renders (F01 amount line, F03 scan pixel-only independence, F08 UserUnit render compensation, failure-mode matrix, option-injection defense, schema conformance)"
+    "native/inkflip/readers/tesseract.py": "rendered-region OCR adapter: fixed argv with explicitly pinned -l/--tessdata-dir, shell=False, neutral private filenames, validated language identifiers, per-language local model resolution with authoritative TESSDATA_PREFIX, typed region/crop validation, padded-crop planning with recorded inverse transforms, page-scoped verbatim raw words with diagnostic confidence, pre-decode pixel budget, exact word cap, distinct typed failure terminals",
+    "native/tests/ocr/test_ocr.py": "TEST-27 suite: 36 tests over real tesseract 5.5.3 runs on T05 fixture renders (F01 amount line, F03 scan pixel-only independence, F08 UserUnit render compensation, failure-mode matrix, option-injection defense, schema conformance) plus 16 wave-1 review regression tests (region/crop validation, budget ordering, word cap, model selection, I/O faults)"
   },
   "measured_decisions": [
     {"decision": "Native full-page default PSM 3 instead of the browser PSM 6 prescription", "reason": "Measured (macOS): PSM 6 drops the isolated '$100' amount line on the F01 render; PSM 3/11 find it. PSM is recorded per invocation (raw_source_locator tag); single-line user regions use PSM 7 as the contract requires.", "linux_observation_2026_09_12": "Spot-check on Linux tesseract 5.5.3 (artifacts/tasks/T27/psm6-spotcheck.log): PSM 3, 6 and 11 all read the identical 16 words including '$100'. The Mac rationale does not reproduce on Linux; default kept at PSM 3, contract decision escalated to the coordinator."},
@@ -133,7 +147,9 @@
   ],
   "limitations": [
     "Printed English OCR only; no non-Latin script recognition is claimed (F14 preservation stays with native text readers).",
-    "Implementation-time registered runs were macOS arm64; Linux amd64 executed 2026-09-12 on the merged candidate (see linux_checkpoint): OCR suites pass 20/20, T26 PDFium geometry tests fail there as recorded platform drift (T46 parity scope), bun run verify trips the relay's linked-worktree guard (environment finding)."
+    "Current counts (2026-09-12, Linux amd64, source revision 12bc8ac + merged mains): 36/36 OCR contract tests, 89 native tests + 126 subtests, bun run verify 115/115 in the linked worktree, bun run test:native exit 0. The former T26 PDFium geometry baseline failures are RESOLVED by the approved font-oracle fix (merged main); the original failed-run log is preserved as dated history.",
+    "PENDING: the final OCR verification bound to the ULTIMATE accepted candidate has not been rerun while T10 holds the heavy OCR reservation (no real OCR/model/corpus suites until Astra grants it back); the current green OCR runs bind to 442f3cd-era candidates whose T27 sources are byte-identical to 12bc8ac.",
+    "Child-only timeout kill and in-memory TSV capture are T29 supervision scope; scale-only transform model is the F10 contract question held by Astra; DEFAULT_PSM=3 kept with explicit platform-specific observations."
   ],
   "dependency_requests": [
     "Fixture owner lane: committed F14/F15 families when assigned.",

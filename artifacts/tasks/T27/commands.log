@@ -167,3 +167,22 @@ RESOURCE HANDSHAKE ACKNOWLEDGEMENT: no heavy OCR/corpus/performance run in
 flight or queued; registered verification complete; no new heavy suites until
 Astra returns the reservation; light source/stub work may continue.
 ================================================================================
+
+================================================================================
+LIGHT CHECKPOINT (Astra collection/next-checkpoint grant, 2026-09-12 04:57 UTC)
+Collected candidate: c14e4b0 (source revision 12bc8ac). T10 now HOLDS the
+heavy OCR reservation; no real OCR/model/corpus suites run by this worker
+after the handshake. Light work only:
+- T27 sources verified byte-identical since 12bc8ac (git diff 12bc8ac..HEAD
+  -- native/ is empty); later commits are main merges + dated evidence.
+- bun run verify: 115/115 (49+2+64), exit 0 in the linked worktree
+  (shared harness fix confirmed, not an unresolved environment exception).
+- Current counts: 36/36 OCR, 89 native + 126 subtests, test:native exit 0.
+- T26 baseline RESOLVED by the approved font-oracle fix; original failed-run
+  log preserved as dated history (a6f6b1d).
+- HONEST GAP: final OCR verification on the ULTIMATE candidate is pending
+  until the heavy slot returns; run.json binds evaluated_commit 442f3cd.
+- Independent Codex wave-2 review is SOURCE-only on immutable c14e4b0
+  (Mac review-codex-t27-wave2); final binding + OCR rerun follow after T10
+  yields. T27 remains unaccepted. Worker yields; no Beads writes.
+================================================================================
