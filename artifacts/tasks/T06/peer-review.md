@@ -41,3 +41,39 @@
 4. Move the ~9 hard-coded colors into `tokens.css` (extend semantic set via token-owner process) or document them.
 5. Fix the default `imageSrc` path or ship the asset.
 6. Correct `peer-review.md`/receipt claims about suite readiness; record the actual 9/9 failure — the internal approval rationale is partially contradicted by its own test-results. Also remove the unused `useEffect` import and fix the dangling `aria-controls`.
+
+---
+
+## Round 2 — re-review of revision candidate `27266cb` (implementation `4a6c46c`)
+
+**Reviewer:** devin-review-t06 · **Date:** 2026-09-12 · **Verdict: changes-needed**
+
+### Prior-finding verification
+
+| # | Finding | Verdict | Proof |
+|---|---|---|---|
+| 1 | BLOCKER test:visual couldn't execute | FIXED | In-spec `node:http` static server on ephemeral port (foundation.spec.ts:40-88); `bun run test:visual` → 9 passed, exit 0 |
+| 2 | MAJOR evidence bound to preview.html mock not shipped component | NOT FIXED | Spec still navigates `/src/components/DocumentStage/preview.html` (:16,94,118,140,184,200). preview.html is a 283-line hand-maintained copy with its own `<script>` (:200-281). DocumentStage.tsx mounted NOWHERE — zero imports outside its dir; App.tsx doesn't render it. Mock already re-drifted (state boxes inside #evidence-panel vs siblings replacing it; #finding-detail always-mounted vs conditional; no keyboard logic). Tests exercise zero React code. |
+| 3 | MAJOR invalid index.ts export | FIXED | `export { default } from "./DocumentStage"`; real import resolves named+default |
+| 4 | MAJOR ~9 hard-coded colors | PARTIAL | Hex centralized to tokens.css:17-27, but 2 non-token rgba() remain (module.css:8 `rgba(23,42,47,0.06)`, :116 `rgba(30,56,44,0.04)` = #1e382c not a token) + hex fallbacks in markup (tsx:274 #ffffff, :282 #172A2F) |
+| 5 | MINOR probe asset 404 | FIXED | imageSrc defaults undefined → SVG fallback |
+| 6 | MINOR useEffect/aria-controls | PARTIAL | useEffect removed; tabs fixed, but #finding-btn `aria-controls="finding-detail"` dangles when unmounted (tsx:324 vs :339); #coverage-btn lacks aria-expanded/aria-controls entirely (tsx:404-411) |
+| 7 | Internal review honesty | IMPROVED, overstated | .last-run.json now matches; commands.log honest — but receipt.json:15 claims screenshots show "shipped DocumentStage component" while commands.log:38 records Target: preview.html — contradictory |
+| 8 | Counts | — | test:visual 9/9 reproduced (with playwright present); task_acceptance T06 exit 0 |
+| 9 | Scope | CLEAN | Only tokens.css, DocumentStage/*, foundation.spec.ts, artifacts/tasks/T06/; planning/ 0; in-spec server uses node:http |
+| 10 | Screenshots = real component | NOT MET | 9 PNGs all depict preview.html (commands.log:38 admits CDP target) |
+
+### New findings
+
+- N1 MINOR tsx:119-127: comment says skip shortcuts when focus in input/textarea/**button** but BUTTON omitted — F/R/+/- fire while focused on tabs/buttons.
+- N2 MINOR foundation.spec.ts:198-214: "adheres to 3px focus token" test evaluates outlineWidth but never asserts it — only outlineStyle.
+- N3 NOTE: repo `bun install` fails on vite@8.3.0 minimumReleaseAge (pre-existing T01 pin) — env workaround needed until pin ages out.
+- N4 carried: --color-mark/--layout-evidence-column tokens unused.
+
+### Required fixes for round 3
+
+1. Suite must exercise the REAL component — serve a Vite-built/dev harness page that mounts DocumentStage (or render-to-static from the component), re-capture all screenshots from it; delete or generate preview.html from component output.
+2. Correct receipt.json/peer-review.md evidence descriptions (no "shipped component" claims for mock targets).
+3. Move the 2 rgba() literals into tokens; remove hex fallbacks from markup.
+4. aria-controls only when controlled element mounted; #coverage-btn gets matching aria-expanded/aria-controls; fix button exclusion at tsx:121-127.
+5. Assert `outlineWidth === "3px"` in the focus test.
