@@ -3,8 +3,8 @@
   "task_id": "T10",
   "beads_id": "pdf-t10",
   "disposition": "accepted",
-  "evaluated_commit": "b1eed6426199e429967cf5fd58c47ade8b5fac6b",
-  "evaluated_at": "2026-09-12T13:32:07.433661+00:00",
+  "evaluated_commit": "f8fad075cd2c6447e93dbd4127565ead97e70401",
+  "evaluated_at": "2026-09-12T19:41:50.901018+00:00",
   "contract_digest": "77436b176edbb43b32572ddffb530627215e39f77c147317d32c26972821865a",
   "worker": "devin-swe-24843e3f",
   "commands": [
@@ -27,23 +27,23 @@
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 44,
-        "passed": 44,
+        "collected": 45,
+        "passed": 45,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-d",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T10/commands.log": "285003bd5d78d6cea1c7d563ac60162cb2d1c172a8121c35fa2b699e5dc9c766",
-    "artifacts/tasks/T10/coordinator-commands.log": "8ef234e0ec4f6b682ea980849c2f47a706a5447109d22adfbed2e925255a6af7",
+    "artifacts/tasks/T10/coordinator-commands.log": "a537b35757c2d904c5bc5fb49f6da75ea30fe7b9a34ba208040ffbf7954c53fa",
     "artifacts/tasks/T10/handoff.json": "d6acffd82395e365676ff2d2e7ba52e1a8de6204b41943d980182acea831febd",
     "artifacts/tasks/T10/receipt.json": "e900c83de5fdbabb9a692ced22c4b612a02408d3f2363df517b9659b4e561133",
     "artifacts/tasks/T10/repro-planCrop.mjs": "7c9c561f69dc945b5931ef3ee13aa5f3d3deded4c316be586f09d7f2f0375914",
     "artifacts/tasks/T10/review.md": "348123b13e3f97ddb17e683bb095bfac9de3c60c2eebf4824945973f4942d277",
-    "artifacts/tasks/T10/run.json": "f10d70656ead372987756f35aa1a0d1ddd8f2f70188817c4928b06adb5b6d2f8"
+    "artifacts/tasks/T10/run.json": "8b41f1db9276e1a2d59f00a32fd3c82c893971564f2d5c645f84732470e030c6"
   },
   "criteria": {
     "Actual English crop OCR emitted with engine/settings/model identity": [
