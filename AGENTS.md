@@ -21,20 +21,22 @@ once per session, then only the assigned task's inputs.
 
 - Beads owns live status, dependencies, claims, notes and acceptance. Product task
   T01 maps to pdf-t01. Static planning and passes.json are not live task state.
-- Devin Local on the Mac is the sole integration lead and Beads writer. ZCode
-  on Homebase consumes native read-replica assignments; Antigravity is inactive.
+- Codex/Astra on the Mac is the sole integration lead and Beads writer. Devin
+  Local SWE-2 and Homebase ZCode consume assignments; Antigravity is inactive.
   Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
-  Three active workers/reviewers maximum: Devin 2, ZCode 1. Active
-  work by a lead counts; idle coordination does not. Writers yield for review.
+  The owner replaced fixed worker maxima with adaptive concurrency. Admit
+  useful independent work with disjoint ownership, available compute and review
+  capacity. Account for native descendants in Beads; no recursive unbounded
+  spawning. Writers yield before review. Native platform limits still apply.
 - One branch, one writer, one isolated checkout. Preserve existing work. Never
   reset, clean, force-push or overwrite another checkout. Mac worktrees share
   the canonical Beads database. Homebase pulls a native read replica through
   the project SSH relay; only the Mac coordinator publishes authoritative state.
 - The owner explicitly approved private GitHub access, source sharing with the
   selected harnesses, commits, pushes, review and integration. The current
-  execution uses Local SWE-2 and Homebase ZCode; Cloud is stopped. Only Devin
+  execution uses Astra, Local SWE-2 and Homebase ZCode; Cloud is stopped. Only Astra
   accepts/closes product tasks after independent review and real merged checks.
   T54 public publication/deployment and messages to people require approval.
 - Continue ready work through the defined passes; do not stop at each ticket.

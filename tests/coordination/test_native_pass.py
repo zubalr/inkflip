@@ -28,9 +28,16 @@ class PassTests(unittest.TestCase):
         planned = [t for stage in self.config["passes"] for t in stage["tasks"]]
         self.assertEqual(len(owned), len(set(owned)))
         self.assertEqual(set(owned), set(planned))
-        self.assertEqual(self.config["worker_budgets"], {"devin": 2, "antigravity": 0, "zcode": 1})
-        self.assertEqual(sum(self.config["worker_budgets"].values()), self.config["max_active_workers"])
-        self.assertEqual(self.config["max_active_workers"], 3)
+        self.assertEqual(len(owned), 53)
+        self.assertEqual(self.config["integration_owner"], "codex")
+        self.assertEqual(self.config["worker_budgets"], {
+            "codex": None, "devin": None, "antigravity": 0, "zcode": None})
+        self.assertIsNone(self.config["max_active_workers"])
+        self.assertEqual(self.config["apps"]["codex"]["tasks"],
+                         "T03 T04 T11 T15 T23 T24 T25 T29 T30 T32 T33 T34 T40 T46 T48 T51 T52 T55".split())
+        self.assertEqual(self.config["apps"]["zcode"]["tasks"],
+                         "T05 T17 T21 T26 T27 T28 T35 T37 T38 T41 T42 T44 T45 T47 T49 T50".split())
+        self.assertEqual(self.config["apps"]["antigravity"]["tasks"], [])
 
     def test_no_pass_depends_on_future_work(self):
         seen = set(self.config["completed_bootstrap"])
@@ -60,12 +67,62 @@ class PassTests(unittest.TestCase):
             self.assertTrue(p.dispatch_errors(self.config, stage, tid, issue, [], "zcode"))
 
     def test_local_app_budget_and_global_capacity_both_apply(self):
+        self.config["max_active_workers"] = 3
+        self.config["worker_budgets"]["zcode"] = 1
         stage = self.config["passes"][0]
         issue = {"status": "open"}
         self.assertEqual(p.dispatch_errors(self.config, stage, "T05", issue, [], "zcode"), [])
         own = [{"metadata": {"execution": {"app": "zcode"}}}]
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, own, "zcode"))
         self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 3, "zcode"))
+
+    def test_adaptive_capacity_has_no_numeric_ceiling_but_preserves_admission(self):
+        stage = self.config["passes"][0]
+        for app, task in (("codex", "T03"), ("devin", "T10"), ("zcode", "T27")):
+            workers = [{"metadata": {"execution": {"app": app}}}] * 100
+            with self.subTest(app=app):
+                self.assertEqual(p.dispatch_errors(self.config, stage, task,
+                                                  {"status": "open"}, workers, app), [])
+                self.assertTrue(p.dispatch_errors(self.config, stage, task,
+                                                 {"status": "in_progress"}, workers, app))
+                self.assertTrue(p.dispatch_errors(self.config, None, task,
+                                                 {"status": "open"}, workers, app))
+        self.assertIn("App worker capacity is occupied", p.dispatch_errors(
+            self.config, stage, "T03", {"status": "open"}, [], "antigravity"))
+
+    def test_finite_global_and_app_limits_work_independently_of_null(self):
+        stage = self.config["passes"][0]
+        workers = [{"metadata": {"execution": {"app": "zcode"}}}] * 3
+        self.config["max_active_workers"] = 3
+        self.assertEqual(p.dispatch_errors(self.config, stage, "T27", {"status": "open"}, workers, "zcode"),
+                         ["Global worker capacity is occupied"])
+        self.config["max_active_workers"] = None
+        self.config["worker_budgets"]["zcode"] = 3
+        self.assertEqual(p.dispatch_errors(self.config, stage, "T27", {"status": "open"}, workers, "zcode"),
+                         ["App worker capacity is occupied"])
+
+    def test_new_codex_assignment_and_existing_grants_keep_their_original_app_and_branch(self):
+        grant = p.assignment(self.config, "T03", "codex", "a" * 40, 1)
+        self.assertEqual(grant["branch"], "work/codex/t03")
+        issues = {}
+        for task, app in (("T10", "devin"), ("T27", "zcode"), ("T03", "devin")):
+            issues[p.c.bead_id(task)] = {"status": "in_progress", "assignee": "saved-worker",
+                "metadata": {"execution": {"app": app, "branch": f"work/{app}/{task.lower()}",
+                                           "base": "b" * 40, "pass": 1}}}
+        before = json.dumps(issues, sort_keys=True)
+        with patch.object(p.c, "admission_lock"), patch.object(p.c, "issues_by_id", return_value=issues), \
+             patch.object(p.c, "bd") as bd:
+            for app, expected in (("devin", {"T10", "T03"}), ("zcode", {"T27"}), ("codex", set())):
+                with redirect_stdout(StringIO()) as output:
+                    p.status(app, False)
+                inbox = json.loads(output.getvalue())
+                self.assertIsNone(inbox["worker_budget"])
+                self.assertEqual({item["task"] for item in inbox["assignments"]}, expected)
+                for item in inbox["assignments"]:
+                    self.assertEqual(item["branch"], f"work/{app}/{item['task'].lower()}")
+                    self.assertEqual(item["base"], "b" * 40)
+            bd.assert_not_called()
+        self.assertEqual(json.dumps(issues, sort_keys=True), before)
 
     def test_sync_failure_does_not_report_empty_inbox(self):
         with patch.object(p.c, "admission_lock"), patch.object(p, "sync_state", side_effect=ValueError("offline")), patch.object(p.c, "issues_by_id") as read:

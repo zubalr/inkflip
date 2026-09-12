@@ -3,66 +3,49 @@
   "repository": "zubalr/inkflip",
   "default_branch": "main",
   "state_authority": "Beads",
-  "integration_owner": "devin",
-  "max_active_workers": 3,
+  "integration_owner": "codex",
+  "max_active_workers": null,
   "worker_budgets": {
-    "devin": 2,
+    "codex": null,
+    "devin": null,
     "antigravity": 0,
-    "zcode": 1
+    "zcode": null
   },
   "apps": {
     "devin": {
-      "role": "Mac SWE-2 implementation, architecture, independent review and sole integration lead",
+      "role": "Mac SWE-2 local implementation swarm and independent review, admitted by Codex",
       "tasks": [
         "T02",
-        "T03",
-        "T04",
         "T06",
         "T07",
         "T08",
         "T09",
         "T10",
-        "T11",
         "T12",
         "T13",
         "T14",
-        "T15",
         "T16",
         "T18",
         "T19",
         "T20",
         "T22",
-        "T23",
-        "T24",
-        "T25",
-        "T29",
-        "T30",
         "T31",
-        "T32",
-        "T33",
-        "T34",
         "T36",
         "T39",
-        "T40",
         "T43",
-        "T46",
-        "T48",
-        "T51",
-        "T52",
-        "T53",
-        "T55"
+        "T53"
       ],
       "branch_prefix": "work/devin/",
       "port": 5182
     },
     "antigravity": {
-      "role": "Inactive; remaining tasks reassigned to Devin or ZCode",
+      "role": "Inactive; no new assignments",
       "tasks": [],
       "branch_prefix": "work/antigravity/",
       "port": 5186
     },
     "zcode": {
-      "role": "Homebase GLM worker for defined components, fixtures, repeated verification and supporting deliverables",
+      "role": "Homebase ZCode Goal execution for volume implementation and verification, admitted by Codex",
       "tasks": [
         "T05",
         "T17",
@@ -83,6 +66,31 @@
       ],
       "branch_prefix": "work/zcode/",
       "port": 5185
+    },
+    "codex": {
+      "role": "Astra sole orchestrator and integrator; hard implementation, contracts, security and supervision",
+      "tasks": [
+        "T03",
+        "T04",
+        "T11",
+        "T15",
+        "T23",
+        "T24",
+        "T25",
+        "T29",
+        "T30",
+        "T32",
+        "T33",
+        "T34",
+        "T40",
+        "T46",
+        "T48",
+        "T51",
+        "T52",
+        "T55"
+      ],
+      "branch_prefix": "work/codex/",
+      "port": 5181
     }
   },
   "passes": [

@@ -1,5 +1,1 @@
-Antigravity is inactive for Inkflip under the owner's current execution plan.
-Keep this session and its workers stopped. Devin Local on the Mac and ZCode on
-Homebase own the current work; see START_HERE.md and docs/HOMEBASE.md. Preserve
-historical branches and evidence. Resume Antigravity only after an explicit
-owner change of plan and a new coordinator grant.
+Inkflip execution no longer assigns work to Antigravity. Keep this session and its workers stopped. Codex/Astra coordinates local SWE-2 and Homebase ZCode under the current canonical docs/NATIVE_PASSES.md and docs/HOMEBASE.md. Preserve previous commits and evidence; do not claim, modify or publish new project work from this app unless the owner changes the plan explicitly.

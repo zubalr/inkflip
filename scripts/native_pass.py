@@ -38,13 +38,16 @@ def assignment(config: dict, task_id: str, app: str, base: str, stage: int) -> d
 def dispatch_errors(config: dict, stage: dict | None, task_id: str, issue: dict,
                     workers: list[dict], app: str) -> list[str]:
     own = [i for i in workers if i.get("metadata", {}).get("execution", {}).get("app") == app]
+    # None removes a numeric ceiling; each grant still requires coordinator admission.
+    global_limit = config["max_active_workers"]
+    app_limit = config["worker_budgets"][app]
     checks = [
         (stage is None, "All implementation passes are already closed"),
         (task_id not in (stage or {}).get("tasks", []), "Task is outside the current pass"),
         (issue.get("status") != "open", "Task is already claimed or unavailable; resume its existing assignment"),
         (bool(issue.get("assignee")), "Task already has an assignee"),
-        (len(workers) >= config["max_active_workers"], "Global worker capacity is occupied"),
-        (len(own) >= config["worker_budgets"][app], "App worker capacity is occupied"),
+        (global_limit is not None and len(workers) >= global_limit, "Global worker capacity is occupied"),
+        (app_limit is not None and len(own) >= app_limit, "App worker capacity is occupied"),
     ]
     return [message for failed, message in checks if failed]
 
@@ -52,7 +55,7 @@ def dispatch_errors(config: dict, stage: dict | None, task_id: str, issue: dict,
 def dispatch(task_id: str, app: str) -> None:
     config = plan()
     if c.run(["git", "config", "--get", "inkflip.role"]) != "integrator":
-        raise ValueError("Only the designated Devin integration clone may dispatch")
+        raise ValueError(f"Only the designated {config['integration_owner']} integration clone may dispatch")
     c.run(["git", "fetch", "origin", "main"])
     base = c.run(["git", "rev-parse", "HEAD"])
     if c.run(["git", "branch", "--show-current"]) != "main":
@@ -94,7 +97,9 @@ def status(app: str, sync: bool) -> None:
         issues = c.issues_by_id()
     stage = current_pass(config, issues)
     assignments = []
-    for task_id in config["apps"][app]["tasks"]:
+    # Saved grants outlive changes to the static allocation; never remap their branch/app.
+    product_tasks = [task for stage in config["passes"] for task in stage["tasks"]]
+    for task_id in product_tasks:
         issue = issues.get(c.bead_id(task_id), {})
         grant = issue.get("metadata", {}).get("execution", {})
         if issue.get("status") == "in_progress" and grant.get("app") == app:

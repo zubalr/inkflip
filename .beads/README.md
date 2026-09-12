@@ -1,7 +1,7 @@
 # Beads task state
 
 Beads owns live Inkflip task state. See [the execution protocol](../docs/NATIVE_PASSES.md)
-before any task mutation. Only the designated Devin Local integration checkout
+before any task mutation. Only the designated Codex/Astra integration checkout
 writes and publishes this database. Mac workers read the shared canonical database through
 `python3 scripts/native_pass.py status APP` without `--sync`. Homebase reads its
 native local-relay replica with `status zcode --sync`; only the Mac coordinator
