@@ -215,3 +215,114 @@ exit 0 — vite build apps/web: 18 modules, dist written (532ms).
 # Reservation yielded: no heavy command in flight or queued.
 # Pending: independent review + coordinator acceptance receipt
 # (receipt.json requires reviewer != worker; not produced locally).
+
+# ============================================================
+# WAVE-3 revision (post-Astra rejection of 87e2073, review artifact
+# /private/tmp/inkflip-t10-wave2-review.md). All checks below are
+# LIGHT: stub-engine browser cases + worker-init-only real-engine
+# cases + arithmetic. NO real Tesseract recognize() was run or
+# queued — the heavy OCR reservation remains yielded to Astra.
+# ============================================================
+
+# Changes vs 87e2073 (reviewed candidate):
+#  1) occurrences.ts: word polygon perimeter order corrected to
+#     TL,TR,BR,BL (was TL,TR,BL,BR — self-crossing bow-tie, zero
+#     shoelace area, rejected by contract validation).
+#  2) Verified model bytes are now the engine's actual input:
+#     model-cache.ts prepareForEngine() gate (re-commit + read-back
+#     verify of the worker-readable idb-keyval slot) runs inside
+#     ensureWorker BEFORE createEngineWorker; engine.ts launches the
+#     worker with the pinned v7 object payload [{code:'eng',
+#     data:'eng'}] + cacheMethod:'readOnly' — the pinned worker's
+#     loadLanguage has NO fetch branch for object payloads, so the
+#     engine can only consume the verified slot or fail Init honestly.
+#     reader.ts constructor requires paths.cachePath===model.cachePath.
+#  3) renderReaderId is required config, validated at construction
+#     (^[a-z0-9_-]{1,60}$), bound into describe()/plan()/output/
+#     occurrence identity, and the produced raster's renderReaderId is
+#     re-validated at extraction (mismatch -> render_error).
+#  4) Deadline/cancellation: the adjudicated pdf-ebz boundary — the
+#     T02-approved WorkerOptions.signal patch is consumed here.
+#     OpScope = {op seq, absolute deadlineAt, cancellation, handle};
+#     withDeadline races every external await (raster source, blob
+#     encode, arrayBuffer, prepare, init, recognize) against the ONE
+#     absolute deadline + cancel poll; guard() after every await and
+#     before install/progress/emit/accounting; a retry draws only the
+#     remaining budget; close() invalidates (closed + opSeq++ +
+#     handle=null) BEFORE teardown; workerInitCtl lets destroyWorker
+#     abort an in-flight init's raw worker (found + fixed during the
+#     light lifecycle tests — previously the controller was only
+#     reachable after install); joined inits never overlap; late
+#     init resolution self-terminates; progress is dropped unless the
+#     emitting op is current (jobOps for recognize-scoped job ids).
+#  5) Raw-text run budget counts UTF-8 bytes (TextEncoder), not
+#     UTF-16 code units.
+#  6) imageSmoothingEnabled public option removed entirely (config,
+#     cropToBlob, call sites, pixel tests) — browser default stays.
+#  7) The four crop-pixel regressions moved INTO the registered spec
+#     (tests/readers/tesseract.spec.ts 'light:' describes, stub engine
+#     at the decoded-PNG boundary); shared stub layer is the test-only
+#     tests/readers/t10-pixel-harness.ts (PIXEL_ENTRY_SNIPPET is
+#     appended to the same bundle — one server, no separate harness,
+#     no top-level hooks). crop-pixels.spec.ts deleted.
+#  8) Harness: tesseract.js is now bundled from the pinned package
+#     ENTRY src/index.js (not dist/tesseract.esm.min.js) so tests
+#     exercise the patched WorkerOptions.signal path.
+
+$ bun x --no-install tsc -b tsconfig.json
+exit 0
+
+$ node --test tests/readers/crop-math.mjs
+exit 0 — tests 13, pass 13, fail 0.
+
+$ bun x --no-install oxlint packages/readers-tesseract/src/ \
+    tests/readers/tesseract.spec.ts tests/readers/t10-pixel-harness.ts
+exit 0 — 0 warnings, 0 errors (unused imports Region/
+LOW_CONFIDENCE_BELOW/mapPoint/OcrError removed; useless spread
+fallback simplified).
+
+$ bun x --no-install playwright test tests/readers/tesseract.spec.ts \
+    -g 'light:' --reporter=line
+exit 0 — 24/24 pass (~6s). LIGHT only: stub engine at the decoded-PNG
+  boundary + real-engine worker INIT checks (no recognize on a real
+  model anywhere in this selection):
+  - crop pixel regressions x4 (ImageData + CanvasImageSource branches,
+    no-resize control, crop-offset region) — same assertions as the
+    deleted crop-pixels.spec.ts, now inside the registered file.
+  - renderer identity x3 (plan/extract/describe agree; foreign raster
+    -> render_error; malformed/missing config ids -> unsupported).
+  - occurrence geometry + report x2 (polygon [[2,2],[20,2],[20,12],
+    [2,12]] TL,TR,BR,BL, |signed area|=180; assembled Report passes
+    contracts.validateReport with strict=false).
+  - UTF-8 raw-text budget x1 ('é' rejected at 1-byte cap, accepted at
+    2; '😀' rejected at 3-byte cap).
+  - verified model bytes x5 (stub captures langs [{code:'eng',
+    data:'eng'}] + cacheMethod 'readOnly' + signal AbortSignal +
+    Uint8Array PNG input; real-engine init on a pre-corrupted slot
+    succeeds after delete+refetch+verify+commit; divergent-second-
+    response route proves the engine fetched nothing itself
+    (served==1); idbFactory 'none' and 'writeFail' both fail open()
+    with missing_model BEFORE any createWorker).
+  - deadline/cancellation lifecycle x9 (stalled raster -> timeout at
+    ~1x deadline + worker terminated; cancel during raster -> fast
+    user_cancel; hung extract-time init -> timeout, no overlap;
+    cancel during init -> user_cancel + typed abort reason reached the
+    engine's signal; late init success self-terminates and installs
+    nothing; flakyHang retry draws the SHARED deadline ~1x not 2x;
+    hung recognize -> timeout + terminate; cancel-before-extract never
+    touches the engine; close() during REAL open aborts the in-flight
+    raw worker — openRes 'worker_crash', workerInitCount 0,
+    page.workers() back to baseline).
+
+$ bun x --no-install playwright test tests/readers/tesseract.spec.ts \
+    --list
+exit 0 — 35 tests collected in the registered file: 11 real-OCR +
+  24 light. Registered command unchanged:
+  bun run test:browser -- tests/readers/tesseract.spec.ts
+
+# Heavy status: real Tesseract recognize() was NOT run on this
+# revision — the 11 real-OCR tests above the 'light:' block are
+# unchanged in intent but the reader implementation changed beneath
+# them (verified-byte engine input, deadline/cancellation, renderer
+# identity, utf-8 budget). The heavy reservation remains yielded to
+# Astra; nothing heavy is running or queued.
