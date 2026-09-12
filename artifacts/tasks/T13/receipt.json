@@ -1,0 +1,95 @@
+{
+  "task_id": "T13",
+  "beads_id": "pdf-t13",
+  "disposition": "implemented_pending_review",
+  "branch": "work/antigravity/t13",
+  "base_commit": "96ab5351c953ec128b09a5be3da718f163447fa3",
+  "implementation_commit": "5f644caa0ad5c83145ac3501ab549f50ea89d96f",
+  "actor": "antigravity-t13",
+  "model": "Gemini 3.8 Flash via Antigravity",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "acceptance_criteria_evidence": {
+    "Click/keyboard finding selects correct duplicate/page after zoom/rotation": {
+      "status": "executed",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 1) and CanvasOverlay / ViewerStage implementation. Tests that zoom (150%) and 90\u00b0 clockwise rotation preserve exact canonical coordinate transformation. Selecting finding finding-dup-2 targets the second duplicate occurrence (\"INVOICE\", occ-p0-dup2, page 0, ordinal 1) with exact coordinate highlight (#highlight-occ-p0-dup2), displaying ordinal and page in the EvidenceSlip and changing selection state without string-search ambiguity (Invariant I04).",
+      "evidence": [
+        "artifacts/tasks/T13/commands.log",
+        "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png",
+        "artifacts/tasks/T13/run.json"
+      ]
+    },
+    "two views sync without scroll loop": {
+      "status": "executed",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 2) and ComparePanes implementation. In compare mode with side-by-side viewports (#compare-pane-left and #compare-pane-right), scrolling pane A to 300px triggers synchronized scrolling on pane B within 2px tolerance. Scrolling pane B back to 100px updates pane A without recursive scroll feedback or jitter via requestAnimationFrame loop breaker (Invariant I07).",
+      "evidence": [
+        "artifacts/tasks/T13/commands.log",
+        "artifacts/tasks/T13/screenshots/compare-sync-scroll.png",
+        "artifacts/tasks/T13/run.json"
+      ]
+    },
+    "narrow screen stacks instead of squeezing": {
+      "status": "executed",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 3) and ComparePanes responsive styles. When viewport width is resized to 600px (< 768px threshold), compare panes switch from side-by-side row layout to stacked column layout (#compare-panes.stacked), with both left and right panes maintaining full readable widths (>= 320px).",
+      "evidence": [
+        "artifacts/tasks/T13/commands.log",
+        "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png",
+        "artifacts/tasks/T13/run.json"
+      ]
+    },
+    "unknown geometry stays page-level": {
+      "status": "executed",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 4) and CanvasOverlay / ViewerStage implementation. For findings with geometry.precision: \"page_only\" | \"unknown\" (finding-page-level), navigating to Page 2 renders #page-level-geometry-notice with text explaining the finding applies to the page as a whole because localized coordinates are unavailable. Asserts 0 fabricated coordinate highlight boxes are drawn on the canvas (Invariant I02).",
+      "evidence": [
+        "artifacts/tasks/T13/commands.log",
+        "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png",
+        "artifacts/tasks/T13/run.json"
+      ]
+    },
+    "canvas has equivalent reachable content and limits.": {
+      "status": "executed",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 5), AccessibleTextLayer implementation, and automated axe-core accessibility audit. The accessible text layer (#accessible-text-equivalent) provides a non-visual DOM equivalent carrying all page text occurrences with ordinals, timestamps, and published reader limits per Invariant I14 / ACCESSIBILITY.md row A02. Automated WCAG 2.2 AA audit across tags wcag2a, wcag2aa, wcag21a, wcag21aa, and wcag22aa returns 0 serious or critical violations.",
+      "evidence": [
+        "artifacts/tasks/T13/commands.log",
+        "artifacts/tasks/T13/screenshots/accessible-text-layer.png",
+        "artifacts/tasks/T13/run.json"
+      ]
+    }
+  },
+  "commands": {
+    "log": "artifacts/tasks/T13/commands.log",
+    "key_results": [
+      {
+        "command": "bun run build:web",
+        "exit": 0,
+        "detail": "Clean static production build in 103ms"
+      },
+      {
+        "command": "bun run test:browser -- tests/browser/viewer.spec.ts",
+        "exit": 0,
+        "detail": "5 collected, 5 passed, 0 failed, 0 skipped against live mounted React features via Vite in 3.0s"
+      },
+      {
+        "command": "bun run verify",
+        "exit": 0,
+        "detail": "116 passing tests (49 bootstrap + 2 native + 65 coordination)"
+      },
+      {
+        "command": "python3 scripts/task_acceptance.py task T13 --report artifacts/tasks/T13/run.json",
+        "exit": 0,
+        "detail": "Evaluated commit 5f644caa0ad5c83145ac3501ab549f50ea89d96f with 5 collected, 5 passed, 0 failures, 0 evidence errors"
+      },
+      {
+        "command": "python3 scripts/acceptance_receipts.py verify-run T13",
+        "exit": 0,
+        "detail": "Run verified successfully for task T13"
+      }
+    ]
+  },
+  "invariants_verified": [
+    "I02",
+    "I04",
+    "I07",
+    "I14"
+  ]
+}
