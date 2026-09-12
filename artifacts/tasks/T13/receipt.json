@@ -4,12 +4,12 @@
   "disposition": "implemented_pending_review",
   "branch": "work/antigravity/t13",
   "base_commit": "96ab5351c953ec128b09a5be3da718f163447fa3",
-  "implementation_commit": "ab38b9e5afbda714477b9107a22ebde1bf80ef87",
+  "implementation_commit": "9c161e1bf3e7e5b362b7445c48abf327686655b8",
   "actor": "antigravity-t13",
   "model": "Gemini 3.8 Flash via Antigravity",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-12",
-  "scope_notes": "Coordinator-sanctioned scope addition: apps/web/src/pages/Home.module.css and apps/web/src/pages/Workspace.module.css are companion CSS Modules required by the owned page components (P2-F3).",
+  "scope_notes": "Coordinator-sanctioned scope addition: apps/web/src/pages/Home.module.css and apps/web/src/pages/Workspace.module.css are companion CSS Modules required by the owned page components (P2-F3). Round-2 revisions address: honest PDF validation without fabricated findings (P1), Home page 360px viewport overflow fix (P2), degenerate JSON validation and ErrorBoundary protection (P2).",
   "acceptance_criteria_evidence": {
     "Click/keyboard finding selects correct duplicate/page after zoom/rotation": {
       "status": "executed",
@@ -68,7 +68,7 @@
       {
         "command": "bun run test:browser -- tests/browser/viewer.spec.ts",
         "exit": 0,
-        "detail": "6 collected, 6 passed, 0 failed, 0 skipped against live mounted React features via Vite in 3.1s"
+        "detail": "9 collected, 9 passed, 0 failed, 0 skipped against live mounted React features via Vite in 3.4s"
       },
       {
         "command": "bun run verify",
@@ -78,7 +78,7 @@
       {
         "command": "python3 scripts/task_acceptance.py task T13 --report artifacts/tasks/T13/run.json",
         "exit": 0,
-        "detail": "Evaluated commit ab38b9e5afbda714477b9107a22ebde1bf80ef87 with 6 collected, 6 passed, 0 failures, 0 evidence errors"
+        "detail": "Evaluated commit 9c161e1bf3e7e5b362b7445c48abf327686655b8 with 9 collected, 9 passed, 0 failures, 0 evidence errors"
       },
       {
         "command": "python3 scripts/acceptance_receipts.py verify-run T13",
