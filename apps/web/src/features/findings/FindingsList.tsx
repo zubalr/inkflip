@@ -1,25 +1,36 @@
 import React from "react";
 import type { Finding, Occurrence, Reader } from "../../../../../packages/contracts/src/index.ts";
 import { groupFindings, COPY } from "../../../../../packages/explanations/src/index.ts";
-import FindingCard from "./FindingCard";
+import FindingCard, { type Annotation } from "./FindingCard";
 import styles from "./FindingsList.module.css";
+
+function formatRegionLabel(regionId: string): string {
+  const clean = regionId.replace(/^region[-_]/i, "");
+  if (!clean) return "Selected region";
+  const words = clean.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1));
+  return `Region: ${words.join(" ")}`;
+}
 
 export interface FindingsListProps {
   findings: Finding[];
   occurrences: Occurrence[];
   readers: Reader[];
+  annotations?: Annotation[];
   selectedFindingId?: string | null;
-  onSelectFinding?: (finding: Finding) => void;
-  onKeepEvidence?: (finding: Finding) => void;
+  onSelectFinding?: (finding) => void;
+  onKeepEvidence?: (finding) => void;
+  onAddNote?: (findingId: string, text: string) => void;
 }
 
 export const FindingsList: React.FC<FindingsListProps> = ({
   findings,
   occurrences,
   readers,
+  annotations = [],
   selectedFindingId,
   onSelectFinding,
   onKeepEvidence,
+  onAddNote,
 }) => {
   if (findings.length === 0) {
     return (
@@ -57,7 +68,7 @@ export const FindingsList: React.FC<FindingsListProps> = ({
         >
           <div id={`group-title-${groupKey}`} className={styles.groupHeader}>
             Page {group.pageIndex + 1}
-            {group.regionId ? ` · Region ${group.regionId}` : " · Page scope"}
+            {group.regionId ? ` · ${formatRegionLabel(group.regionId)}` : " · Page scope"}
           </div>
 
           {group.items.map((finding) => (
@@ -66,9 +77,11 @@ export const FindingsList: React.FC<FindingsListProps> = ({
               finding={finding}
               occurrences={occurrences}
               readers={readers}
+              annotations={annotations}
               isSelected={finding.id === selectedFindingId}
               onSelectFinding={onSelectFinding}
               onKeepEvidence={onKeepEvidence}
+              onAddNote={onAddNote}
             />
           ))}
         </div>

@@ -9,6 +9,7 @@ import type {
   Page,
 } from "../../../../../packages/contracts/src/index.ts";
 import { FindingsList } from "./FindingsList";
+import type { Annotation } from "./FindingCard";
 import { CoveragePanel } from "../coverage/CoveragePanel";
 
 const mockReaders: Reader[] = [
@@ -277,6 +278,30 @@ function FindingsHarness() {
 
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [keptFindingIds, setKeptFindingIds] = useState<string[]>([]);
+  const [annotations, setAnnotations] = useState<Annotation[]>([
+    {
+      id: "note-1",
+      finding_id: "f-amount-1",
+      page_index: 0,
+      text: "Verified manual ledger entry matches PDFium amount.",
+      author_label: "Reviewer Audit",
+      origin: "human_entered",
+    },
+  ]);
+
+  const handleAddNote = (findingId: string, text: string) => {
+    setAnnotations((prev) => [
+      ...prev,
+      {
+        id: `note-${Date.now()}`,
+        finding_id: findingId,
+        page_index: 0,
+        text,
+        author_label: "Local Reviewer",
+        origin: "human_entered",
+      },
+    ]);
+  };
 
   let findings: Finding[] = [];
   let checks: CheckResult[] = [];
@@ -331,6 +356,59 @@ function FindingsHarness() {
         id: "chk-4",
         status: "unsupported",
         reason: "Reader does not support font metrics inspection",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+    ];
+  } else if (scenario === "all-terminal-statuses") {
+    findings = mockFindings;
+    checks = [
+      {
+        id: "chk-completed",
+        status: "completed",
+        reason: null,
+        produced_occurrence_count: 2,
+        retained_occurrence_ids: ["occ-1", "occ-2"],
+      },
+      {
+        id: "chk-timeout",
+        status: "timeout",
+        reason: "Page 0 timed out after 10000ms",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+      {
+        id: "chk-model-missing",
+        status: "failed",
+        reason: "Tesseract OCR could not start due to missing traineddata model",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+      {
+        id: "chk-unsupported",
+        status: "unsupported",
+        reason: "Reader does not support font metrics inspection",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+      {
+        id: "chk-failed",
+        status: "failed",
+        reason: "Decoder crashed with syntax error",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+      {
+        id: "chk-cancelled",
+        status: "cancelled",
+        reason: "Execution cancelled by user",
+        produced_occurrence_count: 0,
+        retained_occurrence_ids: [],
+      },
+      {
+        id: "chk-skipped",
+        status: "skipped",
+        reason: "Feature flag disabled",
         produced_occurrence_count: 0,
         retained_occurrence_ids: [],
       },
@@ -436,9 +514,11 @@ function FindingsHarness() {
             findings={findings}
             occurrences={mockOccurrences}
             readers={mockReaders}
+            annotations={annotations}
             selectedFindingId={selectedFindingId}
             onSelectFinding={(f) => setSelectedFindingId(f.id)}
             onKeepEvidence={(f) => setKeptFindingIds((prev) => [...prev, f.id])}
+            onAddNote={handleAddNote}
           />
         </div>
 
