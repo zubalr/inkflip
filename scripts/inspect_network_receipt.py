@@ -65,6 +65,36 @@ TELEMETRY_LITERAL_RE = re.compile(
     re.IGNORECASE,
 )
 MAX_VIOLATION_DETAILS = 25
+# Candidate base64/base64url payloads embedded in log text (F6): decode
+# and re-scan so a marker wrapped inside a base64'd JSON/blob is caught.
+B64_TOKEN_RE = re.compile(r"[A-Za-z0-9+/_-]{24,}={0,2}")
+# Egress kinds the in-page tripwire can emit. Anything outside this closed
+# set is itself a violation — a channel the tripwire learned later can
+# never slip past unexamined (F4).
+EGRESS_FORBIDDEN = {
+    "beacon", "eventsource", "window.open", "serviceworker.register",
+    "websocket", "webrtc", "webtransport", "form.submit",
+}
+EGRESS_SAME_ORIGIN = {"fetch", "xhr", "worker"}
+# Keys every capture must carry — absence means the proof, not just the
+# data, is missing (F1: fail closed on absent evidence).
+REQUIRED_CAPTURE_KEYS = {
+    "schema_version", "label", "mode", "surface", "origin", "legs",
+    "requests", "request_failures", "responses", "websockets", "egress",
+    "console", "page_errors", "dialogs", "downloads", "server_log",
+    "storage",
+}
+# Journey coverage required across the union of all captures' legs —
+# a receipt cannot claim the journey ran if the legs were never recorded.
+REQUIRED_JOURNEY_LEGS = {
+    "open": re.compile(r"open-canary"),
+    "error": re.compile(r"error-"),
+    "render": re.compile(r"render"),
+    "ocr": re.compile(r"ocr-(open|extract|prepare)"),
+    "export": re.compile(r"export"),
+    "reopen": re.compile(r"reopen-export"),
+    "clear": re.compile(r"clear-file"),
+}
 
 
 def sha256_hex(data: bytes) -> str:
@@ -131,16 +161,29 @@ def iter_strings(node: object, prefix: str = ""):
             yield from iter_strings(value, f"{prefix}[{index}]")
 
 
+def _headers_text(value: object) -> str:
+    """Serialize a captured header map deterministically for scanning."""
+    return json.dumps(value, sort_keys=True) if isinstance(value, dict) else ""
+
+
 def observation_texts(capture: dict):
     """(channel, text) pairs that could carry document material outbound."""
     obs = []
     for i, req in enumerate(capture.get("requests", [])):
         obs.append((f"requests[{i}].url", req.get("url", "")))
+        headers = _headers_text(req.get("headers"))
+        if headers:
+            obs.append((f"requests[{i}].headers", headers))
         body = req.get("post_body")
         if isinstance(body, str):
             obs.append((f"requests[{i}].post_body", body))
     for i, req in enumerate(capture.get("request_failures", [])):
         obs.append((f"request_failures[{i}].url", req.get("url", "")))
+        headers = _headers_text(req.get("headers"))
+        if headers:
+            obs.append((f"request_failures[{i}].headers", headers))
+    for i, res in enumerate(capture.get("responses", [])):
+        obs.append((f"responses[{i}].url", res.get("url", "")))
     for i, ws in enumerate(capture.get("websockets", [])):
         obs.append((f"websockets[{i}].url", ws.get("url", "")))
         for j, frame in enumerate(ws.get("frames_sent", [])):
@@ -154,11 +197,20 @@ def observation_texts(capture: dict):
         obs.append((f"console[{i}].text", str(msg.get("text", ""))))
     for i, text in enumerate(capture.get("page_errors", [])):
         obs.append((f"page_errors[{i}]", str(text)))
+    for i, leg in enumerate(capture.get("legs", [])):
+        detail = leg.get("detail") if isinstance(leg, dict) else None
+        if isinstance(detail, str):
+            obs.append((f"legs[{i}].detail", detail))
+    for i, dialog in enumerate(capture.get("dialogs", [])):
+        obs.append((f"dialogs[{i}].message", str(dialog.get("message", ""))))
     for i, entry in enumerate(capture.get("server_log", [])):
         obs.append((f"server_log[{i}].path", str(entry.get("path", ""))))
         query = entry.get("query")
         if isinstance(query, str):
             obs.append((f"server_log[{i}].query", query))
+        headers = _headers_text(entry.get("headers"))
+        if headers:
+            obs.append((f"server_log[{i}].headers", headers))
     storage = capture.get("storage", {})
     for field, text in iter_strings(storage):
         obs.append((f"storage.{field}", text))
@@ -262,6 +314,43 @@ def main() -> int:
                 # satisfied by the browser HTTP cache (warm mode) — counted
                 # for the record, not a violation.
                 cache_hits.append(f"{method} {path}")
+        # Failed requests never reached the wire, but their intended
+        # destination still has to satisfy the same wire rules — a
+        # failures-only record can never smuggle a foreign origin.
+        for i, req in enumerate(cap.get("request_failures", [])):
+            url = str(req.get("url", ""))
+            parsed = urlparse(url)
+            if parsed.scheme not in ("http", "https"):
+                v_same.append({"capture": cpath.name,
+                               "channel": f"request_failures[{i}].url",
+                               "problem": f"non-http scheme {parsed.scheme!r}"})
+                continue
+            if parsed.netloc != origin_netloc:
+                v_same.append({"capture": cpath.name,
+                               "channel": f"request_failures[{i}].url",
+                               "problem": f"foreign origin {parsed.netloc!r}"})
+            path = parsed.path or "/"
+            if path not in allowlist:
+                v_allow.append({"capture": cpath.name,
+                                "channel": f"request_failures[{i}].url",
+                                "problem": f"path not allowlisted: {path}"})
+            if parsed.query:
+                v_query.append({"capture": cpath.name,
+                                "channel": f"request_failures[{i}].url",
+                                "problem": "query string present"})
+            method = str(req.get("method", "")).upper()
+            if method and method not in ALLOWED_METHODS:
+                v_method.append({"capture": cpath.name,
+                                 "channel": f"request_failures[{i}].url",
+                                 "problem": f"method {method}"})
+        for i, res in enumerate(cap.get("responses", [])):
+            parsed = urlparse(str(res.get("url", "")))
+            if parsed.scheme in ("http", "https") and parsed.netloc != origin_netloc:
+                v_same.append({"capture": cpath.name, "channel": f"responses[{i}].url",
+                               "problem": f"foreign origin {parsed.netloc!r}"})
+            elif parsed.scheme not in ("http", "https"):
+                v_same.append({"capture": cpath.name, "channel": f"responses[{i}].url",
+                               "problem": f"non-http scheme {parsed.scheme!r}"})
     for cpath, cap in captures:
         for i, entry in enumerate(cap.get("server_log", [])):
             path = str(entry.get("path", ""))
@@ -308,7 +397,8 @@ def main() -> int:
         })
     v_markers: list[dict] = []
     for cpath, cap in captures:
-        for channel, text in observation_texts(cap):
+        obs = observation_texts(cap)
+        for channel, text in obs:
             variants = {text, unquote(text)}
             for marker in marker_rows:
                 if channel.split("[")[0] in marker["allowed_channels"]:
@@ -319,12 +409,55 @@ def main() -> int:
                             "capture": cpath.name, "channel": channel,
                             "marker_id": marker["id"], "encoding": enc_name})
                         break
+        # Normalized sweep: a marker split across two log lines or smeared
+        # over whitespace is invisible to per-text substring matching, so
+        # the concatenation and a whitespace-collapsed variant are scanned
+        # per marker (excluding that marker's allowed channels).
+        for marker in marker_rows:
+            scoped = [t for ch, t in obs
+                      if ch.split("[")[0] not in marker["allowed_channels"]]
+            joined = "".join(scoped)
+            collapsed = re.sub(r"\s+", "", joined)
+            for enc_name, enc_value in marker["encodings"].items():
+                if enc_value in joined or enc_value in collapsed:
+                    v_markers.append({
+                        "capture": cpath.name, "channel": "<joined channels>",
+                        "marker_id": marker["id"],
+                        "encoding": f"{enc_name} (cross-channel/whitespace)"})
+                    break
+            # Base64-carried payloads: decode plausible tokens and scan the
+            # decoded text — catches a marker wrapped inside a base64'd
+            # JSON/blob payload on any channel.
+            for channel, text in obs:
+                if channel.split("[")[0] in marker["allowed_channels"]:
+                    continue
+                for token in B64_TOKEN_RE.findall(text)[:50]:
+                    if len(token) > 8192:
+                        continue
+                    for decoder in (base64.b64decode, base64.urlsafe_b64decode):
+                        try:
+                            decoded = decoder(token + "=" * (-len(token) % 4))
+                        except (ValueError, TypeError):
+                            continue
+                        decoded_text = decoded.decode("utf-8", errors="ignore")
+                        if not decoded_text:
+                            continue
+                        for enc_name in ("raw", "url_encoded"):
+                            enc_value = marker["encodings"].get(enc_name, "")
+                            if enc_value and enc_value in decoded_text:
+                                v_markers.append({
+                                    "capture": cpath.name, "channel": channel,
+                                    "marker_id": marker["id"],
+                                    "encoding": "base64-wrapped payload"})
+                                break
     check("no_canary_material_outbound",
           "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
           "no marker (filename, visible/hidden text, document hash, raster "
-          "pixels, note, report id/name — in raw, percent, base64 or hex "
-          "spellings) appears in any captured request URL, body, websocket, "
-          "egress attempt, console payload, storage value or server path",
+          "pixels, note, report id/name — in raw, percent, base64, hex, "
+          "cross-channel-split or base64-wrapped spellings) appears in any "
+          "captured request URL/header/body, response, websocket, egress "
+          "attempt, console payload, leg detail, dialog, storage value or "
+          "server path/header",
           v_markers, {"markers": len(marker_rows)})
 
     # --- 3. No websocket/beacon/service-worker channel exists at all. -------
@@ -338,33 +471,39 @@ def main() -> int:
         for i, entry in enumerate(cap.get("egress", [])):
             kind = str(entry.get("kind", ""))
             target = str(entry.get("target", ""))
-            if kind in {"beacon", "eventsource", "window.open", "serviceworker.register"}:
+            if kind in EGRESS_FORBIDDEN:
                 v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
                                    "problem": f"{kind} attempt: {urlparse(urljoin(origin, target)).netloc or target}"})
-            elif kind in {"fetch", "xhr", "worker", "websocket"}:
+            elif kind in EGRESS_SAME_ORIGIN:
                 resolved = urlparse(urljoin(origin, target))
                 if resolved.scheme in ("http", "https", "ws", "wss"):
                     if resolved.netloc != origin_netloc:
                         v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
                                            "problem": f"foreign {kind} target {resolved.netloc}"})
-                    elif kind == "websocket":
-                        v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
-                                           "problem": "websocket constructor used"})
                     elif resolved.path not in allowlist:
                         v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
                                            "problem": f"{kind} target not allowlisted: {resolved.path}"})
                 elif resolved.scheme not in LOCAL_SCHEMES:
                     v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
                                        "problem": f"unhandled {kind} scheme {resolved.scheme!r}"})
+            else:
+                v_channels.append({"capture": cpath.name, "channel": f"egress[{i}]",
+                                   "problem": f"unrecognized egress kind {kind!r} — fails closed"})
+        for i, dialog in enumerate(cap.get("dialogs", [])):
+            v_channels.append({"capture": cpath.name, "channel": f"dialogs[{i}]",
+                               "problem": f"unexpected {dialog.get('type')} dialog: "
+                                          f"{str(dialog.get('message', ''))[:80]}"})
         sw = cap.get("storage", {}).get("service_workers", 0)
         if sw not in (0, "0", None):
             v_channels.append({"capture": cpath.name, "channel": "storage.service_workers",
                                "problem": f"{sw} service worker registration(s)"})
     check("no_websocket_beacon_serviceworker",
           "telemetry/external-font absence proven",
-          "zero websockets, zero sendBeacon/EventSource/window.open attempts, "
-          "zero service-worker registrations; worker/fetch/XHR tripwire "
-          "targets all stay inside the same-origin allowlist",
+          "zero websockets, zero sendBeacon/EventSource/window.open/"
+          "WebRTC/WebTransport/form.submit attempts, zero unexpected "
+          "dialogs, zero service-worker registrations; fetch/XHR/worker "
+          "tripwire targets all stay inside the same-origin allowlist; "
+          "unrecognized egress kinds fail closed",
           v_channels, {"websockets": ws_total})
 
     # --- 4. Telemetry / external-font denylist. ------------------------------
@@ -414,6 +553,70 @@ def main() -> int:
           "no document keys, names, crops or reports persist",
           v_store, {"allowed_idb": sorted("/".join(k) for k in allowed_idb)})
 
+    # --- 5b. Evidence presence — the validator requires evidence, not
+    #         merely the absence of leaks (F1: fail closed on absence). --
+    v_present: list[dict] = []
+    all_leg_names: set[str] = set()
+    for cpath, cap in captures:
+        missing_keys = sorted(REQUIRED_CAPTURE_KEYS - set(cap.keys()))
+        for key in missing_keys:
+            v_present.append({"capture": cpath.name, "channel": "capture",
+                              "problem": f"required capture key {key!r} absent"})
+        legs = cap.get("legs")
+        if not isinstance(legs, list) or not legs:
+            v_present.append({"capture": cpath.name, "channel": "legs",
+                              "problem": "no journey legs recorded"})
+        else:
+            for j, leg in enumerate(legs):
+                if not isinstance(leg, dict) or not leg.get("name"):
+                    v_present.append({"capture": cpath.name,
+                                      "channel": f"legs[{j}]",
+                                      "problem": "leg missing a name"})
+                    continue
+                all_leg_names.add(str(leg["name"]))
+                if not isinstance(leg.get("ok"), bool):
+                    v_present.append({"capture": cpath.name,
+                                      "channel": f"legs[{j}]",
+                                      "problem": "leg.ok is not boolean"})
+        if "storage" not in cap:
+            v_present.append({"capture": cpath.name, "channel": "storage",
+                              "problem": "storage snapshot absent"})
+        if not isinstance(cap.get("mode"), str) or not cap.get("mode"):
+            v_present.append({"capture": cpath.name, "channel": "mode",
+                              "problem": "mode label absent"})
+        if cap.get("offline") is not True and not cap.get("requests"):
+            v_present.append({"capture": cpath.name, "channel": "requests",
+                              "problem": "non-offline capture recorded zero "
+                                         "requests — evidence absent"})
+        for i, req in enumerate(cap.get("requests", [])):
+            if not isinstance(req.get("headers"), dict):
+                v_present.append({"capture": cpath.name,
+                                  "channel": f"requests[{i}].headers",
+                                  "problem": "request headers not captured"})
+        for i, req in enumerate(cap.get("request_failures", [])):
+            if not isinstance(req.get("headers"), dict):
+                v_present.append({"capture": cpath.name,
+                                  "channel": f"request_failures[{i}].headers",
+                                  "problem": "failed-request headers not captured"})
+        for i, entry in enumerate(cap.get("server_log", [])):
+            if not isinstance(entry.get("headers"), dict):
+                v_present.append({"capture": cpath.name,
+                                  "channel": f"server_log[{i}].headers",
+                                  "problem": "served request headers not logged"})
+    for journey, pattern in REQUIRED_JOURNEY_LEGS.items():
+        if not any(pattern.search(name) for name in all_leg_names):
+            v_present.append({"capture": "-", "channel": "legs",
+                              "problem": f"required journey leg {journey!r} "
+                                         "absent from every capture"})
+    check("capture_evidence_present",
+          "online/warm/offline modes documented",
+          "every capture carries the full channel key set, nonempty named "
+          "legs, a storage snapshot and captured request headers; every "
+          "non-offline capture recorded at least one request; the union of "
+          "legs covers open/error/render/OCR/export/reopen/clear — absent "
+          "or emptied evidence can never pass",
+          v_present, {"journey_legs_seen": len(all_leg_names)})
+
     # --- 6. Recorded legs all completed + required modes are present. -------
     v_legs: list[dict] = []
     modes_seen: dict[str, int] = {}
@@ -447,6 +650,53 @@ def main() -> int:
           "only fixed-asset attempts (prepared-cache hits or the honestly "
           "failed cold-offline model fetch)",
           v_legs, {"modes": modes_seen})
+
+    # --- 6b. Model-fetch provenance from the wire evidence (F9). ------------
+    # Cold mode must show the staged model download reaching the server
+    # exactly once; warm mode must show zero model requests (verified IDB
+    # slot); offline captures must show zero model paths in the server log.
+    v_prov: list[dict] = []
+    model_reqs_cold = 0
+    model_served_total = 0
+    for cpath, cap in captures:
+        mode = str(cap.get("mode", ""))
+        model_reqs = [
+            urlparse(str(r.get("url", ""))).path
+            for r in cap.get("requests", [])
+            if urlparse(str(r.get("url", ""))).path.startswith("/models/")
+        ]
+        model_served = [
+            str(e.get("path", ""))
+            for e in cap.get("server_log", [])
+            if str(e.get("path", "")).startswith("/models/")
+        ]
+        model_served_total += len(model_served)
+        if mode == "cold":
+            model_reqs_cold += len(model_reqs)
+        if mode == "warm" and (model_reqs or model_served):
+            v_prov.append({"capture": cpath.name, "channel": "models",
+                           "problem": f"warm mode touched model assets "
+                                      f"(requests={len(model_reqs)} served={len(model_served)})"})
+        if mode == "offline" and model_served:
+            v_prov.append({"capture": cpath.name, "channel": "models",
+                           "problem": "model asset reached the server while offline"})
+    if model_reqs_cold == 0:
+        v_prov.append({"capture": "-", "channel": "models",
+                       "problem": "no cold-mode capture shows the staged "
+                                  "model download — network provenance unproven"})
+    if model_served_total == 0:
+        v_prov.append({"capture": "-", "channel": "models",
+                       "problem": "the model fetch never reached the server "
+                                  "in any capture — cold download unproven"})
+    check("model_fetch_provenance",
+          "online/warm/offline modes documented",
+          "cold mode fetched the staged model over the wire exactly once "
+          "(network provenance), warm mode reused the verified cache with "
+          "zero model requests, offline captures served zero model paths — "
+          "derived from request and server-log evidence, not in-page "
+          "assertions",
+          v_prov, {"cold_model_requests": model_reqs_cold,
+                   "model_paths_served": model_served_total})
 
     # --- 7. Cold fixed-asset assessment (first navigation). -----------------
     v_cold: list[dict] = []
@@ -531,7 +781,19 @@ def main() -> int:
                 str(canary.get("document", {}).get("sha256", "")).encode()
             )[:16],
             "byte_length": canary.get("document", {}).get("byte_length"),
-            "markers": [{"id": m["id"], "sha256_16": m["digest"]} for m in marker_rows],
+            # allowed_channels is declared per marker in the private canary
+            # manifest (gitignored); the policy is echoed here — marker ids
+            # and digests only, never marker values — so the committed
+            # receipt shows which channels each report-derived marker was
+            # permitted to occupy (local downloads only).
+            "markers": [
+                {
+                    "id": m["id"],
+                    "sha256_16": m["digest"],
+                    "allowed_channels": sorted(m["allowed_channels"]),
+                }
+                for m in marker_rows
+            ],
         },
         "captures": [
             {
@@ -540,9 +802,11 @@ def main() -> int:
                 "mode": cap.get("mode"),
                 "surface": cap.get("surface"),
                 "requests": len(cap.get("requests", [])),
+                "responses": len(cap.get("responses", [])),
                 "websockets": len(cap.get("websockets", [])),
                 "egress_records": len(cap.get("egress", [])),
                 "console_messages": len(cap.get("console", [])),
+                "dialogs": len(cap.get("dialogs", [])),
                 "legs": [{"name": l.get("name"), "ok": l.get("ok")} for l in cap.get("legs", [])],
             }
             for cpath, cap in captures
