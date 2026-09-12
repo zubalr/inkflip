@@ -32,7 +32,7 @@ class PassTests(unittest.TestCase):
         self.assertEqual(self.config["integration_owner"], "devin")
         self.assertEqual(self.config["worker_budgets"], {
             "codex": 0, "devin": None, "antigravity": None, "zcode": None})
-        self.assertEqual(self.config["max_active_workers"], 5)
+        self.assertIsNone(self.config["max_active_workers"])
         self.assertEqual(self.config["apps"]["codex"]["tasks"], [])
         self.assertLessEqual(set("T03 T04 T11 T15 T23 T24 T25 T29 T30 T32 T33 T34 T40 T46 T48 T51 T52 T55".split()),
                              set(self.config["apps"]["devin"]["tasks"]))
@@ -79,7 +79,7 @@ class PassTests(unittest.TestCase):
         self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 3, "zcode"))
 
     def test_adaptive_capacity_has_no_numeric_ceiling_but_preserves_admission(self):
-        # The generic helper still supports null; live project policy caps at five.
+        # The generic helper supports null; live project policy has no numeric ceiling.
         self.config["max_active_workers"] = None
         stage = self.config["passes"][0]
         for app, task in (("antigravity", "T13"), ("devin", "T10"), ("zcode", "T27")):
@@ -94,11 +94,16 @@ class PassTests(unittest.TestCase):
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(
             self.config, stage, "T03", {"status": "open"}, [], "codex"))
 
-    def test_live_project_rejects_a_sixth_worker(self):
+    def test_live_project_has_no_numeric_worker_ceiling(self):
+        # Live config sets max_active_workers null: a sixth admission is
+        # decided by scope/review throughput, not a fixed count. Configured
+        # budgets still bound — codex stays zero.
         stage = self.config["passes"][0]
         workers = [{"metadata": {"execution": {"app": "devin"}}}] * 5
-        self.assertIn("Global worker capacity is occupied", p.dispatch_errors(
-            self.config, stage, "T13", {"status": "open"}, workers, "antigravity"))
+        self.assertEqual(p.dispatch_errors(
+            self.config, stage, "T13", {"status": "open"}, workers, "antigravity"), [])
+        self.assertIn("App worker capacity is occupied", p.dispatch_errors(
+            self.config, stage, "T13", {"status": "open"}, workers, "codex"))
         with self.assertRaisesRegex(ValueError, "not owned"):
             p.assignment(self.config, "T29", "codex", "a" * 40, 1)
 

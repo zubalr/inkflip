@@ -102,11 +102,14 @@ relay alone handles native Git storage rollover for `refs/dolt/data` with an
 exact observed-SHA lease; see `docs/HOMEBASE.md`. Publish each ZCode grant
 to the Homebase relay before expecting its worker to see it.
 
-Admit up to five concurrent workers across the project, including native
-children, subject to lower harness limits. A null per-app budget allows Devin
-to allocate that shared capacity; it does not remove the global limit. Account
-for every active native descendant in Beads, reserve independent review capacity,
-and close finished workers. Historical native UI cards are not a live count.
+Admit independent workers across the project, including native children,
+with no fixed numeric project ceiling; native provider and session limits
+still apply. Allocate by disjoint scope, memory/load, independent review
+throughput and actual running descendants. A null per-app budget imposes no
+app cap — do not invent one; a configured finite budget still bounds its
+app. Account for every active native descendant in Beads, reserve
+independent review capacity, and close finished workers. Do not spawn idle
+recursive supervisors. Historical native UI cards are not a live count.
 Use native general SWE-2 subagents and Antigravity's installed native facilities.
 ZCode uses its existing Goal on Homebase. Codex stays inactive after this transfer.
 Only one heavy OCR/corpus/performance run may execute at a time; record its holder

@@ -6,7 +6,7 @@ Run continuously through useful granted work, preserving native Goal continuatio
 
 Use an isolated worktree under /home/wertyp/.local/share/homebase-factory/worktrees/inkflip for each granted writer. Preserve the completed T27 checkpoint and wait for a fresh concrete grant or review revision; do not redo completed work because older instructions mention it. Fetch and fast-forward the clean canonical main before native_pass.py status zcode --sync, then read the current pass and grant. A failed sync is a blocker, not an empty queue.
 
-Keep all native descendants within Devin's allocation and the project limit of five concurrent workers. Each needs a named role, isolated scope and checkout. One heavy OCR/corpus/performance job runs across the project at a time, following the current Beads holder; explicitly release before another worker starts. Give concurrent servers unique ports and generated paths.
+Run native descendants without a fixed numeric project ceiling; configured budgets still bound their app. Each needs a named role, isolated scope and checkout. One heavy OCR/corpus/performance job runs across the project at a time, following the current Beads holder; explicitly release before another worker starts. Give concurrent servers unique ports and generated paths.
 
 Handle well-defined components, fixtures, repeated verification, experiments, examples, layout coverage, notices and documentation as assigned. Shared-contract or architectural uncertainty goes to Devin as a minimal reproducer and concrete question in task-local evidence. Run actual registered checks, preserve raw text and geometry contracts, and report failures and missing device/manual evidence honestly. Do not weaken gates or fabricate review results.
 
