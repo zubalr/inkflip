@@ -1,8 +1,8 @@
 {
   "task": "T31",
   "beads_id": "pdf-t31",
-  "evaluated_commit": "ec992e6f16e3712a79163293fb50b6d7b0368ed9",
-  "evaluated_at": "2026-09-12T15:29:17.009864+00:00",
+  "evaluated_commit": "bb339eaa0e7d0e885a79525e6100219c5ecf18f8",
+  "evaluated_at": "2026-09-12T15:39:30.470964+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-ry9qh97i/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-zo1_91hd/results",
         "--test",
         "tests/bridge/bridge.test.mjs"
       ],
@@ -37,7 +37,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t31",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     },
     {
@@ -63,11 +63,11 @@
         "pytest",
         "native/tests/bridge",
         "-q",
-        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-18s9g3hv/results"
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-nnj9imth/results"
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "............................                                             [100%]\n28 passed in 1.73s\n",
+      "stdout": "............................                                             [100%]\n28 passed in 1.75s\n",
       "stderr": "",
       "tests": {
         "collected": 28,
@@ -75,7 +75,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t31",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ]
