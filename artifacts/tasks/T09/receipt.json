@@ -1,0 +1,76 @@
+{
+  "task_id": "T09",
+  "beads_id": "pdf-t09",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t09",
+  "base_commit": "d1c02af",
+  "implementation_commit": "b6aad4da2c503b09a17f5932d9c3ac1ff5f0e993",
+  "actor": "devin-t09",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "acceptance_criteria_evidence": {
+    "Real mapping and clean PDFs processed through bytes": {
+      "status": "executed",
+      "detail": "Real Chromium (Playwright 1.57.0) drives the adapter over loopback HTTP against real T05 fixture bytes fetched as Uint8Array. F01: mapping-amount.pdf opens via getDocument({data: <adapter-owned copy>}) with the caller-supplied digest verified before open; extraction emits '$1,000' while the rendered raster is byte-identical to mapping-control.pdf's raster (painted '$100') — looks right, reads wrong, end to end. F02: covered-amount.pdf emits both '$1,000' and '$100' raw items while its dark-pixel count matches covered-control.pdf within 8px, proving the hidden layer is reported, not painted away. All four F07 files and all four F08 files process the same path. Test: 'F01 mapping vs control: bytes in, raw text out, identical raster', 'F02 covered vs control: hidden layer kept raw, raster unaffected'. Counts: 10/10.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    },
+    "raw text not injected": {
+      "status": "executed",
+      "detail": "Each test re-opens the same bytes with a direct getTextContent({disableNormalization:true, includeMarkedContent:true}) on the same pinned build and asserts occurrences.map(raw_text) deep-equals the raw item string sequence — no injection, reordering or adapter-side normalization of raw_text; ordinals deep-equal the 0-based TextItem indices; normalized_text/normalization_map recomputed with contracts.normalize() per occurrence (normOk). Marked-content records counted, never emitted. Test: F01/F02 suites.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    },
+    "occurrence geometry/rotation/UserUnit verified": {
+      "status": "executed",
+      "detail": "F07: rotation 0/90/180/270 read as page.rotation; effective_view_box [20,40,500,390] (nonzero+negative CropBox origin), canonical C matrix asserted element-equal to the COORDINATES.md analytic value [2,0,0,-2,-40,780] (u=2, 960x700pt); pdf.js getViewport({scale:1}).transform equals @inkflip/geometry pageToDisplay (R*C) within 1e-6 on every page — viewportVerified true. Every emitted occurrence polygon is recomputed in-test from the raw TextItem (transform, width, ascent/descent) through the page's canonical C and compared elementwise — geometryMismatches 0 on all five F07 pages. Raster dims match rotated display size ([960,700] or [700,960]). F08: user_unit 0.5/1/2/10 reported exactly; canonical size is 520u x 400u pt; the 100pt fiducial square's right edge lands at 472u*scale px in the raster (no double scaling); u=10 hits the 4Mpx cap and the downsampling is recorded in raster.limitations. media_box/crop_box asserted null (unavailable through the selected API — never invented). Tests: 'F07 rotations and origins...', 'F08 UserUnit values...'.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    },
+    "no full glyph-paint provenance claim": {
+      "status": "executed",
+      "detail": "Every occurrence asserts geometry.precision in {estimated, page_only} and its limitations carry 'not a glyph-paint or per-character provenance'; multi-character items add the no-per-character-advance limitation. describe() reader/manifest records state the estimated-extent limitation; the serialized identity blob is asserted free of any exact-glyph/per-glyph claim. getOperatorList is never called as a visibility oracle.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    },
+    "render cancellation releases task/canvas": {
+      "status": "executed",
+      "detail": "A pre-aborted signal driven into renderPage exercises RenderTask.cancel() on a REAL in-flight pdf.js RenderTask (RenderingCancelledException path): the thrown ReaderError is failure=cancelled/user_cancel and every adapter-created canvas is asserted 0x0 afterwards; a subsequent render of the same page completes at full size (960x700) proving no half-alive task/canvas. Adapter-level extract with a pre-aborted signal returns status cancelled/user_cancel without touching the page. Text mid-walk cancel (chunkOccurrences=1, abort inside emitChunk) returns status cancelled with produced=retained=1 — produced evidence survives cancellation. Tests: 'render cancellation releases task and canvas; later renders unaffected', 'text extraction mid-walk cancel retains produced evidence'.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    },
+    "unavailable structure check is unsupported": {
+      "status": "executed",
+      "detail": "Checks planned for structure, ocr, object_render_mode, paint_overlap, crop_metadata and alignment all terminate status 'unsupported' with reasons matching /^unsupported:/ and produced_occurrence_count 0 — named reasons, never faked success. describe() marks the same capabilities 'unavailable' in both reader records. Test: 'unavailable capabilities terminate unsupported with named reasons'.",
+      "evidence": [
+        "artifacts/tasks/T09/run.json",
+        "artifacts/tasks/T09/commands.log"
+      ]
+    }
+  },
+  "limitations": [
+    "F10 (mapping-missing) and F11 (duplicates) have no generated fixtures in the T05 tree; the suite asserts their absence honestly and covers the substitute mechanism (ordinal-keyed occurrence identity preserves equal strings at distinct positions). No fixture or result was fabricated.",
+    "Original MediaBox/CropBox are unavailable through the selected pdf.js API: page.media_box/crop_box are null and page.view is recorded as the effective view only (limitation on every page record).",
+    "Occurrence extent is an estimated TextItem quad (transform + width/height + font ascent/descent); there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary.",
+    "reading_order capability is 'approximate': the raw emitted getTextContent sequence only, not verified logical/screen-reader order.",
+    "Render rasters are bounded by pixel/edge caps; userunit-10 clamps scale and records it. Annotation rendering uses static appearance streams only (AnnotationMode.ENABLE); actions, links, forms, XFA, attachments and scripting are never activated.",
+    "The adapter does not stage the pdf.js main/worker pair: T02 staged the data assets (cmaps/standard_fonts/wasm/iccs) while the pinned pair is the frozen bun.lock install (pdfjs-dist@6.3.289, package integrity recorded in resolved-assets.json). The caller injects module + same-origin workerSrc; the suite serves both from the pinned install and records their sha256."
+  ],
+  "verification_commands": [
+    {"command": "bun run test:browser -- tests/readers/pdfjs.spec.ts", "exit": 0, "tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0}},
+    {"command": "python3 scripts/task_acceptance.py task T09", "exit": 0, "tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0}},
+    {"command": "python3 scripts/task_acceptance.py task T09 --report artifacts/tasks/T09/run.json", "exit": 0, "tests": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0}},
+    {"command": "./node_modules/.bin/tsc -b tsconfig.json", "exit": 0},
+    {"command": "bun run verify", "exit": 0}
+  ]
+}
