@@ -1,0 +1,86 @@
+# Attribution and provenance ledger
+
+Started by T02 (supply-chain owner). Per `planning/security/LICENSE_AND_ATTRIBUTION.md`:
+record exact upstream path/commit, copyright/license, target file, modifications
+and required notice for copied or substantially adapted material; name material
+influences rather than erasing them; unknown terms or absent provenance block an
+asset's inclusion.
+
+## Dependency selections (T02 freeze, 2026-09-12)
+
+Versions selected by the planning package (`planning/config/dependencies.json`,
+research sources S22–S39) were re-verified against registry.npmjs.org and
+pypi.org, then locked exactly in `bun.lock` (isolated linker) and
+`native/uv.lock`. No library-family substitutions were needed; every planned
+pin resolved. Publish dates were checked against bunfig's 7-day
+`minimumReleaseAge`: vite@8.3.0, wrangler@4.131.0, oxlint@1.82.0 and
+oxfmt@0.67.0 (plus wrangler's same-day transitive workerd/miniflare) were
+younger than the gate and are exempted explicitly in `bunfig.toml` — the gate
+still applies to everything else.
+
+| Package | Version | License | Role / purpose |
+|---|---|---|---|
+| react / react-dom | 19.2.8 | MIT | Web UI runtime |
+| vite | 8.3.0 | MIT | Static build (build-time only) |
+| @vitejs/plugin-react | 6.1.1 | MIT | React plugin for Vite |
+| typescript | 6.0.2 | Apache-2.0 | Typecheck all packages |
+| pdfjs-dist | 6.3.289 | Apache-2.0 + bundled asset notices | Browser PDF reader; runtime assets staged same-origin |
+| tesseract.js | 7.0.0 | Apache-2.0 | Browser OCR wrapper; CDN defaults unused |
+| tesseract.js-core | 7.0.0 | Apache-2.0 + binary notices | WASM OCR engine (single-threaded scalar/SIMD) |
+| ajv | 8.18.0 | MIT | Schema-build validator generation (test/build tool). **Justified substitution:** plan pin 8.17.1 → 8.18.0 (patch bump, 2026-02-14) to clear GHSA-2g4f-4pwh-qvx6 (`$data` ReDoS); the option is unused — zero `$data` in the inkflip schema — but the advisory-free pin removes the class entirely |
+| @playwright/test | 1.57.0 | Apache-2.0 | Test-only browser runner |
+| @axe-core/playwright | 4.13.0 | MIT (wrapper; axe-core MPL-2.0) | Test-only accessibility audits |
+| oxlint / oxfmt | 1.82.0 / 0.67.0 | MIT | Owner-selected lint/format tools |
+| wrangler | 4.131.0 | MIT OR Apache-2.0 | Deploy-only static-assets publish; no Worker |
+| pypdfium2 | 5.8.0 | Apache-2.0 OR BSD-3-Clause; PDFium build notices separate | Native PDFium reader |
+| pypdf | 6.18.0 | BSD-3-Clause | Native PDF structure reader |
+| Pillow | 12.3.0 | MIT-CMU + codec notices | Native image re-encode |
+| jsonschema | 4.26.0 | MIT | Native + planning validation |
+| pytest | 9.1.1 | MIT | Test-only native runner (dev group) |
+
+Toolchain pins: node 22.23.2 (22 LTS "Jod", latest patch on freeze date),
+python 3.13.15 (latest 3.13 patch; uv standalone build 20260901),
+bun 1.4.0 (`packageManager`), uv ≥0.12.13 for the managed-interpreter index.
+
+## Staged browser assets (`config/resolved-assets.json`)
+
+Every staged file carries source, SHA-256, byte count and license in the
+manifest; `scripts/prepare_assets.py verify` re-hashes them. Sources:
+
+- **pdfjs-dist@6.3.289** (npm, Apache-2.0): `cmaps/` (169), `standard_fonts/`
+  (16), `wasm/` incl. `LICENSE_OPENJPEG`/`LICENSE_JBIG2`/`LICENSE_QCMS` and
+  `LICENSE_PDFJS_*` notices, `iccs/` + `LICENSE`, package `LICENSE` — staged
+  under `apps/web/public/assets/pdfjs/6.3.289/`.
+- **tesseract.js@7.0.0** (npm, Apache-2.0): `dist/worker.min.js`,
+  `dist/worker.min.js.LICENSE.txt`, `LICENSE.md` — staged under
+  `apps/web/public/assets/tesseract/7.0.0/`.
+- **tesseract.js-core@7.0.0** (npm, Apache-2.0 + binary notices): the six
+  feature-detected `tesseract-core*.wasm.js` builds + `LICENSE` — staged under
+  `apps/web/public/assets/tesseract-core/7.0.0/`.
+- **tessdata_fast eng.traineddata** (upstream Apache-2.0): commit
+  `65727574dfcd264acbb0c3e07860e4e9e9b22185` of
+  `tesseract-ocr/tessdata_fast`, git blob `bbef4675053b5b468cdb477053e28b1c698ba08e`,
+  SHA-256 `7d4322bd…7170b2`, 4,113,088 bytes — staged at
+  `apps/web/public/models/tessdata-fast-eng/7d4322bd/eng.traineddata`.
+
+## Build provenance (`build/base-image.lock.json`)
+
+- OCI reference image `python:3.13.15-slim-trixie` pinned by index digest
+  `sha256:9d2e5553…e00285` (linux/arm64 `sha256:c89921a0…44b0b4`).
+- `actions/checkout@v4` resolved to commit
+  `11d5960a326750d5838078e36cf38b85af677262` (v4.4.0) — recorded; the workflow
+  file itself awaits the owning-surface pin (see `docs/proposals/T02.md`).
+- Proof-time downloads (node 22.23.2 tarball, bun 1.4.0 zip, uv 0.12.13 wheel)
+  verified against publisher checksums inside the Linux proof.
+
+## Material influences and blocked items
+
+- tesseract.js's default CDN endpoints (jsdelivr for worker/core/lang data)
+  are documented upstream behavior we deliberately do not use: the adapter
+  contract requires explicit same-origin paths with `workerBlobURL:false`.
+- `opencollective-postinstall` (tesseract.js transitive dep) runs a
+  donation-message install script; `trustedDependencies` stays `[]` so it is
+  blocked with no capability loss.
+- No code was copied from upstream sources in T02; `scripts/prepare_assets.py`
+  and `scripts/check_dependencies.py` are original implementations. RapidOCR
+  and browser-PDFium candidates remain controlled experiments and are absent.

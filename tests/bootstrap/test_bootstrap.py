@@ -83,14 +83,31 @@ class EmptyRegistrationFailsTests(unittest.TestCase):
         self.assertIn("not a documented command", result.stderr)
 
     def test_declared_suite_with_missing_runner_fails(self):
-        result = run_tool(HARNESS, "run", "test:browser")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("prerequisites missing", result.stderr)
+        # Pin the guarantee to a synthetic declared entry: any real command's
+        # prerequisites are lifecycle-bound (T02 installs test:browser's
+        # playwright), so a fixed name would silently stop exercising the check.
+        with tempfile.TemporaryDirectory() as tmp:
+            reg = Path(tmp) / "reg.json"
+            reg.write_text(json.dumps({"commands": {"x": {
+                "kind": "test", "status": "declared", "collection": "harness-unittest",
+                "argv": [sys.executable, "-c", "pass"],
+                "requires": ["path/that/never/exists"]}}}))
+            result = run_tool(HARNESS, "--registry", str(reg), "run", "x")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("prerequisites missing", result.stderr)
 
     def test_declared_suite_with_no_implementation_fails(self):
-        result = run_tool(HARNESS, "run", "test:fixtures")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("no implementation registered", result.stderr)
+        # The registry reserves per-owner registration (T05 registered
+        # test:fixtures when its suite landed), so pin this guarantee to a
+        # synthetic null-argv entry instead of another task's lifecycle.
+        with tempfile.TemporaryDirectory() as tmp:
+            reg = Path(tmp) / "reg.json"
+            reg.write_text(json.dumps({"commands": {"x": {
+                "kind": "test", "status": "active", "collection": "harness-unittest",
+                "argv": None}}}))
+            result = run_tool(HARNESS, "--registry", str(reg), "run", "x")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("no implementation registered", result.stderr)
 
     def test_zero_collected_unittest_suite_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

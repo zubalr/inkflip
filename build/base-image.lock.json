@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_by": "T02",
+  "recorded_at": "2026-09-12",
+  "purpose": "Immutable build-provenance record: the OCI reference image used for the Linux frozen-install proof, the pinned tool revisions installed inside it, and every GitHub Actions `uses:` reference resolved to a full commit SHA. Digests were resolved on 2026-09-12 via `docker buildx imagetools inspect` (OCI) and `git ls-remote` (actions); they are immutable revision records, not floating tags.",
+  "oci_images": [
+    {
+      "ref": "python:3.13.15-slim-trixie",
+      "role": "linux-frozen-install-proof",
+      "index_digest": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+      "platform_digests": {
+        "linux/amd64": "sha256:cc9dffa47c8294ba9bb795a8dfaeb7b76f2b30acade2c52a461a2999d127eb00",
+        "linux/arm64": "sha256:c89921a0c7b42f27338ed8c279fb370e69e941c92460f91895d08304e844b0b4"
+      },
+      "source": "https://hub.docker.com/_/python (docker-library official image, Debian trixie-slim base)",
+      "license": "Image contents under Debian/PSF licenses; see https://github.com/docker-library/python",
+      "notes": "Provides the exact .python-version interpreter (3.13.15) as system python; proves the uv.lock requires-python pin without a managed-interpreter download."
+    }
+  ],
+  "tool_installs": [
+    {
+      "tool": "node",
+      "version": "22.23.2",
+      "role": "comparison-runtime",
+      "source": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-arm64.tar.xz",
+      "integrity_check": "SHA-256 compared against https://nodejs.org/dist/v22.23.2/SHASUMS256.txt at proof time",
+      "pin_file": ".node-version"
+    },
+    {
+      "tool": "bun",
+      "version": "1.4.0",
+      "role": "workspace-manager",
+      "source": "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-linux-aarch64.zip",
+      "integrity_check": "SHA-256 compared against the release's SHASUMS256.txt at proof time",
+      "pin_file": "package.json packageManager"
+    },
+    {
+      "tool": "uv",
+      "version": "0.12.13",
+      "role": "native-runner",
+      "source": "https://pypi.org/project/uv/0.12.13/ (pip wheel)",
+      "integrity_check": "pip verifies the wheel against the PyPI-published sha256 fragment",
+      "pin_file": "config/test-toolchain.json (recorded minimum; uv >=0.12 required for the 3.13.15 managed-interpreter index)"
+    }
+  ],
+  "github_actions": [
+    {
+      "workflow": ".github/workflows/ci.yml",
+      "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "resolved_sha": "11d5960a326750d5838078e36cf38b85af677262",
+      "resolved_tag": "v4 (== v4.4.0)",
+      "resolved_at": "2026-09-12",
+      "resolution": "git ls-remote https://github.com/actions/checkout refs/tags/v4",
+      "note": "Pinned in-file by coordinator at T02 integration per proposal P1 and independent review F2; SHA verified via git ls-remote (v4 == v4.4.0)."
+    }
+  ]
+}

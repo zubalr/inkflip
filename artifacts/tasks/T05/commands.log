@@ -1,0 +1,34 @@
+# T05 executed command transcript
+date: 2026-09-11T23:04:53Z  host: macOS 26.5.2 arm64 (arm64)  python: Python 3.14.7
+
+$ python3 scripts/make_fixtures.py --check
+check ok: 33 files in /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t05/fixtures match deterministic regeneration
+exit: 0
+
+$ python3 -m unittest discover -s tests/fixtures -v
+----------------------------------------------------------------------
+Ran 38 tests in 0.455s
+
+OK
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T05
+exit: 0
+Traceback (most recent call last):
+  File "<string>", line 7, in <module>
+    print('counts: collected', m.group(1), 'passed', m.group(2), 'failed', m.group(3), 'skipped', m.group(4))
+                               ^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'group'
+
+$ bun run verify
+exit: 0
+OK
+self-check: 16 commands in config/acceptance-commands.json
+
+# Supplemental local render observation (macOS QuickLook/PDFKit, 400px thumbnails)
+$ qlmanage -t -s 400 -o <tmp> fixtures/public/{mapping-amount,mapping-control,covered-amount,covered-control}.pdf
+observed: all four PNG thumbnails byte-identical (cmp); repeat run identical.
+$ qlmanage -t -s 400 fixtures/development/{scan-correct,scan-raster-only}.pdf
+observed: scan-correct and scan-raster-only thumbnails byte-identical (invisible layer adds no marks).
+decoded ink check: mapping-amount 1891/30700 dark samples; scan-correct 1947/30900 (non-blank).
+files archived under render-evidence/ (environment-labeled; not Linux or device evidence).

@@ -12,20 +12,37 @@
     "verify": {
       "kind": "group",
       "status": "active",
-      "members": ["self-check", "test:bootstrap", "test:native-bootstrap", "check:coordination"],
+      "members": [
+        "self-check",
+        "test:bootstrap",
+        "test:native-bootstrap",
+        "check:coordination"
+      ],
       "description": "Every registered check that exists today. Later tasks extend members when their suites are implemented."
     },
     "self-check": {
       "kind": "check",
       "status": "active",
-      "argv": ["python3", "scripts/task_acceptance.py", "self-check"],
+      "argv": [
+        "python3",
+        "scripts/task_acceptance.py",
+        "self-check"
+      ],
       "description": "Registry consistency: scripts exist, groups resolve, declared commands fail honestly."
     },
     "test:bootstrap": {
       "kind": "test",
       "status": "active",
       "collection": "harness-unittest",
-      "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/bootstrap", "-v"],
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/bootstrap",
+        "-v"
+      ],
       "owner_task": "T01",
       "description": "Bootstrap contract tests (TEST-01)."
     },
@@ -33,7 +50,15 @@
       "kind": "test",
       "status": "active",
       "collection": "harness-unittest",
-      "argv": ["python3", "-m", "unittest", "discover", "-s", "native/tests/bootstrap", "-v"],
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "native/tests/bootstrap",
+        "-v"
+      ],
       "owner_task": "T01",
       "description": "Native project boundary checks; stdlib only until T02 resolves dependencies."
     },
@@ -41,30 +66,58 @@
       "kind": "test",
       "status": "active",
       "collection": "harness-unittest",
-      "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/coordination", "-v"],
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/coordination",
+        "-v"
+      ],
       "owner_task": "coordinator",
       "description": "Required coordination admission and override tests."
     },
     "build": {
       "kind": "group",
       "status": "declared",
-      "members": ["build:packages", "build:web"],
+      "members": [
+        "build:packages",
+        "build:web"
+      ],
       "description": "Static and shared Node build only; no deployment."
     },
     "build:packages": {
       "kind": "build",
       "status": "declared",
-      "argv": ["bun", "x", "--no-install", "tsc", "-b", "tsconfig.json"],
-      "requires": ["node_modules/.bin/tsc"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "tsc",
+        "-b",
+        "tsconfig.json"
+      ],
+      "requires": [
+        "node_modules/.bin/tsc"
+      ],
       "owner_task": "T02",
       "description": "Shared packages compile in declared project-reference order."
     },
     "build:web": {
       "kind": "build",
       "status": "declared",
-      "argv": ["bun", "x", "--no-install", "vite", "build"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "vite",
+        "build"
+      ],
       "cwd": "apps/web",
-      "requires": ["apps/web/node_modules/.bin/vite"],
+      "requires": [
+        "apps/web/node_modules/.bin/vite"
+      ],
       "owner_task": "T02",
       "description": "Static web artifact at apps/web/dist."
     },
@@ -72,8 +125,16 @@
       "kind": "test",
       "status": "declared",
       "collection": "structured-report",
-      "argv": ["bun", "x", "--no-install", "playwright", "test"],
-      "requires": ["node_modules/.bin/playwright"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "playwright",
+        "test"
+      ],
+      "requires": [
+        "node_modules/.bin/playwright"
+      ],
       "owner_task": "T02",
       "description": "Playwright own-file/fixture/cancel/export flows; suite paths are passed after `--`."
     },
@@ -81,8 +142,18 @@
       "kind": "test",
       "status": "declared",
       "collection": "structured-report",
-      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/privacy"],
-      "requires": ["node_modules/.bin/playwright", "tests/privacy/"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/privacy"
+      ],
+      "requires": [
+        "node_modules/.bin/playwright",
+        "tests/privacy/"
+      ],
       "owner_task": "T15",
       "description": "Cold/warm/offline canary network and storage capture on the built site."
     },
@@ -90,8 +161,18 @@
       "kind": "test",
       "status": "declared",
       "collection": "structured-report",
-      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/a11y"],
-      "requires": ["node_modules/.bin/playwright", "tests/a11y/"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/a11y"
+      ],
+      "requires": [
+        "node_modules/.bin/playwright",
+        "tests/a11y/"
+      ],
       "owner_task": "T07",
       "description": "Automated accessible component checks; manual AT receipts remain separately required."
     },
@@ -99,24 +180,47 @@
       "kind": "test",
       "status": "declared",
       "collection": "structured-report",
-      "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/visual"],
-      "requires": ["node_modules/.bin/playwright", "tests/visual/"],
+      "argv": [
+        "bun",
+        "x",
+        "--no-install",
+        "playwright",
+        "test",
+        "tests/visual"
+      ],
+      "requires": [
+        "node_modules/.bin/playwright",
+        "tests/visual/"
+      ],
       "owner_task": "T06",
       "description": "Approved desktop/narrow/reduced-motion/error-state screenshots; baselines never auto-update."
     },
     "test:fixtures": {
       "kind": "test",
-      "status": "declared",
-      "argv": null,
-      "requires": ["scripts/make_fixtures.py"],
+      "status": "active",
+      "collection": "harness-unittest",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/fixtures",
+        "-v"
+      ],
+      "requires": [
+        "scripts/make_fixtures.py"
+      ],
       "owner_task": "T05",
-      "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Implementation is registered by the fixture owner; no runner is assumed."
+      "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Registered by the fixture owner (T05): the suite includes the generator --check determinism pass plus the TEST-05 structural contract."
     },
     "test:regression": {
       "kind": "test",
       "status": "declared",
       "argv": null,
-      "requires": ["tests/regression/"],
+      "requires": [
+        "tests/regression/"
+      ],
       "owner_task": "T34",
       "description": "Baseline immutability, coverage loss, invalid comparison and rule exit behavior."
     },
@@ -124,16 +228,38 @@
       "kind": "test",
       "status": "declared",
       "collection": "structured-report",
-      "argv": ["uv", "run", "--frozen", "--project", "native", "python", "-m", "pytest"],
-      "requires": ["native/uv.lock"],
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests"
+      ],
+      "requires": [
+        "native/uv.lock"
+      ],
       "owner_task": "T02",
       "description": "Native adapter/CLI/process/resource/import tests. Frozen run: never silently resolves a lockfile."
     },
     "check:static-dist": {
       "kind": "check",
       "status": "declared",
-      "argv": ["python3", "scripts/check_static_dist.py", "apps/web/dist", "--config", "wrangler.json"],
-      "requires": ["scripts/check_static_dist.py", "wrangler.json", "apps/web/dist/"],
+      "argv": [
+        "python3",
+        "scripts/check_static_dist.py",
+        "apps/web/dist",
+        "--config",
+        "wrangler.json"
+      ],
+      "requires": [
+        "scripts/check_static_dist.py",
+        "wrangler.json",
+        "apps/web/dist/"
+      ],
       "owner_task": "T48",
       "description": "No dynamic server artifact or paid bindings; hashes/sizes/notices/external allowlist."
     }

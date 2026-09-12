@@ -1,0 +1,123 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "searchable-scan",
+  "fixture_id": "F03",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "layer": "shifted",
+    "raster": "owned 5x7 bitmap print, 680x880 gray",
+    "shift_pt": [
+      90.0,
+      72.0
+    ]
+  },
+  "observation": "deliberately displaced layer; layer words do not match raster word anchors",
+  "raster": {
+    "bits_per_component": 8,
+    "colorspace": "DeviceGray",
+    "filter": "RunLengthDecode",
+    "font": "generated 5x7 bitmap table; no PDF font resource",
+    "height_px": 880,
+    "lines": [
+      "QUARTERLY SUMMARY",
+      "INVOICE 2026-0417",
+      "AMOUNT DUE $100.00",
+      "ISSUED 2026-09-01",
+      "PAGE 1 OF 1"
+    ],
+    "width_px": 680
+  },
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development",
+  "text_layer": {
+    "displacement_pt": [
+      90.0,
+      72.0
+    ],
+    "font": "Helvetica base-14 (no program embedded)",
+    "font_size_pt": 26,
+    "mode": "invisible Tr 3",
+    "words": [
+      {
+        "line": 0,
+        "word": "QUARTERLY",
+        "x_pt": 144.0,
+        "y_pt": 752.4
+      },
+      {
+        "line": 0,
+        "word": "SUMMARY",
+        "x_pt": 306.0,
+        "y_pt": 752.4
+      },
+      {
+        "line": 1,
+        "word": "INVOICE",
+        "x_pt": 144.0,
+        "y_pt": 725.4
+      },
+      {
+        "line": 1,
+        "word": "2026-0417",
+        "x_pt": 273.6,
+        "y_pt": 725.4
+      },
+      {
+        "line": 2,
+        "word": "AMOUNT",
+        "x_pt": 144.0,
+        "y_pt": 698.4
+      },
+      {
+        "line": 2,
+        "word": "DUE",
+        "x_pt": 257.4,
+        "y_pt": 698.4
+      },
+      {
+        "line": 2,
+        "word": "$100.00",
+        "x_pt": 322.2,
+        "y_pt": 698.4
+      },
+      {
+        "line": 3,
+        "word": "ISSUED",
+        "x_pt": 144.0,
+        "y_pt": 671.4
+      },
+      {
+        "line": 3,
+        "word": "2026-09-01",
+        "x_pt": 257.4,
+        "y_pt": 671.4
+      },
+      {
+        "line": 4,
+        "word": "PAGE",
+        "x_pt": 144.0,
+        "y_pt": 644.4
+      },
+      {
+        "line": 4,
+        "word": "1",
+        "x_pt": 225.0,
+        "y_pt": 644.4
+      },
+      {
+        "line": 4,
+        "word": "OF",
+        "x_pt": 257.4,
+        "y_pt": 644.4
+      },
+      {
+        "line": 4,
+        "word": "1",
+        "x_pt": 306.0,
+        "y_pt": 644.4
+      }
+    ]
+  }
+}

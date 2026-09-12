@@ -1,0 +1,404 @@
+#!/usr/bin/env python3
+"""Verify the frozen supply-chain state of the Inkflip checkout (T02).
+
+`--frozen` performs read-only, offline verification of every frozen surface:
+
+  1. Toolchain pins — .node-version, .python-version, packageManager and the
+     pyproject interpreter constraint agree exactly.
+  2. bun.lock — every dependency spec in every workspace manifest resolves to
+     an exact locked package carrying a content integrity hash; bunfig.toml
+     still enforces the isolated linker, exact saves and the release-age gate.
+  3. native/uv.lock — the pinned interpreter constraint matches .python-version,
+     every declared dependency/dev pin resolves to a locked package, and every
+     locked artifact carries a sha256.
+  4. config/resolved-assets.json — strict schema plus a re-hash of every staged
+     same-origin file (missing or substituted bytes fail closed).
+  5. build/base-image.lock.json — OCI references are digest-pinned and every
+     `uses:` action reference in .github/workflows is recorded at a full
+     commit SHA.
+  6. No-runtime-download policy — staged serve paths are same-origin and the
+     web entry points contain no remote loader/CDN references.
+
+It does not install or mutate anything; the twice-from-clean-checkout install
+proof runs bun/uv themselves and is recorded in artifacts/tasks/T02/.
+
+Exit 0 only when every check passes; each failure prints its cause.
+"""
+from __future__ import annotations
+
+import argparse
+import glob
+import hashlib
+import json
+import re
+import sys
+import tomllib
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import prepare_assets  # noqa: E402
+
+FAILURES: list[str] = []
+CHECKS = 0
+
+
+def ok(name: str, detail: str) -> None:
+    global CHECKS
+    CHECKS += 1
+    print(f"ok   {name}: {detail}")
+
+
+def fail(name: str, detail: str) -> None:
+    global CHECKS
+    CHECKS += 1
+    FAILURES.append(f"{name}: {detail}")
+    print(f"FAIL {name}: {detail}")
+
+
+def require(condition: bool, name: str, detail: str, good: str) -> None:
+    fail(name, detail) if not condition else ok(name, good)
+
+
+def load_json(path: Path, name: str) -> dict | None:
+    try:
+        return json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        fail(name, f"cannot parse {path.relative_to(ROOT)}: {error}")
+        return None
+
+
+# --- bun.lock is JSONC: strip comments and trailing commas safely ----------
+
+
+def jsonc_to_json(text: str) -> str:
+    out: list[str] = []
+    i, n = 0, len(text)
+    in_string = False
+    while i < n:
+        ch = text[i]
+        if in_string:
+            out.append(ch)
+            if ch == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if ch == '"':
+                in_string = False
+            i += 1
+            continue
+        if ch == '"':
+            in_string = True
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "/" and i + 1 < n and text[i + 1] == "/":
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and text[i + 1] == "*":
+            end = text.find("*/", i + 2)
+            i = n if end < 0 else end + 2
+            continue
+        out.append(ch)
+        i += 1
+    cleaned = "".join(out)
+    return re.sub(r",(\s*[}\]])", r"\1", cleaned)
+
+
+def read_pin(path: Path) -> str | None:
+    try:
+        lines = [line.strip() for line in path.read_text().splitlines()
+                 if line.strip() and not line.strip().startswith("#")]
+    except OSError:
+        return None
+    return lines[0] if len(lines) == 1 else None
+
+
+SEMVER = r"\d+\.\d+\.\d+"
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+SHA1_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def check_toolchain() -> None:
+    node_pin = read_pin(ROOT / ".node-version")
+    require(node_pin is not None and re.fullmatch(SEMVER, node_pin or "") is not None,
+            "toolchain.node", "missing or malformed .node-version",
+            f".node-version={node_pin}")
+    py_pin = read_pin(ROOT / ".python-version")
+    require(py_pin is not None and re.fullmatch(SEMVER, py_pin or "") is not None,
+            "toolchain.python", "missing or malformed .python-version",
+            f".python-version={py_pin}")
+
+    package = load_json(ROOT / "package.json", "toolchain.package") or {}
+    manager = package.get("packageManager", "")
+    require(isinstance(manager, str) and re.fullmatch(rf"bun@{SEMVER}", manager) is not None,
+            "toolchain.bun", f"packageManager must pin an exact bun: {manager!r}",
+            f"packageManager={manager}")
+
+    pyproject_path = ROOT / "native/pyproject.toml"
+    try:
+        pyproject = tomllib.loads(pyproject_path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        fail("toolchain.pyproject", f"cannot parse native/pyproject.toml: {error}")
+        pyproject = {}
+    requires_python = pyproject.get("project", {}).get("requires-python", "")
+    expected = f"=={py_pin}" if py_pin else ""
+    require(requires_python == expected,
+            "toolchain.python-agreement",
+            f"native/pyproject.toml requires-python {requires_python!r} != pinned =={py_pin}",
+            f"native interpreter pin =={py_pin} matches .python-version")
+
+
+def workspace_manifests(package: dict) -> dict[str, dict]:
+    manifests: dict[str, dict] = {}
+    for pattern in package.get("workspaces", []):
+        for candidate in sorted(glob.glob(str(ROOT / pattern))):
+            manifest_path = Path(candidate) / "package.json"
+            if manifest_path.is_file():
+                rel = manifest_path.parent.relative_to(ROOT).as_posix()
+                try:
+                    manifests[rel] = json.loads(manifest_path.read_text())
+                except json.JSONDecodeError:
+                    pass
+    manifests[""] = package
+    return manifests
+
+
+def check_bun_lock() -> None:
+    lock_path = ROOT / "bun.lock"
+    if not lock_path.is_file():
+        fail("bun.lock", "bun.lock missing — run `bun install` and commit the lock")
+        return
+    try:
+        lock = json.loads(jsonc_to_json(lock_path.read_text()))
+    except json.JSONDecodeError as error:
+        fail("bun.lock", f"bun.lock is not parseable JSONC: {error}")
+        return
+    packages = lock.get("packages", {})
+    workspaces_lock = lock.get("workspaces", {})
+
+    package = load_json(ROOT / "package.json", "bun.lock") or {}
+    manifests = workspace_manifests(package)
+    unresolved: list[str] = []
+    checked_specs = 0
+    for ws_rel, manifest in manifests.items():
+        for section in ("dependencies", "devDependencies", "optionalDependencies",
+                        "peerDependencies"):
+            for dep_name, spec in (manifest.get(section) or {}).items():
+                if str(spec).startswith(("workspace:", "link:", "file:")):
+                    continue
+                checked_specs += 1
+                locked_spec = (workspaces_lock.get(ws_rel, {}).get(section) or {}).get(dep_name)
+                if locked_spec != spec:
+                    unresolved.append(f"{ws_rel or '.'}:{dep_name} spec {spec!r} "
+                                      f"!= lock workspace spec {locked_spec!r}")
+                    continue
+                key = f"{dep_name}@{spec}"
+                # bun.lock v2 keys the packages map by plain name; the entry's
+                # first element is "name@version" and the last is integrity.
+                entry = packages.get(dep_name)
+                if isinstance(entry, list) and entry and entry[0] == key:
+                    pass
+                else:
+                    entry = packages.get(key)
+                if entry is None:
+                    unresolved.append(f"{ws_rel or '.'}:{dep_name}@{spec} absent from lock packages")
+                    continue
+                if isinstance(entry, list) and len(entry) >= 2 and str(entry[1]).startswith("file:"):
+                    continue  # local file/link resolution, integrity n/a
+                record = json.dumps(entry)
+                if not re.search(r"sha(256|384|512)-[A-Za-z0-9+/=]+", record):
+                    unresolved.append(f"{key} has no content integrity hash")
+    require(not unresolved and checked_specs > 0,
+            "bun.lock.coverage",
+            "; ".join(unresolved[:8]) or "no dependency specs found",
+            f"all {checked_specs} manifest specs resolve to hashed lock entries")
+
+    trusted = package.get("trustedDependencies")
+    require(isinstance(trusted, list),
+            "bun.lock.trusted-policy",
+            "package.json must declare an explicit trustedDependencies list",
+            f"trustedDependencies declared explicitly ({len(trusted)} entries)")
+
+    bunfig = (ROOT / "bunfig.toml").read_text() if (ROOT / "bunfig.toml").is_file() else ""
+    require('linker = "isolated"' in bunfig,
+            "bun.lock.linker", "bunfig.toml must keep linker = \"isolated\"",
+            "isolated linker enforced")
+    require("exact = true" in bunfig and "minimumReleaseAge" in bunfig,
+            "bun.lock.install-policy",
+            "bunfig.toml must keep exact = true and minimumReleaseAge",
+            "exact saves + release-age gate enforced")
+
+
+def check_uv_lock() -> None:
+    lock_path = ROOT / "native/uv.lock"
+    if not lock_path.is_file():
+        fail("uv.lock", "native/uv.lock missing — run `uv lock --project native` and commit it")
+        return
+    try:
+        lock = tomllib.loads(lock_path.read_text())
+    except tomllib.TOMLDecodeError as error:
+        fail("uv.lock", f"native/uv.lock is not valid TOML: {error}")
+        return
+    py_pin = read_pin(ROOT / ".python-version")
+    require(lock.get("requires-python") == f"=={py_pin}",
+            "uv.lock.interpreter",
+            f"uv.lock requires-python {lock.get('requires-python')!r} != =={py_pin}",
+            f"uv.lock interpreter =={py_pin}")
+
+    try:
+        pyproject = tomllib.loads((ROOT / "native/pyproject.toml").read_text())
+    except (OSError, tomllib.TOMLDecodeError):
+        pyproject = {}
+    declared: dict[str, str] = {}
+    for dep in pyproject.get("project", {}).get("dependencies", []):
+        match = re.match(r"^([A-Za-z0-9_.-]+?)\s*==\s*([0-9][^,; ]*)$", dep)
+        if match:
+            declared[match.group(1).lower().replace("_", "-")] = match.group(2)
+        else:
+            fail("uv.lock.manifest", f"dependency is not an exact pin: {dep!r}")
+    for group, deps in (pyproject.get("dependency-groups") or {}).items():
+        for dep in deps:
+            match = re.match(r"^([A-Za-z0-9_.-]+?)\s*==\s*([0-9][^,; ]*)$", dep)
+            if match:
+                declared[match.group(1).lower().replace("_", "-")] = match.group(2)
+            else:
+                fail("uv.lock.manifest", f"{group} dependency is not an exact pin: {dep!r}")
+
+    locked = {p["name"].lower().replace("_", "-"): p for p in lock.get("package", [])}
+    missing = [f"{name}=={ver}" for name, ver in declared.items()
+               if locked.get(name, {}).get("version") != ver]
+    require(not missing and declared,
+            "uv.lock.coverage",
+            f"declared pins missing/different in uv.lock: {missing}" if missing
+            else "no declared dependencies",
+            f"all {len(declared)} declared pins locked exactly")
+
+    unhashed = [p["name"] for p in lock.get("package", [])
+                if "registry" in (p.get("source") or {})
+                and not p.get("sdist", {}).get("hash")
+                and not any("sha256:" in w.get("hash", "") for w in p.get("wheels", []))]
+    require(not unhashed,
+            "uv.lock.hashes",
+            f"locked packages without artifact hashes: {unhashed}",
+            f"every locked package carries sha256 artifact hashes ({len(lock.get('package', []))} packages)")
+
+
+def check_assets() -> None:
+    try:
+        manifest = prepare_assets.load_manifest()
+        checked = prepare_assets.verify(manifest)
+        ok("assets", f"{checked} staged files hash-verified; "
+                   f"{len(manifest['assets'])} assets all same-origin with license/source")
+    except prepare_assets.AssetError as error:
+        fail("assets", str(error))
+
+
+def check_base_image_lock() -> None:
+    data = load_json(ROOT / "build/base-image.lock.json", "base-image")
+    if data is None:
+        return
+    images = data.get("oci_images")
+    if not isinstance(images, list) or not images:
+        fail("base-image.oci", "oci_images must be a nonempty list")
+    else:
+        for image in images:
+            ref = image.get("ref", "?")
+            index = image.get("index_digest", "")
+            platforms = image.get("platform_digests", {})
+            problems = []
+            if not SHA256_RE.match(index):
+                problems.append(f"index_digest {index!r} is not sha256:<64hex>")
+            if not isinstance(platforms, dict) or not platforms:
+                problems.append("no platform_digests recorded")
+            else:
+                for plat, digest in platforms.items():
+                    if not SHA256_RE.match(str(digest)):
+                        problems.append(f"{plat} digest {digest!r} is not sha256:<64hex>")
+            tag = ref.rsplit(":", 1)[-1] if ":" in ref else ""
+            if "@" not in ref and (not tag or tag in ("latest", "main", "edge")):
+                problems.append(f"mutable or missing tag in ref {ref!r}")
+            require(not problems, f"base-image.oci.{ref}",
+                    "; ".join(problems) or "ok",
+                    f"{ref} pinned at immutable digests")
+
+    actions = data.get("github_actions")
+    used: set[str] = set()
+    workflow_dir = ROOT / ".github/workflows"
+    for workflow in sorted(workflow_dir.glob("*.y*ml")) if workflow_dir.is_dir() else []:
+        for match in re.finditer(r"uses:\s*([^\s'\"]+)", workflow.read_text()):
+            used.add(match.group(1))
+    recorded = {}
+    if isinstance(actions, list):
+        for entry in actions:
+            uses = entry.get("uses", "")
+            sha = entry.get("resolved_sha", "")
+            recorded[uses] = entry
+            if not SHA1_RE.match(str(sha)):
+                fail("base-image.actions",
+                     f"{uses}: resolved_sha {sha!r} is not a full commit SHA")
+    for uses in sorted(used):
+        entry = recorded.get(uses)
+        if entry is None:
+            fail("base-image.actions", f"workflow uses {uses} but no immutable revision is recorded")
+        elif not SHA1_RE.match(str(entry.get("resolved_sha", ""))):
+            fail("base-image.actions", f"{uses} recorded without a full SHA")
+        else:
+            ok("base-image.actions", f"{uses} recorded at immutable {entry['resolved_sha'][:12]}…")
+    if not used:
+        ok("base-image.actions", "no workflow `uses:` references present")
+
+
+REMOTE_LOADER_RE = re.compile(
+    r"(?:src|href)\s*=\s*[\"']https?://|importScripts\(\s*[\"']https?://|"
+    r"new\s+Worker\(\s*[\"']https?://|fetch\(\s*[\"']https?://|"
+    r"(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run)")
+
+
+def check_no_runtime_download() -> None:
+    try:
+        manifest = prepare_assets.load_manifest()
+        for asset in prepare_assets.validate_manifest(manifest):
+            prepare_assets.check_serve_prefix(asset["serve_prefix"])
+        ok("no-cdn.serve-paths", "all staged serve_prefixes are same-origin /-paths")
+    except prepare_assets.AssetError as error:
+        fail("no-cdn.serve-paths", str(error))
+
+    offenders: list[str] = []
+    scan_roots = [ROOT / "apps/web/src", ROOT / "apps/web/index.html",
+                  ROOT / "apps/web/vite.config.ts"]
+    for item in scan_roots:
+        files = [item] if item.is_file() else sorted(item.rglob("*")) if item.is_dir() else []
+        for file in files:
+            if file.is_file() and file.suffix in (".ts", ".tsx", ".js", ".mjs", ".html", ".css"):
+                text = file.read_text(errors="replace")
+                for match in REMOTE_LOADER_RE.finditer(text):
+                    line = text[:match.start()].count("\n") + 1
+                    offenders.append(f"{file.relative_to(ROOT)}:{line}")
+    require(not offenders, "no-cdn.sources",
+            f"remote loader/CDN references in web sources: {offenders[:6]}",
+            "web sources carry no remote script/worker/fetch or CDN reference")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--frozen", action="store_true", required=True,
+                        help="verify the committed frozen state (read-only, offline)")
+    args = parser.parse_args()
+
+    check_toolchain()
+    check_bun_lock()
+    check_uv_lock()
+    check_assets()
+    check_base_image_lock()
+    check_no_runtime_download()
+
+    print(f"check_dependencies: {CHECKS - len(FAILURES)} passed, {len(FAILURES)} failed")
+    return 1 if FAILURES else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

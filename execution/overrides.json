@@ -7,8 +7,14 @@
     "pnpm-lock.yaml": "bun.lock"
   },
   "command_replacements": [
-    ["pnpm exec ", "bun x --no-install "],
-    ["pnpm ", "bun run "]
+    [
+      "pnpm exec ",
+      "bun x --no-install "
+    ],
+    [
+      "pnpm ",
+      "bun run "
+    ]
   ],
   "scope_additions": {
     "T01": [
@@ -26,9 +32,19 @@
       "scripts/acceptance_receipts.py",
       "docs/ACCEPTANCE.md"
     ],
-    "T02": ["bunfig.toml", "tests/build/"],
-    "T03": ["native/tests/contracts/"],
-    "T49": ["LICENSE", "CONTRIBUTING.md", "SECURITY.md"]
+    "T02": [
+      "bunfig.toml",
+      "tests/build/",
+      "apps/web/public/"
+    ],
+    "T03": [
+      "native/tests/contracts/"
+    ],
+    "T49": [
+      "LICENSE",
+      "CONTRIBUTING.md",
+      "SECURITY.md"
+    ]
   },
   "reserved_paths": [
     "planning/",

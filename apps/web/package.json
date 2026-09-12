@@ -13,8 +13,11 @@
     "format:check": "oxfmt --check ."
   },
   "dependencies": {
+    "pdfjs-dist": "6.3.289",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "6.1.1",

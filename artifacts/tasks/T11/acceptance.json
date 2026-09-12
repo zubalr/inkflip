@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "task_id": "T11",
+  "beads_id": "pdf-t11",
+  "disposition": "accepted",
+  "evaluated_commit": "55828c35780436000e6aa9cd7cc75b0708ac897f",
+  "evaluated_at": "2026-09-12T01:32:02.520432+00:00",
+  "contract_digest": "93ce32bd4465ff9d033d963a18b5314dd41bc757408cf8571093fac2e9a8e8f5",
+  "worker": "devin-subagent-t11",
+  "commands": [
+    {
+      "segment": "node --test tests/runtime/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/runtime/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-qnd_h4ay/results",
+        "--test",
+        "tests/runtime/runtime.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 51,
+        "passed": 51,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T11/commands.log": "df6cb06d804b43f2c5187adcb730a31db02caeb634d589058a95b8ced0b7f60c",
+    "artifacts/tasks/T11/coordinator-commands.log": "35138c7fee69ca32c4efbae1871fe4a0ef29e61a103c2d80032c571416a958ec",
+    "artifacts/tasks/T11/peer-review.md": "fecb566befaecb2b73ad3c86c210044fc11a07436ee04dece5382ebe2b3e2995",
+    "artifacts/tasks/T11/receipt.json": "e8ca38019c3c669169086ec3d41f010b1ff16e37948b90fb94bdd28e4d968732",
+    "artifacts/tasks/T11/review.md": "fecb566befaecb2b73ad3c86c210044fc11a07436ee04dece5382ebe2b3e2995",
+    "artifacts/tasks/T11/run.json": "c5c52704a79382e92a58907890f1eb49bf803200b881275ca77a272b02fc949c"
+  },
+  "criteria": {
+    "Stale results after replace/cancel cannot render": [
+      "artifacts/tasks/T11/commands.log",
+      "artifacts/tasks/T11/run.json"
+    ],
+    "256-occurrence chunks and two unacked cap enforced": [
+      "artifacts/tasks/T11/commands.log",
+      "artifacts/tasks/T11/run.json"
+    ],
+    "cancelled/partial/failed differ": [
+      "artifacts/tasks/T11/commands.log",
+      "artifacts/tasks/T11/run.json"
+    ],
+    "empty success not retried": [
+      "artifacts/tasks/T11/commands.log",
+      "artifacts/tasks/T11/run.json"
+    ],
+    "UI cancellation target of 100 ms and termination target of 500 ms measured in integration.": [
+      "artifacts/tasks/T11/commands.log",
+      "artifacts/tasks/T11/run.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-review-t11"
+    ],
+    "path": "artifacts/tasks/T11/review.md"
+  }
+}

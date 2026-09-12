@@ -1,0 +1,96 @@
+# T02 commands.log — executed commands, exit codes, counts
+# Worktree: worktrees/pdf-t02  Branch: work/devin/t02
+# Implementation commits: 801ff42 (locks/assets/checks/tests) + 063d04c
+#   (ajv 8.18.0 substitution, browser probe, pytest scope, proposal P3)
+# Base: 3bef697a31120d4cb32e8fa044d419bc34e32cf5
+
+## Toolchain acquisition & pins (executed during implementation)
+- `uvx uv@0.12.13 python install 3.13.15`                      exit 0  # host uv 0.9.5's index predates the 3.13.15 standalone build; managed cpython-3.13.15-macos-aarch64 installed
+- `.node-version` = 22.23.2   `.python-version` = 3.13.15     # exact toolchain pins
+- `native/pyproject.toml` requires-python = "==3.13.15"       # interpreter freeze; uv sync/run resolve exactly this
+
+## Dependency resolution & lock generation
+- `bun install`                                               exit 0  # generated bun.lock (isolated linker, exact saves); 87 pkgs macOS
+  - initial run blocked workerd@1.20260910.1 + miniflare@5.20260910.0-alpha by minimumReleaseAge=604800
+    → documented exact-version `minimumReleaseAgeExcludes` added to bunfig.toml; rerun resolved
+- `uv lock --project native`                                  exit 0  # native/uv.lock: 15 pkgs, all sha256-hashed, requires-python ==3.13.15
+- `uv sync --project native`                                  exit 0  # 13 payloads incl. pytest 9.1.1
+
+## Registry / engine verification
+- npm registry HTTP 200 for all 15 manifest specs (scoped URLs percent-encoded; initial 404s were an encoding bug, corrected)
+- engines checked: vite 8.3.0 + @vitejs/plugin-react 6.1.1 (^20.19||>=22.12), pdfjs-dist 6.3.289 (>=22.13), playwright 1.57.0 (>=18) → all satisfied by node 22.23.2
+
+## Asset staging
+- `python3 scripts/prepare_assets.py resolve`                 exit 0  # config/resolved-assets.json: 8 asset groups, 212 files, sha256+bytes+source+license each
+- `python3 scripts/prepare_assets.py stage`                   exit 0  # 212 files → apps/web/public (51 MiB), hash-verified on write
+- `python3 scripts/prepare_assets.py verify`                  exit 0  # re-hashes every staged file
+- tessdata eng.traineddata fetched once from the pinned upstream commit; sha256 7d4322bd…7170b2 == manifest; 4,113,088 bytes
+
+## Advisory checks
+- `bun audit`   (ajv 8.17.1)                                  exit 1  # moderate GHSA-2g4f-4pwh-qvx6 ($data ReDoS)
+- substitute ajv → 8.18.0 (same-family patch; $data unused in inkflip schema)
+- `bun audit`   (ajv 8.18.0)                                  exit 0  # "No vulnerabilities found (checked 168 packages)"
+- `uv export --project native --frozen --format requirements-txt --no-hashes | uvx pip-audit -r /dev/stdin`
+                                                              exit 0  # "No known vulnerabilities found"
+
+## Acceptance command (T02 effective command, this checkout, commit 063d04c)
+- `python3 scripts/check_dependencies.py --frozen`            exit 0  # 16 passed, 0 failed (toolchain pins, lock coverage/hashes/linker/policy, 212 staged hashes, OCI+action immutability, no-CDN)
+- `python3 -m unittest discover -s tests/build -v`            exit 0  # Ran 37 tests — OK — incl. substituted-model, missing-asset, CDN, mutable action/OCI negative controls
+
+## Frozen install ×2 — Linux (Docker, pinned OCI image)
+- image: python@sha256:c89921a0c7b42f27338ed8c279fb370e69e941c92460f91895d08304e844b0b4
+  (= linux/arm64 platform digest of docker.io/library/python:3.13.15-slim-trixie, index sha256:9d2e5553…e00285)
+- host: Docker 29.4.0 / OrbStack, Linux aarch64 (7.0.14-orbstack)
+- clean checkout = `git archive 063d04c` → src.tar (no node_modules/.venv)
+- in-container toolchain verified by publisher checksums before use:
+  node-v22.23.2-linux-arm64.tar.xz vs nodejs.org SHASUMS256.txt → OK
+  bun-linux-aarch64.zip vs release SHASUMS256.txt → OK
+  uv 0.12.13 manylinux wheel vs recorded sha256 → OK
+- run 1: `bun install --frozen-lockfile` → 87 pkgs (ajv@8.18.0); `uv sync --frozen --project native` → 13 pkgs
+- run 2: rm -rf node_modules/**/node_modules native/.venv; `bun install --frozen-lockfile` → 87 pkgs; `uv sync --frozen --project native` → 13 pkgs
+- `uv run --frozen --project native python -m pytest --version` → pytest 9.1.1
+- `python3 scripts/check_dependencies.py --frozen` → 16 passed, 0 failed
+- `python3 -m unittest discover -s tests/build -v` → Ran 37 tests — OK
+- `PROOF-OK`, docker exit 0 — full log: artifacts/tasks/T02/linux-frozen-install.log
+
+## Frozen install — macOS clean copy (supplementary platform coverage)
+- `git archive 063d04c` → /private/tmp/inkflip-t02-macos (clean, no node_modules/.venv)
+- `bun install --frozen-lockfile`                             exit 0  # 84 pkgs (ajv@8.18.0; darwin-arm64 optional deps)
+- `uv sync --frozen --project native`                         exit 0  # 13 pkgs
+- `uv run --frozen --project native python -m pytest --version` → pytest 9.1.1
+- `python3 scripts/check_dependencies.py --frozen`            exit 0  # 16 passed, 0 failed
+- `python3 -m unittest discover -s tests/build`               exit 0  # Ran 37 — OK
+- log: artifacts/tasks/T02/macos-frozen-install.log
+
+## Browser feasibility probe (same-origin, real Chromium)
+- Chromium/headless-shell for playwright 1.57.0 acquired via npmmirror after
+  Google's CDN stalled at ~428 KiB / 0 B/s; archives extracted manually into
+  ~/Library/Caches/ms-playwright/{chromium-1200,chromium_headless_shell-1200};
+  both binaries verified "Google Chrome for Testing 143.0.7499.4"
+- `node tests/build/probe/probe.mjs`                          exit 0  # verdict PASS — 7/7 checks:
+  control OK; pdfjs 6.3.289 text layer contains "HELLO INKFLIP reading control";
+  OCR reads control string; no console errors; all requests same-origin;
+  model fetched same-origin; missing-model scenario fails closed.
+  evidence: artifacts/tasks/T02/browser-probe.json + browser-probe.png
+  NOTE: feasibility only — not product/browser acceptance. pdfjs legacy
+  main/worker pair used (modern build needs Map.getOrInsertComputed, absent
+  in Chromium 143); probe documents the pairing the reader adapter must use.
+
+## Cross-suite effects observed (recorded in docs/proposals/T02.md)
+- `bun run verify`                                            exit 1  # 49 tests, 1 failed: T01's
+  tests/bootstrap::test_declared_suite_with_missing_runner_fails asserts
+  `run test:browser` ⇒ "prerequisites missing". T02 installs playwright, so the
+  command now fails honestly at the next layer ("zero tests collected"). T01-owned
+  file; repoint proposal P2. test:a11y/test:visual/test:privacy still print
+  "prerequisites missing" (their suites' dirs absent) — equivalent live scenario.
+- `python3 scripts/task_acceptance.py run test:native`        exit≠0 # pytest now runs
+  (uv.lock exists) but rootdirs at repo root and collects byte-frozen
+  planning/tools/test_validators.py → ImportError on yaml (a planning-tool dep).
+  Declared command fails explicitly until its suite lands; argv/rootdir scoping
+  is the future native test task's — proposal P3. pyproject testpaths added for
+  native/-rootdir invocations.
+- `python3 scripts/task_acceptance.py run build`              exit 0  # vite build succeeds (deps now installed); declared command activated by T02
+
+## Hygiene
+- `git diff --check`                                          exit 0  # no whitespace errors
+- `git check-ignore apps/web/public/...`                      exit 1  # staged assets are tracked, not ignored

@@ -1,0 +1,31 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "public/covered-control.pdf",
+  "family": "covered-text",
+  "fixture_id": "F02",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "known_reader_observations": [
+    {
+      "output": "$1,00000",
+      "reader": "PDFium",
+      "source": "planning/product/DEMO_AND_GALLERY.md (planning environment, 2026-09)"
+    },
+    {
+      "output": "$1,000$100",
+      "reader": "pypdf",
+      "source": "planning/product/DEMO_AND_GALLERY.md (planning environment, 2026-09)"
+    }
+  ],
+  "mechanism": {
+    "covered": true
+  },
+  "observation": "actual extraction kept, mechanism limited; reader-dependent concatenation is retained as observed behavior",
+  "paint_order": [
+    "$1,000",
+    "white cover rect",
+    "$100"
+  ],
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "public"
+}
