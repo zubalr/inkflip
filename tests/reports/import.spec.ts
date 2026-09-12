@@ -456,16 +456,32 @@ test("source attach requires exact bytes; mismatch is never attached", async ({ 
   await offerReport(page, "evidence.inkflip.json", await makeExport(page));
   await expect(page.locator("[data-testid=source-missing]")).toBeVisible();
 
-  // Wrong bytes — a different real PDF — rejected with verbatim copy and
-  // never attached.
+  // Wrong length — a different real PDF — rejected at the declared-size
+  // gate with verbatim copy and never attached.
   await offerSourceFile(page, WRONG_PDF);
   await expect(page.locator("#source-mismatch")).toContainText(
     "does not match the original document checksum",
   );
+  await expect(page.locator("[data-testid=source-error-detail]")).toHaveText(
+    "source:length-mismatch",
+  );
   await expect(page.locator("[data-testid=source-missing]")).toBeVisible();
   await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
+
+  // Same length, different bytes — the declared-size gate passes, so the
+  // digest itself must refuse: byte length alone is never sufficient.
+  const corrupt = Buffer.from(SOURCE_PDF);
+  corrupt[corrupt.length - 1] ^= 0x01;
+  await offerSourceFile(page, corrupt);
+  await expect(page.locator("[data-testid=source-error-detail]")).toHaveText(
+    "source:sha256-mismatch",
+  );
+  await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
   const rejected = (await events(page)).filter((e) => e.type === "source_rejected");
-  expect(rejected.length).toBe(1);
+  expect(rejected.map((e) => e.detail)).toEqual([
+    "source:length-mismatch",
+    "source:sha256-mismatch",
+  ]);
 
   // The exact original bytes attach and replay state updates.
   await offerSourceFile(page, SOURCE_PDF);
@@ -946,6 +962,123 @@ test("a new report clears the previous generation before reopening", async ({ pa
     { gen: genA },
   );
   expect(stale).toEqual({ ok: false, code: "stale_generation" });
+});
+
+test("a pending source read cannot attach across a superseded generation", async ({ page }) => {
+  await openPreview(page);
+  const reportA = await makeExport(page);
+  // B records a DIFFERENT document — an attach verified against A's
+  // identity must never land on it, even as a display claim.
+  const reportB = await page.evaluate(async (src) => {
+    const t = (globalThis as any).__t22;
+    const rep = JSON.parse(JSON.stringify(src));
+    rep.document.sha256 = "a".repeat(64);
+    rep.document.byte_length = 42;
+    t.contracts.seal(rep);
+    const { report } = t.exportEngine.projectReport(rep, {});
+    return t.exportEngine.serializeReportJson(report);
+  }, NATIVE_EVIDENCE);
+  const idB = JSON.parse(reportB).report_id as string;
+
+  // Phase 1+2 — busy entry guard, then replace-during-read: the new
+  // report wins and the stale read is dropped before it can attach.
+  const race = await page.evaluate(
+    async ({ aJson, bJson, pdf }) => {
+      const t = (globalThis as any).__t22;
+      const enc = new TextEncoder();
+      const out: Record<string, unknown> = {};
+      const defer = (make: () => ArrayBuffer) => {
+        let release!: () => void;
+        const gate = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        return { read: () => gate.then(make), release };
+      };
+
+      // offerSource during an in-flight report import is refused up
+      // front — it never starts a byte read.
+      const a = defer(() => enc.encode(aJson).buffer as ArrayBuffer);
+      const offerP = t.controller.offer({
+        name: "a.inkflip.json",
+        size: enc.encode(aJson).byteLength,
+        arrayBuffer: a.read,
+      });
+      const early = await t.controller.offerSource({
+        name: "early.pdf",
+        size: pdf.length,
+        arrayBuffer: async () => new Uint8Array(pdf).buffer as ArrayBuffer,
+      });
+      out.busy = early.ok ? "accepted" : early.kind;
+      a.release();
+      out.openA = (await offerP).ok;
+
+      // A source read pending on A, then report B offered (replace):
+      // B's generation wins and the in-flight read resolves superseded
+      // — no attach, no ownership, no event under B's generation.
+      const src = defer(() => new Uint8Array(pdf).buffer as ArrayBuffer);
+      const pending = t.controller.offerSource({
+        name: "orig.pdf",
+        size: pdf.length,
+        arrayBuffer: src.read,
+      });
+      out.openB = (
+        await t.controller.offer({
+          name: "b.inkflip.json",
+          size: enc.encode(bJson).byteLength,
+          arrayBuffer: async () => enc.encode(bJson).buffer as ArrayBuffer,
+        })
+      ).ok;
+      src.release();
+      const stale = await pending;
+      out.stale = stale.ok ? "attached" : stale.kind;
+      out.currentIsB = t.controller.currentImport?.view.reportId === JSON.parse(bJson).report_id;
+      return out;
+    },
+    { aJson: reportA, bJson: reportB, pdf: Array.from(SOURCE_PDF) },
+  );
+  expect(race.busy).toBe("busy");
+  expect(race.openA).toBe(true);
+  expect(race.openB).toBe(true);
+  expect(race.stale).toBe("superseded");
+  expect(race.currentIsB).toBe(true);
+
+  // B's own view is untouched by A's pending attach: it still records
+  // a missing original and no attach ever displayed.
+  await expect(page.locator("[data-testid=report-id]")).toContainText(idB.slice(0, 16));
+  await expect(page.locator("[data-testid=source-missing]")).toBeVisible();
+  await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
+
+  // Phase 3 — clear-during-read: the workspace empties and the stale
+  // read cannot resurrect the cleared report.
+  const cleared = await page.evaluate(async () => {
+    const t = (globalThis as any).__t22;
+    const out: Record<string, unknown> = {};
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const pending = t.controller.offerSource({
+      name: "late.pdf",
+      size: 42,
+      arrayBuffer: () => gate.then(() => new ArrayBuffer(42)),
+    });
+    t.controller.clear();
+    release();
+    const stale = await pending;
+    out.stale = stale.ok ? "attached" : stale.kind;
+    out.currentAfterClear = t.controller.currentImport === null;
+    out.stateAfterClear = t.coordinator.fileState;
+    out.attachEvents = t.events.filter(
+      (e: { type: string }) => e.type === "source_attached",
+    ).length;
+    return out;
+  });
+  expect(cleared.stale).toBe("superseded");
+  expect(cleared.currentAfterClear).toBe(true);
+  expect(cleared.stateAfterClear).toBe("idle");
+  expect(cleared.attachEvents).toBe(0);
+  await expect(page.locator("[data-testid=import-report]")).toHaveCount(0);
+  await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
 });
 
 test("declared-size gate rejects before any byte is read", async ({ page }) => {

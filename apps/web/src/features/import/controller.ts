@@ -284,12 +284,22 @@ export class ImportController {
    * an open evidence report whose original bytes are missing; the bytes
    * must verify against the recorded document identity or nothing is
    * attached and replay stays blocked (I09).
+   *
+   * The byte read is bound to the exact opened report and generation it
+   * started under: a replace or clear that lands while the read is in
+   * flight supersedes it, and the verified bytes are dropped rather
+   * than attached to a different report or a cleared workspace (I07 —
+   * the same generation discipline `offer` applies to itself). The
+   * newer action always wins; the stale read never emits.
    */
   async offerSource(
     candidate: ReportCandidate,
   ): Promise<
     SourceCheckLike | { readonly ok: false; readonly kind: string; readonly detail: string }
   > {
+    if (this.busy) {
+      return { ok: false, kind: "busy", detail: "source:busy" };
+    }
     const current = this.current;
     if (current === null) {
       return { ok: false, kind: "no_report", detail: "source:no-report-open" };
@@ -311,6 +321,8 @@ export class ImportController {
       });
       return { ok: false, kind: "source_mismatch", detail };
     }
+    // Bind the pending read to this exact report at this generation.
+    const generation = this.host.currentGeneration;
     let bytes: Uint8Array;
     try {
       bytes = new Uint8Array(await candidate.arrayBuffer());
@@ -322,6 +334,12 @@ export class ImportController {
         detail,
       });
       return { ok: false, kind: "source_mismatch", detail };
+    }
+    // The read outlived the report it was offered for — replace or
+    // clear already won. Drop the bytes: no attach, no ownership, no
+    // event under the new generation.
+    if (this.current !== current || this.host.currentGeneration !== generation) {
+      return { ok: false, kind: "superseded", detail: "source:superseded" };
     }
     const check = this.engine.verifySource(current.imported.report, bytes);
     if (!check.ok) {
