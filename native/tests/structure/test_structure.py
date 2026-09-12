@@ -351,6 +351,33 @@ class UnsupportedCompositingTests(unittest.TestCase):
         ]
         self.assertTrue(alpha_limited, "alpha compositing limit must be recorded")
 
+    def test_transparent_text_is_flagged_per_occurrence_opaque_is_not(self):
+        """P2 fix: transparency participates per object via
+        FPDFPageObj_HasTransparency — an object under an ExtGState (alpha or
+        soft-mask family) carries its own unsupported-compositing limitation,
+        while an ordinary opaque text object on the same page carries none."""
+        content = (
+            "q /G0 gs BT /F0 12 Tf 0 Tr 1 0 0 1 60 300 Tm (ALPHA) Tj ET Q\n"
+            "BT /F0 12 Tf 0 Tr 1 0 0 1 60 260 Tm (OPAQUE) Tj ET\n"
+        )
+        data = build_pdf(
+            content,
+            extra_resources=" /ExtGState << /G0 6 0 R >>",
+            extra_objects={6: "<< /Type /ExtGState /ca 0.5 /CA 0.5 >>"},
+        )
+        result, occurrences = run_extract(data, "object_render_mode")
+        self.assertEqual(result["status"], "completed")
+        by_text = {o["raw_text"]: o for o in occurrences if o["raw_text"]}
+        self.assertIn("ALPHA", by_text)
+        self.assertIn("OPAQUE", by_text)
+        alpha_limits = " ".join(by_text["ALPHA"]["limitations"])
+        opaque_limits = " ".join(by_text["OPAQUE"]["limitations"])
+        self.assertIn("transparency compositing", alpha_limits)
+        self.assertIn("unsupported compositing recorded", alpha_limits)
+        self.assertNotIn("transparency compositing", opaque_limits)
+        schema_validator("Occurrence").validate(by_text["ALPHA"])
+        schema_validator("Occurrence").validate(by_text["OPAQUE"])
+
     def test_nested_form_xobject_is_not_traversed_and_recorded(self):
         # A Form XObject draws the text; the page content only invokes it.
         # The traversal stays top-level and records the unsupported compositing.
