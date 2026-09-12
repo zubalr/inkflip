@@ -104,3 +104,10 @@ copied or adapted:
 - The frozen cost weights (0.65/0.20/0.15), acceptance thresholds
   (0.45/0.12), span cap (4) and component cap (64) are specified by the
   planning document, not tuned against fixtures.
+
+### Local Tesseract client patch
+
+The Apache-2.0 tesseract.js 7.0.0 source constructor and its types carry the
+Inkflip cancellation patch in `patches/tesseract.js@7.0.0.patch`. Upstream and
+modified hashes are recorded in `config/dependency-patches.json`. The staged
+worker, WASM and model bytes and existing license notices are unchanged.

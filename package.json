@@ -36,5 +36,8 @@
     "oxlint": "1.82.0",
     "typescript": "6.0.2",
     "wrangler": "4.131.0"
+  },
+  "patchedDependencies": {
+    "tesseract.js@7.0.0": "patches/tesseract.js@7.0.0.patch"
   }
 }

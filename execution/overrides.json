@@ -35,7 +35,9 @@
     "T02": [
       "bunfig.toml",
       "tests/build/",
-      "apps/web/public/"
+      "apps/web/public/",
+      "patches/",
+      "config/dependency-patches.json"
     ],
     "T03": [
       "native/tests/contracts/"

@@ -1,0 +1,122 @@
+diff --git a/src/createWorker.js b/src/createWorker.js
+index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f84c183539 100644
+--- a/src/createWorker.js
++++ b/src/createWorker.js
+@@ -21,11 +21,13 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+   const {
+     logger,
+     errorHandler,
++    signal,
+     ...options
+   } = resolvePaths({
+     ...defaultOptions,
+     ..._options,
+   });
++  if (signal && signal.aborted) throw signal.reason;
+   const promises = {};
+ 
+   // Current langs, oem, and config file.
+@@ -41,15 +43,33 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+     workerResResolve = resolve;
+     workerResReject = reject;
+   });
+-  const workerError = (event) => { workerResReject(event.message); };
+-
+   let worker = spawnWorker(options);
+-  worker.onerror = workerError;
++  let terminalError;
++  const abort = () => stop(signal.reason);
++  // Inkflip: own the raw transport from spawn, including never-ready workers.
++  const stop = (reason) => {
++    if (worker === null) return;
++    const ownedWorker = worker;
++    worker = null;
++    terminalError = reason;
++    if (signal) signal.removeEventListener('abort', abort);
++    workerResReject(reason);
++    Object.keys(promises).forEach((promiseId) => {
++      promises[promiseId].reject(reason);
++      delete promises[promiseId];
++    });
++    terminateWorker(ownedWorker);
++  };
++  worker.onerror = (event) => stop(new Error(event.message));
+ 
+   workerCounter += 1;
+ 
+   const startJob = ({ id: jobId, action, payload }) => (
+     new Promise((resolve, reject) => {
++      if (worker === null) {
++        reject(terminalError);
++        return;
++      }
+       log(`[${id}]: Start ${jobId}, action=${action}`);
+       // Using both `action` and `jobId` in case user provides non-unique `jobId`.
+       const promiseId = `${action}-${jobId}`;
+@@ -186,22 +206,13 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+   };
+ 
+   const terminate = async () => {
+-    if (worker !== null) {
+-      /*
+-      await startJob(createJob({
+-        id: jobId,
+-        action: 'terminate',
+-      }));
+-      */
+-      terminateWorker(worker);
+-      worker = null;
+-    }
+-    return Promise.resolve();
++    stop(new Error('Worker has been terminated'));
+   };
+ 
+   onMessage(worker, ({
+     workerId, jobId, status, action, data,
+   }) => {
++    if (worker === null) return;
+     const promiseId = `${action}-${jobId}`;
+     if (status === 'resolve') {
+       log(`[${workerId}]: Complete ${jobId}`);
+@@ -210,17 +221,16 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+     } else if (status === 'reject') {
+       promises[promiseId].reject(data);
+       delete promises[promiseId];
+-      if (action === 'load') workerResReject(data);
+       if (errorHandler) {
+         errorHandler(data);
+-      } else {
+-        throw Error(data);
+       }
+     } else if (status === 'progress') {
+       logger({ ...data, userJobId: jobId });
+     }
+   });
+ 
++  if (signal) signal.addEventListener('abort', abort, { once: true });
++
+   const resolveObj = {
+     id,
+     worker,
+@@ -240,7 +250,7 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+     .then(() => loadLanguageInternal(langs))
+     .then(() => initializeInternal(langs, oem, config))
+     .then(() => workerResResolve(resolveObj))
+-    .catch(() => {});
++    .catch(stop);
+ 
+   return workerRes;
+ };
+diff --git a/src/index.d.ts b/src/index.d.ts
+index 2c9689db387906b7ce272ae15005f8b9aa56a269..d8da5cd95342d091da5a7b5ccd105855bae1a0fb 100644
+--- a/src/index.d.ts
++++ b/src/index.d.ts
+@@ -51,6 +51,8 @@ declare namespace Tesseract {
+   }
+ 
+   interface WorkerOptions {
++    /** Inkflip: abort readiness/posted jobs and terminate; upstream input loading is not cancelled. */
++    signal?: AbortSignal
+     corePath: string
+     langPath: string
+     cachePath: string
