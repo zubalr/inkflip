@@ -172,10 +172,9 @@ def start(task: dict, actor: str, overrides: dict) -> None:
 
 def start_review(issue_id: str, actor: str, overrides: dict) -> None:
     raise ValueError(
-        "Deprecated local review admission is refused: the coordinator assigns "
-        "independent reviews through 'python3 scripts/native_pass.py dispatch' "
-        "from the canonical integration checkout. Workers never self-claim; "
-        "ask the coordinator for the review grant.")
+        "Deprecated local review admission is refused: request an explicit "
+        "independent review assignment from the coordinator through existing "
+        "native facilities. Workers never self-claim.")
 
 
 def ready(tasks: dict) -> None:
@@ -206,7 +205,6 @@ def check() -> None:
 def render_prompt(task: dict, actor: str, overrides: dict) -> str:
     validate_actor(actor)
     tid = task["id"]
-    checkout = canonical_root().parent / "worktrees" / bead_id(tid)
     port = overrides["development_port_base"] + int(tid[1:])
     inputs = "\n".join(f"- `planning/{p}`" for p in task["input_files"])
     scope = "\n".join(f"- `{p}`" for p in task["allowed_scope"])
@@ -286,8 +284,9 @@ are a subsequent task after T03 and T06 acceptance, not extra scope here.""",
     return f"""# {tid}: {task['title']}
 
 You are an implementation worker in the owner's PDF inspector project.
-Assigned checkout: `{checkout}`
-Assigned branch: `work/{bead_id(tid)}`
+Use the exact branch saved in your Beads execution grant and the checkout
+assigned separately by the coordinator; do not create or assume a worktree
+or branch.
 Beads task: `{bead_id(tid)}`. Suggested unique session label: `{actor}`.
 Development port: `{port}` with strict-port behavior; tests use separate ports.
 
@@ -318,7 +317,8 @@ python3 scripts/coordination.py task {tid}
 
 3. Start editing only inside a coordinator-granted checkout. The coordinator
    admits work through `scripts/native_pass.py dispatch`, which records the
-   claim in Beads and prepares the task branch; workers never self-claim and
+   grant in Beads; it separately prepares and names the granted checkout.
+   Workers never self-claim and
    the historical `coordination.py start`/`start-review` commands refuse.
    A blocked future task, stale base, dirty checkout, occupied claim, or
    absent grant needs a coordinator handoff. Do not reset, force-refresh,
