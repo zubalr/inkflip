@@ -32,6 +32,8 @@ Evidence from macOS arm64, September 12, 2026:
 - `build-tests.log`: all 46 registered TEST-02 Python cases pass, including
   seven patch tampering cases and the nested 11 + 4 JavaScript cases.
 
-Independent review and clean-install evidence are collected separately before
-integration. No worker protocol, frozen planning, asset hash or acceptance
+`fresh-installs.log` records two fresh Mac clones of source candidate
+`68d31df54734e2d086f0915346b04a20e2e8d1e2`: both frozen Bun 1.4.0 installs,
+installed patch checks, 11 constructor tests and lock-drift checks pass.
+Independent review is collected separately before integration. No worker protocol, frozen planning, asset hash or acceptance
 assertion has been relaxed.
