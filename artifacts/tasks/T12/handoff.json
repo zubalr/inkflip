@@ -1,0 +1,88 @@
+{
+ "task": "T12",
+ "beads_id": "pdf-t12",
+ "title": "Implement raw normalization and conservative alignment",
+ "worker": "devin-t12 (Devin app, single active Devin worker)",
+ "app": "devin",
+ "pass": 1,
+ "branch": "work/devin/t12",
+ "base": "219a469",
+ "implementation_commit": "d821b2779d21eb093d55147598949f8931f30957",
+ "ready_for_review": true,
+ "review_scope": "implementation commit plus evidence commits on work/devin/t12",
+ "executed_commands": [
+  {
+   "command": "node --test tests/alignment/*.test.mjs",
+   "exit": 0,
+   "counts": {
+    "collected": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0
+   }
+  },
+  {
+   "command": "python3 scripts/task_acceptance.py task T12",
+   "exit": 0,
+   "counts": {
+    "collected": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0
+   }
+  },
+  {
+   "command": "bun run verify",
+   "exit": 0
+  },
+  {
+   "command": "bun x --no-install tsc -b tsconfig.json --force",
+   "exit": 0
+  }
+ ],
+ "evidence_paths": [
+  "artifacts/tasks/T12/receipt.json",
+  "artifacts/tasks/T12/commands.log",
+  "artifacts/tasks/T12/criteria-evidence.md",
+  "artifacts/tasks/T12/experiment-granularity.md",
+  "artifacts/tasks/T12/handoff.json"
+ ],
+ "deliverables": {
+  "packages/compare/normalization/index.ts": "scalar-whitespace-v1 normalized view built on the contract normalize(); reversible scalar-index maps (normalizedToRawStart/End, normalizedRangeToRaw, rawToNormalized, rawRangeToNormalized, rawSlice*); checkNormalizedView integrity check; material/combining/whitespace scalar classification",
+  "packages/compare/normalization/README.md": "module doc + executable example",
+  "packages/compare/alignment/constants.ts": "frozen REGION_MATCH_V1 parameters (weights 0.65/0.20/0.15, accept 0.45, margin 0.12, span cap 4, component cap 64, unmatchedPenalty 0.5, pairPreference 0.2) + SCORE_SEMANTICS",
+  "packages/compare/alignment/text.ts": "scalar Levenshtein with material-substitution cost; normalizedTextDistance",
+  "packages/compare/alignment/spatial.ts": "fragment/line-run/block construction, polygon intersection, vertical/horizontal gates, bounded counters",
+  "packages/compare/alignment/match.ts": "classification (localized/page_level/out_of_scope), candidate spans 1-4 frags, pair costs, bounded non-crossing assignment, margin via re-solve + local exchanges, abstention, order differences, diagnostics",
+  "packages/compare/alignment/index.ts": "public surface",
+  "packages/compare/alignment/README.md": "module doc + executable example",
+  "tests/alignment/normalization.test.mjs": "17 tests: collapse semantics, material preservation, scalar indices, reversible maps, integrity check",
+  "tests/alignment/alignment.test.mjs": "19 tests: unique/split-merge matches, F11 duplicates, ties/weak/order_conflict abstention, page_only gating, F12 order differences, F13/F14 preservation, region scope, bounded counters",
+  "docs/ATTRIBUTION.md": "T12 provenance entry (original implementation, no copied code)"
+ },
+ "measured_decisions": [
+  {
+   "decision": "pairPreference = 0.2 granularity term inside the assignment minimizer only",
+   "reason": "Measured: whole-line span blobs beat per-fragment matches because text distance averages local differences over longer strings \u2014 three duplicate occurrences surfaced all-ambiguous. The preference keeps one_to_one granularity ahead while split/merge still wins when its pair cost dominates. Recorded in experiment-granularity.md (E-T12-1)."
+  },
+  {
+   "decision": "margin = min(non-crossing re-solve, bounded local exchanges conflicting with <=2 chosen pairs)",
+   "reason": "Measured: the non-crossing model alone floors margins at the granularity preference, so the spec's 'tie' abstention could never fire (E-T12-2). Exchanges let a displaced fragment rematch or stay unmatched \u2014 a real competing assignment \u2014 while crossing solutions are still never accepted as unique."
+  },
+  {
+   "decision": "normalization wraps the contract normalize() rather than re-implementing collapse",
+   "reason": "Views produced here must be byte-for-byte the contract views the report validator recomputes; this module adds index conversion, raw-slice recovery and integrity checking instead of a second collapse implementation."
+  }
+ ],
+ "review_attention": [
+  "match.ts exchangeMargin (lines ~720-830): the local-exchange margin term is the subtlest piece \u2014 verify the displaced-fragment rescue solve and the conflicted-pair cap of 2.",
+  "constants.ts pairPreference: a bookkeeping term inside the minimizer; acceptance thresholds apply to the unmodified pair cost \u2014 confirm no exported component includes it.",
+  "tests construct synthetic occurrences per F11-F15 dimension descriptions; no reader extraction was fabricated.",
+  "packages/compare tsconfig include is src/** \u2014 scaffold wiring for the new dirs belongs to the comparison-runtime task; noted as a limitation, not silently fixed out of scope."
+ ],
+ "limitations": [
+  "Package export/src wiring (packages/compare/package.json -> ./src/index.ts) is outside the T12 allowed scope; the delivered directories match the contract's deliverable paths.",
+  "F11-F15 are exercised as synthetic occurrence inputs; reader-produced PDF extractions belong to downstream comparison tasks."
+ ],
+ "dependency_requests": []
+}
