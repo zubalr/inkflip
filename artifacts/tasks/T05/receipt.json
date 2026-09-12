@@ -86,7 +86,11 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T05/commands.log",
-        "artifacts/tasks/T05/criteria-evidence.md"
+        "artifacts/tasks/T05/criteria-evidence.md",
+        "artifacts/tasks/T05/refresh-20260912/run.json",
+        "artifacts/tasks/T05/refresh-20260912/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T05/refresh-20260912/review-inputs.json"
       ],
       "detail": "Two fresh generations byte-identical (all 33 files); --check byte-compares the committed tree and detects a flipped byte; RunLength raster encoding removes zlib-build dependence, so every manifest entry is byte-identical and none uses the pinned-asset escape."
     },
@@ -96,7 +100,11 @@
         "artifacts/tasks/T05/commands.log",
         "artifacts/tasks/T05/criteria-evidence.md",
         "artifacts/tasks/T05/render-evidence/mapping-amount.pdf.png",
-        "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png"
+        "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png",
+        "artifacts/tasks/T05/refresh-20260912/run.json",
+        "artifacts/tasks/T05/refresh-20260912/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T05/refresh-20260912/review-inputs.json"
       ],
       "detail": "Content streams byte-identical between mapping-amount and mapping-control; the only file difference is the ToUnicode <31> entry (<0031002C0030> vs <0031>), so extraction differs ($1,000 vs $100) for any ToUnicode-honoring reader while painting is identical. macOS QuickLook renders both byte-identically (repeatable, ink-decoded non-blank). Measured reader extraction and in-suite pixel rendering are deferred to T26/T27/G1 because no reader dependency is installed in this checkout (locks owned by T02); the render observation is macOS-local and is not Linux or device evidence."
     },
@@ -104,7 +112,11 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T05/criteria-evidence.md",
-        "artifacts/tasks/T05/commands.log"
+        "artifacts/tasks/T05/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/run.json",
+        "artifacts/tasks/T05/refresh-20260912/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T05/refresh-20260912/review-inputs.json"
       ],
       "detail": "No fixture bytes contain their own name or stem; renamed copies are byte-identical and manifest identity is SHA-256 content-addressed, so renamed documents resolve to the same fixture entry."
     },
@@ -112,7 +124,11 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T05/criteria-evidence.md",
-        "artifacts/tasks/T05/commands.log"
+        "artifacts/tasks/T05/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/run.json",
+        "artifacts/tasks/T05/refresh-20260912/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T05/refresh-20260912/review-inputs.json"
       ],
       "detail": "Across all 17 PDFs: no /FontFile*, no /FontDescriptor, only base-14 Helvetica /BaseFont; the scan raster uses the generator's own 5x7 bitmap table (no font resource). Decoded streams contain no private-key armor, password/secret/flag markers or address-like '@'; every manifest entry carries the project-MIT rights statement."
     },
@@ -122,9 +138,18 @@
         "artifacts/tasks/T05/criteria-evidence.md",
         "artifacts/tasks/T05/commands.log",
         "artifacts/tasks/T05/render-evidence/scan-correct.pdf.png",
-        "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png"
+        "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png",
+        "artifacts/tasks/T05/refresh-20260912/run.json",
+        "artifacts/tasks/T05/refresh-20260912/commands.log",
+        "artifacts/tasks/T05/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T05/refresh-20260912/review-inputs.json"
       ],
       "detail": "The minimum control is generated and structurally proven: scan-correct carries a correctly anchored invisible (Tr 3) layer whose words and coordinates match the raster exactly (expectation files record them), with raster-only and displaced-layer siblings in the same development split; scan renders are byte-identical with and without the layer (invisible adds no marks). The 'read without an alarm' outcome is realized when the native/browser readers (T26/T27) and the G1 scenario consume these fixtures; this task executes no OCR and fabricates no reading. Reviewer attention: bind the reader-side half of this criterion at T26/T27/G1 evidence."
     }
+  },
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T05/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
   }
 }

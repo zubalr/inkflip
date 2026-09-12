@@ -15,7 +15,11 @@
       "detail": "`python3 scripts/task_acceptance.py list` exit 0 lists 16 registry commands; `bun run verify` exit 0; every registry command name has a package.json script routing through the harness (asserted by tests/bootstrap).",
       "evidence": [
         "artifacts/tasks/T01/run.json",
-        "artifacts/tasks/T01/peer-review.md"
+        "artifacts/tasks/T01/peer-review.md",
+        "artifacts/tasks/T01/refresh-20260912/run.json",
+        "artifacts/tasks/T01/refresh-20260912/commands.log",
+        "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
       ]
     },
     "empty/missing test registration fails": {
@@ -23,7 +27,11 @@
       "detail": "`bun run test:browser` exit 2 (prerequisites missing: node_modules/.bin/playwright); `run test:fixtures` exit 2 (no implementation registered); temp-registry tests prove zero-collected suites and missing/empty registries fail; a real temp suite passes (harness is not fail-always).",
       "evidence": [
         "artifacts/tasks/T01/run.json",
-        "artifacts/tasks/T01/peer-review.md"
+        "artifacts/tasks/T01/peer-review.md",
+        "artifacts/tasks/T01/refresh-20260912/run.json",
+        "artifacts/tasks/T01/refresh-20260912/commands.log",
+        "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
       ]
     },
     "old repository remains byte/Git-unchanged": {
@@ -32,7 +40,12 @@
       "evidence": [
         "artifacts/tasks/T01/run.json",
         "artifacts/tasks/T01/peer-review.md",
-        "artifacts/tasks/T01/origin-revalidation.json"
+        "artifacts/tasks/T01/origin-revalidation.json",
+        "artifacts/tasks/T01/refresh-20260912/run.json",
+        "artifacts/tasks/T01/refresh-20260912/commands.log",
+        "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T01/refresh-20260912/review-inputs.json",
+        "artifacts/tasks/T01/refresh-20260912/origin-revalidation.json"
       ]
     },
     "no network action or generated achievement claim occurs": {
@@ -40,7 +53,11 @@
       "detail": "No install/sync/fetch commands exist in the registry or CI; `bun x` is always `bun x --no-install`; index.html references no remote resources; trustedDependencies is empty; this receipt records disposition implemented_pending_review \u2014 acceptance remains coordinator-only.",
       "evidence": [
         "artifacts/tasks/T01/run.json",
-        "artifacts/tasks/T01/peer-review.md"
+        "artifacts/tasks/T01/peer-review.md",
+        "artifacts/tasks/T01/refresh-20260912/run.json",
+        "artifacts/tasks/T01/refresh-20260912/commands.log",
+        "artifacts/tasks/T01/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T01/refresh-20260912/review-inputs.json"
       ]
     }
   },
@@ -156,5 +173,10 @@
       "failed": 0,
       "skipped": 0
     }
+  },
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T01/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
   }
 }

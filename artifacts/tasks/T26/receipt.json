@@ -83,44 +83,73 @@
     "Mapping/control/covered actual outputs preserved": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "mapping-amount expands glyph 0x31 to '1,0' (coalesced occurrence with the shared reported glyph box); mapping-control keeps identity '1' with the identical dollar box; covered-amount preserves PDFium's actual merged output '$1,00000' and pypdf's '$1,000$100' verbatim. No output was corrected or normalized away."
     },
     "shared glyph boxes not split with guessed widths": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "Consecutive characters reporting an exactly-equal loose charbox are coalesced into one occurrence carrying the full multi-scalar text; no width interpolation exists in the adapter (asserted: no standalone ',' occurrence, dollar box unchanged, basis documents the coalescing)."
     },
     "pypdf text stays page-only": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "The pypdf adapter emits one occurrence per page with precision 'page_only', polygon null and empty transform_ids; no visitor matrices are read and no combining with PDFium boxes exists in either adapter."
     },
     "all rotations/origins map correctly": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "geometry-0/90/180/270 store identical canonical anchors for the '$' glyph (rotation is display-only), matching the analytic value (56, 2*(390-263.44)) from the negative-origin crop box at UserUnit 2; userunit-0.5/1/2/10 scale exactly once (physical dims 520u x 400u from pypdf metadata; PDFium get_size() measured UserUnit-blind and is not trusted)."
     },
     "malformed/encrypted failures isolated": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "Empty/malformed bytes, digest mismatch and password-encrypted documents raise typed AdapterError('parser_error') at open; closed handles, out-of-range pages, wrong capability and region requests return terminal unsupported/failed CheckResults; cancellation is terminal; emission chunks are bounded at 256. No exception escapes with partial results."
     },
     "build/version manifest complete.": {
       "status": "executed",
       "evidence": [
-        "artifacts/tasks/T26/commands.log"
+        "artifacts/tasks/T26/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/run.json",
+        "artifacts/tasks/T26/refresh-20260912/commands.log",
+        "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T26/refresh-20260912/review-inputs.json"
       ],
       "detail": "Both manifests validate against the T03 JSON Schema ($defs/ReaderManifest, Draft 2020-12): adapter_version 1.0.0, engine build 'pypdfium2 5.8.0 / PDFium 149.0.7825.0', SHA-256 of the loaded PDFium native binary as model hash and asset hash, pypdf 6.18.0 distribution digest, capability support/limits, execution policy constant."
     }
+  },
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T26/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
   }
 }

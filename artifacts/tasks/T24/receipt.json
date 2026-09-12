@@ -16,32 +16,56 @@
         "artifacts/tasks/T24/commands.log",
         "artifacts/tasks/T24/run.json",
         "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
-        "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl"
+        "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl",
+        "artifacts/tasks/T24/refresh-20260912/run.json",
+        "artifacts/tasks/T24/refresh-20260912/commands.log",
+        "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
       ]
     },
     "bounded fuzz receipts show no unexpected accepts/crashes/egress": {
       "status": "executed",
-      "detail": "python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000: verdict=pass, exit 0. 1000 generated cases across 28 categories (baselines/whitespace/artifacts, hostile strings, corpus paths, PNG ancillary sanitization as expected accepts; truncation, bit flips, duplicate keys, prototype keys, structural and executable-field mutations, deep nesting, nonfinite/unsafe numbers, oversized strings/JSON, 11 archive/container families, tar, markup, bare PDF, UTF-16 BOMs, polyglots, garbage, surrogates, PNG corruption/bombs, asset metadata/hash/MIME/base64 attacks as expected rejects): 172 accepted, 828 rejected, 0 crashes, 0 egress, 0 unexpected accepts, 0 unexpected rejects. Reject codes: JSON 146, SCHEMA 124, ARCHIVE 94, KIND 71, PNG 66, ASSET 65, UNICODE 60, PROTOTYPE 47, DEPTH 38, PATH 29, DUPLICATE_KEY 26, SIZE 23, HASH 13, NONFINITE 12, NUMBER 11, SOURCE 3. Case stream is deterministic (stream_sha256 c779dbd9… identical across runs of the same seed; seeds 1234/42 also pass). The driver arms fetch/WebSocket/XMLHttpRequest/net/tls/dgram/child_process tripwires; egress_attempts=[]. Max case time 26.28 ms, wall 2.75 s — bounded.",
+      "detail": "python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000: verdict=pass, exit 0. 1000 generated cases across 28 categories (baselines/whitespace/artifacts, hostile strings, corpus paths, PNG ancillary sanitization as expected accepts; truncation, bit flips, duplicate keys, prototype keys, structural and executable-field mutations, deep nesting, nonfinite/unsafe numbers, oversized strings/JSON, 11 archive/container families, tar, markup, bare PDF, UTF-16 BOMs, polyglots, garbage, surrogates, PNG corruption/bombs, asset metadata/hash/MIME/base64 attacks as expected rejects): 172 accepted, 828 rejected, 0 crashes, 0 egress, 0 unexpected accepts, 0 unexpected rejects. Reject codes: JSON 146, SCHEMA 124, ARCHIVE 94, KIND 71, PNG 66, ASSET 65, UNICODE 60, PROTOTYPE 47, DEPTH 38, PATH 29, DUPLICATE_KEY 26, SIZE 23, HASH 13, NONFINITE 12, NUMBER 11, SOURCE 3. Case stream is deterministic (stream_sha256 c779dbd9\u2026 identical across runs of the same seed; seeds 1234/42 also pass). The driver arms fetch/WebSocket/XMLHttpRequest/net/tls/dgram/child_process tripwires; egress_attempts=[]. Max case time 26.28 ms, wall 2.75 s \u2014 bounded.",
       "evidence": [
         "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
         "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl",
-        "artifacts/tasks/T24/commands.log"
+        "artifacts/tasks/T24/commands.log",
+        "artifacts/tasks/T24/refresh-20260912/run.json",
+        "artifacts/tasks/T24/refresh-20260912/commands.log",
+        "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
       ]
     },
     "HTML export opens script-free": {
       "status": "executed",
-      "detail": "tests/security/import/html.test.mjs renders every delivered valid report through the reference-equivalent export double (tests/security/import/html_export_double.mjs — same fixed stylesheet, meta-CSP formula and escape-everything rule as planning/tools/export_html.py) and asserts assertScriptFreeHtml on the serialized bytes: meta CSP carries default-src 'none'; img-src data:; style-src 'sha256-…'; base-uri 'none'; form-action 'none'; no script/iframe/object/embed/form/a/svg/template/video/audio elements; no on* handlers, srcdoc/srcset/formaction/href/style attributes; no javascript:/vbscript:/data: schemes in any attribute after entity decoding (except the embedded-PNG img src); no url()/@import/expression()/behavior/-moz-binding in the stylesheet; no conditional comments or processing instructions. 16 hostile payload strings rotated across title/explanation/reader-name/limitations import as inert data and appear only escaped; occurrence raw_text keeps byte fidelity (I03). Embedded crops embed the sanitized re-encode, never attacker bytes.",
+      "detail": "tests/security/import/html.test.mjs renders every delivered valid report through the reference-equivalent export double (tests/security/import/html_export_double.mjs \u2014 same fixed stylesheet, meta-CSP formula and escape-everything rule as planning/tools/export_html.py) and asserts assertScriptFreeHtml on the serialized bytes: meta CSP carries default-src 'none'; img-src data:; style-src 'sha256-\u2026'; base-uri 'none'; form-action 'none'; no script/iframe/object/embed/form/a/svg/template/video/audio elements; no on* handlers, srcdoc/srcset/formaction/href/style attributes; no javascript:/vbscript:/data: schemes in any attribute after entity decoding (except the embedded-PNG img src); no url()/@import/expression()/behavior/-moz-binding in the stylesheet; no conditional comments or processing instructions. 16 hostile payload strings rotated across title/explanation/reader-name/limitations import as inert data and appear only escaped; occurrence raw_text keeps byte fidelity (I03). Embedded crops embed the sanitized re-encode, never attacker bytes.",
       "evidence": [
         "artifacts/tasks/T24/commands.log",
-        "artifacts/tasks/T24/run.json"
+        "artifacts/tasks/T24/run.json",
+        "artifacts/tasks/T24/refresh-20260912/run.json",
+        "artifacts/tasks/T24/refresh-20260912/commands.log",
+        "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
       ]
     },
     "no archive decompression surface.": {
       "status": "executed",
-      "detail": "The gate rejects ZIP (local/EoCD/spanning), gzip, 7z, RAR, xz, bzip2, zstd, MS-CAB, OLE/CFB and tar (ustar@257) by signature before any decode — code ARCHIVE — and there is no archive/decompression import path anywhere in packages/reports/validation/. The only inflate anywhere is the bounded zlib/deflate decoder used exclusively for PNG IDAT under an exact-raster output cap. Fuzz categories archive(66), tar(16) and polyglot(36) all reject; PNG+PK trailing polyglots reject.",
+      "detail": "The gate rejects ZIP (local/EoCD/spanning), gzip, 7z, RAR, xz, bzip2, zstd, MS-CAB, OLE/CFB and tar (ustar@257) by signature before any decode \u2014 code ARCHIVE \u2014 and there is no archive/decompression import path anywhere in packages/reports/validation/. The only inflate anywhere is the bounded zlib/deflate decoder used exclusively for PNG IDAT under an exact-raster output cap. Fuzz categories archive(66), tar(16) and polyglot(36) all reject; PNG+PK trailing polyglots reject.",
       "evidence": [
         "artifacts/tasks/T24/commands.log",
-        "artifacts/tasks/T24/fuzz/fuzz-receipt.json"
+        "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
+        "artifacts/tasks/T24/refresh-20260912/run.json",
+        "artifacts/tasks/T24/refresh-20260912/commands.log",
+        "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+        "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
       ]
     }
   },
@@ -84,5 +108,10 @@
   ],
   "dependency_requests": [],
   "attribution": "Dependency-free original implementation. The zlib/deflate decoder implements RFC 1950/1951 and the PNG codec implements the PNG (ISO/IEC 15948) format directly; no external code was copied or adapted, so docs/ATTRIBUTION.md needs no update beyond T02's existing entries.",
-  "review_status": "pending independent review — reviewer writes review.md/peer-review.md per coordinator process"
+  "review_status": "pending independent review \u2014 reviewer writes review.md/peer-review.md per coordinator process",
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T24/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
+  }
 }

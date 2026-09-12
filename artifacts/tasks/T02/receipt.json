@@ -25,7 +25,11 @@
       "evidence": [
         "artifacts/tasks/T02/linux-frozen-install.log",
         "artifacts/tasks/T02/macos-frozen-install.log",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "Twice on linux/arm64 in the pinned OCI image (bun install --frozen-lockfile -> 87 pkgs and uv sync --frozen -> 13 pkgs, each run twice after wiping dependency dirs, from a git-archive clean checkout of the implementation commit; ends PROOF-OK, docker exit 0). Also once on a macOS clean copy (84 pkgs darwin-arm64 + 13 pkgs)."
     },
@@ -33,7 +37,11 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "212 staged files across 8 asset groups; each manifest entry carries source URL/commit, sha256, byte count and license. check_dependencies 'assets' check re-hashes all 212 and requires license+source (passes in both frozen-install logs). Provenance summarized in docs/ATTRIBUTION.md."
     },
@@ -41,7 +49,11 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "test_substituted_model_fails_checksum writes wrong bytes under the correct model path and asserts prepare_assets verify fails (ok in the 37-test run, also inside the Linux proof transcript)."
     },
@@ -50,7 +62,11 @@
       "evidence": [
         "artifacts/tasks/T02/browser-probe.json",
         "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "test_missing_asset_fails_closed (verify refuses a missing staged file) ok in the 37-test run; the browser probe's missing-model scenario returned a closed failure in-browser ('missing model fails closed' check true in browser-probe.json)."
     },
@@ -59,7 +75,11 @@
       "evidence": [
         "artifacts/tasks/T02/linux-frozen-install.log",
         "artifacts/tasks/T02/browser-probe.json",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "check_dependencies no-cdn.serve-paths + no-cdn.sources checks pass (all serve prefixes are /-paths; web sources carry no remote script/worker/fetch or CDN reference). Probe asserts every scenario-A request was same-origin in a real browser. tesseract.js jsDelivr defaults documented as unused; adapter contract requires explicit same-origin paths."
     },
@@ -67,9 +87,18 @@
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T02/linux-frozen-install.log",
-        "artifacts/tasks/T02/commands.log"
+        "artifacts/tasks/T02/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/run.json",
+        "artifacts/tasks/T02/refresh-20260912/commands.log",
+        "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T02/refresh-20260912/review-inputs.json"
       ],
       "detail": "python:3.13.15-slim-trixie recorded at index sha256:9d2e5553\u2026e00285 with linux/amd64+arm64 manifest digests (arm64 digest c89921a0\u202644b0b4 executed by the proof); actions/checkout@v4 recorded at SHA 11d5960a326750d5838078e36cf38b85af677262. check_dependencies base-image.* checks reject mutable tags/digests and pass. Caveat recorded honestly: the workflow file itself still names the v4 tag because .github is outside T02 scope \u2014 see docs/proposals/T02.md P1 and handoff dependency_requests."
     }
+  },
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T02/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
   }
 }

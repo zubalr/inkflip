@@ -1,0 +1,47 @@
+{
+  "task": "T26",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "prior_evaluated_commit": "d5856f1b58a1f88e81055a945e1b4adc8a267ffc",
+  "prior_worker": "zcode-t26",
+  "prior_reviewers": [
+    "antigravity-review-t26"
+  ],
+  "scope_changes_since_prior_evaluation": [
+    "AGENTS.md",
+    "bun.lock",
+    "bunfig.toml",
+    "config/dependency-patches.json",
+    "config/homebase.json",
+    "execution/overrides.json",
+    "native/tests/readers/test_readers.py",
+    "package.json",
+    "packages/geometry/src/affine.ts",
+    "packages/geometry/src/geometry.ts",
+    "packages/geometry/src/polygon.ts",
+    "packages/readers-pdfjs/tsconfig.json",
+    "packages/reports/package.json",
+    "packages/reports/tsconfig.json",
+    "patches/tesseract.js@7.0.0.patch",
+    "scripts/check_dependencies.py",
+    "scripts/coordination.py",
+    "scripts/homebase_pre_push.py",
+    "scripts/homebase_relay.py",
+    "scripts/native_pass.py",
+    "tests/build/tesseract-browser.test.mjs",
+    "tests/build/tesseract-model.test.mjs",
+    "tests/build/tesseract-worker.test.mjs",
+    "tests/build/test_dependency_patch.py",
+    "tests/build/test_tesseract_worker.py",
+    "tests/geometry/followup-iy2.test.mjs",
+    "tests/geometry/geometry.test.mjs"
+  ],
+  "current_run_tests": {
+    "collected": 22,
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0
+  },
+  "current_run_path": "artifacts/tasks/T26/refresh-20260912/run.json",
+  "historical_review_copy": "artifacts/tasks/T26/refresh-20260912/prior-review.md",
+  "limitations": "The current run executes the effective task commands. Prior evidence is retained for additional criteria; this record does not assert new manual/device checks or independent reviewer approval. Fixture followup g78 and browser OCR T10 are separate unmerged candidates."
+}

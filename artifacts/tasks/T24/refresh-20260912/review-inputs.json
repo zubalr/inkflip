@@ -1,0 +1,52 @@
+{
+  "task": "T24",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "prior_evaluated_commit": "7a9c6032e08057ab6c6f80ec911f035b498e345e",
+  "prior_worker": "devin-subagent-t24",
+  "prior_reviewers": [
+    "devin-review-t24"
+  ],
+  "scope_changes_since_prior_evaluation": [
+    "AGENTS.md",
+    "apps/web/src/styles/tokens.css",
+    "bun.lock",
+    "bunfig.toml",
+    "config/dependency-patches.json",
+    "config/homebase.json",
+    "execution/overrides.json",
+    "package.json",
+    "packages/readers-pdfjs/tsconfig.json",
+    "packages/reports/package.json",
+    "packages/reports/tsconfig.json",
+    "packages/reports/validation/README.md",
+    "packages/reports/validation/html_guard.ts",
+    "packages/reports/validation/import_gate.ts",
+    "packages/reports/validation/inflate.ts",
+    "packages/reports/validation/png.ts",
+    "packages/runtime/tsconfig.json",
+    "patches/tesseract.js@7.0.0.patch",
+    "scripts/check_dependencies.py",
+    "scripts/coordination.py",
+    "scripts/homebase_pre_push.py",
+    "scripts/homebase_relay.py",
+    "scripts/native_pass.py",
+    "tests/build/tesseract-browser.test.mjs",
+    "tests/build/tesseract-model.test.mjs",
+    "tests/build/tesseract-worker.test.mjs",
+    "tests/build/test_dependency_patch.py",
+    "tests/build/test_tesseract_worker.py",
+    "tests/security/import/followup-3oz.test.mjs",
+    "tests/security/import/html-browser.test.mjs",
+    "tests/security/import/html.test.mjs",
+    "tests/security/import/html_export_double.mjs"
+  ],
+  "current_run_tests": {
+    "collected": 104,
+    "passed": 104,
+    "failed": 0,
+    "skipped": 0
+  },
+  "current_run_path": "artifacts/tasks/T24/refresh-20260912/run.json",
+  "historical_review_copy": "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+  "limitations": "The current run executes the effective task commands. Prior evidence is retained for additional criteria; this record does not assert new manual/device checks or independent reviewer approval. Fixture followup g78 and browser OCR T10 are separate unmerged candidates."
+}

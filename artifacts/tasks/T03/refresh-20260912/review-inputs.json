@@ -1,0 +1,41 @@
+{
+  "task": "T03",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "prior_evaluated_commit": "216ae2f56e30c79829be0f69160396b8fbc389bd",
+  "prior_worker": "devin-subagent-t03",
+  "prior_reviewers": [
+    "devin-review-t03"
+  ],
+  "scope_changes_since_prior_evaluation": [
+    "AGENTS.md",
+    "apps/web/src/styles/tokens.css",
+    "bun.lock",
+    "bunfig.toml",
+    "config/acceptance-commands.json",
+    "config/dependency-patches.json",
+    "config/homebase.json",
+    "execution/overrides.json",
+    "package.json",
+    "packages/geometry/tsconfig.json",
+    "packages/readers-pdfjs/tsconfig.json",
+    "packages/reports/package.json",
+    "packages/reports/tsconfig.json",
+    "packages/runtime/tsconfig.json",
+    "scripts/check_dependencies.py",
+    "scripts/coordination.py",
+    "scripts/fuzz_reports.py",
+    "scripts/homebase_pre_push.py",
+    "scripts/homebase_relay.py",
+    "scripts/native_pass.py",
+    "tests/bootstrap/test_bootstrap.py"
+  ],
+  "current_run_tests": {
+    "collected": 60,
+    "passed": 60,
+    "failed": 0,
+    "skipped": 0
+  },
+  "current_run_path": "artifacts/tasks/T03/refresh-20260912/run.json",
+  "historical_review_copy": "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+  "limitations": "The current run executes the effective task commands. Prior evidence is retained for additional criteria; this record does not assert new manual/device checks or independent reviewer approval. Fixture followup g78 and browser OCR T10 are separate unmerged candidates."
+}

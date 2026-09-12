@@ -15,7 +15,11 @@
       "detail": "Verified by Playwright suite (tests/a11y/primitives.spec.ts: test 2) asserting keyboard reachability and operation for Button, Tabs (roving tabindex, ArrowLeft, ArrowRight, Home, End navigation), and Disclosure (Enter/Space to expand/collapse).",
       "evidence": [
         "artifacts/tasks/T07/commands.log",
-        "artifacts/tasks/T07/primitives-overview.png"
+        "artifacts/tasks/T07/primitives-overview.png",
+        "artifacts/tasks/T07/refresh-20260912/run.json",
+        "artifacts/tasks/T07/refresh-20260912/commands.log",
+        "artifacts/tasks/T07/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T07/refresh-20260912/review-inputs.json"
       ]
     },
     "Escape/focus return works": {
@@ -23,7 +27,11 @@
       "detail": "Verified by Playwright suite (tests/a11y/primitives.spec.ts: test 3) asserting that pressing Escape dismisses the modal dialog and returns focus cleanly to the trigger button that launched it.",
       "evidence": [
         "artifacts/tasks/T07/commands.log",
-        "artifacts/tasks/T07/modal-open.png"
+        "artifacts/tasks/T07/modal-open.png",
+        "artifacts/tasks/T07/refresh-20260912/run.json",
+        "artifacts/tasks/T07/refresh-20260912/commands.log",
+        "artifacts/tasks/T07/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T07/refresh-20260912/review-inputs.json"
       ]
     },
     "no focus trap outside modal": {
@@ -31,7 +39,11 @@
       "detail": "Verified by Playwright suite (tests/a11y/primitives.spec.ts: test 4) verifying Part A: outside modal, Tab moves freely across interactive elements without trapping; Part B: inside modal, focus cycles within focusable elements of the dialog with wrap-around on Tab and Shift+Tab.",
       "evidence": [
         "artifacts/tasks/T07/commands.log",
-        "artifacts/tasks/T07/modal-open.png"
+        "artifacts/tasks/T07/modal-open.png",
+        "artifacts/tasks/T07/refresh-20260912/run.json",
+        "artifacts/tasks/T07/refresh-20260912/commands.log",
+        "artifacts/tasks/T07/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T07/refresh-20260912/review-inputs.json"
       ]
     },
     "dynamic progress does not announce every OCR token": {
@@ -39,7 +51,11 @@
       "detail": "Verified by Playwright suite (tests/a11y/primitives.spec.ts: test 5) and ProgressBar implementation: progress updates with token counts are displayed visually in detail text without triggering aria-live announcements, while discrete named stage transitions update role status polite.",
       "evidence": [
         "artifacts/tasks/T07/commands.log",
-        "artifacts/tasks/T07/primitives-overview.png"
+        "artifacts/tasks/T07/primitives-overview.png",
+        "artifacts/tasks/T07/refresh-20260912/run.json",
+        "artifacts/tasks/T07/refresh-20260912/commands.log",
+        "artifacts/tasks/T07/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T07/refresh-20260912/review-inputs.json"
       ]
     },
     "no serious/critical automated violations in primitives.": {
@@ -50,7 +66,11 @@
         "artifacts/tasks/T07/primitives-overview.png",
         "artifacts/tasks/T07/focus-outline.png",
         "artifacts/tasks/T07/modal-open.png",
-        "artifacts/tasks/T07/replace-dialog.png"
+        "artifacts/tasks/T07/replace-dialog.png",
+        "artifacts/tasks/T07/refresh-20260912/run.json",
+        "artifacts/tasks/T07/refresh-20260912/commands.log",
+        "artifacts/tasks/T07/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T07/refresh-20260912/review-inputs.json"
       ]
     }
   },
@@ -103,5 +123,10 @@
     "Visual screenshot evidence captured directly from the live mounted component harness rendered in Chromium via Vite."
   ],
   "receipt_signed_by": "antigravity-t07",
-  "verification_verdict": "ready_for_review"
+  "verification_verdict": "ready_for_review",
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T07/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
+  }
 }

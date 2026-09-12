@@ -13,28 +13,44 @@
       "status": "executed",
       "detail": "node --test tests/geometry/*.test.mjs: exit 0, 32/32. The F07 loop emits five tests (geometry-control + geometry-0/90/180/270); each asserts C, C-inverse, D=R*C, display size, and every named anchor's canonical/display/raster@1.5/OCR-crop/recovered coordinates against expected.json within 1e-5pt. expected.json is NOT produced by inverting the implementation: derive_expectations.py computes it with exact fractions.Fraction arithmetic plus hand-derived closed-form per-rotation equations, anchored on the published COORDINATES.md worked example (48,220)->canonical (56,340)->display@90 (360,56)->raster@1.5 (540,84)->OCR (80,48) and on the executed PDFium probe's rendered pixel grids. Nonzero/negative origins are exercised by the fixtures' MediaBox [-20,-30,...] and CropBox [20,40,...]. The F08 loop emits four tests (UserUnit 0.5/1/2/10): canonical size equals u*span exactly once (u^2 explicitly asserted NOT to match), and the 100-user-unit fiducial maps to a 100u-pt physical square. A 10,000-sample deterministic round-trip holds max error 4.7e-13pt <= 1e-5pt. The pytest leg (6/6 under uv run --project native) re-verifies closed-form-vs-matrix agreement on a wider grid and the published anchors.",
       "evidence": [
-        "artifacts/tasks/T04/commands.log"
+        "artifacts/tasks/T04/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/run.json",
+        "artifacts/tasks/T04/refresh-20260912/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
       ]
     },
     "singular transforms rejected": {
       "status": "executed",
       "detail": "Node test 'singular transforms are rejected (determinant <= 1e-12)': matrices with det=0 and |det|<=1e-12 throw ContractError code TRANSFORM from both the contract inverse() and the package's checkedInverse/makeTransform paths; near-singular but legal determinants above the bound still invert. The pytest leg asserts the same rejection in the independent reference path (de.inverse_m raises on a rank-1 matrix). Nonfinite and malformed matrices are separately rejected with NONFINITE/TYPE codes.",
       "evidence": [
-        "artifacts/tasks/T04/commands.log"
+        "artifacts/tasks/T04/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/run.json",
+        "artifacts/tasks/T04/refresh-20260912/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
       ]
     },
     "estimated/page-only polygons obey schema": {
       "status": "executed",
       "detail": "makeGeometry enforces the precision/polygon invariant at construction AND the emitted records pass the real contract validator inside a full report (tests 'estimated and page_only geometry validate inside a real report', 'precision/polygon conflicts are rejected at build and at validation', 'degenerate and malformed polygons are rejected'): polygon===null iff precision is page_only or unknown; exact/estimated require a non-degenerate 3..64-vertex polygon; conflicts throw ContractError GEOMETRY at build and are caught by validate() on report data. Geometry carries transform_ids that must resolve to same-page transforms (ensureGeometryPage, mirroring the report validator's cross-page rule), satisfying I02/I04.",
       "evidence": [
-        "artifacts/tasks/T04/commands.log"
+        "artifacts/tasks/T04/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/run.json",
+        "artifacts/tasks/T04/refresh-20260912/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
       ]
     },
     "CSS/DPR tests verify correct page and p95<=2px, maximum 4 px once viewer integrates.": {
       "status": "executed",
-      "detail": "Executable-now portions verified: 'viewport/css math matches independent expectations' asserts display->CSS zoom/pan matrices against independently derived values; 'viewport records are contract transforms bound to the right page' asserts the contract Transform record's page binding; DPR enters only at the backing canvas (backingScale), never in DOM overlay coordinates — asserted. 'stored 6dp rounding keeps overlay error far below the 2px budget' bounds the worst storage-rounding-induced overlay error at ~1e-4pt, ~2000x under the 2pt budget that underwrites p95<=2px. The literal 'p95<=2px, maximum 4px' measurement is a viewer-integrated observation: no viewer exists in this checkout (T01/T15+ integrate it), so that measurement is explicitly deferred by the criterion's own 'once viewer integrates' clause — recorded as a limitation, not fabricated.",
+      "detail": "Executable-now portions verified: 'viewport/css math matches independent expectations' asserts display->CSS zoom/pan matrices against independently derived values; 'viewport records are contract transforms bound to the right page' asserts the contract Transform record's page binding; DPR enters only at the backing canvas (backingScale), never in DOM overlay coordinates \u2014 asserted. 'stored 6dp rounding keeps overlay error far below the 2px budget' bounds the worst storage-rounding-induced overlay error at ~1e-4pt, ~2000x under the 2pt budget that underwrites p95<=2px. The literal 'p95<=2px, maximum 4px' measurement is a viewer-integrated observation: no viewer exists in this checkout (T01/T15+ integrate it), so that measurement is explicitly deferred by the criterion's own 'once viewer integrates' clause \u2014 recorded as a limitation, not fabricated.",
       "evidence": [
-        "artifacts/tasks/T04/commands.log"
+        "artifacts/tasks/T04/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/run.json",
+        "artifacts/tasks/T04/refresh-20260912/commands.log",
+        "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
       ]
     }
   },
@@ -44,5 +60,10 @@
     "bun run verify fails 1/49 on pre-existing base issue: T01-owned test_declared_suite_with_missing_runner_fails expects test:browser 'prerequisites missing' but playwright is now installed (T02-documented cross-suite effect, repoint proposal P2). Confirmed identical with all T04 changes removed.",
     "Tests ran under Node v26.7.0 (system); the repo pins Node 22.23.2 which is not installed in this environment.",
     "Native probe covers geometry-0/90/180/270 but not geometry-control; probe-grid assertions are gated on record presence."
-  ]
+  ],
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T04/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
+  }
 }

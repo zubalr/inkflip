@@ -19,12 +19,11 @@
         "artifacts/tasks/T06/intermediate-768.png",
         "artifacts/tasks/T06/mobile-390.png",
         "artifacts/tasks/T06/mobile-320.png",
-        "artifacts/tasks/T06/desktop-1440.png",
-        "artifacts/tasks/T06/intermediate-1024.png",
-        "artifacts/tasks/T06/intermediate-768.png",
-        "artifacts/tasks/T06/mobile-390.png",
-        "artifacts/tasks/T06/mobile-320.png",
-        "artifacts/tasks/T06/commands.log"
+        "artifacts/tasks/T06/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/run.json",
+        "artifacts/tasks/T06/refresh-20260912/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T06/refresh-20260912/review-inputs.json"
       ]
     },
     "page and disagreement dominate": {
@@ -33,8 +32,11 @@
       "evidence": [
         "artifacts/tasks/T06/desktop-1440.png",
         "artifacts/tasks/T06/mobile-390.png",
-        "artifacts/tasks/T06/desktop-1440.png",
-        "artifacts/tasks/T06/commands.log"
+        "artifacts/tasks/T06/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/run.json",
+        "artifacts/tasks/T06/refresh-20260912/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T06/refresh-20260912/review-inputs.json"
       ]
     },
     "contrast checks meet stated targets": {
@@ -44,7 +46,10 @@
         "artifacts/tasks/T06/desktop-1440.png",
         "artifacts/tasks/T06/focus-state.png",
         "artifacts/tasks/T06/commands.log",
-        "artifacts/tasks/T06/commands.log"
+        "artifacts/tasks/T06/refresh-20260912/run.json",
+        "artifacts/tasks/T06/refresh-20260912/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T06/refresh-20260912/review-inputs.json"
       ]
     },
     "reduced motion disables flips": {
@@ -52,7 +57,10 @@
       "detail": "Automated Playwright test with reducedMotion: 'reduce' verifies --motion-state and --motion-panel compute to 0ms/0s on the live mounted component, and DocumentStage.module.css enforces transition: none !important.",
       "evidence": [
         "artifacts/tasks/T06/commands.log",
-        "artifacts/tasks/T06/commands.log"
+        "artifacts/tasks/T06/refresh-20260912/run.json",
+        "artifacts/tasks/T06/refresh-20260912/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T06/refresh-20260912/review-inputs.json"
       ]
     },
     "screenshot evidence covers dark text, focus and partial states.": {
@@ -66,7 +74,11 @@
         "artifacts/tasks/T06/state-loading.png",
         "artifacts/tasks/T06/state-failed.png",
         "artifacts/tasks/T06/state-empty.png",
-        "artifacts/tasks/T06/commands.log"
+        "artifacts/tasks/T06/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/run.json",
+        "artifacts/tasks/T06/refresh-20260912/commands.log",
+        "artifacts/tasks/T06/refresh-20260912/prior-review.md",
+        "artifacts/tasks/T06/refresh-20260912/review-inputs.json"
       ]
     }
   },
@@ -110,5 +122,10 @@
     "All visual screenshot evidence was executed and captured directly from the live mounted DocumentStage React component rendered in Chromium via Vite across 1440, 1024, 768, 390, and 320 px viewports."
   ],
   "receipt_signed_by": "antigravity-t06",
-  "verification_verdict": "ready_for_review"
+  "verification_verdict": "ready_for_review",
+  "current_revalidation": {
+    "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+    "run": "artifacts/tasks/T06/refresh-20260912/run.json",
+    "note": "Fresh effective-command run appended to retained criterion evidence. Independent review and coordinator acceptance follow separately."
+  }
 }

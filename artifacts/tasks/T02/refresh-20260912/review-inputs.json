@@ -1,0 +1,49 @@
+{
+  "task": "T02",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "prior_evaluated_commit": "fd9f4370957819b9c3442d1a802de283a6f28263",
+  "prior_worker": "devin-subagent-t02",
+  "prior_reviewers": [
+    "devin-review-t02"
+  ],
+  "scope_changes_since_prior_evaluation": [
+    "AGENTS.md",
+    "apps/web/src/styles/tokens.css",
+    "bun.lock",
+    "bunfig.toml",
+    "config/acceptance-commands.json",
+    "config/dependency-patches.json",
+    "config/homebase.json",
+    "execution/overrides.json",
+    "package.json",
+    "packages/contracts/tsconfig.json",
+    "packages/geometry/tsconfig.json",
+    "packages/readers-pdfjs/tsconfig.json",
+    "packages/reports/package.json",
+    "packages/reports/tsconfig.json",
+    "packages/runtime/tsconfig.json",
+    "patches/tesseract.js@7.0.0.patch",
+    "scripts/check_dependencies.py",
+    "scripts/coordination.py",
+    "scripts/fuzz_reports.py",
+    "scripts/generate_contracts.py",
+    "scripts/homebase_pre_push.py",
+    "scripts/homebase_relay.py",
+    "scripts/native_pass.py",
+    "tests/bootstrap/test_bootstrap.py",
+    "tests/build/tesseract-browser.test.mjs",
+    "tests/build/tesseract-model.test.mjs",
+    "tests/build/tesseract-worker.test.mjs",
+    "tests/build/test_dependency_patch.py",
+    "tests/build/test_tesseract_worker.py"
+  ],
+  "current_run_tests": {
+    "collected": 49,
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0
+  },
+  "current_run_path": "artifacts/tasks/T02/refresh-20260912/run.json",
+  "historical_review_copy": "artifacts/tasks/T02/refresh-20260912/prior-review.md",
+  "limitations": "The current run executes the effective task commands. Prior evidence is retained for additional criteria; this record does not assert new manual/device checks or independent reviewer approval. Fixture followup g78 and browser OCR T10 are separate unmerged candidates."
+}
