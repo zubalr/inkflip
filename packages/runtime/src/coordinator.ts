@@ -220,7 +220,8 @@ export class RunCoordinator {
   }
 
   get rejectionStats(): ReadonlyMap<AdmitCode, number> {
-    return this.stats.rejected;
+    // A copy: callers must not mutate the live accounting map.
+    return new Map(this.stats.rejected);
   }
 
   private rejected(code: AdmitCode): Admission {
@@ -298,6 +299,14 @@ export class RunCoordinator {
     );
     const runKey = options.runKey;
     const checks = freezePlan(options.checks);
+    // An empty plan is not a run: with no checks nothing can settle the
+    // lifecycle (I05), and a vacuous 'complete' would fabricate success.
+    // Reject it at issue rather than letting the state machine stall.
+    requireRuntime(
+      checks.length > 0,
+      'PLAN',
+      'run plan must contain at least one check',
+    );
     const deps = options.dependencies ?? deriveDependencies(checks);
     validateDependencies(deps, new Set(checks.map((c) => c.id)));
     this.generation += 1;
@@ -382,28 +391,37 @@ export class RunCoordinator {
     if (run === null || this.state !== 'running') return;
     for (const record of runnableChecks(run.checks, run.deps)) {
       if (!this.capabilityRoom(record)) continue;
-      const jobId = `j_${++run.jobCounter}`;
-      this.authority.registerJob(jobId);
-      record.phase = 'running';
-      record.jobId = jobId;
-      run.jobs.set(jobId, { jobId, checkId: record.plan.id });
-      run.outbox.push({
-        type: 'dispatch',
-        jobId,
-        checkId: record.plan.id,
-        capability: record.plan.capability,
-      });
-      if (this.schedule !== null) {
-        const handle = this.schedule(
-          () => this.onCheckDeadline(record.plan.id, jobId),
-          this.limits.checkTimeoutMs,
-        );
-        run.cleanup.own(handle, `check-deadline:${jobId}`, () =>
-          this.unschedule?.(handle),
-        );
-      }
+      this.dispatchCheck(run, record);
     }
     this.notify();
+  }
+
+  /**
+   * Dispatch one check on a fresh job identity and arm its deadline
+   * watchdog — used by initial scheduling AND by retry dispatch, so a
+   * retried job can never run watchdog-free (I05).
+   */
+  private dispatchCheck(run: RunContext, record: CheckRecord): void {
+    const jobId = `j_${++run.jobCounter}`;
+    this.authority.registerJob(jobId);
+    record.phase = 'running';
+    record.jobId = jobId;
+    run.jobs.set(jobId, { jobId, checkId: record.plan.id });
+    run.outbox.push({
+      type: 'dispatch',
+      jobId,
+      checkId: record.plan.id,
+      capability: record.plan.capability,
+    });
+    if (this.schedule !== null) {
+      const handle = this.schedule(
+        () => this.onCheckDeadline(record.plan.id, jobId),
+        this.limits.checkTimeoutMs,
+      );
+      run.cleanup.own(handle, `check-deadline:${jobId}`, () =>
+        this.unschedule?.(handle),
+      );
+    }
   }
 
   private onRunDeadline(): void {
@@ -457,6 +475,11 @@ export class RunCoordinator {
     } catch {
       return this.rejected('malformed');
     }
+    // Schema-valid but semantically illegal messages are rejected BEFORE
+    // admission: no seq is consumed, no bookkeeping mutates, and the job
+    // stays usable for its next well-formed message (I07/I05 — a
+    // malformed report can never orphan a live check).
+    if (!semanticallyValid(msg)) return this.rejected('malformed');
     const admission = this.authority.admit(msg);
     if (!admission.ok) return this.rejected(admission.code);
     this.stats.admitted += 1;
@@ -577,8 +600,10 @@ export class RunCoordinator {
   }
 
   private applyCheckTerminal(check: CheckRecord, msg: WorkerMessage): void {
-    const status = msg.payload.status;
-    requireRuntime(status !== null, 'PLAN', 'terminal event without status');
+    // semanticallyValid() already guaranteed: non-null status inside the
+    // terminal enum, and a non-null reason unless completed — so the
+    // mutations below can never be interrupted by a legality throw.
+    const status = msg.payload.status!;
     if (status === 'failed') {
       this.applyFailure(check, msg.job_id, msg.payload.reason ?? 'error');
       return;
@@ -620,16 +645,9 @@ export class RunCoordinator {
       this.authority.closeJob(jobId);
       run.jobs.delete(jobId);
       run.outbox.push({ type: 'terminate', jobId, checkId: check.plan.id });
-      const freshJobId = `j_${++run.jobCounter}`;
-      this.authority.registerJob(freshJobId);
-      check.jobId = freshJobId;
-      run.jobs.set(freshJobId, { jobId: freshJobId, checkId: check.plan.id });
-      run.outbox.push({
-        type: 'dispatch',
-        jobId: freshJobId,
-        checkId: check.plan.id,
-        capability: check.plan.capability,
-      });
+      // Fresh job identity AND a fresh deadline watchdog — same path as
+      // initial dispatch, so a retried job that hangs still settles.
+      this.dispatchCheck(run, check);
       this.notify();
       return;
     }
@@ -896,6 +914,20 @@ export class RunCoordinator {
     requireRuntime(this.run !== null, 'STATE', 'no run');
     return checkResults(this.run.checks);
   }
+}
+
+/**
+ * Semantic legality beyond the wire schema (schema-valid is not always
+ * legal): a `check_terminal` report must name a terminal status and
+ * must carry a reason unless it reports `completed`. Anything else is
+ * rejected as malformed before admission — never partially applied.
+ */
+function semanticallyValid(msg: WorkerMessage): boolean {
+  if (msg.event !== 'check_terminal') return true;
+  const { status, reason } = msg.payload;
+  if (status === null) return false;
+  if (status !== 'completed' && reason === null) return false;
+  return true;
 }
 
 /** Recursive freeze so a snapshot can never be mutated after the fact. */

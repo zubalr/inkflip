@@ -226,31 +226,37 @@ export function terminalize(
 /**
  * After a check reaches a non-completed terminal state, every queued
  * dependent that needed it is terminalized `skipped` with a reason that
- * names the unmet dependency. Returns the ids newly skipped (the caller
- * cascades the propagation).
+ * names the unmet dependency — and their dependents in turn. Iterated
+ * to fixpoint, so a cascade settles in one pass no matter how the plan
+ * ordered its checks (I05: nothing may wait forever). Returns the ids
+ * newly skipped in cascade order.
  */
 export function propagateSkips(
   records: ReadonlyMap<string, CheckRecord>,
   deps: DependencyMap,
 ): string[] {
   const skipped: string[] = [];
-  for (const [id, record] of records) {
-    if (record.phase !== 'queued') continue;
-    const unmet = (deps.get(id) ?? []).find((depId) => {
-      const dep = records.get(depId);
-      return dep?.phase === 'terminal' && dep.result?.status !== 'completed';
-    });
-    if (unmet !== undefined) {
-      const dep = records.get(unmet)!;
-      terminalize(
-        record,
-        'skipped',
-        `${REASON.DEPENDENCY}:${unmet}:${dep.result?.status}`,
-      );
-      skipped.push(id);
+  for (;;) {
+    let progressed = false;
+    for (const [id, record] of records) {
+      if (record.phase !== 'queued') continue;
+      const unmet = (deps.get(id) ?? []).find((depId) => {
+        const dep = records.get(depId);
+        return dep?.phase === 'terminal' && dep.result?.status !== 'completed';
+      });
+      if (unmet !== undefined) {
+        const dep = records.get(unmet)!;
+        terminalize(
+          record,
+          'skipped',
+          `${REASON.DEPENDENCY}:${unmet}:${dep.result?.status}`,
+        );
+        skipped.push(id);
+        progressed = true;
+      }
     }
+    if (!progressed) return skipped;
   }
-  return skipped;
 }
 
 /** Queued checks whose dependencies have all completed. */

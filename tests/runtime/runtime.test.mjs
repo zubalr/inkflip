@@ -193,6 +193,29 @@ test('dependency on an unknown check or a cycle is a PLAN rejection', () => {
   );
 });
 
+test('an empty check plan is rejected at issue — no vacuous run (F5)', () => {
+  const coord = new RunCoordinator({ schedule: () => null, unschedule: () => {} });
+  openDocument(coord);
+  // zero planned checks could never reach terminal (I05), and a
+  // vacuous 'complete' would fabricate success: reject it instead.
+  assert.equal(
+    code(() =>
+      coord.startRun({
+        runKey: RUN_1,
+        checks: [],
+        selectedPagesTotal: 0,
+      }),
+    ),
+    'PLAN',
+  );
+  // rejected cleanly: still selecting, no generation stolen for a
+  // run that never existed, and a real run still starts afterwards
+  assert.equal(coord.fileState, 'selecting');
+  const jobs = startRun(coord, [makeCheck('c_a', 0)]);
+  assert.equal(coord.fileState, 'running');
+  assert.equal(jobs.size, 1);
+});
+
 // ------------------------------------------------------------------
 // identity / stale-event authority (I07)
 // ------------------------------------------------------------------
@@ -297,6 +320,44 @@ test('a stale check_terminal cannot flip a live check (failure never becomes agr
   const current = view.run.checks.find((c) => c.id === 'c_b');
   assert.equal(current.phase, 'running');
   assert.equal(current.status, null);
+});
+
+test('a reasonless or statusless terminal is rejected before anything mutates (F2)', () => {
+  const { coord, jobs } = runningCoordinator([
+    makeCheck('c_a', 0),
+    makeCheck('c_b', 1),
+  ]);
+  const wf = jobFactory(coord, jobs, 'c_a');
+  const admittedBefore = coord.admittedCount;
+  const revisionBefore = coord.snapshot().revision;
+  // schema-valid but semantically illegal: non-completed needs a reason
+  const reasonless = wf.send.checkTerminal('c_a', 'timeout');
+  assert.equal(reasonless.payload.reason, null);
+  const rejection = coord.receive(reasonless);
+  assert.equal(rejection.ok, false);
+  assert.equal(rejection.code, 'malformed');
+  // nothing was consumed: seq unspent, counters untouched, no intents
+  assert.equal(coord.admittedCount, admittedBefore);
+  assert.equal(coord.snapshot().revision, revisionBefore);
+  assert.equal(
+    drain(coord).filter((i) => i.type === 'terminate').length,
+    0,
+  );
+  // the job stays usable: the next well-formed terminal is admitted
+  assert.equal(
+    coord.receive(wf.send.checkTerminal('c_a', 'timeout', 'timeout')).ok,
+    true,
+  );
+  // a status-less terminal is likewise rejected pre-admission
+  const wfB = jobFactory(coord, jobs, 'c_b');
+  const statusless = wfB.send.message('check_terminal', { check_id: 'c_b' });
+  assert.equal(statusless.payload.status, null);
+  assert.equal(coord.receive(statusless).code, 'malformed');
+  assert.equal(coord.receive(wfB.send.checkTerminal('c_b', 'completed')).ok, true);
+  // c_b completed, c_a timed out: partial — and both settled exactly once
+  const view = coord.snapshot();
+  assert.equal(view.fileState, 'partial');
+  assert.equal(view.run.checks.every((c) => c.status !== null), true);
 });
 
 // ------------------------------------------------------------------
@@ -416,6 +477,19 @@ test('at most two live raster_rgba slots; a third claim is resource_limit', () =
   m.payload.transfer_slot = 'raster_rgba';
   m.payload.transfer_bytes = 1024;
   assert.equal(coord.receive(m).ok, true);
+});
+
+test('downgrading a raster claim to pdf_bytes frees the live-raster slot (F4)', () => {
+  const ledger = new TransferLedger(2);
+  assert.equal(ledger.claim('raster_rgba', 'c_1'), 'ok');
+  assert.equal(ledger.claim('raster_rgba', 'c_2'), 'ok');
+  assert.equal(ledger.claim('raster_rgba', 'c_3'), 'raster_cap');
+  // c_1 stops using the raster buffer and drops to the shared source
+  // bytes: its raster hold must be released, not leaked
+  assert.equal(ledger.claim('pdf_bytes', 'c_1'), 'ok');
+  assert.equal(ledger.liveRasters, 1);
+  assert.equal(ledger.claim('raster_rgba', 'c_3'), 'ok');
+  assert.equal(ledger.liveRasters, 2);
 });
 
 // ------------------------------------------------------------------
@@ -570,6 +644,40 @@ test('a completed dependency releases its dependents in order', () => {
   assert.equal(coord.fileState, 'complete');
 });
 
+test('a depth-3 dependency chain settles to skipped in any plan order (F3)', () => {
+  // c_c fails -> c_b skipped -> c_a skipped. The plan lists the most
+  // dependent check FIRST, so a single propagation pass cannot reach
+  // c_a — the cascade must iterate to fixpoint (I05: nothing waits
+  // forever, whatever the plan order).
+  const checks = [
+    makeCheck('c_a', 0),
+    makeCheck('c_b', 0),
+    makeCheck('c_c', 0),
+  ];
+  const dependencies = new Map([
+    ['c_a', ['c_b']],
+    ['c_b', ['c_c']],
+    ['c_c', []],
+  ]);
+  const { coord, jobs } = runningCoordinator(checks, { dependencies });
+  // only c_c is runnable; the chain above it waits
+  assert.deepEqual([...jobs.values()], ['c_c']);
+  const wf = jobFactory(coord, jobs, 'c_c');
+  assert.equal(
+    coord.receive(wf.send.checkTerminal('c_c', 'failed', 'boom')).ok,
+    true,
+  );
+  const view = coord.snapshot();
+  assert.equal(view.fileState, 'failed');
+  const byId = Object.fromEntries(view.run.checks.map((c) => [c.id, c]));
+  assert.equal(byId.c_c.status, 'failed');
+  assert.equal(byId.c_b.status, 'skipped');
+  assert.equal(byId.c_a.status, 'skipped');
+  // the skip reason names the unmet dependency at each hop
+  assert.match(byId.c_b.reason, /dependency_unmet:c_c:failed/);
+  assert.match(byId.c_a.reason, /dependency_unmet:c_b:skipped/);
+});
+
 test('unsupported-only run is partial, not failed and not complete', () => {
   const { coord, jobs } = runningCoordinator([makeCheck('c_a', 0), makeCheck('c_b', 1)]);
   assert.equal(coord.receive(jobFactory(coord, jobs, 'c_a').send.checkTerminal('c_a', 'unsupported', 'unsupported')).ok, true);
@@ -641,6 +749,32 @@ test('a crash beyond the remaining run budget is not retried', () => {
   const view = coord.snapshot();
   assert.equal(view.run.checks[0].status, 'failed');
   assert.equal(drain(coord).filter((i) => i.type === 'dispatch').length, 0);
+});
+
+test('a retried job is dispatched with its own deadline watchdog (F1, I05)', () => {
+  // Regression: the retry path used to redispatch inline without arming
+  // onCheckDeadline — a hung retried job could never reach terminal.
+  const { coord, scheduler, jobs } = runningCoordinator([
+    makeCheck('c_a', 0),
+  ]);
+  const wf1 = jobFactory(coord, jobs, 'c_a');
+  assert.equal(
+    coord.receive(wf1.send.checkTerminal('c_a', 'failed', REASON.WORKER_CRASH)).ok,
+    true,
+  );
+  const [{ jobId: j2 }] = drain(coord).filter((i) => i.type === 'dispatch');
+  assert.notEqual(j2, wf1.jobId);
+  // three timers pending now: the run deadline, j_1's stale check
+  // deadline (will no-op on jobId mismatch), and j_2's OWN deadline
+  assert.equal(scheduler.count(), 3);
+  // fire the newest timer — j_2's check deadline, armed by the retry
+  const j2Timer = Math.max(...scheduler.pending.keys());
+  scheduler.fire(j2Timer);
+  const view = coord.snapshot();
+  assert.equal(view.run.checks[0].status, 'timeout');
+  assert.equal(view.run.checks[0].reason, REASON.TIMEOUT);
+  // the run settled: a hung retry can never stall the lifecycle
+  assert.equal(view.fileState, 'failed');
 });
 
 test('empty success is completed, never retried (acceptance criterion)', () => {
@@ -827,6 +961,18 @@ test('snapshot is immutable and revisions count accepted mutations', () => {
   assert.ok(v1.revision > rev0);
   assert.throws(() => { 'use strict'; v1.fileState = 'idle'; });
   assert.equal(v0.occurrences.length, 0); // old snapshot not retro-mutated
+});
+
+test('rejectionStats returns a copy, not the live accounting map (F7)', () => {
+  const coord = new RunCoordinator({ schedule: () => null, unschedule: () => {} });
+  coord.receive({ nope: true });
+  const stats = coord.rejectionStats;
+  assert.equal(stats.get('malformed'), 1);
+  stats.set('malformed', 999);
+  stats.set('sequence', 5);
+  // internal accounting is untouched by caller mutation
+  assert.equal(coord.rejectionStats.get('malformed'), 1);
+  assert.equal(coord.rejectionStats.has('sequence'), false);
 });
 
 test('deriveRunKey matches the contract runKey formula', () => {

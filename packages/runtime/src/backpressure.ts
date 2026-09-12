@@ -186,7 +186,11 @@ export class TransferLedger {
     holderCheckId: string,
   ): 'ok' | 'raster_cap' | 'foreign' {
     if (slot === 'pdf_bytes') {
+      // Downgrading from a raster claim frees the raster hold — the
+      // check no longer uses the buffer, so it must not count against
+      // the live-raster bound.
       this.claims.set(holderCheckId, slot);
+      this.rasterHolders.delete(holderCheckId);
       return 'ok';
     }
     const prior = this.claims.get(holderCheckId);

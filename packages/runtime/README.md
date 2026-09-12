@@ -64,20 +64,26 @@ findings. Occurrence/raw-text caps end an over-producing check as
 
 Every planned check reaches exactly one terminal result —
 `completed`/`unsupported`/`timeout`/`cancelled`/`failed`/`skipped` —
-with a non-null reason unless completed. Run status: `complete` only
-when all checks completed; `cancelled` on user request; `failed` when
-nothing completed and something failed/timed out; `partial` otherwise.
-A completed check with zero occurrences is a completed check, never a
-retry candidate.
+with a non-null reason unless completed. A run plan must name at least
+one check: an empty plan is rejected with `PLAN` at issue, since
+nothing could ever settle the lifecycle and a vacuous `complete` would
+fabricate success. Run status: `complete` only when all checks
+completed; `cancelled` on user request; `failed` when nothing completed
+and something failed/timed out; `partial` otherwise. A completed check
+with zero occurrences is a completed check, never a retry candidate.
 
 ## Cancellation and cleanup
 
 `requestCancel()` updates the visible state first (≤100 ms target),
 then marks pending checks `cancelled`, emits cancel+terminate intents,
 tears down run resources and invalidates the registry (≤500 ms target,
-old generation unreachable). `requestClear('idle' | 'replace')` bumps
-the generation before teardown, runs both registries, nulls document
-and run state. Neither claims forensic secure erasure.
+old generation unreachable). Interpretation note: chunks of a cancelled
+check that were already committed stay retained — they were
+contract-validated evidence before the cancel landed; the check itself
+terminalizes `cancelled` with its produced/retained counts intact.
+`requestClear('idle' | 'replace')` bumps the generation before
+teardown, runs both registries, nulls document and run state. Neither
+claims forensic secure erasure.
 
 ## Retry taxonomy
 
