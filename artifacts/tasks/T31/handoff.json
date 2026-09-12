@@ -1,0 +1,81 @@
+{
+  "task": "T31",
+  "beads_id": "pdf-t31",
+  "title": "Implement shared Node comparison bridge",
+  "worker": "devin-t31 (Devin Local SWE-2, Mac)",
+  "app": "devin",
+  "gate": "G3",
+  "contract_version": "1.0.0",
+  "branch": "work/devin/t31",
+  "base": "7f41409",
+  "commits": {
+    "implementation": "e260b92 (packages/compare/node/{protocol.mjs,bridge.mjs,README.md} + native/inkflip/compare_bridge.py)",
+    "tests": "ec992e6 (tests/bridge/{bridge.test.mjs,cases.json,direct_driver.mjs} + native/tests/bridge/test_bridge.py)",
+    "head": "ec992e6f16e3712a79163293fb50b6d7b0368ed9"
+  },
+  "ready_for_review": true,
+  "review_scope": "packages/compare/node/ + native/inkflip/compare_bridge.py + tests/bridge/ + native/tests/bridge/ only; diff vs base 7f41409 is 7 new source/test files plus task evidence. planning/, shared schemas, lockfiles and other tasks' modules untouched. No Beads writes by this worker.",
+  "contract_observation": "T31 allowed_scope lists packages/compare/node/, native/inkflip/compare_bridge.py and tests/bridge/; the registered command 'uv run --project native python -m pytest native/tests/bridge -q' additionally mandates native/tests/bridge/ for the Python half (the convention T29/T27 follow, where the test dir is also named in scope). The test file is placed exactly where the contract command collects it; flagged for reviewer awareness, not treated as a plan mismatch since the command itself is authoritative.",
+  "design": {
+    "entrypoint": "packages/compare/node/bridge.mjs is the fixed installed Node entrypoint: one bounded JSON request on stdin, one bounded JSON response on stdout, exit 0 for every handled failure (ok:false + ContractError code), nonzero only when the entrypoint itself cannot run.",
+    "dispatch": "protocol.mjs owns the closed request vocabulary (describe/normalize/align) and dispatches into the same @inkflip/compare modules the browser uses - normalizeText, checkNormalizedView, alignPage with frozen REGION_MATCH_V1 parameters. No native-only reimplementation (ADR009).",
+    "python_side": "native/inkflip/compare_bridge.py invokes fixed argv [resolved node, repo entrypoint] with shell=False, minimal env (locale + private TMPDIR scratch, no NODE_OPTIONS/PATH), and a selectors pump that byte-counts stdout/stderr against caps, kills the child process group on overflow or the wall deadline, and reaps with a bounded wait. stdin is closed promptly so EOF semantics are exact.",
+    "capability": "Missing/non-executable node, missing entrypoint or spawn ENOENT/EACCES -> BridgeCapabilityError('capability'). There is deliberately no Python fallback comparison algorithm.",
+    "identity": "comparatorIdentity() rides every response: package, bridge_version 1.0.0, protocol inkflip-compare-bridge v1, normalization scalar-whitespace-v1, alignment region-match-v1, score_semantics algorithm_diagnostics_not_probability, node version + platform. BridgeResult.manifest_entry() renders it for run/comparison manifests (I13).",
+    "bounds": "Request capped at 16 MiB pre-spawn (Python) and 32 MiB at the entrypoint; stdout capped at 16 MiB (kill -> output_limit, never truncation); stderr capped at 1 MiB with a bounded 8 KiB tail retained on the exception; element caps on raws/pages/occurrences; 60 s wall default."
+  },
+  "executed_checks": [
+    {
+      "command": "node --test tests/bridge/*.test.mjs && uv run --project native python -m pytest native/tests/bridge -q",
+      "exit": 0,
+      "counts": {"node_tests": {"collected": 17, "passed": 17, "failed": 0}, "pytest": {"collected": 28, "passed": 28, "failed": 0, "skipped": 0}},
+      "note": "The exact registered T31 contract command, verbatim."
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T31 --report artifacts/tasks/T31/run.json",
+      "exit": 0,
+      "counts": {"collected": 45, "passed": 45, "failed": 0, "skipped": 0},
+      "note": "run.json binds evaluated_commit ec992e6f16e3712a79163293fb50b6d7b0368ed9 on a clean tree; both registered segments executed and passed."
+    },
+    {
+      "command": "python3 scripts/acceptance_receipts.py verify-run T31",
+      "exit": 0,
+      "counts": {"collected": 45, "passed": 45, "failed": 0, "skipped": 0}
+    },
+    {
+      "command": "bun x oxfmt --check packages/compare/node/ tests/bridge/ && bun x oxlint packages/compare/node/ tests/bridge/",
+      "exit": 0,
+      "note": "Format clean on all 6 files; 0 lint warnings/errors."
+    },
+    {
+      "command": "python3 -m py_compile native/inkflip/compare_bridge.py; stdlib-only import smoke test",
+      "exit": 0
+    }
+  ],
+  "invariants": ["I03", "I04", "I10", "I12", "I13"],
+  "fixture_ids": ["F11", "F12", "F23", "F25"],
+  "test_ids": ["TEST-31"],
+  "evidence": [
+    "artifacts/tasks/T31/commands.log",
+    "artifacts/tasks/T31/run.json",
+    "artifacts/tasks/T31/handoff.json",
+    "artifacts/tasks/T31/receipt.json"
+  ],
+  "limitations": [
+    "Verified on macOS arm64 (Darwin 25.5.0) with node v26.7.0 only; the bridge is POSIX-only by design (process-group kill, start_new_session) - Linux verification is a coordinator dispatch, Windows is out of scope.",
+    "The entrypoint requires a Node new enough to import .ts directly (type stripping); an older runtime exits nonzero and surfaces as a typed capability/child failure, never a comparison result.",
+    "The bridge trusts its fixed entrypoint, not its payload: it defends the invocation boundary (fixed argv/env, bounded streams, process-group kill). It is not a sandbox for hostile entrypoint code - a supervised container remains the hardened route for untrusted corpora per the threat model.",
+    "Python-side caps (16 MiB request/response, 1 MiB stderr, 60 s wall) are stricter than the entrypoint's last-resort bounds; either side over its own cap is an honest typed error.",
+    "T31 ships the bridge and parity proof only; wiring it into a report/manifest writer is a later task's scope."
+  ],
+  "dependency_requests": [],
+  "review": {
+    "status": "pending independent review",
+    "note": "Independent review remains reviewer-owned; this worker did not write review.md."
+  },
+  "next_steps": [
+    "Independent review of work/devin/t31 at ec992e6 (reviewer-owned artifacts/tasks/T31/review.md).",
+    "Coordinator owns Beads acceptance state and the merged-branch acceptance receipt (acceptance.json); this worker claims ready-for-review only.",
+    "Downstream consumers (native compare/report passes) wire CompareBridge into their flows in their own tasks."
+  ]
+}

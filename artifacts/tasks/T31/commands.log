@@ -1,0 +1,70 @@
+# T31 executed command transcript
+date: 2026-09-12T15:29Z
+host: macOS arm64 (Darwin 25.5.0)
+toolchain: node v26.7.0 (/Users/zubair/.local/bin/node, type-stripping .ts imports),
+  bun 1.4.0, uv 0.9.5; python CPython 3.13.15 via uv frozen native/.venv
+worktree: /Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t31
+branch: work/devin/t31  base: 7f41409
+HEAD under test: ec992e6f16e3712a79163293fb50b6d7b0368ed9
+ = e260b92 implementation + ec992e6 test suite
+
+## T31 registered contract command (verbatim)
+
+$ node --test tests/bridge/*.test.mjs && uv run --project native python -m pytest native/tests/bridge -q
+
+  node half:
+    tests 17 / pass 17 / fail 0 / duration ~2.0 s
+    (golden normalize+align entrypoint==in-process parity, claimed
+     semantics, comparator identity on describe and every response,
+     closed-envelope/unknown-field rejection, wrong protocol/version/op,
+     malformed JSON, non-object request, invalid UTF-8, oversized stdin,
+     raw/normalized_text NORMALIZATION disagreement, closed page schema,
+     malformed occurrence contract codes, multi-page page_index
+     requirement, pure dispatch, verbatim ContractError code
+     propagation, non-string raw rejection)
+  python half:
+    28 passed in ~1.7 s, no warnings
+    (golden normalize+align exact agreement across both real paths,
+     Python contract normalize() parity, missing-Node typed capability
+     errors (PATH removal, explicit path, missing entrypoint, injected
+     ENOENT/EACCES spawn), request/response/stderr byte caps ->
+     request_too_large/output_limit, wall timeout -> process-group kill,
+     fixed argv [node, entrypoint] + minimal env immune to hostile raw
+     text and smuggled envelope fields, nonzero exit/crash/malformed
+     output typed taxonomy, unserializable caller input -> typed 'type'
+     error pre-spawn, comparator identity on describe+results and
+     manifest_entry() landing in a manifest-shaped record)
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T31 --report artifacts/tasks/T31/run.json
+exit: 0
+run.json binds evaluated_commit ec992e6f16e3712a79163293fb50b6d7b0368ed9;
+tests: collected 45, passed 45, failed 0, skipped 0 (17 node --test + 28 pytest)
+
+$ python3 scripts/acceptance_receipts.py verify-run T31
+{"verified": "T31", "tests": {"collected": 45, "passed": 45, "failed": 0, "skipped": 0}}
+exit: 0
+
+## Supplementary checks
+
+$ bun x oxfmt --check packages/compare/node/ tests/bridge/
+All matched files use the correct format (6 files).
+exit: 0
+
+$ bun x oxlint packages/compare/node/ tests/bridge/
+Found 0 warnings and 0 errors (4 files, 96 rules).
+exit: 0
+
+$ python3 -m py_compile native/inkflip/compare_bridge.py
+exit: 0
+
+$ python3 -c 'import sys; sys.path.insert(0,"native"); import inkflip.compare_bridge'
+imports under bare stdlib (inkflip.contracts jsonschema dependency is
+lazy-loaded inside _decode so capability probing needs no third-party
+packages).
+exit: 0
+
+## Process hygiene
+pgrep -f 'bridge.mjs' after the suites -> none (each exchange is a
+one-shot child reaped by the bounded pump; timeout/overflow paths
+SIGKILL the process group).
