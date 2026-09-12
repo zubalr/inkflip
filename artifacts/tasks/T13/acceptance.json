@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "task_id": "T13",
+  "beads_id": "pdf-t13",
+  "disposition": "accepted",
+  "evaluated_commit": "6d81b04edb35c3c6b7ac692c452f8778a6daa9f7",
+  "evaluated_at": "2026-09-12T17:31:40.621010+00:00",
+  "contract_digest": "c1ca30ee7646e1d5157913f0b41cbaafff40073280a29251414c60e5b692d1f8",
+  "worker": "antigravity-t13",
+  "commands": [
+    {
+      "segment": "bun run test:browser -- tests/browser/viewer.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/viewer.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/viewer.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 11,
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T13/commands.log": "a59409941222b257212f3e740fcce897379aa4a142b1c3dc4c3a01a5bc7a81be",
+    "artifacts/tasks/T13/coordinator-commands.log": "26ae672264b18693c25247794cccca41e75e72f63c02dde528ae235a5e5611f4",
+    "artifacts/tasks/T13/receipt.json": "affd40c0e6a7bdbaced49b62406758ca9131e6e1b0fd40714d3c870662407a3a",
+    "artifacts/tasks/T13/review.md": "914339fbeca2d6e4996c538a23be7495f60ebf8fdf04fe1bee01f01f1c5e9176",
+    "artifacts/tasks/T13/run.json": "861b87aa04d8648302e14daca975a5e19e6dee72e895b666e7a16c4157ffc2bb",
+    "artifacts/tasks/T13/screenshots/accessible-text-layer.png": "5fda1976ecb295c5d1d14b46484cb399c6c9d05c1e60f75ffeee978910c2f2a9",
+    "artifacts/tasks/T13/screenshots/compare-sync-scroll.png": "e612aee57728e06b59de9eb513120c3ad0eaf08c9bd796fa0fce461fcc55d1a3",
+    "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png": "00083522ebfe1be91c25349395d724deb656ae201bbd052e77beaf4fa06a95d3",
+    "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png": "e98a3f08f14a9397eebabe63dfa7ed0a856857593f09e82c1847459711ea9104",
+    "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png": "1e4389c3bf5a83968f467bd2e1a853f8bfbc5ac76e1e1eb7fed09cfb09f5af4a"
+  },
+  "criteria": {
+    "Click/keyboard finding selects correct duplicate/page after zoom/rotation": [
+      "artifacts/tasks/T13/commands.log",
+      "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png",
+      "artifacts/tasks/T13/run.json"
+    ],
+    "two views sync without scroll loop": [
+      "artifacts/tasks/T13/commands.log",
+      "artifacts/tasks/T13/screenshots/compare-sync-scroll.png",
+      "artifacts/tasks/T13/run.json"
+    ],
+    "narrow screen stacks instead of squeezing": [
+      "artifacts/tasks/T13/commands.log",
+      "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png",
+      "artifacts/tasks/T13/run.json"
+    ],
+    "unknown geometry stays page-level": [
+      "artifacts/tasks/T13/commands.log",
+      "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png",
+      "artifacts/tasks/T13/run.json"
+    ],
+    "canvas has equivalent reachable content and limits.": [
+      "artifacts/tasks/T13/commands.log",
+      "artifacts/tasks/T13/screenshots/accessible-text-layer.png",
+      "artifacts/tasks/T13/run.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "review/devin/t13"
+    ],
+    "path": "artifacts/tasks/T13/review.md"
+  }
+}

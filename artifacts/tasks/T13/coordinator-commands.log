@@ -1,0 +1,24 @@
+bun run test:browser -- tests/browser/viewer.spec.ts
+
+Running 11 tests using 1 worker
+
+
+[1A[2K[1/11] tests/browser/viewer.spec.ts:45:3 › T13: Integrated Viewer & Evidence Navigation › criterion 1: click/keyboard finding selects correct duplicate/page after zoom and rotation
+[1A[2K[2/11] tests/browser/viewer.spec.ts:109:3 › T13: Integrated Viewer & Evidence Navigation › criterion 2: two views sync without scroll loop in compare mode
+[1A[2K[3/11] tests/browser/viewer.spec.ts:157:3 › T13: Integrated Viewer & Evidence Navigation › criterion 3: narrow screen stacks instead of squeezing in compare mode
+[1A[2K[4/11] tests/browser/viewer.spec.ts:194:3 › T13: Integrated Viewer & Evidence Navigation › criterion 4: unknown/page-only geometry stays page-level and does not draw coordinate box
+[1A[2K[5/11] tests/browser/viewer.spec.ts:228:3 › T13: Integrated Viewer & Evidence Navigation › criterion 5: canvas has equivalent reachable content and limits (WCAG 2.2 AA)
+[1A[2K[6/11] tests/browser/viewer.spec.ts:263:3 › T13: Integrated Viewer & Evidence Navigation › document open and report import entry integration (P1-F1)
+[1A[2K[7/11] tests/browser/viewer.spec.ts:292:3 › T13: Integrated Viewer & Evidence Navigation › home landing view does not overflow at 360px viewport (P2-F2)
+[1A[2K[8/11] tests/browser/viewer.spec.ts:309:3 › T13: Integrated Viewer & Evidence Navigation › report import rejects degenerate/invalid JSON without white-screen crash (P2)
+[1A[2K[9/11] tests/browser/viewer.spec.ts:340:3 › T13: Integrated Viewer & Evidence Navigation › PDF open candidate validation rejects non-PDF and does not fabricate findings (P1)
+[1A[2K[10/11] tests/browser/viewer.spec.ts:376:3 › T13: Integrated Viewer & Evidence Navigation › canonical report import accepts page-level occurrences with polygon: null (P1)
+[1A[2K[11/11] tests/browser/viewer.spec.ts:434:3 › T13: Integrated Viewer & Evidence Navigation › FileDrop drag-and-drop handles PDF candidate validation (P3)
+[1A[2K  11 passed (4.4s)
+$ python3 scripts/task_acceptance.py run test:browser tests/browser/viewer.spec.ts
+(node:88150) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[1A[2K(node:88157) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Exit: 0
