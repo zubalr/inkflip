@@ -103,6 +103,70 @@ export function canonicalToRaster(page: Page, scalePxPerPt: number): Matrix {
 }
 
 /**
+ * Candidate ocr_resize factors for a downscaled crop, best first. The
+ * record is exact only if `floor(crop * k)` reproduces the realized
+ * integer output on both axes — i.e. k lies inside the half-open
+ * interval
+ *
+ *   [max(outW/cropW, outH/cropH), min((outW+1)/cropW, (outH+1)/cropH))
+ *
+ * — and only if k is representable at the contract's six-decimal
+ * storage precision: makeTransform rounds the matrix, and
+ * CropPlan.resizeK is the same stored value, so the recorded factor
+ * must already be a six-decimal value.
+ *
+ * In-interval candidates are ordered nearest the midpoint and verified
+ * against the floor products (a grid value can straddle lo/hi by an
+ * ulp). When the interval is narrower than storage precision and holds
+ * no representable value, the adjacent grid values — below, then above
+ * — are returned instead; the caller re-derives the realized size from
+ * the accepted factor, so the record and the realized output stay
+ * consistent by construction.
+ */
+function recordedResizeK(
+  cropW: number,
+  cropH: number,
+  outW: number,
+  outH: number,
+): number[] {
+  const lo = Math.max(outW / cropW, outH / cropH);
+  const hi = Math.min((outW + 1) / cropW, (outH + 1) / cropH);
+  const fits = (r: number): boolean =>
+    r > 0 &&
+    Math.floor(cropW * r) === outW &&
+    Math.floor(cropH * r) === outH;
+  const candidates: number[] = [];
+  // Representable grid: integer m with m/1e6 inside [lo, hi). The 1e-9
+  // tolerance keeps FP roundoff at exact multiples from dropping a
+  // valid grid value; the floor check is the real arbiter.
+  const mLo = Math.ceil(lo * 1e6 - 1e-9);
+  const mHi = Math.ceil(hi * 1e6 - 1e-9) - 1;
+  if (mLo <= mHi) {
+    const mMid = Math.min(
+      Math.max(Math.round(((lo + hi) / 2) * 1e6), mLo),
+      mHi,
+    );
+    for (let d = 0; mMid - d >= mLo || mMid + d <= mHi; d += 1) {
+      if (mMid + d <= mHi) {
+        const r = (mMid + d) / 1e6;
+        if (fits(r)) candidates.push(r);
+      }
+      if (d > 0 && mMid - d >= mLo) {
+        const r = (mMid - d) / 1e6;
+        if (fits(r)) candidates.push(r);
+      }
+    }
+  }
+  // Fallbacks for a sub-precision interval (or every in-interval grid
+  // value straddling an ulp boundary): below the interval the realized
+  // output only shrinks — caps still hold — while above it may grow by
+  // at most a pixel per axis and is re-checked against the caps.
+  candidates.push(Math.max(mLo - 1, 1) / 1e6);
+  candidates.push((mHi + 1) / 1e6);
+  return candidates;
+}
+
+/**
  * Plan one OCR crop. `region` is the resolved canonical selection
  * (null → full page). Returns the recorded chain; throws OcrError
  * (geometry_unavailable / resource_limit) for impossible input.
@@ -221,13 +285,39 @@ export function planCrop(input: {
       OCR_REASON.RESOURCE_LIMIT,
       `downscaled OCR input ${outW}x${outH} still exceeds caps`,
     );
+    // The recorded factor maps recorded-space output pixels back to the
+    // crop grid; it must floor-reproduce the realized integer output on
+    // both axes and survive the contract's storage rounding. Candidates
+    // inside the feasible interval keep the ideal size; a fallback
+    // candidate shifts the realized size by at most a pixel per axis,
+    // re-derived here so the record stays exact.
+    let matched = false;
+    for (const r of recordedResizeK(cropW, cropH, outW, outH)) {
+      const w = Math.floor(cropW * r);
+      const h = Math.floor(cropH * r);
+      if (
+        w >= 1 &&
+        h >= 1 &&
+        w * h <= bounds.maxRasterPixels &&
+        Math.max(w, h) <= bounds.maxRasterEdge
+      ) {
+        k = r;
+        outW = w;
+        outH = h;
+        matched = true;
+        break;
+      }
+    }
+    requireOcr(
+      matched,
+      OCR_REASON.RESOURCE_LIMIT,
+      `no recorded resize factor reproduces the bounded OCR input ` +
+        `${outW}x${outH}`,
+    );
     limitations.push(
       `downsampled: crop ${cropW}x${cropH}px exceeds caps; ` +
         `actual OCR scale ${round6(k)} (recorded in ocr_resize)`,
     );
-    // The recorded factor maps recorded-space output pixels back to the
-    // crop grid; use the realized factor so geometry stays exact.
-    k = Math.min(outW / cropW, outH / cropH);
     cropW = outW;
     cropH = outH;
   }
