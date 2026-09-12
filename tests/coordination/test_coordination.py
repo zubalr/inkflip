@@ -152,7 +152,7 @@ class CoordinationTests(unittest.TestCase):
                  patch.object(c, "bd") as beads, patch.object(c, "run") as git:
                 with self.assertRaisesRegex(ValueError, "native_pass.py dispatch"):
                     c.start(c.effective_task(self.tasks["T01"], self.overrides), "worker", self.overrides)
-                with self.assertRaisesRegex(ValueError, "native_pass.py dispatch"):
+                with self.assertRaisesRegex(ValueError, "independent review assignment"):
                     c.start_review("pdf-review", "reviewer", self.overrides)
                 self.assertFalse(any(call.kwargs.get("write") for call in beads.call_args_list))
                 self.assertFalse(git.called)
@@ -163,17 +163,20 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual({g["id"] for g in gates}, {f"G{n}" for n in range(1, 6)})
         self.assertFalse((ROOT / "execution/state.json").exists())
 
-    def test_generated_prompts_use_separate_worktrees_and_guarded_claims(self):
-        with patch.object(c, "canonical_root", return_value=ROOT):
-            for tid in ["T01", "T02", "T03", "T05", "T06"]:
-                actor = "worker-" + tid.lower()
-                prompt = c.render_prompt(c.effective_task(self.tasks[tid], self.overrides), actor, self.overrides)
-                self.assertIn(str(ROOT.parent / "worktrees" / c.bead_id(tid)), prompt)
-                self.assertIn(f"task {tid}", prompt)
-                self.assertIn("native_pass.py dispatch", prompt)
-                self.assertNotIn(f"start {tid} --actor", prompt)
-                self.assertIn(f"work/{c.bead_id(tid)}", prompt)
-                self.assertIn("Then stop for independent review", prompt)
+    def test_generated_prompts_use_saved_grants_and_guarded_claims(self):
+        # Prompts must point at the saved Beads execution grant and the
+        # coordinator-assigned checkout, never a fabricated branch or
+        # worktree — the grant survives static allocation changes.
+        for tid in ["T01", "T02", "T03", "T05", "T06"]:
+            actor = "worker-" + tid.lower()
+            prompt = c.render_prompt(c.effective_task(self.tasks[tid], self.overrides), actor, self.overrides)
+            self.assertIn("the exact branch saved in your Beads execution grant", prompt)
+            self.assertIn("assigned separately by the coordinator", prompt)
+            self.assertIn(f"task {tid}", prompt)
+            self.assertIn("native_pass.py dispatch", prompt)
+            self.assertNotIn(f"start {tid} --actor", prompt)
+            self.assertNotIn("work/pdf-", prompt)
+            self.assertIn("Then stop for independent review", prompt)
 
     def test_prompt_session_label_cannot_inject_shell_instructions(self):
         for actor in ["", "worker; ls", "worker\nls", "$(whoami)", "x" * 65]:
