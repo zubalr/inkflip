@@ -1,6 +1,61 @@
 # T13 independent review — page/text/compare viewer & root app composition
 
 - **Reviewer:** independent reviewer (Devin Local subagent, coordinator-requested); not the writer (worker: `antigravity-t13`)
+- **Round-4 candidate:** `6f9d526` evidence on `77d9046` fix (merged into this branch); earlier rounds: `baf3b13`/`9c161e1` (R3), `af685aa`/`ab38b9e` (R2), `5d68193`/`5f644ca` (R1)
+- **Checkout:** `original/worktrees/review-devin-t13`
+- **Round-4 verdict: APPROVED** — the round-3 P1 is verifiably fixed and survived a 9-case hostile-shape probe (every non-canonical shape either renders honestly or fails closed into `#import-error`; nothing crashes the React tree and nothing fabricates geometry); both round-3 P3s are resolved with real wired effects; suite is 11/11 reproduced in this checkout, T08 open regression 13/13, verify 116/116, build clean, scope clean, receipt honest.
+
+## Round-4 verification (`77d9046` + `6f9d526`)
+
+| Check | Result |
+|---|---|
+| `bun run test:browser -- tests/browser/viewer.spec.ts` | **11/11 pass (4.5s)** in this worktree — includes the writer's 2 new regression tests (polygon:null import; FileDrop→PDF drop validation) |
+| `bun run test:browser -- tests/browser/open.spec.ts` (T08 regression) | **13/13 pass (11.2s)** — App.tsx wiring changes did not break the open suite |
+| `bun run verify` | **49 bootstrap + 2 native + 65 coordination OK; self-check 16** — 116/116 claim confirmed |
+| `bun run build:web` | clean production build, 51 modules, exit 0 |
+| Round-4 adversarial probe spec (9 probes, preserved at `artifacts/tasks/T13/independent-review-probe-r4.spec.ts`) | **9/9 pass** — details below |
+| `run.json` binding | binds `77d904684f…` (impl commit), 11/11, exit 0; `receipt.json` `implementation_commit` matches |
+| `acceptance_criteria_evidence` | dict keyed by all **5 exact contract criterion strings**; verified against `coordination.py task T13` output |
+| Scope `96ab535..6f9d526` | only the five sanctioned files + `features/viewer/` + the 2 previously-sanctioned page CSS modules + `tests/browser/viewer.spec.ts` + T13 artifacts — **no new out-of-scope files**; round-4 delta itself touched only `App.tsx`, `Workspace.tsx`, `viewer.spec.ts`, artifacts |
+
+### Round-3 P1 — polygon:null import gate — FIXED and adversarially verified
+
+Gate is now `occ.geometry.polygon !== null && !Array.isArray(occ.geometry.polygon)` (Workspace.tsx:344) — accepts canonical `null` (page-level) and arrays. Canonical schema confirmed: `Geometry.polygon = anyOf[point-tuple array minItems 3, null]`; `Finding.occurrence_ids` is a required array, so requiring it is consistent. Hostile-shape probe results (each on a fresh workspace mount, asserting `#root` stays alive):
+
+| Injected shape | Observed behavior | Verdict |
+|---|---|---|
+| `polygon:null` + `precision:"page_only"` (canonical) | mounts; selecting finding → `#page-level-geometry-notice` visible; zero `#highlight-` elements | honest |
+| `polygon:null` + claimed `precision:"exact"` + `alignment:"unique"` | mounts; notice still shown (CanvasOverlay checks `polygon === null`, not just precision); no box | honest — the lie cannot fabricate geometry |
+| `polygon:"str"` / `{x:1}` / `42` | `#import-error` "occurrence missing required geometry or page_index", `#viewer-stage` absent | fail closed |
+| missing `geometry` / `geometry:null` / `geometry:7` | `#import-error`, app alive | fail closed |
+| `polygon:[1,2,3]` (number array — passes `Array.isArray`) | mounts; `<polygon points="NaN,NaN …">` → measured boundingBox 0×0 — inert, invisible, no crash | honest output of malformed input |
+| `polygon:[null,null,null]` | render `TypeError` → `ViewerErrorBoundary` → `#import-error` "Cannot read properties of null (reading '0')", `#root` children ≥1 | fail closed via boundary |
+| `polygon:[]` and `polygon:[[0,0],[1,0]]` (<3 pts) | mounts; SVG filter drops them; zero `#highlight-` elements; no crash | honest (silent — see P3 nit) |
+| mixed report: one `polygon:null` + one valid 4-pt polygon + a finding each | both findings listed; exact finding → `#highlight-occ-mixed-box` visible + no notice; page-level finding → notice + no box | honest per-occurrence |
+
+No probe produced a white screen (`#root` empty) and none produced a fabricated visible box from non-geometry data.
+
+### Round-3 P3s — resolution verified
+
+- **`onOpenFile`/`onImportReport` wired — real effects, not stubs.** `App.tsx` tracks `activeDoc`; `onImportReport` persists the imported doc, `onOpenFile` clears it when a validated PDF arrives, new `onCloseDoc` prop clears it on close. Probed live: import report → Home → back to Workspace → doc remounts as "Imported Report · 1 pages · 1 findings" (round-trips through the seam). This is bookkeeping persistence through the composition root — an honest host seam, not a pretend pipeline.
+- **FileDrop→PDF path now suite-covered** (spec test 11: drop `%PDF-` file → no viewer mount, `#pdf-received-notice` names the file). Code re-inspected: `handlePdfCandidate` still runs T08's real `resolveProfile()` + `validateCandidate()`, still shows the explicit "inspection pipeline is unavailable" notice, still mounts zero findings — no canned-data regression.
+
+### Round-4 residual observations (all P3-level, non-blocking advisories)
+
+- **Precedence quirk (verified live):** with `activeDoc` set, Home's "Try the example" (`onNavigateWorkspace(true)`, explicit `?example=true` intent) mounts the stale imported report, not `EXAMPLE_DOC` — `initialDoc || (initialWithExample ? EXAMPLE_DOC : null)` gives the persisted doc precedence over explicit navigation intent. Example is still reachable via Load Example after closing. Suggested: `initialWithExample ? EXAMPLE_DOC : (initialDoc ?? null)` or clear `activeDoc` on example navigation.
+- **Gate is permissive on polygon contents** (arrays of non-tuples mount and render inert NaN/0×0 polygons; `null` points trip the boundary). Never fabricates and never white-screens, but tightening to tuple validation (`Array.isArray(pt) && pt.length>=2 && pt.every(Number.isFinite)`) would reject earlier and more honestly. T22's strict importer remains the validating gate downstream.
+- **`polygon:[]`/`[<3 points]` with `precision:"exact"` renders neither box nor notice** — silent absence of geometry. Not fabrication; arguably should surface the page-level notice whenever no drawable polygon exists.
+- **Cosmetic carry-overs:** finding without `page_index` still prints "Page NaN" in the card (gate doesn't check it — canonical requires it); accessible layer labels a `polygon:null`+`precision:"exact"` occurrence "(exact)" while the canvas correctly shows the page-level notice (label/decision mismatch, cosmetic); `ViewerErrorBoundary key={docTitle}` could retain error state if a different doc imports under an identical display name (remount clears it — edge).
+
+### Round-4 verdict rationale
+
+The only round-3 blocker (P1) is fixed in exactly the right place and verified against canonical schema plus nine hostile import shapes — including the specific trap of `polygon:null` under a claimed localized precision, which renders honestly page-level rather than fabricating a box. Both advisories were resolved with real wired effects rather than prop deletion. All criteria remain green on a reproduced 11/11 suite plus a 13/13 T08 regression; run.json binds the implementation commit; scope is unchanged from the sanctioned set. Residual items are P3 polish advisories for integration, none blocking. **APPROVED.**
+
+---
+
+## Round 3 (superseded — kept for the record)
+
+- **Reviewer:** independent reviewer (Devin Local subagent, coordinator-requested); not the writer (worker: `antigravity-t13`)
 - **Round-3 candidate:** `baf3b13` evidence on `9c161e1` fix (merged into this branch); earlier rounds: `af685aa`/`ab38b9e` (R2), `5d68193`/`5f644ca` (R1)
 - **Checkout:** `original/worktrees/review-devin-t13`
 - **Round-3 verdict: changes-required** — every round-2 finding is verifiably fixed (PDF path is now honest + genuinely validated, Home/workspace overflow is 0px at 360px, malformed JSON fails closed under a real error boundary, 9/9 suite green), but the new import shape-gate added this round **rejects canonical reports containing page-level (`polygon: null`) occurrences** — a self-inconsistent overreach that must be relaxed before acceptance.
