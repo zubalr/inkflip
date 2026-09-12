@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-12",
+  "scope": "Mac coordinator / Homebase ZCode setup; not product acceptance",
+  "source_base": "e14ea4aa9433ac25fef4faa57050aa5d0a1cd802",
+  "checks": {
+    "registered_verify": {
+      "result": "passed",
+      "tests": 111,
+      "groups": {
+        "bootstrap": 49,
+        "native_bootstrap": 2,
+        "coordination": 60
+      }
+    },
+    "relay_tests": 19,
+    "pre_push_tests": 11,
+    "linux_frozen_install": "passed",
+    "linux_oxlint": "1.82.0",
+    "linux_oxfmt": "0.67.0",
+    "linux_reader_baseline": {
+      "tests": 22,
+      "failures": 5,
+      "result": "reproduced known failure; unresolved"
+    },
+    "actual_relay_publication": "pending after source commit",
+    "native_agents": "not launched yet"
+  },
+  "source_sha256": {
+    "AGENTS.md": "2540e00ffc7b866454af90d9a40a839a227b43e07bd1705c228adb74f43600bc",
+    "START_HERE.md": "e489e1fccfb7a16e7014e97e62c3f4ab3713cc0444bfdafb2fa907aaa0ab4760",
+    ".beads/README.md": "5cd782d8a548e1401d03d86e9054522bc6dda499cb5d2718614fd5d1f777b753",
+    "docs/HOMEBASE.md": "4b51af3f298c55d30e7f9f2bab1e7600b78c0f06e8b4e546d2d333826bcb829a",
+    "docs/NATIVE_PASSES.md": "4efd57ed2a7e277be96aa6dfeb5eef443788fc71a678c683afeaa0b4cd57196d",
+    "prompts/DEVIN.md": "0a7b8dc35c8778729c9e5920f4600043d7a10523b4cf7d805c1b23a48960759f",
+    "prompts/ZCODE.md": "3b1d74188ba86a7088f7121d1d20f2eda50a5413498cdec6bf37751826171d95",
+    "prompts/ANTIGRAVITY.md": "29b772278f8590aefbdd520291858a1d441284198880bea437ae04b81f0ddb17",
+    "execution/passes.json": "1e05a6f322ce21bd56ed5d9eaad7d0288596ef988d627f2b15e61f7b750a3a95",
+    "scripts/homebase_relay.py": "5c930c37517d20b3d30da018bf23255c99d9807624f5756e314e60cad1c34737",
+    "scripts/homebase_pre_push.py": "ef2b4261021ee1a562a6d5adeb1c79018da15e31991e2eb0b3a8e79203cb28dd",
+    "config/homebase.json": "359b02b7b3d388c70faee68c5eba1efe848f76844ef50a821b9483584f919497",
+    "tests/coordination/test_homebase_relay.py": "1541a4c581c18edd2ac1e73b072dd19c87b67054aadbf4509eb13d4a424fec23",
+    "tests/coordination/test_homebase_pre_push.py": "51710218865740d845e85c83db90cc178043cacd936b7abc69a9871f86afa29e",
+    "tests/coordination/test_native_pass.py": "eee47bbd6060f0b7fce4fc0522982700c272ef59dbc6c5171dc9953d52fb32ae",
+    "bun.lock": "74d813632e6bbf0a6a9bc4c2046020950bcda6edf261b59dfef8b877bb3d3bf7",
+    "bunfig.toml": "7fa28466820e628b8b087db8517adc5dcb811621270c1f2c6d4c7a13ff11e4fc"
+  }
+}

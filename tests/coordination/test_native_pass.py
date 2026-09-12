@@ -28,7 +28,9 @@ class PassTests(unittest.TestCase):
         planned = [t for stage in self.config["passes"] for t in stage["tasks"]]
         self.assertEqual(len(owned), len(set(owned)))
         self.assertEqual(set(owned), set(planned))
-        self.assertEqual(sum(self.config["worker_budgets"].values()), 5)
+        self.assertEqual(self.config["worker_budgets"], {"devin": 2, "antigravity": 0, "zcode": 1})
+        self.assertEqual(sum(self.config["worker_budgets"].values()), self.config["max_active_workers"])
+        self.assertEqual(self.config["max_active_workers"], 3)
 
     def test_no_pass_depends_on_future_work(self):
         seen = set(self.config["completed_bootstrap"])
@@ -63,7 +65,7 @@ class PassTests(unittest.TestCase):
         self.assertEqual(p.dispatch_errors(self.config, stage, "T05", issue, [], "zcode"), [])
         own = [{"metadata": {"execution": {"app": "zcode"}}}]
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, own, "zcode"))
-        self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 5, "zcode"))
+        self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 3, "zcode"))
 
     def test_sync_failure_does_not_report_empty_inbox(self):
         with patch.object(p.c, "admission_lock"), patch.object(p, "sync_state", side_effect=ValueError("offline")), patch.object(p.c, "issues_by_id") as read:

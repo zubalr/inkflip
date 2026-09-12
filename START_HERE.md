@@ -1,50 +1,40 @@
-# Start one session in each app
+# Start the Mac coordinator and Homebase worker
 
 Private repository: https://github.com/zubalr/inkflip
 
-Start **Devin Local first** in Devin Desktop, using the existing project directory
-and SWE-2 Max. Use Normal mode and enable Subagents (Preview). Paste
-`prompts/DEVIN.md`. Then paste `prompts/ANTIGRAVITY.md` in Antigravity and
-`prompts/ZCODE.md` in ZCode. Each file is the complete entry prompt.
+Start **Devin Local** in the Mac's existing `original` checkout on `main`, with
+SWE-2 Max, Normal mode and Subagents (Preview). Paste `prompts/DEVIN.md`.
+Start native **ZCode Agent/Goal on Homebase** in
+`/home/wertyp/.local/share/homebase-factory/projects/inkflip` and paste
+`prompts/ZCODE.md`. Select the user's GLM model in ZCode's own UI.
+Both prompts continue the saved work; no per-ticket prompts are needed.
 
-Prepared local folders (relative to the parent `pdf project` directory):
+Read `docs/HOMEBASE.md` for the concrete plan and transport. Devin handles
+architecture, difficult implementation, review and integration. ZCode handles
+assigned components, fixtures, repeated verification and supporting deliverables.
+The Mac alone writes Beads and publishes GitHub commits. Homebase receives source
+and read-only Beads state through a local Git relay and returns checkpoint
+branches over SSH. It needs no personal GitHub login or new Workbench access.
 
-| App | Folder | Starting branch |
-| --- | --- | --- |
-| Devin Local | `original` | `main` |
-| Antigravity | `worktrees/pdf-t06` | `session/antigravity` |
-| ZCode | `worktrees/pdf-t05` | `session/zcode` |
+Leave Antigravity, the old Mac ZCode session, and Cloud sessions stopped.
+Keep the Mac awake and network-connected for Local coordination and publication.
+Homebase must remain running; never reboot, shut down or suspend it.
 
-Keep the Devin coordinator in the existing `original` folder. The session creates
-isolated task worktrees when needed; leave the canonical checkout available for
-integration. All three apps read the same Beads database. Use the current prompt
-files; previously copied Cloud prompts are superseded.
+The [SWE-2 promotion](https://devin.ai/pricing) applies to Desktop/CLI through
+October 10, 2026 (checked September 12). It does not authorize Cloud or paid-model
+fallback. Follow `docs/NATIVE_PASSES.md` for general-subagent model inheritance.
+Native model/login/Goal approvals remain actual app UI choices.
 
-The owner selected Local because the [SWE-2 promotion](https://devin.ai/pricing)
-applies to Desktop and CLI through October 10, 2026 (verified September 12 in
-Qatar). It does not authorize Cloud usage. Follow the model and subagent rules in
-`docs/NATIVE_PASSES.md`; recheck the offer if resuming after it expires.
+`execution/passes.json` owns static allocation. Beads owns current progress,
+grants, follow-ups and acceptance. Read `pdf-pass1` for the Cloud-to-Local
+checkpoint and unresolved defects; do not restart completed tasks.
 
-The app model, GitHub access and native Teamwork/goal confirmation are UI choices;
-prompt text cannot grant account access or bypass those dialogs. The sessions
-arrange their own branches, delegation, handoffs, reviews, commits and integration.
-You do not paste a prompt for each T-number. See `docs/NATIVE_PASSES.md`.
+| Pass | Required result |
+| --- | --- |
+| 1 | Working browser investigation through G1 and native foundations |
+| 2 | Complete browser experience and native regression through G2/G3 |
+| 3 | Quality, experiments and pre-release review |
 
-| Pass | Result | Tasks after accepted T01 |
-| --- | --- | --- |
-| 1 | Browser investigation through G1, plus native foundations | 25 |
-| 2 | Complete browser experience and native regression through G2/G3 | 12 |
-| 3 | Quality, experiments and pre-release review | 16 |
-
-T54 is the separate publication/deployment decision. These are intended work
-boundaries, not guarantees within a provider quota/session limit. Reuse the same
-prompt to resume; Beads determines where to continue. Do not use historical
-T01/T02/T03/T05/T06 entry prompts.
-
-The current implementation is the accepted T01 scaffold. Product work begins at
-T02. Check the existing scaffold with:
-
-```sh
-python3 scripts/task_acceptance.py run verify
-python3 scripts/coordination.py task T02
-```
+Advance only after actual gate evidence passes. There is no fixed runtime
+deadline or guarantee of overnight completion. Preserve work on quota exhaustion
+or a required owner/device action. T54 deployment remains separately authorized.
