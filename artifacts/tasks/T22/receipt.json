@@ -1,0 +1,121 @@
+{
+  "task_id": "T22",
+  "beads_id": "pdf-t22",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t22",
+  "base_commit": "3b70baa",
+  "source_commit": "9742daf5d23ed89f2fd85babfe25176bf0e8ad35",
+  "test_commit": "d802819d7dfbf54f6d2d7da57cecc964067b0b31",
+  "fix_commit": "610eee3f7208f782199cc8219bb8e343056ea4dd",
+  "fix_test_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+  "implementation_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+  "actor": "devin-t22",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "review_rounds": [
+    {
+      "round": 1,
+      "review_commit": "684374f",
+      "candidate": "a2f7e3cc83ea0bb461863eaf88d8d5a71c045d06",
+      "verdict": "changes-needed",
+      "findings_resolved": ["F1 (offerSource busy/generation binding)", "F4 (sha256-mismatch suite gap)"],
+      "findings_deferred": ["F2", "F3", "F5", "F6", "F9 — info/design-level per reviewer, recorded in review.md"],
+      "resolution_commits": ["610eee3f7208f782199cc8219bb8e343056ea4dd", "6d3951b9713ee88b0c09386f4288e2fbee773441"]
+    }
+  ],
+  "acceptance_criteria_evidence": {
+    "Real selected export reopens without upload": {
+      "status": "executed",
+      "detail": "A real T16 selection export (projectReport + serializeReportJson executed in-page) is offered through the real file input and reopens: report id, document sha256 suffix, verbatim export scope/included/omissions, exact coverage counts, recorded readers, findings with cited raw occurrence text, the crop rendered from the gate's sanitized PNG re-encode, and limitations. Every network request is asserted same-origin GET/HEAD/OPTIONS; report id, document sha and occurrence text never appear in URLs or payloads; storage and cookies stay empty; the URL is unchanged. Spec: 'a real selected export reopens locally — no upload, scope/omissions shown'.",
+      "evidence": [
+        "artifacts/tasks/T22/commands.log",
+        "artifacts/tasks/T22/run.json",
+        "artifacts/tasks/T22/criteria-evidence.md"
+      ]
+    },
+    "source omission and unavailable reader explicit": {
+      "status": "executed",
+      "detail": "The evidence export displays the verbatim import.source.missing copy, an explicit source-file-input chooser and the import.nofetch line, with export.replay.absent as the replay state; both recorded native readers (PDFium via pypdfium2 5.8.0, Tesseract 5.5.0) are named 'unavailable' and listed under replay-missing-readers with readiness absent. The delivered replayable example shows source-embedded plus the environment-required copy while missing readers stay named. The F1 fix additionally guarantees a pending source attach can never display on a superseded report or a cleared workspace. Specs: 'evidence export: missing source, chooser and unavailable readers are explicit', 'replayable export shows embedded source and the environment requirement', 'a pending source read cannot attach across a superseded generation'.",
+      "evidence": [
+        "artifacts/tasks/T22/commands.log",
+        "artifacts/tasks/T22/run.json",
+        "artifacts/tasks/T22/criteria-evidence.md"
+      ]
+    },
+    "malicious report cannot fetch/execute/select profile": {
+      "status": "executed",
+      "detail": "30+ hostile inputs are rejected inside the gate: all archive/container magics (ZIP, gzip, 7z, RAR, xz, bzip2, zstd, CAB, OLE/CFB, tar), bare PDF, UTF-16 BOMs, HTML/SVG/XML, malformed/deep/duplicate-key/nonfinite/unsafe-integer JSON, wrong artifact kinds (valid comparison, schema-valid worker_message). Report-shaped attacks — __proto__/constructor/prototype members and executable/command/profile/$ref/source_url/binary_path/fetch/remote-asset fields — fail closed (PROTOTYPE→not_a_report, SCHEMA→invalid); a report can never select a reader executable or profile. A contract-valid report carrying markup/URL/script-shaped strings reopens with every payload as literal text: zero external images, no new script elements, no execution markers. Egress tripwires (fetch/XHR/sendBeacon/WebSocket/EventSource/window.open) record nothing beyond the same-origin Vite HMR socket. Spec: 'hostile corpus: every input rejected, zero egress, nothing executed'.",
+      "evidence": [
+        "artifacts/tasks/T22/commands.log",
+        "artifacts/tasks/T22/run.json",
+        "artifacts/tasks/T22/criteria-evidence.md"
+      ]
+    },
+    "hash mismatch blocks replay": {
+      "status": "executed",
+      "detail": "The delivered tampered-report-hash.json is rejected HASH through the real file input with the verbatim invalid copy and never opens; a retained occurrence mutated without resealing fails HASH; a crop asset whose data_base64 no longer matches its declared sha256 fails ASSET. Source-side, a different-length real PDF is refused source:length-mismatch at the declared-size gate and a same-length corrupt copy of the original (last byte flipped) is refused source:sha256-mismatch after the digest — both verbatim import.source.mismatch, neither attached; only the exact original bytes attach. Specs: 'hash mismatch blocks replay: tampered report and asset are rejected', 'source attach requires exact bytes; mismatch is never attached'.",
+      "evidence": [
+        "artifacts/tasks/T22/commands.log",
+        "artifacts/tasks/T22/run.json",
+        "artifacts/tasks/T22/criteria-evidence.md"
+      ]
+    },
+    "comparison asks for exact locally selected source reports": {
+      "status": "executed",
+      "detail": "The compare panel exposes two real file inputs and produces a verdict only after both sides are explicitly chosen locally: two distinct same-document exports yield compare-status-ready with both report ids shown, the same file twice yields same_report, a different-document report yields incomparable with the verbatim compare.incomparable copy plus reason, and an invalid side shows compare-right-error with no verdict. Report ids, URLs and remote pointers are never accepted; egress stays empty. Spec: 'comparison requires two exact local selections — no ids, no urls'.",
+      "evidence": [
+        "artifacts/tasks/T22/commands.log",
+        "artifacts/tasks/T22/run.json",
+        "artifacts/tasks/T22/criteria-evidence.md"
+      ]
+    }
+  },
+  "test_summary": {
+    "bun run test:browser -- tests/reports/import.spec.ts": {
+      "exit": 0,
+      "collected": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python3 scripts/task_acceptance.py task T22 --report artifacts/tasks/T22/run.json": {
+      "exit": 0,
+      "evaluated_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+      "commands_run": 1,
+      "failures": [],
+      "evidence_errors": []
+    },
+    "bun x --no-install tsc -b packages/reports": {
+      "exit": 0
+    },
+    "bun x --no-install oxlint packages/reports/import apps/web/src/features/import tests/reports": {
+      "exit": 0,
+      "warnings": 0,
+      "errors": 0
+    },
+    "bun x --no-install oxfmt --check (same paths)": {
+      "exit": 0,
+      "detail": "All matched files use the correct format"
+    },
+    "bun run verify": {
+      "exit": 0,
+      "detail": "49 bootstrap + 2 native-boundary + 65 coordination/homebase/pass + 16-command self-check; planning snapshot byte-identical"
+    },
+    "bun x --no-install tsc -p apps/web/tsconfig.json --noEmit": {
+      "exit": 1,
+      "detail": "PRE-EXISTING baseline: 1008 missing-React-typings errors; 290 in features/import all baseline kinds; zero non-baseline diagnostics (reviewer reproduced 1008/290 exactly)"
+    }
+  },
+  "limitations": [
+    "apps/web tsc baseline fails on missing React typings: 1008 errors (TS7016 react/react-jsx-runtime, TS7026 JSX.IntrinsicElements, TS7006/TS7031 implicit-any on the untyped React surface) — pre-existing across the app; features/import contributes 290 diagnostics all of the same baseline, zero non-baseline. @types/react is not installed; adding it touches the frozen lockfile and is out of scope.",
+    "Shared-file touches outside allowed_scope: packages/reports/package.json gains only the additive './import' subpath; packages/reports/tsconfig.json gains only 'import/**/*.ts' in include — adjudicated sanctioned minimal wiring by independent review 684374f.",
+    "The preview mount is standalone wiring (__t22); App.tsx composition/routing belongs to a later task, same constraint as T16's feature.",
+    "Replay readiness is gated and disclosed but no replay run executes — the task requires the explicit local-source gate plus environment disclosure, not a new run path.",
+    "F24/F25/F26 are specified-not-generated in this branch; their import-facing semantics are exercised through constructed variants on the delivered examples (reader substitution, hostile strings, annotations opt-in), documented in the spec header.",
+    "Review round 1 info/low findings intentionally unchanged: F2 (loadsStrict re-parse on failure path — bounded, uses the gate's own parser), F3 (invalid-vs-not_a_report classification nuance — identical refusal), F5 (installed-badge label composition), F6 (corpus asserts kind not code), F9 (feature-local composed strings). Recorded in review.md.",
+    "A pre-existing stash ('Preserve incomplete T01 GUI merge') was accidentally popped during diagnostics and immediately reverted (AGENTS.md restored to HEAD); the stash entry remains untouched and no stash content entered the implementation — reviewer confirmed."
+  ],
+  "dependency_requests": [],
+  "attribution": "Original implementation; consumes in-repo primitives: T24 importReport/audit/sanitizePng and IMPORT_LIMITS, T16 projectReport/serializeReportJson/encodeBase64, contracts loadsStrict/seal/sha256, T11 RunCoordinator lifecycle and MessageFactory. Copy strings mirrored verbatim from planning/product/copy.json per feature convention. No code copied from external sources.",
+  "review_status": "round 1 changes-needed (F1) resolved — pending independent re-review; reviewer writes review.md/peer-review.md per coordinator process"
+}

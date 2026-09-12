@@ -1,0 +1,46 @@
+{
+  "task": "T22",
+  "beads_id": "pdf-t22",
+  "evaluated_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+  "evaluated_at": "2026-09-12T13:23:37.454508+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/reports/import.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/reports/import.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/reports/import.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 12 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/12] tests/reports/import.spec.ts:281:1 \u203a a real selected export reopens locally \u2014 no upload, scope/omissions shown\n\u001b[1A\u001b[2K[2/12] tests/reports/import.spec.ts:375:1 \u203a evidence export: missing source, chooser and unavailable readers are explicit\n\u001b[1A\u001b[2K[3/12] tests/reports/import.spec.ts:400:1 \u203a replayable export shows embedded source and the environment requirement\n\u001b[1A\u001b[2K[4/12] tests/reports/import.spec.ts:419:1 \u203a source attach requires exact bytes; mismatch is never attached\n\u001b[1A\u001b[2K[5/12] tests/reports/import.spec.ts:453:1 \u203a hash mismatch blocks replay: tampered report and asset are rejected\n\u001b[1A\u001b[2K[6/12] tests/reports/import.spec.ts:514:1 \u203a schema version refusal is explicit\n\u001b[1A\u001b[2K[7/12] tests/reports/import.spec.ts:543:1 \u203a hostile corpus: every input rejected, zero egress, nothing executed\n\u001b[1A\u001b[2K[8/12] tests/reports/import.spec.ts:771:1 \u203a comparison requires two exact local selections \u2014 no ids, no urls\n\u001b[1A\u001b[2K[9/12] tests/reports/import.spec.ts:826:1 \u203a a new report clears the previous generation before reopening\n\u001b[1A\u001b[2K[10/12] tests/reports/import.spec.ts:893:1 \u203a a pending source read cannot attach across a superseded generation\n\u001b[1A\u001b[2K[11/12] tests/reports/import.spec.ts:1018:1 \u203a declared-size gate rejects before any byte is read\n\u001b[1A\u001b[2K[12/12] tests/reports/import.spec.ts:1055:1 \u203a installed readers plus attached source make replay readiness explicit\n\u001b[1A\u001b[2K  12 passed (4.0s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/reports/import.spec.ts\n(node:21949) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:21955) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t22",
+      "environment": {}
+    }
+  ]
+}

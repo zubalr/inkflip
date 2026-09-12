@@ -1,0 +1,145 @@
+T22 — Implement strict local JSON import and reopen flow
+Worker: devin-t22 · Branch: work/devin/t22 · Base: 3b70baa
+Implementation commits: 9742daf (source) + d802819 (tests)
+Review round 1 (684374f, CHANGES-NEEDED → F1): fix 610eee3 (controller)
++ 6d3951b (spec, evaluated HEAD)
+All commands run in /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t22
+Dates: 2026-09-12 (UTC)
+
+======================================================================
+$ bun install --frozen-lockfile                 [environment setup]
+----------------------------------------------------------------------
+86 packages installed; no lockfile modification reported.
+exit=0
+
+======================================================================
+$ bun run test:browser -- tests/reports/import.spec.ts   [registered acceptance command]
+----------------------------------------------------------------------
+$ python3 scripts/task_acceptance.py run test:browser tests/reports/import.spec.ts
+Running 11 tests using 1 worker
+  ✓   1 a real selected export reopens locally — no upload, scope/omissions shown
+  ✓   2 evidence export: missing source, chooser and unavailable readers are explicit
+  ✓   3 replayable export shows embedded source and the environment requirement
+  ✓   4 source attach requires exact bytes; mismatch is never attached
+  ✓   5 hash mismatch blocks replay: tampered report and asset are rejected
+  ✓   6 schema version refusal is explicit
+  ✓   7 hostile corpus: every input rejected, zero egress, nothing executed
+  ✓   8 comparison requires two exact local selections — no ids, no urls
+  ✓   9 a new report clears the previous generation before reopening
+  ✓  10 declared-size gate rejects before any byte is read
+  ✓  11 installed readers plus attached source make replay readiness explicit
+  11 passed (3.4s)
+exit=0
+
+======================================================================
+$ python3 scripts/task_acceptance.py task T22 --report artifacts/tasks/T22/run.json
+----------------------------------------------------------------------
+evaluated_commit=d802819d7dfbf54f6d2d7da57cecc964067b0b31
+commands_run=1  failures=[]  evidence_errors=[]
+tests: collected=11 passed=11 failed=0 skipped=0
+record[0]: "bun run test:browser -- tests/reports/import.spec.ts" exit=0
+run record written to artifacts/tasks/T22/run.json
+exit=0
+
+======================================================================
+$ bun x --no-install tsc -b packages/reports
+----------------------------------------------------------------------
+(composite declaration build including import/**/*.ts — clean, no output)
+exit=0
+
+======================================================================
+$ bun x --no-install oxlint packages/reports/import apps/web/src/features/import tests/reports
+----------------------------------------------------------------------
+Found 0 warnings and 0 errors.
+Finished on 15 files with 96 rules.
+exit=0
+
+======================================================================
+$ bun x --no-install oxfmt --check packages/reports/import apps/web/src/features/import tests/reports/import.spec.ts
+----------------------------------------------------------------------
+All matched files use the correct format.
+exit=0
+
+======================================================================
+$ bun x --no-install tsc -p apps/web/tsconfig.json --noEmit
+----------------------------------------------------------------------
+PRE-EXISTING baseline failure (missing React typings — @types/react is
+not installed and the lockfile is frozen). Measured on this worktree:
+  total diagnostics: 1008 errors
+  in apps/web/src/features/import: 290 — every one is TS7016
+    (react / react/jsx-runtime declaration missing), TS7026
+    (JSX.IntrinsicElements missing), TS7006 or TS7031 (implicit any from
+    the untyped React surface)
+  non-baseline diagnostics in features/import: 0
+exit=1 (baseline; zero feature-specific diagnostics)
+
+======================================================================
+$ bun x --no-install playwright test tests/browser/open.spec.ts   [regression sanity]
+----------------------------------------------------------------------
+Ran pre-change during environment verification: 13 collected / 13 passed.
+exit=0
+
+======================================================================
+Manual exploration (not acceptance evidence)
+----------------------------------------------------------------------
+- Vite preview on :5194 + ad-hoc Playwright scripts exercised the real
+  mount end-to-end before the spec was written: evidence/replayable
+  exports, source attach/mismatch, replace dialog, compare verdict,
+  reader-swapped variant, hostile-string report (all strings inert,
+  zero external images, no markers). These scratch scripts were deleted
+  and are superseded by the committed spec.
+
+======================================================================
+REVIEW ROUND 1 — independent review 684374f (CHANGES-NEEDED, F1)
+======================================================================
+Finding F1 (medium): offerSource had no busy/generation guard — a
+pending byte read across replace applied the old report's attach to a
+different-document report (false attached/replay-ready display) and
+across clear resurrected a zombie report. Fixed in controller.ts
+(610eee3): busy entry guard + post-await binding to the captured
+report and generation; a superseded read is dropped with no event, no
+ownership and no attach — the newer action always wins. F4 batched:
+the suite now exercises source:sha256-mismatch (same-length corrupt
+PDF) alongside source:length-mismatch.
+
+======================================================================
+$ bun x --no-install oxfmt + oxfmt --check + oxlint  [revision gates]
+----------------------------------------------------------------------
+oxfmt applied to controller.ts + import.spec.ts; --check clean.
+oxlint: 0 warnings, 0 errors (96 rules, 7 files).
+exit=0
+
+======================================================================
+$ bun x --no-install tsc -b packages/reports        [revision]
+----------------------------------------------------------------------
+(composite declaration build — clean, no output)
+exit=0
+
+======================================================================
+$ bun run test:browser -- tests/reports/import.spec.ts   [revision — registered acceptance command]
+----------------------------------------------------------------------
+Running 12 tests using 1 worker
+  ✓   1 a real selected export reopens locally — no upload, scope/omissions shown
+  ✓   2 evidence export: missing source, chooser and unavailable readers are explicit
+  ✓   3 replayable export shows embedded source and the environment requirement
+  ✓   4 source attach requires exact bytes; mismatch is never attached
+  ✓   5 hash mismatch blocks replay: tampered report and asset are rejected
+  ✓   6 schema version refusal is explicit
+  ✓   7 hostile corpus: every input rejected, zero egress, nothing executed
+  ✓   8 comparison requires two exact local selections — no ids, no urls
+  ✓   9 a new report clears the previous generation before reopening
+  ✓  10 a pending source read cannot attach across a superseded generation
+  ✓  11 declared-size gate rejects before any byte is read
+  ✓  12 installed readers plus attached source make replay readiness explicit
+  12 passed (4.3s)
+exit=0
+
+======================================================================
+$ python3 scripts/task_acceptance.py task T22 --report artifacts/tasks/T22/run.json   [revision]
+----------------------------------------------------------------------
+evaluated_commit=6d3951b (test commit, HEAD at evaluation)
+commands_run=1  failures=[]  evidence_errors=[]
+tests: collected=12 passed=12 failed=0 skipped=0
+record[0]: "bun run test:browser -- tests/reports/import.spec.ts" exit=0
+run record rewritten to artifacts/tasks/T22/run.json
+exit=0

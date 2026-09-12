@@ -1,0 +1,151 @@
+{
+  "task": "T22",
+  "beads_id": "pdf-t22",
+  "worker": "devin-t22",
+  "branch": "work/devin/t22",
+  "base_commit": "3b70baa",
+  "source_commit": "9742daf5d23ed89f2fd85babfe25176bf0e8ad35",
+  "test_commit": "d802819d7dfbf54f6d2d7da57cecc964067b0b31",
+  "fix_commit": "610eee3f7208f782199cc8219bb8e343056ea4dd",
+  "fix_test_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+  "implementation_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+  "evidence_commit": "this file is committed after the implementation commits; see git log",
+  "disposition": "implemented_pending_review",
+  "ready_for_review": true,
+  "review_rounds": [
+    {
+      "round": 1,
+      "review_commit": "684374f",
+      "review_branch": "review/devin/t22",
+      "candidate": "a2f7e3cc83ea0bb461863eaf88d8d5a71c045d06",
+      "verdict": "changes-needed",
+      "finding": "F1 medium — offerSource lacked busy/generation guard: pending byte read across replace applied the old report's attach to a different-document report (false attached/replay-ready); across clear it resurrected a zombie report",
+      "resolution": "610eee3 — busy entry guard + post-await binding to captured report and generation; superseded reads drop with no event/own/attach; committed spec 6d3951b covers busy/replace/clear variants deterministically",
+      "batched_low_findings": [
+        "F4 — suite gap: sha256-mismatch branch now exercised via same-length corrupt PDF through the real file input"
+      ],
+      "unaddressed_findings": "F2/F3/F5/F6/F9 are info/design-level per reviewer; intentionally unchanged in this bounded revision",
+      "status": "fix committed, pending re-review"
+    }
+  ],
+  "changed_paths": [
+    "packages/reports/import/README.md",
+    "packages/reports/import/compare.ts",
+    "packages/reports/import/errors.ts",
+    "packages/reports/import/index.ts",
+    "packages/reports/import/open.ts",
+    "packages/reports/import/readers.ts",
+    "packages/reports/import/source.ts",
+    "packages/reports/import/view.ts",
+    "packages/reports/package.json",
+    "packages/reports/tsconfig.json",
+    "apps/web/src/features/import/ImportWorkspace.module.css",
+    "apps/web/src/features/import/ImportWorkspace.tsx",
+    "apps/web/src/features/import/controller.ts",
+    "apps/web/src/features/import/copy.ts",
+    "apps/web/src/features/import/index.ts",
+    "apps/web/src/features/import/mount.tsx",
+    "apps/web/src/features/import/preview.html",
+    "apps/web/src/features/import/types.ts",
+    "tests/reports/import.spec.ts",
+    "artifacts/tasks/T22/commands.log",
+    "artifacts/tasks/T22/criteria-evidence.md",
+    "artifacts/tasks/T22/handoff.json",
+    "artifacts/tasks/T22/receipt.json",
+    "artifacts/tasks/T22/run.json"
+  ],
+  "commands": [
+    {
+      "command": "bun run test:browser -- tests/reports/import.spec.ts",
+      "exit": 0,
+      "collected": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "note": "T22 registered acceptance command. 12 real Chromium tests over the real preview mount: real T16 exports produced in-page, delivered example reports, real fixture PDFs, a 30+ case hostile corpus, egress tripwires, generation/stale-message proofs and the F1 source-read generation race (deferred arrayBuffer: busy/replace/clear variants)."
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T22 --report artifacts/tasks/T22/run.json",
+      "exit": 0,
+      "evaluated_commit": "6d3951b9713ee88b0c09386f4288e2fbee773441",
+      "commands_run": 1,
+      "failures": [],
+      "evidence_errors": [],
+      "note": "harness re-executed the registered command at the committed HEAD (12/12)"
+    },
+    {
+      "command": "bun x --no-install tsc -b packages/reports",
+      "exit": 0,
+      "note": "composite declaration build incl. import/**/*.ts clean (re-run after F1 fix)"
+    },
+    {
+      "command": "bun x --no-install oxlint packages/reports/import apps/web/src/features/import tests/reports",
+      "exit": 0,
+      "note": "0 warnings, 0 errors (re-run after F1 fix + spec additions)"
+    },
+    {
+      "command": "bun x --no-install oxfmt --check packages/reports/import apps/web/src/features/import tests/reports/import.spec.ts",
+      "exit": 0,
+      "note": "all matched files correctly formatted (oxfmt applied post-fix, then --check clean)"
+    },
+    {
+      "command": "bun x --no-install tsc -p apps/web/tsconfig.json --noEmit",
+      "exit": 1,
+      "note": "PRE-EXISTING baseline: 1008 errors, all missing-React-typings noise (TS7016/TS7026/TS7006/TS7031); 290 name features/import but all are the same baseline — zero non-baseline diagnostics in the feature. Reviewer reproduced exactly 1008/290. See limitations."
+    },
+    {
+      "command": "bun run verify",
+      "exit": 0,
+      "note": "post-evidence-commit full suite: 49 bootstrap + 2 native-boundary + 65 coordination/homebase/pass + 16-command self-check; test_planning_snapshot_is_byte_identical ok"
+    },
+    {
+      "command": "bun x --no-install playwright test tests/browser/open.spec.ts",
+      "exit": 0,
+      "collected": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "note": "T08 regression sanity, run pre-change to verify the harness environment"
+    }
+  ],
+  "scope_check": {
+    "implementation_paths_in_scope": true,
+    "allowed_scope": [
+      "packages/reports/import/",
+      "apps/web/src/features/import/",
+      "tests/reports/import.spec.ts"
+    ],
+    "shared_files_touched_additively": [
+      "packages/reports/package.json (+ './import' subpath only; '.', './validation', './export' unchanged)",
+      "packages/reports/tsconfig.json (+ 'import/**/*.ts' include glob only)"
+    ],
+    "shared_file_note": "Additive plumbing required for the deliverable to compile under tsc -b and be importable — identical in kind to the T16 './export' additions. Independent review 684374f adjudicated: sanctioned minimal wiring, stands.",
+    "evidence_paths": "artifacts/tasks/T22/ only",
+    "planning_byte_identical": true,
+    "lockfiles_touched": false,
+    "routing_touched": false,
+    "other_tasks_modules_touched": false
+  },
+  "key_design_notes": [
+    "Trust boundary: packages/reports/import/open.ts calls the T24 importReport gate for ALL parsing, bounds, duplicate-key/prototype-key audits, closed-schema+semantic validation, digest and asset-signature verification, and PNG sanitization — nothing is re-parsed or re-validated downstream. The package only derives source standing, verbatim scope/omissions disclosure, reader availability, comparison readiness and inert view models.",
+    "Failure classification maps gate ContractError codes to four UI kinds: not_a_report (container/markup/kind/parse violations), unsupported_version (declared schema_version extracted only on SCHEMA failure), too_large (SIZE), invalid (schema/semantic/hash/asset). Version detail is re-parsed via loadsStrict — never a second JSON.parse.",
+    "Replay semantics (I09): SourceState = embedded (verified source_pdf asset) | required (replay requires_original) | not_applicable (diagnostic). verifySourceCandidate binds a locally chosen PDF only on exact byte_length+sha256 equality — a hash is never sufficient and a mismatch is never attached.",
+    "Source-read generation binding (I07, F1 fix): offerSource refuses while offer/offerCompareSide is busy, captures the opened report and generation before the byte read, and after the await drops the result if either changed — a replace or clear always wins; the stale read emits nothing, owns nothing and attaches nothing.",
+    "Reader availability (I10): the app supplies the installed-reader allowlist (pdf.js adapter identities); recorded Reader.ids match by exact equality; misses are named unavailable — a report can never select, install or substitute an executable/profile.",
+    "Comparison requires two explicit local selections through real file inputs; prepareComparison yields same_report / incomparable (different document bytes) / ready — report ids or URLs are never input.",
+    "Lifecycle (I07): the controller drives the same RunCoordinator file lifecycle as T08 (idle -> validating_file -> loading_metadata -> selecting). A new offer while live emits clear intent then requestClear('replace') — generation increments BEFORE teardown; the imported report and attached source bytes are file-scoped owned resources released under the new generation.",
+    "UI honesty: every report-controlled string renders as a React text node inside <bdi> (no innerHTML/autolinking); images come only from the gate's sanitized PNG re-encode as data: URLs; scope.included/omissions and replay/copy strings are verbatim from copy.json; the replace path stands behind an explicit confirm dialog.",
+    "Web feature decoupling mirrors state/store.ts and features/export: ImportEngine/ImportHost are structural ports because apps/web tsconfig cannot resolve cross-package .ts specifiers; the concrete binding lives in mount.tsx (__t22)."
+  ],
+  "limitations": [
+    "apps/web tsc baseline fails on missing React typings (1008 errors: TS7016 react/react-jsx-runtime + TS7026 JSX.IntrinsicElements + TS7006/TS7031 implicit-any on the untyped React surface) — pre-existing across the app; features/import contributes 290 diagnostics that are all the same baseline, zero non-baseline. @types/react not installed; lockfile frozen. Reviewer reproduced 1008/290 exactly.",
+    "The preview mount (preview.html + __t22) is the only composition wiring — App.tsx routing belongs to a later app-composition task, same constraint as T16's feature.",
+    "Replay readiness is gated and surfaced (source present + zero missing readers) but no replay execution runs — the contract requires the explicit local-source gate and environment disclosure, not a new run path.",
+    "F24/F25/F26 are specified-not-generated in this branch; their import-facing semantics are exercised through constructed variants on the real delivered examples (reader substitution, hostile strings, annotations opt-in) — documented in the spec header.",
+    "Shared-file touches flagged in scope_check: packages/reports/{package.json,tsconfig.json} additive only — adjudicated sanctioned by review 684374f.",
+    "Review F2–F3/F5–F9 (info/low) intentionally unchanged: sniffSchemaVersion re-parse via the gate's own loadsStrict (bounded, failure-path only), not_a_report-vs-invalid classification nuance, installed-badge label display, corpus kind-vs-code assertions, feature-local composed strings — all recorded in review.md for the coordinator.",
+    "A git stash entry (pre-existing, 'Preserve incomplete T01 GUI merge') was accidentally popped during measurement and immediately reverted; the stash entry itself is preserved untouched. No content from it entered the implementation. Reviewer confirmed."
+  ],
+  "dependency_requests": [],
+  "review_status": "round 1 changes-needed (F1) resolved at 6d3951b — pending independent re-review"
+}

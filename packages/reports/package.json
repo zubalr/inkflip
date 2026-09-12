@@ -7,7 +7,8 @@
   "exports": {
     ".": "./validation/index.ts",
     "./validation": "./validation/index.ts",
-    "./export": "./export/index.ts"
+    "./export": "./export/index.ts",
+    "./import": "./import/index.ts"
   },
   "types": "./validation/index.ts",
   "scripts": {
