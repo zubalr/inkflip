@@ -148,3 +148,22 @@ $ model identity (review checklist item 10)
   (macOS reference) - platform installs differ; the adapter hashes and passes
   the exact local file (I13-honest); T46 parity reconciles pinned assets.
 ================================================================================
+
+================================================================================
+FINAL ROUND: SHARED LINKED-WORKTREE FIX MERGE (Astra handshake, 2026-09-12)
+Merge: published main 500abfc (approved verify fix pdf-27v / 1aec931) ->
+442f3cd; clean, no T27 source change. Reserved harness NOT touched by worker.
+================================================================================
+$ bun run verify
+  -> exit 0: bootstrap 49/49 OK, native-bootstrap 2/2 OK, coordination 64/64 OK
+  (115 tests, zero failures, zero skipped required cases) IN the linked task
+  worktree - the prior 17 relay-guard failures are resolved by the shared fix
+$ bun run test:native -> 89 passed (exit 0)
+$ uv run --project native python -m pytest native/tests -q
+  -> 89 passed, 126 subtests passed (exit 0)
+$ python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json
+  -> exit 0; collected 36 / passed 36 / failed 0 / skipped 0; bound to 442f3cd
+RESOURCE HANDSHAKE ACKNOWLEDGEMENT: no heavy OCR/corpus/performance run in
+flight or queued; registered verification complete; no new heavy suites until
+Astra returns the reservation; light source/stub work may continue.
+================================================================================

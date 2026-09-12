@@ -89,6 +89,18 @@
       ],
       "handoff_state": "ready_for_review=true; worker yields; final review must bind this branch's pushed head (revision 12bc8ac + evidence commits); Astra owns acceptance; heavy OCR/corpus reservation may be released after collection (no further heavy runs queued)."
     },
+    "final_round_shared_fix_merge": {
+      "recorded_at": "2026-09-12",
+      "merge": "Published main 500abfc (approved shared linked-worktree verify fix pdf-27v, candidate 1aec931, independently approved, Linux clone+linked 115/115) merged as 442f3cd2a67b33f5f2b58a12431a1c35c4121507; clean merge; no T27 source change",
+      "final_registered_verification_linux": [
+        {"command": "bun run verify", "exit": 0, "note": "115 tests total (bootstrap 49 + native-bootstrap 2 + coordination 64), zero failures, zero skipped required cases, in the linked task worktree - the prior environment finding is closed by the approved shared fix"},
+        {"command": "bun run test:native", "exit": 0, "counts": {"passed": 89}},
+        {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126}},
+        {"command": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "note": "bound to evaluated_commit 442f3cd on a clean tree"}
+      ],
+      "resource_handshake_acknowledgement": "Worker acknowledges (2026-09-12): no heavy OCR/corpus/performance run in flight or queued; all registered verification complete; no NEW heavy OCR/corpus suites until Astra returns the reservation; light source/stub regression work may continue; reservation state not touched by the worker; ready for Astra's T10 browser-OCR verification turn.",
+      "handoff_state": "ready_for_review=true; worker yields; final review binds branch head at push time (442f3cd + evidence commits); Astra owns acceptance"
+    },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [

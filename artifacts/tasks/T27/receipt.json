@@ -217,6 +217,20 @@
       ],
       "model_asset_divergence": "Review checklist item 10: the local Linux eng.traineddata served to the engine hashes to sha256 daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047, which differs from the planning/config/model-assets.json pinned 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2 (macOS reference asset). The adapter hashes and passes the exact local file (I13-honest); reconciling pinned assets per platform install belongs to T46 parity.",
       "remaining_limits": "Unchanged from the prior rounds: printed-English OCR only; child-only timeout kill and in-memory TSV capture (T29 supervision); scale-only transform model (F10 question held by Astra); DEFAULT_PSM=3 kept pending Astra's PSM contract decision (Linux spot-check diverges from the macOS rationale)."
+    },
+    "final_round_shared_fix_merge": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra shared-fix/resource handshake 2026-09-12: merge latest published main (approved linked-worktree verify fix) when clean before final registered verification; finish heavy commands, checkpoint, acknowledge no heavy run in flight/queued; hold new heavy OCR/corpus suites until the reservation is returned",
+      "merged_main": "500abfc (includes the independently approved shared linked-worktree verify fix pdf-27v candidate 1aec931)",
+      "merge_commit": "442f3cd2a67b33f5f2b58a12431a1c35c4121507",
+      "executed_commands_linux": [
+        {"segment": "bun run verify", "exit": 0, "detail": "Linux linked task worktree: bootstrap 49/49 OK, native-bootstrap 2/2 OK, coordination 64/64 OK - 115 tests, zero failures, zero skipped required cases. The prior 17 relay-guard failures are resolved by the approved shared fix; the worker did not touch the reserved harness."},
+        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 89}},
+        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126, "failed": 0}},
+        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "detail": "Bound to evaluated_commit 442f3cd on a clean tree."}
+      ],
+      "resource_handshake_acknowledgement": "Worker acknowledges (2026-09-12): no heavy OCR/corpus/performance run is in flight or queued in this checkout; all registered verification for this candidate is complete; no NEW heavy OCR/corpus suites will be started until Astra returns the reservation; light source/stub regression work may continue per grant. The reservation state itself is coordinator-owned Beads state and was not modified by the worker. Ready for Astra's T10 browser-OCR verification turn.",
+      "psm_decision": "DEFAULT_PSM=3 remains, per Astra: Linux PSM-6 success is recorded evidence (psm6-spotcheck.log), not a requirement to change the default; platform-specific observations are explicit in the module comment and manifest."
     }
   },
   "ready_for_review": true
