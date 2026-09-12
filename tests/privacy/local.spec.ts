@@ -28,14 +28,18 @@
  *   prepared context.
  *
  * Canary: a generated PDF whose filename, visible text, hidden Info
- * string, document sha256, raster pixels, a user note, the exported
- * report id and the export filename are each unique greppable markers.
- * Every request URL/method/body, websocket, beacon/fetch/XHR/worker/
- * service-worker tripwire, console payload, storage key and server-observed
- * path is captured per leg and scanned for every marker in raw, percent,
- * base64, base64url and hex encodings — in-test first, then again offline
- * by scripts/inspect_network_receipt.py (the committed receipt carries
- * marker digests only, never marker material).
+ * string, document sha256, pdf base64 head, raster pixels, a user note
+ * (+ token), the report id, the run key and the export filename form
+ * 11 unique greppable markers.
+ * Every request URL/method/headers/body, response, request failure,
+ * websocket, beacon/fetch/XHR/worker/service-worker/WebRTC/WebTransport/
+ * form.submit tripwire, console payload, dialog, storage key and
+ * server-observed path+headers is captured per leg and scanned for every
+ * marker in raw, percent, base64, base64url and hex encodings — in-test
+ * first (plus a cross-channel split-marker sweep), then again offline by
+ * scripts/inspect_network_receipt.py, which additionally decodes base64
+ * payloads and fails closed on absent evidence (the committed receipt
+ * carries marker digests only, never marker material).
  *
  * Modes: cold (first navigation + first model download), warm (second run
  * reuses the verified IDB model slot), offline (the loaded page + prepared
@@ -57,7 +61,13 @@ import { createServer, type Server } from "node:http";
 import { dirname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type Request as PlaywrightRequest,
+} from "@playwright/test";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const WEB = join(ROOT, "apps", "web");
@@ -223,6 +233,7 @@ interface AccessEntry {
   path: string;
   query: string | null;
   status: number;
+  headers: Record<string, string | string[] | undefined>;
 }
 
 interface Harness {
@@ -246,6 +257,9 @@ function startStaticServer(): Promise<Harness> {
       path: pathname,
       query: url.search ? url.search.slice(1) : null,
       status: 200,
+      // Server-side request headers — the second capture layer sees what
+      // actually arrived on the wire, independent of the browser channel.
+      headers: { ...req.headers },
     };
     accessLog.push(entry);
     const headers: Record<string, string> = {
@@ -351,23 +365,32 @@ test.setTimeout(300_000);
 // ---------------------------------------------------------------------------
 // Capture scaffolding: per-leg request/ws/console/egress/storage records.
 // ---------------------------------------------------------------------------
+interface HeaderCarrier {
+  headers: Record<string, string> | null;
+}
+
 interface Capture {
   schema_version: number;
   label: string;
-  mode: "cold" | "warm" | "offline";
+  mode: "cold" | "warm" | "offline" | "online";
   surface: string;
   origin: string;
   cold_boot?: boolean;
   offline?: boolean;
   legs: { name: string; ok: boolean; detail?: string }[];
-  requests: {
+  requests: ({
     url: string;
     method: string;
     resource_type: string;
     is_navigation: boolean;
     post_body: string | null;
-  }[];
-  request_failures: { url: string; method: string; error: string | null }[];
+  } & HeaderCarrier)[];
+  request_failures: ({
+    url: string;
+    method: string;
+    error: string | null;
+  } & HeaderCarrier)[];
+  responses: { url: string; status: number }[];
   websockets: {
     url: string;
     frames_sent: string[];
@@ -376,6 +399,7 @@ interface Capture {
   egress: { kind: string; target: string; detail?: string }[];
   console: { type: string; text: string }[];
   page_errors: string[];
+  dialogs: { type: string; message: string }[];
   downloads: { filename: string; bytes: number; sha256: string; kind: string }[];
   storage?: Record<string, unknown>;
   server_log: AccessEntry[];
@@ -399,40 +423,61 @@ function beginCapture(
     legs: [],
     requests: [],
     request_failures: [],
+    responses: [],
     websockets: [],
     egress: [],
     console: [],
     page_errors: [],
+    dialogs: [],
     downloads: [],
     server_log: [],
   };
+  // Header capture is async in Playwright — keep the live request objects
+  // and resolve allHeaders() inside endCapture before assertions run.
+  const pendingHeaders: { req: PlaywrightRequest; entry: HeaderCarrier }[] = [];
+  (cap as { _pendingHeaders?: unknown })._pendingHeaders = pendingHeaders;
   page.on("request", (req) => {
-    cap.requests.push({
+    const entry: Capture["requests"][number] = {
       url: req.url(),
       method: req.method(),
       resource_type: req.resourceType(),
       is_navigation: req.isNavigationRequest(),
       post_body: req.postData(),
-    });
+      headers: null,
+    };
+    pendingHeaders.push({ req, entry });
+    cap.requests.push(entry);
   });
   page.on("requestfailed", (req) => {
-    cap.request_failures.push({
+    const entry: Capture["request_failures"][number] = {
       url: req.url(),
       method: req.method(),
       error: req.failure()?.errorText ?? null,
-    });
+      headers: null,
+    };
+    pendingHeaders.push({ req, entry });
+    cap.request_failures.push(entry);
+  });
+  page.on("response", (res) => {
+    cap.responses.push({ url: res.url(), status: res.status() });
   });
   page.on("websocket", (ws) => {
     const entry = { url: ws.url(), frames_sent: [] as string[], frames_received: [] as string[] };
     cap.websockets.push(entry);
-    ws.on("framesent", (f) => entry.frames_sent.push(String(f.payload).slice(0, 300)));
-    ws.on("framereceived", (f) => entry.frames_received.push(String(f.payload).slice(0, 300)));
+    ws.on("framesent", (f) => entry.frames_sent.push(String(f.payload).slice(0, 1000)));
+    ws.on("framereceived", (f) => entry.frames_received.push(String(f.payload).slice(0, 1000)));
   });
   page.on("console", (msg) => {
-    cap.console.push({ type: msg.type(), text: msg.text().slice(0, 500) });
+    cap.console.push({ type: msg.type(), text: msg.text().slice(0, 2000) });
   });
   page.on("pageerror", (error) => {
-    cap.page_errors.push(String(error).slice(0, 500));
+    cap.page_errors.push(String(error).slice(0, 2000));
+  });
+  page.on("dialog", (dialog) => {
+    // A fired alert()/confirm() is recorded, never silently swallowed —
+    // the hostile annotation leg depends on this staying empty.
+    cap.dialogs.push({ type: dialog.type(), message: dialog.message().slice(0, 1000) });
+    void dialog.dismiss();
   });
   page.on("download", async (dl) => {
     const path = await dl.path();
@@ -464,6 +509,18 @@ async function endCapture(
   cap.server_log = harness.accessLog.slice(
     (cap as { _logStart?: number })._logStart ?? 0,
   );
+  // Resolve async header capture before any assertion reads it; a header
+  // that cannot be read stays null and fails closed in assertCaptureClean.
+  const pending = (cap as { _pendingHeaders?: { req: PlaywrightRequest; entry: HeaderCarrier }[] })
+    ._pendingHeaders ?? [];
+  for (const { req, entry } of pending) {
+    try {
+      entry.headers = await req.allHeaders();
+    } catch {
+      entry.headers = null;
+    }
+  }
+  delete (cap as { _pendingHeaders?: unknown })._pendingHeaders;
   if (opts.skipEval !== true) {
     await collectPageState(page, cap, opts.withStorage !== false);
   }
@@ -485,19 +542,50 @@ function assertCaptureClean(cap: Capture): void {
       `${cap.label}: expected some requests`,
     ).toBeGreaterThan(0);
   }
+  const wireChecks = (url: string, method: string, label: string) => {
+    expect(url.startsWith(origin), `${cap.label} foreign ${label} ${url}`).toBe(true);
+    expect(["GET", "HEAD", "OPTIONS"], `${cap.label} ${label} method ${method}`).toContain(method);
+    const u = new URL(url);
+    expect(u.search, `${cap.label} ${label} query in ${u.pathname}`).toBe("");
+  };
   for (const req of cap.requests) {
-    expect(req.url.startsWith(origin), `${cap.label} foreign request ${req.url}`).toBe(true);
-    expect(["GET", "HEAD", "OPTIONS"], `${cap.label} method ${req.method}`).toContain(req.method);
-    const u = new URL(req.url);
-    expect(u.search, `${cap.label} query in ${u.pathname}`).toBe("");
+    wireChecks(req.url, req.method, "request");
+    // Headers must be captured — an unread header block is an unmonitored
+    // channel and fails closed here rather than passing unseen.
+    expect(req.headers, `${cap.label} headers not captured for ${req.url}`).not.toBeNull();
+  }
+  for (const req of cap.request_failures) {
+    wireChecks(req.url, req.method, "request_failure");
+    expect(
+      req.headers,
+      `${cap.label} failure headers not captured for ${req.url}`,
+    ).not.toBeNull();
   }
   expect(cap.websockets, `${cap.label} websockets`).toHaveLength(0);
+  expect(cap.dialogs, `${cap.label} unexpected dialog`).toHaveLength(0);
+  const BAD_EGRESS = new Set([
+    "beacon",
+    "eventsource",
+    "window.open",
+    "serviceworker.register",
+    "websocket",
+    "webrtc",
+    "webtransport",
+    "form.submit",
+  ]);
+  const SAME_ORIGIN_EGRESS = new Set(["fetch", "xhr", "worker"]);
   for (const e of cap.egress) {
+    // Unknown kinds fail closed — a channel the tripwire learned to emit
+    // later can never slip past unexamined.
     expect(
-      e.kind,
+      BAD_EGRESS.has(e.kind) || SAME_ORIGIN_EGRESS.has(e.kind),
+      `${cap.label} unrecognized egress kind ${e.kind}`,
+    ).toBe(true);
+    expect(
+      BAD_EGRESS.has(e.kind),
       `${cap.label} ${e.kind} egress channel used toward ${e.target}`,
-    ).not.toMatch(/^(beacon|eventsource|window\.open|serviceworker\.register|websocket)$/);
-    if (e.kind === "fetch" || e.kind === "xhr" || e.kind === "worker") {
+    ).toBe(false);
+    if (SAME_ORIGIN_EGRESS.has(e.kind)) {
       const resolved = new URL(e.target, origin);
       expect(
         resolved.origin === origin || resolved.protocol === "blob:" || resolved.protocol === "data:",
@@ -508,20 +596,36 @@ function assertCaptureClean(cap: Capture): void {
   const haystacks: { channel: string; text: string }[] = [];
   cap.requests.forEach((r, i) => {
     haystacks.push({ channel: `requests[${i}].url`, text: r.url });
+    haystacks.push({ channel: `requests[${i}].headers`, text: JSON.stringify(r.headers) });
     if (r.post_body !== null) {
       haystacks.push({ channel: `requests[${i}].post`, text: r.post_body });
     }
   });
-  cap.request_failures.forEach((r, i) =>
-    haystacks.push({ channel: `request_failures[${i}].url`, text: r.url }),
+  cap.request_failures.forEach((r, i) => {
+    haystacks.push({ channel: `request_failures[${i}].url`, text: r.url });
+    haystacks.push({ channel: `request_failures[${i}].headers`, text: JSON.stringify(r.headers) });
+  });
+  cap.responses.forEach((r, i) =>
+    haystacks.push({ channel: `responses[${i}].url`, text: r.url }),
   );
   cap.egress.forEach((e, i) => {
     haystacks.push({ channel: `egress[${i}]`, text: `${e.target} ${e.detail ?? ""}` });
   });
   cap.console.forEach((m, i) => haystacks.push({ channel: `console[${i}]`, text: m.text }));
   cap.page_errors.forEach((m, i) => haystacks.push({ channel: `page_errors[${i}]`, text: m }));
+  cap.legs.forEach((l, i) => {
+    if (l.detail !== undefined) {
+      haystacks.push({ channel: `legs[${i}].detail`, text: l.detail });
+    }
+  });
+  cap.dialogs.forEach((d, i) =>
+    haystacks.push({ channel: `dialogs[${i}]`, text: d.message }),
+  );
   cap.server_log.forEach((e, i) =>
-    haystacks.push({ channel: `server_log[${i}]`, text: `${e.path} ${e.query ?? ""}` }),
+    haystacks.push({
+      channel: `server_log[${i}]`,
+      text: `${e.path} ${e.query ?? ""} ${JSON.stringify(e.headers)}`,
+    }),
   );
   if (cap.storage) {
     for (const [field, value] of Object.entries(cap.storage)) {
@@ -533,14 +637,29 @@ function assertCaptureClean(cap: Capture): void {
   }
   for (const marker of markers) {
     const allowed = marker.allowed_channels ?? [];
+    const scoped = haystacks.filter(
+      ({ channel }) => !allowed.includes(channel.split("[")[0]),
+    );
     for (const spelling of markerSpellings(marker)) {
-      for (const { channel, text } of haystacks) {
-        if (allowed.includes(channel.split("[")[0])) continue;
+      for (const { channel, text } of scoped) {
         expect(
           text.includes(spelling),
           `${cap.label}: marker ${marker.id} (${spelling.slice(0, 24)}…) in ${channel}`,
         ).toBe(false);
       }
+      // Split-marker sweep: a marker smeared across two log lines is
+      // caught by scanning the concatenation and a whitespace-collapsed
+      // variant (the offline inspector additionally decodes base64
+      // payloads — that layer is authoritative).
+      const joined = scoped.map((h) => h.text).join("");
+      expect(
+        joined.includes(spelling),
+        `${cap.label}: marker ${marker.id} split across channels`,
+      ).toBe(false);
+      expect(
+        joined.replace(/\s+/g, "").includes(spelling),
+        `${cap.label}: marker ${marker.id} split across whitespace`,
+      ).toBe(false);
     }
   }
 }
@@ -703,6 +822,48 @@ async function armEgress(context: BrowserContext): Promise<void> {
         super(url, options);
       }
     } as typeof Worker;
+    // WebRTC/WebTransport emit no 'request' events — construction is
+    // recorded so an unused-today channel can never open silently.
+    const ww = globalThis as unknown as Record<string, unknown>;
+    const NativeRTC = ww.RTCPeerConnection as
+      | (new (config?: { iceServers?: unknown }) => unknown)
+      | undefined;
+    if (typeof NativeRTC === "function") {
+      ww.RTCPeerConnection = class extends NativeRTC {
+        constructor(config?: { iceServers?: unknown }) {
+          rec("webrtc", JSON.stringify(config?.iceServers ?? []));
+          super(config);
+        }
+      };
+    }
+    const NativeWT = ww.WebTransport as
+      | (new (url: string | URL, opts?: unknown) => unknown)
+      | undefined;
+    if (typeof NativeWT === "function") {
+      ww.WebTransport = class extends NativeWT {
+        constructor(url: string | URL, opts?: unknown) {
+          rec("webtransport", url);
+          super(url, opts);
+        }
+      };
+    }
+    const nativeSubmit = window.HTMLFormElement?.prototype.submit;
+    if (nativeSubmit) {
+      window.HTMLFormElement.prototype.submit = function (this: HTMLFormElement) {
+        rec("form.submit", this.action || "(no action)");
+        return nativeSubmit.call(this);
+      };
+    }
+    const nativeRequestSubmit = window.HTMLFormElement?.prototype.requestSubmit;
+    if (nativeRequestSubmit) {
+      window.HTMLFormElement.prototype.requestSubmit = function (
+        this: HTMLFormElement,
+        submitter?: HTMLElement,
+      ) {
+        rec("form.submit", this.action || "(no action)");
+        return nativeRequestSubmit.call(this, submitter);
+      };
+    }
   });
 }
 
@@ -736,7 +897,7 @@ async function leg<T>(
     cap.legs.push({
       name,
       ok: false,
-      detail: String(error instanceof Error ? error.message : error).slice(0, 300),
+      detail: String(error instanceof Error ? error.message : error).slice(0, 1000),
     });
     throw error;
   }
@@ -1237,6 +1398,8 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
       "App composition (T13) is not landed: the journey drives the real built feature mounts plus a test-owned harness page in sequence — the same production code paths the composed shell will call.",
       "Browser automation cannot see every OS/browser process channel; per planning, release-profile proof additionally needs a proxy/firewall capture.",
       "No service worker ships: offline support means an already-loaded page with prepared assets, verified here; cold offline navigation has no app shell to load and is not claimed.",
+      "WebRTC/WebTransport are tripwired (construction is recorded) and asserted unused across the whole journey — verified absent from the built bundles; an already-open data channel's inner frames are not separately captured, so the guarantee is constructor-level.",
+      "Log-channel scans are bounded by capture truncation (console/page-error 2000 chars, leg/egress/dialog details 1000, ws frames 1000); network carriers are closed by method/query/allowlist/header checks, so the residual escape window is log-text only — the inspector additionally scans joined and base64-decoded payloads to shrink it.",
     ],
   };
   writeFileSync(CANARY_FILE, JSON.stringify(canaryManifest, null, 2) + "\n");
@@ -1433,7 +1596,11 @@ test("offline: prepared page completes workflow with zero requests; cold offline
   await armEgress(ctxB);
   try {
     const pageB = await ctxB.newPage();
-    const capNav = beginCapture(pageB, "offline-cold-nav", "offline", HARNESS_PAGE);
+    // This navigation runs ONLINE — it prepares the page the offline leg
+    // needs; mode 'online' keeps the label honest (no offline flag, no
+    // offline assertions) while the file name records which scenario it
+    // belongs to.
+    const capNav = beginCapture(pageB, "offline-cold-nav", "online", HARNESS_PAGE);
     await leg(capNav, "navigate-harness", async () => {
       await pageB.goto(`${harness.base}${HARNESS_PAGE}`);
       await pageB.waitForFunction(

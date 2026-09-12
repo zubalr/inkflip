@@ -50,37 +50,55 @@ Tests (4, single worker — ordering matters):
 
 ## What is captured (per capture file)
 
-Requests (URL/method/headers/post body), responses, request failures,
-WebSockets, the fetch/XHR/beacon/worker/service-worker egress tripwire
-(installed via `addInitScript`), console messages, page errors, downloads
-(filename, bytes, sha256), storage (local/session/IDB keys + value
-hashes/CacheStorage/service workers), an independent **server-side**
-access log, journey legs, and the mode (`cold`/`warm`/`offline`,
-`offline` flag, surface page).
+Requests (URL/method/**all request headers**/post body), responses
+(URL/status), request failures (URL/method/error/headers), WebSockets,
+the fetch/XHR/beacon/worker/service-worker/WebRTC/WebTransport/
+form.submit egress tripwire (installed via `addInitScript`), console
+messages, page errors, dialogs (recorded then dismissed — any dialog is
+a violation), downloads (filename, bytes, sha256), storage
+(local/session/IDB keys + value hashes/CacheStorage/service workers),
+journey legs, an independent **server-side** access log
+(method/path/query/status/**request headers**), and the mode
+(`cold`/`warm`/`offline`/`online`, `offline` flag, surface page).
 
 ## Canary model
 
-A generated PDF plus journey values form the marker set: filename,
-visible text, hidden Info string, document sha256, raster pixel digest,
-a user note, the report id, the export filename, and a hostile SVG-ish
-payload line. Every capture channel is scanned for every marker in raw,
-percent, base64, base64url and hex encodings — first in-test
-(`assertCaptureClean`), then again offline by the inspector. The receipt
-and the redacted capture copies (`artifacts/tasks/T15/capture/`) carry
-`<marker:id>` tokens and marker digests — never marker material.
+A generated PDF plus journey values form **11 greppable markers**:
+filename, visible text, hidden Info string, user note (+ bare token),
+hostile-payload-free variants, document sha256, pdf base64 head, raster
+pixel sha256, report id, run key, export filename. Every capture channel
+is scanned for every marker in raw, percent, base64, base64url, hex and
+digest-base64 spellings — first in-test (`assertCaptureClean`), then
+again offline by the inspector, which additionally scans the
+cross-channel concatenation, a whitespace-collapsed variant and
+base64-decoded payloads (markers split across log lines or wrapped
+inside base64'd JSON are caught). The receipt and the redacted capture
+copies (`artifacts/tasks/T15/capture/`) carry `<marker:id>` tokens and
+marker digests — never marker material. Report-derived markers declare
+`allowed_channels: ["downloads"]` in the private manifest; that policy
+is echoed into the committed receipt per marker id.
 
 ## Inspector
 
 `scripts/inspect_network_receipt.py` (stdlib only) re-validates the raw
-captures: same-origin + path allowlist for requests, read-only methods,
-no query strings/fragments, empty websocket/beacon/service-worker
-channels, no canary material in any channel, document-free storage (only
-the sha256-verified staged model slot may persist), completed journey
-legs per mode, cold fixed-asset census, and a literal census of external
-URLs inside the built bundles (telemetry/collector literals or literals
-also seen in runtime traffic are violations; vendor spec links, xmlns
-namespaces and overridden CDN defaults are census-only — the runtime
-capture is the authority). Exit 0 only when every check passes.
+captures and **fails closed on absent evidence**: every capture must
+carry the full channel key set, nonempty named legs, a storage snapshot
+and captured request headers; every non-offline capture must record at
+least one request; the union of legs must cover
+open/error/render/OCR/export/reopen/clear. Content checks: same-origin +
+path allowlist applied to requests, request failures, responses and the
+server log; read-only methods; no query strings/fragments; empty
+websocket/beacon/service-worker/WebRTC/WebTransport/form.submit/dialog
+channels (unrecognized egress kinds are violations, not skips); no
+canary material in any channel; document-free storage (only the
+sha256-verified staged model slot may persist); completed legs per mode;
+cold fixed-asset census; model-fetch provenance derived from the wire
+(cold = one served model fetch, warm = zero model requests, offline =
+zero served model paths); and a literal census of external URLs inside
+the built bundles (telemetry/collector literals or literals also seen
+in runtime traffic are violations; vendor spec links, xmlns namespaces
+and overridden CDN defaults are census-only — the runtime capture is
+the authority). Exit 0 only when every check passes.
 
 ## Known limitations (recorded in the receipt)
 
@@ -94,3 +112,12 @@ capture is the authority). Exit 0 only when every check passes.
 - No service worker ships: offline support means an already-loaded page
   with prepared assets (verified here); cold offline navigation has no
   app shell to load and is not claimed.
+- WebRTC/WebTransport are tripwired at construction and asserted unused
+  (verified absent from the built bundles); frames inside an
+  already-open data channel are not separately captured — the guarantee
+  is constructor-level.
+- Log-channel scans are bounded by capture truncation (console/page-error
+  2000 chars, leg/egress/dialog details and ws frames 1000); network
+  carriers are closed by method/query/allowlist/header checks, so the
+  residual escape window is log-text only — shrunk further by the
+  inspector's joined and base64-decoded sweeps.
