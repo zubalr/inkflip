@@ -1081,6 +1081,151 @@ test("a pending source read cannot attach across a superseded generation", async
   await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
 });
 
+test("a superseded source read that fails emits nothing under the new report", async ({ page }) => {
+  await openPreview(page);
+  const reportA = await makeExport(page);
+  const reportB = await page.evaluate(async (src) => {
+    const t = (globalThis as any).__t22;
+    const rep = JSON.parse(JSON.stringify(src));
+    rep.document.sha256 = "a".repeat(64);
+    rep.document.byte_length = 42;
+    t.contracts.seal(rep);
+    const { report } = t.exportEngine.projectReport(rep, {});
+    return t.exportEngine.serializeReportJson(report);
+  }, NATIVE_EVIDENCE);
+  const idB = JSON.parse(reportB).report_id as string;
+
+  // Phases 1-3: entry refusals emit nothing; a rejecting read
+  // superseded by a replace drops its failure silently; the identical
+  // failure while still bound emits honestly under its own generation.
+  const race = await page.evaluate(
+    async ({ aJson, bJson, pdfLen }) => {
+      const t = (globalThis as any).__t22;
+      const enc = new TextEncoder();
+      const out: Record<string, unknown> = {};
+      const rejectedCount = () =>
+        t.events.filter((e: { type: string }) => e.type === "source_rejected").length;
+      const cand = (name: string, size: number, read: () => Promise<ArrayBuffer>) => ({
+        name,
+        size,
+        arrayBuffer: read,
+      });
+
+      // Entry refusals — the pick was never evaluated against a report:
+      // no_report (nothing open), then busy (a report import holds the
+      // lock). Typed kinds return to the caller; no event is emitted.
+      const before = rejectedCount();
+      const noReport = await t.controller.offerSource(
+        cand("none.pdf", pdfLen, async () => new ArrayBuffer(pdfLen)),
+      );
+      out.noReport = noReport.ok ? "attached" : noReport.kind;
+      let releaseA!: () => void;
+      const gateA = new Promise<void>((resolve) => {
+        releaseA = resolve;
+      });
+      const offerP = t.controller.offer(
+        cand("a.inkflip.json", enc.encode(aJson).byteLength, () =>
+          gateA.then(() => enc.encode(aJson).buffer as ArrayBuffer),
+        ),
+      );
+      const busy = await t.controller.offerSource(
+        cand("early.pdf", pdfLen, async () => new ArrayBuffer(pdfLen)),
+      );
+      out.busy = busy.ok ? "attached" : busy.kind;
+      releaseA();
+      out.openA = (await offerP).ok;
+      out.refusalsEmitted = rejectedCount() - before;
+      out.genA = t.coordinator.currentGeneration;
+
+      // A pending read on A that REJECTS, superseded by report B: the
+      // failure belongs to the gone report — the newer generation must
+      // never see it (round-2 residual R1).
+      const beforeStale = rejectedCount();
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const pending = t.controller.offerSource(
+        cand("orig.pdf", pdfLen, () => gate.then(() => Promise.reject(new Error("read failed")))),
+      );
+      out.openB = (
+        await t.controller.offer(
+          cand(
+            "b.inkflip.json",
+            enc.encode(bJson).byteLength,
+            async () => enc.encode(bJson).buffer as ArrayBuffer,
+          ),
+        )
+      ).ok;
+      out.genB = t.coordinator.currentGeneration;
+      release();
+      const stale = await pending;
+      out.stale = stale.ok ? "attached" : stale.kind;
+      out.staleEmitted = rejectedCount() - beforeStale;
+      out.currentIsB = t.controller.currentImport?.view.reportId === JSON.parse(bJson).report_id;
+
+      // The identical failure while still bound DOES emit — the pick
+      // was evaluated against the open report and genuinely refused.
+      const unreadable = await t.controller.offerSource(
+        cand("bad.pdf", 42, () => Promise.reject(new Error("still unreadable"))),
+      );
+      out.unreadable = unreadable.ok ? "attached" : unreadable.kind;
+      const last = t.events.filter((e: { type: string }) => e.type === "source_rejected").at(-1);
+      out.unreadableDetail = last?.detail;
+      out.unreadableGen = last?.generation;
+      return out;
+    },
+    { aJson: reportA, bJson: reportB, pdfLen: SOURCE_PDF.length },
+  );
+  expect(race.noReport).toBe("no_report");
+  expect(race.busy).toBe("busy");
+  expect(race.openA).toBe(true);
+  expect(race.refusalsEmitted).toBe(0);
+  expect(race.openB).toBe(true);
+  expect(race.genB).toBe(race.genA + 1);
+  expect(race.stale).toBe("superseded");
+  expect(race.staleEmitted).toBe(0);
+  expect(race.currentIsB).toBe(true);
+  expect(race.unreadable).toBe("source_mismatch");
+  expect(race.unreadableDetail).toBe("source:unreadable");
+  expect(race.unreadableGen).toBe(race.genB);
+
+  // B renders the honest same-context refusal — and only that one.
+  await expect(page.locator("[data-testid=report-id]")).toContainText(idB.slice(0, 16));
+  await expect(page.locator("[data-testid=source-error-detail]")).toHaveText("source:unreadable");
+  await expect(page.locator("[data-testid=source-attached]")).toHaveCount(0);
+
+  // not_required — an embedded-source report refuses the pick before
+  // any read: typed kind, no event, nothing rendered as a rejection.
+  const embedded = await page.evaluate(
+    async ({ replayJson }) => {
+      const t = (globalThis as any).__t22;
+      const enc = new TextEncoder();
+      await t.controller.offer({
+        name: "replay.inkflip.json",
+        size: enc.encode(replayJson).byteLength,
+        arrayBuffer: async () => enc.encode(replayJson).buffer as ArrayBuffer,
+      });
+      const before = t.events.filter((e: { type: string }) => e.type === "source_rejected").length;
+      const notRequired = await t.controller.offerSource({
+        name: "extra.pdf",
+        size: 1,
+        arrayBuffer: async () => new ArrayBuffer(1),
+      });
+      return {
+        notRequired: notRequired.ok ? "attached" : notRequired.kind,
+        emitted:
+          t.events.filter((e: { type: string }) => e.type === "source_rejected").length - before,
+      };
+    },
+    { replayJson: NATIVE_REPLAY.toString("utf8") },
+  );
+  expect(embedded.notRequired).toBe("not_required");
+  expect(embedded.emitted).toBe(0);
+  await expect(page.locator("[data-testid=source-embedded]")).toBeVisible();
+  await expect(page.locator("#source-mismatch")).toHaveCount(0);
+});
+
 test("declared-size gate rejects before any byte is read", async ({ page }) => {
   await openPreview(page);
   const over = await page.evaluate(async (limit) => {
