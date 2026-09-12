@@ -86,6 +86,49 @@
       "detail": "Limits.jobs defaults to native.default_jobs = 1; jobs > 1 requires an explicit CPU/RAM-aware ParallelAdmission and is refused otherwise. The supervisor uses zero threads and zero engine calls - all reader calls execute inside child processes only, so PDFium is never invoked from concurrent threads (s26)."
     }
   ],
+  "acceptance_criteria_evidence": {
+    "Injected Python/native-like hang/crash/OOM/output flood gets classified and bounded": {
+      "status": "executed",
+      "detail": "Real spawned children (never mocks of the supervisor): hang -> timeout/wall with SIGTERM->grace->SIGKILL process-group kill; SIGTERM-ignoring child escalates to SIGKILL; real SIGSEGV -> failed/crash; memory growth -> failed/memory_limit via live RSS probe (libproc macOS, /proc Linux) plus RLIMIT_AS in-child where accepted; stdout/stderr floods -> failed/output_limit with bounded head+tail samples only; nonzero exit -> failed/exit; spawn failure -> failed/spawn_error; leaked same-group descendants reaped after leader exit. Post-review fix: a stream over cap whose excess was only drained in _drain_until_eof AFTER reap also classifies failed/output_limit (test_post_reap_output_overflow_is_classified reproduces the sibling-blocked drain at jobs=2; verified red pre-fix). Committed F20 worker-fault-* fixture scenarios exercised through tests/fixtures/fault_double.py. All bounds enforced by the parent poll loop, never SIGALRM.",
+      "evidence": [
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json",
+        "artifacts/tasks/T29/handoff.json"
+      ]
+    },
+    "successful files remain byte-stable": {
+      "status": "executed",
+      "detail": "Committed report bytes are the child's produced bytes verbatim: tmp-sibling write -> fsync -> os.replace -> directory fsync (atomic_write_bytes); byte-identical reports across runs asserted; resume verifies sha256 + config_digest and marks the job skipped without rewriting. A failed/killed sibling never touches a completed job's committed report.",
+      "evidence": [
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json"
+      ]
+    },
+    "one retry max within deadline": {
+      "status": "executed",
+      "detail": "limits.retries defaults to native.max_retries = 1; only transient kinds (exit, crash, wall, spawn_error) retry, each with a fresh worker and fresh scratch, only while run_wall_seconds leaves room. Retry stops at 2 attempts; no retry past the run deadline. output_limit, memory_limit, missing_output, report_invalid and cancelled are never retried.",
+      "evidence": [
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json"
+      ]
+    },
+    "empty success not retried": {
+      "status": "executed",
+      "detail": "Exit 0 without a declared output completes with attempts == 1, never retried. Exit 0 with a declared-but-absent output is failed/missing_output - deterministic defect, also never retried.",
+      "evidence": [
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json"
+      ]
+    },
+    "Ctrl-C terminates descendants and leaves valid partial artifact.": {
+      "status": "executed",
+      "detail": "SIGINT/SIGTERM to the supervisor (or request_cancel) forwards to a cancel: every live process group is SIGTERM->SIGKILL terminated including leaked descendants, queued jobs get terminal cancelled records (I05), and index.json + journal.jsonl are still written so the partial artifact stays valid (driver-level SIGINT test; in-process SIGINT test).",
+      "evidence": [
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json"
+      ]
+    }
+  },
   "commands": [
     {
       "segment": "uv run --project native python -m pytest native/tests/runtime -q",
