@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "label": "cold-boot-index",
+  "mode": "cold",
+  "surface": "/index.html",
+  "origin": "http://127.0.0.1:58699",
+  "legs": [
+    {
+      "name": "navigate-index",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:58699/",
+      "method": "GET",
+      "resource_type": "document",
+      "is_navigation": true,
+      "post_body": null,
+      "headers": {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/index-CRz5t4SE.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "script",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "script",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "text/css,*/*;q=0.1",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "style",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    }
+  ],
+  "request_failures": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:58699/",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/index-CRz5t4SE.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "status": 200
+    }
+  ],
+  "websockets": [],
+  "egress": [],
+  "console": [],
+  "page_errors": [],
+  "dialogs": [],
+  "downloads": [],
+  "server_log": [
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "accept-language": "en-US",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "sec-fetch-site": "none",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-user": "?1",
+        "sec-fetch-dest": "document",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-CRz5t4SE.js",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "*/*",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "script",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/global-CWUH7hDd.css",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "text/css,*/*;q=0.1",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "style",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/global-CbCfd5ku.js",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "*/*",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "script",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    }
+  ],
+  "_logStart": 0,
+  "cold_boot": true,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}

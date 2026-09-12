@@ -1,0 +1,509 @@
+{
+  "schema_version": 1,
+  "label": "cold-open-mount",
+  "mode": "cold",
+  "surface": "/src/features/open/preview.html",
+  "origin": "http://127.0.0.1:58699",
+  "legs": [
+    {
+      "name": "navigate-open-mount",
+      "ok": true
+    },
+    {
+      "name": "open-canary",
+      "ok": true
+    },
+    {
+      "name": "real-render-raster",
+      "ok": true
+    },
+    {
+      "name": "run-plan-includes-ocr",
+      "ok": true
+    },
+    {
+      "name": "error-malformed",
+      "ok": true
+    },
+    {
+      "name": "reopen-and-replace",
+      "ok": true
+    },
+    {
+      "name": "clear-file",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:58699/src/features/open/preview.html",
+      "method": "GET",
+      "resource_type": "document",
+      "is_navigation": true,
+      "post_body": null,
+      "headers": {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/open-B4SCvXnz.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "script",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/ModalDialog-8VZc2_jj.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "script",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "referer": "",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/ModalDialog-Dp0nC5og.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "text/css,*/*;q=0.1",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "style",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/open-CwzWy_jt.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "text/css,*/*;q=0.1",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "origin": "http://127.0.0.1:58699",
+        "sec-fetch-dest": "style",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "sec-fetch-dest": "worker",
+        "sec-fetch-mode": "same-origin",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "connection": "keep-alive",
+        "host": "127.0.0.1:58699",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "referer": ""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null,
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "referer": ""
+      }
+    }
+  ],
+  "request_failures": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:58699/src/features/open/preview.html",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/ModalDialog-Dp0nC5og.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/open-B4SCvXnz.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/open-CwzWy_jt.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/ModalDialog-8VZc2_jj.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "status": 200
+    }
+  ],
+  "websockets": [],
+  "egress": [
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    }
+  ],
+  "console": [
+    {
+      "type": "warning",
+      "text": "Warning: Indexing all PDF objects"
+    }
+  ],
+  "page_errors": [],
+  "dialogs": [],
+  "downloads": [],
+  "server_log": [
+    {
+      "method": "GET",
+      "path": "/src/features/open/preview.html",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "accept-language": "en-US",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "sec-fetch-site": "none",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-user": "?1",
+        "sec-fetch-dest": "document",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/ModalDialog-Dp0nC5og.css",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "text/css,*/*;q=0.1",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "style",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/open-B4SCvXnz.js",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "*/*",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "script",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/ModalDialog-8VZc2_jj.js",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "*/*",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "script",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/open-CwzWy_jt.css",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "origin": "http://127.0.0.1:58699",
+        "sec-ch-ua-platform": "\"macOS\"",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "accept-language": "en-US",
+        "sec-ch-ua-mobile": "?0",
+        "accept": "text/css,*/*;q=0.1",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "style",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/pdf.worker-DTrjDNvb.mjs",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "same-origin",
+        "sec-fetch-dest": "worker",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "query": null,
+      "status": 200,
+      "headers": {
+        "host": "127.0.0.1:58699",
+        "connection": "keep-alive",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+        "accept": "*/*",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "empty",
+        "accept-encoding": "gzip, deflate, br, zstd"
+      }
+    }
+  ],
+  "_logStart": 4,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}

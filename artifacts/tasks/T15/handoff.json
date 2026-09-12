@@ -1,0 +1,93 @@
+{
+  "task": "T15",
+  "beads_id": "pdf-t15",
+  "worker": "devin-t15",
+  "branch": "work/devin/t15",
+  "base_commit": "21be4c9",
+  "source_commit": "9cc6356",
+  "test_commit": "8bcbc12aaecc37e90c82aad55df8957f4c79f9c8",
+  "implementation_commit": "9cc6356",
+  "evidence_commit": "this file is committed after the implementation commits; see git log",
+  "disposition": "implemented_pending_review",
+  "ready_for_review": true,
+  "review_rounds": [
+    {
+      "round": 1,
+      "review_commit": "6246403",
+      "review_branch": "review/devin/t15",
+      "candidate": "0bf638d589ba270ebd046357cab6ea1051274452",
+      "verdict": "changes-required",
+      "finding": "F1 P2 \u2014 inspector failed open on absent evidence (stripped legs/storage or emptied capture still passed); F2 P2 \u2014 request headers captured nowhere while README claimed them; F3-F9 hardenings (leg-detail scan, egress-kind closed set, failure origin checks, split/b64-wrapped marker sweeps, WebRTC/WebTransport/dialog coverage, online-mode label, wire-derived model provenance); F10-F11 info",
+      "resolution": "9cc6356 (inspector: capture_evidence_present + model_fetch_provenance checks, header/response/dialog/failure scanning, closed egress sets, normalized marker sweeps, allowed_channels echoed to receipt) + 8bcbc12 (spec: allHeaders on requests+failures, server header log, responses+dialogs captured, new tripwires, in-test split sweep, 'online' mode label, new limitations)",
+      "unaddressed_findings": "none \u2014 all review findings resolved or bounded; F6/F7 residual bounds recorded as receipt limitations",
+      "status": "fix committed, pending re-review",
+      "probe_verification": "every reviewer probe re-run against mutated captures now exits nonzero (stripped legs/storage, emptied capture, header markers, leg-detail marker, unrecognized egress kind, failure-only foreign record, split/whitespace/b64-wrapped markers, webrtc, dialog); unmutated captures still pass"
+    }
+  ],
+  "changed_paths": [
+    "scripts/inspect_network_receipt.py",
+    "tests/privacy/README.md",
+    "tests/privacy/harness/mount.tsx",
+    "tests/privacy/harness/privacy.html",
+    "tests/privacy/local.spec.ts",
+    "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+    "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+    "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+    "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+    "artifacts/tasks/T15/capture/04-warm-harness.json",
+    "artifacts/tasks/T15/capture/05-offline-harness.json",
+    "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+    "artifacts/tasks/T15/capture/07-offline-cold-model.json",
+    "artifacts/tasks/T15/commands.log",
+    "artifacts/tasks/T15/handoff.json",
+    "artifacts/tasks/T15/network-receipt.json",
+    "artifacts/tasks/T15/receipt.json",
+    "artifacts/tasks/T15/run.json"
+  ],
+  "scope_check": "All changes inside allowed scope (tests/privacy/ + scripts/inspect_network_receipt.py) plus task-owned artifacts/tasks/T15/. No product, planning, lockfile or shared-schema files touched.",
+  "commands": [
+    {
+      "cmd": "bun run test:privacy -- tests/privacy/local.spec.ts",
+      "result": "4 passed, 0 failed, 0 skipped (final run; iterated failures recorded in commands.log)",
+      "exit": 0
+    },
+    {
+      "cmd": "python3 scripts/task_acceptance.py task T15 --report artifacts/tasks/T15/run.json",
+      "result": "exit 0; evaluated_commit=8bcbc12; collected 4 / passed 4 / failed 0 / skipped 0; failures=[], evidence_errors=[]",
+      "exit": 0
+    },
+    {
+      "cmd": "python3 scripts/inspect_network_receipt.py --capture tests/privacy/.private/capture --canary tests/privacy/.private/canary.json --dist tests/privacy/dist --receipt artifacts/tasks/T15/network-receipt.json --redacted-capture artifacts/tasks/T15/capture --require-modes cold,warm,offline",
+      "result": "verdict=pass, 13/13 checks, 47 requests observed",
+      "exit": 0
+    },
+    {
+      "cmd": "node_modules/.bin/oxlint tests/privacy/local.spec.ts tests/privacy/harness/mount.tsx",
+      "result": "0 errors, 0 warnings",
+      "exit": 0
+    }
+  ],
+  "test_summary": {
+    "tests_total": 4,
+    "tests_passed": 4,
+    "checks_total": 13,
+    "checks_passed": 13,
+    "captures": 8,
+    "modes": [
+      "cold",
+      "warm",
+      "offline"
+    ],
+    "requests_observed": 47,
+    "foreign_hosts_observed": 0,
+    "marker_material_outbound": 0
+  },
+  "journey": "Generated canary PDF (11 greppable markers incl. hidden Info string, doc sha256, note, hostile payload) opened via the real T08 open mount; plan + malformed-error + replace legs; real pdf.js render + native-text extraction; real OCR (staged model download -> integrity verify -> IndexedDB slot -> worker/wasm -> occurrences); real T16 ExportPanel preview + JSON/HTML downloads; real T22 import reopen; clear. Warm run: provenance cache at prepare, memory in handle, zero refetch. Offline: prepared page completes with zero server hits + zero failures; cold offline fails as unavailable_offline/missing_model.",
+  "limitations": [
+    "App composition (T13) unlanded: journey sequentially drives the real built feature mounts + test-owned harness page \u2014 same production code paths, no composed shell.",
+    "Browser automation cannot see every OS/browser process channel; release-profile proof needs a proxy/firewall capture per planning.",
+    "No service worker ships: offline = already-loaded page with prepared assets; cold offline navigation is not claimed."
+  ],
+  "notes_for_reviewer": "Receipt keys match the task contract acceptance_criteria verbatim. Raw captures under tests/privacy/.private/ are task-private (live canary material); committed captures are redacted with <marker:id> tokens. Round-1 fixes: the inspector now requires evidence presence (F1), captures+scans request headers on both layers (F2), fails closed on unrecognized egress kinds, scans leg details and split/base64-wrapped marker spellings, and derives model provenance from the wire. Probe table reproduced \u2014 every mutation now fails.",
+  "evidence_commit_note": "artifacts/tasks/T15/ committed as the evidence commit after implementation+test commits."
+}

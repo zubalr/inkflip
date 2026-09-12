@@ -1,0 +1,539 @@
+{
+  "schema_version": 1,
+  "tool": "scripts/inspect_network_receipt.py",
+  "task": "T15",
+  "generated_at": "2026-09-12T15:14:37.234636+00:00",
+  "origin": "http://127.0.0.1:58699",
+  "canary": {
+    "document_sha256_16": "c383a44b3cebd27f",
+    "byte_length": 810,
+    "markers": [
+      {
+        "id": "filename",
+        "sha256_16": "5877bf3df6436082",
+        "allowed_channels": []
+      },
+      {
+        "id": "visible_text",
+        "sha256_16": "8bdb0865d94b2715",
+        "allowed_channels": []
+      },
+      {
+        "id": "hidden_text",
+        "sha256_16": "490e61495ef1e2a0",
+        "allowed_channels": []
+      },
+      {
+        "id": "note",
+        "sha256_16": "b9bde3f3d3c31a84",
+        "allowed_channels": []
+      },
+      {
+        "id": "note_token",
+        "sha256_16": "675a69fdbb146509",
+        "allowed_channels": []
+      },
+      {
+        "id": "doc_sha256",
+        "sha256_16": "c383a44b3cebd27f",
+        "allowed_channels": []
+      },
+      {
+        "id": "pdf_b64_head",
+        "sha256_16": "61e4bdd11107b596",
+        "allowed_channels": []
+      },
+      {
+        "id": "raster_sha256",
+        "sha256_16": "1759d5c1609d24f8",
+        "allowed_channels": []
+      },
+      {
+        "id": "report_id",
+        "sha256_16": "653d642ac6973b0f",
+        "allowed_channels": [
+          "downloads"
+        ]
+      },
+      {
+        "id": "run_key",
+        "sha256_16": "d679a5e4514f0eb3",
+        "allowed_channels": [
+          "downloads"
+        ]
+      },
+      {
+        "id": "export_filename",
+        "sha256_16": "bf0a0960e7c71d2b",
+        "allowed_channels": [
+          "downloads"
+        ]
+      }
+    ]
+  },
+  "captures": [
+    {
+      "file": "00-cold-boot-index.json",
+      "label": "cold-boot-index",
+      "mode": "cold",
+      "surface": "/index.html",
+      "requests": 4,
+      "responses": 4,
+      "websockets": 0,
+      "egress_records": 0,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-index",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "01-cold-open-mount.json",
+      "label": "cold-open-mount",
+      "mode": "cold",
+      "surface": "/src/features/open/preview.html",
+      "requests": 14,
+      "responses": 14,
+      "websockets": 0,
+      "egress_records": 4,
+      "console_messages": 1,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-open-mount",
+          "ok": true
+        },
+        {
+          "name": "open-canary",
+          "ok": true
+        },
+        {
+          "name": "real-render-raster",
+          "ok": true
+        },
+        {
+          "name": "run-plan-includes-ocr",
+          "ok": true
+        },
+        {
+          "name": "error-malformed",
+          "ok": true
+        },
+        {
+          "name": "reopen-and-replace",
+          "ok": true
+        },
+        {
+          "name": "clear-file",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "02-cold-harness-ocr-export.json",
+      "label": "cold-harness-ocr-export",
+      "mode": "cold",
+      "surface": "/privacy.html",
+      "requests": 8,
+      "responses": 8,
+      "websockets": 0,
+      "egress_records": 3,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-harness",
+          "ok": true
+        },
+        {
+          "name": "open-canary-adapter",
+          "ok": true
+        },
+        {
+          "name": "contract-pages",
+          "ok": true
+        },
+        {
+          "name": "native-text-canary",
+          "ok": true
+        },
+        {
+          "name": "render-raster",
+          "ok": true
+        },
+        {
+          "name": "ocr-reader",
+          "ok": true
+        },
+        {
+          "name": "ocr-prepare-cold",
+          "ok": true
+        },
+        {
+          "name": "ocr-open-plan-extract",
+          "ok": true
+        },
+        {
+          "name": "assemble-seal-report",
+          "ok": true
+        },
+        {
+          "name": "export-panel-downloads",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "03-cold-import-reopen.json",
+      "label": "cold-import-reopen",
+      "mode": "cold",
+      "surface": "/src/features/import/preview.html",
+      "requests": 7,
+      "responses": 7,
+      "websockets": 0,
+      "egress_records": 0,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-import-mount",
+          "ok": true
+        },
+        {
+          "name": "reopen-export",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "04-warm-harness.json",
+      "label": "warm-harness",
+      "mode": "warm",
+      "surface": "/privacy.html",
+      "requests": 7,
+      "responses": 7,
+      "websockets": 0,
+      "egress_records": 2,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-harness",
+          "ok": true
+        },
+        {
+          "name": "open-canary-adapter",
+          "ok": true
+        },
+        {
+          "name": "render-raster",
+          "ok": true
+        },
+        {
+          "name": "ocr-reader",
+          "ok": true
+        },
+        {
+          "name": "ocr-prepare-warm",
+          "ok": true
+        },
+        {
+          "name": "ocr-extract-warm",
+          "ok": true
+        },
+        {
+          "name": "export-engine-warm",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "05-offline-harness.json",
+      "label": "offline-harness",
+      "mode": "offline",
+      "surface": "/privacy.html",
+      "requests": 2,
+      "responses": 2,
+      "websockets": 0,
+      "egress_records": 3,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "offline-ocr-extract",
+          "ok": true
+        },
+        {
+          "name": "offline-open-and-render",
+          "ok": true
+        },
+        {
+          "name": "offline-export",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "06-offline-cold-nav.json",
+      "label": "offline-cold-nav",
+      "mode": "online",
+      "surface": "/privacy.html",
+      "requests": 3,
+      "responses": 3,
+      "websockets": 0,
+      "egress_records": 0,
+      "console_messages": 0,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "navigate-harness",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "file": "07-offline-cold-model.json",
+      "label": "offline-cold-model",
+      "mode": "offline",
+      "surface": "/privacy.html",
+      "requests": 2,
+      "responses": 0,
+      "websockets": 0,
+      "egress_records": 1,
+      "console_messages": 1,
+      "dialogs": 0,
+      "legs": [
+        {
+          "name": "cold-offline-model-fails",
+          "ok": true
+        },
+        {
+          "name": "cold-offline-nav-blocked",
+          "ok": true
+        }
+      ]
+    }
+  ],
+  "census": {
+    "requests_total": 47,
+    "methods": {
+      "GET": 47
+    },
+    "unique_paths": [
+      "/",
+      "/assets/ModalDialog-8VZc2_jj.js",
+      "/assets/ModalDialog-Dp0nC5og.css",
+      "/assets/global-CWUH7hDd.css",
+      "/assets/global-CbCfd5ku.js",
+      "/assets/import_-BFHhLnnB.js",
+      "/assets/import_-BMq_ZVSZ.css",
+      "/assets/index-CRz5t4SE.js",
+      "/assets/open-B4SCvXnz.js",
+      "/assets/open-CwzWy_jt.css",
+      "/assets/pdf.worker-DTrjDNvb.mjs",
+      "/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "/assets/privacy-BDKEFS6n.js",
+      "/assets/privacy-DSXHGIdZ.css",
+      "/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
+      "/assets/tesseract/7.0.0/worker.min.js",
+      "/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+      "/privacy.html",
+      "/src/features/import/preview.html",
+      "/src/features/open/preview.html"
+    ],
+    "served_pairs": 20,
+    "downloads": [
+      {
+        "filename_sha256_16": "bf0a0960e7c71d2b",
+        "bytes": 18392,
+        "kind": "json"
+      },
+      {
+        "filename_sha256_16": "ef6b8804119ee4f0",
+        "bytes": 5870,
+        "kind": "html"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "requests_same_origin",
+      "criterion": "only fixed allowlisted same-origin asset paths",
+      "status": "pass",
+      "detail": "every http(s) request resolved to the local static origin (19 additionally satisfied from browser HTTP cache \u2014 same-origin allowlisted paths)",
+      "counts": {
+        "requests": 47,
+        "cache_satisfied": 19
+      },
+      "violations": []
+    },
+    {
+      "id": "requests_allowlisted_paths",
+      "criterion": "only fixed allowlisted same-origin asset paths",
+      "status": "pass",
+      "detail": "every requested/served path is an exact member of the built-site file allowlist (dist listing plus /, /index.html, /favicon.ico)",
+      "counts": {
+        "allowlist_size": 230,
+        "unique_paths": 20
+      },
+      "violations": []
+    },
+    {
+      "id": "requests_read_only_methods",
+      "criterion": "only fixed allowlisted same-origin asset paths",
+      "status": "pass",
+      "detail": "request methods are read-only static fetches",
+      "counts": {
+        "methods": {
+          "GET": 47
+        }
+      },
+      "violations": []
+    },
+    {
+      "id": "requests_no_query_strings",
+      "criterion": "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
+      "status": "pass",
+      "detail": "no request URL or served path carried a query string",
+      "counts": {
+        "requests": 47
+      },
+      "violations": []
+    },
+    {
+      "id": "no_canary_material_outbound",
+      "criterion": "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
+      "status": "pass",
+      "detail": "no marker (filename, visible/hidden text, document hash, raster pixels, note, report id/name \u2014 in raw, percent, base64, hex, cross-channel-split or base64-wrapped spellings) appears in any captured request URL/header/body, response, websocket, egress attempt, console payload, leg detail, dialog, storage value or server path/header",
+      "counts": {
+        "markers": 11
+      },
+      "violations": []
+    },
+    {
+      "id": "no_websocket_beacon_serviceworker",
+      "criterion": "telemetry/external-font absence proven",
+      "status": "pass",
+      "detail": "zero websockets, zero sendBeacon/EventSource/window.open/WebRTC/WebTransport/form.submit attempts, zero unexpected dialogs, zero service-worker registrations; fetch/XHR/worker tripwire targets all stay inside the same-origin allowlist; unrecognized egress kinds fail closed",
+      "counts": {
+        "websockets": 0
+      },
+      "violations": []
+    },
+    {
+      "id": "no_telemetry_or_external_font",
+      "criterion": "telemetry/external-font absence proven",
+      "status": "pass",
+      "detail": "no captured URL, console payload, egress attempt or server path matches the telemetry/analytics/CDN/external-font denylist",
+      "counts": {
+        "denylist_pattern": "(telemetry|analytics|sentry|datadog|segment\\.io|mixpanel|amplitude|hotjar|fullstory|logrocket|newrelic|google-analytics|googletagmanager|doubleclick|fonts\\.googleapis|fonts\\.gstatic|use\\.fontawesome|jsdelivr|unpkg|cdnjs|cloudflareinsights|cloudflare-static|/beacon\\b|/collect\\b|/rum\\b|/track\\b)"
+      },
+      "violations": []
+    },
+    {
+      "id": "storage_document_free",
+      "criterion": "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs",
+      "status": "pass",
+      "detail": "localStorage/sessionStorage/cookies/CacheStorage are empty and IndexedDB holds only the sha256-verified staged OCR model slot \u2014 no document keys, names, crops or reports persist",
+      "counts": {
+        "allowed_idb": [
+          "keyval-store/keyval/inkflip/models/eng.traineddata"
+        ]
+      },
+      "violations": []
+    },
+    {
+      "id": "capture_evidence_present",
+      "criterion": "online/warm/offline modes documented",
+      "status": "pass",
+      "detail": "every capture carries the full channel key set, nonempty named legs, a storage snapshot and captured request headers; every non-offline capture recorded at least one request; the union of legs covers open/error/render/OCR/export/reopen/clear \u2014 absent or emptied evidence can never pass",
+      "counts": {
+        "journey_legs_seen": 28
+      },
+      "violations": []
+    },
+    {
+      "id": "journey_legs_completed",
+      "criterion": "online/warm/offline modes documented",
+      "status": "pass",
+      "detail": "every recorded journey leg completed (open, error, render, OCR, export, reopen, clear) and every required mode has a capture; offline captures show zero requests reaching the server and only fixed-asset attempts (prepared-cache hits or the honestly failed cold-offline model fetch)",
+      "counts": {
+        "modes": {
+          "cold": 4,
+          "warm": 1,
+          "offline": 2,
+          "online": 1
+        }
+      },
+      "violations": []
+    },
+    {
+      "id": "model_fetch_provenance",
+      "criterion": "online/warm/offline modes documented",
+      "status": "pass",
+      "detail": "cold mode fetched the staged model over the wire exactly once (network provenance), warm mode reused the verified cache with zero model requests, offline captures served zero model paths \u2014 derived from request and server-log evidence, not in-page assertions",
+      "counts": {
+        "cold_model_requests": 1,
+        "model_paths_served": 1
+      },
+      "violations": []
+    },
+    {
+      "id": "cold_fixed_assets",
+      "criterion": "only fixed allowlisted same-origin asset paths",
+      "status": "pass",
+      "detail": "cold navigation requested 4 fixed asset(s), all inside the built-site allowlist",
+      "counts": {
+        "cold_requests": 4
+      },
+      "violations": []
+    },
+    {
+      "id": "built_assets_no_external_endpoints",
+      "criterion": "telemetry/external-font absence proven",
+      "status": "pass",
+      "detail": "built JS/HTML/CSS contains no telemetry/collector endpoint literals and no external literal host that also appeared in runtime traffic; the full literal census (vendor spec links, xmlns namespaces, overridden CDN defaults, parser test vectors) is recorded for review and was never fetched at runtime",
+      "counts": {
+        "literal_hosts": {
+          "github.com": 24,
+          "a": 9,
+          "a@b": 3,
+          "\u0442\u0435\u0441\u0442": 3,
+          "x": 3,
+          "www.w3.org": 42,
+          "${e}": 2,
+          "example.com": 3,
+          "foo.bar": 4,
+          "react.dev": 4,
+          "www.apache.org": 1,
+          "tc39.es": 75,
+          "issues.chromium.org": 3,
+          "bugs.webkit.org": 5,
+          "bugs.chromium.org": 3,
+          "bugzilla.mozilla.org": 1,
+          "html.spec.whatwg.org": 1,
+          "url.spec.whatwg.org": 1,
+          "${url}": 1,
+          "www.xfa.org": 9,
+          "ns.adobe.com": 4,
+          "rolldown.rs": 1,
+          "localhost:3000": 1,
+          "opencollective.com": 1,
+          "cdn.jsdelivr.net": 3
+        }
+      },
+      "violations": []
+    }
+  ],
+  "verdict": "pass",
+  "limitations": [
+    "App composition (T13) is not landed: the journey drives the real built feature mounts plus a test-owned harness page in sequence \u2014 the same production code paths the composed shell will call.",
+    "Browser automation cannot see every OS/browser process channel; per planning, release-profile proof additionally needs a proxy/firewall capture.",
+    "No service worker ships: offline support means an already-loaded page with prepared assets, verified here; cold offline navigation has no app shell to load and is not claimed.",
+    "WebRTC/WebTransport are tripwired (construction is recorded) and asserted unused across the whole journey \u2014 verified absent from the built bundles; an already-open data channel's inner frames are not separately captured, so the guarantee is constructor-level.",
+    "Log-channel scans are bounded by capture truncation (console/page-error 2000 chars, leg/egress/dialog details 1000, ws frames 1000); network carriers are closed by method/query/allowlist/header checks, so the residual escape window is log-text only \u2014 the inspector additionally scans joined and base64-decoded payloads to shrink it."
+  ]
+}
