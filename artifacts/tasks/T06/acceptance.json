@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "task_id": "T06",
+  "beads_id": "pdf-t06",
+  "disposition": "accepted",
+  "evaluated_commit": "fd714bf5de61cd9fd0c443a88ff71f5fb658fca3",
+  "evaluated_at": "2026-09-12T01:47:07.232169+00:00",
+  "contract_digest": "da9bec1f35de94e42ffcdc3ec1440e5edd5a53a1a6eb80ab3a5c7dfbd961b5fd",
+  "worker": "antigravity-t06",
+  "commands": [
+    {
+      "segment": "bun run test:visual -- tests/visual/foundation.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:visual",
+        "--",
+        "tests/visual/foundation.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:visual",
+        "--",
+        "tests/visual/foundation.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T06/commands.log": "98a7f41858ad9b1fd26e0a86537e7e8f7e742832c9a44f219cb9fa395322aed4",
+    "artifacts/tasks/T06/compare-mode.png": "fd69060fbf8c47f6bb2b0cfd646cb264a2f9e774e40b41db3e4826a5a1773d57",
+    "artifacts/tasks/T06/coordinator-commands.log": "87495916417688d17028882e331312a5ae44fe8a82eb952e5f15ac7c19ea9116",
+    "artifacts/tasks/T06/desktop-1440.png": "86ece65d77b20bd842a44c5be3089493f750a4b0d4502d77b82c942976328646",
+    "artifacts/tasks/T06/detail-expanded.png": "260ef5d6acbc5c9a8c815511ae9dbfeb91882b79d80f3f2be841b22fbef4a71e",
+    "artifacts/tasks/T06/focus-state.png": "dbaf282a41d0c5c4392322b771e9694c03929c76fae6e97099d3e1480cd41acf",
+    "artifacts/tasks/T06/intermediate-1024.png": "f180dd988a74fec1afddc5bddcf2309bed0c20f0468c08100a4fedb51eecc2df",
+    "artifacts/tasks/T06/intermediate-768.png": "6bfc872521d83fd9b29a98f35a081ab0098b9e74e2ee05723056f783b350c969",
+    "artifacts/tasks/T06/mobile-320.png": "22ea707e5f0be02294b4eb5bda26129aa207525009e03c6db7fe6a73b2073c40",
+    "artifacts/tasks/T06/mobile-390.png": "f5da174217fd96bea44bca9f48a6e895bd2aa84c895e89d02bae89ff425c0282",
+    "artifacts/tasks/T06/peer-review.md": "c5f9d96225f87373b320fb2cf2da92c3ecc9959ec7ab2dd6ef86c6e0f882d69d",
+    "artifacts/tasks/T06/receipt.json": "baaa9a17749c1f8090786fa59d158bfb9b537c643aa8d3722c614374ff3158f0",
+    "artifacts/tasks/T06/review.md": "c5f9d96225f87373b320fb2cf2da92c3ecc9959ec7ab2dd6ef86c6e0f882d69d",
+    "artifacts/tasks/T06/run.json": "0bfac1c8f476737c7dbb282ba31eca38c82aed5160f033ac8e5b73b5422e5b51",
+    "artifacts/tasks/T06/state-empty.png": "d5ad29f7c0a6e53f55fbde568da02a01e043da29587171e6f84a002b60f2eb37",
+    "artifacts/tasks/T06/state-failed.png": "ad00656d8d2315dec6a5b4acdf1c55ee27736fcf0cd4739e03051590aecd0188",
+    "artifacts/tasks/T06/state-loading.png": "8378977693fea87c503e7b0779874c6be225683faf1fcefc23ecb1a837b47ed5"
+  },
+  "criteria": {
+    "1440/1024/768/390/320 widths have no page overflow": [
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/intermediate-1024.png",
+      "artifacts/tasks/T06/intermediate-768.png",
+      "artifacts/tasks/T06/mobile-390.png",
+      "artifacts/tasks/T06/mobile-320.png",
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/intermediate-1024.png",
+      "artifacts/tasks/T06/intermediate-768.png",
+      "artifacts/tasks/T06/mobile-390.png",
+      "artifacts/tasks/T06/mobile-320.png",
+      "artifacts/tasks/T06/commands.log"
+    ],
+    "page and disagreement dominate": [
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/mobile-390.png",
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/commands.log"
+    ],
+    "contrast checks meet stated targets": [
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/focus-state.png",
+      "artifacts/tasks/T06/commands.log",
+      "artifacts/tasks/T06/commands.log"
+    ],
+    "reduced motion disables flips": [
+      "artifacts/tasks/T06/commands.log",
+      "artifacts/tasks/T06/commands.log"
+    ],
+    "screenshot evidence covers dark text, focus and partial states.": [
+      "artifacts/tasks/T06/desktop-1440.png",
+      "artifacts/tasks/T06/focus-state.png",
+      "artifacts/tasks/T06/compare-mode.png",
+      "artifacts/tasks/T06/detail-expanded.png",
+      "artifacts/tasks/T06/state-loading.png",
+      "artifacts/tasks/T06/state-failed.png",
+      "artifacts/tasks/T06/state-empty.png",
+      "artifacts/tasks/T06/commands.log"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "zcode-review-t06"
+    ],
+    "path": "artifacts/tasks/T06/review.md"
+  }
+}

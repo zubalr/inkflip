@@ -1,0 +1,22 @@
+bun run test:visual -- tests/visual/foundation.spec.ts
+
+Running 9 tests using 1 worker
+
+
+[1A[2K[1/9] tests/visual/foundation.spec.ts:63:5 › T06: Visual Foundations & Responsive Layout › width 1440px (desktop-1440) has no page horizontal overflow
+[1A[2K[2/9] tests/visual/foundation.spec.ts:63:5 › T06: Visual Foundations & Responsive Layout › width 1024px (intermediate-1024) has no page horizontal overflow
+[1A[2K[3/9] tests/visual/foundation.spec.ts:63:5 › T06: Visual Foundations & Responsive Layout › width 768px (intermediate-768) has no page horizontal overflow
+[1A[2K[4/9] tests/visual/foundation.spec.ts:63:5 › T06: Visual Foundations & Responsive Layout › width 390px (mobile-390) has no page horizontal overflow
+[1A[2K[5/9] tests/visual/foundation.spec.ts:63:5 › T06: Visual Foundations & Responsive Layout › width 320px (mobile-320) has no page horizontal overflow
+[1A[2K[6/9] tests/visual/foundation.spec.ts:88:3 › T06: Visual Foundations & Responsive Layout › page and disagreement dominate the visual composition
+[1A[2K[7/9] tests/visual/foundation.spec.ts:112:3 › T06: Visual Foundations & Responsive Layout › contrast checks meet stated WCAG targets on computed DOM styles
+[1A[2K[8/9] tests/visual/foundation.spec.ts:151:3 › T06: Visual Foundations & Responsive Layout › reduced motion disables flips, transitions and animations
+[1A[2K[9/9] tests/visual/foundation.spec.ts:169:3 › T06: Visual Foundations & Responsive Layout › active focus outline styling adheres to 3px focus token
+[1A[2K  9 passed (1.8s)
+$ python3 scripts/task_acceptance.py run test:visual tests/visual/foundation.spec.ts
+(node:40493) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[1A[2K(node:40495) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Exit: 0
