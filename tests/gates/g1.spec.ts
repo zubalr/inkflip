@@ -408,11 +408,6 @@ function assertCaptureClean(cap: Capture): void {
   }
 }
 
-async function sha256Hex(b: Uint8Array): Promise<string> {
-  const d = await crypto.subtle.digest("SHA-256", b as BufferSource);
-  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join("");
-}
-
 /* ---------------- page-side helpers (real collaborators) ---------------- */
 
 async function openMount(page: Page): Promise<void> {
@@ -435,12 +430,6 @@ async function offerFile(page: Page, name: string, bytes: Uint8Array, confirmRep
 async function harness(page: Page): Promise<void> {
   await page.goto(`${baseURL}/privacy.html`);
   await page.waitForFunction(() => (window as never as Record<string, unknown>).__t15 !== undefined, undefined, { timeout: 30_000 });
-}
-
-/** Unwrap the harness tryV envelope; fail loudly with the real error. */
-function unwrap<T>(r: { ok: true; value: T } | { ok: false; error: { message: string; reason: string | null } }, what: string): T {
-  if (!r.ok) throw new Error(`${what} failed: ${r.error.message} (${r.error.reason ?? "no-reason"})`);
-  return r.value;
 }
 
 /* ------------------------------ the gate ------------------------------- */

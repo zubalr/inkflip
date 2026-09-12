@@ -552,10 +552,10 @@
     }
   ],
   "execution": {
-    "execution_id": "7a616917-9de9-4363-8702-be84e1ff42d8",
+    "execution_id": "9433ccfc-d243-4646-b358-ebe83ee3255e",
     "run_key": "c19a175c877aecd3f62a872f5d53ce15806bcfaa5ff2a9c362ddf10aac31aac6",
     "status": "complete",
-    "started_at": "2026-09-12T23:38:06.337Z",
+    "started_at": "2026-09-12T23:45:48.664Z",
     "duration_ms": 1,
     "environment": "Chromium (Playwright) · g1 gate",
     "result_origin": "live",
