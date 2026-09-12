@@ -44,11 +44,32 @@ P3 (optional): left as reviewed - __init__.py kept; form-only completed/0 kept.
 $ uv run --project native python -m pytest native/tests/structure -q
   -> 18 passed, 14 subtests passed (exit 0)
 $ uv run --project native python -m pytest native/tests -q
-  -> 129 passed, 160 subtests passed (exit 0)
+  -> 131 passed, 160 subtests passed (exit 0)
 $ bun run test:native
-  -> 129 passed (exit 0)
+  -> 131 passed (exit 0)
 $ bun run verify
   -> exit 0
 $ python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json
   -> exit 0; collected 18 / passed 18 / failed 0 / skipped 0
+================================================================================
+
+================================================================================
+REVIEW REVISION ROUND 2 (Devin follow-up on 3863dde; 2026-09-12)
+Revision commit: cf01857
+- Evidence namespace: acceptance_criteria_evidence cites only
+  artifacts/tasks/T28/* (new criterion-evidence-current.md itemizes proof).
+- /BM claim corrected: HasTransparency DOES flag non-Normal blend modes
+  (/BM Multiply pinned by test; scoped plain object unflagged). Docstring,
+  manifest and receipt retracted the false 'setter-only' claim.
+- Stroking alpha: /CA 0.5 stroke-mode text now flagged via stroke[3]<255.
+- Stale fields refreshed: receipt worker commit cf01857; counts 20/129.
+================================================================================
+$ uv run --project native python -m pytest native/tests/structure -q
+  -> 20 passed, 14 subtests passed (exit 0)
+$ uv run --project native python -m pytest native/tests -q
+  -> 131 passed, 160 subtests passed (exit 0)
+$ bun run test:native -> 131 passed (exit 0)
+$ bun run verify -> exit 0
+$ python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json
+  -> exit 0; collected 20 / passed 20 / failed 0 / skipped 0
 ================================================================================
