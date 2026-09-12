@@ -1,0 +1,46 @@
+{
+  "task": "T14",
+  "beads_id": "pdf-t14",
+  "evaluated_commit": "2cf02941f12b4e208e7de7a5dc55cadaf3854d36",
+  "evaluated_at": "2026-09-12T11:53:43.171975+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/browser/findings.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/findings.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/findings.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 6 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/6] tests/browser/findings.spec.ts:48:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 1: normal invisible scan has no warning solely for invisibility (I11)\n\u001b[1A\u001b[2K[2/6] tests/browser/findings.spec.ts:73:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 2: timed-out, model-missing, and unsupported are strictly distinct (I05)\n\u001b[1A\u001b[2K[3/6] tests/browser/findings.spec.ts:111:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 3: zero findings cannot display clean or safe (I06)\n\u001b[1A\u001b[2K[4/6] tests/browser/findings.spec.ts:131:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 4: explanations come from deterministic templates and actual recorded evidence\n\u001b[1A\u001b[2K[5/6] tests/browser/findings.spec.ts:164:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 5: priority ordering respects selected > material_token > ordinary > informational\n\u001b[1A\u001b[2K[6/6] tests/browser/findings.spec.ts:183:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 6: no serious or critical automated accessibility violations (WCAG 2.2 AA)\n\u001b[1A\u001b[2K  6 passed (2.1s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/browser/findings.spec.ts\n(node:39481) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:39514) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t14",
+      "environment": {}
+    }
+  ]
+}
