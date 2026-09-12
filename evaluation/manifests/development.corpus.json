@@ -1,0 +1,278 @@
+{
+  "entries": [
+    {
+      "group_id": "f18-bad-pdf",
+      "key": "bad-pdf-control",
+      "pages": [
+        0
+      ],
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "source_path": "fixtures/development/bad-pdf-control.pdf"
+    },
+    {
+      "group_id": "f18-bad-pdf",
+      "key": "bad-pdf-encrypted",
+      "pages": [
+        0
+      ],
+      "sha256": "00b01a2ec4c391bc840a06633addd50a43d4f64fd33cd619d4aced80ee580a58",
+      "source_path": "fixtures/development/bad-pdf-encrypted.pdf"
+    },
+    {
+      "group_id": "f18-bad-pdf",
+      "key": "bad-pdf-malformed",
+      "pages": [
+        0
+      ],
+      "sha256": "e19de710b8323c5d85d02796d33c1f3c542f85213f0c2ce56fac8af4a02de9c9",
+      "source_path": "fixtures/development/bad-pdf-malformed.pdf"
+    },
+    {
+      "group_id": "f18-bad-pdf",
+      "key": "bad-pdf-truncated",
+      "pages": [
+        0
+      ],
+      "sha256": "90cb16af88588b5cba36331eee0ad55447c50337ffa1ee2fba8e9921feea4af5",
+      "source_path": "fixtures/development/bad-pdf-truncated.pdf"
+    },
+    {
+      "group_id": "f11-duplicates",
+      "key": "duplicates-control",
+      "pages": [
+        0
+      ],
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "source_path": "fixtures/development/duplicates-control.pdf"
+    },
+    {
+      "group_id": "f11-duplicates",
+      "key": "duplicates-four",
+      "pages": [
+        0
+      ],
+      "sha256": "036db55ee2f8c320252c7c9fb220daa38699387800e8a3bbf8c6bb73463feb1f",
+      "source_path": "fixtures/development/duplicates-four.pdf"
+    },
+    {
+      "group_id": "f19-huge-page",
+      "key": "huge-page-control",
+      "pages": [
+        0
+      ],
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "source_path": "fixtures/development/huge-page-control.pdf"
+    },
+    {
+      "group_id": "f19-huge-page",
+      "key": "huge-page-extreme",
+      "pages": [
+        0
+      ],
+      "sha256": "d50c2befa32ccf07e92946daaea270223aa034cb980e0699379163909e8c32f6",
+      "source_path": "fixtures/development/huge-page-extreme.pdf"
+    },
+    {
+      "group_id": "f10-mapping-missing",
+      "key": "mapping-missing-absent",
+      "pages": [
+        0
+      ],
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "source_path": "fixtures/development/mapping-missing-absent.pdf"
+    },
+    {
+      "group_id": "f10-mapping-missing",
+      "key": "mapping-missing-control",
+      "pages": [
+        0
+      ],
+      "sha256": "d4ab5ca3fd6a993cf18f86c1ffc7fdbd1a4da09bc4ba2ab117c5511312675a24",
+      "source_path": "fixtures/development/mapping-missing-control.pdf"
+    },
+    {
+      "group_id": "f10-mapping-missing",
+      "key": "mapping-missing-malformed",
+      "pages": [
+        0
+      ],
+      "sha256": "81b2ec12234d97d755ad2d7c1744e453246e6f303bfb4728eb4634e31a5884c4",
+      "source_path": "fixtures/development/mapping-missing-malformed.pdf"
+    },
+    {
+      "group_id": "f21-network-canary",
+      "key": "network-canary-channels",
+      "pages": [
+        0
+      ],
+      "sha256": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
+      "source_path": "fixtures/development/network-canary-channels.pdf"
+    },
+    {
+      "group_id": "f21-network-canary",
+      "key": "network-canary-control",
+      "pages": [
+        0
+      ],
+      "sha256": "5b4471a6fbfc6a38053c4fe797bbd4c7a205b23a6eb4f323267923a28b1ae578",
+      "source_path": "fixtures/development/network-canary-control.pdf"
+    },
+    {
+      "group_id": "f05-paint-order",
+      "key": "paint-order-after",
+      "pages": [
+        0
+      ],
+      "sha256": "3c474638423b2b9b9fa45c79b39abce40105fba5d20566ca9d231ae41fb9955d",
+      "source_path": "fixtures/development/paint-order-after.pdf"
+    },
+    {
+      "group_id": "f05-paint-order",
+      "key": "paint-order-control",
+      "pages": [
+        0
+      ],
+      "sha256": "db606229b121784e8e28d0ef33ed01a1f5135dc3b9c6d958b650991ae15ffe84",
+      "source_path": "fixtures/development/paint-order-control.pdf"
+    },
+    {
+      "group_id": "f06-partial-clip",
+      "key": "partial-clip-control",
+      "pages": [
+        0
+      ],
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "source_path": "fixtures/development/partial-clip-control.pdf"
+    },
+    {
+      "group_id": "f06-partial-clip",
+      "key": "partial-clip-partial",
+      "pages": [
+        0
+      ],
+      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
+      "source_path": "fixtures/development/partial-clip-partial.pdf"
+    },
+    {
+      "group_id": "f06-partial-clip",
+      "key": "partial-clip-triangle",
+      "pages": [
+        0
+      ],
+      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
+      "source_path": "fixtures/development/partial-clip-triangle.pdf"
+    },
+    {
+      "group_id": "f03-searchable-scan",
+      "key": "scan-correct",
+      "pages": [
+        0
+      ],
+      "sha256": "86a17f4a2ee4c4e75bd2eb406266b20ed3f960f644631841c5fad8b0e7ff4f5f",
+      "source_path": "fixtures/development/scan-correct.pdf"
+    },
+    {
+      "group_id": "f03-searchable-scan",
+      "key": "scan-raster-only",
+      "pages": [
+        0
+      ],
+      "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+      "source_path": "fixtures/development/scan-raster-only.pdf"
+    },
+    {
+      "group_id": "f03-searchable-scan",
+      "key": "scan-shifted",
+      "pages": [
+        0
+      ],
+      "sha256": "2b855c7ee27d22c71696d3be9f63758f61b8449e51e03cdfa80272afc4d62158",
+      "source_path": "fixtures/development/scan-shifted.pdf"
+    },
+    {
+      "group_id": "f17-unreadable",
+      "key": "unreadable-blank",
+      "pages": [
+        0
+      ],
+      "sha256": "32a8e848f84ed53c6953e9f7ab6075908fe65fe7c8ecef801bea9f2f10eaec9e",
+      "source_path": "fixtures/development/unreadable-blank.pdf"
+    },
+    {
+      "group_id": "f17-unreadable",
+      "key": "unreadable-control",
+      "pages": [
+        0
+      ],
+      "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+      "source_path": "fixtures/development/unreadable-control.pdf"
+    },
+    {
+      "group_id": "f17-unreadable",
+      "key": "unreadable-noise",
+      "pages": [
+        0
+      ],
+      "sha256": "97d638325fb23e1e6a840257dc2cc54122a1ec2db8c437d3a6bc494ec39ca7c1",
+      "source_path": "fixtures/development/unreadable-noise.pdf"
+    },
+    {
+      "group_id": "f08-userunit",
+      "key": "userunit-0-5",
+      "pages": [
+        0
+      ],
+      "sha256": "839f5fff3aee1c8a8530eb9f9b1ebdce4685ac503fd6f75da324f45f2fffb306",
+      "source_path": "fixtures/development/userunit-0.5.pdf"
+    },
+    {
+      "group_id": "f08-userunit",
+      "key": "userunit-1",
+      "pages": [
+        0
+      ],
+      "sha256": "6f6201cebc34505d6af8ffc3bc555cf16ac94f874e5d674b11c451bb8f0d09cb",
+      "source_path": "fixtures/development/userunit-1.pdf"
+    },
+    {
+      "group_id": "f08-userunit",
+      "key": "userunit-10",
+      "pages": [
+        0
+      ],
+      "sha256": "40827308fc88b2a1f8f88de746af74a0314ab1f5b3d01894d115544850042d8a",
+      "source_path": "fixtures/development/userunit-10.pdf"
+    },
+    {
+      "group_id": "f08-userunit",
+      "key": "userunit-2",
+      "pages": [
+        0
+      ],
+      "sha256": "48c1dc90e5228de82771d9a274a6eb2f103681c1f2fc8159dee0910d944b9295",
+      "source_path": "fixtures/development/userunit-2.pdf"
+    },
+    {
+      "group_id": "f04-white-contrast",
+      "key": "white-contrast-control",
+      "pages": [
+        0
+      ],
+      "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+      "source_path": "fixtures/development/white-contrast-control.pdf"
+    },
+    {
+      "group_id": "f04-white-contrast",
+      "key": "white-contrast-white",
+      "pages": [
+        0
+      ],
+      "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
+      "source_path": "fixtures/development/white-contrast-white.pdf"
+    }
+  ],
+  "kind": "corpus_manifest",
+  "schema_version": "1.0.0",
+  "source_root_policy": "explicit_local_root_no_symlinks",
+  "split": "development"
+}

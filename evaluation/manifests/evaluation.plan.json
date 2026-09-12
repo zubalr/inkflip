@@ -1,0 +1,139 @@
+{
+  "kind": "evaluation_plan",
+  "schema_version": "1.0.0",
+  "plan_id": "eval-2026-09-t36",
+  "protocol": "evaluation/protocol 1.0.0",
+  "custodian": {
+    "role": "evaluation-custodian",
+    "state_ref": "beads:pdf-t36",
+    "note": "Tuning workers get development fixtures and this protocol, never the untouched labels or seeds."
+  },
+  "population": {
+    "clean_pages_min": 300,
+    "supported_failure_pages_min": 300,
+    "mechanism_groups_min": 12,
+    "grouping_rule": "Group by generator family, producer/layout and shared source ancestry; a cover/no-cover twin and all seed variations stay in one split. Public/demo and development groups and their generated siblings never enter the untouched claim denominator.",
+    "note": "Measurement design target from planning/quality/EVALUATION.md; the held-out corpus is generated under custodian control and is not an existing dataset. Different generator implementations, typography and layouts are required, not 600 cosmetic variants of the public amount sample."
+  },
+  "split_manifests": {
+    "development": {
+      "path": "evaluation/manifests/development.corpus.json",
+      "sha256": "4312b140f22664be10923ba30196e4c124a62434031ed7a3f0af41e7b884fefd"
+    },
+    "public_demo": {
+      "path": "evaluation/manifests/public.corpus.json",
+      "sha256": "587d89ca8a0088ce43dc59f7db9238a3f2ca121d9b9867b4a54c73387a7d07cc"
+    },
+    "evaluation": {
+      "path": null,
+      "sha256": null,
+      "note": "Held-out corpus manifest is generated and pinned under custodian control; it is never committed with labels and its groups must not intersect development/public_demo lineages (verify-splits enforces)."
+    },
+    "permissioned": {
+      "path": null,
+      "sha256": null,
+      "note": "Optional small real incidents: consent-bound, permissioned, digest-pinned; same custody rules as evaluation and additionally require consent_ref per page."
+    }
+  },
+  "label_store": {
+    "schema": "inkflip-eval-labels-v1",
+    "labels_file": "eval-labels.json",
+    "sha256": null,
+    "label_count": 0,
+    "permissioned": true,
+    "root_env": "INKFLIP_EVAL_LABEL_ROOT",
+    "rules": [
+      "Label payloads are never committed to any checkout or copied into task artifacts.",
+      "Labels resolve only through scripts/evaluate_inspector.py --label-root or INKFLIP_EVAL_LABEL_ROOT, to a directory outside the repository.",
+      "The pinned sha256 and label_count must match exactly; unattested or stale labels fail closed.",
+      "Artifacts carry digests and aggregate counts only; the serializer refuses label content."
+    ]
+  },
+  "candidate_freeze": {
+    "commit": null,
+    "lock_sha256": null,
+    "config_sha256": null,
+    "note": "Freeze the candidate commit/lock/model/configuration before evaluating. A failure used to tune a candidate retires that case from untouched claims and requires a new evaluation version."
+  },
+  "targets": [
+    {
+      "id": "t_hard_fixtures",
+      "metric": "hard_fixture_failures",
+      "comparator": "==",
+      "threshold": 0,
+      "note": "100% contractual hard fixtures; zero wrong-file/page or fabricated precise anchors."
+    },
+    {
+      "id": "t_useful_precision",
+      "metric": "useful_precision_point",
+      "comparator": ">=",
+      "threshold": 0.95,
+      "min_samples": 100,
+      "note": "Useful localized precision >=0.95 on at least 100 emitted evaluated findings, adjudicated by two blinded reviewers."
+    },
+    {
+      "id": "t_useful_precision_wilson",
+      "metric": "useful_precision_wilson_lower",
+      "comparator": ">=",
+      "threshold": 0.9,
+      "min_samples": 100,
+      "note": "Wilson 95% lower bound >=0.90."
+    },
+    {
+      "id": "t_supported_coverage",
+      "metric": "supported_coverage",
+      "comparator": ">=",
+      "threshold": 0.9,
+      "note": ">=0.90 over predeclared supported cases; abstentions, unsupported checks and timeouts remain in the denominator."
+    },
+    {
+      "id": "t_clean_alerts",
+      "metric": "clean_false_alerts_per_page",
+      "comparator": "<=",
+      "threshold": 0.05,
+      "note": "Mean <=0.05 surfaced non-informational false alerts per clean page."
+    },
+    {
+      "id": "t_alignment_p95",
+      "metric": "alignment_p95_px",
+      "comparator": "<=",
+      "threshold": 2.0,
+      "note": "p95 <=2 CSS px on independent fiducials at reference zoom/DPR."
+    },
+    {
+      "id": "t_alignment_max",
+      "metric": "alignment_max_px",
+      "comparator": "<=",
+      "threshold": 4.0,
+      "note": "max <=4 CSS px on independent fiducials."
+    },
+    {
+      "id": "t_occurrences",
+      "metric": "occurrence_preservation_fraction",
+      "comparator": "==",
+      "threshold": 1.0,
+      "note": "100% repeated-occurrence preservation on supported hard duplicate fixtures."
+    },
+    {
+      "id": "t_check_accounting",
+      "metric": "check_terminal_fraction",
+      "comparator": "==",
+      "threshold": 1.0,
+      "note": "100% planned checks reach a terminal result; missing or nonterminal is never agreement."
+    },
+    {
+      "id": "t_repeatability",
+      "metric": "repeatability_fraction",
+      "comparator": "==",
+      "threshold": 1.0,
+      "note": "Identical semantic digests on repeated same-environment supported fixtures, or an explicit nondeterminism block."
+    }
+  ],
+  "retirement_policy": "A case used to tune a candidate leaves the untouched claim denominator and a new evaluation version is issued; archive negative results and denominators.",
+  "public_boundary": "Public demonstration cases and their generated siblings never enter the untouched claim denominator.",
+  "diagnosis": {
+    "form": "evaluation/protocol/diagnosis.py blinded_review_form + adjudicate",
+    "comparison": "Randomized/counterbalanced task comparison against a PDF viewer plus raw text dump",
+    "targets": ">=4/5 early testers understanding the result without calling it fraud/safety proof; >=30% median diagnosis-time improvement on repeated relevant tasks without correctness loss"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "corpus": {
+    "documents": 3,
+    "groups": 3,
+    "pages": 3,
+    "split": "permissioned"
+  },
+  "kind": "evaluation_report",
+  "labels_sha256": "0aa091a682e26d0e3a05fcb8dc023be0ddf0d584e3bf70d15e63a1372c0a884c",
+  "limitations": [
+    "Verdicts hold only for the bound corpus population and frozen candidate; tuning on these cases retires them from untouched claims."
+  ],
+  "metrics": {
+    "clean_false_alerts": {
+      "alerts": 0,
+      "clean_pages": 1,
+      "max_per_page": 0,
+      "pages_read": 1,
+      "pages_with_alerts": 0,
+      "per_page": 0.0
+    },
+    "full_coverage": {
+      "covered": 2,
+      "rate": 0.6666666666666666,
+      "total": 3,
+      "uncovered_pages": [
+        "5b5107bb7eeba9e11ef48d12b55dbcf70861bcc38f8fd7acae77e3de6ec46421:0"
+      ],
+      "wilson": [
+        0.2076549551264879,
+        0.9385096847238394
+      ]
+    },
+    "occurrence_preservation": {
+      "fraction": null,
+      "lost": [],
+      "pages": 0,
+      "preserved": 0
+    },
+    "samples": {
+      "groups": 3,
+      "readings": 3,
+      "unique_pages": 3
+    },
+    "supported_coverage": {
+      "covered": 2,
+      "grouped_bootstrap": [
+        1.0,
+        1.0,
+        {
+          "groups": 2,
+          "resamples": 2000,
+          "seed": 6732
+        }
+      ],
+      "never_attempted": [],
+      "rate": 1.0,
+      "total": 2,
+      "uncovered_pages": [],
+      "uncovered_statuses": {},
+      "wilson": [
+        0.34237195288961925,
+        1.0
+      ]
+    }
+  },
+  "plan_id": "eval-perm",
+  "plan_sha256": "8bada5bccceb61cd0fc94cc2e592e82359ae9469591cb9d7a098cbd487ab8a61",
+  "protocol_version": "1.0.0",
+  "run": {
+    "candidate_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "config_sha256": "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
+    "corpus_manifest_sha256": "3511f7dcfda78d119d2850478f30552974965de2e4a1190b83cd06fdfcb0219e",
+    "created_at": null,
+    "lock_sha256": "acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0",
+    "run_sha256": "79320114178dc801edbb3822ceb6b9732d46459d64b1de7a13fb0d9f80cdf237"
+  },
+  "samples": {
+    "groups": 3,
+    "readings": 3,
+    "unique_pages": 3
+  },
+  "schema_version": "1.0.0",
+  "summary": {
+    "all_met": true,
+    "met": 1,
+    "unmet": 0
+  },
+  "targets": [
+    {
+      "comparator": ">=",
+      "id": "t_cov",
+      "metric": "supported_coverage",
+      "observed": 1.0,
+      "reason": "measured",
+      "threshold": 0.5,
+      "verdict": "MET"
+    }
+  ]
+}
