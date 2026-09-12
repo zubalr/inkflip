@@ -1,0 +1,14 @@
+{
+  "obsolete_absence_paths": {
+    "mapping-missing.pdf": false,
+    "duplicates.pdf": false
+  },
+  "actual_new_fixture_paths": {
+    "mapping-missing-absent.pdf": true,
+    "mapping-missing-malformed.pdf": true,
+    "mapping-missing-control.pdf": true,
+    "duplicates-four.pdf": true,
+    "duplicates-control.pdf": true
+  },
+  "finding": "The existing PDF.js test checks absent generic filenames even though real F10/F11 family variants now exist. Its synthetic occurrenceId assertions never read those PDF bytes."
+}

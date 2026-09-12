@@ -16,7 +16,7 @@
  * - no glyph-paint provenance claim anywhere (manifests + occurrences)
  * - render cancellation releases the task and its canvas
  * - unavailable structure checks terminate `unsupported`, never faked
- * - F10/F11 are honestly absent from the T05 tree; substitutes verified
+ * - committed F10 mapping variants preserve raw API strings; F11 keeps four positions
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -831,33 +831,50 @@ test('open verifies digest; closing one generation spares the next', async ({ pa
 });
 
 // ---------------------------------------------------------------------------
-// F10/F11 honest absence + substitute coverage
+// F10/F11 committed fixture bytes and independent raw-reader comparison
 // ---------------------------------------------------------------------------
 
-test('F10/F11 absent from T05 tree; ordinal identity preserves duplicates', async ({ page }) => {
-  const absent = ['mapping-missing.pdf', 'duplicates.pdf'].map((name) => ({
-    name,
-    publicPath: existsSync(join(FIXTURE_PUBLIC, name)),
-    devPath: existsSync(join(FIXTURE_DEV, name)),
-  }));
-  for (const f of absent) {
-    expect(
-      f.publicPath || f.devPath,
-      `${f.name} unexpectedly present — update this test to use it`,
-    ).toBe(false);
-  }
-  console.log('F10/F11: not generated in T05 tree; substitutes = F01/F02 raw preservation + ordinal identity check below');
+test('F10/F11 real bytes preserve mapping outputs and four duplicate positions', async ({ page }) => {
+  const outputs = await page.evaluate(async (adapterArgs) => {
+    const { api } = (globalThis as any).__t09;
+    const pdfjs = (globalThis as any).__pdfjs;
+    const adapter = api.createPdfJsReader({ pdfjs, ...adapterArgs });
+    const outputs = [];
+    for (const name of [
+      'mapping-missing-control.pdf', 'mapping-missing-absent.pdf',
+      'mapping-missing-malformed.pdf', 'duplicates-control.pdf', 'duplicates-four.pdf',
+    ]) {
+      const bytes = new Uint8Array(await (await fetch(`/fixtures/${name}`)).arrayBuffer());
+      const sha = api.hexSha256(bytes);
+      const handle = await adapter.open({ bytes, sha256: sha, generation: 1 });
+      const [check] = adapter.plan(handle, { pages: [0], capabilities: ['native_text'] });
+      const chunks: any[][] = [];
+      const outcome = await adapter.extract(handle, check, (chunk: any[]) => chunks.push(chunk));
+      const task = pdfjs.getDocument({ data: bytes.slice(), enableXfa: false });
+      const direct = await task.promise;
+      const directPage = await direct.getPage(1);
+      const content = await directPage.getTextContent({ includeMarkedContent: true, disableNormalization: true });
+      const raw = content.items.filter((item: any) => typeof item.str === 'string').map((item: any) => item.str);
+      await task.destroy();
+      await adapter.close(handle);
+      outputs.push({ name, sha, bytesAfter: api.hexSha256(bytes), status: outcome.result.status, occurrences: chunks.flat(), raw });
+    }
+    return outputs;
+  }, ADAPTER_ARGS);
 
-  const ids = await page.evaluate(async () => {
-    const { contracts } = (globalThis as any).__t09;
-    return {
-      a: contracts.occurrenceId('rk', 'pdfjs-6_3_289-text', 0, 0, 'loc0'),
-      b: contracts.occurrenceId('rk', 'pdfjs-6_3_289-text', 0, 1, 'loc1'),
-      c: contracts.occurrenceId('rk', 'pdfjs-6_3_289-text', 0, 0, 'loc0'),
-    };
-  });
-  // Equal strings at different ordinals must remain distinct occurrences —
-  // the mechanism F11 will exercise once its fixture lands.
-  expect(ids.a).not.toBe(ids.b);
-  expect(ids.a).toBe(ids.c);
+  for (const output of outputs) {
+    expect(output.status, output.name).toBe('completed');
+    expect(output.bytesAfter, output.name).toBe(output.sha);
+    expect(output.occurrences.map((item: any) => item.raw_text), output.name).toEqual(output.raw);
+    expect(output.occurrences.map((item: any) => item.ordinal), output.name).toEqual(output.raw.map((_: string, i: number) => i));
+  }
+  const control = outputs.find((item) => item.name === 'duplicates-control.pdf')!;
+  const duplicate = outputs.find((item) => item.name === 'duplicates-four.pdf')!;
+  expect(control.occurrences.filter((item: any) => item.raw_text === '$100')).toHaveLength(1);
+  const amounts = duplicate.occurrences.filter((item: any) => item.raw_text === '$100');
+  expect(amounts).toHaveLength(4);
+  expect(new Set(amounts.map((item: any) => item.id)).size).toBe(4);
+  expect(new Set(amounts.map((item: any) => item.ordinal)).size).toBe(4);
+  expect(new Set(amounts.map((item: any) => JSON.stringify(item.geometry.polygon))).size).toBe(4);
+  expect(amounts.every((item: any) => item.geometry.precision === 'estimated')).toBe(true);
 });
