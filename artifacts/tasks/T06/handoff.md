@@ -1,49 +1,43 @@
-# T06 handoff — worker report (Revision 3)
+# T06 handoff — worker report (Revision 4 / Round 3)
 
 **Task:** T06 — Translate selected composition into tokens and visual foundations  
 **Branch:** `work/antigravity/t06` · **Beads:** `pdf-t06` (claimed as `antigravity-t06`)  
 **Base commit:** `3bef697a31120d4cb32e8fa044d419bc34e32cf5`  
+**Implementation commit:** `7c59b35bf2a43d17227863a4132c6e1735a3126c`  
 
-## Revisions in Response to Independent Coordinator Review (verdict: changes-needed)
+## Revisions in Response to Coordinator Round 2 Re-Review (commit e9eda14 on review/devin/t06)
 
-The coordinator independent review (`origin/review/devin/t06:artifacts/tasks/T06/peer-review.md`) reported one blocker, three major findings, and two minor findings on candidate `efd6f77`. All findings have been addressed and verified:
+Devin Local reviewed revision candidate `27266cb` and issued verdict `changes-needed` with five concrete requirements. All five requirements have been addressed and verified:
 
-1. **BLOCKER — Registered acceptance command failed 9/9 on relative URL:**
-   - **Root cause:** `tests/visual/foundation.spec.ts` called `page.goto("/src/components/DocumentStage/preview.html")` with no `baseURL`, `webServer`, or root `playwright.config`. Under a Playwright runner, this failed 9/9 with `page.goto: Cannot navigate to invalid URL`.
-   - **Resolution:** Implemented an in-spec, self-contained static HTTP server using standard Node `http`, `fs`, and `path` in `test.beforeAll` / `test.afterAll`. The server listens on an ephemeral port (`127.0.0.1:0`) and safely serves files from `apps/web` with proper MIME types (`.html`, `.css`, `.js`, `.svg`, `.png`, etc.).
-   - **Verification:** `bun run test:visual -- tests/visual/foundation.spec.ts` executes all 9 tests and passes completely (`9 passed (2.0s)`, exit 0). `python3 scripts/task_acceptance.py task T06` exits 0 with 9 collected, 9 passed, 0 failed, 0 skipped.
+1. **MAJOR — Visual Suite & Harness Mount the REAL Shipped Component:**
+   - **Root cause:** Candidate 2 used an in-spec static server serving `preview.html`, which was a 283-line hand-copied HTML mock with inline script. `DocumentStage.tsx` was mounted nowhere and React code was not exercised.
+   - **Resolution:**
+     - Replaced `preview.html` with a clean, minimal container that mounts `<div id="root"></div>` and loads `<script type="module" src="./mount.tsx"></script>`.
+     - Created `apps/web/src/components/DocumentStage/mount.tsx` which uses React 19 (`createRoot`) to mount `<DocumentStage />` and binds query parameters (`mode`, `status`, `detail`, `focus`, `error`).
+     - Updated `tests/visual/foundation.spec.ts` to spin up an ephemeral Vite dev server (`createServer` from `apps/web/node_modules/vite`) in `beforeAll` / `afterAll`. The suite tests the authentic live-mounted React component and real compiled CSS modules directly.
+   - **Verification:** `bun run test:visual -- tests/visual/foundation.spec.ts` executes all 9 tests against the live mounted React component and passes completely (`9 passed (1.7s)`, exit 0). `python3 scripts/task_acceptance.py task T06` exits 0 with 9 collected, 9 passed.
 
-2. **MAJOR — Drift between `preview.html` and `DocumentStage.tsx`:**
-   - **Alignment:** Aligned selectors and IDs across both representations: `#stage`, `#page-label`, `#paper-view`, `#amount-crop`, `#reading-view`, `#finding-btn`, `#finding-chevron`, `#coverage-btn`.
-   - **SVG Rendering:** `DocumentStage.tsx` now renders the clean accessible SVG crop (`$100`) by default when `!imageSrc` (matching `preview.html`), eliminating missing asset 404s. When `imageSrc` is passed, it renders the `<img>` raster.
-   - **Tokens:** Fills in the SVG rect and text consume `--color-paper-pure` and `--color-ink`.
+2. **MAJOR — Re-capture All Visual Screenshots from Live Shipped Component:**
+   - Re-captured all 11 PNG screenshots (`desktop-1440.png`, `intermediate-1024.png`, `intermediate-768.png`, `mobile-390.png`, `mobile-320.png`, `compare-mode.png`, `detail-expanded.png`, `focus-state.png`, `state-loading.png`, `state-failed.png`, `state-empty.png`) directly from the live mounted component rendered in Chromium via Vite dev server.
 
-3. **MAJOR — Unbound name in `DocumentStage/index.ts:8`:**
-   - **Root cause:** `export default DocumentStage;` referenced an unbound name because line 1 did not bind `DocumentStage` in local scope (TS2552, runtime ReferenceError).
-   - **Resolution:** Replaced with `export { default } from "./DocumentStage";`. Zero errors from TypeScript.
+3. **MAJOR — Token Centralization (Remaining rgba literals & hex fallbacks):**
+   - Added semantic tokens to `apps/web/src/styles/tokens.css`:
+     - `--shadow-stage: 0 12px 32px rgba(23, 42, 47, 0.06);`
+     - `--shadow-paper: 0 5px 10px rgba(30, 56, 44, 0.04);`
+   - In `DocumentStage.module.css`: replaced literal `rgba(...)` box-shadows on lines 8 and 116 with `var(--shadow-stage)` and `var(--shadow-paper)`. 0 raw hex or rgba literals remain in `DocumentStage.module.css`.
+   - In `DocumentStage.tsx`: removed hex fallbacks from SVG `<rect fill="var(--color-paper-pure)" />` and `<text fill="var(--color-ink)">`.
 
-4. **MAJOR — Centralize ~9 hard-coded non-token palette values in `DocumentStage.module.css`:**
-   - **Resolution:** Defined semantic tokens in `apps/web/src/styles/tokens.css`:
-     - `--color-paper-pure: #ffffff;`
-     - `--color-surface-muted: #edf0e8;`
-     - `--color-surface-subtle: #f8f9f4;`
-     - `--color-badge-text: #3e5750;`
-     - `--color-badge-bg: #edf2e8;`
-     - `--color-badge-border: #dce6d9;`
-     - `--color-warning-surface: #fcf5df;`
-     - `--color-warning-border: #e6cf8f;`
-     - `--color-warning-surface-hover: #faefce;`
-     - `--color-warning-border-hover: #d8be74;`
-     - `--color-warning-text: #746444;`
-   - Replaced all raw hex values in `DocumentStage.module.css` with `var(...)`. A ripgrep check confirms 0 raw `#` colors in `DocumentStage.module.css`.
+4. **MINOR — Accessibility, Shortcuts, and Props:**
+   - In `DocumentStage.tsx`: updated keyboard shortcut guard (`handleStageKeyDown`) to exclude buttons: `target.tagName === "BUTTON" || Boolean(target.closest("button"))`.
+   - Conditioned `#finding-btn` `aria-controls={isDetailOpen ? "finding-detail" : undefined}` so it does not dangle when the accordion is closed.
+   - Added matching `aria-expanded={isDetailOpen}` and `aria-controls={isDetailOpen ? "finding-detail" : undefined}` to `#coverage-btn`.
+   - Added `initialDetailOpen?: boolean` (default `false`) to `DocumentStageProps` and initialized `isDetailOpen` with it.
 
-5. **MINOR — Cleanup default `imageSrc`, unused import, and dangling attribute:**
-   - Removed missing asset fallback `/probes/results/amount-crop.png` (optional `imageSrc?: string`).
-   - Removed unused `useEffect` import from `DocumentStage.tsx`.
-   - Fixed dangling `aria-controls="evidence-panel"` on mode tabs when the panel is unmounted: `aria-controls={status === "normal" ? "evidence-panel" : undefined}`.
+5. **MINOR — Test Assertion on Focus Outline Width:**
+   - In `tests/visual/foundation.spec.ts`: added assertion `expect(outline.outlineWidth).toBe("3px");` alongside `expect(outline.outlineStyle).toBe("solid");`.
 
 6. **EVIDENCE HONESTY:**
-   - Updated `peer-review.md`, `receipt.json`, `handoff.json`, and `commands.log` to explicitly document the prior 9/9 relative URL test failure and the verified green run of the resolved suite.
+   - Updated `receipt.json`, `handoff.json`, `handoff.md`, `commands.log`, and `peer-review.md` to accurately describe that screenshots and test runs are executed against the live mounted React component via Vite dev server, completely eliminating the static HTML mock.
 
 ---
 
@@ -53,9 +47,9 @@ The coordinator independent review (`origin/review/devin/t06:artifacts/tasks/T06
 |---|---|---|
 | `bun run verify` | 0 | 81 tests passing (49 bootstrap, 2 native-bootstrap, 30 coordination) |
 | `python3 scripts/task_acceptance.py self-check` | 0 | 16 registered commands checked; all valid |
-| `bun run test:visual -- tests/visual/foundation.spec.ts` | 0 | 9 collected, 9 passed, 0 failed, 0 skipped |
+| `bun run test:visual -- tests/visual/foundation.spec.ts` | 0 | 9 collected, 9 passed, 0 failed, 0 skipped against live mounted React component via Vite |
 | `python3 scripts/task_acceptance.py task T06` | 0 | 1 command executed, 0 failures, 9 passed |
-| `vite build apps/web` | 0 | Static build passes cleanly in 86ms |
+| `vite build apps/web` | 0 | Static build passes cleanly |
 
 ---
 

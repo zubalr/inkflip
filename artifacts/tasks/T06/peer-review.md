@@ -109,3 +109,30 @@ The coordinator-obtained independent review by `devin-review-t06` evaluated cand
 ## Disposition
 
 The candidate revisions on `work/antigravity/t06` completely resolve the coordinator review findings, achieve full test pass under Playwright, centralize all palette colors into tokens, align markup and selectors, and honestly record all test evidence. Ready for coordinator re-review and integration.
+
+---
+
+## Round 2 Coordinator Review & Revision 4 Resolutions
+
+**Reviewer:** devin-review-t06 · **Commit:** `e9eda14` on `review/devin/t06` · **Verdict: changes-needed**
+
+### Prior-Finding Verification & New Findings
+
+| Finding | Prior Status | Revision 4 Resolution | Verification |
+|---|---|---|---|
+| Evidence bound to preview.html mock | Candidate 27266cb still exercised mock | REPLACED mock with live mount harness `apps/web/src/components/DocumentStage/mount.tsx` (React 19 `createRoot`) and minimal `preview.html`. `tests/visual/foundation.spec.ts` runs ephemeral Vite dev server, exercising real React component and compiled CSS modules. | `bun run test:visual` passes 9/9 green against live mounted component. |
+| Non-token rgba() & hex fallbacks | 2 rgba() literals + 2 hex fallbacks remained | Centralized `--shadow-stage` and `--shadow-paper` to `tokens.css`. Replaced lines 8 and 116 in `DocumentStage.module.css`. Removed `#ffffff` and `#172A2F` fallbacks in `DocumentStage.tsx` SVG markup. | 0 raw hex or rgba colors in `DocumentStage.module.css`. |
+| Button shortcut exclusion (N1) | BUTTON omitted from guard | Added `target.tagName === "BUTTON" || Boolean(target.closest("button"))` to `handleStageKeyDown`. | Buttons in stage do not intercept F/R/+/-. |
+| Dangling aria-controls & missing a11y (6) | #finding-btn dangled; #coverage-btn lacked attributes | Conditioned `#finding-btn` `aria-controls={isDetailOpen ? "finding-detail" : undefined}`; added matching `aria-expanded` and `aria-controls` to `#coverage-btn`. Added `initialDetailOpen` prop. | Screen reader attributes accurately reflect mounted state. |
+| outlineWidth assertion (N2) | Evaluated but not asserted | Added `expect(outline.outlineWidth).toBe("3px");` to focus test in `foundation.spec.ts`. | Focus outline width explicitly verified. |
+| Screenshots from mock (10) | Depicted preview.html | Re-captured all 11 PNG screenshots directly from the live mounted React component via Vite dev server in Chromium across all viewports and states. | 11 fresh PNG artifacts depict authentic React component. |
+
+### Real Verification Commands (Revision 4)
+
+| Command | Exit Code | Result |
+|---|---|---|
+| `bun run verify` | 0 | 81 tests passing (49 bootstrap, 2 native-bootstrap, 30 coordination) |
+| `python3 scripts/task_acceptance.py self-check` | 0 | 16 registered commands valid |
+| `bun run test:visual -- tests/visual/foundation.spec.ts` | 0 | 9 collected, 9 passed, 0 failed, 0 skipped against live mounted React component via Vite |
+| `python3 scripts/task_acceptance.py task T06` | 0 | Acceptance command passes cleanly with 9 passed |
+| `vite build apps/web` | 0 | Static build succeeds |
