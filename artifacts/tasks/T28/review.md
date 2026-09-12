@@ -1,5 +1,54 @@
 # T28 independent review — bounded native structural observations
 
+## ROUND 2 — revision `faa365a` (impl `3863dde`), merged into this checkout as `8823e09`
+
+- **Reviewer:** Devin Local SWE-2 (independent reviewer subagent), macOS arm64 checkout `review-devin-t28`
+- **Candidate reviewed:** `faa365ac3fb7214dbae4c481b9b179991265941e` on `work/zcode/t28` (descendant of `6e0d17a`), fetched from origin and merged cleanly; revision delta touches only the two allowed code paths plus task-local artifacts.
+- **Verdict: CHANGES-REQUIRED** — P1 is still blocking (record path fails on a different rule), P2 code fix is real and verified but its supporting prose is factually wrong and one same-class gap is undisclosed.
+
+### Round-2 reproduced counts (macOS arm64, merged head `8823e09`)
+
+| Command | Worker claim (Linux) | Reproduced here |
+|---|---|---|
+| `uv run --project native python -m pytest native/tests/structure -q` | 18 + 14 subtests | **18 passed, 14 subtests** ✓ |
+| `uv run --project native python -m pytest native/tests -q` | 129 + 160 subtests | **128 passed, 1 failed**, 160 subtests — same pre-existing T27 OCR macOS `/var`→`/private/var` failure (`test_ocr.py:847`), not introduced by this diff |
+| `python3 scripts/task_acceptance.py task T28 --report` | exit 0, 18/18 | exit 0, collected 18 / passed 18, `evaluated_commit=8823e09` ✓ |
+| `python3 scripts/acceptance_receipts.py verify-run T28` | — | verified; `run.json` correctly **rebound to `3863dde`** (the revision impl) — the staleness concern does not apply; `3863dde..faa365a` is artifacts-only so freshness holds ✓ |
+| `acceptance_receipts.criterion_evidence(task, receipt.json)` | resolves | **STILL FAILS**: `ValueError: T28: evidence must stay in its task namespace` |
+
+### P1 — partially fixed, still blocking
+`acceptance_criteria_evidence` now exists with **byte-exact keys** — verified set-equal to the contract criteria including curly quotes `“all checked”` and the trailing period. **But** every criterion cites `native/inkflip/checks/structure.py` and `native/tests/structure/test_structure.py`, which violate `evidence_path()`'s `artifacts/tasks/T28/` namespace rule (`scripts/acceptance_receipts.py:42–48`). `criterion_evidence` raises before `record` can build `acceptance.json`. The handoff claims "task-local evidence paths" — false. T05/T26/T27 cite only task-local files (commands.log, criteria-evidence.md, run.json, reviews). **Fix:** replace source-file citations with task-local evidence (e.g. a `criteria-evidence.md` narrative plus `commands.log`/`run.json`).
+
+### P2 — code fix verified real; two evidence/prose defects remain
+(a) **Verified**: `FPDFPageObj_HasTransparency` exists on this build and is called per text object (`structure.py:436`); new test `test_transparent_text_is_flagged_per_occurrence_opaque_is_not` proves a `q/Q`-scoped alpha object is flagged while the opaque object on the same page is not. My own probes on the merged build:
+
+| Context | Per-occurrence flag? |
+|---|---|
+| `/ca 0.5` | YES (alpha + transparency limitations) |
+| `/BM /Multiply`, `/BM /Screen` | **YES** — flagged |
+| `/BM /Normal`, `/SMask /None` | no (correct — not transparency) |
+| `/SMask /Luminosity` | YES |
+| `/OC /OCG BDC` membership | no — explicitly disclosed in the new receipt limitation; acceptable per review condition |
+| `/CA 0.5` (stroking alpha) | **NO — undisclosed gap** |
+
+(b) **Prose is factually wrong**: receipt limitation + module docstring + handoff all claim "/BM … not detectable per object on the installed binding (setter-only API)". Empirically false — `HasTransparency` DOES flag non-Normal blend modes; those objects emit the transparency limitation, not "ordinary records". The claim under-reports actual coverage (safe direction) but misstates the mechanism and must be corrected for an accurate record.
+
+(c) **`/CA` stroking alpha is a residual silent case**: a `1 Tr` object under `/CA 0.5` emits a generic-limitation-only record (`HasTransparency` does not fire for CA on this build; the code checks `fill[3] < 255` but never `stroke[3] < 255`). The stroke alpha IS still reported in basis (`stroke=0,0,0,128`), so the value isn't hidden — but no "unsupported compositing" limitation fires and no receipt limitation covers it. Same-class gap as /OC. **Fix options:** symmetric `stroke[3] < 255` check (data already fetched) or an explicit documented limitation line like the /OC one.
+
+### New P3 accuracy nits introduced by the revision
+- `receipt.json` `worker.implementation_commit` still `1050c33` (pre-revision); should be `3863dde`. Its `commands` table still claims 17/128 and "run.json binds evaluated_commit 1050c33" — stale vs the actual 18/129 run and `3863dde` binding. Handoff top-level `executed_commands` similarly stale (its `review_revision_round_1a00561.executed_commands_linux` correctly shows 18).
+- Carried over from round 1 (worker's choice, acknowledged): `checks/__init__.py` kept — fine, coordinator already has it on record; form-only `completed/0` under non-mode capabilities — worker's rationale accepted.
+
+### Resolution requested (round 3)
+1. P1: repoint `acceptance_criteria_evidence[].evidence` to `artifacts/tasks/T28/`-namespaced files only; then `criterion_evidence` must run clean.
+2. P2(b): correct the /BM claim in `receipt.json` limitations, `structure.py` docstring and handoff — BM IS flagged via `HasTransparency`; the true undetectable-per-object gap is /OC membership.
+3. P2(c): close or document the `/CA` stroking-alpha gap (recommend the symmetric `stroke[3] < 255` limitation since stroke RGBA is already recorded).
+4. P3: refresh `worker.implementation_commit` and the `commands` counts/detail in `receipt.json` to the revision run (18/129, `3863dde`).
+
+---
+
+## ROUND 1 — candidate `6e0d17a` (below preserved verbatim)
+
 - **Reviewer:** Devin Local SWE-2 (independent reviewer subagent), macOS arm64 checkout `review-devin-t28`
 - **Candidate:** `6e0d17a` (impl `1050c33` + evidence commit), branch `review/devin/t28`, base `546accd`
 - **Writer:** ZCode on Homebase (`zcode-t28`, `work/zcode/t28`, Linux amd64). I did not write or previously run this code.
