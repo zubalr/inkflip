@@ -10,7 +10,25 @@
   "implementation_commit": "2ea6233",
   "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 = original wave-0 implementation (macOS); 12bc8acca01aa2faa3948d3c60df43eefcbf5c57 = wave-1 review fixes; 5ba110b = wave-2 review fixes (collected and fully green-verified by Erdos as 1e7c8db); 2ea6233 = current source revision after the wave-3 full-review fixes. All prior rounds are dated history only.",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t27 at push time (= current source revision 2ea6233 + main merges ca2dbb1/45821e6/442f3cd + evidence commits). The prior candidate 1e7c8db (source 5ba110b) passed Erdos's full Linux verification (52 OCR + 13 subtests, 105 native, 115 verify, registered acceptance, F08 anchors); the wave-3 findings address residual regression fidelity. New code needs new review and fresh final OCR.",
+  "review_scope": "FINAL MERGED CANDIDATE da1efb6125e4a4f45c75a09ce889bbe06b8736e9 = approved source 2ea6233 + wave-4 review branch f7d7e8f (independent review/current metadata) + merged published main 008ed36. Full heavy verification executed on this exact candidate: 58 OCR incl. 12 real-engine tests, full native suite, registered acceptance, verify. Prior rounds are dated history.",
+  "final_merged_checks": {
+    "recorded_at": "2026-09-12",
+    "grant": "Astra final merged checks grant (heavy slot returned to ZCode after T10 SWE release): fast-forward review branch f7d7e8f, merge published main, run frozen installs, FULL 58-test OCR incl. 12 real-engine tests, full native suite, test:native, registered task T27 with run.json on the committed merged candidate, and 115 verify; update handoff/receipt to actual candidate/counts; copy review.md only from the actual wave-4 verdict",
+    "candidate": "da1efb6125e4a4f45c75a09ce889bbe06b8736e9",
+    "integration": "work/zcode/t27 fast-forwarded e0e7d4c -> f7d7e8f (ancestor check passed, same approved source 2ea6233 + independent review artifacts); merged published main 008ed36 (descendant of the grant's 1f0d900) as da1efb6; clean merge, ancestry preserved",
+    "executed_commands_linux": [
+      {"command": "bun install --frozen-lockfile && uv sync --project native --frozen", "exit": 0},
+      {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 58, "subtests_passed": 20, "failed": 0}, "note": "FULL suite including all 12 real-engine tests; 58 count separate from subtests"},
+      {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 111, "subtests_passed": 146, "failed": 0}},
+      {"command": "bun run test:native", "exit": 0, "counts": {"passed": 111}},
+      {"command": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 58, "passed": 58, "failed": 0, "skipped": 0}, "note": "run.json binds evaluated_commit da1efb6 on a clean tree"},
+      {"command": "bun run verify", "exit": 0, "note": "bootstrap + native-bootstrap + coordination, zero failures/skips"},
+      {"command": "process hygiene", "exit": 0, "note": "0 stray tesseract children, 0 leftover inkflip-ocr-* dirs"}
+    ],
+    "review_record": "artifacts/tasks/T27/review.md is a verbatim provenance copy of the actual wave-4 independent review verdict (Erdos approval of e0e7d4c/source 2ea6233, review branch f7d7e8f); approval is never invented and the approved source is byte-identical in this merged candidate",
+    "resource_release": "EXPLICIT RELEASE (2026-09-12): worker has NO heavy OCR/corpus/performance run in flight or queued after these final merged checks; all requested commands have exited; the reservation is coordinator-owned Beads state and was not written by the worker. Parent will collect, accept, and refresh predecessor receipts.",
+    "handoff_state": "ready for acceptance with full heavy verification bound to candidate da1efb6; worker yields; Astra owns acceptance"
+  },
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -422,7 +440,7 @@
   ],
   "limitations": [
     "Printed English OCR only; no non-Latin script recognition is claimed (F14 preservation stays with native text readers).",
-    "CURRENT STATE (source revision 2ea6233, Linux amd64, 2026-09-12): 58 tests collected; 46 stub/tiny-render tests + 20 subtests executed and green (12 real-engine tests deselected); bun run verify exit 0 (no OCR). The real-engine OCR tests, full native suite, and registered acceptance harness are PENDING the heavy OCR slot, which Astra assigned to T10 SWE source after Erdos's release; new code needs new review and fresh final OCR bound to this revision.",
+    "CURRENT STATE (final merged candidate da1efb6 = approved source 2ea6233 + main 008ed36, Linux amd64, 2026-09-12): 58-test OCR suite FULLY executed incl. all 12 real-engine tests (58 passed + 20 subtests); full native suite 111 passed + 146 subtests; bun run test:native exit 0; registered acceptance 58/58 bound to da1efb6; bun run verify exit 0. The independent wave-4 review APPROVED the source (artifacts/tasks/T27/review.md, verbatim provenance copy).",
     "PRIOR CANDIDATE 1e7c8db (source 5ba110b) PASSED Erdos's full Linux verification: 52 OCR + 13 subtests, 105 native, 115 verify, registered acceptance 52/52, independent F08 anchors at all four rotations - the wave-3 findings are residual regression-fidelity fixes on top of that verified base.",
     "The F10 geometry decision is implemented: precise OCR geometry requires the recorded canonical_to_raster affine (Scale(s)*R); scale-only metadata is a legacy diagnostic yielding unknown geometry. Child-only timeout kill and in-memory TSV capture remain T29 supervision scope.",
     "The former T26 PDFium geometry baseline failures were RESOLVED by the approved font-oracle fix (merged main); the original failed-run log is preserved as dated history (native-tests-linux-baseline.log, commit a6f6b1d)."

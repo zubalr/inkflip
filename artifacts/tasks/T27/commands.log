@@ -254,3 +254,33 @@ $ uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine s
 $ bun run verify
   -> exit 0 (bootstrap + native-bootstrap + coordination 64/64; no OCR)
 ================================================================================
+
+================================================================================
+FINAL MERGED CHECKS (Astra grant: heavy slot returned, 2026-09-12)
+Integration: work/zcode/t27 fast-forwarded e0e7d4c -> f7d7e8f (wave-4 review
+branch, ancestor check passed: same approved source 2ea6233 + independent
+review artifacts); merged published main 008ed36 as da1efb6 (clean, ancestry
+preserved). Source 2ea6233 byte-identical through the integration.
+================================================================================
+$ bun install --frozen-lockfile && uv sync --project native --frozen
+  -> exit 0 (frozen locks)
+$ uv run --project native python -m pytest native/tests/ocr -q
+  -> 58 passed + 20 subtests (exit 0) - FULL suite incl. all 12 real-engine tests
+$ uv run --project native python -m pytest native/tests -q
+  -> 111 passed + 146 subtests (exit 0)
+$ bun run test:native
+  -> 111 passed (exit 0)
+$ python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json
+  -> exit 0; collected 58 / passed 58 / failed 0 / skipped 0;
+  evaluated_commit da1efb6 (clean tree)
+$ bun run verify
+  -> exit 0 (bootstrap + native-bootstrap + coordination 64/64; zero failures/skips)
+$ process hygiene
+  -> 0 stray tesseract children; 0 leftover inkflip-ocr-* dirs
+$ review.md
+  -> verbatim provenance copy of the actual wave-4 independent review verdict
+  (Erdos approval of e0e7d4c/source 2ea6233, review branch f7d7e8f)
+RESOURCE RELEASE: no heavy OCR/corpus/performance run in flight or queued;
+all requested commands exited; reservation untouched by the worker. Parent
+will collect, accept, and refresh predecessor receipts.
+================================================================================

@@ -251,6 +251,23 @@
         {"segment": "bun run verify", "exit": 0, "detail": "115 coordination/bootstrap tests, zero failures, no OCR involved."}
       ],
       "honest_gaps": "Final OCR verification (full 52-test suite incl. the 12 real-engine tests, full native suite, acceptance harness) bound to the ULTIMATE candidate remains PENDING until Astra returns the heavy OCR slot after T10 yields. T27 remains unaccepted."
+    },
+    "final_merged_checks_round": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra final merged checks grant (heavy slot returned after T10 SWE release): fast-forward review/codex/t27-wave4 f7d7e8f, merge published main 008ed36 or newer, run the full heavy verification on the committed merged candidate, update artifacts to actual candidate/counts, copy review.md only from the actual wave-4 verdict",
+      "final_candidate": "da1efb6125e4a4f45c75a09ce889bbe06b8736e9",
+      "integration": "work/zcode/t27 fast-forwarded e0e7d4c -> f7d7e8f (ancestor check passed: same approved source 2ea6233 + independent review artifacts), then merged published main 008ed36 (descendant of 1f0d900); clean merge, ancestry preserved; source 2ea6233 byte-identical",
+      "executed_commands_linux": [
+        {"segment": "bun install --frozen-lockfile && uv sync --project native --frozen", "exit": 0},
+        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 58, "subtests_passed": 20, "failed": 0}, "detail": "FULL suite including all 12 real-engine tests"},
+        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 111, "subtests_passed": 146, "failed": 0}},
+        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 111}},
+        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 58, "passed": 58, "failed": 0, "skipped": 0}, "detail": "run.json binds evaluated_commit da1efb6 on a clean tree"},
+        {"segment": "bun run verify", "exit": 0, "detail": "zero failures/skips across bootstrap, native-bootstrap and coordination suites"},
+        {"segment": "process hygiene", "exit": 0, "detail": "0 stray tesseract children, 0 leftover inkflip-ocr-* dirs"}
+      ],
+      "review_record": "artifacts/tasks/T27/review.md is a verbatim provenance copy of the actual wave-4 independent review verdict (Erdos approval of e0e7d4c/source 2ea6233); no approval invented",
+      "resource_release": "EXPLICIT RELEASE (2026-09-12): no heavy OCR/corpus/performance run in flight or queued after the final merged checks; all requested commands exited; reservation is coordinator-owned Beads state, untouched by the worker. Parent will collect, accept, and refresh predecessor receipts."
     }
   },
   "ready_for_review": true
