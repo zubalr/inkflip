@@ -10,63 +10,43 @@
     "implementation_commit": "1050c33255dc065af4ca9b9759be9208b16e35f2"
   },
   "contract_version": "1.0.0",
-  "fixture_ids": ["F03", "F04", "F05", "F06", "F07"],
-  "test_ids": ["TEST-28"],
-  "criteria": [
-    {
-      "criterion": "Invisible-over-border and white-on-dark controls cannot produce universal hidden/visible verdict",
-      "status": "executed",
-      "evidence": [
-        "native/inkflip/checks/structure.py",
-        "native/tests/structure/test_structure.py",
-        "artifacts/tasks/T28/commands.log"
-      ],
-      "detail": "The module emits no verdict field of any kind; render mode, fill color and overlap are recorded as document properties whose limitations state 'not a hidden or visible verdict'. Tests prove the F03 invisible layer (13 objects, `3 Tr`) and the raster-only control both complete without any alert concept; synthesized F04-style white-on-dark vs white-on-light controls produce byte-identical mode/color records (locator and basis equal) and JSON output free of any hidden/visible/verdict string in all three capabilities."
-    },
-    {
-      "criterion": "no false 'all checked'",
-      "status": "executed",
-      "evidence": [
-        "native/inkflip/checks/structure.py",
-        "native/tests/structure/test_structure.py"
-      ],
-      "detail": "Every planned check reaches a typed terminal (completed/unsupported/failed/cancelled); unsupported capability, region-scoped plans and out-of-range pages are 'unsupported'; the finite object budget returns 'resource_limit' while retaining all prior evidence; unsupported compositing (alpha fills, nested Form XObjects) and the narrow top-level scope are recorded as per-occurrence limitations and manifest limits, so a completed result never implies comprehensive inspection."
-    },
-    {
-      "criterion": "off-crop observation uses raw/native geometry while page display remains crop",
-      "status": "executed",
-      "evidence": [
-        "native/inkflip/checks/structure.py",
-        "native/tests/structure/test_structure.py"
-      ],
-      "detail": "Crop-box mapping never clips: text objects outside the crop-box effective view are emitted with their unclipped canonical polygons (coordinates outside the page extent preserved) plus the raw user-space box in the basis, with the limitation 'page display remains the crop'. The tests assert out-of-window corners survive for synthesized off-crop objects and the module keeps negative coordinates for a shrunk-crop variant."
-    },
-    {
-      "criterion": "unsupported compositing explicitly recorded",
-      "status": "executed",
-      "evidence": [
-        "native/inkflip/checks/structure.py",
-        "native/tests/structure/test_structure.py",
-        "artifacts/tasks/T28/commands.log"
-      ],
-      "detail": "Alpha compositing: a text object drawn under an ExtGState with ca/CA 0.5 records 'alpha compositing not inspected; fill alpha below 255'. Nested compositing: a Form XObject's contents are not traversed; a bounded form observation records 'compositing unsupported' and the nested text is NOT emitted (no false text link). The manifest records that blends, transparency groups, OCG and historical revisions are not inspected."
-    }
+  "fixture_ids": [
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07"
+  ],
+  "test_ids": [
+    "TEST-28"
   ],
   "commands": [
     {
       "segment": "uv run --project native python -m pytest native/tests/structure -q",
       "exit": 0,
-      "counts": {"collected": 17, "passed": 17, "failed": 0, "skipped": 0, "subtests_passed": 14}
+      "counts": {
+        "collected": 17,
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0,
+        "subtests_passed": 14
+      }
     },
     {
       "segment": "uv run --project native python -m pytest native/tests -q",
       "exit": 0,
-      "counts": {"passed": 128, "subtests_passed": 160, "failed": 0}
+      "counts": {
+        "passed": 128,
+        "subtests_passed": 160,
+        "failed": 0
+      }
     },
     {
       "segment": "bun run test:native",
       "exit": 0,
-      "counts": {"passed": 128}
+      "counts": {
+        "passed": 128
+      }
     },
     {
       "segment": "bun run verify",
@@ -76,7 +56,12 @@
     {
       "segment": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json",
       "exit": 0,
-      "counts": {"collected": 17, "passed": 17, "failed": 0, "skipped": 0},
+      "counts": {
+        "collected": 17,
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      },
       "detail": "run.json binds evaluated_commit 1050c33 on a clean tree"
     }
   ],
@@ -101,12 +86,49 @@
     "F04 (white-contrast), F05 (paint-order) and F06 (partial-clip) fixture families are catalog 'specified' on this base and are not yet generated in fixtures/; their criteria are covered here with committed fixtures where available (F03, F02 overlap control, F07 families) plus hand-assembled in-memory minimal PDFs in the tests. Committed families remain a fixture-lane dependency request.",
     "Top-level objects only: nested Form XObject contents are not traversed (bounded record emitted instead); blends, transparency groups, OCG and historical revisions are not inspected.",
     "Object bounds are PDFium-reported axis-aligned bounds in user space, mapped to canonical page space with the documented C transform (UserUnit once); they are API geometry, not exact visible ink.",
-    "Compositing inside alpha fills is recorded as unsupported; no occlusion or overprint semantics are computed."
+    "Compositing inside alpha fills is recorded as unsupported; no occlusion or overprint semantics are computed.",
+    "Blend modes (/BM, e.g. Multiply) are not detectable per object on the installed binding (setter-only API) and optional-content (/OC BDC) membership has no per-object getter: objects drawn under such contexts may emit ordinary records with no compositing limitation. A completed structural check therefore never certifies that all compositing contexts were inspected (no false 'all checked')."
   ],
   "dependency_requests": [
     "Fixture owner lane: generate committed F04/F05/F06 families per the catalog recipes; the check consumes pages generically, so no adapter change is expected."
   ],
   "attribution": "No external material reused; the check implements the project's own contracts against the installed PDFium binding. Contract-cited source ideas (S27 object API) are credited in planning/research/SOURCES.md.",
   "handoff": "artifacts/tasks/T28/handoff.json",
-  "ready_for_review": true
+  "ready_for_review": true,
+  "acceptance_criteria_evidence": {
+    "Invisible-over-border and white-on-dark controls cannot produce universal hidden/visible verdict": {
+      "status": "executed",
+      "evidence": [
+        "native/inkflip/checks/structure.py",
+        "native/tests/structure/test_structure.py",
+        "artifacts/tasks/T28/commands.log"
+      ],
+      "detail": "The module emits no verdict field of any kind; render mode, fill color and overlap are recorded as document properties whose limitations state 'not a hidden or visible verdict'. Tests prove the F03 invisible layer (13 objects, `3 Tr`) and the raster-only control both complete without any alert concept; synthesized F04-style white-on-dark vs white-on-light controls produce byte-identical mode/color records (locator and basis equal) and JSON output free of any hidden/visible/verdict string in all three capabilities."
+    },
+    "no false “all checked”": {
+      "status": "executed",
+      "evidence": [
+        "native/inkflip/checks/structure.py",
+        "native/tests/structure/test_structure.py"
+      ],
+      "detail": "Every planned check reaches a typed terminal (completed/unsupported/failed/cancelled); unsupported capability, region-scoped plans and out-of-range pages are 'unsupported'; the finite object budget returns 'resource_limit' while retaining all prior evidence; unsupported compositing (alpha fills, nested Form XObjects) and the narrow top-level scope are recorded as per-occurrence limitations and manifest limits, so a completed result never implies comprehensive inspection."
+    },
+    "off-crop observation uses raw/native geometry while page display remains crop": {
+      "status": "executed",
+      "evidence": [
+        "native/inkflip/checks/structure.py",
+        "native/tests/structure/test_structure.py"
+      ],
+      "detail": "Crop-box mapping never clips: text objects outside the crop-box effective view are emitted with their unclipped canonical polygons (coordinates outside the page extent preserved) plus the raw user-space box in the basis, with the limitation 'page display remains the crop'. The tests assert out-of-window corners survive for synthesized off-crop objects and the module keeps negative coordinates for a shrunk-crop variant."
+    },
+    "unsupported compositing explicitly recorded.": {
+      "status": "executed",
+      "evidence": [
+        "native/inkflip/checks/structure.py",
+        "native/tests/structure/test_structure.py",
+        "artifacts/tasks/T28/commands.log"
+      ],
+      "detail": "Alpha compositing: a text object drawn under an ExtGState with ca/CA 0.5 records 'alpha compositing not inspected; fill alpha below 255'. Nested compositing: a Form XObject's contents are not traversed; a bounded form observation records 'compositing unsupported' and the nested text is NOT emitted (no false text link). The manifest records that blends, transparency groups, OCG and historical revisions are not inspected. Per-occurrence recording (review 1a00561 P2): objects participating in transparency (alpha or soft mask) are flagged per occurrence via FPDFPageObj_HasTransparency; blend modes (/BM) are not detectable per object on this binding (setter-only) and optional-content (/OC BDC) membership has no per-object getter, so the receipt-level limitation below explicitly states those contexts may emit ordinary records."
+    }
+  }
 }

@@ -28,3 +28,27 @@ NOTES
   fixture-lane dependency request.
 - No OCR/render/model use; single-threaded PDFium calls; no Beads writes.
 ================================================================================
+
+================================================================================
+REVIEW REVISION ROUND 1a00561 (Devin review, changes-required; 2026-09-12)
+Revision commit: 3863dde
+P1: receipt.json acceptance_criteria_evidence rebuilt, keys generated from
+  `coordination.py task T28` (character-exact, incl. curly quotes and the
+  compositing criterion's trailing period); verified key-set equality.
+P2: per-occurrence transparency compositing flag via FPDFPageObj_HasTransparency
+  (+ regression test: q/Q-scoped transparent vs opaque on one page);
+  explicit receipt limitation for /BM (setter-only binding) and /OC BDC
+  (no per-object getter).
+P3 (optional): left as reviewed - __init__.py kept; form-only completed/0 kept.
+================================================================================
+$ uv run --project native python -m pytest native/tests/structure -q
+  -> 18 passed, 14 subtests passed (exit 0)
+$ uv run --project native python -m pytest native/tests -q
+  -> 129 passed, 160 subtests passed (exit 0)
+$ bun run test:native
+  -> 129 passed (exit 0)
+$ bun run verify
+  -> exit 0
+$ python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json
+  -> exit 0; collected 18 / passed 18 / failed 0 / skipped 0
+================================================================================
