@@ -1,0 +1,52 @@
+{
+  "task": "T26",
+  "beads_id": "pdf-t26",
+  "title": "Implement native PDFium and pypdf reader adapters",
+  "worker": "zcode-t26 (ZCode app, single active ZCode worker)",
+  "app": "zcode",
+  "pass": 1,
+  "branch": "work/zcode/t26",
+  "base": "ef5ffff076ea6833fe86db44e087768803646896",
+  "implementation_commit": "d9c18b098540bdbb6713e798656fec8cc23322d3",
+  "ready_for_review": true,
+  "review_scope": "implementation_commit d9c18b098540bdbb6713e798656fec8cc23322d3 plus evidence commits on this branch",
+  "executed_commands": [
+    {"command": "uv run --project native python -m pytest native/tests/readers -q", "exit": 0, "counts": {"collected": 22, "passed": 22, "failed": 0, "skipped": 0}},
+    {"command": "bun run test:native", "exit": 0, "counts": {"collected": 52, "passed": 52, "failed": 0, "skipped": 0}},
+    {"command": "python3 scripts/task_acceptance.py task T26", "exit": 0},
+    {"command": "bun run verify", "exit": 0}
+  ],
+  "evidence_paths": [
+    "artifacts/tasks/T26/receipt.json",
+    "artifacts/tasks/T26/commands.log",
+    "native/inkflip/readers/pdfium.py",
+    "native/inkflip/readers/pypdf.py",
+    "native/tests/readers/test_readers.py"
+  ],
+  "deliverables": {
+    "native/inkflip/readers/pdfium.py": "native_text adapter over frozen pypdfium2 5.8.0 / PDFium 149.0.7825.0; glyph-box occurrences, ToUnicode expansion preserved, UserUnit-compensated canonical geometry, typed failures, bounded chunks",
+    "native/inkflip/readers/pypdf.py": "independent page-only text adapter over frozen pypdf 6.18.0; page_only geometry, typed failures, metadata path for other adapters",
+    "native/tests/readers/test_readers.py": "TEST-26 suite: 22 tests / 10 subtests, schema-validates every emitted occurrence and manifest against the T03 contract"
+  },
+  "measured_decisions": [
+    {"decision": "Glyph-box occurrence granularity with exact-box coalescing", "reason": "PDFium expands one ToUnicode glyph ('1' -> '1,0') into several scalars reporting one identical charbox; coalescing preserves the expansion without invented widths, while duplicates at distinct positions stay distinct (I02)."},
+    {"decision": "Physical geometry from pypdf metadata, UserUnit applied once", "reason": "Measured: PdfDocument.get_size() rotates crop dims but ignores UserUnit (userunit-10 still reports 520x400), matching planning/architecture/COORDINATES.md; contract mandates metadata-based compensation."},
+    {"decision": "Identity normalization_map only", "reason": "Raw fidelity (I03); conservative normalization semantics are T12's contract; the declared 'scalar-whitespace-v1' setting is recorded but no transformation is applied here."},
+    {"decision": "Render capability declared unavailable in the PDFium manifest", "reason": "Render-scale compensation is not proven under this task; claiming it would overstate the manifest. T27/T28 own rendered-region work."}
+  ],
+  "review_attention": [
+    "F10/F11 are covered by in-test synthesized mechanisms (missing-ToUnicode passthrough; four-position duplicates) because those fixture families remain 'specified' in the catalog; committed fixture generation is requested from the fixture owner lane.",
+    "extract() performs per-character get_text_range/get_charbox API calls (bounded by MAX_CHARS_PER_PAGE=200000); fine for contract fixtures, and T29 supervision owns wall-time budgets.",
+    "PDFium UTF-16 code-unit indexing: supplementary-plane scalars are not asserted here (F14 territory)."
+  ],
+  "limitations": [
+    "No Linux execution claimed: this run is macOS arm64 under the frozen uv lock; cross-environment parity is T46 scope.",
+    "No render/OCR/structure capability is claimed by these manifests; only native_text (+ crop_metadata declaration for pypdf)."
+  ],
+  "dependency_requests": [
+    "Fixture owner (T05/T21 lane): generate committed F10/F11 fixture families using the established generator API.",
+    "T29: wrap these in-process adapters with the parent/child supervision, two-message backpressure acknowledgment and atomic partial-result contract."
+  ],
+  "attribution": "No external material reused; adapters implement the project's own adapter contract against the frozen dependencies chosen by T02.",
+  "state_note": "Worker does not write Beads; coordinator is the sole state owner. Requested transition on review approval: in_review -> accepted after merged-branch acceptance per docs/ACCEPTANCE.md."
+}
