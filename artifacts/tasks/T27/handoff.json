@@ -2,14 +2,14 @@
   "task": "T27",
   "beads_id": "pdf-t27",
   "title": "Implement native rendered-region Tesseract reader",
-  "worker": "zcode-t27 (ZCode app, single active ZCode worker)",
+  "worker": "zcode-t27 (ZCode Goal on Homebase, sole T27 evidence writer per Astra grant resume 2026-09-12)",
   "app": "zcode",
   "pass": 1,
   "branch": "work/zcode/t27",
   "base": "726d61c0c",
   "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
   "ready_for_review": true,
-  "review_scope": "implementation_commit 394e65c07be89e2a867b0b316fe46940f927dbf9 plus evidence commits on this branch",
+  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merge ca2dbb1b3ad314b69b15b3a33c0835ebecfa3ed7 of published main 65e84da + evidence commits); final review must bind to this new exact candidate",
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -31,16 +31,42 @@
       "Recorded follow-ups for other owners: committed F14/F15 fixture families (fixture lane); T29 wraps T26/T27 adapters with process-group supervision and atomic partial results"
     ]
   },
+  "linux_checkpoint": {
+    "recorded_at": "2026-09-12",
+    "grant": "Astra grant resume 2026-09-12 (Beads pdf-t27 note): sole T27 evidence writer; merge published main; run missing registered checks; capture T26 baseline separately; fix only T27-scoped findings; push hb/inkflip/t27; yield for independent review",
+    "merge": "Published main 65e84da merged into saved candidate c884b59 as ca2dbb1b3ad314b69b15b3a33c0835ebecfa3ed7; clean merge (disjoint file sets), ancestry preserved, no conflict resolution beyond trivial, no source change to T27 code",
+    "executed_commands_linux": [
+      {"command": "bun install --frozen-lockfile && uv sync --project native --frozen", "exit": 0, "note": "frozen locks; pypdfium2 5.8.0 pinned exactly as in native/uv.lock (no dependency drift introduced)"},
+      {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20, "failed": 0}},
+      {"command": "TESSDATA_PREFIX=/usr/share/tessdata uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20, "failed": 0}},
+      {"command": "uv run --project native python -m pytest native/tests -q", "exit": 1, "counts": {"failed": 5, "passed": 72, "subtests_passed": 122}, "note": "exactly the 5 known T26 PDFium geometry failures (Linux amd64 platform drift); verbatim log: artifacts/tasks/T27/native-tests-linux-baseline.log; T26-owned tests untouched"},
+      {"command": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}},
+      {"command": "bun run test:native", "exit": 1, "note": "exit 1 solely from the same 5 T26 baseline failures; no T27 OCR failure"},
+      {"command": "bun run verify", "exit": 1, "note": "environment finding: 6 failures + 11 errors ALL in tests/coordination/test_homebase_relay.py from the intentional relay canonical-clone guard when run inside a linked task worktree (coordination.canonical_root() gets the absolute main-repo git-common-dir). Relay suite passes 19/19 (+10 subtests) from the canonical Homebase checkout, which stayed clean. Reproducer recorded in receipt.json linux_verification. scripts/ and tests/coordination/ are reserved paths - untouched, escalated to coordinator"},
+      {"command": "psm6 spot-check via adapter on real F01 render (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "note": "PSM 3, 6 and 11 all return the identical 16-word sequence including '$100' on Linux tesseract 5.5.3: the Mac-based rationale for DEFAULT_PSM=3 does not reproduce on Linux"}
+    ],
+    "findings_for_coordinator": [
+      "T26 geometry baseline on Linux amd64 reproduced exactly as the stopped devin-cloud review recorded (e.g. 1346.400146 != 1365.6); out of T27 scope (T46 parity), no test weakened.",
+      "bun run verify is environment-sensitive after the merge: linked task worktrees fail 17 relay-guard tests while canonical checkouts pass. Affects every worker verifying from a worktree; coordination owner decision (reserved paths).",
+      "PSM-6 spot-check contradicts the measured PSM decision on Linux: PSM 6 finds '$100' here. DEFAULT_PSM=3 kept unchanged (reviewed candidate behavior); the deviation's justification is now platform-dependent - Astra decides at acceptance.",
+      "Partial review's low-sev tessdata observation does not reproduce in the current environment: suite passes 20/20 with and without TESSDATA_PREFIX; local model-hash test passes in both runs."
+    ],
+    "t27_scoped_fixes_applied": "None required: no confirmed T27-scoped code finding from the partial review (verdict was 'incomplete - run stopped', scope audit clean) or from the Linux verification. T27 source is byte-identical to reviewed 394e65c.",
+    "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance"
+  },
   "executed_commands": [
-    {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20}},
-    {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126}},
-    {"command": "bun run test:native", "exit": 0},
-    {"command": "python3 scripts/task_acceptance.py task T27", "exit": 0},
-    {"command": "bun run verify", "exit": 0}
+    {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20}, "host": "macOS arm64 (implementation-time run)"},
+    {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126}, "host": "macOS arm64 (implementation-time run)"},
+    {"command": "bun run test:native", "exit": 0, "host": "macOS arm64 (implementation-time run)"},
+    {"command": "python3 scripts/task_acceptance.py task T27", "exit": 0, "host": "macOS arm64 (implementation-time run)"},
+    {"command": "bun run verify", "exit": 0, "host": "macOS arm64 (implementation-time run)"}
   ],
   "evidence_paths": [
     "artifacts/tasks/T27/receipt.json",
     "artifacts/tasks/T27/commands.log",
+    "artifacts/tasks/T27/run.json",
+    "artifacts/tasks/T27/native-tests-linux-baseline.log",
+    "artifacts/tasks/T27/psm6-spotcheck.log",
     "native/inkflip/readers/tesseract.py",
     "native/tests/ocr/test_ocr.py"
   ],
@@ -49,7 +75,7 @@
     "native/tests/ocr/test_ocr.py": "TEST-27 suite: 20 tests over real tesseract 5.5.3 runs on T05 fixture renders (F01 amount line, F03 scan pixel-only independence, F08 UserUnit render compensation, failure-mode matrix, option-injection defense, schema conformance)"
   },
   "measured_decisions": [
-    {"decision": "Native full-page default PSM 3 instead of the browser PSM 6 prescription", "reason": "Measured: PSM 6 drops the isolated '$100' amount line on the F01 render; PSM 3/11 find it. PSM is recorded per invocation (raw_source_locator tag); single-line user regions use PSM 7 as the contract requires."},
+    {"decision": "Native full-page default PSM 3 instead of the browser PSM 6 prescription", "reason": "Measured (macOS): PSM 6 drops the isolated '$100' amount line on the F01 render; PSM 3/11 find it. PSM is recorded per invocation (raw_source_locator tag); single-line user regions use PSM 7 as the contract requires.", "linux_observation_2026_09_12": "Spot-check on Linux tesseract 5.5.3 (artifacts/tasks/T27/psm6-spotcheck.log): PSM 3, 6 and 11 all read the identical 16 words including '$100'. The Mac rationale does not reproduce on Linux; default kept at PSM 3, contract decision escalated to the coordinator."},
     {"decision": "Canonical geometry only with recorded raster scale; otherwise 'unknown' with null polygon", "reason": "COORDINATES.md requires explicit transform chains; guessing geometry from pixels without the recorded named-render metadata would violate I04."}
   ],
   "review_attention": [
@@ -58,7 +84,7 @@
   ],
   "limitations": [
     "Printed English OCR only; no non-Latin script recognition is claimed (F14 preservation stays with native text readers).",
-    "No Linux execution claimed; native reference environment parity is T46 scope."
+    "Implementation-time registered runs were macOS arm64; Linux amd64 executed 2026-09-12 on the merged candidate (see linux_checkpoint): OCR suites pass 20/20, T26 PDFium geometry tests fail there as recorded platform drift (T46 parity scope), bun run verify trips the relay's linked-worktree guard (environment finding)."
   ],
   "dependency_requests": [
     "Fixture owner lane: committed F14/F15 families when assigned.",

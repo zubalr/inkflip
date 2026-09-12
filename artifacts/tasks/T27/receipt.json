@@ -100,7 +100,8 @@
     {
       "decision": "Native full-page default PSM 3 (tesseract automatic), not the browser contract's PSM 6",
       "reason": "Measured on the F01 render: PSM 6 (uniform block) drops the isolated '$100' amount line, while PSM 3 and 11 find it. The Tesseract.js PSM 6 prescription addresses the browser worker path; the native adapter records its PSM per invocation and uses PSM 7 for deliberate single-line user regions, as the contract requires.",
-      "tradeoff": "PSM choice is recorded on occurrences (raw_source_locator psm tag) so readings remain comparable across configurations."
+      "tradeoff": "PSM choice is recorded on occurrences (raw_source_locator psm tag) so readings remain comparable across configurations.",
+      "linux_observation_2026_09_12": "Spot-check on Linux amd64 tesseract 5.5.3 (artifacts/tasks/T27/psm6-spotcheck.log) shows PSM 6, 3 and 11 all read the identical 16-word sequence including '$100' on the same F01 render: the Mac measurement above does not reproduce on Linux. Default left at PSM 3; contract decision escalated to the coordinator."
     },
     {
       "decision": "Geometry maps TSV word boxes to canonical points only when the caller records the named-render scale",
@@ -108,5 +109,68 @@
     }
   ],
   "handoff": "artifacts/tasks/T27/handoff.json",
+  "linux_verification": {
+    "recorded_at": "2026-09-12",
+    "worker": "zcode-t27 (ZCode Goal, Homebase), Astra grant resume",
+    "checkout": "/home/wertyp/.local/share/homebase-factory/worktrees/inkflip/pdf-t27",
+    "merged_main": "65e84da",
+    "merge_commit": "ca2dbb1b3ad314b69b15b3a33c0835ebecfa3ed7",
+    "implementation_commit_unchanged": "394e65c07be89e2a867b0b316fe46940f927dbf9",
+    "environment": {
+      "host": "Linux amd64 (Homebase worker)",
+      "python": "CPython 3.13.15 via uv frozen native/.venv",
+      "engines": "tesseract 5.5.3 (leptonica-1.87.0, /usr/sbin), pypdfium2 5.8.0 (frozen lock), system /usr/share/tessdata"
+    },
+    "commands": [
+      {
+        "segment": "uv run --project native python -m pytest native/tests/ocr -q",
+        "exit": 0,
+        "counts": {"passed": 20, "failed": 0}
+      },
+      {
+        "segment": "TESSDATA_PREFIX=/usr/share/tessdata uv run --project native python -m pytest native/tests/ocr -q",
+        "exit": 0,
+        "counts": {"passed": 20, "failed": 0}
+      },
+      {
+        "segment": "uv run --project native python -m pytest native/tests -q",
+        "exit": 1,
+        "counts": {"failed": 5, "passed": 72, "subtests_passed": 122},
+        "detail": "Exactly the 5 known T26 PDFium geometry failures on Linux amd64 (test_rotations_store_identical_canonical_anchors + 4 UserUnit subtests of test_userunit_scales_exactly_once); captured verbatim in artifacts/tasks/T27/native-tests-linux-baseline.log. T26-owned file, out of T27 scope; no test weakened or changed."
+      },
+      {
+        "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
+        "exit": 0,
+        "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0},
+        "detail": "Fresh Linux merged-candidate report written to artifacts/tasks/T27/run.json."
+      },
+      {
+        "segment": "bun run test:native",
+        "exit": 1,
+        "detail": "Runs the full native/tests suite; exit 1 comes solely from the same 5 T26 PDFium geometry baseline failures (72 passed). No T27 OCR failure."
+      },
+      {
+        "segment": "bun run verify",
+        "exit": 1,
+        "detail": "Environment finding, not a T27 finding: 6 failures + 11 errors, ALL in tests/coordination/test_homebase_relay.py, all caused by the relay's intentional canonical-clone guard when the suite runs from a linked task worktree (coordination.canonical_root() resolves git --git-common-dir to the main repo, tripping 'Relay cannot run in a linked worktree'). These relay tests arrived with the merged main and predate no branch work. Counter-evidence: the same relay suite passes 19/19 (+10 subtests) from the canonical Homebase checkout, which stayed clean. Reproducer: run 'git rev-parse --git-common-dir' in a linked worktree (absolute path) vs a plain clone ('.git'). Escalated to the coordinator; scripts/ and tests/coordination/ are reserved paths, not touched."
+      },
+      {
+        "segment": "uv run --project native python /tmp/psm6_spotcheck.py (transcript: artifacts/tasks/T27/psm6-spotcheck.log)",
+        "exit": 0,
+        "detail": "Real F01 fixture render (public/mapping-amount.pdf, scale 3, 1560x1200px) through the adapter at full-page PSM 3, 6 and 11. Linux tesseract 5.5.3 returns identical 16-word sequences including '$100' for ALL three PSMs: the Mac-based measured rationale that PSM 6 drops the isolated '$100' line does NOT reproduce on Linux amd64."
+      }
+    ],
+    "findings": [
+      "T26 PDFium geometry tests fail on Linux amd64 exactly as the stopped devin-cloud review recorded (e.g. 1346.400146 != 1365.6); platform drift, T46 parity scope, baseline preserved without weakening tests.",
+      "bun run verify fails only in linked task worktrees because the relay guard is environment-sensitive; passes in the canonical checkout. Coordination-owner finding, reserved paths untouched.",
+      "PSM-6 spot-check contradicts the Mac measured decision on Linux (PSM 6 finds '$100'); DEFAULT_PSM=3 left unchanged pending Astra's acceptance decision, since the deviation's justification is now platform-dependent.",
+      "The partial review's low-sev observation (missing TESSDATA_PREFIX -> PATH-symlinked binary misses tessdata) does not reproduce in the current environment: /usr/sbin/tesseract resolves ../share/tessdata = /usr/share/tessdata and the suite passes 20/20 both with and without TESSDATA_PREFIX set; the local model hash test passes in both runs."
+    ],
+    "artifacts": [
+      "artifacts/tasks/T27/run.json",
+      "artifacts/tasks/T27/native-tests-linux-baseline.log",
+      "artifacts/tasks/T27/psm6-spotcheck.log"
+    ]
+  },
   "ready_for_review": true
 }

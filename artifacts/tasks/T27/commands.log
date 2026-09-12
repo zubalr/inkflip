@@ -27,3 +27,52 @@ exit: 0
 - UserUnit render compensation: geometry-0 (crop 480x350 user, UserUnit 2) rendered at scale*UserUnit = 6 gives 2880x2100 px = physical 960x700 pt at 3 px/pt; OCR boxes land within canonical page bounds.
 - Distinct failures: missing binary -> unsupported 'executable not found'; missing traineddata -> failed 'missing_model: ...'; undecodable bytes -> unreadable_pixels at open; wall-time overrun -> timeout terminal; blank raster -> completed with zero occurrences.
 - Option injection: 'eng --psm 8' rejected by the language identifier pattern; invoked argv is exactly [tesseract, <mkdtemp>/input.png, stdout, --psm 3, tsv], shell=False, in a private temp dir removed afterwards.
+
+================================================================================
+LINUX AMD64 MERGED-CANDIDATE VERIFICATION (Astra grant resume, 2026-09-12)
+Worker: zcode-t27 (ZCode Goal, Homebase) | checkout: worktrees/inkflip/pdf-t27
+Merge: published main 65e84da -> saved candidate c884b59 as ca2dbb1 (clean,
+ancestry preserved; T27 source byte-identical to reviewed 394e65c)
+Toolchain: bun frozen lockfile install; uv sync --project native --frozen
+(pypdfium2 5.8.0 pinned in native/uv.lock - no dependency drift)
+================================================================================
+$ uv run --project native python -m pytest native/tests/ocr -q
+  -> 20 passed in 4.91s (exit 0)
+$ TESSDATA_PREFIX=/usr/share/tessdata uv run --project native python -m pytest native/tests/ocr -q
+  -> 20 passed in 5.20s (exit 0)
+$ uv run --project native python -m pytest native/tests -q
+  -> 5 failed, 72 passed, 122 subtests passed (exit 1)
+  FAILED native/tests/readers/test_readers.py::TestPdfiumGeometry::test_rotations_store_identical_canonical_anchors
+  SUBFAILED(userunit='0.5'|'1'|'2'|'10') ::TestPdfiumGeometry::test_userunit_scales_exactly_once
+  (example: 1346.400146 != 1365.6 within 0.1) - the 5 known T26 PDFium geometry
+  failures on Linux amd64, exactly as recorded by the stopped devin-cloud
+  review. T26-owned file: untouched, baseline preserved verbatim in
+  artifacts/tasks/T27/native-tests-linux-baseline.log. T46 parity scope.
+$ python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json
+  -> exit 0; collected 20 / passed 20 / failed 0 / skipped 0; report written.
+$ bun run test:native
+  -> exit 1, solely the same 5 T26 geometry baseline failures (72 passed).
+$ bun run verify
+  -> exit 1: 6 failures + 11 errors, ALL in tests/coordination/test_homebase_relay.py;
+  every failure is the intentional relay guard 'Relay cannot run in a linked
+  worktree' (coordination.canonical_root() -> git --git-common-dir is absolute
+  inside a linked worktree, so it never equals the sandboxed relay ROOT the
+  tests patch). These relay tests came with the merged main. Counter-evidence:
+  the same suite passes 19/19 (+10 subtests) from the canonical Homebase
+  checkout, which stayed clean. Reserved paths (scripts/, tests/coordination/)
+  untouched; escalated to the coordinator in handoff/receipt findings.
+$ psm6 spot-check (real F01 fixture render, scale 3, 1560x1200 px; transcript
+  in artifacts/tasks/T27/psm6-spotcheck.log)
+  psm=3:  words=16, '$100' present=True
+  psm=6:  words=16, '$100' present=True   <- Mac measured rationale (psm 6
+  psm=11: words=16, '$100' present=True      drops '$100') does NOT reproduce
+  All three return the IDENTICAL 16-word sequence on Linux tesseract 5.5.3.
+  DEFAULT_PSM=3 left unchanged (reviewed candidate behavior); platform-divergent
+  contract decision escalated to Astra for the acceptance call.
+================================================================================
+ENVIRONMENT NOTE: the stopped review's low-sev observation (without
+TESSDATA_PREFIX, PATH-symlinked binary misses tessdata) does not reproduce in
+the current environment: /usr/sbin/tesseract resolves ../share/tessdata =
+/usr/share/tessdata and the suite passes 20/20 with and without TESSDATA_PREFIX;
+the local model-hash test passes in both runs.
+================================================================================
