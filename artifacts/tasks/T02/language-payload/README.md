@@ -15,3 +15,7 @@ The maintained Bun patch now normalizes language objects to their codes only in 
 - The first frozen-check invocation used a nonexistent flag and failed before executing checks (`frozen-command-attempt.log`). The corrected `--frozen` command passed 25 checks (`frozen.log`). This invocation error is not a product failure.
 
 Bun 1.4.0's patch generator included an internal empty `.bun-tag` hunk. Only that generated cache-marker hunk was removed; the maintained patch still targets exactly `src/createWorker.js` and the previously patched `src/index.d.ts`. The dependency checker enforces this inventory and both installed source hashes. The package manifest and lock remained byte-identical because the existing patch path did not change. A fresh frozen install succeeded after the patch update. Committed-candidate verification follows below; raw earlier logs retain their actual runs.
+
+## Committed-candidate verification
+
+The registered T02 runner passed on exact `14f062e887d49812fbd8e9369547bd99f6cba201`: frozen dependency checks and all 49 build cases, with zero failures, skipped cases, or evidence errors. See `registered-run.json` and `registered-task.log`. These are parent-run checks; independent Helmholtz review (`01a09467-215d-7a30-827e-e60905c3d73d`) is pending. All parent real-engine commands have ended; no further heavy run is queued.
