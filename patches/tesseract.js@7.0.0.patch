@@ -1,5 +1,5 @@
 diff --git a/src/createWorker.js b/src/createWorker.js
-index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f84c183539 100644
+index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f181ea9295813e736d27892c05d3ef7f7dc9a1b3 100644
 --- a/src/createWorker.js
 +++ b/src/createWorker.js
 @@ -21,11 +21,13 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
@@ -53,7 +53,23 @@ index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f8
        log(`[${id}]: Start ${jobId}, action=${action}`);
        // Using both `action` and `jobId` in case user provides non-unique `jobId`.
        const promiseId = `${action}-${jobId}`;
-@@ -186,22 +206,13 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+@@ -126,7 +146,14 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+     startJob(createJob({
+       id: jobId,
+       action: 'initialize',
+-      payload: { langs: _langs, oem: _oem, config: _config },
++      // The worker's object branch uses .data as the Init language name.
++      // Keep model bytes in loadLanguage, and send only codes to initialize.
++      payload: {
++        langs: typeof _langs === 'string' ? _langs
++          : _langs.map((lang) => (typeof lang === 'string' ? lang : lang.code)).join('+'),
++        oem: _oem,
++        config: _config,
++      },
+     }))
+   );
+ 
+@@ -186,22 +213,13 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
    };
  
    const terminate = async () => {
@@ -78,7 +94,7 @@ index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f8
      const promiseId = `${action}-${jobId}`;
      if (status === 'resolve') {
        log(`[${workerId}]: Complete ${jobId}`);
-@@ -210,17 +221,16 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+@@ -210,17 +228,16 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
      } else if (status === 'reject') {
        promises[promiseId].reject(data);
        delete promises[promiseId];
@@ -98,7 +114,7 @@ index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f8
    const resolveObj = {
      id,
      worker,
-@@ -240,7 +250,7 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
+@@ -240,7 +257,7 @@ module.exports = async (langs = 'eng', oem = OEM.LSTM_ONLY, _options = {}, confi
      .then(() => loadLanguageInternal(langs))
      .then(() => initializeInternal(langs, oem, config))
      .then(() => workerResResolve(resolveObj))
