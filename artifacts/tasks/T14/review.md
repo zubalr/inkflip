@@ -1,72 +1,68 @@
-# Task Review & Verification Evidence — T14
+# Independent Peer Review — T14 (changes-required)
 
-**Task:** T14 — Implement findings, coverage and plain explanations  
-**Beads Issue:** `pdf-t14`  
-**Worker:** `antigravity-t14`  
-**Branch:** `work/antigravity/t14`  
-**Base Commit:** `546accd220a09e0fa071850671b532918d67f8b5`  
-**Implementation Commit:** `2cf02941f12b4e208e7de7a5dc55cadaf3854d36`  
-**Date:** 2026-09-12  
-**Contract Version:** 1.0.0  
-**Disposition:** `implemented_pending_review`  
+**Reviewer:** devin-review-t14 (SWE-2 subagent, independent — did not write this code; antigravity wrote it, reviewer never ran it before this review)
+**Candidate reviewed:** `e9b14b9` on `review/devin/t14` (implementation `2cf02941f12b4e208e7de7a5dc55cadaf3854d36`, base `546accd`)
+**Date:** 2026-09-12 · **Verdict: changes-required**
 
----
+## Reproduced results (independent, this checkout)
 
-## Executive Summary
+- `bun install --frozen-lockfile` → 86 packages, clean.
+- `bun run test:browser -- tests/browser/findings.spec.ts` → **6 collected / 6 passed / 0 failed / 0 skipped (3.4s, exit 0)**, matching run.json and commands.log. Tests mount the REAL `FindingsList`/`CoveragePanel`/`FindingCard` components via a Vite server + React root (`mount.tsx`), not mock markup.
+- `bun run build:web` → clean, 18 modules, exit 0.
+- `bun x oxlint` on the three impl paths → 0 warnings / 0 errors.
+- `python3 scripts/acceptance_receipts.py verify-run T14` → `{"verified": "T14", tests 6/6}`.
+- Live module probes (`bun -e`) of `categorizeCheckStatus`, `isMaterialTokenDifference`, `explainCoverage`, `groupFindings` — results cited per finding below.
+- `run.json` `evaluated_commit` = `2cf02941f12b4e208e7de7a5dc55cadaf3854d36` ✓ binds the impl commit.
 
-Task T14 implements the deterministic explanation engine and the UI features for comparative findings and coverage accounting under `packages/explanations/`, `apps/web/src/features/findings/`, and `apps/web/src/features/coverage/`. It delivers the TEST-14 Playwright browser test suite in `tests/browser/findings.spec.ts`.
+## Per-criterion verdicts
 
-All 4 task acceptance criteria plus WCAG 2.2 AA accessibility requirements are fully implemented and verified against live mounted components under Vite.
+1. **6/6 against real mounted features — REPRODUCED.** `preview.html` + `mount.tsx` render the shipped components with fixture data; `?scenario=` selects fixture sets at the harness level only — no behavioral knob inside the components themselves. Not a test-only production knob.
+2. **Normal invisible scan — PASS.** `coverage.normal_scan` renders with `role="note"`, `.scanNotice` (teal info styling); grep confirms no warning/danger/error/alert copy or class reachable for invisibility. Same scenario still surfaces the named reading-difference card (test 4 runs on `scenario=normal-scan`). I11 satisfied.
+3. **timed-out/model-missing/unsupported distinct — PASS with caveat.** `TerminalStatusCategory` enum (7 kinds) maps all six contract `CheckResult.status` values; model-missing is derived from `failed`+reason keywords since the contract has no such status — reasonable. Distinct stat cards (`#stat-timeout`/`#stat-model-missing`/`#stat-unsupported`), badge colors and copy verified in test 2 and by probe. Caveat: P2-1 below — `failed`/`cancelled`/`skipped` fall through to Unsupported styling.
+4. **Zero findings cannot display clean/safe — PASS.** `FindingsList` renders `#findings-noalert` with the scoped `coverage.noalert` disclaimer; grep across `apps/web/src/features/` + `packages/explanations/` finds zero `clean`/`safe`/`all-clear`/`no issues` copy. Checked scope (pages summary, completed/incomplete counts, status rows) renders adjacent via `CoveragePanel`; agreement copy is scoped to "the checked region" and always carries the no-alert disclaimer. Probe: zero findings + 1 completed + 2 timeouts still shows "1 checks completed · 2 incomplete or unsupported" + status rows next to the agreement notice. I06 satisfied.
+5. **Deterministic templates + recorded evidence — PASS with one P1.** `COPY` is verbatim from `planning/product/copy.json`; readings cite real evidence fields (reader name+version, occurrence ordinal+id, `raw_text`, geometry basis via disclosure); disclaimer `finding.limit` always present; ambiguous/unmatched correctly abstain from location/missing-text claims; hypothesis titled "not established by this check". P1-1 below: the material-token re-derivation fabricates a claim beyond recorded `priority`.
 
-The suite executes cleanly:
-- `bun run test:browser -- tests/browser/findings.spec.ts`: 6 collected, 6 passed, 0 failures.
-- `bun run verify`: 116/116 tests passed.
-- `bun run build:web`: static production bundle built cleanly in 159ms.
-- `python3 scripts/task_acceptance.py task T14 --report artifacts/tasks/T14/run.json`: evaluated commit `2cf0294` with 0 failures, 0 evidence errors.
-- `python3 scripts/acceptance_receipts.py verify-run T14`: verified successfully.
+## Also verified
 
----
+- **Grouping preserves counts:** probe with 6 findings → 2 groups × 3 = 6 items; header badge shows total `findings.length`; no dedupe of duplicate occurrences (`readings` maps all `occurrence_ids`, keys include occurrenceId+idx). I18 satisfied.
+- **Kind coverage:** all 5 contract `Finding.kind` values get distinct title copy; material/ambiguous get badges.
+- **Scope discipline:** `2cf0294` touches exactly the four allowed paths (12 files, all additions). `Disclosure`/`Button` imports are pre-existing T07 controls — untouched.
+- **Receipt resolves:** `acceptance_criteria_evidence` keys match all four contract criteria after `rstrip(".")` normalization in `acceptance_receipts.criterion_evidence` (scripts/acceptance_receipts.py:172-182); every entry `status: executed` with nonempty existing evidence paths.
 
-## Scope & Boundary Audit
+## Findings
 
-- **Allowed Scope:**
-  - `packages/explanations/`
-  - `apps/web/src/features/findings/`
-  - `apps/web/src/features/coverage/`
-  - `tests/browser/findings.spec.ts`
-  - `artifacts/tasks/T14/` (evidence namespace)
-- **Modifications:**
-  - 12 new files added in implementation commit `2cf0294`.
-  - Zero modifications to `planning/`, lockfiles, shared contracts schemas, or routing outside task scope.
-  - Zero raw hex or rgba color literals in CSS module files (strict adherence to semantic tokens in `tokens.css`).
-  - Zero lint warnings or errors via `oxlint`.
-  - Full code formatting compliance via `oxfmt`.
+### P1-1 — Material-token substring heuristic manufactures claims not in evidence
 
----
+`packages/explanations/src/index.ts:175-179,216`. `MATERIAL_TOKEN_RE = /[$€£¥₹\d+-]/` tests whether **any reading contains** a digit/currency/sign — not whether the *difference* is in a material token. Probe: readings `"Page 2 layout"` vs `"Page 2 layoutt"` (priority `ordinary`) → `isMaterialTokenDifference` returns `true` → card is titled "This amount reads differently" and badged "Material difference", contradicting the recorded `priority` field. On the honesty-critical surface this is a generated truth claim: a word-level difference is presented to the user as an amount/material difference. Planning doc scopes materiality to *material-token changes*, not digit-bearing strings. Fix: trust `finding.priority === "material_token"` (the recorded classification), or intersect the *differing* tokens with the material charset.
 
-## Acceptance Criteria Evaluation
+### P2-1 — failed/cancelled/skipped collapse into Unsupported badge styling; no stat cards
 
-| Acceptance Criterion | Result | Verification Evidence & Implementation |
-|---|---|---|
-| **Normal invisible scan has no warning solely for invisibility** | **PASS** | Implemented in `packages/explanations/src/index.ts` (`explainCoverage`) and `CoveragePanel.tsx`. Emits informative notice `coverage.normal_scan` ("Searchable scans can contain invisible OCR text. That alone is not a problem.") with `role="note"`. Test 1 in `tests/browser/findings.spec.ts` asserts presence, copy, and verifies no `warning`, `danger`, `error`, or `alert` styling exists (Invariant I11). |
-| **timed-out/model-missing/unsupported are distinct** | **PASS** | Implemented in `categorizeCheckStatus` and `CoveragePanel.tsx`. Terminal statuses are strictly segregated: `timeout` ("Timed out" / `progress.timeout`), `model_missing` ("Model missing" / `model.failure`), and `unsupported` ("Unsupported" / `coverage.unsupported`). Test 2 in `tests/browser/findings.spec.ts` verifies distinct stat cards (`#stat-timeout`, `#stat-model-missing`, `#stat-unsupported`) and non-conflated status row items (Invariant I05). |
-| **zero findings cannot display clean/safe** | **PASS** | Implemented in `FindingsList.tsx`. When findings array is empty, renders `#findings-noalert` with copy `coverage.noalert` ("No localized differences were found in completed comparisons. This is not a document safety or correctness check."). Test 3 in `tests/browser/findings.spec.ts` verifies banner presence and executes automated regex assertion confirming words `clean`, `safe`, or `all-clear` do not appear anywhere in rendered content (Invariant I06). |
-| **explanations come from deterministic templates and actual recorded evidence, not generated truth claims.** | **PASS** | Implemented in `packages/explanations/src/index.ts` (`explainFinding`, `explainCoverage`). Explanations are derived exclusively from frozen string templates (`COPY`) and actual recorded occurrences (reader IDs, versions, ordinals, verbatim texts, coordinates). No LLM generation or probabilistic truth guessing is performed. Test 4 in `tests/browser/findings.spec.ts` verifies comparative reader display, ordinals, and interactive "How this was checked" disclosures. Test 5 verifies review priority ordering: `selected` > `material_token` > `ordinary` > `informational`. |
-| **WCAG 2.2 AA Accessibility** | **PASS** | Verified by axe-core analysis in Test 6 of `tests/browser/findings.spec.ts` across `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, and `wcag22aa` tags, yielding 0 serious or critical accessibility violations. |
+`apps/web/src/features/coverage/CoveragePanel.tsx:105-112` — badge ternary: `timeout→badgeTimeout`, `model_missing→badgeModelMissing`, **everything else→badgeUnsupported**. A `failed` (non-model) or `cancelled`/`skipped` check is visually categorized as "unsupported" — a different terminal category (I05-adjacent conflation). Separately, stats grid (lines 50-70) only renders cards for timeout/model_missing/unsupported, so `failed`/`cancelled`/`skipped` count toward "incomplete" in the summary but are invisible in the card breakdown. Probe confirms `categorizeCheckStatus` emits all three residual categories with correct labels — only the visual layer flattens them.
 
----
+### P2-2 — Recorded check identity and reason dropped; same-category rows collapse identically
 
-## Invariant Conformance
+`CoveragePanel.tsx:95-117` + `index.ts:88-115`. For `timeout`, `unsupported`, `cancelled` the recorded `reason` is discarded in favor of generic copy, and the check `id`/capability/reader is never rendered. Probe: two distinct timeouts (`"timed out page 0"`, `"timed out page 0 alt reader"`) produce two **byte-identical rows** — distinct unaligned work items are indistinguishable next to the no-difference result. Only `failed`/`skipped` surface reason text. Fix: render check id (or check→capability/reader label) plus recorded reason alongside the generic description.
 
-- **Invariant I05 (Terminal check categorization):** Incomplete checks never conflate timeouts, missing models, or unsupported reader capabilities into a generic error bucket.
-- **Invariant I06 (No adjudication / no clean / safe claims):** Differences never declare which reader is correct; zero findings explicitly warn that absence of localized differences is not a document safety or correctness check.
-- **Invariant I11 (Normal invisible text scan is not an alert):** Searchable PDF invisible text scan property is purely informational.
-- **Invariant I18 (Evidence and occurrence preservation):** Occurrence IDs and counts are strictly preserved when grouping and displaying findings.
+### P2-3 — "notes" category from task purpose absent
 
----
+Contract purpose: "Render actual named readings, structural observations, OCR interpretation, hypotheses, **notes** and incomplete checks distinctly." Contract `Annotation` (`origin: "human_entered"`) and copy keys `finding.note`/`finding.note.label`/`finding.note.disclosure` exist; nothing in `findings/` or `coverage/` accepts or renders annotations, and no add-note affordance exists. If note rendering is owned by a later task, the handoff does not disclose the deferral (handoff.json lists no such limitation).
 
-## Next Steps for Integration Lead (Devin Local)
+### P3-1 — skipped reason built inline instead of frozen template
 
-1. Independent peer review on `work/antigravity/t14` at implementation commit `2cf02941f12b4e208e7de7a5dc55cadaf3854d36`.
-2. Devin Local runs `python3 scripts/acceptance_receipts.py record T14 ...` to generate official coordinator acceptance receipt.
-3. Devin Local updates Beads status for `pdf-t14` to accepted/closed and merges `work/antigravity/t14` into canonical `main`.
+`index.ts:122`: `` `Not run: ${reason}` `` hardcoded; copy deck has `coverage.skipped: "Not run: {reason}"`. Identical output today; drifts if copy is revised. `coverage.empty`/`coverage.unchecked` keys also unused.
+
+### P3-2 — Group header leaks raw region id
+
+`FindingsList.tsx:60`: `"Region region-total"` — machine identifier shown to users as a label.
+
+### INFO (no action required)
+
+- `readingAlt` (rust) styling on the second comparative reading could subtly imply "the wrong one"; `finding.limit` disclaimer mitigates.
+- `CoverageExplanation.isFullyComplete` computed but never consumed.
+- `tsc -b` reports pre-existing repo-wide ambient-type gaps (missing `@types/react` incl. pre-existing `main.tsx`; contracts `.ts`-extension imports) — same class as `mount.tsx:454`; not introduced by T14 and outside its gates (oxlint/oxfmt/vite build all pass).
+- Writer's self-assessment previously occupied this `review.md`; superseded by this independent review per T12 convention (original preserved in git history and `handoff.md`).
+
+## Evidence of this review
+
+- Commands rerun in `review-devin-t14` at `e9b14b9`: frozen install → test:browser 6/6 → build:web → oxlint → verify-run → module probes (quoted above).
+- Writer evidence relied on: `run.json`, `commands.log`, `receipt.json`, `handoff.json/md`, five screenshots — all present, nonempty, consistent with reproduced output.
