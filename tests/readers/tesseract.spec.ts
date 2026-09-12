@@ -1840,25 +1840,50 @@ test.describe('light: operation deadline and cancellation lifecycle', () => {
   });
 
   test('close during a real open aborts the raw worker init', async ({ page }) => {
-    // REAL engine: the in-flight createWorker's raw Worker is
-    // hard-terminated; nothing is installed on a closed reader.
+    // REAL engine: close() while the real createWorker init is provably
+    // in flight must reject the open with user_cancel, abort the raw
+    // worker through the patched signal, and install nothing.
     const baseline = page.workers().length;
-    await page.evaluate(async () => {
-      const api = (globalThis as any).__t10;
-      const { readerId } = api.makeReader({ docId: 'unused' });
-      (globalThis as any).__tmpReaderId = readerId;
-      return api.openStart(readerId);
+    const res = await page.evaluate(async () => {
+      const g = globalThis as any;
+      const api = g.__t10;
+      const actual = g.__tesseract;
+      // In-page in-flight flag: flips when the REAL createWorker is
+      // entered and when its promise settles. close() then lands while
+      // init is provably pending — deterministic regardless of how fast
+      // a warm page finishes the real init (a CDP workers-poll gate
+      // leaves a poll->evaluate lag the warm init can fit inside).
+      g.__initPending = false;
+      g.__initSettled = false;
+      g.__tesseract = {
+        ...actual,
+        createWorker: (...a: any[]) => {
+          g.__initPending = true;
+          const p = actual.createWorker(...a);
+          p.then(
+            () => { g.__initSettled = true; },
+            () => { g.__initSettled = true; },
+          );
+          return p;
+        },
+      };
+      try {
+        const { readerId } = api.makeReader({ docId: 'unused' });
+        api.openStart(readerId);
+        while (!g.__initPending) {
+          await new Promise((r) => setTimeout(r, 1));
+        }
+        // The real init is in flight (spawned or spawning); its promise
+        // cannot have settled — createWorker only resolves after core
+        // load + loadLanguage + Init.
+        const initSettledAtClose = g.__initSettled;
+        const out = await api.closeDuringOpen(readerId);
+        return { ...out, initSettledAtClose };
+      } finally {
+        g.__tesseract = actual;
+      }
     });
-    // Wait until the raw engine Worker actually exists — the patched
-    // createWorker registers its abort listener in the same synchronous
-    // block as spawnWorker, so a visible worker is always abort-covered.
-    await expect
-      .poll(() => page.workers().length, { timeout: 15_000 })
-      .toBe(baseline + 1);
-    const res = await page.evaluate(() => {
-      const api = (globalThis as any).__t10;
-      return api.closeDuringOpen((globalThis as any).__tmpReaderId);
-    });
+    expect(res.initSettledAtClose).toBe(false);
     expect(res.openRes.ok).toBe(false);
     // close() fires the operation's terminal signal — the pending open
     // rejects with user_cancel, the lease's concrete signal aborts the
