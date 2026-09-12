@@ -436,7 +436,9 @@ export class TesseractOcrReader {
   private opSeq = 0;
   /** Every live operation scope — close/supersession wakes them. */
   private readonly liveScopes = new Set<OpScope>();
-  /** Engine jobId -> owning operation scope, for callback admission. */
+  /** Engine jobId -> owning operation scope, for callback admission.
+   *  jobIds embed `scope.op` so a superseded op's zombie job can never
+   *  share a key with a live op's job on a reused worker. */
   private readonly jobScopes = new Map<string, OpScope>();
   private workerInitCount = 0;
   private runOcrPixels = 0;
@@ -578,7 +580,11 @@ export class TesseractOcrReader {
       );
       this.guard(scope);
       const handle: OcrHandle = {
-        id: `ocrh_${input.generation}_${Math.floor(this.now())}`,
+        // Handle ids must be unique per open even when two same-generation
+        // opens land in the same clock tick: every `.id` guard below keys on
+        // this string, so mint the monotonic op number alongside the
+        // timestamp. Format stays contract-valid `[A-Za-z0-9._-]+`.
+        id: `ocrh_${input.generation}_${Math.floor(this.now())}_${scope.op}`,
         documentSha256: input.documentSha256,
         generation: input.generation,
         openedAt: this.now(),
@@ -1268,7 +1274,13 @@ export class TesseractOcrReader {
     // 5) Recognize with the recorded PSM under the same deadline.
     const worker = await this.ensureWorker(scope);
     this.guard(scope);
-    const jobId = `j_${check.id}_${attempt}`;
+    // The engine jobId must be unique per OPERATION, not just per check:
+    // a superseded op's in-flight recognize keeps running on a reused
+    // worker, and upstream routes responses by `${action}-${jobId}` — a
+    // colliding id would let the dead job resolve the live op's promise
+    // upstream of jobScopes gating. `scope.op` makes every op's jobs
+    // unique; `attempt` still distinguishes this op's own retry.
+    const jobId = `j_${scope.op}_${check.id}_${attempt}`;
     this.jobScopes.set(jobId, scope);
     let result: { jobId: string; data: EngineRecognizePage };
     try {

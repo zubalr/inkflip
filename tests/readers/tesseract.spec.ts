@@ -495,6 +495,12 @@ const api = {
     const r = state.rasters.get(docId + ':' + pageIndex);
     return r ? r.built.page : null;
   },
+
+  // Wave-4 review seam: expose the produced raster OBJECT so custom
+  // rasterSources can alternate real vs replacement pixels in-page.
+  async peekRaster(docId, pageIndex) {
+    return state.rasters.get(docId + ':' + pageIndex);
+  },
 };
 
 ${PIXEL_ENTRY_SNIPPET}
@@ -2053,6 +2059,113 @@ test.describe('light: independent lifecycle probes (stub engine)', () => {
     expect(out.progress).toEqual([]);
     expect(out.errors).toEqual([]);
   });
+
+  // Wave-4 review F1 (stub arm): engine jobIds must be unique per
+  // OPERATION, so a superseded op's zombie recognize on a reused worker
+  // can never share upstream's `${action}-${jobId}` key with the live
+  // op's job — its late progress maps to a deleted scope and is dropped.
+  test('a superseded job id cannot collide with or admit events to a newer job (stub)', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, delay, wrap } = (globalThis as any).__rv;
+      let saved: any;
+      let recog = 0;
+      let release2: any;
+      const jobIds: any[] = [];
+      const x = make({
+        budget: { checkTimeoutMs: 4000, openTimeoutMs: 4000 },
+        engine: {
+          OEM: { LSTM_ONLY: 1 },
+          PSM: {},
+          createWorker: async (_l: any, _o: any, opts: any) => {
+            saved = opts;
+            return {
+              terminated: false,
+              terminate: async () => {},
+              recognize: (_i: any, _o2: any, _out: any, jobId: any) => {
+                recog++;
+                jobIds.push(jobId);
+                if (recog === 1) return new Promise(() => {}); // zombie
+                return new Promise((r) => {
+                  release2 = () =>
+                    r({
+                      jobId,
+                      data: {
+                        text: '', blocks: [], confidence: null,
+                        psm: '6', oem: 'LSTM_ONLY', version: 'stub',
+                      },
+                    });
+                });
+              },
+            };
+          },
+        },
+      });
+      const h = await x.reader.open({ documentSha256: 'z', generation: 1 });
+      const check = x.reader.plan(h, [{ pageIndex: 0, purpose: 'page' }])[0];
+      const p1 = wrap(x.reader.extract(h, check, () => {}));
+      while (recog === 0) await delay(1);
+      const p2 = wrap(x.reader.extract(h, check, () => {}));
+      while (recog < 2) await delay(1);
+      const r1 = await p1;
+      // Zombie job1 is still running on the shared worker; its late
+      // event arrives stamped with ITS job id — which no live scope owns.
+      saved.logger({ status: 'zombie progress', progress: 0.5, userJobId: jobIds[0] });
+      saved.logger({ status: 'foreign progress', progress: 0.5, userJobId: 'j_unknown_9' });
+      release2();
+      const r2 = await p2;
+      await x.reader.close();
+      return {
+        r1reason: r1.ok ? r1.value.check.reason : r1.reason,
+        r2status: r2.ok ? r2.value.check.status : r2,
+        jobIds, progress: x.events.progress, errors: x.events.errors,
+      };
+    });
+    expect(out.r1reason).toBe('user_cancel');
+    // The fix invariant: op1's and op2's jobs on the same check never
+    // share an upstream routing key.
+    expect(out.jobIds.length).toBe(2);
+    expect(out.jobIds[0]).not.toBe(out.jobIds[1]);
+    // Dead-op job events refused; only op2's live id may admit progress
+    // (none was injected for it here).
+    expect(out.progress).toEqual([]);
+    expect(out.errors).toEqual([]);
+    expect(out.r2status).toBe('completed');
+  });
+
+  // Wave-4 review F2: same-generation opens landing inside one clock
+  // tick must still mint distinct handle ids — every admission guard
+  // compares `.id`, so a collision admits a stale handle.
+  test('same-millisecond opens mint distinct handle ids; stale close/extract refused (stub)', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, wrap } = (globalThis as any).__rv;
+      // Fixed clock => the ms-floored component of the handle id is
+      // identical for both opens — the deterministic form of the
+      // same-ms collision the reviewer reproduced.
+      const x = make({ hooks: { now: () => 1000 } });
+      const h1 = await x.reader.open({ documentSha256: 'd', generation: 1 });
+      const h2 = await x.reader.open({ documentSha256: 'd', generation: 1 });
+      const check = x.reader.plan(h2, [{ pageIndex: 0, purpose: 'page' }])[0];
+      const closeWithStale = await wrap(x.reader.close(h1));
+      const afterStaleClose = await wrap(x.reader.extract(h2, check, () => {}));
+      const foreign = await wrap(x.reader.extract(h1, check, () => {}));
+      await x.reader.close();
+      return {
+        ids: { h1: h1.id, h2: h2.id, equal: h1.id === h2.id },
+        closeWithStaleOk: closeWithStale.ok,
+        afterStaleClose: afterStaleClose.ok ? afterStaleClose.value.check : afterStaleClose,
+        foreign: foreign.ok ? foreign.value.check : foreign,
+      };
+    });
+    expect(out.ids.equal).toBe(false);
+    // A stale close() leaves the live reader working...
+    expect(out.afterStaleClose.status ?? out.afterStaleClose.reason).toBe('completed');
+    // ...and a stale handle extract is refused as foreign.
+    expect(out.foreign.status ?? out.foreign.reason).toBe('unsupported');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -2155,4 +2268,107 @@ test.describe('independent real cache provenance (real engine)', () => {
       },
     );
   }
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('independent real zombie-job probe (real engine)', () => {
+  // Wave-4 review F1 (real arm, faithful port): a superseded extract's
+  // in-flight recognize keeps running on the reused worker. Engine
+  // jobIds must be unique per operation so the dead job's response can
+  // only resolve its own orphaned upstream entry — never the live op's.
+  test('zombie recognize on the reused worker cannot deliver its result to a newer job', async ({
+    page,
+  }) => {
+    const { docId } = await loadScanDoc(page, 2);
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e)));
+    const out = await page.evaluate(async ({ docId, region }) => {
+      const g = globalThis as any;
+      const api = g.__t10;
+      const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const wrap = async (p: Promise<any>) => {
+        try { return { ok: true, value: await p }; }
+        catch (e: any) { return { ok: false, reason: e && e.reason, message: String(e && e.message || e) }; }
+      };
+      // Raster A: the real pdf.js scan render. Raster B: a blank canvas
+      // of the same page/built — a legitimate re-rendered raster (e.g. a
+      // repaint) carrying the same renderer identity.
+      const rasterA = await api.peekRaster(docId, 0);
+      await api.rasterize(docId, 0, 2, 'blank');
+      const rasterB = { ...(await api.peekRaster(docId, 0)),
+        renderReaderId: rasterA.renderReaderId };
+      const events = { progress: [] as any[], errors: [] as any[] };
+      const recogCalls: any[] = [];
+      const actual = g.__tesseract;
+      g.__tesseract = { ...actual, createWorker: async (...a: any[]) => {
+        const w = await actual.createWorker(...a);
+        const orig = w.recognize.bind(w);
+        w.recognize = (img: any, o: any, o2: any, jobId: any) => {
+          recogCalls.push({ jobId, bytes: img.byteLength });
+          return orig(img, o, o2, jobId);
+        };
+        return w;
+      } };
+      try {
+        let call = 0;
+        const reader = new api.adapter.TesseractOcrReader({
+          engine: g.__tesseract, engineVersion: '7.0.0',
+          model: api.MODEL, paths: api.PATHS, assetHashes: [],
+          renderReaderId: rasterA.renderReaderId, profile: 'desktop',
+          runKey: 'zombie-probe',
+          rasterSource: async () => (++call === 1 ? rasterA : rasterB),
+          hooks: {
+            onProgress: (e: any) => events.progress.push({ status: e.status, progress: e.progress }),
+            onError: (d: any) => events.errors.push(String(d)),
+          },
+        });
+        const h = await reader.open({ documentSha256: 'zombie', generation: 1 });
+        // Full-page check: job1 is a multi-second recognize so job2 is
+        // provably posted while job1 is still in flight on the worker.
+        const check = reader.plan(h, [{ pageIndex: 0, purpose: 'page' }])[0];
+        const p1 = wrap(reader.extract(h, check, () => {}));
+        while (recogCalls.length === 0) await delay(1);   // job1 in flight
+        const p2 = wrap(reader.extract(h, check, () => {})); // supersedes op1
+        while (recogCalls.length < 2) await delay(1);       // job2 posted
+        const r1 = await p1;
+        const r2 = await p2;
+        // Aftermath: is the shared worker still usable for a later check?
+        const p3 = wrap(reader.extract(h, check, () => {}));
+        const r3 = await p3;
+        await reader.close();
+        const r3out = r3.ok ? { status: r3.value.check.status, reason: r3.value.check.reason,
+          text: r3.value.raw && r3.value.raw.text, attempt: r3.value.diagnostics && r3.value.diagnostics.attempt } : r3;
+        return {
+          recogCalls,
+          r1: r1.ok ? { ok: true, status: r1.value.check.status, reason: r1.value.check.reason } : r1,
+          r2: r2.ok ? {
+            ok: true,
+            status: r2.value.check.status, reason: r2.value.check.reason,
+            text: r2.value.raw && r2.value.raw.text,
+            rasterId: r2.value.raster && r2.value.raster.rasterId,
+            occurrences: r2.value.occurrences ? r2.value.occurrences.length : null,
+          } : r2,
+          r3: r3out,
+          progress: events.progress, errors: events.errors,
+        };
+      } finally { g.__tesseract = actual; }
+    }, { docId, region: AMOUNT_LINE_REGION });
+    console.log('ZOMBIE_JOB_CROSSTALK', JSON.stringify(out), 'pageerrors:', JSON.stringify(pageErrors));
+    expect(out.r1.ok).toBe(true);
+    expect(out.r1.reason).toBe('user_cancel');          // superseded op
+    // The fix invariant: op1's and op2's jobs never share an upstream
+    // routing key, so the zombie's response can only resolve its own
+    // orphaned entry (recogCalls also records the r3 aftermath job).
+    expect(out.recogCalls.length).toBeGreaterThanOrEqual(2);
+    expect(out.recogCalls[0].jobId).not.toBe(out.recogCalls[1].jobId);
+    // The newer op's result must be RASTER B's own OCR (blank -> empty),
+    // never the dead job's invoice payload.
+    expect(out.r2.ok).toBe(true);
+    expect(out.r2.status).toBe('completed');
+    expect(out.r2.rasterId).toBe('synthetic_blank_0');
+    expect(out.r2.text ?? '').not.toMatch(/AMOUNT|INVOICE|QUARTERLY/);
+    expect(out.r2.occurrences).toBe(0);
+    expect(pageErrors).toEqual([]);
+  });
 });

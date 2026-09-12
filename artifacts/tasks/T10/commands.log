@@ -547,3 +547,72 @@ exit 0 — vite 8.3.0, 18 modules, dist/assets/index-DLl647JV.js
   191.77 kB gzip 60.54 kB, built in 174ms.
 
 # RELEASE: no heavy command in flight or queued after this block.
+
+=== WAVE-5 (post-review round 2 — independent review 03e34cd CHANGES-REQUIRED) ===
+
+Review: artifacts/tasks/T10/review.md on review/devin/t10-wave4 —
+all five wave-3 findings verified RESOLVED; two bounded defects
+reproduced and fixed:
+  F1 (P1) zombie recognize-job cross-talk on a reused worker:
+    reader.ts minted userJobId j_<check>_<attempt>, identical for
+    every op of the same check; a superseded op's in-flight job on
+    the shared worker collided with the newer op's upstream
+    ${action}-${jobId} key — zombie response resolved the LIVE op's
+    promise upstream of jobScopes gating (real-engine repro: op2 on
+    blank raster completed with op1's invoice text + 14 occurrences).
+    Fix: jobId = j_<scope.op>_<check>_<attempt> — per-operation
+    unique; zombie resolves only its own orphaned upstream entry.
+  F2 (P2) OcrHandle.id ocrh_<gen>_<floor(now)> collided for
+    same-generation opens inside 1 ms; every .id guard then admitted
+    the stale handle (fixed-clock repro: close(h1) tore down live
+    reader). Fix: id appends _<scope.op> — clock-independent
+    uniqueness, format still [A-Za-z0-9._-]+.
+
+$ bun run tsc -b
+exit 0.
+
+$ node --test tests/readers/crop-math.mjs
+exit 0 — pass 13, fail 0.
+
+$ node artifacts/tasks/T10/repro-planCrop.mjs
+exit 0 — 6/6 ALL OK.
+
+Committed separately:
+  75ac92d impl (reader.ts only: two mints + comments)
+  af80d15 tests (peekRaster seam + 3 promoted probes)
+
+$ python3 scripts/task_acceptance.py run test:browser \
+    tests/readers/tesseract.spec.ts
+exit 0 — 44 collected / 44 passed / 0 failed / 0 skipped (11.1s).
+  All 41 prior cases still green; the 3 promoted reviewer probes:
+  - 'a superseded job id cannot collide with or admit events to a
+    newer job (stub)' — jobIds [j_5_ocr_0_0_0, j_6_ocr_0_0_0] style,
+    distinct per op; zombie+foreign progress dropped; r2 completed.
+  - 'same-millisecond opens mint distinct handle ids; stale
+    close/extract refused (stub)' — now:()=>1000, ids differ;
+    close(stale) is a no-op, live extract completes, stale extract
+    -> unsupported.
+  - 'zombie recognize on the reused worker cannot deliver its
+    result to a newer job' (REAL ENGINE) — recogCalls
+    j_2_/j_3_/j_4_ocr_0_0_0 (unique per op); r1 user_cancel;
+    r2 completed unreadable_pixels on synthetic_blank_0 with empty
+    text and 0 occurrences (previously returned op1's invoice text +
+    14 occurrences); r3 completes — worker still usable; pageerrors [].
+
+$ python3 scripts/task_acceptance.py task T10 \
+    --report artifacts/tasks/T10/run.json
+exit 0 — evaluated_commit af80d15e05b8c907aa588329770cafd3ef72a4a5;
+  commands_run 1; failures []; evidence_errors []; tests 44
+  collected / 44 passed / 0 failed / 0 skipped.
+
+$ bun run verify
+exit 0 — 115 tests total (49 bootstrap/acceptance + 2
+  native-boundary + 64 coordination/homebase); 1 pre-existing
+  skip inside the skip-detection meta-test; self-check: 16
+  commands.
+
+$ bun run build:web
+exit 0 — vite 8.3.0, 18 modules, dist/assets/index-DLl647JV.js
+  191.77 kB gzip 60.54 kB, built in 187ms.
+
+# RELEASE: no heavy command in flight or queued after this block.
