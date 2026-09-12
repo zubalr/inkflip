@@ -1,0 +1,29 @@
+# T27 executed command transcript
+date: 2026-09-12T01:59:52Z  host: macOS 26.5.2 arm64  python: Python 3.14.7  uv: uv 0.9.5 (d5f39331a 2025-10-21)
+engines: tesseract 5.5.3 (/opt/homebrew/bin/tesseract, leptonica-1.87.0); local eng.traineddata sha256 recorded in the reader manifest; pypdfium2 5.8.0 renders; Pillow 12.3.0 crops
+
+$ uv run --project native python -m pytest native/tests/ocr -q   (T27 contract command)
+....................                                                     [100%]
+20 passed in 1.42s
+exit: 0
+
+$ uv run --project native python -m pytest native/tests -q   (whole native suite)
+...........................................                  [100%]
+73 passed, 126 subtests passed in 1.62s
+exit: 0
+
+$ bun run test:native
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T27
+exit: 0
+
+$ bun run verify
+exit: 0
+
+# Measured behaviors encoded as tests:
+- PSM sweep on F01 render: psm 6 drops the isolated '$100' line; psm 3/11 find it. Native default is psm 3 (recorded per invocation); deliberate single-line regions use psm 7 ('\ $100' at 96.7% confidence).
+- F03 searchable scan: OCR over scan-correct and scan-raster-only rasters produces IDENTICAL word sequences - the invisible layer contributes nothing to pixels (no alarm from invisibility); OCR misreads of the 5x7 bitmap print are retained verbatim ('\#166,' etc.), never corrected.
+- UserUnit render compensation: geometry-0 (crop 480x350 user, UserUnit 2) rendered at scale*UserUnit = 6 gives 2880x2100 px = physical 960x700 pt at 3 px/pt; OCR boxes land within canonical page bounds.
+- Distinct failures: missing binary -> unsupported 'executable not found'; missing traineddata -> failed 'missing_model: ...'; undecodable bytes -> unreadable_pixels at open; wall-time overrun -> timeout terminal; blank raster -> completed with zero occurrences.
+- Option injection: 'eng --psm 8' rejected by the language identifier pattern; invoked argv is exactly [tesseract, <mkdtemp>/input.png, stdout, --psm 3, tsv], shell=False, in a private temp dir removed afterwards.

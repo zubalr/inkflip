@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "task_id": "T27",
+  "beads_id": "pdf-t27",
+  "worker": {
+    "app": "zcode",
+    "worker_id": "zcode-t27",
+    "branch": "work/zcode/t27",
+    "base": "726d61c0c",
+    "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9"
+  },
+  "contract_version": "1.0.0",
+  "fixture_ids": ["F01", "F03", "F14", "F15", "F20"],
+  "test_ids": ["TEST-27"],
+  "criteria": [
+    {
+      "criterion": "No URL or runtime model fetch",
+      "status": "executed",
+      "evidence": [
+        "native/tests/ocr/test_ocr.py",
+        "artifacts/tasks/T27/commands.log"
+      ],
+      "detail": "The traineddata file is located on disk beside the resolved binary (or TESSDATA_PREFIX) and hashed into the manifest; the adapter performs no network I/O of any kind, and the invoked argv contains only the binary, an adapter-generated private temp path, 'stdout' and fixed flags."
+    },
+    {
+      "criterion": "missing model/binary/unreadable page differ",
+      "status": "executed",
+      "evidence": [
+        "native/tests/ocr/test_ocr.py",
+        "artifacts/tasks/T27/commands.log"
+      ],
+      "detail": "Missing binary -> terminal 'unsupported' ('tesseract executable not found'); missing eng.traineddata (nonexistent language) -> terminal 'failed' with 'missing_model: ...'; undecodable raster bytes -> typed 'unreadable_pixels' at open; wall-time overrun -> terminal 'timeout'; a blank but valid raster completes with zero occurrences rather than an error."
+    },
+    {
+      "criterion": "malicious filename cannot become an option",
+      "status": "executed",
+      "evidence": [
+        "native/tests/ocr/test_ocr.py"
+      ],
+      "detail": "Language identifiers are validated against ^[a-z0-9_-]{1,32}$ ('eng --psm 8' is rejected as a terminal unsupported); the crop is saved under the neutral adapter-generated name input.png inside a private mkdtemp directory removed afterwards; the spied invocation argv is exactly [tesseract, <tmp>/input.png, stdout, --psm 3, tsv] with shell=False, so no caller-controlled string reaches the command line."
+    },
+    {
+      "criterion": "crop padding/resize inverses correct",
+      "status": "executed",
+      "evidence": [
+        "native/tests/ocr/test_ocr.py"
+      ],
+      "detail": "Padding is max(8 raster px, ceil(10% region height)), clipped at raster edges (corner region never goes negative); CropPlan records the original region, the padded rect and the resize factors with explicit inverse methods; a PSM 7 single-line crop of the F01 render reads '$100' at 0.97 confidence and its TSV box maps back into the original region's canonical footprint; resize (2,2) inverse exactly halves reported boxes."
+    },
+    {
+      "criterion": "native OCR retains raw punctuation and all occurrences.",
+      "status": "executed",
+      "evidence": [
+        "native/tests/ocr/test_ocr.py",
+        "artifacts/tasks/T27/commands.log"
+      ],
+      "detail": "Word TSV rows become one occurrence each with verbatim raw text: case ('SYNTHETIC'), trailing punctuation ('transaction.'), and engine misreads on the F03 bitmap print ('#166,' for '$100.00') are retained, never corrected; word confidence is emitted as a diagnostic EngineScore, not a quality verdict; empty OCR is a completed check with zero occurrences."
+    }
+  ],
+  "commands": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/ocr -q",
+      "exit": 0,
+      "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}
+    },
+    {
+      "segment": "uv run --project native python -m pytest native/tests -q",
+      "exit": 0,
+      "counts": {"passed": 73, "subtests_passed": 126}
+    },
+    {
+      "segment": "bun run test:native",
+      "exit": 0
+    },
+    {
+      "segment": "python3 scripts/task_acceptance.py task T27",
+      "exit": 0
+    },
+    {
+      "segment": "bun run verify",
+      "exit": 0
+    }
+  ],
+  "environment": {
+    "host": "macOS arm64 (Darwin 25.5.0)",
+    "python": "CPython 3.13.15 via uv frozen native/.venv",
+    "engines": "tesseract 5.5.3 (leptonica-1.87.0, /opt/homebrew), pypdfium2 5.8.0 renders, Pillow 12.3.0 crops; local eng.traineddata SHA-256 recorded in the manifest",
+    "note": "OCR runs use the locally installed Tesseract only; no model download, no network access."
+  },
+  "limitations": [
+    "Printed English only, per the capability matrix; non-Latin script OCR support is explicitly not claimed (F14 families stay with native text readers).",
+    "The F03 bitmap print OCRs imperfectly by design ('2026-0417' reads as '2626-6417'); the tests assert raw retention and pixel-only behavior, not recognition accuracy. Accuracy targets belong to the alignment/quality tasks (T12, T42).",
+    "F15 (OCR material ambiguity) and F20 (worker faults) remain catalog 'specified': the fault-injection mechanics belong to the T29 supervisor; the adapter's typed failure terminals are exercised with timeout/missing-model cases here.",
+    "Wall-time kill here terminates the tesseract child only; process-group supervision and partial-result atomicity are T29 scope."
+  ],
+  "dependency_requests": [
+    "Fixture owner lane: generate committed F14/F15 families when their recipes are assigned; the adapter consumes any named-render raster, so no adapter change is expected."
+  ],
+  "measured_decisions": [
+    {
+      "decision": "Native full-page default PSM 3 (tesseract automatic), not the browser contract's PSM 6",
+      "reason": "Measured on the F01 render: PSM 6 (uniform block) drops the isolated '$100' amount line, while PSM 3 and 11 find it. The Tesseract.js PSM 6 prescription addresses the browser worker path; the native adapter records its PSM per invocation and uses PSM 7 for deliberate single-line user regions, as the contract requires.",
+      "tradeoff": "PSM choice is recorded on occurrences (raw_source_locator psm tag) so readings remain comparable across configurations."
+    },
+    {
+      "decision": "Geometry maps TSV word boxes to canonical points only when the caller records the named-render scale",
+      "reason": "COORDINATES.md makes the raster transform chain explicit (O then raster scale); without recorded scale metadata the adapter refuses to guess and emits 'unknown' geometry with null polygon while retaining the raw text (I04, 'raw text is preserved even where geometry is absent')."
+    }
+  ],
+  "handoff": "artifacts/tasks/T27/handoff.json",
+  "ready_for_review": true
+}

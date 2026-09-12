@@ -1,0 +1,48 @@
+{
+  "task": "T27",
+  "beads_id": "pdf-t27",
+  "title": "Implement native rendered-region Tesseract reader",
+  "worker": "zcode-t27 (ZCode app, single active ZCode worker)",
+  "app": "zcode",
+  "pass": 1,
+  "branch": "work/zcode/t27",
+  "base": "726d61c0c",
+  "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
+  "ready_for_review": true,
+  "review_scope": "implementation_commit 394e65c07be89e2a867b0b316fe46940f927dbf9 plus evidence commits on this branch",
+  "executed_commands": [
+    {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20}},
+    {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126}},
+    {"command": "bun run test:native", "exit": 0},
+    {"command": "python3 scripts/task_acceptance.py task T27", "exit": 0},
+    {"command": "bun run verify", "exit": 0}
+  ],
+  "evidence_paths": [
+    "artifacts/tasks/T27/receipt.json",
+    "artifacts/tasks/T27/commands.log",
+    "native/inkflip/readers/tesseract.py",
+    "native/tests/ocr/test_ocr.py"
+  ],
+  "deliverables": {
+    "native/inkflip/readers/tesseract.py": "rendered-region OCR adapter: fixed argv, shell=False, neutral private filenames, validated language identifiers, local model hashing, padded-crop planning with recorded inverse transforms, verbatim raw words with diagnostic confidence, distinct typed failure terminals",
+    "native/tests/ocr/test_ocr.py": "TEST-27 suite: 20 tests over real tesseract 5.5.3 runs on T05 fixture renders (F01 amount line, F03 scan pixel-only independence, F08 UserUnit render compensation, failure-mode matrix, option-injection defense, schema conformance)"
+  },
+  "measured_decisions": [
+    {"decision": "Native full-page default PSM 3 instead of the browser PSM 6 prescription", "reason": "Measured: PSM 6 drops the isolated '$100' amount line on the F01 render; PSM 3/11 find it. PSM is recorded per invocation (raw_source_locator tag); single-line user regions use PSM 7 as the contract requires."},
+    {"decision": "Canonical geometry only with recorded raster scale; otherwise 'unknown' with null polygon", "reason": "COORDINATES.md requires explicit transform chains; guessing geometry from pixels without the recorded named-render metadata would violate I04."}
+  ],
+  "review_attention": [
+    "F03 OCR intentionally misreads the 5x7 bitmap print ('2026-0417' -> '2626-6417'); the tests assert raw retention and pixel-only independence (identical word sequences for scan-correct vs scan-raster-only), not recognition accuracy.",
+    "Timeout kills the tesseract child only; process-group supervision, two-message backpressure and atomic partial results are T29 scope (recorded in limitations and dependency requests)."
+  ],
+  "limitations": [
+    "Printed English OCR only; no non-Latin script recognition is claimed (F14 preservation stays with native text readers).",
+    "No Linux execution claimed; native reference environment parity is T46 scope."
+  ],
+  "dependency_requests": [
+    "Fixture owner lane: committed F14/F15 families when assigned.",
+    "T29: wrap with parent/child supervision and partial-result atomicity."
+  ],
+  "attribution": "No external material reused; adapter implements the project's own contract against the locally installed Tesseract and frozen dependencies.",
+  "state_note": "Worker does not write Beads; coordinator is the sole state owner. Requested transition on review approval: in_review -> accepted after merged-branch acceptance per docs/ACCEPTANCE.md."
+}
