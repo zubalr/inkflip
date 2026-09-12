@@ -32,7 +32,6 @@ import type {
   Occurrence,
   Reader,
   ReaderManifest,
-  Region,
   Transform,
 } from '../../contracts/src/index.ts';
 import type { BuiltPage } from '../../geometry/src/index.ts';
@@ -40,6 +39,8 @@ import {
   createEngineWorker,
   OCR_PSM,
   type EnginePaths,
+  type EngineProgress,
+  type EngineRecognizePage,
   type OcrPsm,
   type TesseractEngineModule,
   type TesseractEngineWorker,
@@ -70,7 +71,6 @@ import {
   type ReaderIdentityInput,
 } from './identity.ts';
 import {
-  LOW_CONFIDENCE_BELOW,
   mapEngineBlocks,
   meanWordConfidence,
 } from './occurrences.ts';
@@ -87,10 +87,20 @@ export interface OcrBudget {
   readonly maxOccurrencesPerPage: number;
   /** Per-run produced-occurrence cap (100_000). */
   readonly maxOccurrencesPerRun: number;
-  /** Per-run raw-text byte cap (8_388_608). */
+  /** Per-run raw-text byte cap (8_388_608) — UTF-8 bytes. */
   readonly maxRawTextBytesPerRun: number;
-  /** Per-check wall deadline (30_000). */
+  /**
+   * One absolute wall deadline covering the WHOLE check operation —
+   * raster acquisition, crop/encode, engine init (if needed) and
+   * recognize including the single transient retry (30_000). A retry
+   * only ever receives the time remaining.
+   */
   readonly checkTimeoutMs: number;
+  /**
+   * Bounded lifetime for `open()` — model preparation plus eager
+   * worker initialization (30_000).
+   */
+  readonly openTimeoutMs: number;
   /** Automatic transient retries (1). */
   readonly maxRetries: number;
 }
@@ -103,6 +113,7 @@ export const DEFAULT_OCR_BUDGET: OcrBudget = {
   maxOccurrencesPerRun: 100_000,
   maxRawTextBytesPerRun: 8_388_608,
   checkTimeoutMs: 30_000,
+  openTimeoutMs: 30_000,
   maxRetries: 1,
 };
 
@@ -241,6 +252,16 @@ export interface OcrReaderConfig {
   readonly model: ModelIdentity;
   readonly paths: EnginePaths;
   /**
+   * Reader id of the named render reader this OCR reading consumes.
+   * Required and validated up front (`^[a-z0-9_-]{1,60}$`): it is bound
+   * into describe()/plan()/output/occurrence identity BEFORE any
+   * CheckPlan is finalized, so the immutable plan never carries a
+   * pending placeholder. Every raster supplied by `rasterSource` must
+   * carry this exact `renderReaderId` — a mismatch is a typed
+   * `render_error`, not a silently re-identified reading.
+   */
+  readonly renderReaderId: string;
+  /**
    * SHA-256 digests (hex) of the staged assets this reader may load —
    * worker script, every feature-detected core variant, and the
    * traineddata — recorded verbatim in the ReaderManifest's
@@ -252,22 +273,37 @@ export interface OcrReaderConfig {
   readonly rasterSource: RasterSource;
   readonly budget?: Partial<OcrBudget>;
   readonly hooks?: OcrReaderHooks;
-  /**
-   * Test seam: canvas image smoothing for the crop drawImage. Default
-   * true (the canvas default); tests set false to make nearest-
-   * neighbor sampling of the recorded resize factor deterministic.
-   * Production callers leave it unset — quality defaults unchanged.
-   */
-  readonly imageSmoothingEnabled?: boolean;
 }
 
 const VALID_CHECK_ID = /^[a-z][a-z0-9_-]{0,95}$/;
+/**
+ * A configured render reader id must already be in reader-id
+ * namespace form — the same alphabet `ocrReaderId` emits — so the
+ * bound identity is faithful and the composed reader id stays under
+ * the 96-char id limit untruncated.
+ */
+const VALID_RENDER_READER_ID = /^[a-z0-9_-]{1,60}$/;
+
+/** UTF-8 byte accounting for the raw-text run budget. */
+const utf8 = new TextEncoder();
+
+/**
+ * One operation's absolute deadline + cancellation scope. `handle` is
+ * set once the handle being opened exists (open()); every guarded
+ * await checks cancellation, the absolute deadline, reader closure,
+ * operation supersession and handle validity.
+ */
+interface OpScope {
+  readonly op: number;
+  readonly deadlineAt: number;
+  readonly cancel: OcrCancellation;
+  handle: OcrHandle | null;
+}
 
 /** Draw the crop region of a produced raster into a PNG Blob. */
 async function cropToBlob(
   raster: PageRaster,
   plan: CropPlan,
-  imageSmoothing: boolean,
 ): Promise<Blob> {
   const useOffscreen = typeof OffscreenCanvas !== 'undefined';
   const makeCanvas = (w: number, h: number): {
@@ -294,7 +330,9 @@ async function cropToBlob(
   };
 
   const { canvas, ctx } = makeCanvas(plan.outWidthPx, plan.outHeightPx);
-  ctx.imageSmoothingEnabled = imageSmoothing;
+  // Canvas image smoothing stays at the production default (true);
+  // there is deliberately no public knob — the recorded resize factor
+  // is the real drawn factor under the browser's own smoothing.
   const image = raster.image;
   // The recorded ocr_resize factor IS the real destination scale: the
   // source crop is drawn to crop*resizeK x crop*resizeK output pixels
@@ -354,8 +392,23 @@ export class TesseractOcrReader {
   private readonly budget: OcrBudget;
   private readonly modelManager: ModelAssetManager;
   private worker: TesseractEngineWorker | null = null;
+  /** Concrete-lifetime controller for `this.worker` (engine signal). */
+  private workerCtl: AbortController | null = null;
+  /** A worker init in flight — joined, never overlapped. */
+  private workerInit: Promise<TesseractEngineWorker> | null = null;
+  /**
+   * Concrete-lifetime controller for the in-flight init. Reachable
+   * from destroyWorker() so close()/deadline aborts the real raw
+   * worker even before install — the signal covers the worker's
+   * entire life, including constructor readiness.
+   */
+  private workerInitCtl: AbortController | null = null;
   private handle: OcrHandle | null = null;
   private closed = false;
+  /** Monotonic current-operation token; a newer op supersedes older. */
+  private opSeq = 0;
+  /** Engine jobId -> owning op, for progress attribution. */
+  private readonly jobOps = new Map<string, number>();
   private workerInitCount = 0;
   private runOcrPixels = 0;
   private runOccurrences = 0;
@@ -365,7 +418,21 @@ export class TesseractOcrReader {
 
   constructor(config: OcrReaderConfig) {
     this.cfg = config;
-    this.budget = { ...DEFAULT_OCR_BUDGET, ...(config.budget ?? {}) };
+    this.budget = { ...DEFAULT_OCR_BUDGET, ...config.budget };
+    requireOcr(
+      VALID_RENDER_READER_ID.test(config.renderReaderId),
+      OCR_REASON.UNSUPPORTED,
+      `renderReaderId must match ${VALID_RENDER_READER_ID} ` +
+        `(got ${JSON.stringify(config.renderReaderId)})`,
+    );
+    requireOcr(
+      config.paths.cachePath === config.model.cachePath,
+      OCR_REASON.UNSUPPORTED,
+      'paths.cachePath and model.cachePath must agree: the engine ' +
+        'consumes the adapter-verified cache slot by construction ' +
+        `(${JSON.stringify(config.paths.cachePath)} != ` +
+        `${JSON.stringify(config.model.cachePath)})`,
+    );
     this.modelManager = new ModelAssetManager(config.model, {
       onState: (s) => config.hooks?.onModelState?.(s),
       ...(config.hooks?.fetchImpl !== undefined
@@ -407,11 +474,20 @@ export class TesseractOcrReader {
    * Explicit model preparation (cold/download/cache/memory states).
    * Idempotent: verified in-memory bytes are reused without a
    * network or cache round-trip. Initialization failure surfaces
-   * here — never as a fabricated page result.
+   * here — never as a fabricated page result. Bounded by
+   * `openTimeoutMs` like every async step this reader owns.
    */
   async prepareModel(): Promise<ModelPreparation> {
     requireOcr(!this.closed, OCR_REASON.UNSUPPORTED, 'reader is closed');
-    return (await this.modelManager.prepare()).preparation;
+    const scope: OpScope = {
+      op: this.opSeq,
+      deadlineAt: this.now() + this.budget.openTimeoutMs,
+      cancel: cancellationOf(undefined),
+      handle: null,
+    };
+    return (
+      await this.withDeadline(this.modelManager.prepare(), scope)
+    ).preparation;
   }
 
   /**
@@ -428,7 +504,9 @@ export class TesseractOcrReader {
       engineVersion: this.cfg.engineVersion,
       coreBuild: this.cfg.coreBuild ?? 'lstm',
       model: this.cfg.model,
-      renderReaderId: raster?.renderReaderId ?? 'unbound',
+      // The configured render reader id is bound at construction —
+      // never a pending placeholder and never rewritten per call.
+      renderReaderId: this.cfg.renderReaderId,
       rasterDpi: Math.round((raster?.scalePxPerPt ?? 0) * 72),
       psm,
       profile: this.cfg.profile,
@@ -443,68 +521,258 @@ export class TesseractOcrReader {
     return ocrReaderId({
       profile: this.cfg.profile,
       psm,
-      renderReaderId: 'pending',
+      renderReaderId: this.cfg.renderReaderId,
     });
   }
 
   /**
    * `open()` — prepare the verified model and initialize the single
-   * reusable engine worker for this handle. Initialization failure is
-   * a terminal state of the *handle*, never a fabricated reading.
+   * reusable engine worker for this handle, under one bounded
+   * cancellation lifetime (`openTimeoutMs`): model preparation and
+   * eager worker init share the deadline and the caller's
+   * cancellation. Initialization failure is a terminal state of the
+   * *handle*, never a fabricated reading.
    */
   async open(input: {
     readonly documentSha256: string;
     readonly generation: number;
+    readonly cancellation?: AbortSignal | OcrCancellation | (() => boolean);
   }): Promise<OcrHandle> {
     requireOcr(!this.closed, OCR_REASON.UNSUPPORTED, 'reader is closed');
-    const prepared = await this.modelManager.prepare();
-    const handle: OcrHandle = {
-      id: `ocrh_${input.generation}_${Math.floor(this.now())}`,
-      documentSha256: input.documentSha256,
-      generation: input.generation,
-      openedAt: this.now(),
-      model: prepared.preparation,
+    const op = ++this.opSeq;
+    const scope: OpScope = {
+      op,
+      deadlineAt: this.now() + this.budget.openTimeoutMs,
+      cancel: cancellationOf(input.cancellation),
+      handle: null,
     };
-    this.handle = handle;
-    // A new run gets a fresh budget and plan set; a healthy worker
-    // from the previous run may be reused (same-generation reuse is
-    // allowed; file replacement terminates it via close()).
-    this.runOcrPixels = 0;
-    this.runOccurrences = 0;
-    this.runRawTextBytes = 0;
-    this.selections.clear();
-    this.regionById.clear();
-    await this.ensureWorker();
-    return handle;
+    try {
+      const prepared = await this.withDeadline(
+        this.modelManager.prepare(),
+        scope,
+      );
+      this.guard(scope);
+      const handle: OcrHandle = {
+        id: `ocrh_${input.generation}_${Math.floor(this.now())}`,
+        documentSha256: input.documentSha256,
+        generation: input.generation,
+        openedAt: this.now(),
+        model: prepared.preparation,
+      };
+      // Install before worker init so staleness guards can see it.
+      this.handle = handle;
+      scope.handle = handle;
+      // A new run gets a fresh budget and plan set; a healthy worker
+      // from the previous run may be reused (same-generation reuse is
+      // allowed; file replacement terminates it via close()).
+      this.runOcrPixels = 0;
+      this.runOccurrences = 0;
+      this.runRawTextBytes = 0;
+      this.selections.clear();
+      this.regionById.clear();
+      await this.ensureWorker(scope);
+      this.guard(scope);
+      return handle;
+    } catch (error) {
+      const { reason, detail } = classifyError(error, OCR_REASON.INIT_CRASH);
+      // The failed open must not leave a half-usable handle or worker.
+      this.handle = null;
+      await this.destroyWorker();
+      throw new OcrError(reason, `OCR open: ${detail}`);
+    }
+  }
+
+  /**
+   * Terminal-status guard: throws a typed reason once the operation
+   * is cancelled, past its absolute deadline, superseded by a newer
+   * operation, or detached from the live handle. Called after every
+   * awaited step and before installing workers, starting recognition,
+   * publishing progress, changing accounting, or emitting.
+   */
+  private guard(scope: OpScope): void {
+    if (scope.cancel.isCancelled()) {
+      throw new OcrError(OCR_REASON.USER_CANCEL, 'cancelled');
+    }
+    if (this.now() >= scope.deadlineAt) {
+      throw new OcrError(OCR_REASON.TIMEOUT, 'operation deadline reached');
+    }
+    if (this.closed) {
+      throw new OcrError(OCR_REASON.USER_CANCEL, 'reader closed');
+    }
+    if (this.opSeq !== scope.op) {
+      throw new OcrError(OCR_REASON.USER_CANCEL, 'operation superseded');
+    }
+    if (scope.handle !== null && this.handle?.id !== scope.handle.id) {
+      throw new OcrError(OCR_REASON.USER_CANCEL, 'handle superseded');
+    }
+  }
+
+  /** Milliseconds left on the operation's absolute deadline. */
+  private remaining(scope: OpScope): number {
+    return scope.deadlineAt - this.now();
+  }
+
+  /**
+   * Race one external await against the operation's absolute deadline
+   * and cancellation poll. The work promise keeps its handlers
+   * registered after losing, so a late settlement is consumed — never
+   * an unhandled rejection — while its result is dropped by the
+   * caller's next guard.
+   */
+  private async withDeadline<T>(
+    work: Promise<T>,
+    scope: OpScope,
+  ): Promise<T> {
+    this.guard(scope);
+    const ms = this.remaining(scope);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let poll: ReturnType<typeof setInterval> | undefined;
+    try {
+      return await new Promise<T>((resolve, reject) => {
+        timer = setTimeout(
+          () =>
+            reject(
+              new OcrError(
+                OCR_REASON.TIMEOUT,
+                `operation deadline ${scope.deadlineAt}`,
+              ),
+            ),
+          ms,
+        );
+        poll = setInterval(() => {
+          if (scope.cancel.isCancelled()) {
+            reject(new OcrError(OCR_REASON.USER_CANCEL, 'cancelled'));
+          }
+        }, 25);
+        work.then(resolve, reject);
+      });
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+      if (poll !== undefined) clearInterval(poll);
+    }
+  }
+
+  /**
+   * Worker-level progress is published only while its owning
+   * operation is still current: recognize progress carries our jobId
+   * (jobOps), init progress belongs to the op that created the
+   * worker; events from superseded ops or a closed reader are
+   * dropped.
+   */
+  private forwardProgress(e: EngineProgress, creatingOp: number): void {
+    if (this.closed) return;
+    const jobOp = typeof e.userJobId === 'string'
+      ? this.jobOps.get(e.userJobId)
+      : undefined;
+    const owner = jobOp ?? creatingOp;
+    if (owner !== this.opSeq) return;
+    this.cfg.hooks?.onProgress?.({
+      checkId: null,
+      status: e.status,
+      progress: e.progress,
+    });
   }
 
   /** One reusable initialized model per active profile. */
-  private async ensureWorker(): Promise<TesseractEngineWorker> {
+  private async ensureWorker(scope: OpScope): Promise<TesseractEngineWorker> {
     if (this.worker !== null) return this.worker;
-    try {
-      this.worker = await createEngineWorker({
+    this.guard(scope);
+    if (this.workerInit !== null) {
+      // An init already owns this slot — join it rather than start an
+      // overlapping initialization.
+      const joined = await this.withDeadline(this.workerInit, scope);
+      this.guard(scope);
+      return joined;
+    }
+    const ctl = new AbortController();
+    const creatingOp = scope.op;
+    this.workerInitCtl = ctl;
+    const init = (async (): Promise<TesseractEngineWorker> => {
+      // Engine-boundary gate first: the worker-readable cache slot
+      // must already hold the verified payload — the engine's only
+      // model channel — before any worker exists.
+      await this.withDeadline(this.modelManager.prepareForEngine(), scope);
+      return createEngineWorker({
         engine: this.cfg.engine,
         lang: this.cfg.model.lang,
         paths: this.cfg.paths,
-        onProgress: (e) =>
-          this.cfg.hooks?.onProgress?.({
-            checkId: null,
-            status: e.status,
-            progress: e.progress,
-          }),
+        signal: ctl.signal,
+        onProgress: (e) => this.forwardProgress(e, creatingOp),
         onError: (d) => this.cfg.hooks?.onError?.(d),
       });
+    })();
+    this.workerInit = init;
+    try {
+      const worker = await this.withDeadline(init, scope);
+      // Reject the stale install: if this op was superseded, closed or
+      // re-deadlined while the worker was initializing, the fresh
+      // worker is terminated by the catch below instead of installed.
+      this.guard(scope);
+      requireOcr(
+        this.worker === null,
+        OCR_REASON.WORKER_CRASH,
+        'worker slot occupied during init',
+      );
+      this.worker = worker;
+      this.workerCtl = ctl;
+      this.workerInit = null;
+      this.workerInitCtl = null;
       this.workerInitCount++;
-      return this.worker;
+      return worker;
     } catch (error) {
+      if (this.workerInit === init) this.workerInit = null;
+      if (this.workerInitCtl === ctl) this.workerInitCtl = null;
       const { reason, detail } = classifyError(error, OCR_REASON.INIT_CRASH);
+      if (!ctl.signal.aborted) {
+        ctl.abort(error instanceof OcrError ? error : new OcrError(reason, detail));
+      }
+      // Own the init promise to settlement: a late success terminates
+      // its own worker (never a newer one); a late rejection is
+      // consumed here.
+      init.then(
+        (late) => {
+          void late.terminate();
+        },
+        () => {},
+      );
       throw new OcrError(reason, `OCR worker init: ${detail}`);
     }
   }
 
   private async destroyWorker(): Promise<void> {
     const w = this.worker;
+    const ctl = this.workerCtl;
+    const init = this.workerInit;
+    const initCtl = this.workerInitCtl;
+    // Invalidate admission before cleanup settles.
     this.worker = null;
+    this.workerCtl = null;
+    this.workerInit = null;
+    this.workerInitCtl = null;
+    // Abort the concrete lifetimes FIRST — an in-flight init's raw
+    // worker is hard-terminated by the patched engine even before the
+    // promise settles; an installed worker's signal does the same.
+    if (initCtl !== null && !initCtl.signal.aborted) {
+      initCtl.abort(
+        new OcrError(OCR_REASON.WORKER_CRASH, 'worker terminated'),
+      );
+    }
+    if (ctl !== null && !ctl.signal.aborted) {
+      ctl.abort(
+        new OcrError(OCR_REASON.WORKER_CRASH, 'worker terminated'),
+      );
+    }
+    if (init !== null) {
+      // A still-pending init resolves late at best — its worker must
+      // terminate itself without touching a newer one; rejections are
+      // consumed so nothing escapes unhandled.
+      init.then(
+        (late) => {
+          void late.terminate();
+        },
+        () => {},
+      );
+    }
     if (w !== null) {
       try {
         await w.terminate();
@@ -598,7 +866,18 @@ export class TesseractOcrReader {
     cancellation?: AbortSignal | OcrCancellation | (() => boolean),
   ): Promise<OcrCheckOutput> {
     const cancel = cancellationOf(cancellation);
+    const op = ++this.opSeq;
     const started = this.now();
+    // ONE absolute deadline scopes the whole operation: raster
+    // acquisition, crop encode, engine init, recognize, and the single
+    // transient retry all draw from it — a retry receives only the
+    // remaining budget, never a fresh full timeout.
+    const scope: OpScope = {
+      op,
+      deadlineAt: started + this.budget.checkTimeoutMs,
+      cancel,
+      handle,
+    };
     const emptyShell = (psmForRecord: OcrPsm): Omit<OcrCheckOutput, 'check'> => ({
       reader: this.readerFor(psmForRecord),
       engine: {
@@ -696,7 +975,7 @@ export class TesseractOcrReader {
     for (;;) {
       try {
         return await this.extractOnce(handle, check, psm, region,
-          emitChunk, cancel, started, attempt);
+          emitChunk, scope, started, attempt);
       } catch (error) {
         const { reason, detail } = classifyError(error, OCR_REASON.WORKER_CRASH);
         if (reason === OCR_REASON.TIMEOUT || reason === OCR_REASON.USER_CANCEL) {
@@ -705,7 +984,11 @@ export class TesseractOcrReader {
         }
         const transient = reason === OCR_REASON.INIT_CRASH ||
           reason === OCR_REASON.WORKER_CRASH;
-        if (transient && attempt < this.budget.maxRetries) {
+        // A retry runs only inside the operation's remaining time.
+        if (
+          transient && attempt < this.budget.maxRetries &&
+          this.remaining(scope) > 0
+        ) {
           // One transient retry, fresh worker only (RUNTIME_LIFECYCLE).
           attempt++;
           await this.destroyWorker();
@@ -724,7 +1007,7 @@ export class TesseractOcrReader {
     psm: OcrPsm,
     region: OcrRegionInput | null,
     emitChunk: EmitChunk,
-    cancel: OcrCancellation,
+    scope: OpScope,
     started: number,
     attempt: number,
   ): Promise<OcrCheckOutput> {
@@ -733,25 +1016,40 @@ export class TesseractOcrReader {
       OCR_REASON.UNSUPPORTED,
       'extract() requires this reader’s current handle',
     );
-    // 1) Raster from the named render reader (render dependency).
+    this.guard(scope);
+    // 1) Raster from the named render reader (render dependency) —
+    //    bounded by the operation's absolute deadline; a stalled
+    //    source returns on the deadline instead of parking forever.
     let raster: PageRaster;
     try {
-      raster = await this.cfg.rasterSource(check.page_index);
+      raster = await this.withDeadline(
+        this.cfg.rasterSource(check.page_index),
+        scope,
+      );
     } catch (error) {
+      if (error instanceof OcrError) throw error;
       throw new OcrError(
         OCR_REASON.RENDER_ERROR,
         `raster source failed for page ${check.page_index}: ` +
           `${error instanceof Error ? error.message : String(error)}`,
       );
     }
+    this.guard(scope);
     requireOcr(
       raster.built.page.index === check.page_index,
       OCR_REASON.RENDER_ERROR,
       'raster source returned the wrong page',
     );
-    if (cancel.isCancelled()) {
-      throw new OcrError(OCR_REASON.USER_CANCEL, 'cancelled after raster');
-    }
+    // The produced raster must come from the render reader this
+    // reading was configured for — anything else is a different
+    // provenance and never silently re-identified.
+    requireOcr(
+      raster.renderReaderId === this.cfg.renderReaderId,
+      OCR_REASON.RENDER_ERROR,
+      `raster supplied by ${JSON.stringify(raster.renderReaderId)} ` +
+        `but this reading is configured for ` +
+        `${JSON.stringify(this.cfg.renderReaderId)}`,
+    );
 
     // 2) Crop/resize plan through the recorded geometry chain.
     const plan = planCrop({
@@ -774,31 +1072,50 @@ export class TesseractOcrReader {
           `(${this.runOcrPixels}+${pixelsOcr})`,
       );
     }
+    this.guard(scope);
     this.runOcrPixels += pixelsOcr;
 
-    // 4) Crop to an owned PNG blob (no external image URLs, ever).
-    const blob = await cropToBlob(
-      raster,
-      plan,
-      this.cfg.imageSmoothingEnabled ?? true,
+    // 4) Crop to owned PNG bytes (no external image URLs, ever). The
+    //    blob encode and byte materialization are asynchronous stalls
+    //    — both stay inside the operation's deadline. The engine
+    //    input port accepts prepared Uint8Array bytes only.
+    const blob = await this.withDeadline(cropToBlob(raster, plan), scope);
+    this.guard(scope);
+    const imageBytes = new Uint8Array(
+      await this.withDeadline(blob.arrayBuffer(), scope),
+    );
+    this.guard(scope);
+    // The produced PNG is bounded by the same raster pixel caps —
+    // 4 bytes/px worst case plus container slack.
+    const maxPngBytes = pixelsOcr * 4 + 65_536;
+    requireOcr(
+      imageBytes.byteLength <= maxPngBytes,
+      OCR_REASON.RESOURCE_LIMIT,
+      `encoded OCR input ${imageBytes.byteLength} exceeds bound ` +
+        `${maxPngBytes} for ${pixelsOcr} px`,
     );
 
-    // 5) Recognize with the recorded PSM; bounded by the check deadline.
-    const worker = await this.ensureWorker();
-    const result = await this.withDeadline(
-      worker.recognize(
-        blob,
-        { tessedit_pageseg_mode: psm },
-        { text: true, blocks: true },
-        `j_${check.id}_${attempt}`,
-      ),
-      this.budget.checkTimeoutMs,
-      cancel,
-    );
-    const data = result.data;
-    if (cancel.isCancelled()) {
-      throw new OcrError(OCR_REASON.USER_CANCEL, 'cancelled after recognize');
+    // 5) Recognize with the recorded PSM under the same deadline.
+    const worker = await this.ensureWorker(scope);
+    this.guard(scope);
+    const jobId = `j_${check.id}_${attempt}`;
+    this.jobOps.set(jobId, scope.op);
+    let result: { jobId: string; data: EngineRecognizePage };
+    try {
+      result = await this.withDeadline(
+        worker.recognize(
+          imageBytes,
+          { tessedit_pageseg_mode: psm },
+          { text: true, blocks: true },
+          jobId,
+        ),
+        scope,
+      );
+    } finally {
+      this.jobOps.delete(jobId);
     }
+    this.guard(scope);
+    const data = result.data;
 
     // 6) Missing blocks = capability failure, never fabricated boxes.
     requireOcr(
@@ -815,14 +1132,17 @@ export class TesseractOcrReader {
       readerId: ocrReaderId({
         profile: this.cfg.profile,
         psm,
-        renderReaderId: raster.renderReaderId,
+        renderReaderId: this.cfg.renderReaderId,
       }),
       runKey: this.cfg.runKey,
       pageIndex: check.page_index,
       maxOccurrences: this.budget.maxOccurrencesPerPage,
     });
     const rawText = typeof data.text === 'string' ? data.text : null;
-    const rawBytes = rawText === null ? 0 : rawText.length;
+    // The raw-text run cap counts UTF-8 BYTES (TextEncoder), never
+    // UTF-16 units — a multibyte string costs more than .length.
+    const rawBytes = rawText === null ? 0 : utf8.encode(rawText).byteLength;
+    this.guard(scope);
     if (
       this.runOccurrences + mapped.occurrences.length >
         this.budget.maxOccurrencesPerRun ||
@@ -836,12 +1156,10 @@ export class TesseractOcrReader {
     this.runOccurrences += mapped.occurrences.length;
     this.runRawTextBytes += rawBytes;
 
-    // 8) Bounded emission.
+    // 8) Bounded emission — terminal-status guard before each chunk.
     for (let i = 0; i < mapped.occurrences.length; i += MAX_CHUNK_OCCURRENCES) {
+      this.guard(scope);
       emitChunk(check.id, mapped.occurrences.slice(i, i + MAX_CHUNK_OCCURRENCES));
-    }
-    if (cancel.isCancelled()) {
-      throw new OcrError(OCR_REASON.USER_CANCEL, 'cancelled after emit');
     }
 
     const ids = mapped.occurrences.map((o) => o.id);
@@ -920,40 +1238,17 @@ export class TesseractOcrReader {
     };
   }
 
-  /** Deadline + cancellation around an engine promise. */
-  private async withDeadline<T>(
-    work: Promise<T>,
-    timeoutMs: number,
-    cancel: OcrCancellation,
-  ): Promise<T> {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let poll: ReturnType<typeof setInterval> | undefined;
-    try {
-      return await new Promise<T>((resolve, reject) => {
-        timer = setTimeout(
-          () => reject(new OcrError(OCR_REASON.TIMEOUT, `check deadline ${timeoutMs}ms`)),
-          timeoutMs,
-        );
-        poll = setInterval(() => {
-          if (cancel.isCancelled()) {
-            reject(new OcrError(OCR_REASON.USER_CANCEL, 'cancelled'));
-          }
-        }, 25);
-        work.then(resolve, reject);
-      });
-    } finally {
-      if (timer !== undefined) clearTimeout(timer);
-      if (poll !== undefined) clearInterval(poll);
-    }
-  }
-
   /** `close()` — terminate the worker and release the handle. */
   async close(handle?: OcrHandle): Promise<void> {
     if (handle !== undefined && this.handle?.id !== handle.id) {
       return; // a stale handle cannot close a newer generation's worker
     }
-    await this.destroyWorker();
-    this.handle = null;
+    // Invalidate admission before cleanup: any in-flight open/extract
+    // continuation observes terminal status (closed + superseded op +
+    // detached handle) before worker teardown settles.
     this.closed = true;
+    this.opSeq++;
+    this.handle = null;
+    await this.destroyWorker();
   }
 }

@@ -37,7 +37,7 @@ import type {
   EngineLine,
   EngineWord,
 } from './engine.ts';
-import { OcrError, OCR_REASON, requireOcr } from './errors.ts';
+import { OCR_REASON, requireOcr } from './errors.ts';
 import type { CropPlan } from './crop.ts';
 
 /** Recognizer score scale (tesseract word confidence). */

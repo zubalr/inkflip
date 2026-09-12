@@ -13,9 +13,17 @@
  * idb-keyval store (`keyval-store`/`keyval`) that the pinned
  * tesseract.js@7.0.0 worker reads with `cacheMethod:'readOnly'`, keyed
  * `${cachePath}/${lang}.traineddata`; that way the engine consumes the
- * exact verified bytes instead of refetching. If IndexedDB is
- * unavailable the worker falls back to fetching the same verified
- * `langPath` itself — never a CDN.
+ * exact verified bytes instead of refetching.
+ *
+ * The slot is the ONLY model channel the engine may use. The reader
+ * calls `prepareForEngine()` immediately before each worker creation:
+ * it requires the slot to exist and re-verifies its contents. The
+ * worker is launched with a v7 `Lang` object payload — the pinned
+ * worker script has no fetch branch for object languages — so a cache
+ * miss fails initialization honestly rather than downloading
+ * unverified bytes. If IndexedDB is unavailable or the verified
+ * payload cannot be committed/read back, `prepareForEngine` throws:
+ * the engine receives the exact verified bytes or the run fails.
  *
  * A mismatched cache entry is deleted and reported, then replaced by a
  * fresh download (RUNTIME_LIFECYCLE: "A mismatched cache entry is
@@ -308,6 +316,61 @@ export class ModelAssetManager {
       },
       bytes,
     };
+  }
+
+  /**
+   * Engine-boundary gate: guarantee that the worker-readable cache
+   * slot holds the exact verified payload before a worker is created.
+   *
+   * Why this exists: the pinned worker consumes
+   * `${cachePath}/${lang}.traineddata` from idb-keyval — and nothing
+   * else (the `Lang` object payload it is launched with has no fetch
+   * branch, and `cacheMethod:'readOnly'` never writes). So if this
+   * slot cannot be committed and read back verified, there is no
+   * honest way to feed the engine the verified model — the caller
+   * gets a typed `missing_model`/`model_integrity` failure instead of
+   * a silent second download or stale bytes.
+   */
+  async prepareForEngine(): Promise<PreparedModel> {
+    const prepared = await this.prepare();
+    requireOcr(
+      this.store !== null,
+      OCR_REASON.MISSING_MODEL,
+      'cannot deliver verified model bytes to the engine: the ' +
+        'worker-readable model cache (IndexedDB keyval-store) is ' +
+        'unavailable',
+    );
+    const store = this.store;
+    // Commit a snapshot copy so later mutation of the in-memory bytes
+    // cannot alter what the worker reads.
+    try {
+      await store.set(this.cacheKey, prepared.bytes.slice());
+    } catch (error) {
+      throw new OcrError(
+        OCR_REASON.MISSING_MODEL,
+        'cannot deliver verified model bytes to the engine: ' +
+          'worker-readable cache write failed: ' +
+          `${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    let check: unknown;
+    try {
+      check = await store.get(this.cacheKey);
+    } catch (error) {
+      throw new OcrError(
+        OCR_REASON.MISSING_MODEL,
+        'cannot deliver verified model bytes to the engine: ' +
+          'worker-readable cache read-back failed: ' +
+          `${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    requireOcr(
+      check instanceof Uint8Array && this.verify(check),
+      OCR_REASON.MODEL_INTEGRITY,
+      'worker-readable model cache slot failed verification after ' +
+        'commit — refusing to let the engine consume unverified bytes',
+    );
+    return prepared;
   }
 
   /**

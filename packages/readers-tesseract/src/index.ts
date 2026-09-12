@@ -45,6 +45,7 @@ export {
   OCR_PSM,
   type EngineBBox,
   type EngineBlock,
+  type EngineLangPayload,
   type EngineLine,
   type EngineParagraph,
   type EnginePaths,

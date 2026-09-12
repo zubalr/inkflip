@@ -23,6 +23,13 @@ export interface EngineProgress {
   readonly status: string;
   /** 0..1 within the stage; may be absent/indeterminate upstream. */
   readonly progress: number;
+  /**
+   * The adapter's own job id for recognize-scoped progress (the
+   * `j_<check>_<attempt>` value posted with the job); init-stage
+   * progress carries upstream's internal job ids. Used by the reader
+   * to drop events belonging to superseded operations.
+   */
+  readonly userJobId?: string | null;
 }
 
 /** The recognize() result page shape used by the adapter. */
@@ -75,8 +82,16 @@ export interface EngineBBox {
 
 /** The tesseract.js Worker surface the adapter uses. */
 export interface TesseractEngineWorker {
+  /**
+   * The input port accepts PREPARED `Uint8Array` PNG bytes only. The
+   * adapter materializes the crop blob via `arrayBuffer()` inside the
+   * operation deadline before calling — never pass a URL/string/Blob/
+   * canvas: upstream's `loadImage` would take an asynchronous loader
+   * path (fetch/FileReader) that sits outside the operation's
+   * deadline/cancellation scope.
+   */
   recognize(
-    image: unknown,
+    image: Uint8Array,
     options: Record<string, unknown>,
     output: Record<string, boolean>,
     jobId?: string,
@@ -145,6 +160,14 @@ export interface CreateEngineWorkerInput {
   readonly engine: TesseractEngineModule;
   readonly lang: string;
   readonly paths: EnginePaths;
+  /**
+   * Concrete-lifetime abort for THIS worker. The pdf-ebz-patched
+   * tesseract.js@7.0.0 `WorkerOptions.signal`: observed before spawn
+   * and for the worker's whole life — aborting synchronously
+   * terminates the real raw worker and rejects pending
+   * readiness/jobs with `signal.reason`.
+   */
+  readonly signal?: AbortSignal;
   /** Bounded stage/progress reporter — stage codes only. */
   readonly onProgress?: (event: EngineProgress) => void;
   /** Raw engine errors for local diagnostics (path-stripped). */
@@ -152,24 +175,41 @@ export interface CreateEngineWorkerInput {
 }
 
 /**
- * `createWorker(lang, OEM.LSTM_ONLY, options)` with the contract's
- * explicit local configuration:
+ * `createWorker([{code, data}], OEM.LSTM_ONLY, options)` with the
+ * contract's explicit local configuration:
  *
  * - `workerPath`/`corePath`/`langPath` point at staged same-origin
  *   assets — never the baked-in jsdelivr defaults;
  * - `gzip:false` — the staged eng.traineddata is uncompressed;
  * - `workerBlobURL:false` — the worker script loads from its real
  *   same-origin URL, not an opaque blob indirection;
- * - `cacheMethod:'readOnly'` — the engine only *reads* the traineddata
- *   cache slot the adapter pre-seeded with SHA-256-verified bytes, so
- *   unverified bytes can never enter the model;
+ * - `langs` is the v7 `Lang` payload array `[{code, data}]` — NOT a
+ *   language string. For object payloads the pinned worker's
+ *   `loadLanguage` has no fetch branch at all (fetching exists only
+ *   for string langs), so a model download can never replace the
+ *   adapter-verified bytes inside the engine.
+ * - `cacheMethod:'readOnly'` — the worker reads exactly the
+ *   `${cachePath}/${lang}.traineddata` cache slot that the adapter
+ *   seeds with SHA-256-verified bytes (see model-cache.ts
+ *   `prepareForEngine`) and never writes it. The adapter gates worker
+ *   creation on that slot containing the verified payload, so the
+ *   engine input is the verified bytes or initialization fails.
+ *   `cacheMethod:'none'` is NOT usable on pinned 7.0.0: with no cache
+ *   read, `loadLanguage` would write `data` verbatim and `initialize`
+ *   maps `payload.data` to the Init() language name — so `data` must
+ *   equal `code`. A cache miss therefore writes a 3-byte poison file
+ *   and Init fails honestly instead of fetching unverified bytes.
+ * - `signal` (pdf-ebz patched `WorkerOptions.signal`) owns this
+ *   worker's concrete lifetime: abort hard-terminates the raw worker
+ *   and rejects readiness/pending jobs even mid-initialization.
  * - `logger` forwards only bounded stage/progress codes.
  */
 export function createEngineWorker(
   input: CreateEngineWorkerInput,
 ): Promise<TesseractEngineWorker> {
   const { engine, lang, paths } = input;
-  return engine.createWorker(lang, engine.OEM.LSTM_ONLY, {
+  const langs: readonly EngineLangPayload[] = [{ code: lang, data: lang }];
+  return engine.createWorker(langs, engine.OEM.LSTM_ONLY, {
     workerPath: paths.workerPath,
     corePath: paths.corePath,
     langPath: paths.langPath,
@@ -177,9 +217,14 @@ export function createEngineWorker(
     gzip: false,
     workerBlobURL: false,
     cacheMethod: 'readOnly',
-    logger: (m: { status?: unknown; progress?: unknown }) => {
+    ...(input.signal !== undefined ? { signal: input.signal } : {}),
+    logger: (m: { status?: unknown; progress?: unknown; userJobId?: unknown }) => {
       if (typeof m?.status === 'string' && typeof m?.progress === 'number') {
-        input.onProgress?.({ status: m.status, progress: m.progress });
+        input.onProgress?.({
+          status: m.status,
+          progress: m.progress,
+          userJobId: typeof m.userJobId === 'string' ? m.userJobId : null,
+        });
       }
     },
     errorHandler: (detail: unknown) => {

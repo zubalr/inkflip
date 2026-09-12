@@ -19,7 +19,6 @@
 import {
   compose,
   displayRotation,
-  mapPoint,
   ocrResizeRecord,
   cropTranslationRecord,
   rasterTransformRecord,
@@ -34,7 +33,7 @@ import type {
   Point,
   Transform,
 } from '../../contracts/src/index.ts';
-import { OcrError, OCR_REASON, requireOcr } from './errors.ts';
+import { OCR_REASON, requireOcr } from './errors.ts';
 
 /** A raster produced by the named render reader for one page. */
 export interface PageRasterInfo {
