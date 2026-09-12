@@ -2166,6 +2166,77 @@ test.describe('light: independent lifecycle probes (stub engine)', () => {
     // ...and a stale handle extract is refused as foreign.
     expect(out.foreign.status ?? out.foreign.reason).toBe('unsupported');
   });
+
+  // pdf-1t0 (wave-5 residual O3): two DIFFERENT reader instances mint
+  // identical handle ids when their opens land in the same clock tick
+  // with aligned per-reader op counters — `.id` equality cannot tell a
+  // foreign handle apart. Admission binds the handle OBJECT instead,
+  // so a foreign same-id handle or a forged same-shaped copy is refused
+  // everywhere and a foreign close retires nothing on either reader.
+  test('foreign reader handles with colliding ids are refused; foreign close retires nothing (stub)', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, wrap } = (globalThis as any).__rv;
+      // One fixed clock for both readers: each first open mints
+      // `ocrh_1_1000_1` — the reviewer's CROSS_READER_HANDLE replay.
+      const now = () => 1000;
+      const a = make({ hooks: { now } });
+      const b = make({ hooks: { now } });
+      const hA = await a.reader.open({ documentSha256: 'd', generation: 1 });
+      const hB = await b.reader.open({ documentSha256: 'd', generation: 1 });
+      const checkA = a.reader.plan(hA, [{ pageIndex: 0, purpose: 'page' }])[0];
+      const checkB = b.reader.plan(hB, [{ pageIndex: 0, purpose: 'page' }])[0];
+      // A forged copy of A's handle: identical id string, other object.
+      const forged = { ...hA };
+      const res: Record<string, unknown> = {
+        ids: { a: hA.id, b: hB.id, equal: hA.id === hB.id, sameObject: hA === hB },
+        // Foreign closes in both directions — each must be a no-op.
+        closeAwithB: (await wrap(a.reader.close(hB))).ok,
+        closeBwithA: (await wrap(b.reader.close(hA))).ok,
+        closeAforged: (await wrap(a.reader.close(forged))).ok,
+        // A forged or foreign handle can never plan/extract either.
+        extractAforged: await wrap(a.reader.extract(forged, checkA, () => {})),
+        planAforged: await wrap(
+          Promise.resolve().then(() =>
+            a.reader.plan(forged, [{ pageIndex: 0, purpose: 'page' }])),
+        ),
+        extractBwithA: await wrap(b.reader.extract(hA, checkB, () => {})),
+      };
+      // The invariant: after every foreign close both readers still
+      // serve their own handles — pre-fix the close killed the CALLED
+      // reader's worker because the colliding id was admitted.
+      const afterA = await wrap(a.reader.extract(hA, checkA, () => {}));
+      const afterB = await wrap(b.reader.extract(hB, checkB, () => {}));
+      res.afterA = afterA.ok ? afterA.value.check : afterA;
+      res.afterB = afterB.ok ? afterB.value.check : afterB;
+      res.terminatedA = a.events.workers.map((w: any) => w.terminated);
+      res.terminatedB = b.events.workers.map((w: any) => w.terminated);
+      await a.reader.close();
+      await b.reader.close();
+      return res;
+    });
+    // The collision really is exercised: identical ids, distinct objects.
+    expect(out.ids.equal).toBe(true);
+    expect(out.ids.sameObject).toBe(false);
+    // Foreign/forged closes resolve as no-ops (stale-close semantics).
+    expect(out.closeAwithB).toBe(true);
+    expect(out.closeBwithA).toBe(true);
+    expect(out.closeAforged).toBe(true);
+    // A forged same-id handle is refused with typed `unsupported`.
+    expect(out.extractAforged.ok).toBe(false);
+    expect(out.extractAforged.reason).toBe('unsupported');
+    expect(out.planAforged.ok).toBe(false);
+    expect(out.planAforged.reason).toBe('unsupported');
+    // And a foreign reader's handle is refused the same way on B.
+    expect(out.extractBwithA.ok).toBe(false);
+    expect(out.extractBwithA.reason).toBe('unsupported');
+    // Both readers survived every foreign close — neither worker died.
+    expect(out.afterA.status ?? out.afterA.reason).toBe('completed');
+    expect(out.afterB.status ?? out.afterB.reason).toBe('completed');
+    expect(out.terminatedA).toEqual([false]);
+    expect(out.terminatedB).toEqual([false]);
+  });
 });
 
 // ---------------------------------------------------------------------------
