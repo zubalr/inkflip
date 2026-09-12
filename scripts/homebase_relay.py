@@ -70,9 +70,19 @@ def require_ancestor(base: str, candidate: str, context: str) -> None:
         raise ValueError(f"{context}: candidate does not descend from {base}") from error
 
 
+def beads_changes() -> object:
+    # Beads 1.2.2 emits a fixed plain-text response for an empty diff even
+    # with --json. Recognize only that exact response; other text fails closed.
+    output = c.run(["bd", "--sandbox", "--directory", str(c.canonical_root()),
+                    "--json", "--readonly", "diff", "origin/main", "HEAD"])
+    if output == "No changes between origin/main and HEAD":
+        return []
+    return json.loads(output)
+
+
 def require_published_beads() -> None:
     """An old transport ref must not mask new coordinator grants left locally."""
-    changes = c.bd(["diff", "origin/main", "HEAD"])
+    changes = beads_changes()
     if not isinstance(changes, list):
         raise ValueError("Beads publication comparison is malformed; publication is unverified")
     if changes:
