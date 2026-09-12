@@ -46,6 +46,7 @@ const adapter = createPdfJsReader({
   standardFontDataUrl: "/assets/pdfjs/6.3.289/standard_fonts/",
   wasmUrl: "/assets/pdfjs/6.3.289/wasm/",
   iccUrl: "/assets/pdfjs/6.3.289/iccs/",
+  limits: { maxRasterPixels: profile.maxRasterPixels },
 });
 
 const coordinator = new RunCoordinator();
@@ -97,22 +98,41 @@ async function renderPageRaster(
   };
 }
 
+let lastStartRunRegions: ReadonlyMap<number, ContractRegion> | null = null;
+
 function startRun(
   handle: unknown,
   pages: readonly number[],
   regions: ReadonlyMap<number, ContractRegion>,
 ): PlanOutcome {
+  lastStartRunRegions = regions;
   const doc = controller.currentDocument;
   if (!doc) throw new Error("no document");
   const regionBindings: Record<string, string> = {};
   for (const [pageIndex, region] of regions) {
     regionBindings[`ocr:p${pageIndex}`] = region.id;
   }
-  const checks = adapter.plan(handle as never, {
+  const baseChecks = adapter.plan(handle as never, {
     pages: [...pages],
-    capabilities: ["native_text", "render", "ocr"],
-    regions: regionBindings,
+    capabilities: ["native_text", "render"],
   });
+  // Enforce maxOcrPagesPerRun (audit §2):
+  // Prioritize pages with explicit user-defined regions, then remaining selected pages up to cap.
+  const regionPages = pages.filter((p) => regions.has(p));
+  const nonRegionPages = pages.filter((p) => !regions.has(p));
+  const ocrPages = [...regionPages, ...nonRegionPages].slice(
+    0,
+    profile.maxOcrPagesPerRun,
+  );
+  const ocrChecks =
+    ocrPages.length > 0
+      ? adapter.plan(handle as never, {
+          pages: ocrPages,
+          capabilities: ["ocr"],
+          regions: regionBindings,
+        })
+      : [];
+  const checks = [...baseChecks, ...ocrChecks];
   const runKey = deriveRunKey(
     doc.sha256,
     [adapter.readers.text, adapter.readers.render],
@@ -152,6 +172,7 @@ function startRun(
   profile,
   events,
   MessageFactory,
+  getLastStartRunRegions: () => lastStartRunRegions,
 };
 
 const rootElement = document.getElementById("root");

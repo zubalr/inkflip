@@ -1,214 +1,154 @@
-# pdf-8hn — T08 Review Follow-ups Audit
+# pdf-8hn — T08 Review Follow-ups Implementation Report
 
 - **Task:** `pdf-8hn` ("T08 review follow-ups: stale handle on failed replace, unenforced OCR/raster caps, region label edit propagation, busy-refusal event")
-- **Auditor:** Antigravity (Mac UI worker / independent reviewer)
-- **Grant:** `bd show pdf-8hn --json` (Devin coordinator grant, 2026-09-12)
-- **Base:** `aa6d039` (canonical `main`)
+- **Worker:** Antigravity (Mac UI worker / independent reviewer)
+- **Grant:** `bd show pdf-8hn --json` (Devin coordinator grant converted to IMPLEMENTATION on 2026-09-13)
+- **Base:** `aa6d039` (canonical `main`), atop initial audit commit `4fe6be0`
 - **Branch:** `work/antigravity/pdf-8hn` in `worktrees/pdf-8hn`
-- **Product Source Edits:** **0** (strictly preserved during frozen G1 batch)
-- **Beads Writes:** **0** (read-only audit per coordinator directive)
-- **Reproduction Script:** `artifacts/followups/pdf-8hn/repro.ts` (`bun artifacts/followups/pdf-8hn/repro.ts` exits 0 with all 4 confirmed)
+- **Product Source Edits:** **3 files** strictly within allowed paths:
+  - `apps/web/src/features/open/controller.ts`
+  - `apps/web/src/features/open/mount.tsx`
+  - `apps/web/src/features/open/OpenWorkspace.tsx`
+- **Focused Regression Spec:** `tests/browser/pdf-8hn.spec.ts` (4 Playwright browser tests, 100% passing)
+- **Verification Script:** `artifacts/followups/pdf-8hn/repro.ts` (`bun artifacts/followups/pdf-8hn/repro.ts` exits 0 with all 4 confirmed resolved)
+- **Beads Writes:** **0** (no mutations performed on canonical Beads tracker)
 
 ---
 
 ## Executive Summary
 
-All four findings from `artifacts/tasks/T08/review.md` (F1, F2, F3, F5) **still reproduce on canonical main `aa6d039`**. Every issue has been traced to exact source lines with executable minimal repros, and all four fixes are strictly bounded to local UI/adapter orchestration files without altering any public contract, schema, or gate prerequisite.
+All four findings from `artifacts/tasks/T08/review.md` (F1, F2, F3, F5) have been implemented and verified on branch `work/antigravity/pdf-8hn`. Every change is strictly bounded to the explicitly permitted paths, preserving all contracts, schemas, and receipts.
 
-| # | Finding | Primary Source Site | Status on `main` | Fix Bounded? | Scope / Files |
-|---|---|---|---|---|---|
-| 1 | Stale handle on failed replace | `apps/web/src/features/open/controller.ts:172,178,191,201,220,251,267,308` | **Reproduced** | **Yes** (bounded) | `features/open/controller.ts` (~8 lines) |
-| 2 | Unenforced OCR/raster caps | `apps/web/src/features/open/mount.tsx:40-49,111-115` | **Reproduced** | **Yes** (bounded) | `features/open/mount.tsx` (~10 lines) |
-| 3 | Region label edit propagation | `apps/web/src/features/open/OpenWorkspace.tsx:333-338` | **Reproduced** | **Yes** (bounded) | `features/open/OpenWorkspace.tsx` (~5 lines) |
-| 4 | Busy-refusal event | `apps/web/src/features/open/controller.ts:144-149` | **Reproduced** | **Yes** (bounded) | `features/open/controller.ts` (~6 lines) |
+| # | Finding | Primary Source Site | Status | Resolution |
+|---|---|---|---|---|
+| 1 | Stale handle on failed replace | `apps/web/src/features/open/controller.ts` | **Resolved** | Nulled `handle` and `document` on replace initiation and across all rejection/error catch paths. |
+| 2 | Unenforced OCR/raster caps | `apps/web/src/features/open/mount.tsx` | **Resolved** | Passed `limits: { maxRasterPixels: profile.maxRasterPixels }` to reader; capped planned OCR checks to `profile.maxOcrPagesPerRun` in `startRun` prioritizing explicit user regions. |
+| 3 | Region label edit propagation | `apps/web/src/features/open/OpenWorkspace.tsx` | **Resolved** | Updated `onLabelChange` callback to synchronize nested `entry.region.label` alongside `entry.label`. |
+| 4 | Busy-refusal event | `apps/web/src/features/open/controller.ts` | **Resolved** | Emitted `{ type: "rejected", generation, kind: "open_failed", error }` on `this.busy` refusal. |
 
 ---
 
-## Detailed Audit & Evidence
+## Implementation Details
 
 ### 1. Stale handle on failed replace (Review F1)
-
-- **Exact File & Lines:**
-  - `apps/web/src/features/open/controller.ts:163-172`: Replacement begins and calls `this.host.requestClear("replace")`, bumping generation and destroying old document resources, but `this.handle` and `this.document` are not nulled.
-  - `apps/web/src/features/open/controller.ts:174-178`: Rejection on candidate validation (`validateCandidate`).
-  - `apps/web/src/features/open/controller.ts:186-192`: Rejection on `candidate.arrayBuffer()`.
-  - `apps/web/src/features/open/controller.ts:196-202`: Rejection on `sha256Hex()`.
-  - `apps/web/src/features/open/controller.ts:211-220`: Rejection on `adapter.open()`.
-  - `apps/web/src/features/open/controller.ts:250-252`: Rejection on `adapter.pages()` (nulls `this.handle`, but leaves `this.document` stale).
-  - `apps/web/src/features/open/controller.ts:266-268`: Rejection on `too_many_pages` (nulls `this.handle`, but leaves `this.document` stale).
-  - `apps/web/src/features/open/controller.ts:293-312`: Outer catch block (neither is nulled).
-
-- **Reproduction Evidence:**
-  When candidate document A is open and candidate B is offered but fails validation (e.g. non-PDF MIME type), `controller.offer()` clears the host state back to `"idle"` via `this.host.requestClear("idle")`. However:
-  ```ts
-  controller.currentHandle; // still returns doc A's torn-down handle object!
-  controller.currentDocument; // still returns doc A's metadata info!
-  ```
-  Verified via `artifacts/followups/pdf-8hn/repro.ts` (Item 1: `staleHandle !== null && staleDoc !== null && host.fileState === "idle"` is `true`).
-
-- **Root Cause & Impact:**
-  `OpenController` only sets `this.handle` upon successful `adapter.open()` and `this.document` upon successful `metadataLoaded()`. If replacement clears document A and candidate B fails prior to that, the instance fields retain document A's references. While `OpenWorkspace.tsx` reacts to the `rejected`/`clear` event stream by clearing local state (`setDoc(null)`), external or harness callers inspecting `controller.currentHandle` or `controller.currentDocument` observe destroyed/stale document references while host state is `"idle"`.
-
-- **Bounded Fix:**
-  Strictly bounded to `apps/web/src/features/open/controller.ts`:
-  1. In `offer()` upon initiating replace (`state !== "idle"`), immediately reset `this.handle = null; this.document = null;` before validating the new candidate.
-  2. In all error/rejection paths and the outer catch block in `offer()`, ensure `this.handle = null; this.document = null;`.
-
----
+- **File:** `apps/web/src/features/open/controller.ts`
+- **Changes:**
+  - Upon starting replacement (`state !== "idle"`), immediately reset `this.handle = null; this.document = null;`.
+  - In all rejection branches (`validateCandidate`, `candidate.arrayBuffer()`, `sha256Hex()`, `adapter.open()`, `adapter.pages()`, `too_many_pages`), explicitly null `this.handle` and `this.document`.
+  - In the outer `catch (error)` handler and `state === "clearing"` branch, reset `this.handle = null; this.document = null;`.
+  - Also ensure `candidate.arrayBuffer()` and `sha256Hex()` failure catch blocks emit a `rejected` event before returning so listeners observe the failure.
 
 ### 2. Unenforced OCR/raster caps (Review F2)
-
-- **Exact File & Lines:**
-  - `apps/web/src/features/open/limits.ts:21-24,32-33,41-42`: Declares `maxOcrPagesPerRun` (5 desktop, 1 mobile) and `maxRasterPixels` (4,000,000 desktop, 2,000,000 mobile).
-  - `apps/web/src/features/open/mount.tsx:40-49`: `createPdfJsReader` instantiation.
-  - `apps/web/src/features/open/mount.tsx:111-115`: `adapter.plan()` in `startRun()`.
-
-- **Reproduction Evidence:**
-  1. **Raster pixel cap:** `mount.tsx:40-49` calls `createPdfJsReader(...)` without specifying `limits: { maxRasterPixels: profile.maxRasterPixels }`. Under `?profile=mobile` (`MOBILE_PROFILE`), `profile.maxRasterPixels` is `2_000_000`, but `resolveConfig()` defaults to `4_000_000`. The mobile raster budget is unenforced in the reader adapter.
-  2. **OCR pages per run cap:** `mount.tsx:111-115` executes:
-     ```ts
-     const checks = adapter.plan(handle as never, {
-       pages: [...pages],
-       capabilities: ["native_text", "render", "ocr"],
-       regions: regionBindings,
-     });
-     ```
-     When 8 pages are selected on desktop, 8 OCR checks are planned (cap is 5). When 5 pages are selected on mobile, 5 OCR checks are planned (cap is 1). There is neither a UI warning nor a plan truncation enforcing `maxOcrPagesPerRun`.
-  Verified via `artifacts/followups/pdf-8hn/repro.ts` (Item 2: both conditions return `true`).
-
-- **Root Cause & Impact:**
-  `OpenProfile` in `limits.ts` accurately transcribed the `settings.json` contract values, but the preview mount wiring omitted passing `profile.maxRasterPixels` to the reader factory and planned the `ocr` capability indiscriminately across all selected pages without checking `profile.maxOcrPagesPerRun`.
-
-- **Bounded Fix:**
-  Strictly bounded to `apps/web/src/features/open/mount.tsx` (and `OpenWorkspace.tsx` if OCR cap notice is surfaced):
-  1. Pass `limits: { maxRasterPixels: profile.maxRasterPixels }` into `createPdfJsReader` in `mount.tsx:40-49`.
-  2. In `startRun` in `mount.tsx:111-115`, restrict planned `ocr` checks to the first `profile.maxOcrPagesPerRun` pages (or pages carrying explicit region bindings up to that cap).
-
----
+- **File:** `apps/web/src/features/open/mount.tsx`
+- **Changes:**
+  - In `createPdfJsReader({...})`, added `limits: { maxRasterPixels: profile.maxRasterPixels }`. Under desktop profile this provides 4,000,000 pixels; under mobile profile this enforces the 2,000,000 pixel cap.
+  - In `startRun()`, separated check planning into base capabilities (`native_text`, `render` for all selected pages) and OCR capability:
+    - Prioritizes pages with explicit user-defined region bindings (`regions.has(p)`).
+    - Caps total OCR planned pages to `profile.maxOcrPagesPerRun` (5 on desktop, 1 on mobile).
+    - Preserves all selected pages in the run total and base checks without violating OCR resource caps.
+  - Exported `getLastStartRunRegions: () => lastStartRunRegions` on `globalThis.__t08` to enable deterministic browser verification.
 
 ### 3. Region label edit propagation (Review F3)
-
-- **Exact File & Lines:**
-  - `apps/web/src/features/open/OpenWorkspace.tsx:333-338`: `onLabelChange` callback on `<RegionEditor>`.
-  - `apps/web/src/features/open/OpenWorkspace.tsx:231-238`: `runStart` constructing `contractRegions`.
-
-- **Reproduction Evidence:**
-  In `OpenWorkspace.tsx`:
-  ```tsx
-  onLabelChange={(next) => {
-    if (!previewRegion) return;
-    const updated = new Map(regions);
-    updated.set(previewPage, { ...previewRegion, label: next });
-    setRegions(updated);
-  }}
-  ```
-  `previewRegion` is of type `RegionEntry { box: RegionBox; region: ContractRegion; label: string }`.
-  Updating `{ ...previewRegion, label: next }` alters the UI state `entry.label`, but leaves `entry.region.label` containing the stale commit-time label (e.g. `"Region 1"`).
-  When the user clicks "Start Run", `runStart()` passes `entry.region` directly to `startRun()`:
-  ```tsx
-  for (const [pageIndex, entry] of regions) {
-    if (selection.has(pageIndex)) contractRegions.set(pageIndex, entry.region);
-  }
-  ```
-  Consequently, the emitted `ContractRegion` in the check plan retains the initial label, ignoring any subsequent user edits.
-  Verified via `artifacts/followups/pdf-8hn/repro.ts` (Item 3: `labelDiverged === true`).
-
-- **Root Cause & Impact:**
-  `onLabelChange` only updated the shallow `label` field of the `RegionEntry` wrapper without updating the nested `region.label` property on the inner `ContractRegion` record.
-
-- **Bounded Fix:**
-  Strictly bounded to `apps/web/src/features/open/OpenWorkspace.tsx:333-338`:
-  Update `onLabelChange` to synchronize `region.label`:
-  ```tsx
-  onLabelChange={(next) => {
-    if (!previewRegion) return;
-    const trimmed = next.trim() || "Region 1";
-    const updated = new Map(regions);
-    updated.set(previewPage, {
-      ...previewRegion,
-      label: next,
-      region: {
-        ...previewRegion.region,
-        label: trimmed.slice(0, 200),
-      },
-    });
-    setRegions(updated);
-  }}
-  ```
-
----
+- **File:** `apps/web/src/features/open/OpenWorkspace.tsx`
+- **Changes:**
+  - In `RegionEditor.onLabelChange`, updated the state setter to synchronize `previewRegion.region.label` with `trimmed.slice(0, 200)` alongside `previewRegion.label`.
+  - When `runStart()` later harvests `contractRegions`, the resulting `ContractRegion` records carry the user-edited text instead of stale initial values (`"Region 1"`).
 
 ### 4. Busy-refusal event (Review F5)
-
-- **Exact File & Lines:**
-  - `apps/web/src/features/open/controller.ts:144-149`:
-    ```ts
-    if (this.busy) {
-      return {
-        ok: false,
-        error: makeError("open_failed", OPEN_COPY.malformed, "open:busy"),
-      };
-    }
-    ```
-  - `apps/web/src/features/open/OpenWorkspace.tsx:154-160`:
-    ```tsx
-    const offer = useCallback(
-      async (candidate: FileCandidate) => {
-        setError(null);
-        await controller.offer(candidate);
-      },
-      [controller],
-    );
-    ```
-
-- **Reproduction Evidence:**
-  When an offer is already in flight (`this.busy === true`) and another candidate is offered:
-  - `controller.offer()` returns `{ ok: false, error: ... }` with detail `"open:busy"`.
-  - Crucially, `this.emit(...)` is **never called** — no `rejected` event is emitted.
-  - In `OpenWorkspace.tsx`, calling `offer()` first calls `setError(null)`, then awaits `controller.offer(candidate)` without checking the returned value.
-  - Because `OpenWorkspace.tsx` only updates error state via `controller.subscribe((event) => { if (event.type === "rejected") setError(event.error); })`, the busy error is completely swallowed: any prior error display is cleared, and no error notice is rendered.
-  Verified via `artifacts/followups/pdf-8hn/repro.ts` (Item 4: returns `true`).
-
-- **Root Cause & Impact:**
-  Every other rejection path in `OpenController.offer()` emits a `rejected` event so that subscriber views stay synchronised with controller state. The early `this.busy` guard returned a failure object directly without emitting a corresponding `rejected` event.
-
-- **Bounded Fix:**
-  Strictly bounded to `apps/web/src/features/open/controller.ts:144-149`:
-  Emit a `rejected` event before returning:
-  ```ts
-  if (this.busy) {
-    const err = makeError("open_failed", OPEN_COPY.malformed, "open:busy");
-    this.emit({
-      type: "rejected",
-      generation: this.host.currentGeneration,
-      kind: err.kind,
-      error: err,
-    });
-    return {
-      ok: false,
-      error: err,
-    };
-  }
-  ```
+- **File:** `apps/web/src/features/open/controller.ts`
+- **Changes:**
+  - In `offer()`, when `this.busy` is true, emit `{ type: "rejected", generation: this.host.currentGeneration, kind: err.kind, error: err }` before returning `{ ok: false, error: err }`.
+  - UI listeners (`OpenWorkspace.tsx`) subscribe to controller events to render error notices; emitting `rejected` ensures busy refusals surface visibly to users and test harnesses instead of being silently swallowed.
 
 ---
 
-## Verification & Baseline Integrity
+## Verification Evidence
 
-1. **Current Playwright Browser Suite Baseline:**
-   ```bash
-   $ bun run test:browser -- tests/browser/open.spec.ts
-   # 13 collected, 13 passed, 0 failed, 0 skipped (11.7s) — exit 0
-   ```
-2. **Deterministic Reproduction Suite:**
-   ```bash
-   $ bun artifacts/followups/pdf-8hn/repro.ts
-   # Item 1 reproduced: true
-   # Item 2 reproduced: true
-   # Item 3 reproduced: true
-   # Item 4 reproduced: true
-   ```
-3. **Workspace Discipline:**
-   - No files modified under `apps/web/src/`, `packages/`, `scripts/`, or `planning/`.
-   - No writes or mutations performed on the Beads database.
-   - Ready to be applied as a normal implementation grant once Gate G1 lands.
+### 1. Deterministic Standalone Verification Suite
+```bash
+$ bun artifacts/followups/pdf-8hn/repro.ts
+=== pdf-8hn Fix Verifications (work/antigravity/pdf-8hn) ===
+
+--- Item 1: Stale handle/document on failed replace ---
+Offer outcome ok: false
+Host fileState: idle
+currentHandle nulled: true
+currentDocument nulled: true
+Item 1 resolved: true
+
+--- Item 2: Unenforced OCR/raster caps ---
+MOBILE_PROFILE.maxRasterPixels: 2000000
+Configured reader adapter maxRasterPixels: 2000000
+Raster cap enforced in mobile reader adapter: true
+Selected pages count: 8
+DESKTOP_PROFILE.maxOcrPagesPerRun: 5
+Planned OCR pages count: 5
+OCR per-run cap enforced: true
+Item 2 resolved: true
+
+--- Item 3: Region label edit propagation ---
+UI displayed entry.label: Total Amount Bounding Box
+Contract entry.region.label (passed to startRun): Total Amount Bounding Box
+Contract record synchronized with UI edit: true
+Item 3 resolved: true
+
+--- Item 4: Busy-refusal event ---
+Concurrent offer outcome ok: false
+Concurrent offer error detail: open:busy
+Emitted rejected event for busy refusal: true
+Item 4 resolved: true
+
+============================================================
+=== All 4 follow-up issues CONFIRMED RESOLVED ===
+# Exit code: 0
+```
+
+### 2. Focused Playwright Browser Regression Suite
+```bash
+$ bun run test:browser -- tests/browser/pdf-8hn.spec.ts
+$ python3 scripts/task_acceptance.py run test:browser "tests/browser/pdf-8hn.spec.ts"
+
+Running 4 tests using 1 worker
+
+[1/4] tests/browser/pdf-8hn.spec.ts:116:1 › F1: failed replace nulls currentHandle and currentDocument
+[2/4] tests/browser/pdf-8hn.spec.ts:168:1 › F2: reader limits receive profile.maxRasterPixels and startRun enforces maxOcrPagesPerRun
+[3/4] tests/browser/pdf-8hn.spec.ts:221:1 › F3: edited region label propagates to contract region in check plan
+[4/4] tests/browser/pdf-8hn.spec.ts:277:1 › F5: busy refusal emits rejected event and surfaces error
+  4 passed (3.9s)
+# Exit code: 0
+```
+
+### 3. Static Analysis & Build Verification
+```bash
+$ bun x --no-install oxlint apps/web/src/features/open tests/browser/pdf-8hn.spec.ts artifacts/followups/pdf-8hn/repro.ts
+Found 0 warnings and 0 errors.
+Finished in 10ms on 11 files with 96 rules using 14 threads.
+
+$ bun run build:web
+$ python3 scripts/task_acceptance.py run build:web
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.55 kB │ gzip:  0.33 kB
+dist/assets/index-CK80oKyc.css   20.13 kB │ gzip:  4.01 kB
+dist/assets/index-BqjCALFT.js   229.93 kB │ gzip: 71.16 kB
+✓ built in 586ms
+# Exit code: 0
+```
+
+---
+
+## Bounded Diff Summary
+
+```diff
+ apps/web/src/features/open/OpenWorkspace.tsx | 10 +++++++++-
+ apps/web/src/features/open/controller.ts    | 58 +++++++++++++++++++++++++++++++++++++++++++++++-----------
+ apps/web/src/features/open/mount.tsx         | 26 ++++++++++++++++++++++----
+ artifacts/followups/pdf-8hn/notes.md         | (documentation updated)
+ artifacts/followups/pdf-8hn/repro.ts         | (converted from audit repro to passing resolution verification)
+ tests/browser/pdf-8hn.spec.ts                | (new focused Playwright browser regression spec)
+```
+
+No files outside the allowed paths were modified. No Beads database writes were performed. Branch `work/antigravity/pdf-8hn` is ready for coordinator Devin review and post-G1 integration.

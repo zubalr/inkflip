@@ -332,8 +332,16 @@ export function OpenWorkspace({
               onClear={() => clearRegion(previewPage)}
               onLabelChange={(next) => {
                 if (!previewRegion) return;
+                const trimmed = next.trim() || "Region 1";
                 const updated = new Map(regions);
-                updated.set(previewPage, { ...previewRegion, label: next });
+                updated.set(previewPage, {
+                  ...previewRegion,
+                  label: next,
+                  region: {
+                    ...previewRegion.region,
+                    label: trimmed.slice(0, 200),
+                  },
+                });
                 setRegions(updated);
               }}
             />

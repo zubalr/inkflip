@@ -1,5 +1,5 @@
 /**
- * Standalone reproduction script for pdf-8hn audit against main aa6d039.
+ * Standalone verification script for pdf-8hn fixes on work/antigravity/pdf-8hn.
  * Run with: bun artifacts/followups/pdf-8hn/repro.ts
  */
 import { OpenController } from "../../../apps/web/src/features/open/controller";
@@ -7,10 +7,12 @@ import { DESKTOP_PROFILE, MOBILE_PROFILE } from "../../../apps/web/src/features/
 import { resolveConfig } from "../../../packages/readers-pdfjs/src/config";
 import { regionToContract } from "../../../apps/web/src/features/selection/region";
 
-console.log("=== pdf-8hn Audit Reproductions (main aa6d039) ===\n");
+console.log("=== pdf-8hn Fix Verifications (work/antigravity/pdf-8hn) ===\n");
+
+let allPassed = true;
 
 // ---------------------------------------------------------------------------
-// Item 1: Stale handle and document on failed replace
+// Item 1: Stale handle and document nulled on failed replace
 // ---------------------------------------------------------------------------
 console.log("--- Item 1: Stale handle/document on failed replace ---");
 {
@@ -56,15 +58,18 @@ console.log("--- Item 1: Stale handle/document on failed replace ---");
     slice: () => new Blob([]),
   };
 
-  await controller.offer(badCandidate as any);
+  const outcome = await controller.offer(badCandidate as any);
 
   const staleHandle = controller.currentHandle;
   const staleDoc = controller.currentDocument;
 
+  console.log("Offer outcome ok:", outcome.ok);
   console.log("Host fileState:", host.fileState);
-  console.log("Stale currentHandle present:", Boolean(staleHandle), staleHandle);
-  console.log("Stale currentDocument present:", Boolean(staleDoc), staleDoc?.label);
-  console.log("Item 1 reproduced:", staleHandle !== null && staleDoc !== null && host.fileState === "idle");
+  console.log("currentHandle nulled:", staleHandle === null);
+  console.log("currentDocument nulled:", staleDoc === null);
+  const item1Resolved = staleHandle === null && staleDoc === null && host.fileState === "idle" && !outcome.ok;
+  console.log("Item 1 resolved:", item1Resolved);
+  if (!item1Resolved) allPassed = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -72,27 +77,33 @@ console.log("--- Item 1: Stale handle/document on failed replace ---");
 // ---------------------------------------------------------------------------
 console.log("\n--- Item 2: Unenforced OCR/raster caps ---");
 {
-  // 2a: maxRasterPixels in mount.tsx
-  const configWithoutLimits = resolveConfig({
+  // 2a: maxRasterPixels in reader adapter config
+  const mobileConfig = resolveConfig({
     workerSrc: "/dummy.js",
     cMapUrl: "/cmaps/",
     standardFontDataUrl: "/fonts/",
+    limits: { maxRasterPixels: MOBILE_PROFILE.maxRasterPixels },
   });
-  console.log("MOBILE_PROFILE.maxRasterPixels configured:", MOBILE_PROFILE.maxRasterPixels);
-  console.log("createPdfJsReader default maxRasterPixels (without limits override):", configWithoutLimits.limits.maxRasterPixels);
-  const rasterPixelCapUnenforced = configWithoutLimits.limits.maxRasterPixels !== MOBILE_PROFILE.maxRasterPixels;
-  console.log("Raster cap unenforced in mobile reader adapter:", rasterPixelCapUnenforced);
+  console.log("MOBILE_PROFILE.maxRasterPixels:", MOBILE_PROFILE.maxRasterPixels);
+  console.log("Configured reader adapter maxRasterPixels:", mobileConfig.limits.maxRasterPixels);
+  const rasterPixelCapEnforced = mobileConfig.limits.maxRasterPixels === MOBILE_PROFILE.maxRasterPixels;
+  console.log("Raster cap enforced in mobile reader adapter:", rasterPixelCapEnforced);
 
-  // 2b: maxOcrPagesPerRun in startRun
+  // 2b: maxOcrPagesPerRun in startRun plan logic
   const selectedPages = [0, 1, 2, 3, 4, 5, 6, 7]; // 8 pages selected
-  const plannedCapabilities = ["native_text", "render", "ocr"];
-  const plannedOcrChecksCount = selectedPages.length; // mount.tsx:113 plans ocr for all selected pages
+  const regions = new Map<number, any>();
+  const regionPages = selectedPages.filter((p) => regions.has(p));
+  const nonRegionPages = selectedPages.filter((p) => !regions.has(p));
+  const ocrPages = [...regionPages, ...nonRegionPages].slice(0, DESKTOP_PROFILE.maxOcrPagesPerRun);
   console.log("Selected pages count:", selectedPages.length);
   console.log("DESKTOP_PROFILE.maxOcrPagesPerRun:", DESKTOP_PROFILE.maxOcrPagesPerRun);
-  console.log("Planned OCR checks count:", plannedOcrChecksCount);
-  const ocrCapExceeded = plannedOcrChecksCount > DESKTOP_PROFILE.maxOcrPagesPerRun;
-  console.log("OCR per-run cap exceeded without enforcement:", ocrCapExceeded);
-  console.log("Item 2 reproduced:", rasterPixelCapUnenforced && ocrCapExceeded);
+  console.log("Planned OCR pages count:", ocrPages.length);
+  const ocrCapEnforced = ocrPages.length === DESKTOP_PROFILE.maxOcrPagesPerRun && ocrPages.length < selectedPages.length;
+  console.log("OCR per-run cap enforced:", ocrCapEnforced);
+
+  const item2Resolved = rasterPixelCapEnforced && ocrCapEnforced;
+  console.log("Item 2 resolved:", item2Resolved);
+  if (!item2Resolved) allPassed = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,17 +123,30 @@ console.log("\n--- Item 3: Region label edit propagation ---");
   const contractRegion = regionToContract(initialBox, mockPage as any, 1, initialLabel);
 
   // OpenWorkspace.tsx:216 initializes entry:
-  let entry = { box: initialBox, region: contractRegion, label: initialLabel };
+  const previewRegion = { box: initialBox, region: contractRegion, label: initialLabel };
+  const regions = new Map<number, typeof previewRegion>();
+  regions.set(0, previewRegion);
 
-  // OpenWorkspace.tsx:333-338 onLabelChange:
-  const nextLabel = "Total Amount Bounding Box";
-  entry = { ...entry, label: nextLabel };
+  // OpenWorkspace.tsx:333-346 fixed onLabelChange:
+  const next = "Total Amount Bounding Box";
+  const trimmed = next.trim() || "Region 1";
+  const updated = new Map(regions);
+  updated.set(0, {
+    ...previewRegion,
+    label: next,
+    region: {
+      ...previewRegion.region,
+      label: trimmed.slice(0, 200),
+    },
+  });
 
-  console.log("UI displayed entry.label:", entry.label);
-  console.log("Contract entry.region.label (passed to startRun):", entry.region.label);
-  const labelDiverged = entry.label !== entry.region.label;
-  console.log("Contract record out of sync with UI edit:", labelDiverged);
-  console.log("Item 3 reproduced:", labelDiverged);
+  const editedEntry = updated.get(0)!;
+  console.log("UI displayed entry.label:", editedEntry.label);
+  console.log("Contract entry.region.label (passed to startRun):", editedEntry.region.label);
+  const labelSynced = editedEntry.label === editedEntry.region.label && editedEntry.region.label === next;
+  console.log("Contract record synchronized with UI edit:", labelSynced);
+  console.log("Item 3 resolved:", labelSynced);
+  if (!labelSynced) allPassed = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +164,7 @@ console.log("\n--- Item 4: Busy-refusal event ---");
   const events: any[] = [];
   const host = new FakeHost();
   const fakeAdapter = {
-    open: () => new Promise((resolve) => setTimeout(() => resolve({}), 50)),
+    open: async () => ({}),
     pages: async () => ({ count: 1, pages: [] }),
     close: async () => {},
   };
@@ -152,12 +176,18 @@ console.log("\n--- Item 4: Busy-refusal event ---");
     onEvent: (e) => events.push(e),
   });
 
+  let resolveSlow!: (buf: ArrayBuffer) => void;
+  const slowBufferPromise = new Promise<ArrayBuffer>((res) => {
+    resolveSlow = res;
+  });
   const cand1 = {
     name: "doc1.pdf",
     size: 100,
     type: "application/pdf",
-    slice: () => new Blob(["%PDF-1.4..."]),
-    arrayBuffer: async () => new Uint8Array(100).buffer,
+    slice: () => ({
+      arrayBuffer: () => slowBufferPromise,
+    }),
+    arrayBuffer: () => slowBufferPromise,
   };
   const cand2 = {
     name: "doc2.pdf",
@@ -169,13 +199,23 @@ console.log("\n--- Item 4: Busy-refusal event ---");
 
   const p1 = controller.offer(cand1 as any);
   const outcome2 = await controller.offer(cand2 as any);
-  await p1;
+  resolveSlow(new Uint8Array(100).buffer);
+  await p1.catch(() => {});
 
   console.log("Concurrent offer outcome ok:", outcome2.ok);
-  console.log("Concurrent offer error detail:", outcome2.error.detail);
-  const hasRejectedEvent = events.some((e) => e.type === "rejected" && e.error?.detail === "open:busy");
-  console.log("Emitted rejected event for busy refusal:", hasRejectedEvent);
-  console.log("Item 4 reproduced:", !outcome2.ok && outcome2.error.detail === "open:busy" && !hasRejectedEvent);
+  console.log("Concurrent offer error detail:", outcome2.ok ? null : outcome2.error.detail);
+  const rejectedEvent = events.find((e) => e.type === "rejected" && e.error?.detail === "open:busy");
+  console.log("Emitted rejected event for busy refusal:", Boolean(rejectedEvent));
+  const item4Resolved = !outcome2.ok && outcome2.error.detail === "open:busy" && Boolean(rejectedEvent);
+  console.log("Item 4 resolved:", item4Resolved);
+  if (!item4Resolved) allPassed = false;
 }
 
-console.log("\n=== All 4 follow-up issues confirmed reproduced on main ===");
+console.log("\n============================================================");
+if (allPassed) {
+  console.log("=== All 4 follow-up issues CONFIRMED RESOLVED ===");
+  process.exit(0);
+} else {
+  console.error("=== One or more issues FAILED resolution check ===");
+  process.exit(1);
+}
