@@ -1,0 +1,196 @@
+{
+  "comment": "TEST-31 shared golden cases. The same inputs are exercised through BOTH paths — the in-process shared TS functions (browser path, via tests/bridge/direct_driver.mjs) and the Python->Node bridge (native/inkflip/compare_bridge.py -> packages/compare/node/bridge.mjs) — and the results must agree exactly. Occurrence 'box' is shorthand: [x0,y0,x1,y1] canonical-pt corners become a 4-point polygon, null keeps a null polygon for page_only/unknown geometry (I04). 'precision' defaults to 'exact'.",
+  "normalize": [
+    { "id": "empty", "raw": "" },
+    { "id": "single-identity", "raw": "Total:$1,000.00" },
+    { "id": "leading-trailing-runs", "raw": " \t Total due \n " },
+    { "id": "mixed-ws-runs", "raw": "x   y z w　q" },
+    { "id": "combining-sequence", "raw": "café nómina" },
+    { "id": "ligature", "raw": "ﬁle ﬂow" },
+    { "id": "supplementary-scalar", "raw": "pay 💸 now" },
+    { "id": "arabic-cjk", "raw": "\u0627\u0644\u0645\u0627\u0644\t\u4e2d\u6587" },
+    { "id": "material-signs", "raw": "-$1,000.00 −100% #4-5" },
+    { "id": "zwsp-bom-preserved", "raw": "a​b﻿c" },
+    { "id": "negation-words", "raw": "not paid\tversus  paid" },
+    { "id": "crlf-run", "raw": "line one\r\nline two" }
+  ],
+  "align": [
+    {
+      "id": "exact-unique",
+      "left": [
+        {
+          "id": "l0",
+          "page_index": 0,
+          "ordinal": 0,
+          "raw": "Total $1,000.00",
+          "box": [10, 20, 90, 32]
+        },
+        {
+          "id": "l1",
+          "page_index": 0,
+          "ordinal": 1,
+          "raw": "Due 2026-09-15",
+          "box": [10, 40, 90, 52]
+        }
+      ],
+      "right": [
+        {
+          "id": "r0",
+          "page_index": 0,
+          "ordinal": 0,
+          "raw": "Total $1,000.00",
+          "box": [10, 20, 90, 32]
+        },
+        {
+          "id": "r1",
+          "page_index": 0,
+          "ordinal": 1,
+          "raw": "Due 2026-09-15",
+          "box": [10, 40, 90, 52]
+        }
+      ]
+    },
+    {
+      "id": "split-merge-provenance",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "$1,", "box": [10, 20, 40, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "000.00", "box": [42, 20, 80, 32] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "$1,000.00", "box": [10, 20, 80, 32] }
+      ]
+    },
+    {
+      "id": "material-text-difference",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "$1,000.00", "box": [10, 20, 80, 32] },
+        {
+          "id": "l1",
+          "page_index": 0,
+          "ordinal": 1,
+          "raw": "paid in full",
+          "box": [10, 40, 80, 52]
+        }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "$1,O00.00", "box": [10, 20, 80, 32] },
+        {
+          "id": "r1",
+          "page_index": 0,
+          "ordinal": 1,
+          "raw": "paid in full",
+          "box": [10, 40, 80, 52]
+        }
+      ]
+    },
+    {
+      "id": "duplicate-positions",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "Total", "box": [10, 20, 50, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "Total", "box": [10, 40, 50, 52] },
+        { "id": "l2", "page_index": 0, "ordinal": 2, "raw": "Total", "box": [100, 20, 140, 32] },
+        { "id": "l3", "page_index": 0, "ordinal": 3, "raw": "Total", "box": [100, 40, 140, 52] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "Total", "box": [10, 20, 50, 32] },
+        { "id": "r1", "page_index": 0, "ordinal": 1, "raw": "Total", "box": [10, 40, 50, 52] },
+        { "id": "r2", "page_index": 0, "ordinal": 2, "raw": "Total", "box": [100, 20, 140, 32] },
+        { "id": "r3", "page_index": 0, "ordinal": 3, "raw": "Total", "box": [100, 40, 140, 52] }
+      ]
+    },
+    {
+      "id": "column-order-differs",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "alpha", "box": [10, 20, 60, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "beta", "box": [10, 40, 60, 52] },
+        { "id": "l2", "page_index": 0, "ordinal": 2, "raw": "gamma", "box": [100, 20, 150, 32] },
+        { "id": "l3", "page_index": 0, "ordinal": 3, "raw": "delta", "box": [100, 40, 150, 52] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "alpha", "box": [10, 20, 60, 32] },
+        { "id": "r1", "page_index": 0, "ordinal": 1, "raw": "gamma", "box": [100, 20, 150, 32] },
+        { "id": "r2", "page_index": 0, "ordinal": 2, "raw": "beta", "box": [10, 40, 60, 52] },
+        { "id": "r3", "page_index": 0, "ordinal": 3, "raw": "delta", "box": [100, 40, 150, 52] }
+      ]
+    },
+    {
+      "id": "page-level-no-rescue",
+      "left": [
+        {
+          "id": "l0",
+          "page_index": 0,
+          "ordinal": 0,
+          "raw": "Same words",
+          "box": null,
+          "precision": "page_only"
+        },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "Anchor", "box": [10, 20, 60, 32] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "Same words", "box": [10, 40, 80, 52] },
+        { "id": "r1", "page_index": 0, "ordinal": 1, "raw": "Anchor", "box": [10, 20, 60, 32] }
+      ]
+    },
+    {
+      "id": "region-scoped",
+      "region": [0, 0, 200, 35],
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "inside", "box": [10, 20, 60, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "outside", "box": [10, 60, 60, 72] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "inside", "box": [10, 20, 60, 32] },
+        { "id": "r1", "page_index": 0, "ordinal": 1, "raw": "outside", "box": [10, 60, 60, 72] }
+      ]
+    },
+    {
+      "id": "unmatched-extra",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "alpha", "box": [10, 20, 60, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "bonus line", "box": [10, 40, 60, 52] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "alpha", "box": [10, 20, 60, 32] }
+      ]
+    },
+    {
+      "id": "ambiguous-tie",
+      "left": [
+        { "id": "l0", "page_index": 0, "ordinal": 0, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "l1", "page_index": 0, "ordinal": 1, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "l2", "page_index": 0, "ordinal": 2, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "l3", "page_index": 0, "ordinal": 3, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "l4", "page_index": 0, "ordinal": 4, "raw": "echo", "box": [10, 20, 60, 32] }
+      ],
+      "right": [
+        { "id": "r0", "page_index": 0, "ordinal": 0, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "r1", "page_index": 0, "ordinal": 1, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "r2", "page_index": 0, "ordinal": 2, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "r3", "page_index": 0, "ordinal": 3, "raw": "echo", "box": [10, 20, 60, 32] },
+        { "id": "r4", "page_index": 0, "ordinal": 4, "raw": "echo", "box": [10, 20, 60, 32] }
+      ]
+    },
+    {
+      "id": "normalized-text-supplied",
+      "left": [
+        {
+          "id": "l0",
+          "page_index": 0,
+          "ordinal": 0,
+          "raw": "Total  due",
+          "normalized_text": "Total due",
+          "box": [10, 20, 80, 32]
+        }
+      ],
+      "right": [
+        {
+          "id": "r0",
+          "page_index": 0,
+          "ordinal": 0,
+          "normalized_text": "Total due",
+          "box": [10, 20, 80, 32]
+        }
+      ]
+    }
+  ]
+}
