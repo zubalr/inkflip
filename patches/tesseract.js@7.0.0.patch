@@ -108,14 +108,14 @@ index 89b53b89b27f6579155ed2a0ef372fa8c2a8b8e6..f5d931b4c6c94609e06155b73d8ea9f8
    return workerRes;
  };
 diff --git a/src/index.d.ts b/src/index.d.ts
-index 2c9689db387906b7ce272ae15005f8b9aa56a269..ad7cde0f7ee85943a33c3dad41a180affb6b9856 100644
+index 2c9689db387906b7ce272ae15005f8b9aa56a269..d8da5cd95342d091da5a7b5ccd105855bae1a0fb 100644
 --- a/src/index.d.ts
 +++ b/src/index.d.ts
 @@ -51,6 +51,8 @@ declare namespace Tesseract {
    }
  
    interface WorkerOptions {
-+    /** Inkflip patch: abort initialization or active jobs and terminate the worker. */
++    /** Inkflip: abort readiness/posted jobs and terminate; upstream input loading is not cancelled. */
 +    signal?: AbortSignal
      corePath: string
      langPath: string

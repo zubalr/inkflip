@@ -405,6 +405,7 @@ def check_dependency_patch() -> None:
     try:
         lock = json.loads(jsonc_to_json((ROOT / "bun.lock").read_text()))
         installed = prepare_assets.package_root("tesseract.js")
+        patch_text = (ROOT / patch_path).read_text()
     except (OSError, json.JSONDecodeError, prepare_assets.AssetError) as error:
         fail("patch.install", str(error))
         return
@@ -420,6 +421,11 @@ def check_dependency_patch() -> None:
     check_file_digest(ROOT / patch_path, entry.get("patch_sha256"), "patch.bytes")
     files = entry.get("files", {})
     required_files = {"src/createWorker.js", "src/index.d.ts"}
+    headers = re.findall(r"^diff --git a/(\S+) b/(\S+)$", patch_text, re.M)
+    expected_headers = {(relative, relative) for relative in required_files}
+    require(set(headers) == expected_headers and len(headers) == len(expected_headers),
+            "patch.targets", "patch contains missing, repeated or unexpected file targets",
+            "patch modifies only its two recorded source files")
     require(set(files) == required_files, "patch.files", "unexpected patched file set",
             "constructor and public types are the complete patched file set")
     for relative in sorted(required_files):

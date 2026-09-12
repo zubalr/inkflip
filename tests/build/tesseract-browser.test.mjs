@@ -83,3 +83,20 @@ for (const stage of ['load', 'loadLanguage', 'initialize', 'ready']) {
     }
   });
 }
+
+test('prepared byte input rejects on abort before any job is posted', { timeout: 15000 }, async () => {
+  const page = await browser.newPage();
+  try {
+    await page.goto(base);
+    await page.evaluate(() => window.start('ready'));
+    await page.waitForFunction(() => window.outcome === 'ready');
+    const outcome = await page.evaluate(async () => {
+      const pending = worker.recognize(new Uint8Array([137, 80, 78, 71]));
+      controller.abort(new Error('abort before image microtask'));
+      return pending.then(() => 'unexpected success', (error) => error.message);
+    });
+    assert.equal(outcome, 'abort before image microtask');
+  } finally {
+    await page.close();
+  }
+});

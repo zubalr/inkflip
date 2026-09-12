@@ -1,5 +1,6 @@
 """Tampering with patch declarations, source or bytes fails frozen verification."""
 import contextlib
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -48,7 +49,17 @@ class DependencyPatchTests(unittest.TestCase):
 
     def test_missing_patch_fails(self):
         (self.root / "patches/tesseract.js@7.0.0.patch").unlink()
-        self.assertTrue(any("patch.bytes" in item for item in self.verify()))
+        self.assertTrue(any("patch.install" in item for item in self.verify()))
+
+    def test_unrecorded_patch_target_fails_even_with_updated_digest(self):
+        patch = self.root / "patches/tesseract.js@7.0.0.patch"
+        with patch.open("a") as handle:
+            handle.write("\ndiff --git a/.bun-tag-extra b/.bun-tag-extra\nnew file mode 100644\n")
+        metadata = self.root / "config/dependency-patches.json"
+        record = json.loads(metadata.read_text())
+        record["tesseract.js@7.0.0"]["patch_sha256"] = hashlib.sha256(patch.read_bytes()).hexdigest()
+        metadata.write_text(json.dumps(record))
+        self.assertTrue(any("patch.targets" in item for item in self.verify()))
 
     def test_unpatched_or_modified_constructor_fails(self):
         (self.installed / "src/createWorker.js").write_text("module.exports = async () => {};\n")
