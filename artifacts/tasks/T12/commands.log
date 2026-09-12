@@ -1,0 +1,55 @@
+# T12 executed command transcript
+date: 2026-09-12T01:20:10Z  host: Darwin 25.5.0 arm64  node: v26.7.0  python: Python 3.14.7  bun: 1.4.0
+worktree: /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t12  branch: work/devin/t12
+
+$ node --test tests/alignment/*.test.mjs
+ℹ tests 36
+ℹ pass 36
+ℹ fail 0
+ℹ skipped 0
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T12
+{
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": { "collected": 36, "passed": 36, "failed": 0, "skipped": 0 },
+  "records": [{
+    "segment": "node --test tests/alignment/*.test.mjs",
+    "executed_argv": ["node","--test-reporter=junit","--test-reporter-destination=<tmp>","--test",
+      "tests/alignment/alignment.test.mjs","tests/alignment/normalization.test.mjs"],
+    "exit": 0,
+    "tests": { "collected": 36, "passed": 36, "failed": 0, "skipped": 0 }
+  }]
+}
+exit: 0
+
+$ bun run verify
+(python3 scripts/task_acceptance.py run verify)
+Ran 49 bootstrap tests OK; 2 native-bootstrap tests OK; 30 coordination tests OK
+self-check: 16 commands in config/acceptance-commands.json
+exit: 0
+
+$ bun x --no-install tsc -b tsconfig.json --force
+exit: 0
+(note: packages/compare/tsconfig.json has include: ["src/**/*.ts"]; the scaffold's
+src/ tree does not exist yet — wiring it is the comparison-runtime task's scope.
+Type-cleanliness of the new modules was verified separately below.)
+
+$ bun x --no-install tsc -p <tmp>/tsconfig.check.json
+(temp config: root tsconfig + allowImportingTsExtensions + noEmit, including
+ packages/compare/{normalization,alignment}/** plus contracts/geometry sources)
+packages/contracts/src/core.ts(66,16): error TS2304: Cannot find name 'TextEncoder'.
+packages/contracts/src/core.ts(67,16): error TS2304: Cannot find name 'TextDecoder'.
+packages/contracts/src/core.ts(559,13): error TS2304: Cannot find name 'structuredClone'.
+exit: nonzero on pre-existing ambient-global names in T03 contracts code only;
+zero diagnostics in packages/compare/normalization/ or packages/compare/alignment/.
+These globals exist at runtime on node 26; the scaffold lib config is a T02/T13 concern.
+
+# README executable examples (both modules) were run verbatim and produced the
+# documented output (normalized text + recovered raw slice; one_to_one match
+# with geometry 0 / order 0 / text 0.222 / cost 0.033 diagnostics).
+
+# Development-time measurement behind the pairPreference parameter and the
+# exchange-margin pass is recorded in experiment-granularity.md.
