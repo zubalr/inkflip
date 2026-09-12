@@ -10,6 +10,27 @@
   "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
   "ready_for_review": true,
   "review_scope": "implementation_commit 394e65c07be89e2a867b0b316fe46940f927dbf9 plus evidence commits on this branch",
+  "checkpoint": {
+    "recorded_at": "2026-09-13 (overnight handoff)",
+    "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
+    "completed_checks": [
+      "uv run --project native python -m pytest native/tests/ocr -q -> 20/20 passed (exit 0)",
+      "uv run --project native python -m pytest native/tests -q -> 73 passed + 126 subtests (exit 0)",
+      "bun run test:native -> exit 0",
+      "python3 scripts/task_acceptance.py task T27 -> exit 0",
+      "bun run verify -> exit 0"
+    ],
+    "failures_found_and_fixed_during_implementation": [
+      "PSM 6 dropped the isolated '$100' line on the F01 render; native default changed to PSM 3 (measured decision below)",
+      "language parameter was overwritten by a hardcoded default inside extract(); fixed and covered by the missing-model test",
+      "test-side float tolerances and expectations corrected (float32 source boxes, crop-box physical dims 960x700 not mediabox, padding expectation, generation argument)"
+    ],
+    "next_steps": [
+      "Coordinator: independent review of candidate 394e65c/ffe7313 on origin/work/zcode/t27; worker handles revisions on the same branch if findings arrive",
+      "After T27 acceptance: T28 (deps T26+T05 met) and T29 (deps T03+T26 met) are dispatchable to zcode",
+      "Recorded follow-ups for other owners: committed F14/F15 fixture families (fixture lane); T29 wraps T26/T27 adapters with process-group supervision and atomic partial results"
+    ]
+  },
   "executed_commands": [
     {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20}},
     {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126}},
