@@ -114,7 +114,7 @@
    "evidence": "8fb1cee",
    "wave3_wip_impl": "d4caea5",
    "wave3_wip_tests": "c757be7",
-   "wave3_wip_evidence": "6139ddc (amended to include this field update)"
+   "wave3_wip_evidence": "f221660"
   },
   "evidence_paths": [
    "artifacts/tasks/T10/handoff.json",
