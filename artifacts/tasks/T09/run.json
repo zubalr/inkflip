@@ -1,8 +1,8 @@
 {
   "task": "T09",
   "beads_id": "pdf-t09",
-  "evaluated_commit": "b6aad4da2c503b09a17f5932d9c3ac1ff5f0e993",
-  "evaluated_at": "2026-09-12T01:57:52.464181+00:00",
+  "evaluated_commit": "927b07049ffc65842a5c537f9b294d8fc9402133",
+  "evaluated_at": "2026-09-12T02:43:46.906349+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -31,15 +31,15 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "\nRunning 10 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/10] tests/readers/pdfjs.spec.ts:166:1 \u203a pinned pair + describe() identity and honest capabilities\n\u001b[1A\u001b[2Ktests/readers/pdfjs.spec.ts:166:1 \u203a pinned pair + describe() identity and honest capabilities\npinned pdf.mjs sha256=91e29f812c593904e8d48d022db5ddf93e3443575d4765ac9bfbb42494cfbd8d\n\n\u001b[1A\u001b[2Kpinned pdf.worker.mjs sha256=df3bf6bf6b8b8dac8a4042d8c4ecf1cf21e1d197e0fe231c192122409eba656b\n\n\u001b[1A\u001b[2K[2/10] tests/readers/pdfjs.spec.ts:225:1 \u203a F01 mapping vs control: bytes in, raw text out, identical raster\n\u001b[1A\u001b[2K[3/10] tests/readers/pdfjs.spec.ts:373:1 \u203a F02 covered vs control: hidden layer kept raw, raster unaffected\n\u001b[1A\u001b[2K[4/10] tests/readers/pdfjs.spec.ts:440:1 \u203a F07 rotations and origins: page records, R*C verification, raster dims\n\u001b[1A\u001b[2K[5/10] tests/readers/pdfjs.spec.ts:572:1 \u203a F08 UserUnit values: no double scaling, fiducial square lands exactly\n\u001b[1A\u001b[2K[6/10] tests/readers/pdfjs.spec.ts:657:1 \u203a render cancellation releases task and canvas; later renders unaffected\n\u001b[1A\u001b[2K[7/10] tests/readers/pdfjs.spec.ts:745:1 \u203a text extraction mid-walk cancel retains produced evidence\n\u001b[1A\u001b[2K[8/10] tests/readers/pdfjs.spec.ts:803:1 \u203a unavailable capabilities terminate unsupported with named reasons\n\u001b[1A\u001b[2K[9/10] tests/readers/pdfjs.spec.ts:855:1 \u203a open verifies digest; closing one generation spares the next\n\u001b[1A\u001b[2K[10/10] tests/readers/pdfjs.spec.ts:929:1 \u203a F10/F11 absent from T05 tree; ordinal identity preserves duplicates\n\u001b[1A\u001b[2Ktests/readers/pdfjs.spec.ts:929:1 \u203a F10/F11 absent from T05 tree; ordinal identity preserves duplicates\nF10/F11: not generated in T05 tree; substitutes = F01/F02 raw preservation + ordinal identity check below\n\n\u001b[1A\u001b[2K  10 passed (2.8s)\n",
-      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/readers/pdfjs.spec.ts\n(node:56230) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:56238) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "stdout": "\nRunning 10 tests using 1 worker\n\n\u001b[1A\u001b[2K[1/10] tests/readers/pdfjs.spec.ts:184:1 \u203a pinned pair + describe() identity and honest capabilities\n\u001b[1A\u001b[2Ktests/readers/pdfjs.spec.ts:184:1 \u203a pinned pair + describe() identity and honest capabilities\npinned pdf.mjs sha256=91e29f812c593904e8d48d022db5ddf93e3443575d4765ac9bfbb42494cfbd8d\n\n\u001b[1A\u001b[2Kpinned pdf.worker.mjs sha256=df3bf6bf6b8b8dac8a4042d8c4ecf1cf21e1d197e0fe231c192122409eba656b\n\n\u001b[1A\u001b[2K[2/10] tests/readers/pdfjs.spec.ts:232:1 \u203a F01 mapping vs control: bytes in, raw text out, identical raster\n\u001b[1A\u001b[2K[3/10] tests/readers/pdfjs.spec.ts:367:1 \u203a F02 covered vs control: hidden layer kept raw, raster unaffected\n\u001b[1A\u001b[2K[4/10] tests/readers/pdfjs.spec.ts:432:1 \u203a F07 rotations and origins: page records, R*C verification, raster dims\n\u001b[1A\u001b[2K[5/10] tests/readers/pdfjs.spec.ts:560:1 \u203a F08 UserUnit values: no double scaling, fiducial square lands exactly\n\u001b[1A\u001b[2K[6/10] tests/readers/pdfjs.spec.ts:632:1 \u203a render cancellation releases task and canvas; later renders unaffected\n\u001b[1A\u001b[2K[7/10] tests/readers/pdfjs.spec.ts:699:1 \u203a text extraction mid-walk cancel retains produced evidence\n\u001b[1A\u001b[2K[8/10] tests/readers/pdfjs.spec.ts:748:1 \u203a unavailable capabilities terminate unsupported with named reasons\n\u001b[1A\u001b[2K[9/10] tests/readers/pdfjs.spec.ts:787:1 \u203a open verifies digest; closing one generation spares the next\n\u001b[1A\u001b[2K[10/10] tests/readers/pdfjs.spec.ts:837:1 \u203a F10/F11 absent from T05 tree; ordinal identity preserves duplicates\n\u001b[1A\u001b[2Ktests/readers/pdfjs.spec.ts:837:1 \u203a F10/F11 absent from T05 tree; ordinal identity preserves duplicates\nF10/F11: not generated in T05 tree; substitutes = F01/F02 raw preservation + ordinal identity check below\n\n\u001b[1A\u001b[2K  10 passed (4.2s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/readers/pdfjs.spec.ts\n",
       "tests": {
         "collected": 10,
         "passed": 10,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t09",
+      "checkout": "/home/ubuntu/repos/inkflip",
       "environment": {}
     }
   ]
