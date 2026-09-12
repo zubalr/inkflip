@@ -1,51 +1,36 @@
-# Astra coordinator, Mac SWE swarm and Homebase Goal worker
+# Devin coordinator, Mac Antigravity and Homebase ZCode
 
-The owner ended Cloud execution for quota consumption and selected Devin Local
-with SWE-2 Max on the Mac plus native ZCode on Homebase. The owner subsequently
-selected Codex/Astra as the sole coordinator and hard-work owner, with SWE as
-a local implementation swarm and ZCode continuously running in Goal mode.
-Antigravity is inactive.
+The owner resumed work on September 12, 2026 after the scheduled stop and
+selected Devin Local SWE-2 Max as sole orchestrator and hard-work owner again.
+Antigravity runs on the Mac; ZCode keeps its existing Goal on Homebase. Codex
+has transferred coordination and its continuation heartbeat remains paused.
+Cloud and the old Mac ZCode project session remain outside this execution.
 This document defines transport and operating priorities; Beads remains the only
 live task state. `execution/passes.json` owns the static task allocation.
 
 ## Responsibilities and order
 
-Astra owns architecture, difficult implementation, integration, failure diagnosis,
-security boundaries and independent acceptance. SWE-2 owns substantial bounded
-feature implementation and independent assigned reviews. ZCode owns defined components,
+Devin owns architecture, difficult implementation, integration, failure diagnosis,
+security boundaries and independent acceptance. Antigravity owns interface implementation, accessibility, visual checks and
+independent assigned reviews. SWE-2 general children execute bounded Devin work. ZCode owns defined components,
 fixtures, repeated verification, examples and supporting deliverables. Each
 ZCode grant includes the established contract, scope, real command and expected
 observable result. ZCode escalates a contract ambiguity through task evidence;
-Astra resolves it before expanding scope. Volume work still requires correctness.
+Devin resolves it before expanding scope. Volume work still requires correctness.
 
-The initial sequence is:
+On transfer, read the latest Beads `pdf-pass1` notes and the handoff referenced
+there. Inspect existing native sessions and preserve their branches and dirty
+edits before any resume. Finish saved T10 and fixture integration/review work;
+refresh stale foundation receipts before granting dependent tasks. T27 already
+has an acceptance receipt; verify its freshness against subsequent shared changes.
+Grant T28 to Homebase ZCode after predecessor validation. Devin owns native
+supervision, CLI, version comparison, security, integration and difficult defects;
+Antigravity owns the browser interface path. Later passes require actual gates.
 
-1. Resume Cloud's T10 branch and reproduce the remaining crop/resize failure.
-   Validate the proposed arithmetic against the actual transform contract rather
-   than copying the handoff's suggested fix. Complete its browser evidence.
-2. Finish T27's interrupted independent review on Linux using its saved candidate
-   and partial review. Reproduce the T26 PDFium drift and `pdf-p7q` tool binding
-   issue before changing code. Keep product failures distinct from environment
-   failures. Give ZCode concrete review revisions or missing evidence to produce.
-3. Once T27 is accepted, give ZCode T28's bounded structural reader while SWE
-   develops the dependency-critical browser path: file/region selection, viewer
-   composition, report export/import and evidence navigation. Prefer one coherent
-   integration path over a large set of unfinished branches.
-4. Revalidate stale acceptance inputs on the integrated candidate before G1.
-   Then advance through the defined passes: native supervision/CLI/resume and
-   version comparison stay with Astra; examples, repeated experimental runs,
-   layout coverage, notices and documentation use ZCode where assigned.
-5. Execute the real browser investigation scenarios and native regression gates.
-   Resolve failures and request missing physical-device evidence honestly. T54
-   public deployment remains an owner decision.
-
-The owner removed fixed numerical worker budgets. Astra admits concrete waves
-of independent work and accounts for all native descendants in Beads. Add
-workers when ready scopes, compute and review capacity justify them; retire
-finished workers and avoid redundant supervisors. SWE uses native general
-subagents, Astra may use Codex subagents, and ZCode uses supported native Goal
-parallelism. Each writer has its own branch and checkout. Native platform
-limits and resource contention still apply.
+Use up to five concurrent workers, including native descendants, and honor any
+lower harness limit. Every writer has a named scope and isolated checkout. Keep
+review capacity available and retire completed workers. Existing grants retain
+their saved app and branch when the static future allocation changes.
 
 Run one heavy OCR/corpus/performance job at a time, recording its holder in the
 task's Beads note. Linux review uses a separate checkout from ZCode and shares
@@ -55,20 +40,20 @@ simultaneous checkouts; app ports are defaults, not permission to reuse a busy p
 The objective is to finish the authorized product, with no invented clock
 deadline. Continue useful ready work, fix ordinary failures, publish recoverable
 progress and resume native sessions without new per-ticket owner prompts.
-Astra continues across active turns and same-task heartbeat runs until the
+Devin continues through its existing native session until the
 objective is achieved or an actual external blocker needs the owner. Keep expensive
 reasoning focused on actual uncertainty. Do not add speculative refactors,
 duplicate checks or unattended quota-reset jobs. On exhaustion, preserve work and
 leave a precise handoff. The Mac must remain awake and network-connected for
-Astra coordination, new grants, integration and GitHub publication. Homebase can
+Devin coordination, new grants, integration and GitHub publication. Homebase can
 finish an existing assignment while disconnected but must wait for the relay.
 
 ## Workspaces and state
 
 | Role | Canonical checkout | Execution |
 | --- | --- | --- |
-| Astra | `/Users/zubair/Code/Projects/pdf project/original` on `main` | Existing Codex task and bounded Codex subagents; hard edits in separate worktrees |
-| SWE-2 | Isolated Mac task/review worktrees under the existing project | Native Local general subagents directed by Astra; no Beads writes or GitHub pushes |
+| Devin lead | `/Users/zubair/Code/Projects/pdf project/original` on `main` | Existing Local SWE-2 Max session; hard edits in isolated worktrees |
+| Mac workers | Isolated Mac task/review worktrees under the existing project | Antigravity and native SWE-2 general children; no Beads writes or GitHub pushes |
 | ZCode | `/home/wertyp/.local/share/homebase-factory/projects/inkflip` on `main` | Native Goal; isolated Homebase task worktrees for granted writers |
 
 Homebase's project-local toolchain is activated with
@@ -77,7 +62,7 @@ Keep this canonical Homebase checkout on clean published main for control reads;
 put implementation/review checkouts under
 `/home/wertyp/.local/share/homebase-factory/worktrees/inkflip/`.
 
-Only Astra in the Mac integration session writes Beads. Mac linked worktrees read its
+Only Devin in the Mac integration session writes Beads. Mac linked worktrees read its
 canonical database without `--sync`. Homebase has a native read replica restored
 from `file:///home/wertyp/.local/share/homebase-factory/git/inkflip.git`; it reads
 with `python3 scripts/native_pass.py status zcode --sync` from its canonical main.
@@ -104,7 +89,7 @@ these guards to branch refs, so they permit native snapshot rollover.
 
 1. Mac: read the current pass, grants and blockers. Resume an unfinished grant on
    its saved branch before dispatching another task. New grants use
-   `python3 scripts/native_pass.py dispatch Txx --app codex|devin|zcode`.
+   `python3 scripts/native_pass.py dispatch Txx --app devin|antigravity|zcode`.
 2. Mac: publish reviewed code and native Beads changes to GitHub, then run
    `python3 scripts/homebase_relay.py publish`. Do this after dispatch, a handoff
    note, acceptance, or any change Homebase must see. Failed publication blocks
@@ -122,18 +107,17 @@ these guards to branch refs, so they permit native snapshot rollover.
 5. Mac: poll `python3 scripts/homebase_relay.py collect` during native coordination.
    It imports new active ZCode candidates and pushes their exact commit to the
    original assigned GitHub branch after ancestry checks. It does not accept or
-   merge work. Astra orders independent review, resolves findings, integrates
+   merge work. Devin orders independent review, resolves findings, integrates
    and records actual acceptance before dispatching dependent work.
 
-Assigned SWE or Codex reviewers inspect ZCode independently; every implementation,
-including Astra edits, receives an independent actual reviewer. Use real session identities in evidence. Homebase reviewers
+Assigned Antigravity or independent SWE reviewers inspect ZCode independently; every implementation,
+including Devin edits, receives an independent actual reviewer. Use real session identities in evidence. Homebase reviewers
 must not share a writing checkout with ZCode. Held-out labels require the
 repository's actual access isolation, not another folder or a reviewer persona.
 
-During an active run, Astra uses bounded waits while native workers execute.
-A same-task Codex heartbeat resumes coordination after the active turn ends;
-it reads Beads and native session state before acting, reports meaningful
-changes only, and is paused when work completes or the owner stops it.
+During an active run, Devin uses bounded waits while native workers execute,
+collects Homebase checkpoints and resumes granted work after ordinary interruptions.
+The previous Codex heartbeat remains paused to prevent a second coordinator.
 ZCode keeps its native Goal loop and 30–60 second state refresh. There is no
 custom daemon or mirrored work queue. Continue other
 ready work during an unrelated network/model block. Do not redispatch another

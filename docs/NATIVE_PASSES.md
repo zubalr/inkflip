@@ -1,4 +1,4 @@
-# Astra coordination with native worker swarms
+# Devin coordination with Mac Antigravity and Homebase ZCode
 
 The owner approved this private Git remote, source sharing with the three
 selected harnesses, implementation commits, pushes, review and integration.
@@ -14,12 +14,12 @@ run the frozen planning package's bootstrap helper.
 
 ## Startup and state
 
-The active setup is Codex/Astra coordinating here, Devin Local SWE-2 on the Mac,
-and ZCode Goal mode on Homebase. Astra alone assigns work, writes Beads, publishes
+The active setup is Devin Local SWE-2 coordinating on the Mac, Antigravity on
+the Mac, and ZCode Goal mode on Homebase. Devin alone assigns work, writes Beads, publishes
 GitHub state, integrates candidates and accepts product tasks. Both worker apps
 remain subordinate to those grants, including their native subagents.
 Read `docs/HOMEBASE.md` for the concrete work allocation, SSH relay, activation,
-checkpoint/review loop and startup paths. Antigravity and Devin Cloud are stopped.
+checkpoint/review loop and startup paths. Codex continuation and Devin Cloud are stopped.
 Only the canonical Mac integration session writes Beads or publishes to GitHub.
 Mac linked worktrees use its existing database; Homebase uses a native read
 replica restored from its local Git relay. Neither host initializes a competing
@@ -84,11 +84,11 @@ finish. Keep T54 outside the three passes.
 
 ## Dispatch and isolation
 
-On clean, published main Astra runs, for example:
+On clean, published main Devin runs, for example:
 
 ```sh
-python3 scripts/native_pass.py dispatch T29 --app codex
-python3 scripts/native_pass.py dispatch T08 --app devin
+python3 scripts/native_pass.py dispatch T29 --app devin
+python3 scripts/native_pass.py dispatch T13 --app antigravity
 python3 scripts/native_pass.py dispatch T05 --app zcode
 ```
 
@@ -102,18 +102,15 @@ relay alone handles native Git storage rollover for `refs/dolt/data` with an
 exact observed-SHA lease; see `docs/HOMEBASE.md`. Publish each ZCode grant
 to the Homebase relay before expecting its worker to see it.
 
-The owner explicitly removed fixed worker maxima. A null budget in
-`execution/passes.json` means concurrency is admitted by Astra for the current
-wave, not automatic unlimited spawning. Size each wave to ready independent
-work, disjoint file scopes, machine resources, model availability and review
-capacity. Store the concrete worker/reviewer allocations in Beads task notes.
-Astra may add Codex subagents, SWE may run native general subagents, and ZCode
-may parallelize granted independent work when its actual native capabilities
-support it. Every descendant needs a named role and checkout; close idle or
-completed workers and yield writing ownership before review. Antigravity stays
-inactive. Native platform ceilings and actual resource contention still apply.
-Only one heavy OCR/corpus/performance run at a time; the coordinator records
-the holder on its Bead.
+Admit up to five concurrent workers across the project, including native
+children, subject to lower harness limits. A null per-app budget allows Devin
+to allocate that shared capacity; it does not remove the global limit. Account
+for every active native descendant in Beads, reserve independent review capacity,
+and close finished workers. Historical native UI cards are not a live count.
+Use native general SWE-2 subagents and Antigravity's installed native facilities.
+ZCode uses its existing Goal on Homebase. Codex stays inactive after this transfer.
+Only one heavy OCR/corpus/performance run may execute at a time; record its holder
+in Beads and obtain an explicit release before transferring the reservation.
 
 For a grant, fetch origin/main and the assigned branch. Use one isolated
 worktree/clone per writer. If the branch exists, resume its committed work;
@@ -142,7 +139,7 @@ immutable download caches.
    labels require a restricted evaluator environment: another same-user
    worktree or reviewer persona is not access isolation.
 2. Commit source and evidence on the assigned branch. Mac workers return the
-   local commit to Astra; only Astra publishes to GitHub. Homebase workers push
+   local commit to Devin; only Devin publishes to GitHub. Homebase workers push
    their local handoff branch through `docs/HOMEBASE.md`. Write task-local
    `handoff.json` with task, worker, exact implementation_commit, executed
    commands/counts, evidence paths, limitations, dependency requests and
@@ -179,9 +176,9 @@ When blocked on another app, do independent work first, then use bounded
 resumability/compaction. Local workers read the shared canonical Beads state
 without remote pulls; the coordinator handles remote synchronization.
 
-Workers continue through ready granted work and later passes as Astra opens
+Workers continue through ready granted work and later passes as Devin opens
 them after actual gates. A wave ending is a checkpoint, not permission to
-dispatch themselves. Astra finishes when the authorized product scope is
+dispatch themselves. Devin finishes when the authorized product scope is
 accepted with actual gate evidence, or records a specific external blocker. A single ticket or a
 temporarily empty inbox is not completion. Report accepted tasks, actual gate
 results, main commit and material blockers. Quotas, authentication, native UI

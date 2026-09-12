@@ -21,22 +21,23 @@ once per session, then only the assigned task's inputs.
 
 - Beads owns live status, dependencies, claims, notes and acceptance. Product task
   T01 maps to pdf-t01. Static planning and passes.json are not live task state.
-- Codex/Astra on the Mac is the sole integration lead and Beads writer. Devin
-  Local SWE-2 and Homebase ZCode consume assignments; Antigravity is inactive.
+- Devin Local SWE-2 on the Mac is the sole integration lead, hard-work owner
+  and Beads writer. Mac Antigravity and Homebase ZCode consume assignments.
+  Codex has yielded coordination and its continuation heartbeat stays paused.
   Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
-  The owner replaced fixed worker maxima with adaptive concurrency. Admit
-  useful independent work with disjoint ownership, available compute and review
-  capacity. Account for native descendants in Beads; no recursive unbounded
-  spawning. Writers yield before review. Native platform limits still apply.
+  Admit useful independent work with disjoint ownership and review capacity,
+  up to five concurrent workers including native descendants. Honor lower
+  harness limits. Record allocations in Beads; writers yield before review.
 - One branch, one writer, one isolated checkout. Preserve existing work. Never
   reset, clean, force-push or overwrite another checkout. Mac worktrees share
   the canonical Beads database. Homebase pulls a native read replica through
   the project SSH relay; only the Mac coordinator publishes authoritative state.
 - The owner explicitly approved private GitHub access, source sharing with the
   selected harnesses, commits, pushes, review and integration. The current
-  execution uses Astra, Local SWE-2 and Homebase ZCode; Cloud is stopped. Only Astra
+  execution uses Mac Devin Local SWE-2, Mac Antigravity and Homebase ZCode.
+  Cloud is stopped. Only the Devin coordinator
   accepts/closes product tasks after independent review and real merged checks.
   T54 public publication/deployment and messages to people require approval.
 - Continue ready work through the defined passes; do not stop at each ticket.

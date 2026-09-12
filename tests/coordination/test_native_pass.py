@@ -29,15 +29,17 @@ class PassTests(unittest.TestCase):
         self.assertEqual(len(owned), len(set(owned)))
         self.assertEqual(set(owned), set(planned))
         self.assertEqual(len(owned), 53)
-        self.assertEqual(self.config["integration_owner"], "codex")
+        self.assertEqual(self.config["integration_owner"], "devin")
         self.assertEqual(self.config["worker_budgets"], {
-            "codex": None, "devin": None, "antigravity": 0, "zcode": None})
-        self.assertIsNone(self.config["max_active_workers"])
-        self.assertEqual(self.config["apps"]["codex"]["tasks"],
-                         "T03 T04 T11 T15 T23 T24 T25 T29 T30 T32 T33 T34 T40 T46 T48 T51 T52 T55".split())
+            "codex": 0, "devin": None, "antigravity": None, "zcode": None})
+        self.assertEqual(self.config["max_active_workers"], 5)
+        self.assertEqual(self.config["apps"]["codex"]["tasks"], [])
+        self.assertLessEqual(set("T03 T04 T11 T15 T23 T24 T25 T29 T30 T32 T33 T34 T40 T46 T48 T51 T52 T55".split()),
+                             set(self.config["apps"]["devin"]["tasks"]))
         self.assertEqual(self.config["apps"]["zcode"]["tasks"],
-                         "T05 T17 T21 T26 T27 T28 T35 T37 T38 T41 T42 T44 T45 T47 T49 T50".split())
-        self.assertEqual(self.config["apps"]["antigravity"]["tasks"], [])
+                         "T05 T21 T26 T27 T28 T35 T41 T42 T44 T45 T47".split())
+        self.assertEqual(self.config["apps"]["antigravity"]["tasks"],
+                         "T06 T07 T13 T14 T17 T19 T20 T37 T38 T49 T50".split())
 
     def test_no_pass_depends_on_future_work(self):
         seen = set(self.config["completed_bootstrap"])
@@ -77,8 +79,10 @@ class PassTests(unittest.TestCase):
         self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 3, "zcode"))
 
     def test_adaptive_capacity_has_no_numeric_ceiling_but_preserves_admission(self):
+        # The generic helper still supports null; live project policy caps at five.
+        self.config["max_active_workers"] = None
         stage = self.config["passes"][0]
-        for app, task in (("codex", "T03"), ("devin", "T10"), ("zcode", "T27")):
+        for app, task in (("antigravity", "T13"), ("devin", "T10"), ("zcode", "T27")):
             workers = [{"metadata": {"execution": {"app": app}}}] * 100
             with self.subTest(app=app):
                 self.assertEqual(p.dispatch_errors(self.config, stage, task,
@@ -88,7 +92,15 @@ class PassTests(unittest.TestCase):
                 self.assertTrue(p.dispatch_errors(self.config, None, task,
                                                  {"status": "open"}, workers, app))
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(
-            self.config, stage, "T03", {"status": "open"}, [], "antigravity"))
+            self.config, stage, "T03", {"status": "open"}, [], "codex"))
+
+    def test_live_project_rejects_a_sixth_worker(self):
+        stage = self.config["passes"][0]
+        workers = [{"metadata": {"execution": {"app": "devin"}}}] * 5
+        self.assertIn("Global worker capacity is occupied", p.dispatch_errors(
+            self.config, stage, "T13", {"status": "open"}, workers, "antigravity"))
+        with self.assertRaisesRegex(ValueError, "not owned"):
+            p.assignment(self.config, "T29", "codex", "a" * 40, 1)
 
     def test_finite_global_and_app_limits_work_independently_of_null(self):
         stage = self.config["passes"][0]
@@ -101,22 +113,22 @@ class PassTests(unittest.TestCase):
         self.assertEqual(p.dispatch_errors(self.config, stage, "T27", {"status": "open"}, workers, "zcode"),
                          ["App worker capacity is occupied"])
 
-    def test_new_codex_assignment_and_existing_grants_keep_their_original_app_and_branch(self):
-        grant = p.assignment(self.config, "T03", "codex", "a" * 40, 1)
-        self.assertEqual(grant["branch"], "work/codex/t03")
+    def test_new_devin_assignment_and_existing_grants_keep_their_original_app_and_branch(self):
+        grant = p.assignment(self.config, "T03", "devin", "a" * 40, 1)
+        self.assertEqual(grant["branch"], "work/devin/t03")
         issues = {}
-        for task, app in (("T10", "devin"), ("T27", "zcode"), ("T03", "devin")):
+        for task, app in (("T10", "devin"), ("T27", "zcode"), ("T03", "codex")):
             issues[p.c.bead_id(task)] = {"status": "in_progress", "assignee": "saved-worker",
                 "metadata": {"execution": {"app": app, "branch": f"work/{app}/{task.lower()}",
                                            "base": "b" * 40, "pass": 1}}}
         before = json.dumps(issues, sort_keys=True)
         with patch.object(p.c, "admission_lock"), patch.object(p.c, "issues_by_id", return_value=issues), \
              patch.object(p.c, "bd") as bd:
-            for app, expected in (("devin", {"T10", "T03"}), ("zcode", {"T27"}), ("codex", set())):
+            for app, expected in (("devin", {"T10"}), ("zcode", {"T27"}), ("codex", {"T03"})):
                 with redirect_stdout(StringIO()) as output:
                     p.status(app, False)
                 inbox = json.loads(output.getvalue())
-                self.assertIsNone(inbox["worker_budget"])
+                self.assertEqual(inbox["worker_budget"], self.config["worker_budgets"][app])
                 self.assertEqual({item["task"] for item in inbox["assignments"]}, expected)
                 for item in inbox["assignments"]:
                     self.assertEqual(item["branch"], f"work/{app}/{item['task'].lower()}")
