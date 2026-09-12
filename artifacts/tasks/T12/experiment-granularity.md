@@ -46,7 +46,7 @@ re-solve and (b) bounded local exchanges: every candidate pair sharing a
 fragment may conflict with at most two other chosen pairs, and displaced
 fragments are rescued by a fresh bounded solve or left unmatched.
 Re-run: all five occurrences `ambiguous` with `reason: tie`,
-`margin: 0.1 < 0.12`, 27 candidates accessible per contested unit.
+`margin: 0.1 < 0.12`, 96-160 candidates (verified at review; earlier figure stale) accessible per contested unit.
 
 **Rejected along the way:** accepting crossing assignments outright
 (violates the geometry/order agreement requirement — a positional cross
