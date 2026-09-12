@@ -180,7 +180,7 @@ export function clipToView(
       return [a[0] + t * (b[0] - a[0]), h];
     },
   );
-  if (pts.length === 0) {
+  if (Math.abs(signedArea(pts)) === 0) {
     // Fully outside: source polygon is preserved for the outside-view
     // inset; nothing is moved onto the page.
     return { status: 'outside', clipped: null, source, fullyVisible: false };

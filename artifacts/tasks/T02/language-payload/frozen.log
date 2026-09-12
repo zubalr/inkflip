@@ -1,0 +1,26 @@
+ok   toolchain.node: .node-version=22.23.2
+ok   toolchain.python: .python-version=3.13.15
+ok   toolchain.bun: packageManager=bun@1.4.0
+ok   toolchain.python-agreement: native interpreter pin ==3.13.15 matches .python-version
+ok   bun.lock.coverage: all 15 manifest specs resolve to hashed lock entries
+ok   bun.lock.trusted-policy: trustedDependencies declared explicitly (0 entries)
+ok   bun.lock.linker: isolated linker enforced
+ok   bun.lock.install-policy: exact saves + release-age gate enforced
+ok   patch.manifest: exact pinned patch declaration matches
+ok   patch.lock: exact pinned patch declaration matches
+ok   patch.version: installed package is tesseract.js@7.0.0
+ok   patch.path: patch path matches provenance
+ok   patch.bytes: tesseract.js@7.0.0.patch SHA-256 matches recorded provenance
+ok   patch.targets: patch modifies only its two recorded source files
+ok   patch.files: constructor and public types are the complete patched file set
+ok   patch.installed.src/createWorker.js: createWorker.js SHA-256 matches recorded provenance
+ok   patch.installed.src/index.d.ts: index.d.ts SHA-256 matches recorded provenance
+ok   uv.lock.interpreter: uv.lock interpreter ==3.13.15
+ok   uv.lock.coverage: all 5 declared pins locked exactly
+ok   uv.lock.hashes: every locked package carries sha256 artifact hashes (15 packages)
+ok   assets: 212 staged files hash-verified; 8 assets all same-origin with license/source
+ok   base-image.oci.python:3.13.15-slim-trixie: python:3.13.15-slim-trixie pinned at immutable digests
+ok   base-image.actions: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 recorded at immutable 11d5960a3267…
+ok   no-cdn.serve-paths: all staged serve_prefixes are same-origin /-paths
+ok   no-cdn.sources: web sources carry no remote script/worker/fetch or CDN reference
+check_dependencies: 25 passed, 0 failed

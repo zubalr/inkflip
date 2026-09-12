@@ -73,7 +73,8 @@ export interface TransformInput {
   source: string;
   /**
    * Points over which the stored matrix/inverse pair must compose within
-   * 1e-5 pt. Default probes cover origin, unit axes and a 1e6-pt extreme.
+   * 1e-5 pt. An explicit extent must contain at least one finite point.
+   * Default probes cover origin, unit axes and a +/-10,000-pt square.
    */
   extent?: Point[];
 }

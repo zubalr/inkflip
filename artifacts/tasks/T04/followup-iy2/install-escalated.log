@@ -1,0 +1,13 @@
+bun install v1.4.0 (34cbb9a40)
+Resolving dependencies
+Resolved, downloaded and extracted [1]
+
++ @axe-core/playwright@4.13.0
++ @playwright/test@1.57.0
++ ajv@8.18.0
++ oxfmt@0.67.0
++ oxlint@1.82.0
++ typescript@6.0.2
++ wrangler@4.131.0
+
+86 packages installed [3.98s]

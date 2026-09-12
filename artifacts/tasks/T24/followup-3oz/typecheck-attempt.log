@@ -1,0 +1,46 @@
+$ tsc -b
+validation/assets.ts(28,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/assets.ts(34,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/assets.ts(35,38): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/html_guard.ts(18,39): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/html_guard.ts(19,30): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/html_guard.ts(20,27): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/html_guard.ts(116,18): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(118,22): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(118,34): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(145,39): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(146,26): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(148,28): error TS18048: 'tag' is possibly 'undefined'.
+validation/html_guard.ts(152,26): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+validation/html_guard.ts(160,28): error TS18047: 'match' is possibly 'null'.
+validation/html_guard.ts(208,33): error TS2304: Cannot find name 'btoa'.
+validation/html_guard.ts(208,72): error TS2304: Cannot find name 'TextEncoder'.
+validation/import_gate.ts(34,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/import_gate.ts(36,49): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/import_gate.ts(37,36): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/import_gate.ts(38,45): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/import_gate.ts(41,16): error TS2304: Cannot find name 'TextEncoder'.
+validation/index.ts(13,70): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(19,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(26,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(34,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(36,56): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(42,8): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/index.ts(43,50): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/inflate.ts(18,31): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/inflate.ts(129,5): error TS2532: Object is possibly 'undefined'.
+validation/inflate.ts(147,34): error TS2532: Object is possibly 'undefined'.
+validation/inflate.ts(153,45): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+validation/names.ts(22,40): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/names.ts(23,31): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/png.ts(18,31): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/png.ts(19,47): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/png.ts(20,31): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+validation/png.ts(186,8): error TS18048: 'depths' is possibly 'undefined'.
+validation/png.ts(364,19): error TS18047: 'palette' is possibly 'null'.
+validation/png.ts(365,23): error TS18047: 'palette' is possibly 'null'.
+validation/png.ts(366,23): error TS18047: 'palette' is possibly 'null'.
+validation/png.ts(367,23): error TS18047: 'palette' is possibly 'null'.
+validation/png.ts(367,55): error TS18047: 'palette' is possibly 'null'.
+validation/png.ts(368,13): error TS18047: 'palette' is possibly 'null'.

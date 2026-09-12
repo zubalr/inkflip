@@ -4,12 +4,20 @@
     "composite": true,
     "declaration": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": ".",
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
+    "lib": [
+      "ES2022",
+      "WebWorker"
+    ]
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "validation/**/*.ts"
+  ],
   "references": [
-    { "path": "../contracts" },
-    { "path": "../geometry" },
-    { "path": "../compare" }
+    {
+      "path": "../contracts"
+    }
   ]
 }

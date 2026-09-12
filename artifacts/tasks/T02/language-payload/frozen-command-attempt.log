@@ -1,0 +1,2 @@
+usage: check_dependencies.py [-h] --frozen
+check_dependencies.py: error: the following arguments are required: --frozen
