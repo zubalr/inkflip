@@ -14,30 +14,36 @@
       "status": "executed",
       "detail": "Verified by automated Playwright suite (tests/visual/foundation.spec.ts: 5/5 viewport tests passing) and authentic rendered screenshots of the live-mounted DocumentStage React component via ephemeral Vite dev server at 1440x900, 1024x768, 768x1024, 390x844 (mobile emulation), and 320x568 (mobile emulation) proving zero horizontal overflow (scrollWidth <= clientWidth across all widths).",
       "evidence": [
-        "tests/visual/foundation.spec.ts",
         "artifacts/tasks/T06/desktop-1440.png",
         "artifacts/tasks/T06/intermediate-1024.png",
         "artifacts/tasks/T06/intermediate-768.png",
         "artifacts/tasks/T06/mobile-390.png",
-        "artifacts/tasks/T06/mobile-320.png"
+        "artifacts/tasks/T06/mobile-320.png",
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/intermediate-1024.png",
+        "artifacts/tasks/T06/intermediate-768.png",
+        "artifacts/tasks/T06/mobile-390.png",
+        "artifacts/tasks/T06/mobile-320.png",
+        "artifacts/tasks/T06/commands.log"
       ]
     },
     "page and disagreement dominate": {
       "status": "executed",
       "detail": "Verified by Playwright suite asserting DocumentStage bounding box > 600x400 and finding banner > 76px height, alongside authentic visual evidence from the live-mounted component showing the paper view and amount disagreement finding banner dominating visual hierarchy across all viewports.",
       "evidence": [
-        "tests/visual/foundation.spec.ts",
         "artifacts/tasks/T06/desktop-1440.png",
-        "artifacts/tasks/T06/mobile-390.png"
+        "artifacts/tasks/T06/mobile-390.png",
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/commands.log"
       ]
     },
     "contrast checks meet stated targets": {
       "status": "executed",
       "detail": "Automated dynamic contrast calculation on DOM computed styles of the live mounted DocumentStage component in Playwright test passing >= 10:1 requirement (ink on paper #172A2F on #FFFDF8 exceeds 14.6:1, WCAG AAA; ink on canvas exceeds 13:1; muted on paper #526368 on #FFFDF8 exceeds 6.1:1, WCAG AA; focus outline has > 3:1 non-text contrast).",
       "evidence": [
-        "tests/visual/foundation.spec.ts",
         "artifacts/tasks/T06/desktop-1440.png",
         "artifacts/tasks/T06/focus-state.png",
+        "artifacts/tasks/T06/commands.log",
         "artifacts/tasks/T06/commands.log"
       ]
     },
@@ -45,7 +51,7 @@
       "status": "executed",
       "detail": "Automated Playwright test with reducedMotion: 'reduce' verifies --motion-state and --motion-panel compute to 0ms/0s on the live mounted component, and DocumentStage.module.css enforces transition: none !important.",
       "evidence": [
-        "tests/visual/foundation.spec.ts",
+        "artifacts/tasks/T06/commands.log",
         "artifacts/tasks/T06/commands.log"
       ]
     },
@@ -59,7 +65,8 @@
         "artifacts/tasks/T06/detail-expanded.png",
         "artifacts/tasks/T06/state-loading.png",
         "artifacts/tasks/T06/state-failed.png",
-        "artifacts/tasks/T06/state-empty.png"
+        "artifacts/tasks/T06/state-empty.png",
+        "artifacts/tasks/T06/commands.log"
       ]
     }
   },
