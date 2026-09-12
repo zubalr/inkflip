@@ -274,36 +274,48 @@ _RLIMIT_PROBE = {
     "RLIMIT_NOFILE": 256,
 }
 
+# Probe script run in a fresh subprocess (never os.fork: the parent may hold
+# threads, and forking a threaded process risks deadlocks). The child tries
+# each limit and exits a bitmask.
+_PROBE_SCRIPT = """
+import resource, sys
+names = sys.argv[1:]
+probes = %r
+code = 0
+for index, name in enumerate(names):
+    try:
+        resource.setrlimit(getattr(resource, name), (probes[name], probes[name]))
+        code |= 1 << index
+    except BaseException:
+        pass
+sys.exit(code & 0x7F)
+""" % repr(_RLIMIT_PROBE)
+
 
 def probe_rlimits() -> dict:
-    """Best-effort fork probe of which rlimits this platform actually accepts.
+    """Best-effort probe of which rlimits this platform actually accepts.
 
     macOS reports RLIMIT_AS/DATA/RSS as infinity yet rejects lowering them;
-    Linux accepts AS and ignores RSS. The probed child tries each limit and
-    reports a bitmask; any failure degrades to an empty map."""
-    if not POSIX or not hasattr(os, "fork"):
+    Linux accepts AS and ignores RSS. A fresh interpreter child tries each
+    limit and reports a bitmask; any failure degrades to an empty map."""
+    if not POSIX:
         return {}
     names = sorted(_RLIMIT_PROBE)
-    pid = os.fork()
-    if pid == 0:  # child: try each setrlimit, exit a bitmask
-        code = 0
-        for index, name in enumerate(names):
-            try:
-                resource.setrlimit(
-                    getattr(resource, name), (_RLIMIT_PROBE[name], _RLIMIT_PROBE[name])
-                )
-                code |= 1 << index
-            except BaseException:
-                pass
-        os._exit(code & 0x7F)
     try:
-        _, status = os.waitpid(pid, 0)
-        code = os.waitstatus_to_exitcode(status)
-        if code < 0 or code > 0x7F:
-            return {}
-        return {name: bool(code & (1 << index)) for index, name in enumerate(names)}
-    except (OSError, ChildProcessError):
+        proc = subprocess.run(
+            [sys.executable, "-c", _PROBE_SCRIPT, *names],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
         return {}
+    code = proc.returncode
+    if code < 0 or code > 0x7F:
+        return {}
+    return {name: bool(code & (1 << index)) for index, name in enumerate(names)}
 
 
 def _rss_bytes(pid: int) -> int | None:
