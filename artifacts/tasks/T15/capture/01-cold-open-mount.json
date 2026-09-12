@@ -3,7 +3,7 @@
   "label": "cold-open-mount",
   "mode": "cold",
   "surface": "/src/features/open/preview.html",
-  "origin": "http://127.0.0.1:58699",
+  "origin": "http://127.0.0.1:59828",
   "legs": [
     {
       "name": "navigate-open-mount",
@@ -36,7 +36,7 @@
   ],
   "requests": [
     {
-      "url": "http://127.0.0.1:58699/src/features/open/preview.html",
+      "url": "http://127.0.0.1:59828/src/features/open/preview.html",
       "method": "GET",
       "resource_type": "document",
       "is_navigation": true,
@@ -46,7 +46,7 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "sec-fetch-dest": "document",
         "sec-fetch-mode": "navigate",
         "sec-fetch-site": "none",
@@ -59,7 +59,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/open-B4SCvXnz.js",
+      "url": "http://127.0.0.1:59828/assets/open-B4SCvXnz.js",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -69,8 +69,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "script",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -81,13 +81,13 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "url": "http://127.0.0.1:59828/assets/global-CbCfd5ku.js",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
       "post_body": null,
       "headers": {
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "referer": "",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
@@ -97,7 +97,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/ModalDialog-8VZc2_jj.js",
+      "url": "http://127.0.0.1:59828/assets/ModalDialog-8VZc2_jj.js",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -107,8 +107,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "script",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -119,13 +119,13 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "url": "http://127.0.0.1:59828/assets/global-CWUH7hDd.css",
       "method": "GET",
       "resource_type": "stylesheet",
       "is_navigation": false,
       "post_body": null,
       "headers": {
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "referer": "",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
@@ -135,7 +135,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/ModalDialog-Dp0nC5og.css",
+      "url": "http://127.0.0.1:59828/assets/ModalDialog-Dp0nC5og.css",
       "method": "GET",
       "resource_type": "stylesheet",
       "is_navigation": false,
@@ -145,8 +145,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "style",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -157,7 +157,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/open-CwzWy_jt.css",
+      "url": "http://127.0.0.1:59828/assets/open-CwzWy_jt.css",
       "method": "GET",
       "resource_type": "stylesheet",
       "is_navigation": false,
@@ -167,8 +167,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "style",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -179,7 +179,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -189,7 +189,7 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "sec-fetch-dest": "worker",
         "sec-fetch-mode": "same-origin",
         "sec-fetch-site": "same-origin",
@@ -197,7 +197,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "method": "GET",
       "resource_type": "fetch",
       "is_navigation": false,
@@ -206,7 +206,7 @@
         "accept": "*/*",
         "accept-encoding": "gzip, deflate, br, zstd",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -214,7 +214,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -225,7 +225,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -236,7 +236,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "method": "GET",
       "resource_type": "fetch",
       "is_navigation": false,
@@ -247,7 +247,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -258,7 +258,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "method": "GET",
       "resource_type": "fetch",
       "is_navigation": false,
@@ -272,59 +272,59 @@
   "request_failures": [],
   "responses": [
     {
-      "url": "http://127.0.0.1:58699/src/features/open/preview.html",
+      "url": "http://127.0.0.1:59828/src/features/open/preview.html",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/global-CbCfd5ku.js",
+      "url": "http://127.0.0.1:59828/assets/global-CbCfd5ku.js",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/global-CWUH7hDd.css",
+      "url": "http://127.0.0.1:59828/assets/global-CWUH7hDd.css",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/ModalDialog-Dp0nC5og.css",
+      "url": "http://127.0.0.1:59828/assets/ModalDialog-Dp0nC5og.css",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/open-B4SCvXnz.js",
+      "url": "http://127.0.0.1:59828/assets/open-B4SCvXnz.js",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/open-CwzWy_jt.css",
+      "url": "http://127.0.0.1:59828/assets/open-CwzWy_jt.css",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/ModalDialog-8VZc2_jj.js",
+      "url": "http://127.0.0.1:59828/assets/ModalDialog-8VZc2_jj.js",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:59828/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:59828/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "status": 200
     }
   ],
@@ -363,7 +363,7 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
         "sec-ch-ua-mobile": "?0",
@@ -385,9 +385,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
@@ -406,9 +406,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
@@ -427,9 +427,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
@@ -448,9 +448,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
@@ -469,7 +469,7 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
         "accept": "*/*",
         "accept-language": "en-US",
@@ -486,7 +486,7 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "accept": "*/*",

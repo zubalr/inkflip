@@ -2,8 +2,8 @@
   "schema_version": 1,
   "tool": "scripts/inspect_network_receipt.py",
   "task": "T15",
-  "generated_at": "2026-09-12T15:14:37.234636+00:00",
-  "origin": "http://127.0.0.1:58699",
+  "generated_at": "2026-09-12T15:25:08.368792+00:00",
+  "origin": "http://127.0.0.1:59828",
   "canary": {
     "document_sha256_16": "c383a44b3cebd27f",
     "byte_length": 810,

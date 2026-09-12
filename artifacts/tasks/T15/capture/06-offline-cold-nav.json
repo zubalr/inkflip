@@ -3,7 +3,7 @@
   "label": "offline-cold-nav",
   "mode": "online",
   "surface": "/privacy.html",
-  "origin": "http://127.0.0.1:58699",
+  "origin": "http://127.0.0.1:59828",
   "legs": [
     {
       "name": "navigate-harness",
@@ -12,7 +12,7 @@
   ],
   "requests": [
     {
-      "url": "http://127.0.0.1:58699/privacy.html",
+      "url": "http://127.0.0.1:59828/privacy.html",
       "method": "GET",
       "resource_type": "document",
       "is_navigation": true,
@@ -22,7 +22,7 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "sec-fetch-dest": "document",
         "sec-fetch-mode": "navigate",
         "sec-fetch-site": "none",
@@ -35,7 +35,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/privacy-BDKEFS6n.js",
+      "url": "http://127.0.0.1:59828/assets/privacy-BDKEFS6n.js",
       "method": "GET",
       "resource_type": "script",
       "is_navigation": false,
@@ -45,8 +45,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "script",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -57,7 +57,7 @@
       }
     },
     {
-      "url": "http://127.0.0.1:58699/assets/privacy-DSXHGIdZ.css",
+      "url": "http://127.0.0.1:59828/assets/privacy-DSXHGIdZ.css",
       "method": "GET",
       "resource_type": "stylesheet",
       "is_navigation": false,
@@ -67,8 +67,8 @@
         "accept-encoding": "gzip, deflate, br, zstd",
         "accept-language": "en-US",
         "connection": "keep-alive",
-        "host": "127.0.0.1:58699",
-        "origin": "http://127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
+        "origin": "http://127.0.0.1:59828",
         "sec-fetch-dest": "style",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
@@ -82,15 +82,15 @@
   "request_failures": [],
   "responses": [
     {
-      "url": "http://127.0.0.1:58699/privacy.html",
+      "url": "http://127.0.0.1:59828/privacy.html",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/privacy-DSXHGIdZ.css",
+      "url": "http://127.0.0.1:59828/assets/privacy-DSXHGIdZ.css",
       "status": 200
     },
     {
-      "url": "http://127.0.0.1:58699/assets/privacy-BDKEFS6n.js",
+      "url": "http://127.0.0.1:59828/assets/privacy-BDKEFS6n.js",
       "status": 200
     }
   ],
@@ -107,7 +107,7 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
         "sec-ch-ua-mobile": "?0",
@@ -129,9 +129,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
@@ -150,9 +150,9 @@
       "query": null,
       "status": 200,
       "headers": {
-        "host": "127.0.0.1:58699",
+        "host": "127.0.0.1:59828",
         "connection": "keep-alive",
-        "origin": "http://127.0.0.1:58699",
+        "origin": "http://127.0.0.1:59828",
         "sec-ch-ua-platform": "\"macOS\"",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
         "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
