@@ -1,11 +1,3 @@
-# T27 independent review record (provenance copy)
-
-Copied verbatim from the actual wave-4 independent review verdict
-(artifacts/tasks/T27/wave4/independent-review.md, review branch review/codex/t27-wave4 commit f7d7e8f)
-by the worker ZCode at final merged checks; no content edited. Provenance only:
-
-Source: independent reviewer Erdos, Codex session 01a093f7-2dea-78e3-80cc-c495153d946c.
-
 # T27 wave-4 independent light review
 
 **Verdict: source/light review approved on exact `e0e7d4c513832bd7fb23aac4f6f0822f2f1a6214` (source `2ea6233`). All three blocking wave-3 findings are resolved.** No new actionable source finding in this focused revision review. Final real-OCR verification and task acceptance remain pending; this is not approval of unexecuted checks.
