@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "label": "cold-open-mount",
+  "mode": "cold",
+  "surface": "/src/features/open/preview.html",
+  "origin": "http://127.0.0.1:53866",
+  "legs": [
+    {
+      "name": "navigate-open-mount",
+      "ok": true
+    },
+    {
+      "name": "open-canary",
+      "ok": true
+    },
+    {
+      "name": "real-render-raster",
+      "ok": true
+    },
+    {
+      "name": "run-plan-includes-ocr",
+      "ok": true
+    },
+    {
+      "name": "error-malformed",
+      "ok": true
+    },
+    {
+      "name": "reopen-and-replace",
+      "ok": true
+    },
+    {
+      "name": "clear-file",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:53866/src/features/open/preview.html",
+      "method": "GET",
+      "resource_type": "document",
+      "is_navigation": true,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/open-B4SCvXnz.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/global-CbCfd5ku.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/ModalDialog-8VZc2_jj.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/global-CWUH7hDd.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/ModalDialog-Dp0nC5og.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/open-CwzWy_jt.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null
+    }
+  ],
+  "request_failures": [],
+  "websockets": [],
+  "egress": [
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    }
+  ],
+  "console": [
+    {
+      "type": "warning",
+      "text": "Warning: Indexing all PDF objects"
+    }
+  ],
+  "page_errors": [],
+  "downloads": [],
+  "server_log": [
+    {
+      "method": "GET",
+      "path": "/src/features/open/preview.html",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/open-B4SCvXnz.js",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/ModalDialog-Dp0nC5og.css",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/ModalDialog-8VZc2_jj.js",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/open-CwzWy_jt.css",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/pdf.worker-DTrjDNvb.mjs",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "query": null,
+      "status": 200
+    }
+  ],
+  "_logStart": 4,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}

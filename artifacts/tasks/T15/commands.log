@@ -1,0 +1,111 @@
+T15 — Prove initial own-file no-egress behavior
+Worker: devin-t15 · Branch: work/devin/t15 · Base: 21be4c9
+Implementation commit: 7804dc4 (inspector + harness page)
+Test commit:           ed960fd (spec + README)
+All commands run in <repo>/worktrees/pdf-t15 (worktree path redacted)
+Dates: 2026-09-12 (UTC)
+
+======================================================================
+$ bun install --frozen-lockfile                 [environment setup]
+----------------------------------------------------------------------
+Workspace deps installed earlier in the task; no lockfile changes.
+exit=0
+
+======================================================================
+$ bun run test:privacy -- tests/privacy/local.spec.ts
+    [registered acceptance command — iterated during development]
+----------------------------------------------------------------------
+$ python3 scripts/task_acceptance.py run test:privacy tests/privacy/local.spec.ts
+Iterations (failures fixed in sequence):
+  a) Rolldown could not resolve bare "react" import from the harness
+     mount via resolve.modules → fixed by a symlinked
+     tests/privacy/harness/node_modules so normal Node resolution finds
+     workspace deps (git-ignored; rebuilt each run).
+  b) pdf.js adapter emitChunk signature misuse → corrected to the real
+     (Occurrence[]) => unknown callback; OCR keeps its (checkId,
+     occurrences) callback.
+  c) Report schema rejection: OCR reader description carried
+     raster_dpi=0 → use the real output reader produced after
+     rasterization (real DPI).
+  d) projectReport source-identity error: supplied bytes must be the
+     exact canary bytes that were opened → passed through verbatim.
+  e) "ID: Duplicate identifiers" at export: OCR output re-emitted the
+     raster transform → deduplicated by transform id before sealing.
+  f) Warm-mode provenance: prepare() reports provenance=cache (the
+     verified IDB slot); the opened handle then reports memory —
+     assertions corrected to both real semantics; zero model refetch
+     asserted.
+  g) Prepared-offline run: browser emits request events for cache-served
+     fixed assets (pdf.worker, standard fonts) with ZERO server-side
+     hits → assertions moved to server log + request_failures; cold
+     offline split into online-nav capture + post-setOffline capture;
+     egress/storage collected before the context-destroying blocked
+     navigation.
+  h) Receipt embed of the raw document sha256 (itself a marker) →
+     receipt now carries sha256_16 digests only; stale redacted capture
+     copies wiped before the inspector writes.
+  i) Dist literal census: vendored bundles carry inert literals
+     (tc39.es, github.com repo links, xmlns namespaces, overridden CDN
+     defaults, pdf.js parser test vectors) → check now fails only on
+     telemetry/collector literals or literals also seen in runtime
+     traffic; full census recorded in the receipt.
+
+======================================================================
+$ bun run test:privacy -- tests/privacy/local.spec.ts
+    [registered acceptance command — final run]
+----------------------------------------------------------------------
+$ python3 scripts/task_acceptance.py run test:privacy tests/privacy/local.spec.ts
+Running 4 tests using 1 worker
+  ✓   1 cold: built-site own-file journey leaves zero document trace
+  ✓   2 warm: second run reuses verified cached model — zero asset refetch
+  ✓   3 offline: prepared page completes workflow with zero requests;
+        cold offline fails specifically
+  ✓   4 receipt: offline inspector validates every capture
+  4 passed (4.4s)
+exit=0
+
+======================================================================
+$ python3 scripts/inspect_network_receipt.py
+    --capture tests/privacy/.private/capture
+    --canary tests/privacy/.private/canary.json
+    --dist tests/privacy/dist
+    --receipt artifacts/tasks/T15/network-receipt.json
+    --redacted-capture artifacts/tasks/T15/capture
+    --require-modes cold,warm,offline
+----------------------------------------------------------------------
+receipt: artifacts/tasks/T15/network-receipt.json  verdict=pass
+  checks=11 failed=0  requests=47
+  pass requests_same_origin
+  pass requests_allowlisted_paths
+  pass requests_read_only_methods
+  pass requests_no_query_strings
+  pass no_canary_material_outbound
+  pass no_websocket_beacon_serviceworker
+  pass no_telemetry_or_external_font
+  pass storage_document_free
+  pass journey_legs_completed
+  pass cold_fixed_assets
+  pass built_assets_no_external_endpoints
+exit=0
+
+======================================================================
+$ node_modules/.bin/oxlint tests/privacy/local.spec.ts
+    tests/privacy/harness/mount.tsx
+----------------------------------------------------------------------
+0 errors, 0 warnings (unused-import warning fixed before commit).
+exit=0
+
+======================================================================
+$ python3 scripts/coordination.py task T15
+----------------------------------------------------------------------
+Printed the effective task contract (acceptance criteria, commands,
+evidence artifacts, reserved paths) used to shape the receipt keys.
+exit=0
+
+Notes
+-----
+- Raw captures (tests/privacy/.private/) are task-private and contain
+  live canary material; only the redacted copies in
+  artifacts/tasks/T15/capture/ and the digest-only receipt are public.
+- The suite requires the pinned Playwright Chromium (installed earlier
+  via the explicit `playwright install` policy).

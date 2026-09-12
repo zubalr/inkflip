@@ -1,0 +1,81 @@
+{
+  "task_id": "T15",
+  "beads_id": "pdf-t15",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t15",
+  "base_commit": "21be4c9",
+  "source_commit": "7804dc4810eaa5af8bde5e9f1f427c1e43c490ed",
+  "test_commit": "ed960fdf66d82a14bf8284be9c8a05e76e1f0280",
+  "implementation_commit": "7804dc4810eaa5af8bde5e9f1f427c1e43c490ed",
+  "actor": "devin-t15",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "review_rounds": [],
+  "acceptance_criteria_evidence": {
+    "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs": {
+      "status": "executed",
+      "detail": "A generated canary PDF (unique visible text, hidden Info string, filename, document sha256, raster pixel digest, user note, report id, export filename, hostile SVG-ish payload line — 8 greppable markers) was opened through the real built flow in real Chromium: T08 open mount file input → harness page running the real T09 pdf.js adapter (native text + render), the real T10 TesseractOcrReader (staged model download → verify → IDB slot → worker/wasm → occurrences), the real T16 ExportPanel (JSON + HTML Blob/anchor downloads) and the real T22 import mount. Every request URL/method/headers/post body, websocket, fetch/XHR/beacon/worker/service-worker tripwire record, console payload, download and the independent server-side access log was captured per leg and scanned for every marker in raw, percent, base64, base64url and hex encodings — first in-test, then again by scripts/inspect_network_receipt.py. 47 requests across 8 captures: zero marker material outbound; the only artifacts containing canary data are the intentional local JSON/HTML downloads and task-private raw captures. Reopened report fetched nothing and executed nothing (no new script/img/network; hostile payload stayed literal text).",
+      "evidence": [
+        "artifacts/tasks/T15/commands.log",
+        "artifacts/tasks/T15/network-receipt.json",
+        "artifacts/tasks/T15/capture/"
+      ]
+    },
+    "only fixed allowlisted same-origin asset paths": {
+      "status": "executed",
+      "detail": "Inspector checks requests_same_origin (every request netloc == the loopback test origin; zero foreign hosts in requests, egress tripwire, websockets), requests_allowlisted_paths (all 47 requests inside the fixed allowlist: /, index/preview html pages, /assets/*, /models/*, /_headers-adjacent static paths — enumerated in the receipt census), requests_read_only_methods (GET/HEAD only, zero POST/PUT bodies), requests_no_query_strings (zero ? or # on any outbound URL). The staged OCR model fetch is the single warm-path network operation and is allowlisted; warm run proves zero refetch.",
+      "evidence": [
+        "artifacts/tasks/T15/commands.log",
+        "artifacts/tasks/T15/network-receipt.json"
+      ]
+    },
+    "telemetry/external-font absence proven": {
+      "status": "executed",
+      "detail": "Check no_telemetry_or_external_font scanned every runtime channel for collector/CDN/font-host patterns (sentry, datadog, segment, amplitude, googletagmanager, jsdelivr, unpkg, cdnjs, fonts.googleapis, beacons) — zero hits; no_telemetry check on built assets records the full literal census of external URLs inside the shipped bundles (vendor spec links: tc39.es, whatwg; repo links: github.com; xmlns namespaces: w3.org/xfa.org/adobe; overridden CDN defaults inside vendored tesseract.js; pdf.js parser test vectors) — none are telemetry/collector literals and none appear in runtime traffic. Storage check proves document-free persistence: only the sha256-verified staged model slot (inkflip/models IDB) may persist; local/session storage, CacheStorage and service-worker registrations are empty/absent.",
+      "evidence": [
+        "artifacts/tasks/T15/commands.log",
+        "artifacts/tasks/T15/network-receipt.json"
+      ]
+    },
+    "online/warm/offline modes documented": {
+      "status": "executed",
+      "detail": "Receipt requires modes cold,warm,offline — 8 captures document all three. Cold: shipped index boot (fixed-asset census separated from document data), canary open, full journey incl. real model download. Warm: second run reuses the verified IDB model slot — prepare() reports provenance=cache, opened handle reports memory, zero model-asset refetches. Offline: prepared page completes open→plan→OCR→export with all network blocked — zero server-side hits, zero request failures (browser cache request events for fixed assets are expected and allowed); cold offline context fails specifically as unavailable_offline/missing_model, and cold offline navigation is blocked (no service worker ships — recorded as a limitation).",
+      "evidence": [
+        "artifacts/tasks/T15/commands.log",
+        "artifacts/tasks/T15/network-receipt.json",
+        "artifacts/tasks/T15/capture/"
+      ]
+    },
+    "redact private test logs before public artifacts.": {
+      "status": "executed",
+      "detail": "Raw captures (tests/privacy/.private/) stay task-private and git-ignored. The inspector writes redacted capture copies (artifacts/tasks/T15/capture/) with every marker encoding replaced by <marker:id> tokens and absolute private paths by <private>; the committed network-receipt.json carries marker ids + sha256_16 digests only — the receipt test asserts marker-freedom of both the receipt and every redacted capture. commands.log redacts the worktree path.",
+      "evidence": [
+        "artifacts/tasks/T15/commands.log",
+        "artifacts/tasks/T15/network-receipt.json",
+        "artifacts/tasks/T15/capture/"
+      ]
+    }
+  },
+  "test_summary": {
+    "command": "bun run test:privacy -- tests/privacy/local.spec.ts",
+    "runner": "python3 scripts/task_acceptance.py run test:privacy (structured-report harness over pinned Playwright Chromium)",
+    "tests_total": 4,
+    "tests_passed": 4,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "checks_total": 11,
+    "checks_passed": 11,
+    "captures": 8,
+    "requests_observed": 47,
+    "receipt_verdict": "pass",
+    "exit_code": 0
+  },
+  "limitations": [
+    "App composition (T13) is not landed: index.html is the shipped scaffold, so the suite sequentially drives the real built feature mounts (T08 open preview, the test-owned harness page binding the real T09/T10/T16 collaborators, T22 import preview) rather than one composed shell — the same production code paths the shell will call.",
+    "Browser automation cannot see every OS/browser process channel; per planning, release-profile proof additionally needs a proxy/firewall capture.",
+    "No service worker ships: offline support means an already-loaded page with prepared assets, verified here; cold offline navigation has no app shell to load and is not claimed."
+  ],
+  "dependency_requests": [],
+  "attribution": "Inspector and harness are new test-owned code; no external material reused.",
+  "review_status": "pending_review"
+}

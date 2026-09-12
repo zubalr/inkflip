@@ -1,0 +1,70 @@
+{
+  "task": "T15",
+  "beads_id": "pdf-t15",
+  "worker": "devin-t15",
+  "branch": "work/devin/t15",
+  "base_commit": "21be4c9",
+  "source_commit": "7804dc4810eaa5af8bde5e9f1f427c1e43c490ed",
+  "test_commit": "ed960fdf66d82a14bf8284be9c8a05e76e1f0280",
+  "implementation_commit": "7804dc4810eaa5af8bde5e9f1f427c1e43c490ed",
+  "evidence_commit": "this file is committed after the implementation commits; see git log",
+  "disposition": "implemented_pending_review",
+  "ready_for_review": true,
+  "review_rounds": [],
+  "changed_paths": [
+    "scripts/inspect_network_receipt.py",
+    "tests/privacy/README.md",
+    "tests/privacy/harness/mount.tsx",
+    "tests/privacy/harness/privacy.html",
+    "tests/privacy/local.spec.ts",
+    "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+    "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+    "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+    "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+    "artifacts/tasks/T15/capture/04-warm-harness.json",
+    "artifacts/tasks/T15/capture/05-offline-harness.json",
+    "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+    "artifacts/tasks/T15/capture/07-offline-cold-model.json",
+    "artifacts/tasks/T15/commands.log",
+    "artifacts/tasks/T15/handoff.json",
+    "artifacts/tasks/T15/network-receipt.json",
+    "artifacts/tasks/T15/receipt.json"
+  ],
+  "scope_check": "All changes inside allowed scope (tests/privacy/ + scripts/inspect_network_receipt.py) plus task-owned artifacts/tasks/T15/. No product, planning, lockfile or shared-schema files touched.",
+  "commands": [
+    {
+      "cmd": "bun run test:privacy -- tests/privacy/local.spec.ts",
+      "result": "4 passed, 0 failed, 0 skipped (final run; iterated failures recorded in commands.log)",
+      "exit": 0
+    },
+    {
+      "cmd": "python3 scripts/inspect_network_receipt.py --capture tests/privacy/.private/capture --canary tests/privacy/.private/canary.json --dist tests/privacy/dist --receipt artifacts/tasks/T15/network-receipt.json --redacted-capture artifacts/tasks/T15/capture --require-modes cold,warm,offline",
+      "result": "verdict=pass, 11/11 checks, 47 requests observed",
+      "exit": 0
+    },
+    {
+      "cmd": "node_modules/.bin/oxlint tests/privacy/local.spec.ts tests/privacy/harness/mount.tsx",
+      "result": "0 errors, 0 warnings",
+      "exit": 0
+    }
+  ],
+  "test_summary": {
+    "tests_total": 4,
+    "tests_passed": 4,
+    "checks_total": 11,
+    "checks_passed": 11,
+    "captures": 8,
+    "modes": ["cold", "warm", "offline"],
+    "requests_observed": 47,
+    "foreign_hosts_observed": 0,
+    "marker_material_outbound": 0
+  },
+  "journey": "Generated canary PDF (8 greppable markers incl. hidden Info string, doc sha256, note, hostile payload) opened via the real T08 open mount; plan + malformed-error + replace legs; real pdf.js render + native-text extraction; real OCR (staged model download -> integrity verify -> IndexedDB slot -> worker/wasm -> occurrences); real T16 ExportPanel preview + JSON/HTML downloads; real T22 import reopen; clear. Warm run: provenance cache at prepare, memory in handle, zero refetch. Offline: prepared page completes with zero server hits + zero failures; cold offline fails as unavailable_offline/missing_model.",
+  "limitations": [
+    "App composition (T13) unlanded: journey sequentially drives the real built feature mounts + test-owned harness page — same production code paths, no composed shell.",
+    "Browser automation cannot see every OS/browser process channel; release-profile proof needs a proxy/firewall capture per planning.",
+    "No service worker ships: offline = already-loaded page with prepared assets; cold offline navigation is not claimed."
+  ],
+  "notes_for_reviewer": "Receipt keys match the task contract acceptance_criteria verbatim. Raw captures under tests/privacy/.private/ are task-private (live canary material); committed captures are redacted with <marker:id> tokens. The dist literal census in the receipt documents inert vendor literals (spec links, xmlns, overridden CDN defaults, parser test vectors) — none fetched at runtime.",
+  "evidence_commit_note": "artifacts/tasks/T15/ committed as the evidence commit after implementation+test commits."
+}

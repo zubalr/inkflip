@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "label": "offline-harness",
+  "mode": "offline",
+  "surface": "/privacy.html",
+  "origin": "http://127.0.0.1:53866",
+  "legs": [
+    {
+      "name": "offline-ocr-extract",
+      "ok": true
+    },
+    {
+      "name": "offline-open-and-render",
+      "ok": true
+    },
+    {
+      "name": "offline-export",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:53866/assets/pdf.worker-DTrjDNvb.mjs",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "method": "GET",
+      "resource_type": "fetch",
+      "is_navigation": false,
+      "post_body": null
+    }
+  ],
+  "request_failures": [],
+  "websockets": [],
+  "egress": [
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    },
+    {
+      "kind": "worker",
+      "target": "http://127.0.0.1:53866/assets/tesseract/7.0.0/worker.min.js"
+    },
+    {
+      "kind": "worker",
+      "target": "/assets/pdf.worker-DTrjDNvb.mjs"
+    }
+  ],
+  "console": [],
+  "page_errors": [],
+  "downloads": [],
+  "server_log": [],
+  "_logStart": 21,
+  "offline": true,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [
+      {
+        "db": "keyval-store",
+        "store": "keyval",
+        "key": "inkflip/models/eng.traineddata",
+        "value_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+        "bytes": 4113088
+      }
+    ],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}

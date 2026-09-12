@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "label": "offline-cold-nav",
+  "mode": "offline",
+  "surface": "/privacy.html",
+  "origin": "http://127.0.0.1:53866",
+  "legs": [
+    {
+      "name": "navigate-harness",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:53866/privacy.html",
+      "method": "GET",
+      "resource_type": "document",
+      "is_navigation": true,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/privacy-BDKEFS6n.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/privacy-DSXHGIdZ.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null
+    }
+  ],
+  "request_failures": [],
+  "websockets": [],
+  "egress": [],
+  "console": [],
+  "page_errors": [],
+  "downloads": [],
+  "server_log": [
+    {
+      "method": "GET",
+      "path": "/privacy.html",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/privacy-BDKEFS6n.js",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/privacy-DSXHGIdZ.css",
+      "query": null,
+      "status": 200
+    }
+  ],
+  "_logStart": 21,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "label": "cold-boot-index",
+  "mode": "cold",
+  "surface": "/index.html",
+  "origin": "http://127.0.0.1:53866",
+  "legs": [
+    {
+      "name": "navigate-index",
+      "ok": true
+    }
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:53866/",
+      "method": "GET",
+      "resource_type": "document",
+      "is_navigation": true,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/index-CRz5t4SE.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/global-CbCfd5ku.js",
+      "method": "GET",
+      "resource_type": "script",
+      "is_navigation": false,
+      "post_body": null
+    },
+    {
+      "url": "http://127.0.0.1:53866/assets/global-CWUH7hDd.css",
+      "method": "GET",
+      "resource_type": "stylesheet",
+      "is_navigation": false,
+      "post_body": null
+    }
+  ],
+  "request_failures": [],
+  "websockets": [],
+  "egress": [],
+  "console": [],
+  "page_errors": [],
+  "downloads": [],
+  "server_log": [
+    {
+      "method": "GET",
+      "path": "/index.html",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-CRz5t4SE.js",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/global-CWUH7hDd.css",
+      "query": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/global-CbCfd5ku.js",
+      "query": null,
+      "status": 200
+    }
+  ],
+  "_logStart": 0,
+  "cold_boot": true,
+  "storage": {
+    "local": {},
+    "session": {},
+    "cookies": "",
+    "idb": [],
+    "cache_storage": [],
+    "service_workers": 0
+  }
+}
