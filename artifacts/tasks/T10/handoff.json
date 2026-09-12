@@ -4,8 +4,8 @@
  "worker": "devin-local-swe2-t10 (Devin Local SWE-2 subagent, coordinator Astra); session 1 was devin-cloud-t10",
  "branch": "work/devin/t10",
  "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
- "state": "wave4-revision-light-checkpoint",
- "ready_for_review": false,
+ "state": "wave4-revision-green-checkpoint",
+ "ready_for_review": true,
  "checkpoint": {
   "completed": [
    "Merged current canonical main 500abfc (coordinator-authorized) -> merge commit a5a270f, zero conflicts. Prior merge 65e84da -> 50dddc0 and prior impl/evidence 32f098e/4282857 preserved in ancestry.",
@@ -19,7 +19,6 @@
   ],
   "next_steps": [
    "Independent review by a reviewer other than this worker; coordinator produces the acceptance receipt (record_acceptance requires reviewer != worker and a review commit/path - not created locally).",
-   "When the heavy reservation returns from Homebase ZCode (T27), run the full registered sequence on the final clean commit, in order: bun run test:browser -- tests/readers/tesseract.spec.ts; python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json; bun run verify; bun run build:web. The 41-test file includes the excluded real-engine cases.",
    "If review requests changes: rework on this branch, rerun the registered checks, record real results."
   ],
   "limitations": [
@@ -186,6 +185,52 @@
     "failed": 0,
     "skipped": 0,
     "note": "attempt 2: all allowed light cases incl. 4 ported stub lifecycle probes + payload/IDB controls"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts",
+    "exit": 1,
+    "collected": 41,
+    "passed": 40,
+    "failed": 1,
+    "note": "attempt 1: racy close-during-open gate (warm init beat the CDP poll->evaluate lag); harness determinism fix 1a655a1, assertions unchanged"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 -g 'close during a real open'",
+    "exit": 0,
+    "collected": 1,
+    "passed": 1,
+    "failed": 0
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts",
+    "exit": 0,
+    "collected": 41,
+    "passed": 41,
+    "failed": 0,
+    "skipped": 0,
+    "note": "FULL registered suite green on wave-4: 11 real-OCR + real provenance pair + stub probes + all light"
+   },
+   {
+    "cmd": "python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json",
+    "exit": 0,
+    "collected": 41,
+    "passed": 41,
+    "failed": 0,
+    "note": "evaluated_commit 1a655a1"
+   },
+   {
+    "cmd": "bun run verify",
+    "exit": 0,
+    "collected": 115,
+    "passed": 115,
+    "failed": 0,
+    "skipped": 1,
+    "note": "49 bootstrap + 2 native + 64 coordination; 1 pre-existing meta-test skip"
+   },
+   {
+    "cmd": "bun run build:web",
+    "exit": 0,
+    "note": "vite 8.3.0, 174ms, index-DLl647JV.js 191.77kB"
    }
   ],
   "commits": {
@@ -239,7 +284,7 @@
    }
   }
  },
- "disposition": "WAVE-4 REVISION - LIGHT CHECKPOINT. Pauli's wave-3 findings reworked per Astra direction on top of merged q38: verified model bytes now ride the {code,data} engine payload with cacheMethod 'none' (shared-cache replacement cannot change engine bytes); operation-scoped terminal signals + WorkerLease lifetimes close the stale-cleanup, close-wakeup, late-model and callback-admission holes. Allowed checks only under the ZCode heavy hold: tsc 0, oxlint 0, crop-math 13/13, repro-planCrop 6/6, playwright light subset 25/25 incl. the 4 ported stub probes and new payload/IDB controls. Real-engine registered cases (2 prior + new real provenance pair) NOT run - awaiting explicit slot return. NOT ready for review and NOT accepted. No push, no Beads writes.",
+ "disposition": "WAVE-4 REVISION GREEN - Pauli's wave-3 findings reworked per Astra direction on merged q38: verified model bytes ride the {code,data} engine payload with cacheMethod 'none' (real FS-hash probes prove engine bytes == reported hash under same-origin cache replacement); OpScope terminal signals + WorkerLease lifetimes close the stale-cleanup, close-wakeup, late-model and callback-admission holes; the four stub probes and the real provenance pair are registered and executed. Full sequence by the sole heavy holder at 1a655a1: test:browser 41/41, task_acceptance exit 0 (evaluated 1a655a1), verify 115/115, build:web exit 0. One first-attempt failure was a racy test gate (warm init beat the poll->evaluate lag) fixed deterministically in 1a655a1 with no assertion weakened. READY FOR REVIEW - independent review + coordinator acceptance receipt remain; NOT accepted. No push, no Beads writes. Reservation released: nothing running or queued.",
  "wave4": {
   "review_of": "7699f9752d82f97251c86f53e15407b5b087668d (Pauli wave-3 review, changes required)",
   "direction": "/private/tmp/inkflip-t10-wave4.txt",
@@ -263,13 +308,14 @@
    "node artifacts/tasks/T10/repro-planCrop.mjs": "6/6 ALL OK",
    "playwright light (allowed subset)": "25/25 (~5.5s) after one settle-hook race fix"
   },
-  "excluded_under_hold": [
-   "a stale or corrupt cache slot is replaced before the engine sees it",
-   "the engine consumes the verified slot - never a second divergent copy",
-   "close during a real open aborts the raw worker init",
-   "independent real cache provenance: unchanged cache control + cache replacement after verification cannot change engine bytes"
-  ],
-  "collection": "41 registered tests (11 real-OCR + 24 light reworked + 4 stub probes + 2 real provenance probes)",
-  "heavy_reservation": "NOT held - belongs to Homebase ZCode (T27). No heavy command in flight or queued. Full registered sequence awaits explicit slot transfer."
+  "collection": "41 registered tests, all executed and green at 1a655a1",
+  "heavy_reservation": "sole holder (port 5191) - returned after ZCode T27 acceptance 3f6bf96",
+  "heavy_run": {
+   "bun run test:browser -- tests/readers/tesseract.spec.ts": "exit 0 - 41/41 (10.2s): 11 real-OCR + 24 light reworked + 4 stub probes + 2 real provenance probes; attempt 1 40/1 (racy close-during-open gate, fixed 1a655a1)",
+   "task_acceptance.py task T10 --report run.json": "exit 0 - evaluated 1a655a1, 41/41, failures [], evidence_errors []",
+   "bun run verify": "exit 0 - 115 checks",
+   "bun run build:web": "exit 0 - vite 8.3.0, 174ms",
+   "real_provenance_result": "both probes passed - engine FS /eng.traineddata sha256 == reported sha256 even with same-origin cache replacement on createWorker entry; exactly one model request"
+  }
  }
 }
