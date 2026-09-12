@@ -1,0 +1,72 @@
+{
+  "task": "T36",
+  "beads_id": "pdf-t36",
+  "title": "Build independent evaluation protocol and held-out corpus",
+  "worker": "devin-t36",
+  "app": "devin",
+  "branch": "work/devin/t36",
+  "base": "01690c01474eee7d31584cad68e92097565b804b",
+  "implementation_commit": "04b39692178e5d9a358ae00b60f636bf070b7018",
+  "test_commit": "33fb81b208288e1234b16892f9196d2986696dc7",
+  "evidence_commit": "this file is committed after the test commit; see git log on work/devin/t36",
+  "head_under_test": "33fb81b208288e1234b16892f9196d2986696dc7",
+  "ready_for_review": true,
+  "scope_delivered": {
+    "evaluation/protocol/__init__.py": "package doc, PROTOCOL_VERSION/SCHEMA_VERSION",
+    "evaluation/protocol/lineage.py": "transitive sibling clustering (group ids, control edges, identical bytes), split_violations/assert_no_leakage, naive vs grouped assignment demonstrators",
+    "evaluation/protocol/manifest.py": "closed corpus_manifest + evaluation_plan validation, content-addressed page keys/effective groups, deterministic corpus freezing from fixtures/manifest.json",
+    "evaluation/protocol/metrics.py": "declared-page denominators, collapse_readings dedup, Wilson intervals, grouped bootstrap CI, check accounting, clean-alert and occurrence-preservation metrics",
+    "evaluation/protocol/custody.py": "outside-checkout pinned label gate, permissioned consent check, corpus/label coverage equality, forbidden-key + label-content scan on every serialization",
+    "evaluation/protocol/diagnosis.py": "blinded review forms, >=2-reviewer adjudication preserving disagreements, counterbalanced assignments, per-tester task order, diagnosis summary",
+    "evaluation/protocol/report.py": "closed inspection_run validation, corpus binding, metric computation, target verdicts (UNMET until a real bound run), leak-scanning serializer",
+    "evaluation/manifests/": "development.corpus.json (32 entries) + public.corpus.json (7 entries) frozen byte-exact from fixtures/manifest.json, evaluation.plan.json (10 declared targets, population minimums, pinned label-store descriptor, retirement policy), README custody rules",
+    "scripts/evaluate_inspector.py": "custodian CLI: emit-corpus (+--check), verify-splits, status, evaluate, review-form, adjudicate",
+    "tests/evaluation/": "8 stdlib-only files, 84 tests, all five contract criteria plus intervals/diagnosis/freeze"
+  },
+  "commands": [
+    {
+      "command": "python -m unittest discover -s tests/evaluation -v",
+      "executed_as": "python3 -m unittest discover -s tests/evaluation -v",
+      "note": "no `python` on this host; registry maps python -> python3 (config/acceptance-commands.json interpreters)",
+      "exit": 0,
+      "counts": {"collected": 84, "passed": 84, "failed": 0, "skipped": 0}
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T36 --report artifacts/tasks/T36/run.json",
+      "exit": 0,
+      "counts": {"collected": 84, "passed": 84, "failed": 0, "skipped": 0},
+      "note": "run.json binds evaluated_commit 33fb81b208288e1234b16892f9196d2986696dc7 on clean inputs"
+    },
+    {
+      "command": "python3 scripts/evaluate_inspector.py emit-corpus --split development|public --out <committed manifest> --check",
+      "exit": 0,
+      "note": "both committed corpora byte-match fixtures/manifest.json"
+    },
+    {
+      "command": "python3 scripts/evaluate_inspector.py verify-splits evaluation/manifests/development.corpus.json evaluation/manifests/public.corpus.json",
+      "exit": 0,
+      "note": "39 entries across development + public_demo, no sibling straddles a boundary"
+    },
+    {
+      "command": "python3 scripts/evaluate_inspector.py status --plan evaluation/manifests/evaluation.plan.json",
+      "exit": 1,
+      "note": "all 10 declared targets UNMET (no_evaluation_run) - honest nonzero while unmet"
+    },
+    {
+      "command": "permissioned evaluate end-to-end (synthetic corpus + labels, label root outside checkout)",
+      "exit": 0,
+      "note": "MET verdict from a bound run; incident/consent refs asserted absent from the emitted report; missing and in-tree label roots refused (exit 2). Transcript: custody-demo.txt"
+    }
+  ],
+  "limitations": [
+    "No held-out evaluation corpus or label store exists yet: evaluation.plan.json pins the design (300 clean + 300 supported-failure pages across >=12 mechanism/layout groups, custodian-issued labels) and `status` honestly reports all targets UNMET. Generating the held-out corpus and labels is future custodian work; the plan's split_manifests entries for evaluation/permissioned stay null until issued.",
+    "The protocol is exercised on synthetic corpora/labels plus the frozen T05 fixtures; no real inspection engine exists to produce inspection_run records yet, so evaluate() was verified on synthetic bound runs, not a real inspector output.",
+    "Development/public_demo scoring expects a labels file in the eval-labels schema (--labels); deriving dev truth from T05 expectation files is a documented bridge, not implemented here (not required by the criteria).",
+    "Alignment p95/max and repeatability metrics are wired through run-provided alignment_errors_px/repeat_digests; real fiducial measurement belongs to the inspection engine tasks.",
+    "F01 mapping-control and F07 geometry-control are byte-identical in the frozen T05 fixtures, so F01+F07 correctly union into one lineage cluster (conservative: wider bootstrap intervals, same split). If the fixture catalog intends them independent, the bytes must diverge upstream in the generator - recorded, not hidden.",
+    "Python: contract command uses `python`; this host provides only `python3` (3.14.7). The acceptance registry maps it; recorded here for honesty.",
+    "No independent review exists yet: review.md/acceptance.json are coordinator-written artifacts produced at acceptance time; this handoff is a worker receipt, not acceptance."
+  ],
+  "dependency_requests": [],
+  "acceptance_notes": "A worker receipt is not coordinator acceptance. acceptance_receipts.criterion_evidence consumes receipt.json's acceptance_criteria_evidence dict (exact criterion keys, status executed, task-local evidence paths); record_acceptance additionally requires the verified run.json (bound), commands.log, and a committed independent review.md from a reviewer != worker."
+}
