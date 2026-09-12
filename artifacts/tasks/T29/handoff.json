@@ -1,0 +1,68 @@
+{
+  "task": "T29",
+  "beads_id": "pdf-t29",
+  "title": "Implement native parent supervision and atomic partial results",
+  "worker": "devin-t29 (Devin Local SWE-2, Mac)",
+  "app": "devin",
+  "pass": 1,
+  "branch": "work/devin/t29",
+  "base": "21be4c9",
+  "commits": {
+    "implementation": "607a0f7 (native/inkflip/runtime/: supervisor.py, artifacts.py, __init__.py, README.md)",
+    "tests": "07c6d24 (native/tests/runtime/: fault_worker.py, supervisor_driver.py, test_supervision.py)",
+    "implementation_fix": "e067442 (probe_rlimits uses a subprocess probe instead of os.fork; removes multi-threaded-fork DeprecationWarning)",
+    "head": "e06744223f53a00975ae33b0b2da8e4ca3828420"
+  },
+  "ready_for_review": true,
+  "review_scope": "native/inkflip/runtime/ + native/tests/runtime/ only; diff vs base 21be4c9 is exactly 7 new files (2482 insertions, zero modifications to existing files). planning/ untouched. No Beads writes by this worker.",
+  "executed_checks": [
+    {
+      "command": "uv run --project native python -m pytest native/tests/runtime -q",
+      "exit": 0,
+      "counts": {"passed": 34, "subtests_passed": 4, "failed": 0, "skipped": 0}
+    },
+    {
+      "command": "uv run --project native python -m pytest native/tests/runtime -q -W error::DeprecationWarning",
+      "exit": 0,
+      "counts": {"passed": 34, "subtests_passed": 4, "failed": 0}
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T29 --report artifacts/tasks/T29/run.json",
+      "exit": 0,
+      "counts": {"collected": 34, "passed": 34, "failed": 0, "skipped": 0},
+      "note": "run.json binds evaluated_commit e06744223f53a00975ae33b0b2da8e4ca3828420 on a clean tree"
+    },
+    {
+      "command": "uv run --project native python -m pytest native/tests -q",
+      "exit": 1,
+      "counts": {"passed": 144, "subtests_passed": 153, "failed": 1},
+      "note": "Single failure is native/tests/ocr/test_ocr.py::TestModelSelection::test_fallback_dir_is_probed_per_language - a T27-owned /private/var vs /var symlink path-equality issue on macOS; pre-existing on this host, zero T29 bytes in that path, recorded not hidden"
+    },
+    {
+      "command": "process hygiene",
+      "exit": 0,
+      "note": "pgrep fault_worker -> none; no leftover per-attempt scratch dirs under $TMPDIR after the suite"
+    }
+  ],
+  "failures_found_and_fixed_during_implementation": [
+    "Child argv relative paths resolved against the per-attempt scratch cwd (worker exited 2, no report): diagnosed as a caller-input issue - argv is verbatim per contract; tests pass absolute worker paths.",
+    "Poll loop could spin when pending jobs remained but refill was blocked by cancel/deadline: added the empty-active break and terminal sweep.",
+    "Repeated child_killed journal spam on cancellation: killed_cause is now set once and the cancel path does not re-terminate.",
+    "Unreapable (D-state) children could stall the loop forever: added honest 'abandoned' handling (journal child_unreaped, classified) instead of hanging the run.",
+    "Journal seq restarted on resume: Journal counts existing lines and continues the global sequence.",
+    "os.fork() rlimit probe fired DeprecationWarning in multi-threaded hosts and could deadlock in the child: probe now runs in a fresh interpreter subprocess (e067442).",
+    "macOS injects __CF_USER_TEXT_ENCODING at exec regardless of the parent's env: the env-allowlist test accepts documented platform-injected keys and still asserts the parent secret never leaks."
+  ],
+  "platform_notes": {
+    "host": "macOS arm64 (Darwin 25.x)",
+    "rlimit_support_on_this_host": {"RLIMIT_AS": false, "RLIMIT_CORE": true, "RLIMIT_CPU": true, "RLIMIT_FSIZE": true, "RLIMIT_NOFILE": true},
+    "memory_bound_degradation": "RLIMIT_AS is rejected by macOS; on this host the memory bound is enforced by the live libproc proc_pidinfo RSS probe plus post-exit wait4 ru_maxrss. On Linux RLIMIT_AS applies inside the child as well. The per-run index records rlimit_support honestly; no facility is silently skipped.",
+    "linux_correctness": "POSIX-only primitives (setsid, killpg, wait4, /proc RSS). Linux path uses /proc/<pid>/status VmRSS; untested on Linux in this worktree - flagged for the Homebase/Linux verification round."
+  },
+  "invariants": ["I05", "I07", "I17"],
+  "next_steps": [
+    "Independent review of work/devin/t29 at e067442 (review.md is reviewer-owned; this worker did not write it)",
+    "Linux verification run on Homebase (RLIMIT_AS path, /proc RSS probe) when the coordinator dispatches",
+    "Coordinator owns Beads acceptance state; this worker claims ready-for-review only"
+  ]
+}

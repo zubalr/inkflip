@@ -1,0 +1,44 @@
+# T29 executed command transcript
+date: 2026-09-12T14:12Z  host: macOS arm64 (Darwin 25.x)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7)
+worktree: /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t29  branch: work/devin/t29  base: 21be4c9
+HEAD under test: e06744223f53a00975ae33b0b2da8e4ca3828420 (607a0f7 impl + 07c6d24 tests + e067442 probe fix)
+
+$ uv run --project native python -m pytest native/tests/runtime -q   (T29 contract command)
+..................................                                   [100%]
+34 passed, 4 subtests passed in 9.66s
+exit: 0
+
+$ uv run --project native python -m pytest native/tests/runtime -q -W error::DeprecationWarning
+..................................                                   [100%]
+34 passed, 4 subtests passed in 10.40s
+exit: 0
+(no DeprecationWarning: probe_rlimits runs the setrlimit probe in a fresh
+interpreter subprocess, never os.fork from a possibly-threaded parent)
+
+$ python3 scripts/task_acceptance.py task T29 --report artifacts/tasks/T29/run.json
+exit: 0
+run.json binds evaluated_commit e06744223f53a00975ae33b0b2da8e4ca3828420;
+tests: collected 34, passed 34, failed 0, skipped 0
+
+$ uv run --project native python -m pytest native/tests -q   (whole native suite, regression check)
+1 failed, 144 passed, 153 subtests passed in 25.98s
+exit: 1
+FAILURE ANALYSIS: the single failure is
+native/tests/ocr/test_ocr.py::TestModelSelection::test_fallback_dir_is_probed_per_language
+- a T27-owned test comparing PosixPath('/private/var/...tessdata') to
+  PosixPath('/var/...tessdata'): the macOS /var -> /private/var symlink
+  differs from tempfile's canonicalized path. T29 diff (git diff 21be4c9..HEAD)
+  touches zero bytes under native/tests/ocr/ or native/inkflip/readers/, so
+  the failure is pre-existing/environmental on this host, not introduced here.
+  Recorded as a limitation/environment finding; not weakened, not touched.
+
+# Process hygiene after the suite:
+$ pgrep -fl fault_worker        -> exit 1 (no stray workers/descendants)
+$ find $TMPDIR -name '*-a[0-9]-*' -> no leftover per-attempt scratch dirs
+
+# Manual smoke (pre-test debugging evidence, all scenarios real children):
+# file-a report -> completed, reports/file-a.json committed byte-verbatim
+# crash (SIGSEGV) -> failed/crash, retried exactly once (attempts 2)
+# hang -> timeout/wall, SIGTERM group kill, retried once
+# journal events: run_started, job_queued x3, child_spawned/child_killed/
+#   child_reaped, report_committed, job_terminal, job_retry, run_terminal

@@ -1,0 +1,55 @@
+{
+  "task": "T29",
+  "beads_id": "pdf-t29",
+  "evaluated_commit": "e06744223f53a00975ae33b0b2da8e4ca3828420",
+  "evaluated_at": "2026-09-12T14:12:05.239879+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 34,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/runtime -q",
+      "argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/runtime",
+        "-q"
+      ],
+      "executed_argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/runtime",
+        "-q",
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-wemdlxo4/results"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "..................................                                   [100%]\n34 passed, 4 subtests passed in 10.55s\n",
+      "stderr": "",
+      "tests": {
+        "collected": 34,
+        "passed": 34,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t29",
+      "environment": {}
+    }
+  ]
+}

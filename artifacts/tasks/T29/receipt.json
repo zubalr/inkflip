@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "task_id": "T29",
+  "beads_id": "pdf-t29",
+  "worker": {
+    "app": "devin",
+    "worker_id": "devin-t29",
+    "branch": "work/devin/t29",
+    "base": "21be4c9",
+    "implementation_commit": "607a0f7",
+    "test_commit": "07c6d24",
+    "head": "e06744223f53a00975ae33b0b2da8e4ca3828420",
+    "commit_history": "607a0f7 = runtime implementation (native/inkflip/runtime/); 07c6d24 = real-subprocess test suite (native/tests/runtime/); e067442 = rlimit probe moved from os.fork to a subprocess (DeprecationWarning fix)"
+  },
+  "contract_version": "1.0.0",
+  "fixture_ids": ["F17", "F18", "F19", "F20", "F21"],
+  "test_ids": ["TEST-29"],
+  "criteria": [
+    {
+      "criterion": "Injected Python/native-like hang/crash/OOM/output flood gets classified and bounded",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "native/tests/runtime/fault_worker.py",
+        "artifacts/tasks/T29/commands.log",
+        "artifacts/tasks/T29/run.json"
+      ],
+      "detail": "Real spawned children (never mocks of the supervisor): hang -> status timeout/failure_kind wall with SIGTERM->grace->SIGKILL process-group kill (test_hang_is_bounded_timeout_and_retried_once); SIGTERM-ignoring child escalates to SIGKILL (test_sigterm_ignoring_child_is_killed); real SIGSEGV -> failed/crash with signal name recorded (test_sigsegv_crash_classified_and_retried_once); memory growth -> failed/memory_limit via live RSS probe kill on macOS and RLIMIT_AS inside the child on Linux (test_memory_growth_is_bounded_and_classified); stdout and stderr floods -> failed/output_limit with only bounded head+tail samples retained (test_stdout/stderr_flood_is_bounded_and_classified); nonzero exit -> failed/exit; spawn failure -> failed/spawn_error; leaked same-group descendants are reaped after leader exit (test_leaked_descendant_is_reaped_after_completed_leader, test_hang-grandchild coverage). Committed F20 worker-fault-* fixture scenarios are additionally exercised through tests/fixtures/fault_double.py (TestWorkerFaultFixtures). All bounds enforced by the parent poll loop, never SIGALRM."
+    },
+    {
+      "criterion": "successful files remain byte-stable",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "native/inkflip/runtime/artifacts.py",
+        "artifacts/tasks/T29/commands.log"
+      ],
+      "detail": "Committed report bytes are the child's produced bytes verbatim: tmp-sibling write -> fsync -> os.replace -> directory fsync (atomic_write_bytes); test_identical_runs_produce_byte_identical_reports asserts byte-identical reports across two runs; test_completed_job_commits_report_verbatim compares bytes; resume verifies sha256+config_digest and marks the job skipped without rewriting (test_resume_skips_verified_completed_and_preserves_bytes). A failed/killed sibling job never touches a completed job's committed report (partial-run test)."
+    },
+    {
+      "criterion": "one retry max within deadline",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "native/inkflip/runtime/supervisor.py",
+        "artifacts/tasks/T29/commands.log"
+      ],
+      "detail": "limits.retries defaults to native.max_retries = 1; only transient kinds (exit, crash, wall, spawn_error) are retryable, each with a fresh worker and fresh scratch, and only while run_wall_seconds leaves room (_retryable). test_retry_is_bounded_to_one asserts attempts stop at 2; test_transient_failure_succeeds_on_single_retry covers the success path; test_run_deadline_preempts_retry asserts no retry past the run deadline. output_limit, memory_limit, missing_output, report_invalid and cancelled are never retried."
+    },
+    {
+      "criterion": "empty success not retried",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "artifacts/tasks/T29/commands.log"
+      ],
+      "detail": "A child that exits 0 without declaring an output is a completed job with attempts == 1 and no retry (test_empty_success_is_completed_and_not_retried). An exit-0 child that declared an output it did not produce is failed/missing_output - a deterministic defect that is also never retried (test_missing_declared_output_fails_and_is_not_retried)."
+    },
+    {
+      "criterion": "Ctrl-C terminates descendants and leaves valid partial artifact.",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "native/tests/runtime/supervisor_driver.py",
+        "artifacts/tasks/T29/commands.log"
+      ],
+      "detail": "SIGINT/SIGTERM to the supervisor process (and an in-process request_cancel) forwards to a cancel: every live process group is SIGTERM->SIGKILL terminated including leaked descendants, queued jobs receive terminal 'cancelled' records (I05 - no job left unterminated), and index.json plus journal.jsonl are still written so the partial artifact stays valid (test_sigint_to_driver_kills_process_group_and_keeps_partial via a real driver subprocess; test_in_process_sigint_cancels_run). Run status reports 'cancelled' with per-job counts journaled in run_terminal."
+    },
+    {
+      "criterion": "One task failure does not poison the whole corpus (I17 containment)",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "artifacts/tasks/T29/commands.log"
+      ],
+      "detail": "A crashing/hanging job terminates as failed/timeout while earlier and later jobs still complete and commit reports; run status is 'partial' (mixed) not 'failed' (smoke evidence in commands.log: file-a completed while file-b crashed and file-c timed out). index.json records a terminal record for every planned job."
+    },
+    {
+      "criterion": "jobs default 1; PDFium/reader calls stay out of concurrent threads",
+      "status": "executed",
+      "evidence": [
+        "native/tests/runtime/test_supervision.py",
+        "native/inkflip/runtime/supervisor.py",
+        "native/inkflip/runtime/README.md"
+      ],
+      "detail": "Limits.jobs defaults to native.default_jobs = 1 (test_default_jobs_is_one). jobs > 1 requires an explicit CPU/RAM-aware ParallelAdmission and is refused otherwise (test_jobs_two_requires_explicit_admission; admitted concurrency verified in test_admitted_parallel_jobs_run_concurrently). The supervisor uses zero threads and zero engine calls: all reader engine calls (pypdfium2, pypdf, tesseract adapters) execute inside child processes only (test_supervision_uses_processes_not_threads scans the module for thread creation), so PDFium is never invoked from concurrent threads (s26)."
+    }
+  ],
+  "commands": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/runtime -q",
+      "exit": 0,
+      "counts": {"collected": 34, "passed": 34, "failed": 0, "skipped": 0, "subtests_passed": 4}
+    },
+    {
+      "segment": "uv run --project native python -m pytest native/tests/runtime -q -W error::DeprecationWarning",
+      "exit": 0,
+      "counts": {"passed": 34, "subtests_passed": 4, "failed": 0}
+    },
+    {
+      "segment": "python3 scripts/task_acceptance.py task T29 --report artifacts/tasks/T29/run.json",
+      "exit": 0,
+      "counts": {"collected": 34, "passed": 34, "failed": 0, "skipped": 0},
+      "detail": "run.json binds evaluated_commit e06744223f53a00975ae33b0b2da8e4ca3828420"
+    },
+    {
+      "segment": "uv run --project native python -m pytest native/tests -q",
+      "exit": 1,
+      "counts": {"passed": 144, "subtests_passed": 153, "failed": 1},
+      "detail": "Whole-suite regression check. The one failure is native/tests/ocr/test_ocr.py::TestModelSelection::test_fallback_dir_is_probed_per_language - T27-owned, a macOS /var->/private/var symlink path-equality issue; T29's diff touches zero bytes under native/tests/ocr/ or native/inkflip/readers/ (pre-existing on this host). Recorded, not weakened, not touched."
+    }
+  ],
+  "environment": {
+    "host": "macOS arm64 (Darwin 25.x)",
+    "python": "CPython 3.13.15 via uv frozen native/.venv (system python3 is 3.14.7; all runs used the frozen project interpreter)",
+    "rlimit_support_observed": {"RLIMIT_AS": false, "RLIMIT_CORE": true, "RLIMIT_CPU": true, "RLIMIT_FSIZE": true, "RLIMIT_NOFILE": true},
+    "note": "RLIMIT_AS is rejected by macOS; on this host the memory bound is the live libproc RSS probe + post-exit wait4 ru_maxrss. Linux adds in-child RLIMIT_AS and /proc VmRSS probing. rlimit_support is recorded per run in index.json."
+  },
+  "limitations": [
+    "Verified on macOS arm64 only in this worktree; the Linux rlimit path (RLIMIT_AS, /proc RSS) is implemented and probed but awaits the Homebase/Linux verification round.",
+    "Memory bound is layered and degraded where the platform refuses rlimits (macOS RLIMIT_AS): the RSS probe polls at 100 ms so a child could briefly exceed the bound before the kill lands; a container remains the hardened route per THREAT_MODEL.",
+    "RLIMIT_CPU is only a backstop (wall deadline +60 s); the authoritative deadline is the parent's poll loop.",
+    "Unreapable D-state children are recorded as 'abandoned' (journal child_unreaped, job classified) rather than hanging the run forever.",
+    "The single native/tests/ocr failure on this host is a T27-owned macOS path-canonicalization issue outside T29 scope; preserved verbatim, not weakened.",
+    "Resume refuses a changed per-job config digest (new run directory required) - stricter than silently rerunning, per the byte-stability contract."
+  ],
+  "dependency_requests": [],
+  "handoff": "artifacts/tasks/T29/handoff.json",
+  "review": {
+    "status": "pending",
+    "note": "Independent review required before acceptance; artifacts/tasks/T29/review.md is reviewer-owned and was not written by this worker."
+  }
+}
