@@ -3,7 +3,8 @@
 - **Reviewer:** independent read-only reviewer (Devin Local subagent, coordinator-requested)
 - **Candidate:** `a2f7e3cc83ea0bb461863eaf88d8d5a71c045d06` (impl `9742daf`, tests `d802819`, evidence `a2f7e3c`; base `3b70baa`)
 - **Review branch/checkout:** `review/devin/t22` @ `worktrees/review-devin-t22`, HEAD `a2f7e3c`, clean tree
-- **Verdict: changes-needed** — all five acceptance criteria verify and the security boundary is sound, but a deterministic TOCTOU in `ImportController.offerSource` corrupts controller state and can display a false "attached"/"replay-ready" claim (F1, medium). Fix is small (busy guard + generation binding, the pattern `offer`/`offerCompareSide` already use). All other findings are low/info.
+- **Round-1 verdict: changes-needed** — all five acceptance criteria verify and the security boundary is sound, but a deterministic TOCTOU in `ImportController.offerSource` corrupts controller state and can display a false "attached"/"replay-ready" claim (F1, medium). Fix is small (busy guard + generation binding, the pattern `offer`/`offerCompareSide` already use). All other findings are low/info.
+- **Round-2 verdict (current): approved** — F1 resolved at `610eee3`/`6d3951b`, verified on candidate `a8c9600`; see the Round-2 section below.
 
 ## Reproduced commands (this worktree, real counts)
 
@@ -73,3 +74,45 @@
 - `App.tsx` composition/routing (later task — preview mount is the only wiring, same as T16).
 - Non-baseline type errors hiding inside the 1008-error React-typings baseline cannot be fully excluded (all 290 feature diagnostics confirmed baseline-class; oxlint clean is the only static signal on those files).
 - Evidence files were reviewed in this worktree; the worker's `work/devin/t22` branch was not fetched.
+
+---
+
+# Round 2 — fix verification
+
+- **Candidate:** `a8c9600f8f29a7bcf31af7e006d5478ba841a017` (fix `610eee3`, tests `6d3951b`, evidence `a8c9600`); branch updated by merge `55db481` (round-1 review `684374f` in ancestry)
+- **Round-2 verdict: approved** — F1 is resolved with the recommended shape; all reproduced corruption variants now fail closed as `superseded`; F4 batched faithfully. One low-severity residual (R1) plus info notes; nothing else regressed.
+
+## Reproduced (this worktree, real counts)
+
+| Check | Result |
+|---|---|
+| `bun run test:browser -- tests/reports/import.spec.ts` | **12/12 pass, 0 fail/skip, exit 0 (4.2s)** — new race spec included |
+| `tsc -b packages/reports` | exit 0 |
+| oxlint `features/import` + `tests/reports` | 0 warnings / 0 errors (96 rules, 8 files) |
+| oxfmt `controller.ts` + spec | correctly formatted |
+| Spec diff `a2f7e3c→a8c9600` | **purely additive/strengthening** — no assertion removed or weakened; F4 adds `source:length-mismatch` + `source:sha256-mismatch` UI asserts and ordered event details; new 12th spec covers busy/replace/clear phases |
+| Evidence consistency | `run.json` evaluated `6d3951b`, 12/12; `handoff.json` review_rounds cites `684374f`, fix commits, and honestly lists unaddressed info findings |
+
+## My own F1 reproductions replayed against the fix (script-level, independent of the committed spec)
+
+| Variant (round-1 result) | Round-2 result |
+|---|---|
+| `offerSource(slow)` × `offer(B, different doc)` → stale `current`=A, false `attached` on B | **`superseded`**; `current`=B (`doc aaaa…`, replay `missing` — honest); **0** `source_attached` events |
+| `offerSource(slow)` × `clear()` → zombie current while `fileState=idle` | **`superseded`**; `current`=null, `fileState=idle`, no zombie |
+| Concurrent `offerSource` ×2 | deduped — first-resolver attaches (`source_attached` ×1), loser returns `superseded` via the `this.current !== current` identity check |
+| `offerSource` during pending `offer` | `busy` — refused before any byte read |
+| `offerSource` × `offer(BAD)` (replace fails) | `superseded`, `idle`, `current` null — correct, nothing left to attach to |
+
+## Fix analysis (`controller.ts:295-372`)
+
+- `:300-302` busy guard refuses while `offer`/`offerCompareSide` holds the lock — never starts a read. `offerSource` still doesn't *set* `busy`, which is correct precedence: a report offer may supersede a pending source pick, while a source pick can never interrupt an import (compare sides don't touch `current`/generation, so they neither block nor invalidate a pending read — verified reasoning).
+- `:325` generation + `:341` identity binding placed after the only `await` (byte read); everything after the check is synchronous, so once it passes nothing can interleave. `this.current !== current` also dedups concurrent `offerSource` (winner writes a new object → loser sees superseded).
+- Superseded path: no `source_attached`, no `host.own`, no `this.current` write, no `sourceAttached` flip — bytes dropped. Verified.
+
+## Round-2 findings
+
+- **R1 — low — `controller.ts:329-336`.** Residual of F1: when the byte *read itself fails* (`arrayBuffer()` rejects) after supersession, the `catch` emits `source_rejected`/`source:unreadable` under `this.host.currentGeneration` — the NEW generation — before the `:341` check runs. Reproduced: replace mid-read + rejected read → `source_rejected` event gen+1 → `#source-mismatch` notice would render on the new report (wrong-context error, clears on next interaction; nothing attaches, no state corruption). The code comment "the stale read never emits" is exact only for the success path. Narrow + cosmetic — the medium defect is closed; this is a polish item, not a blocker.
+- **R2 — info — `controller.ts:300-312` + `ImportWorkspace.tsx:396-405`.** The new `busy`/`superseded`/`no_report`/`not_required` kinds emit no `source_rejected` event, so the UI silently drops the pick (clears `sourceBusy` only). Correct and transient — the file input remains usable; noted for completeness.
+- **F1 — RESOLVED.** Verified by my own replays, not only the committed spec.
+- **F4 — RESOLVED.** Same-length corrupt `SOURCE_PDF` (last byte XOR `0x01`) through the real `source-file-input` asserts `source:sha256-mismatch` verbatim detail + ordered `[length-mismatch, sha256-mismatch]` rejection events — genuine same-size/different-hash refusal, exactly the missing branch. Fidelity confirmed.
+- **F2/F3/F5/F6/F7/F8/F9** — info-level per round 1; worker documented them as intentionally unchanged; no dispute.
