@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ViewerStage } from "../features/viewer/ViewerStage";
 import type { ViewerDoc } from "../features/viewer/types";
 import { FileDrop, type OpenPhase } from "../features/open/FileDrop";
+import { validateCandidate, resolveProfile } from "../features/open";
 import type { FileCandidate } from "../features/open/types";
 import styles from "./Workspace.module.css";
 
@@ -255,6 +256,33 @@ const EXAMPLE_DOC: ViewerDoc = {
   ],
 };
 
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback: (error: Error) => React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  error: Error | null;
+}
+
+class ViewerErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { error };
+  }
+
+  override render() {
+    if (this.state.error) {
+      return this.props.fallback(this.state.error);
+    }
+    return this.props.children;
+  }
+}
+
 export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
   initialWithExample = true,
@@ -274,6 +302,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   );
   const [openPhase, setOpenPhase] = useState<OpenPhase>("idle");
   const [importError, setImportError] = useState<string | null>(null);
+  const [pdfNotice, setPdfNotice] = useState<string | null>(null);
 
   const reportInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -282,23 +311,67 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     (text: string, fallbackName: string) => {
       try {
         const data = JSON.parse(text);
-        if (data && Array.isArray(data.pages) && Array.isArray(data.findings)) {
-          const importedDoc: ViewerDoc = {
-            pages: data.pages,
-            readers: Array.isArray(data.readers) ? data.readers : [],
-            occurrences: Array.isArray(data.occurrences) ? data.occurrences : [],
-            findings: data.findings,
-          };
-          setDoc(importedDoc);
-          setDocTitle(data.document?.display_name || fallbackName);
-          setImportError(null);
-          onImportReport?.(importedDoc);
-        } else {
-          setImportError("Invalid report JSON: missing required pages or findings.");
+        if (!data || typeof data !== "object") {
+          setImportError("Invalid report JSON: Expected JSON object.");
+          setDoc(null);
+          return;
         }
+        if (!Array.isArray(data.pages) || data.pages.length === 0) {
+          setImportError("Invalid report JSON: report must contain at least one page.");
+          setDoc(null);
+          return;
+        }
+        if (!Array.isArray(data.findings)) {
+          setImportError("Invalid report JSON: missing required findings array.");
+          setDoc(null);
+          return;
+        }
+        for (const p of data.pages) {
+          if (!p || typeof p.index !== "number" || !Array.isArray(p.canonical_size_pt)) {
+            setImportError("Invalid report JSON: malformed page structure in report.");
+            setDoc(null);
+            return;
+          }
+        }
+        if (Array.isArray(data.occurrences)) {
+          for (const occ of data.occurrences) {
+            if (
+              !occ ||
+              typeof occ.page_index !== "number" ||
+              !occ.geometry ||
+              !Array.isArray(occ.geometry.polygon)
+            ) {
+              setImportError(
+                "Invalid report JSON: occurrence missing required geometry or page_index.",
+              );
+              setDoc(null);
+              return;
+            }
+          }
+        }
+        for (const f of data.findings) {
+          if (!f || typeof f.id !== "string" || !Array.isArray(f.occurrence_ids)) {
+            setImportError("Invalid report JSON: malformed finding structure in report.");
+            setDoc(null);
+            return;
+          }
+        }
+
+        const importedDoc: ViewerDoc = {
+          pages: data.pages,
+          readers: Array.isArray(data.readers) ? data.readers : [],
+          occurrences: Array.isArray(data.occurrences) ? data.occurrences : [],
+          findings: data.findings,
+        };
+        setDoc(importedDoc);
+        setDocTitle(data.document?.display_name || fallbackName);
+        setImportError(null);
+        setPdfNotice(null);
+        onImportReport?.(importedDoc);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Invalid JSON";
         setImportError(`Could not parse report file: ${msg}`);
+        setDoc(null);
       }
     },
     [onImportReport],
@@ -315,20 +388,47 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     [handleImportReportText],
   );
 
+  const handlePdfCandidate = useCallback(
+    async (file: FileCandidate) => {
+      setOpenPhase("validating");
+      try {
+        const profile = resolveProfile();
+        const err = await validateCandidate(file, profile);
+        if (err) {
+          setImportError(err.message);
+          setDoc(null);
+          setPdfNotice(null);
+          return;
+        }
+        // Valid PDF: do NOT fabricate canned findings!
+        setDoc(null);
+        setImportError(null);
+        setPdfNotice(
+          `PDF received: ${file.name}. In-browser inspection pipeline is unavailable in this viewer build. Open an exported report (.inkflip.json) to inspect findings.`,
+        );
+        if (onOpenFile && file instanceof File) {
+          onOpenFile(file);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Validation error";
+        setImportError(`Failed to validate PDF: ${msg}`);
+        setDoc(null);
+        setPdfNotice(null);
+      } finally {
+        setOpenPhase("idle");
+      }
+    },
+    [onOpenFile],
+  );
+
   const handlePdfFileChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) return;
       event.target.value = "";
-      setDocTitle(file.name);
-      setDoc({
-        ...EXAMPLE_DOC,
-        pages: EXAMPLE_DOC.pages.map((p) => ({ ...p })),
-      });
-      setImportError(null);
-      if (onOpenFile) onOpenFile(file);
+      await handlePdfCandidate(file);
     },
-    [onOpenFile],
+    [handlePdfCandidate],
   );
 
   const handleFileCandidate = useCallback(
@@ -347,32 +447,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         } catch (err: unknown) {
           const msg = err instanceof Error ? err.message : "Read failure";
           setImportError(`Failed to read report file: ${msg}`);
+          setDoc(null);
         } finally {
           setOpenPhase("idle");
         }
         return;
       }
 
-      // Handle PDF candidate
-      setOpenPhase("validating");
-      try {
-        setDocTitle(candidate.name);
-        setDoc({
-          ...EXAMPLE_DOC,
-          pages: EXAMPLE_DOC.pages.map((p) => ({ ...p })),
-        });
-        setImportError(null);
-        if (onOpenFile && candidate instanceof File) {
-          onOpenFile(candidate);
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Open failure";
-        setImportError(`Failed to open document: ${msg}`);
-      } finally {
-        setOpenPhase("idle");
-      }
+      // Handle PDF candidate with strict validation
+      await handlePdfCandidate(candidate);
     },
-    [handleImportReportText, onOpenFile],
+    [handleImportReportText, handlePdfCandidate],
   );
 
   return (
@@ -449,6 +534,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               onClick={() => {
                 setDoc(null);
                 setDocTitle("Workspace");
+                setImportError(null);
+                setPdfNotice(null);
               }}
             >
               Close Document
@@ -468,6 +555,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               onClick={() => {
                 setDoc(EXAMPLE_DOC);
                 setDocTitle("Invoice-Example.pdf");
+                setImportError(null);
+                setPdfNotice(null);
               }}
             >
               Load Example
@@ -478,7 +567,27 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
       <main className={styles.workspaceMain}>
         {doc ? (
-          <ViewerStage doc={doc} />
+          <ViewerErrorBoundary
+            key={docTitle}
+            fallback={(error) => (
+              <div
+                id="import-error"
+                role="alert"
+                style={{
+                  padding: "var(--space-4)",
+                  backgroundColor: "var(--color-surface-muted)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  color: "var(--color-ink)",
+                  fontSize: "var(--text-caption)",
+                }}
+              >
+                Failed to display document: {error.message}
+              </div>
+            )}
+          >
+            <ViewerStage doc={doc} />
+          </ViewerErrorBoundary>
         ) : (
           <div className={styles.emptyWorkspace}>
             <FileDrop phase={openPhase} onFile={handleFileCandidate} hasDocument={false} />
@@ -497,6 +606,23 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 }}
               >
                 {importError}
+              </div>
+            )}
+            {pdfNotice && (
+              <div
+                id="pdf-received-notice"
+                role="status"
+                style={{
+                  marginTop: "var(--space-3)",
+                  padding: "var(--space-2) var(--space-4)",
+                  backgroundColor: "var(--color-surface-subtle)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  color: "var(--color-ink)",
+                  fontSize: "var(--text-caption)",
+                }}
+              >
+                {pdfNotice}
               </div>
             )}
             <div
@@ -561,6 +687,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 onClick={() => {
                   setDoc(EXAMPLE_DOC);
                   setDocTitle("Invoice-Example.pdf");
+                  setImportError(null);
+                  setPdfNotice(null);
                 }}
               >
                 Try the example

@@ -299,4 +299,85 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     await page.locator("#btn-close-doc").click();
     await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
   });
+
+  test("home landing view does not overflow at 360px viewport (P2-F2)", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto(`${baseUrl}/#/`);
+    await page.waitForSelector("#hero-headline");
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+
+    // Verify key action buttons are visible and stacked cleanly
+    await expect(page.locator("#btn-try-example")).toBeVisible();
+    await expect(page.locator("#btn-open-report")).toBeVisible();
+    await expect(page.locator("#btn-open-locally")).toBeVisible();
+  });
+
+  test("report import rejects degenerate/invalid JSON without white-screen crash (P2)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+
+    const fs = await import("node:fs");
+    const testDir = path.resolve(process.cwd(), "test-results");
+    fs.mkdirSync(testDir, { recursive: true });
+
+    // 1. Degenerate JSON with empty pages
+    const degeneratePath = path.resolve(testDir, "degenerate-report.json");
+    fs.writeFileSync(degeneratePath, '{"pages":[],"findings":[]}');
+    await page.locator("#input-import-report").setInputFiles(degeneratePath);
+
+    await expect(page.locator("#import-error")).toBeVisible();
+    await expect(page.locator("#viewer-stage")).toHaveCount(0);
+    const bodyText = (await page.locator("body").textContent()) || "";
+    expect(bodyText.length).toBeGreaterThan(50);
+
+    // 2. Malformed JSON syntax
+    const badJsonPath = path.resolve(testDir, "malformed-syntax.json");
+    fs.writeFileSync(badJsonPath, "{not json !!!");
+    await page.locator("#input-import-report").setInputFiles(badJsonPath);
+    await expect(page.locator("#import-error")).toBeVisible();
+    await expect(page.locator("#viewer-stage")).toHaveCount(0);
+  });
+
+  test("PDF open candidate validation rejects non-PDF and does not fabricate findings (P1)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+
+    const fs = await import("node:fs");
+    const testDir = path.resolve(process.cwd(), "test-results");
+    fs.mkdirSync(testDir, { recursive: true });
+
+    // 1. Fake binary file masquerading as PDF without %PDF- magic
+    const fakeExePath = path.resolve(testDir, "fake.pdf");
+    fs.writeFileSync(fakeExePath, "MZ This is not a PDF binary file!");
+    await page.locator("#input-open-pdf").setInputFiles(fakeExePath);
+
+    await expect(page.locator("#import-error")).toBeVisible();
+    expect(await page.locator("#import-error").textContent()).toContain(
+      "This file could not be opened as a PDF",
+    );
+    await expect(page.locator("#viewer-stage")).toHaveCount(0);
+
+    // 2. Real PDF header bytes: accepted, but does NOT mount canned invoice findings
+    const validPdfPath = path.resolve(testDir, "my-tax-return.pdf");
+    fs.writeFileSync(validPdfPath, "%PDF-1.4\n%real-bytes\n1 0 obj\n<<>>\nendobj\n");
+    await page.locator("#input-open-pdf").setInputFiles(validPdfPath);
+
+    // Viewer stage with canned findings must NOT be mounted
+    await expect(page.locator("#viewer-stage")).toHaveCount(0);
+    // Explicit pipeline status notice must be rendered
+    const notice = page.locator("#pdf-received-notice");
+    await expect(notice).toBeVisible();
+    expect(await notice.textContent()).toContain("my-tax-return.pdf");
+    expect(await notice.textContent()).toContain("inspection pipeline is unavailable");
+  });
 });
