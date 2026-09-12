@@ -1,0 +1,114 @@
+{
+  "task": "T08",
+  "beads_id": "pdf-t08",
+  "worker": "devin-t08",
+  "branch": "work/devin/t08",
+  "worktree": "worktrees/pdf-t08",
+  "base_commit": "546accd",
+  "implementation_commit": "eefc39d7fd5b1b3f71fce1873951ff60d42d9cb1",
+  "evidence_commit": "this file is committed after the implementation commit; see git log on work/devin/t08",
+  "disposition": "implemented_pending_review",
+  "ready_for_review": true,
+  "title": "Implement local file validation and page/region selection",
+  "changed_paths": [
+    "apps/web/src/features/open/FileDrop.module.css",
+    "apps/web/src/features/open/FileDrop.tsx",
+    "apps/web/src/features/open/OpenWorkspace.module.css",
+    "apps/web/src/features/open/OpenWorkspace.tsx",
+    "apps/web/src/features/open/README.md",
+    "apps/web/src/features/open/controller.ts",
+    "apps/web/src/features/open/copy.ts",
+    "apps/web/src/features/open/index.ts",
+    "apps/web/src/features/open/limits.ts",
+    "apps/web/src/features/open/mount.tsx",
+    "apps/web/src/features/open/preview.html",
+    "apps/web/src/features/open/types.ts",
+    "apps/web/src/features/open/validate.ts",
+    "apps/web/src/features/selection/PagePicker.module.css",
+    "apps/web/src/features/selection/PagePicker.tsx",
+    "apps/web/src/features/selection/README.md",
+    "apps/web/src/features/selection/RegionEditor.module.css",
+    "apps/web/src/features/selection/RegionEditor.tsx",
+    "apps/web/src/features/selection/index.ts",
+    "apps/web/src/features/selection/pages.ts",
+    "apps/web/src/features/selection/region.ts",
+    "tests/browser/open.spec.ts"
+  ],
+  "scope_check": "git status shows only the three allowed paths touched; zero modifications to existing files; no pushes; no Beads writes.",
+  "commands": [
+    {
+      "argv": "bun run test:browser -- tests/browser/open.spec.ts",
+      "exit": 0,
+      "result": "13 collected, 13 passed, 0 failed, 0 skipped (registered command)"
+    },
+    {
+      "argv": "bun x --no-install playwright test tests/browser/open.spec.ts",
+      "exit": 0,
+      "result": "13/13 passed on three consecutive runs (10.8s, 9.8s, 10.2s)"
+    },
+    {
+      "argv": "bun x --no-install playwright test tests/browser/open.spec.ts --reporter=json",
+      "exit": 0,
+      "result": "expected=13 unexpected=0 skipped=0 flaky=0 -> artifacts/tasks/T08/run.json"
+    },
+    {
+      "argv": "node_modules/.bin/oxlint apps/web/src/features/open apps/web/src/features/selection tests/browser/open.spec.ts",
+      "exit": 0,
+      "result": "0 warnings, 0 errors (15 files, 96 rules)"
+    },
+    {
+      "argv": "apps/web/node_modules/.bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "exit": 1,
+      "result": "pre-existing baseline ~430 errors (TS7016/TS7006/TS7026 — @types/react unresolved under isolated linker); owned files contribute 0 non-baseline errors"
+    },
+    {
+      "argv": "cd apps/web && node_modules/.bin/vite build",
+      "exit": 0,
+      "result": "app entry builds to dist/ in ~0.5s"
+    }
+  ],
+  "tests": {
+    "collected": 13,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "file": "tests/browser/open.spec.ts",
+    "harness": "Vite dev server (programmatic, apps/web/node_modules/vite) serving src/features/open/preview.html; real pdf.js 6.3.289 legacy pair, T09 adapter, T11 RunCoordinator; no contract-surface mocks"
+  },
+  "evidence_paths": [
+    "artifacts/tasks/T08/commands.log",
+    "artifacts/tasks/T08/run.json",
+    "artifacts/tasks/T08/receipt.json",
+    "artifacts/tasks/T08/handoff.json",
+    "tests/browser/open.spec.ts"
+  ],
+  "acceptance_criteria_status": {
+    "20MiB/1000-page and mobile limits exercised without giant allocations": "executed — tests 4,5,6",
+    "wrong MIME/header, encrypted and malformed are distinct": "executed — test 3 (five distinct kinds incl. too_large, too_many_pages in tests 4-6)",
+    "new file revokes old generation first": "executed — tests 7,13",
+    "page selection never silently excludes a page": "executed — tests 5,8",
+    "no document metadata in URL.": "executed — test 12"
+  },
+  "limitations": [
+    "F17/F18/F19/F21 are not in the merged fixtures/ tree (catalogued as development fixtures but absent). The spec generates equivalent minimal PDFs in-page: /Encrypt-dictionary (F18 encrypted), truncated body (F18 malformed), 100_000pt MediaBox (F19 huge-page metadata+bounds), canary document (F21 network-canary). F17's unreadable-region aspect is check-phase behavior owned by later tasks; T08 covers its open/metadata half via real fixtures.",
+    "apps/web/src/App.tsx is outside T08's allowed scope — integration into the app shell belongs to the composition task. The T08-owned host is features/open/preview.html + mount.tsx, which wires the real production collaborators (pinned pdf.js pair, T09 adapter, T11 coordinator).",
+    "Baseline typecheck: ~430 pre-existing errors repo-wide (missing @types/react under the isolated linker); identical error class exists on untouched T07 components. Owned files add 0 non-baseline errors.",
+    "oxfmt has no committed config; its defaults contradict the checked-in baseline style on untouched files. Owned files follow their directory conventions (double quotes in apps/web, single quotes in tests/).",
+    "?profile=mobile is an explicit test affordance for deterministic mobile-profile exercise; the production resolver uses coarse-pointer/narrow-viewport heuristics per CAPABILITIES.md.",
+    "The plan/run path freezes checks and drains dispatch intents but does not spawn workers — check execution is owned by later tasks; ocr checks plan honestly and would terminate 'unsupported' at extract until an OCR reader lands."
+  ],
+  "dependency_requests": [],
+  "consumed_dependencies": {
+    "T09": "PdfJsReaderAdapter public API (open/pages/plan/extract/close, ReaderError.reason classification, hexSha256) — no changes needed",
+    "T11": "RunCoordinator public API (openFile/fileValidated/metadataLoaded/requestClear/own/startRun/drainOutbox/receive/snapshot/subscribe, MessageFactory, deriveRunKey) — no changes needed",
+    "T07": "Button, Notice (id prop, not data-testid), ReplaceConfirmDialog/ModalDialog primitives — no changes needed",
+    "T02": "pinned pdfjs-dist 6.3.289 legacy pair via ?url same-origin worker + staged cMaps/fonts/wasm/iccs"
+  },
+  "notes": [
+    "Controller emits a ControllerEvent stream (clear/teardown/validated/opened/metadata/rejected); OpenWorkspace renders exclusively from it, so offers through ANY caller surface identically — this is what makes the size/page-count limits observable in the DOM without mocks.",
+    "'clear' records the retired generation; 'teardown' records the new generation — the strict inequality is the I07 proof point asserted in tests.",
+    "PageSelection refuses over-cap mutations ('limit') and reports truncated in its summary — the 'no silent exclusion' mechanism is refusal-plus-notice, never quiet trimming.",
+    "Region numeric input is validated, not clamped; pointer drags are clamped to the raster surface by construction; both paths produce contract Region records in canonical_page space with the page's raw_to_canonical transform id.",
+    "review.md is reviewer-owned — intentionally not created by this worker."
+  ]
+}
