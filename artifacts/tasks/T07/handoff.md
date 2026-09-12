@@ -1,9 +1,10 @@
-# T07 handoff — worker report
+# T07 handoff — worker report (Overnight Checkpoint)
 
 **Task:** T07 — Build accessible reusable controls and navigation  
 **Branch:** `work/antigravity/t07` · **Beads:** `pdf-t07` (claimed as `antigravity-t07`)  
 **Base commit:** `90d702987f42b9a19b4eea606c4c57facf623b12`  
 **Implementation commit:** `58cc331e784d6e55b3b09cd50c48f9d0d6d96329`  
+**Status:** `implemented_pending_review` (not accepted; awaiting independent peer review and coordinator acceptance)
 
 ## Implementation Overview
 
@@ -42,3 +43,14 @@
 | `bun run test:a11y -- tests/a11y/primitives.spec.ts` | 0 | 7 collected, 7 passed, 0 failed, 0 skipped against live mounted React primitives via Vite |
 | `python3 scripts/task_acceptance.py task T07 --report artifacts/tasks/T07/run.json` | 0 | Task acceptance check passes cleanly with 7 passing tests; zero failures or evidence errors |
 | `python3 scripts/acceptance_receipts.py verify-run T07` | 0 | Verified T07 run record |
+
+## Failures & Notes
+
+- **Initial run failure:** Initial Playwright run timed out on tab locator `#sec-tabs button[role="tab"]` because `#sec-tabs` was the ID of the `<h2>` heading rather than a container. Fixed selector to `[role="tablist"] button[role="tab"]`. All 7 tests then passed cleanly in 2.6s.
+- **Current failures:** None. 100% of acceptance criteria executed and verified.
+
+## Next Steps
+
+1. **Independent Peer Review:** Peer reviewer (Devin Local or ZCode) reviews candidate commit `58cc331e784d6e55b3b09cd50c48f9d0d6d96329` on branch `work/antigravity/t07`.
+2. **Acceptance Receipt:** Devin Local (integration lead & Beads state authority) runs acceptance check, records `artifacts/tasks/T07/acceptance.json`, and updates Beads task `pdf-t07`.
+3. **Integration:** Merge `work/antigravity/t07` into `main`.
