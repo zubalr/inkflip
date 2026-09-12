@@ -1,6 +1,58 @@
-# T10 wave-4 independent review — changes required
+# T10 independent review — round 1 changes required, round 2 **approved**
 
-Candidate: `66655e142f815fccf089248a73f575d34953ef57` (impl `c08849e`, tests `8e567e5`+`1a655a1`, evidence `c1cc743`+`66655e1`, on merged q38 `1f0d900`/`14f062e`). Review checkout: `/Users/zubair/Code/Projects/pdf project/worktrees/review-devin-t10-wave4`, branch `review/devin/t10-wave4`. No production/test source edits in the checkout; this file is the only added artifact.
+Candidate (round 1): `66655e142f815fccf089248a73f575d34953ef57` (impl `c08849e`, tests `8e567e5`+`1a655a1`, evidence `c1cc743`+`66655e1`, on merged q38 `1f0d900`/`14f062e`).
+Candidate (round 2): `62ac653` (wave-5 impl `75ac92d`, tests `af80d15`, evidence `62ac653`), merged into this branch as `0ee35c4`. Review checkout: `/Users/zubair/Code/Projects/pdf project/worktrees/review-devin-t10-wave4`, branch `review/devin/t10-wave4`. No production/test source edits in the checkout; this file is the only added artifact.
+
+Reviewer: independent Devin SWE-2 reviewer; direct local source review and executions against Pauli's wave-3 verdict `a4f0e725` (`wave3-full-review.md`, `/private/tmp/inkflip-t10-wave3-review.md`, `/private/tmp/inkflip-t10-wave3/probes.spec.ts`) and the wave-4 direction `/private/tmp/inkflip-t10-wave4.txt`. Review evidence only, not product acceptance.
+
+## Round-2 verdict: **approved**
+
+The wave-5 revision fixes both round-1 findings exactly as recommended, the writer's promoted ports are faithful (assertions strengthened, not weakened — the spec diff is purely additive, 0 removed lines vs `66655e1`), and every replayed reproducer and new boundary attack passes. Registered suite **44/44** at `0ee35c4`, `task_acceptance` exit 0 (44/44, `failures:[]`, `evidence_errors:[]`), `bun run verify` 115 checks, `tsc -b` clean, crop-math 13/13, planCrop 6/6.
+
+**Heavy reservation released.** Registered suite, acceptance run, and all real-engine probes have exited; `lsof -nP -iTCP:5192 -sTCP:LISTEN` shows no listener. No further heavy work is queued from this review.
+
+### F1 verification — resolved
+
+- Impl: `reader.ts:1277` now mints `j_${scope.op}_${check.id}_${attempt}`; `scope.op` comes from the strictly monotonic `++this.opSeq` (`reader.ts:436,642`; `close()` also bumps it at `:1433`) — per-operation unique for the life of the reader, so upstream's `${action}-${jobId}` promise map can never cross-deliver; the zombie's late response resolves only its own orphaned entry and its progress maps to a deleted `jobScopes` key → dead `initOwner` → dropped.
+- My real-engine replay (`ZOMBIE_JOB_CROSSTALK`, corrected assertion): `recogCalls` = `j_2_ocr_0_0_0` (47,962 B), `j_3_ocr_0_0_0` (44,030 B), `j_4_ocr_0_0_0` (44,030 B) — all distinct; `r1` `user_cancel`; `r2` `completed`/`unreadable_pixels`, **empty text, 0 occurrences, rasterId `synthetic_blank_0`** — the newer op got its own blank raster's honest result, not the zombie's invoice payload; `r3` clean; `pageerrors:[]`. The round-1 run under identical code paths had returned the full invoice + 14 occurrences — the cross-talk is gone.
+- My stub replay (`ZOMBIE_PROGRESS`, updated to inject the zombie's *own* minted `jobIds[0]`): `progress:[]` — dead-op events refused; `j_unknown_9` control also refused.
+- New attacks on the mint: `JOBID_UNIQUENESS` — `j_2`…`j_6` across sequential + superseded ops, all unique; `RETRY_JOBID` — `j_2_ocr_0_0_0` vs `j_2_ocr_0_0_1` distinct within one op's retry (fresh worker, `killed:2`). No reuse path found: `opSeq` never resets or repeats within a reader; cross-reader id equality is moot for jobs since each reader owns a private worker and upstream map.
+- Writer's registered ports verified faithful: stub arm asserts `jobIds[0] !== jobIds[1]` + dropped zombie/foreign events; real arm asserts distinct ids + `r2` blank-raster honesty + `pageErrors` empty — all pass inside the 44/44.
+
+### F2 verification — resolved
+
+- Impl: `reader.ts:583` now mints `ocrh_${generation}_${Math.floor(this.now())}_${scope.op}` — clock-independent because `scope.op` is monotonic; format stays `[A-Za-z0-9._-]+`.
+- My fixed-clock replay (`FOREIGN_HANDLE`, `now:()=>1000`): `h1='ocrh_1_1000_1'`, `h2='ocrh_1_1000_2'`, `equal:false`; `close(h1)` is a no-op — the live reader still completes (`afterStaleClose: completed/unreadable_pixels`); `extract(h1)` refused `unsupported`. Round-1 behavior under the same probe was `equal:true` + stale close killed the reader.
+- Writer's registered port asserts the same under the fixed clock — passes inside the 44/44.
+
+### Round-2 residual observation (non-blocking)
+
+- **O3 — cross-reader handle-id collision.** `CROSS_READER_HANDLE`: two *different* reader instances each mint `ocrh_1_1000_1` under a fixed clock (per-reader `opSeq` counters align at their first open), and `readerA.close(readerB.handle)` is admitted — it kills reader A (`afterForeignClose: unsupported`). The `_op` suffix gives per-reader uniqueness only; `.id` guards cannot distinguish foreign-reader handles either. Blast radius is narrow: requires two live readers + synchronized opens + aligned op counts + a caller passing another reader's handle (out-of-contract misuse), and only `close()` lacks a secondary guard — a foreign `extract`/`plan` dies at selection binding anyway. Suggested hardening (optional): add a per-reader-instance component (e.g., a reader uid or random suffix) to the handle id. Not blocking: the wave-4 requirement was stale-vs-current distinction on the same reader, which is now airtight.
+- **O1 (round-1 obs) adjudicated — not a finding.** `prepareModel()` superseding a live extract is consistent one-operation-at-a-time semantics: the cancelled op rejects `user_cancel` and epoch+signal guards keep model state coherent. Callers own operation ordering; nothing is silently corrupted.
+- **O2 (round-1 obs) adjudicated — not a finding.** `forwardError` admitting only the lease-owner scope means engine `errorHandler` events during recognize are dropped post-open; the requirement was that dead-scope callbacks be refused, which this satisfies (over-refuses, if anything). Recognize failures still reach the caller as typed rejections through the job promise.
+
+### Round-2 reproduced counts
+
+- `tsc -b` exit 0; `node --test tests/readers/crop-math.mjs` **13/13**; `repro-planCrop.mjs` **6/6**.
+- `bun run test:browser -- tests/readers/tesseract.spec.ts` — **44 collected, 44 passed, 0 failed, 0 skipped** (11.2 s) at `0ee35c4`.
+- `python3 scripts/task_acceptance.py task T10 --report /private/tmp/inkflip-t10-wave4-review/run-review-r2.json` — exit 0, `evaluated_commit=0ee35c4`, 44/44.
+- `bun run verify` — exit 0, **115 checks** (bootstrap 49 + native-bootstrap 2 + coordination 64), self-check 16.
+- Independent probe file (50 tests, `/private/tmp/inkflip-t10-wave4-review/probes.spec.ts`): **46 passed, 4 failed** — the 4 failures are the same stale wave-3-semantics assertions in my probe copy documented below (not product defects; the wave-4 equivalents pass in the registered suite). All F1/F2 reproducers and the 3 new round-2 attacks pass except the documented O3 residual.
+- `peekRaster` audit: a read-only accessor on the in-page `__t10` test seam returning `state.rasters.get(...)` — test-only, no product export or knob.
+- Assertion audit: `git diff 66655e1...62ac653` touches `reader.ts` (+18: two mints + comments), `tesseract.spec.ts` (+216, 0 removed lines), and evidence artifacts only; receipt refreshed to `af80d15` with wave-4 history preserved.
+
+### Round-2 not-verified list
+
+- Cross-reader handle-collision consequence is demonstrated for `close()` only; `plan`/`extract` on a foreign handle were not exercised to failure (selection binding would refuse them) — consistent with the O3 classification.
+- The 4 stale-assertion probe failures are harness drift (they assert pre-wave-4 semantics: `readOnly` cache, mandatory `missing_model`, `worker_crash`-on-close); they were left in the file deliberately as drift evidence, not counted against the candidate.
+- No Linux/device matrix; Playwright Chromium only.
+- No Beads writes, no pushes, no source edits; only this file was added on `review/devin-t10-wave4` (merge `0ee35c4`).
+
+---
+
+# Round-1 record (superseded by round 2 — preserved verbatim)
+
+Candidate: `66655e142f815fccf089248a73f575d34953ef57` (impl `c08849e`, tests `8e567e5`+`1a655a1`, evidence `c1cc743`+`66655e1`, on merged q38 `1f0d900`/`14f062e`).
 
 Reviewer: independent Devin SWE-2 reviewer; direct local source review and executions against Pauli's wave-3 verdict `a4f0e725` (`wave3-full-review.md`, `/private/tmp/inkflip-t10-wave3-review.md`, `/private/tmp/inkflip-t10-wave3/probes.spec.ts`) and the wave-4 direction `/private/tmp/inkflip-t10-wave4.txt`. Review evidence only, not product acceptance.
 
@@ -15,7 +67,7 @@ Both mints predate wave-4 (`7699f97:556`, `7699f97:1101`), so these are inherite
 
 ## F1 — zombie recognize job delivers its result and progress to a newer same-id job on the reused worker (P1)
 
-Locations: `packages/readers-tesseract/src/reader.ts:1271` (`const jobId = `j_${check.id}_${attempt}`;`), `reader.ts:1272` (`this.jobScopes.set(jobId, scope)`), `reader.ts:787–791` (`forwardProgress` resolves `userJobId → jobScopes → scope`), `packages/readers-tesseract/src/engine.ts:221–226` (`userJobId` passthrough). Upstream: `apps/web/node_modules/tesseract.js/src/createWorker.js:75–76` (`promises[`${action}-${jobId}`] = {resolve,reject}` — a second post with the same key overwrites the first), `createWorker.js:223–235` (a response resolves/rejects whatever entry is currently registered; progress is stamped `userJobId: jobId`), `worker-script/index.js:500–528` (`dispatchHandlers` runs every packet concurrently — no job-id dedup or queue).
+Locations (pre-fix `66655e1` line numbers; post-fix the mint is `reader.ts:1277`): `packages/readers-tesseract/src/reader.ts:1271` (`const jobId = `j_${check.id}_${attempt}`;`), `reader.ts:1272` (`this.jobScopes.set(jobId, scope)`), `reader.ts:787–791` (`forwardProgress` resolves `userJobId → jobScopes → scope`), `packages/readers-tesseract/src/engine.ts:221–226` (`userJobId` passthrough). Upstream: `apps/web/node_modules/tesseract.js/src/createWorker.js:75–76` (`promises[`${action}-${jobId}`] = {resolve,reject}` — a second post with the same key overwrites the first), `createWorker.js:223–235` (a response resolves/rejects whatever entry is currently registered; progress is stamped `userJobId: jobId`), `worker-script/index.js:500–528` (`dispatchHandlers` runs every packet concurrently — no job-id dedup or queue).
 
 Mechanism: `check.id` is `ocr_${pageIndex}_${ordinal}` and `attempt` restarts at 0 for every extract, so two extracts of the same check on the same shared worker mint the *same* `userJobId`. When op1 is superseded mid-recognize, op1's job keeps running inside the worker (upstream has no per-job cancel; the adapter only drops the await). Op2 posts `recognize` with the same `action-jobId` key → upstream `promises` entry is overwritten with op2's resolver → op1's response arrives first (it started first) and **resolves op2's promise with op1's data**. Reader-side `jobScopes` cannot detect this: by delivery time the key legitimately maps to op2's live scope. Zombie progress is likewise stamped with the colliding id and published under op2.
 
@@ -40,7 +92,7 @@ Fix direction: mint `userJobId` with a component unique per operation — e.g. `
 
 ## F2 — timestamp-based handle ids collide; stale-handle guards then admit the stale handle (P2)
 
-Location: `packages/readers-tesseract/src/reader.ts:581` — `id: `ocrh_${input.generation}_${Math.floor(this.now())}``. Every foreign-handle check compares only `.id`: the scope guard `reader.ts:696` (`this.handle?.id !== scope.handle.id`), `plan()` admission `:963`, `extract()` admission `:1033`, `extractOnce` admission `:1185`, and `close(handle)` stale-handle return `:1413`.
+Location (pre-fix `66655e1` line number; post-fix the mint is `reader.ts:583`): `packages/readers-tesseract/src/reader.ts:581` — `id: `ocrh_${input.generation}_${Math.floor(this.now())}``. Every foreign-handle check compares only `.id`: the scope guard `reader.ts:696` (`this.handle?.id !== scope.handle.id`), `plan()` admission `:963`, `extract()` admission `:1033`, `extractOnce` admission `:1185`, and `close(handle)` stale-handle return `:1413`.
 
 Reproduction (`FOREIGN_HANDLE`, probes.spec.ts:2275): with `hooks.now = () => 1000`, two same-generation opens mint identical ids:
 
