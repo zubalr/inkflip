@@ -5,9 +5,9 @@
 **Candidate reviewed:** `c884b59fee2c470233a6ee0f9f2207cc2d21c6cb` (implementation `394e65c07be89e2a867b0b316fe46940f927dbf9`, evidence `ffe7313`), base `726d61c0c56bde92605e139edeb4e7c62df17a01`
 **Reviewer:** `devin-swe-t27-wave1` — Devin Local SWE-2 subagent under coordinator Astra (independent source reviewer; not the worker `zcode-t27`)
 **Review branch:** `review/devin/t27-wave1`
-**Date:** 2026-09-13
+**Date:** 2026-09-12
 **Contract version:** 1.0.0
-**Platform:** macOS arm64 (Homebase). **SOURCE REVIEW ONLY** — ZCode/Homebase holds the global heavy-OCR reservation; no tesseract/OCR/model-load or heavy raster work was run. Checks executed: full-file reads, contract/schema/invariant cross-reads, and small pure-python probes (module import, hashing, canned-TSV parse, a *stub* executable emitting canned TSV — no OCR engine involved).
+**Platform:** Mac arm64 (macOS). **SOURCE REVIEW ONLY** — ZCode/Homebase holds the global heavy-OCR reservation; no tesseract/OCR/model-load or heavy raster work was run. Checks executed: full-file reads, contract/schema/invariant cross-reads, and small pure-python probes (module import, hashing, canned-TSV parse, a *stub* executable emitting canned TSV — no OCR engine involved).
 **Verdict:** `changes-needed` — core design sound, all five contract criteria evidenced, but bounded correctness/identity fixes are required before final acceptance.
 
 > File named `preliminary-review-wave1.md` because `artifacts/tasks/T27/peer-review.md` already exists in this task's evidence chain (Cloud partial review, commit `a3fff16` on `review/zcode/t27`, a direct child of this candidate). This file does not replace it; reconciliation is below.
