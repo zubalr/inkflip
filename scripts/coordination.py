@@ -317,7 +317,8 @@ python3 scripts/coordination.py task {tid}
 
 3. Start editing only inside a coordinator-granted checkout. The coordinator
    admits work through `scripts/native_pass.py dispatch`, which records the
-   claim in Beads and prepares the task branch; workers never self-claim and
+   grant in Beads; it separately prepares and names the granted checkout.
+   Workers never self-claim and
    the historical `coordination.py start`/`start-review` commands refuse.
    A blocked future task, stale base, dirty checkout, occupied claim, or
    absent grant needs a coordinator handoff. Do not reset, force-refresh,
