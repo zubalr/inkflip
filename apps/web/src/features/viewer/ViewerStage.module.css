@@ -1,0 +1,178 @@
+.stage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  outline: none;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--control-min-height);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  margin-bottom: var(--space-4);
+}
+
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.modeTabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background-color: var(--color-surface-muted);
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+}
+
+.modeTab {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-ink);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.modeTabSelected {
+  background-color: var(--color-paper-pure);
+  color: var(--color-teal);
+  box-shadow: var(--shadow-paper);
+}
+
+.toolButton {
+  min-height: 36px;
+  min-width: 36px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-ink);
+  background-color: var(--color-paper-pure);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.toolButton:hover {
+  background-color: var(--color-surface-subtle);
+}
+
+.zoomLabel {
+  font-size: var(--text-caption);
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+  min-width: 48px;
+  text-align: center;
+}
+
+.workspaceGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--layout-evidence-column);
+  gap: var(--space-5);
+  width: 100%;
+}
+
+@media (max-width: 1099px) {
+  .workspaceGrid {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.stagePaperArea {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  overflow: auto;
+  min-height: 480px;
+}
+
+.evidenceSlip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  height: fit-content;
+}
+
+.evidenceHeading {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: var(--space-2);
+}
+
+.findingNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.findingCardSelected {
+  border: 2px solid var(--color-focus);
+  background-color: var(--color-paper-pure);
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
+}
+
+.findingTitle {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: var(--space-1);
+}
+
+.findingMeta {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+
+.readingsComparison {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background-color: var(--color-surface-muted);
+  border-radius: var(--radius-control);
+}
+
+.readingRow {
+  font-size: var(--text-caption);
+}
+
+.readingReader {
+  font-weight: 600;
+  color: var(--color-teal);
+}
+
+.readingText {
+  font-family: var(--font-mono);
+  color: var(--color-ink);
+  margin-left: var(--space-2);
+}
