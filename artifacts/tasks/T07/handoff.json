@@ -1,0 +1,30 @@
+{
+  "task": "T07",
+  "worker": "antigravity-t07",
+  "implementation_commit": "58cc331e784d6e55b3b09cd50c48f9d0d6d96329",
+  "branch": "work/antigravity/t07",
+  "base_commit": "90d702987f42b9a19b4eea606c4c57facf623b12",
+  "executed_commands": [
+    "bun run verify (81/81 passing)",
+    "python3 scripts/task_acceptance.py self-check (16 commands registered)",
+    "bun run build:web (clean build in 185ms)",
+    "bun run test:a11y -- tests/a11y/primitives.spec.ts (7 passed, exit 0)",
+    "python3 scripts/task_acceptance.py task T07 --report artifacts/tasks/T07/run.json (exit 0)",
+    "python3 scripts/acceptance_receipts.py verify-run T07 (exit 0)"
+  ],
+  "evidence_paths": [
+    "artifacts/tasks/T07/receipt.json",
+    "artifacts/tasks/T07/commands.log",
+    "artifacts/tasks/T07/review.md",
+    "artifacts/tasks/T07/run.json",
+    "artifacts/tasks/T07/primitives-overview.png",
+    "artifacts/tasks/T07/focus-outline.png",
+    "artifacts/tasks/T07/modal-open.png",
+    "artifacts/tasks/T07/replace-dialog.png"
+  ],
+  "limitations": [
+    "Test suite utilizes Playwright and @axe-core/playwright frozen dependencies.",
+    "Visual screenshot evidence captured directly from the live mounted component harness rendered in Chromium via Vite."
+  ],
+  "ready_for_review": true
+}
