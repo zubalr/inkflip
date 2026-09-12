@@ -1,0 +1,67 @@
+# T08 commands.log — executed commands in order, with exit codes.
+# Worker: devin-t08  Branch: work/devin/t08  Worktree: worktrees/pdf-t08
+# Implementation commit: eefc39d7fd5b1b3f71fce1873951ff60d42d9cb1
+
+## Pre-implementation baseline
+$ python3 scripts/task_acceptance.py task T08
+  exit 1 — collected 0 tests ("zero tests collected — empty required suites fail");
+  expected: spec did not exist yet.
+
+## Informational probes (temporary scripts under /tmp, not committed)
+$ node /tmp/t08-smoke.mjs
+  exit 0 — Vite dev server + preview.html boot; __t08 wired; coordinator fileState=idle, profile=desktop.
+$ node /tmp/t08-fixture-probe.mjs
+  exit 0 — generated PDFs through real controller: 3-page opens (612x792pt);
+  /Encrypt dict -> kind=encrypted (encrypted:password-protected documents are unsupported);
+  truncated -> kind=malformed (parser_error:InvalidPDFException); 25-page and 100000pt-page open.
+$ node /tmp/t08-1000-probe.mjs
+  exit 0 — ?profile=mobile resolves (10485760 bytes / 5 pages);
+  generated 1000-page PDF (156246 bytes) opens in ~490ms; 1001-page -> too_many_pages (~380ms).
+$ node /tmp/t08-drag-probe.mjs
+  exit 0 — diagnosed drag failure: region surface was below the 720px viewport fold
+  (boundingBox y=742); zero pointer events reached it. Fixed by scrollIntoViewIfNeeded in spec.
+
+## Browser suite iterations (development of tests/browser/open.spec.ts)
+$ bun x --no-install playwright test tests/browser/open.spec.ts
+  run 1: 6 passed / 7 failed — root causes: Notice does not forward data-testid (switched to id=);
+    workspace did not subscribe to controller events for direct offers (added ControllerEvent stream
+    + OpenController.subscribe; workspace renders events); drags fired before raster loaded and
+    off-viewport; 'metadata' event find() returned the first document's event.
+  run 2: 9 passed / 4 failed — remaining: drag off-viewport (probe above), first-metadata find.
+  run 3: 12 passed / 1 failed — region-x0 input read raced the committed-box field sync (fixed with
+    not.toHaveValue('') wait).
+  run 4: 13 passed (10.8s)  exit 0
+  run 5: 13 passed (9.8s)   exit 0   (stability repeat)
+  run 6: 13 passed (10.2s)  exit 0   (stability repeat)
+
+## Registered acceptance command (the one the contract runs)
+$ bun run test:browser -- tests/browser/open.spec.ts
+  exit 0 — 13 collected, 13 passed, 0 failed, 0 skipped (10.8s), 1 worker.
+$ bun x --no-install playwright test tests/browser/open.spec.ts --reporter=json
+  exit 0 — structured report captured at artifacts/tasks/T08/run.json
+  (stats: expected=13, unexpected=0, skipped=0, flaky=0).
+
+## Lint / format / type / build
+$ node_modules/.bin/oxlint apps/web/src/features/open apps/web/src/features/selection tests/browser/open.spec.ts
+  exit 0 — 0 warnings, 0 errors (15 files, 96 rules).
+  (one earlier warning fixed: useless spread in controller.emit)
+$ node_modules/.bin/oxfmt --check <same paths>
+  exit 1 — repo carries no oxfmt config; default style disagrees with the checked-in baseline
+  (packages/runtime/src/coordinator.ts and apps/web/src/components/Controls/Button.tsx fail
+  the same check). Owned files follow their directory neighbors' conventions instead
+  (double quotes in apps/web, single quotes in tests/). Documented as a limitation.
+$ apps/web/node_modules/.bin/tsc -p apps/web/tsconfig.json --noEmit
+  exit 1 — pre-existing baseline: ~430 errors repo-wide, all class TS7016/TS7006/TS7026
+  (@types/react not resolvable under the isolated linker — predates T08; verified identical
+  error class on untouched T07 components). Owned files: 0 non-baseline errors after fixes
+  (region.ts tuple destructure, RegionEditor ImageData overload, mount pdfjs cast to PdfJsApi,
+  removed unused ts-expect-error on ?url import).
+$ cd apps/web && node_modules/.bin/vite build
+  exit 0 — production build of the app entry succeeds (dist/, ~493ms).
+  preview.html is a dev/test entry, not part of index.html build inputs.
+
+## Git
+$ git add apps/web/src/features tests/browser/open.spec.ts
+$ git commit  -> eefc39d7fd5b1b3f71fce1873951ff60d42d9cb1 (22 files, +3800)
+  Allowed scope verified: only apps/web/src/features/{open,selection}/ and
+  tests/browser/open.spec.ts changed; no existing file modified; no pushes.

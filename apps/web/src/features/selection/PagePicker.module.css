@@ -1,0 +1,110 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-family: var(--font-ui);
+}
+
+.summary {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.windowNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.windowLabel {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.jumpLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.jumpInput {
+  width: 6em;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  font: inherit;
+  background: var(--color-paper-pure);
+  color: var(--color-ink);
+}
+
+.pageList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-2);
+}
+
+.pageToggle {
+  width: 100%;
+  min-height: var(--control-min-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-paper-pure);
+  color: var(--color-ink);
+}
+
+.pageToggle:hover {
+  border-color: var(--color-teal);
+}
+
+.pageToggle.selected {
+  border-color: var(--color-teal);
+  background: var(--color-badge-bg);
+}
+
+.pageNumber {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pageState {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.selected .pageState {
+  color: var(--color-teal);
+}
