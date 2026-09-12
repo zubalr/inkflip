@@ -72,6 +72,14 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace }) => {
                 Try the example
               </button>
               <button
+                id="btn-open-report"
+                type="button"
+                className={styles.btnSecondary}
+                onClick={() => onNavigateWorkspace(false)}
+              >
+                Open saved report
+              </button>
+              <button
                 id="btn-open-locally"
                 type="button"
                 className={styles.btnSecondary}

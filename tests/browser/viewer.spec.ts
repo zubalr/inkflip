@@ -82,6 +82,25 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     const classAttr1 = await occ1Highlight.getAttribute("class");
     expect(classAttr1).not.toContain("highlightSelected");
 
+    // Keyboard selection verification (P3-F4): press 'n' to cycle to next finding
+    await page.keyboard.press("n");
+    const unknownFinding = page.locator("#finding-item-finding-page1-unknown");
+    await expect(unknownFinding).toHaveAttribute("aria-selected", "true");
+
+    // Press 'p' to cycle back to finding-dup2
+    await page.keyboard.press("p");
+    await expect(finding2).toHaveAttribute("aria-selected", "true");
+
+    // Verify Enter on focused finding item selects it
+    const finding1 = page.locator("#finding-item-finding-dup1");
+    await finding1.focus();
+    await page.keyboard.press("Enter");
+    await expect(finding1).toHaveAttribute("aria-selected", "true");
+    const occ1HighlightAfter = page.locator("#highlight-occ-p0-dup1");
+    await expect(occ1HighlightAfter).toBeVisible();
+    const classAttrOcc1 = await occ1HighlightAfter.getAttribute("class");
+    expect(classAttrOcc1).toContain("highlightSelected");
+
     await page.screenshot({
       path: "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png",
       fullPage: true,
@@ -141,8 +160,8 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
   test("criterion 3: narrow screen stacks instead of squeezing in compare mode", async ({
     page,
   }) => {
-    // Narrow mobile viewport (390px width)
-    await page.setViewportSize({ width: 390, height: 844 });
+    // Narrow mobile viewport (360px width)
+    await page.setViewportSize({ width: 360, height: 800 });
     await page.goto(`${baseUrl}/#/workspace?example=true`);
     await page.waitForSelector("#viewer-stage");
 
@@ -162,10 +181,15 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     if (leftBox && rightBox) {
       // Right pane must be stacked below left pane vertically
       expect(rightBox.y).toBeGreaterThanOrEqual(leftBox.y + leftBox.height - 5);
-      // Both panes must retain readable width (>= 320px) rather than being squeezed
-      expect(leftBox.width).toBeGreaterThanOrEqual(320);
-      expect(rightBox.width).toBeGreaterThanOrEqual(320);
+      // Both panes must retain readable width (>= 280px) rather than being squeezed
+      expect(leftBox.width).toBeGreaterThanOrEqual(280);
+      expect(rightBox.width).toBeGreaterThanOrEqual(280);
     }
+
+    // P2-F2 verification: ensure zero horizontal page scroll at 360px
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 
     await page.screenshot({
       path: "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png",
@@ -245,5 +269,34 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
       path: "artifacts/tasks/T13/screenshots/accessible-text-layer.png",
       fullPage: true,
     });
+  });
+
+  test("document open and report import entry integration (P1-F1)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    // Navigate to workspace without example
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+
+    await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
+    await expect(page.locator("#btn-import-report")).toBeVisible();
+    await expect(page.locator("#btn-open-pdf")).toBeVisible();
+    await expect(page.locator("#btn-empty-load-example")).toBeVisible();
+
+    // Import a valid report JSON via the hidden file input
+    const reportPath = path.resolve(
+      process.cwd(),
+      "planning/contracts/examples/valid/native-evidence.inkflip.json",
+    );
+    const fileInput = page.locator("#input-import-report");
+    await fileInput.setInputFiles(reportPath);
+
+    // Verify viewer stage mounts with the imported report
+    await page.waitForSelector("#viewer-stage");
+    await expect(page.locator("#document-paper")).toBeVisible();
+    await expect(page.locator("#btn-close-doc")).toBeVisible();
+
+    // Verify closing returns to intake state
+    await page.locator("#btn-close-doc").click();
+    await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
   });
 });

@@ -38,18 +38,8 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
 
   const stageRef = useRef<HTMLDivElement>(null);
 
-  const currentPage: Page = doc.pages[pageIndex] || {
-    index: 0,
-    media_box: [0, 0, 612, 792],
-    crop_box: [0, 0, 612, 792],
-    effective_view_box: [0, 0, 612, 792],
-    box_source: "media_box",
-    user_unit: 1.0,
-    rotation: 0,
-    canonical_size_pt: [612, 792],
-    raw_to_canonical_transform_id: "t_p0",
-    limitations: [],
-  };
+  const clampedPageIndex = Math.max(0, Math.min(pageIndex, Math.max(0, doc.pages.length - 1)));
+  const currentPage: Page = doc.pages[clampedPageIndex] || doc.pages[0];
 
   const pageOccurrences = doc.occurrences.filter((o) => o.page_index === pageIndex);
   const selectedFinding = doc.findings.find((f) => f.id === selectedFindingId) || null;
@@ -316,9 +306,9 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
             </button>
             <span id="findings-counter" style={{ fontSize: "var(--text-caption)" }}>
               {doc.findings.length > 0
-                ? `${doc.findings.findIndex((f) => f.id === selectedFindingId) + 1 || 1} of ${
-                    doc.findings.length
-                  }`
+                ? selectedFindingId
+                  ? `${doc.findings.findIndex((f) => f.id === selectedFindingId) + 1} of ${doc.findings.length}`
+                  : `0 of ${doc.findings.length}`
                 : "0 findings"}
             </span>
             <button
@@ -342,7 +332,7 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                   key={f.id}
                   id={`finding-item-${f.id}`}
                   role="option"
-                  className={`${styles.findingCardSelected} ${isSelected ? "" : styles.toolButton}`}
+                  className={`${styles.findingCard} ${isSelected ? styles.findingCardSelected : ""}`}
                   style={{
                     marginBottom: "var(--space-3)",
                     cursor: "pointer",

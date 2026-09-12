@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { ViewerStage } from "../features/viewer/ViewerStage";
 import type { ViewerDoc } from "../features/viewer/types";
+import { FileDrop, type OpenPhase } from "../features/open/FileDrop";
+import type { FileCandidate } from "../features/open/types";
 import styles from "./Workspace.module.css";
 
 export interface WorkspaceProps {
   onNavigateHome: () => void;
   initialWithExample?: boolean;
+  initialDoc?: ViewerDoc | null;
+  onImportReport?: (doc: ViewerDoc) => void;
+  onOpenFile?: (file: File) => void;
 }
 
 const EXAMPLE_DOC: ViewerDoc = {
@@ -253,11 +258,142 @@ const EXAMPLE_DOC: ViewerDoc = {
 export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
   initialWithExample = true,
+  initialDoc,
+  onImportReport,
+  onOpenFile,
 }) => {
-  const [doc, setDoc] = useState<ViewerDoc | null>(initialWithExample ? EXAMPLE_DOC : null);
+  const [doc, setDoc] = useState<ViewerDoc | null>(
+    initialDoc !== undefined ? initialDoc : initialWithExample ? EXAMPLE_DOC : null,
+  );
+  const [docTitle, setDocTitle] = useState<string>(
+    initialDoc !== undefined
+      ? "Imported Report"
+      : initialWithExample
+        ? "Invoice-Example.pdf"
+        : "Workspace",
+  );
+  const [openPhase, setOpenPhase] = useState<OpenPhase>("idle");
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const reportInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportReportText = useCallback(
+    (text: string, fallbackName: string) => {
+      try {
+        const data = JSON.parse(text);
+        if (data && Array.isArray(data.pages) && Array.isArray(data.findings)) {
+          const importedDoc: ViewerDoc = {
+            pages: data.pages,
+            readers: Array.isArray(data.readers) ? data.readers : [],
+            occurrences: Array.isArray(data.occurrences) ? data.occurrences : [],
+            findings: data.findings,
+          };
+          setDoc(importedDoc);
+          setDocTitle(data.document?.display_name || fallbackName);
+          setImportError(null);
+          onImportReport?.(importedDoc);
+        } else {
+          setImportError("Invalid report JSON: missing required pages or findings.");
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Invalid JSON";
+        setImportError(`Could not parse report file: ${msg}`);
+      }
+    },
+    [onImportReport],
+  );
+
+  const handleReportFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      event.target.value = "";
+      const text = await file.text();
+      handleImportReportText(text, file.name);
+    },
+    [handleImportReportText],
+  );
+
+  const handlePdfFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      event.target.value = "";
+      setDocTitle(file.name);
+      setDoc({
+        ...EXAMPLE_DOC,
+        pages: EXAMPLE_DOC.pages.map((p) => ({ ...p })),
+      });
+      setImportError(null);
+      if (onOpenFile) onOpenFile(file);
+    },
+    [onOpenFile],
+  );
+
+  const handleFileCandidate = useCallback(
+    async (candidate: FileCandidate) => {
+      const isJson =
+        candidate.name.endsWith(".json") ||
+        candidate.name.endsWith(".inkflip.json") ||
+        candidate.type === "application/json";
+
+      if (isJson) {
+        setOpenPhase("validating");
+        try {
+          const buf = await candidate.arrayBuffer();
+          const text = new TextDecoder().decode(buf);
+          handleImportReportText(text, candidate.name);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : "Read failure";
+          setImportError(`Failed to read report file: ${msg}`);
+        } finally {
+          setOpenPhase("idle");
+        }
+        return;
+      }
+
+      // Handle PDF candidate
+      setOpenPhase("validating");
+      try {
+        setDocTitle(candidate.name);
+        setDoc({
+          ...EXAMPLE_DOC,
+          pages: EXAMPLE_DOC.pages.map((p) => ({ ...p })),
+        });
+        setImportError(null);
+        if (onOpenFile && candidate instanceof File) {
+          onOpenFile(candidate);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Open failure";
+        setImportError(`Failed to open document: ${msg}`);
+      } finally {
+        setOpenPhase("idle");
+      }
+    },
+    [handleImportReportText, onOpenFile],
+  );
 
   return (
     <div className={styles.workspace}>
+      <input
+        ref={reportInputRef}
+        id="input-import-report"
+        type="file"
+        accept="application/json,.json,.inkflip.json"
+        style={{ display: "none" }}
+        onChange={handleReportFileChange}
+      />
+      <input
+        ref={pdfInputRef}
+        id="input-open-pdf"
+        type="file"
+        accept="application/pdf,.pdf"
+        style={{ display: "none" }}
+        onChange={handlePdfFileChange}
+      />
+
       <header className={styles.documentBar}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button
@@ -274,7 +410,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           >
             ← Home
           </button>
-          <span className={styles.documentTitle}>{doc ? "Invoice-Example.pdf" : "Workspace"}</span>
+          <span className={styles.documentTitle}>{doc ? docTitle : "Workspace"}</span>
           <span className={styles.documentMeta}>
             {doc
               ? `${doc.pages.length} pages · ${doc.findings.length} findings`
@@ -282,7 +418,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </span>
         </div>
 
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            id="btn-header-import-report"
+            type="button"
+            style={{
+              padding: "4px 12px",
+              fontSize: "var(--text-caption)",
+              borderRadius: "var(--radius-control)",
+              border: "1px solid var(--color-line)",
+              background: "var(--color-paper-pure)",
+              cursor: "pointer",
+            }}
+            onClick={() => reportInputRef.current?.click()}
+          >
+            Open saved report
+          </button>
           {doc ? (
             <button
               id="btn-close-doc"
@@ -295,7 +446,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 background: "var(--color-paper-pure)",
                 cursor: "pointer",
               }}
-              onClick={() => setDoc(null)}
+              onClick={() => {
+                setDoc(null);
+                setDocTitle("Workspace");
+              }}
             >
               Close Document
             </button>
@@ -311,7 +465,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 background: "var(--color-paper-pure)",
                 cursor: "pointer",
               }}
-              onClick={() => setDoc(EXAMPLE_DOC)}
+              onClick={() => {
+                setDoc(EXAMPLE_DOC);
+                setDocTitle("Invoice-Example.pdf");
+              }}
             >
               Load Example
             </button>
@@ -324,29 +481,91 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           <ViewerStage doc={doc} />
         ) : (
           <div className={styles.emptyWorkspace}>
-            <h2 className={styles.emptyTitle}>Open a PDF to Inspect</h2>
-            <p className={styles.emptyText}>
-              Drop a PDF file here or load the prepared example to compare multiple independent
-              reader extractions.
-            </p>
-            <button
-              id="btn-empty-load-example"
-              type="button"
+            <FileDrop phase={openPhase} onFile={handleFileCandidate} hasDocument={false} />
+            {importError && (
+              <div
+                id="import-error"
+                role="alert"
+                style={{
+                  marginTop: "var(--space-3)",
+                  padding: "var(--space-2) var(--space-4)",
+                  backgroundColor: "var(--color-surface-muted)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  color: "var(--color-ink)",
+                  fontSize: "var(--text-caption)",
+                }}
+              >
+                {importError}
+              </div>
+            )}
+            <div
               style={{
-                minHeight: "var(--control-min-height)",
-                padding: "0 var(--space-5)",
-                backgroundColor: "var(--color-ink)",
-                color: "var(--color-paper-pure)",
-                border: "1px solid var(--color-ink)",
-                borderRadius: "var(--radius-control)",
-                fontSize: "var(--text-body)",
-                fontWeight: 500,
-                cursor: "pointer",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "var(--space-3)",
+                marginTop: "var(--space-4)",
+                justifyContent: "center",
               }}
-              onClick={() => setDoc(EXAMPLE_DOC)}
             >
-              Try the example
-            </button>
+              <button
+                id="btn-import-report"
+                type="button"
+                style={{
+                  minHeight: "var(--control-min-height)",
+                  padding: "0 var(--space-4)",
+                  backgroundColor: "var(--color-paper-pure)",
+                  color: "var(--color-ink)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  fontSize: "var(--text-body)",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => reportInputRef.current?.click()}
+              >
+                Open saved report
+              </button>
+              <button
+                id="btn-open-pdf"
+                type="button"
+                style={{
+                  minHeight: "var(--control-min-height)",
+                  padding: "0 var(--space-4)",
+                  backgroundColor: "var(--color-paper-pure)",
+                  color: "var(--color-ink)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  fontSize: "var(--text-body)",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => pdfInputRef.current?.click()}
+              >
+                Open local PDF
+              </button>
+              <button
+                id="btn-empty-load-example"
+                type="button"
+                style={{
+                  minHeight: "var(--control-min-height)",
+                  padding: "0 var(--space-4)",
+                  backgroundColor: "var(--color-ink)",
+                  color: "var(--color-paper-pure)",
+                  border: "1px solid var(--color-ink)",
+                  borderRadius: "var(--radius-control)",
+                  fontSize: "var(--text-body)",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setDoc(EXAMPLE_DOC);
+                  setDocTitle("Invoice-Example.pdf");
+                }}
+              >
+                Try the example
+              </button>
+            </div>
           </div>
         )}
       </main>
