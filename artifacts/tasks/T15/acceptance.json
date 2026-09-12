@@ -3,8 +3,8 @@
   "task_id": "T15",
   "beads_id": "pdf-t15",
   "disposition": "accepted",
-  "evaluated_commit": "b668a1b198aa60284941f42308adad18bcc601d4",
-  "evaluated_at": "2026-09-12T15:25:08.476858+00:00",
+  "evaluated_commit": "b86b4d290b0b8f1552ffc9309c5de02c23147173",
+  "evaluated_at": "2026-09-12T19:42:52.459532+00:00",
   "contract_digest": "0c4843b694a9d79e6d52423b2f5c9c997aa0c8f5d8326217d2507f27ecd67c86",
   "worker": "devin-swe-4b09fb92",
   "commands": [
@@ -32,7 +32,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
       "environment": {}
     }
   ],
@@ -46,11 +46,11 @@
     "artifacts/tasks/T15/capture/06-offline-cold-nav.json": "3866f7732d3b87a7fff60defc486b9af1de8d0a1d4390049433d9332613074ab",
     "artifacts/tasks/T15/capture/07-offline-cold-model.json": "6b6e21b2eb09d6774f403229993f41e69d4b7c8b07a38d45daa8ba38d5871e75",
     "artifacts/tasks/T15/commands.log": "ea4d85842c1481cacc7e0fc26fbe84316099a409d469795e2c157d5f29611eaa",
-    "artifacts/tasks/T15/coordinator-commands.log": "53d9716f584f7584d8b55d101c8f75b944a71a3bd5fc60dc81a94cab1c82a48c",
+    "artifacts/tasks/T15/coordinator-commands.log": "22804dac159c874092f8194a9ecc2c24bc58512c38307e7c1bb419a055dcf4fc",
     "artifacts/tasks/T15/network-receipt.json": "08845bf23eb79b310dd773438c4bd8e56cd7be340669b602eca8fded8c700bd1",
     "artifacts/tasks/T15/receipt.json": "b54cfd0df946f99716b7bdffb9b65c9f8c4ae49756b08f5cf576702ac1bde0ce",
     "artifacts/tasks/T15/review.md": "ce5dd5d4ef0891be9190b78a9d48feada486d4412631ad144e37b30b69fb6630",
-    "artifacts/tasks/T15/run.json": "49c1e9b28b226359db67b0c36c227f391194c5a1b2c2cccac74b5efc005e0a1f"
+    "artifacts/tasks/T15/run.json": "c8346bb33730b78fddd1f58d10bcf332b8ead13d64f9578bee18ee86ac17f18f"
   },
   "criteria": {
     "No canary bytes/text/name/hash/crop/report in outbound traffic or URLs": [

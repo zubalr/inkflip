@@ -3,8 +3,8 @@
   "task_id": "T16",
   "beads_id": "pdf-t16",
   "disposition": "accepted",
-  "evaluated_commit": "c2ce2d4b66e00797adef81d5c7c005d204361653",
-  "evaluated_at": "2026-09-12T12:20:28.404168+00:00",
+  "evaluated_commit": "2c400834f145dfe4861b53dca86e89bfb7f528e9",
+  "evaluated_at": "2026-09-12T22:02:02.434430+00:00",
   "contract_digest": "b5fb4bf0a81e633e0d0c23e4fa894f93cd3bf2917efb0f3d6e1acc70c7cc227a",
   "worker": "devin-swe-93c2c47c",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-7vcw9ps9/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-xyvfyj9j/results",
         "--test",
         "tests/reports/export.test.mjs"
       ],
@@ -30,7 +30,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
       "environment": {}
     }
   ],
@@ -40,7 +40,7 @@
     "artifacts/tasks/T16/criteria-evidence.md": "7a40f3c4a7511886e391c5fe198d66d5a59492bcc18a3e32fc1cf87f8970d5f6",
     "artifacts/tasks/T16/receipt.json": "51e19a9fd1ed076e3958b81abbab351b485cdfc7bc3834da5310f5dbe89a5517",
     "artifacts/tasks/T16/review.md": "d395f2ecc2318d6df9c1a278991146f0c17874cbf19afc7fb98541763704932a",
-    "artifacts/tasks/T16/run.json": "ea64c08e8cc22c07be9c137470f2f4380f190d6ec725b406982d690c0cbf73a2"
+    "artifacts/tasks/T16/run.json": "86beeb82bca3d13ea3c810629dedb2f6783a18907b559c72b59c2401fff8bd54"
   },
   "criteria": {
     "Preview equals decoded contents": [

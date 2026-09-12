@@ -1,8 +1,8 @@
 {
   "task": "T14",
   "beads_id": "pdf-t14",
-  "evaluated_commit": "4d9733131111b27dd795f4926ce8d68b86d720cf",
-  "evaluated_at": "2026-09-12T17:16:16.631383+00:00",
+  "evaluated_commit": "8192139e691c8f21cd04d2b63efab27f97c1cf01",
+  "evaluated_at": "2026-09-12T19:42:30.810698+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -31,15 +31,15 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "\nRunning 8 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/8] tests/browser/findings.spec.ts:48:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 1: normal invisible scan has no warning solely for invisibility (I11)\n\u001b[1A\u001b[2K[2/8] tests/browser/findings.spec.ts:73:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 2: timed-out, model-missing, and unsupported are strictly distinct (I05)\n\u001b[1A\u001b[2K[3/8] tests/browser/findings.spec.ts:117:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 3: zero findings cannot display clean or safe (I06)\n\u001b[1A\u001b[2K[4/8] tests/browser/findings.spec.ts:137:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 4: explanations come from deterministic templates and actual recorded evidence\n\u001b[1A\u001b[2K[5/8] tests/browser/findings.spec.ts:170:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 5: priority ordering respects selected > material_token > ordinary > informational\n\u001b[1A\u001b[2K[6/8] tests/browser/findings.spec.ts:189:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 6: no serious or critical automated accessibility violations (WCAG 2.2 AA)\n\u001b[1A\u001b[2K[7/8] tests/browser/findings.spec.ts:200:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 7: failed, cancelled, and skipped checks have distinct stat cards and badges (P2-1, P2-2)\n\u001b[1A\u001b[2K[8/8] tests/browser/findings.spec.ts:230:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 8: local notes and annotations render distinctly with non-reader label (P2-3)\n\u001b[1A\u001b[2K  8 passed (2.8s)\n",
-      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/browser/findings.spec.ts\n(node:50550) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:50551) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "stdout": "\nRunning 8 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/8] tests/browser/findings.spec.ts:48:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 1: normal invisible scan has no warning solely for invisibility (I11)\n\u001b[1A\u001b[2K[2/8] tests/browser/findings.spec.ts:73:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 2: timed-out, model-missing, and unsupported are strictly distinct (I05)\n\u001b[1A\u001b[2K[3/8] tests/browser/findings.spec.ts:117:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 3: zero findings cannot display clean or safe (I06)\n\u001b[1A\u001b[2K[4/8] tests/browser/findings.spec.ts:137:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 4: explanations come from deterministic templates and actual recorded evidence\n\u001b[1A\u001b[2K[5/8] tests/browser/findings.spec.ts:170:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 5: priority ordering respects selected > material_token > ordinary > informational\n\u001b[1A\u001b[2K[6/8] tests/browser/findings.spec.ts:189:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 6: no serious or critical automated accessibility violations (WCAG 2.2 AA)\n\u001b[1A\u001b[2K[7/8] tests/browser/findings.spec.ts:200:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 7: failed, cancelled, and skipped checks have distinct stat cards and badges (P2-1, P2-2)\n\u001b[1A\u001b[2K[8/8] tests/browser/findings.spec.ts:230:3 \u203a T14: Findings, Coverage and Plain Explanations \u203a criterion 8: local notes and annotations render distinctly with non-reader label (P2-3)\n\u001b[1A\u001b[2K  8 passed (7.1s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/browser/findings.spec.ts\n(node:1353) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:1458) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
       "tests": {
         "collected": 8,
         "passed": 8,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
       "environment": {}
     }
   ]
