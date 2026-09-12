@@ -290,7 +290,8 @@ export class ImportController {
    * flight supersedes it, and the verified bytes are dropped rather
    * than attached to a different report or a cleared workspace (I07 —
    * the same generation discipline `offer` applies to itself). The
-   * newer action always wins; the stale read never emits.
+   * newer action always wins; the stale read never emits — a read that
+   * fails after supersession drops its `source_rejected` the same way.
    */
   async offerSource(
     candidate: ReportCandidate,
@@ -327,6 +328,13 @@ export class ImportController {
     try {
       bytes = new Uint8Array(await candidate.arrayBuffer());
     } catch {
+      // The same binding as the success path: a read superseded while
+      // in flight (replace/clear landed first) drops its failure too —
+      // the report it was offered for is gone, so the rejection can
+      // never render on the newer generation's report.
+      if (this.current !== current || this.host.currentGeneration !== generation) {
+        return { ok: false, kind: "superseded", detail: "source:superseded" };
+      }
       const detail = "source:unreadable";
       this.emit({
         type: "source_rejected",
