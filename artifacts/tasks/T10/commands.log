@@ -41,3 +41,89 @@ exit 1 — collected=11 passed=10 failed=1 skipped=0
   [max(outW/cropW,outH/cropH), min((outW+1)/cropW,(outH+1)/cropH))
   (midpoint + floor check) so floor reproduces outW/outH exactly, then
   rerun the suite; then task_acceptance --report run.json, receipt.json.
+
+# ---------------------------------------------------------------------
+# Session 2 — devin local SWE-2 subagent (coordinator: Astra)
+# Worktree /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t10,
+# branch work/devin/t10. Local commits only; no push, no Beads writes.
+# Toolchain here: node v26.7.0 (~/.local/bin), bun 1.4.0.
+# LIGHT CHECKS ONLY — ZCode holds the global heavy OCR reservation;
+# no playwright/OCR/model-load commands were run. Port 5191 reserved
+# for the deferred heavy runs.
+# ---------------------------------------------------------------------
+
+$ git status && git log --oneline -5
+exit 0 — clean at 61dbc3d on work/devin/t10.
+
+$ git fetch origin
+exit 0 — origin/main at 65e84da (includes merged T09 + T06/T07 evidence).
+
+$ git merge origin/main            # coordinator-authorized integration
+exit 0 — clean merge, 0 conflicts -> merge commit 50dddc0
+  (+133 files: readers-pdfjs package, pdfjs.spec.ts, T06/T07/T09
+  acceptance evidence, homebase scripts, bunfig/bun.lock toolchain).
+
+$ bun install --frozen-lockfile
+exit 0 (4 packages installed; lockfile untouched)
+
+$ bun x --no-install tsc -b tsconfig.json     # post-merge, pre-fix
+exit 0
+
+# Reproduce BEFORE fixing — arithmetic, then real planCrop.
+$ node -e '<inline arithmetic: 4896x6336, caps 4e6/8192>'
+exit 0 — realized outW=1758 outH=2275 at k=0.3590886736076522;
+  recorded round6(min(1758/4896, 2275/6336)) = 0.359059 lies BELOW the
+  feasible interval [0.3590686, 0.3592172): floor(4896*0.359059)=1757,
+  floor(6336*0.359059)=2274 — BOTH axes misreproduce.
+
+$ node artifacts/tasks/T10/repro-planCrop.mjs   # pre-fix @ 50dddc0
+exit 1 — defect reproduced through real planCrop, 5/6 cases misrecord:
+  4896x6336  rec 0.359059 -> floor 1757x2274 (realized 1758x2275)
+  9000x120   rec 0.908333 -> floor 8174x108  (realized 8192x109; -18px)
+  8000x999   rec 0.706707 -> floor 5653x706  (realized 5659x706; -6px)
+  50000x100  rec 0.16     -> floor 8000x16   (realized 8192x16; -192px)
+  440x240 region, 50k cap rec 0.686364 -> floor 302x164 (realized 302x165)
+  8000x1000  symmetric control -> consistent (floor 5656x707 == out)
+
+# Fix in packages/readers-tesseract/src/crop.ts: recorded factor must be
+# a 6-decimal-representable value inside
+#   [max(outW/cropW,outH/cropH), min((outW+1)/cropW,(outH+1)/cropH))
+# — new recordedResizeK() returns ordered candidates (in-interval grid
+# nearest midpoint, floor-verified; then below/above interval for
+# sub-precision intervals); caller re-derives realized size from the
+# accepted factor and re-verifies caps. Same value feeds resizeK and
+# the ocr_resize transform record. Edge-cap trigger logic unchanged.
+
+$ bun x --no-install tsc -b tsconfig.json     # post-fix
+exit 0
+
+$ node artifacts/tasks/T10/repro-planCrop.mjs   # post-fix
+exit 0 — 6/6 PASS; e.g. 4896x6336 records 0.359143,
+  floor->1758x2275 exact; 9000x120 records 0.910278 -> 8192x109;
+  every case: ocr_resize matrix[0] === resizeK, caps hold.
+
+$ node --test tests/readers/crop-math.mjs
+exit 0 — tests 12, pass 12, fail 0 (node:test; no browser/OCR).
+  Covers: spec regression (out 1758x2275, resizeK in interval), edge
+  caps 9000x120/50000x100, asymmetric 8000x999, region+pad 440x240 @50k,
+  sub-precision-interval fallback 8192x4000 @903px (interval
+  [0.00524902,0.00525) holds no 1e-6 multiple -> records 0.005249 and
+  re-derives realized 42x20, floor-exact), no-downscale k==1, degenerate
+  polygon rejection, clipped-padding record, transform-chain shape,
+  216 raster x bounds plans + 200 seeded region plans floor-equality
+  fuzz (176 + region downscales; all matrix[0]===resizeK, all in caps).
+
+$ bun x --no-install oxlint packages/readers-tesseract/src/crop.ts tests/readers/crop-math.mjs
+exit 0 — 0 errors, 2 warnings, both pre-existing at 61dbc3d
+  (unused imports mapPoint, OcrError — untouched by this fix).
+
+$ bun x --no-install oxfmt --check <files>
+exit 1 — non-conforming under oxfmt defaults, but PRE-EXISTING: the
+  committed crop.ts@61dbc3d and untouched errors.ts/reader.ts fail the
+  same check. Not reformatted — restyling the package would be
+  unrelated churn; new code matches the file's existing style.
+
+# NOT run (pending, heavy/global): bun run test:browser --
+# tests/readers/tesseract.spec.ts (expect 11/11), python3
+# scripts/task_acceptance.py task T10 [--report run.json],
+# bun run verify, bun run build:web.

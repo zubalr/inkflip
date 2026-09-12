@@ -1,45 +1,50 @@
 {
   "task": "T10",
   "beads_id": "pdf-t10",
-  "worker": "devin-cloud-t10",
-  "worker_session": "https://app.devin.ai/sessions/5641af15b25d46e49f2dd6e2c76c3293",
+  "worker": "devin-local-swe2-t10 (Devin Local SWE-2 subagent, coordinator Astra); session 1 was devin-cloud-t10",
   "branch": "work/devin/t10",
   "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
   "state": "wip-checkpoint",
   "ready_for_review": false,
   "checkpoint": {
     "completed": [
-      "Environment rebuilt verbatim on this VM: node v22.23.2, bun 1.4.0, uv 0.12.13, python 3.13.15 (~/.local/bin).",
-      "Checkout at branch head f5a151e; bun install --frozen-lockfile ok; playwright chromium 143.0.7499.4 installed; uv sync --frozen --project native ok; tsc -b tsconfig.json clean.",
-      "First REAL run of the registered harness: 'bun run test:browser -- tests/readers/tesseract.spec.ts' collected 11, failed 9 — all at harness loadDoc: pdf.js getDocument() transfers (detaches) the input ArrayBuffer, so contracts.sha256(bytes) threw 'Cannot perform %TypedArray%.prototype.set on a detached ArrayBuffer'.",
-      "Committed fix in commit 3fdfb0f (tests/readers/tesseract.spec.ts): pass pdf.js bytes.slice() so the harness's retained bytes stay immutable (also matches I01 intent).",
-      "Second real run: 11 collected, 10 passed, 1 failed. Real OCR verified in-browser: PSM7 crop read 'AMOUNT DUE $108, a' off the F03 scan with full engine/model/transform identity; cold/cached/memory/offline model states, integrity rejection, init_crash vs unreadable_pixels, transient-retry and cancel all pass."
+      "Merged canonical main 65e84da into work/devin/t10 (coordinator-authorized integration) -> merge commit 50dddc01217dbc50bf3b6eaf2e98237900645288, zero conflicts; +133 files incl. accepted readers-pdfjs package, pdfjs.spec.ts, T06/T07/T09 evidence, bunfig/bun.lock toolchain updates. bun install --frozen-lockfile ok (4 pkgs); tsc -b clean post-merge.",
+      "REPRODUCED the crop.ts defect before fixing via artifacts/tasks/T10/repro-planCrop.mjs against real planCrop: exit 1, 5/6 cases misrecorded. Worse than documented: recorded round6(min(outW/cropW,outH/cropH)) is below the feasible interval whenever per-axis ratios differ — 4896x6336 floors to 1757x2274 (realized 1758x2275), edge-cap 9000x120 floors to 8174 vs 8192, extreme 50000x100 floors to 8000 vs 8192 (-192px), region path also affected (height axis).",
+      "Fixed in commit 32f098e45e862a49e5b88a1d95f6bc8836ec46da (packages/readers-tesseract/src/crop.ts): new recordedResizeK() picks a six-decimal (contract storage precision) factor inside [max(outW/cropW,outH/cropH), min((outW+1)/cropW,(outH+1)/cropH)) nearest the midpoint, floor-verified per candidate; when the interval is narrower than storage precision and holds no representable value, adjacent grid factors below then above are offered and the realized size is re-derived from the accepted factor, so record and output stay consistent by construction. Same factor feeds CropPlan.resizeK and the ocr_resize transform record; caps re-verified; unmatched plans fail honestly as resource_limit. Edge-cap trigger logic untouched.",
+      "Light checks only (ZCode holds the global heavy OCR reservation): tsc -b tsconfig.json exit 0; node --test tests/readers/crop-math.mjs exit 0, 12/12 pass — incl. spec regression, sub-precision fallback (8192x4000 @903px -> records 0.005249, realized 42x20), 216 raster x bounds + 200 seeded-region floor-equality fuzz; oxlint 0 errors (2 pre-existing warnings); oxfmt --check non-conforming but pre-existing at 61dbc3d (whole package predates the oxfmt toolchain), no reformat applied."
     ],
     "failures": [
-      "tests/readers/tesseract.spec.ts 'bounded raster/edge/pixel counts enforced and recorded': real defect in packages/readers-tesseract/src/crop.ts planCrop — recorded resizeK = round6(min(outW/cropW, outH/cropH)) does not reproduce the realized output via floor: for the 4896x6336 raster outWidthPx=1758 but floor(4896*resizeK)=1757 (spec assertion `outWidthPx === floor(cropWidthPx * resizeK)`). Every other assertion in the suite passed, including the edge-cap planCropOnly checks in the same test."
+      "Browser suite status UNKNOWN this session: the planCrop defect is fixed and floor-exact at arithmetic level (all 6 repro cases + 400+ fuzz plans), but 'bun run test:browser -- tests/readers/tesseract.spec.ts' was NOT rerun — heavy OCR reservation held by ZCode. Last real run (3fdfb0f): 10/11, sole failure was this defect; expectation for next run is 11/11."
     ],
     "next_steps": [
-      "In crop.ts, compute the recorded resize factor inside the interval [max(outW/cropW, outH/cropH), min((outW+1)/cropW, (outH+1)/cropH)) — e.g. its midpoint, with a floor-equality verification fallback — so floor(cropWidthPx * resizeK) === outWidthPx (and same for height). Use the same realized factor in resizeK and the ocr_resize transform record.",
-      "Re-run 'bun run test:browser -- tests/readers/tesseract.spec.ts' until 11/11 pass, then 'python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json' (needs committed source before+after).",
-      "Then 'bun run verify', 'bun run build:web', 'bun x --no-install tsc -b tsconfig.json'; record real exits/counts in artifacts/tasks/T10/commands.log and receipt.json (every criterion -> {status:'executed', evidence, detail}); see artifacts/tasks/T09 on origin/work/devin/t09 for shapes.",
-      "Commit source+evidence, push work/devin/t10, hand to independent review. Never claim acceptance locally."
+      "When the heavy reservation frees: 'bun run test:browser -- tests/readers/tesseract.spec.ts' expecting 11/11 (port 5191 is reserved for these runs; OS-assigned harness ports are per-run).",
+      "Then 'python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json' on committed source, 'bun run verify', 'bun run build:web'; record real exits/counts in commands.log and build receipt.json (every criterion -> {status:'executed', evidence, detail}); see artifacts/tasks/T09 for shapes.",
+      "Commit remaining evidence, hand to independent review via coordinator. Never claim acceptance locally; no push from this worktree."
     ],
     "limitations": [
-      "Suite is 1 failure short of green; no run.json/receipt.json/commands.log produced in this checkpoint — evidence files from a non-passing suite would be fabricated claims, so none were written.",
-      "No acceptance run recorded; task_acceptance.py task T10 currently reports the single failing spec test."
+      "No browser/OCR/model-load commands run this session — deliberately light-only while ZCode holds the global heavy OCR reservation. Suite greenness is inferred, not observed.",
+      "oxfmt defaults flag crop.ts and other package files — pre-existing non-conformance at 61dbc3d, not introduced by this fix; left as-is to avoid unrelated churn.",
+      "recordedResizeK fallback (interval narrower than 1e-6) shifts the realized output by at most 1px/axis vs the ideal floor(k) size — exercised by the 8192x4000 @903px test; reachable only for adversarial cap/dim alignments, still floor-exact and cap-safe.",
+      "run.json/receipt.json still absent — produced only by the real acceptance run, which is pending."
     ],
     "executed_commands": [
-      {"cmd": "bun install --frozen-lockfile", "exit": 0},
-      {"cmd": "bun x playwright install chromium", "exit": 0, "note": "chromium headless shell 143.0.7499.4"},
-      {"cmd": "uv sync --frozen --project native", "exit": 0},
-      {"cmd": "bun x --no-install tsc -b tsconfig.json", "exit": 0},
-      {"cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts", "exit": 1, "collected": 11, "passed": 2, "failed": 9, "skipped": 0, "commit": "f5a151e", "note": "all 9 failures: detached ArrayBuffer in harness loadDoc"},
-      {"cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts", "exit": 1, "collected": 11, "passed": 10, "failed": 1, "skipped": 0, "commit": "3fdfb0f", "note": "only 'bounded raster/edge/pixel counts' fails: resizeK floor mismatch"}
+      {"cmd": "git fetch origin && git merge origin/main", "exit": 0, "note": "clean merge -> 50dddc0, 0 conflicts"},
+      {"cmd": "bun install --frozen-lockfile", "exit": 0, "note": "4 packages; lockfile untouched"},
+      {"cmd": "bun x --no-install tsc -b tsconfig.json", "exit": 0, "note": "post-merge and post-fix, both clean"},
+      {"cmd": "node -e '<4896x6336 arithmetic>'", "exit": 0, "note": "recorded 0.359059 -> floor 1757x2274 vs realized 1758x2275"},
+      {"cmd": "node artifacts/tasks/T10/repro-planCrop.mjs (pre-fix)", "exit": 1, "note": "5/6 cases misrecorded — defect reproduced"},
+      {"cmd": "node artifacts/tasks/T10/repro-planCrop.mjs (post-fix)", "exit": 0, "note": "6/6 pass; matrix[0]===resizeK everywhere"},
+      {"cmd": "node --test tests/readers/crop-math.mjs", "exit": 0, "collected": 12, "passed": 12, "failed": 0, "skipped": 0, "note": "incl. 216 raster x bounds + 200 region fuzz plans"},
+      {"cmd": "bun x --no-install oxlint packages/readers-tesseract/src/crop.ts tests/readers/crop-math.mjs", "exit": 0, "note": "0 errors; 2 pre-existing unused-import warnings"},
+      {"cmd": "bun x --no-install oxfmt --check <changed+unchanged pkg files>", "exit": 1, "note": "non-conforming but pre-existing at 61dbc3d — not a regression, no reformat"}
     ],
     "evidence_paths": [
       "artifacts/tasks/T10/handoff.json",
-      "artifacts/tasks/T10/commands.log"
+      "artifacts/tasks/T10/commands.log",
+      "artifacts/tasks/T10/repro-planCrop.mjs",
+      "tests/readers/crop-math.mjs",
+      "packages/readers-tesseract/src/crop.ts"
     ]
   },
-  "disposition": "NOT a review candidate — stopped by coordinator (Cloud run ended for quota); real work in progress, 10/11 spec tests passing."
+  "disposition": "NOT a review candidate — defect fixed and light-verified at commit 32f098e (merge base 50dddc0); browser OCR suite + acceptance still pending under ZCode's heavy-run reservation."
 }
