@@ -141,6 +141,40 @@ test('successful initialization and recognition preserve the existing protocol',
   const result = await worker.recognize(new Uint8Array([1]), {}, { text: true });
   assert.equal(result.data.text, 'control');
   assert.deepEqual(Array.from(h.messages[1].payload.langs[0].data), [4, 5]);
+  assert.equal(h.messages[2].payload.langs, 'eng', 'initialize receives the language code, never model bytes');
   await worker.terminate();
   assert.equal(h.workers[0].terminated, 1);
+});
+
+test('mixed language payloads keep bytes for loading and codes for initialization', { timeout: 1000 }, async () => {
+  const h = harness();
+  const langs = ['eng', { code: 'ara', data: new Uint8Array([4, 5, 6]) }];
+  const worker = await h.createWorker(langs, 1);
+  assert.equal(h.messages[1].payload.langs, langs, 'loading retains the original payloads');
+  assert.equal(h.messages[2].payload.langs, 'eng+ara');
+  assert.deepEqual(Array.from(langs[1].data), [4, 5, 6], 'initialization does not mutate supplied bytes');
+  await worker.terminate();
+});
+
+test('reinitialization normalizes new object payloads without changing their model bytes', { timeout: 1000 }, async () => {
+  const h = harness();
+  const worker = await h.createWorker('eng', 1);
+  const langs = ['eng', { code: 'ara', data: new Uint8Array([7, 8]) }];
+  await worker.reinitialize(langs, 1);
+  const loads = h.messages.filter((m) => m.action === 'loadLanguage');
+  assert.equal(loads.length, 2);
+  assert.equal(loads[1].payload.langs.length, 1);
+  assert.equal(loads[1].payload.langs[0], langs[1]);
+  assert.equal(h.messages.at(-1).payload.langs, 'eng+ara');
+  await worker.terminate();
+});
+
+test('string language initialization remains unchanged', { timeout: 1000 }, async () => {
+  const h = harness();
+  const worker = await h.createWorker('eng+ara', 1);
+  assert.equal(h.messages[1].payload.langs, 'eng+ara');
+  assert.equal(h.messages[2].payload.langs, 'eng+ara');
+  await worker.reinitialize('eng+ara', 1);
+  assert.equal(h.messages.at(-1).payload.langs, 'eng+ara');
+  await worker.terminate();
 });

@@ -23,12 +23,12 @@ export const PNG_SIG = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
 ]);
 
-const fail = (message: string): never => {
+function fail(message: string): never {
   throw new ContractError('PNG', message);
-};
-const failSize = (message: string): never => {
+}
+function failSize(message: string): never {
   throw new ContractError('SIZE', message);
-};
+}
 
 // ---------------------------------------------------------------------------
 // CRC-32 (ISO 3309, as used by PNG chunks)
@@ -118,6 +118,27 @@ function parseChunks(data: Uint8Array): Chunk[] {
 // ---------------------------------------------------------------------------
 // IHDR and geometry accounting
 // ---------------------------------------------------------------------------
+
+/** Validate relationships before collecting or inflating pixel data. */
+function assertChunkOrder(chunks: Chunk[], colorType: number): void {
+  const types = chunks.map((chunk) => chunk.type);
+  for (const type of ['IHDR', 'PLTE', 'tRNS']) {
+    if (types.indexOf(type) !== types.lastIndexOf(type)) fail(`Duplicate ${type}`);
+  }
+  const firstData = types.indexOf('IDAT');
+  if (firstData < 0) fail('Missing IDAT');
+  const lastData = types.lastIndexOf('IDAT');
+  if (types.slice(firstData, lastData + 1).some((type) => type !== 'IDAT')) {
+    fail('IDAT chunks must be consecutive');
+  }
+  if (['PLTE', 'tRNS'].some((type) => types.indexOf(type) > firstData)) {
+    fail('Palette and transparency must precede IDAT');
+  }
+  const palette = types.indexOf('PLTE');
+  const transparency = types.indexOf('tRNS');
+  if (transparency >= 0 && transparency < palette) fail('tRNS must follow PLTE');
+  if (palette >= 0 && [0, 4].includes(colorType)) fail('PLTE forbidden for greyscale');
+}
 
 /** Samples per pixel for each legal color type. */
 const SAMPLES: Record<number, number> = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 };
@@ -425,6 +446,7 @@ export function decodePng(
   const maxEdge = limits.maxEdge ?? IMPORT_LIMITS.maxPngEdge;
   const chunks = parseChunks(data);
   const info = parseIhdr(chunks[0]!.data, maxPixels, maxEdge);
+  assertChunkOrder(chunks, info.colorType);
   let plte: Chunk | null = null;
   let trns: Chunk | null = null;
   const idat: Uint8Array[] = [];
@@ -446,7 +468,6 @@ export function decodePng(
     // ignored entirely: their bytes are never interpreted and are dropped
     // by the re-encode, which also removes APNG animation data.
   }
-  if (idat.length === 0) fail('Missing IDAT');
   const packedLen = idat.reduce((n, c) => n + c.length, 0);
   const packed = new Uint8Array(packedLen);
   {

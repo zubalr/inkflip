@@ -1,0 +1,2 @@
+bun install v1.4.0 (34cbb9a40)
+error: bun is unable to write files to tempdir: EPERM

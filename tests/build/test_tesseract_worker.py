@@ -14,10 +14,14 @@ class TesseractWorkerTests(unittest.TestCase):
     def test_real_browser_worker_lifecycle(self):
         self.run_node("tests/build/tesseract-browser.test.mjs")
 
+    def test_real_browser_verified_model_payload(self):
+        self.run_node("tests/build/tesseract-model.test.mjs")
+
     def test_registered_cases_ignore_negative_control_override(self):
         with mock.patch.dict(os.environ, {"INKFLIP_TEST_TESSERACT_PACKAGE": "/nonexistent/inkflip-control-package"}):
             self.test_installed_constructor_lifecycle()
             self.test_real_browser_worker_lifecycle()
+            self.test_real_browser_verified_model_payload()
 
     def run_node(self, path):
         root = Path(__file__).resolve().parents[2]

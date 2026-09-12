@@ -1,0 +1,65 @@
+['git', 'rev-parse', 'HEAD']
+exit=0
+14f062e887d49812fbd8e9369547bd99f6cba201
+
+['git', 'branch', '--show-current']
+exit=0
+review/codex/pdf-q38
+
+['git', 'status', '--porcelain=v1']
+exit=0
+
+['git', 'merge-base', 'a4f1069e763fb9769aac421331b91de1fed67837', 'HEAD']
+exit=0
+a4f1069e763fb9769aac421331b91de1fed67837
+
+['git', 'diff', '--exit-code', 'a4f1069e763fb9769aac421331b91de1fed67837', 'HEAD', '--', 'package.json', 'bun.lock', 'native/uv.lock', 'apps/web/public', 'config/resolved-assets.json']
+exit=0
+
+['git', 'diff', '--check', 'a4f1069e763fb9769aac421331b91de1fed67837', 'HEAD']
+exit=2
+artifacts/tasks/T02/language-payload/red-unit.log:72: trailing whitespace.
++    
+artifacts/tasks/T02/language-payload/red-unit.log:83: trailing whitespace.
++    
+artifacts/tasks/T02/language-payload/red-unit.log:109: trailing whitespace.
++    
+artifacts/tasks/T02/language-payload/red-unit.log:122: trailing whitespace.
++    
+artifacts/tasks/T02/language-payload/red-unit.log:150: trailing whitespace.
++    
+artifacts/tasks/T02/language-payload/red-unit.log:162: trailing whitespace.
++    
+patches/tesseract.js@7.0.0.patch:71: trailing whitespace.
++ 
+
+Author evidence: baseline-unit.log
+# tests 11
+# pass 11
+# fail 0
+# skipped 0
+Author evidence: red-unit.log
+# tests 14
+# pass 11
+# fail 3
+# skipped 0
+Author evidence: green-unit.log
+# tests 14
+# pass 14
+# fail 0
+# skipped 0
+Author evidence: browser-model.log
+# tests 2
+# pass 2
+# fail 0
+# skipped 0
+Author evidence: build-tests.log
+Ran 49 tests in 7.120s
+OK
+Author evidence: verify.log
+Ran 49 tests in 7.497s
+OK
+Ran 2 tests in 0.001s
+OK
+Ran 64 tests in 22.777s
+OK

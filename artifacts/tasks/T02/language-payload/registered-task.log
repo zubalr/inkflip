@@ -1,0 +1,150 @@
+test_mutable_tag_rejected (test_check_dependencies.BaseImageTests.test_mutable_tag_rejected) ... ok
+test_short_digest_rejected (test_check_dependencies.BaseImageTests.test_short_digest_rejected) ... ok
+test_tag_pinned_action_rejected (test_check_dependencies.BaseImageTests.test_tag_pinned_action_rejected)
+A recorded action must resolve to a full 40-hex commit SHA. ... ok
+test_unrecorded_action_fails (test_check_dependencies.BaseImageTests.test_unrecorded_action_fails) ... ok
+test_valid_lock_passes (test_check_dependencies.BaseImageTests.test_valid_lock_passes) ... ok
+test_entry_without_integrity_fails (test_check_dependencies.BunLockCoverageTests.test_entry_without_integrity_fails) ... ok
+test_hashed_entry_passes (test_check_dependencies.BunLockCoverageTests.test_hashed_entry_passes) ... ok
+test_manifest_lock_spec_drift_fails (test_check_dependencies.BunLockCoverageTests.test_manifest_lock_spec_drift_fails) ... ok
+test_missing_entry_fails (test_check_dependencies.BunLockCoverageTests.test_missing_entry_fails) ... ok
+test_comments_and_trailing_commas_stripped (test_check_dependencies.JsoncTests.test_comments_and_trailing_commas_stripped) ... ok
+test_double_slash_inside_string_preserved (test_check_dependencies.JsoncTests.test_double_slash_inside_string_preserved) ... ok
+test_escaped_quote_inside_string (test_check_dependencies.JsoncTests.test_escaped_quote_inside_string) ... ok
+test_committed_lock_files_exist (test_check_dependencies.LiveCheckoutTests.test_committed_lock_files_exist) ... ok
+test_frozen_acceptance_passes_on_this_checkout (test_check_dependencies.LiveCheckoutTests.test_frozen_acceptance_passes_on_this_checkout)
+The real acceptance command's first segment passes here. ... ok
+test_remote_worker_reference_fails (test_check_dependencies.NoCdnTests.test_remote_worker_reference_fails) ... ok
+test_missing_pin (test_check_dependencies.PinTests.test_missing_pin) ... ok
+test_multiline_pin_rejected (test_check_dependencies.PinTests.test_multiline_pin_rejected) ... ok
+test_single_version_line (test_check_dependencies.PinTests.test_single_version_line) ... ok
+test_exact_record_and_installed_bytes_pass (test_dependency_patch.DependencyPatchTests.test_exact_record_and_installed_bytes_pass) ... ok
+test_missing_lock_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_lock_declaration_fails) ... ok
+test_missing_manifest_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_manifest_declaration_fails) ... ok
+test_missing_patch_fails (test_dependency_patch.DependencyPatchTests.test_missing_patch_fails) ... ok
+test_modified_patch_fails (test_dependency_patch.DependencyPatchTests.test_modified_patch_fails) ... ok
+test_unpatched_or_modified_constructor_fails (test_dependency_patch.DependencyPatchTests.test_unpatched_or_modified_constructor_fails) ... ok
+test_unrecorded_patch_target_fails_even_with_updated_digest (test_dependency_patch.DependencyPatchTests.test_unrecorded_patch_target_fails_even_with_updated_digest) ... ok
+test_wrong_installed_version_fails (test_dependency_patch.DependencyPatchTests.test_wrong_installed_version_fails) ... ok
+test_verify_action_on_live_checkout (test_prepare_assets.CliTests.test_verify_action_on_live_checkout)
+The committed staged assets verify in the real checkout. ... ok
+test_bad_sha256_rejected (test_prepare_assets.ManifestValidationTests.test_bad_sha256_rejected) ... ok
+test_duplicate_staged_path_rejected (test_prepare_assets.ManifestValidationTests.test_duplicate_staged_path_rejected) ... ok
+test_missing_required_key_rejected (test_prepare_assets.ManifestValidationTests.test_missing_required_key_rejected) ... ok
+test_path_traversal_rejected (test_prepare_assets.ManifestValidationTests.test_path_traversal_rejected) ... ok
+test_serve_prefix_remote_rejected (test_prepare_assets.ManifestValidationTests.test_serve_prefix_remote_rejected) ... ok
+test_short_sha256_rejected (test_prepare_assets.ManifestValidationTests.test_short_sha256_rejected) ... ok
+test_unknown_asset_key_rejected (test_prepare_assets.ManifestValidationTests.test_unknown_asset_key_rejected) ... ok
+test_unknown_file_key_rejected (test_prepare_assets.ManifestValidationTests.test_unknown_file_key_rejected) ... ok
+test_unknown_source_rejected (test_prepare_assets.ManifestValidationTests.test_unknown_source_rejected) ... ok
+test_unknown_top_level_key_rejected (test_prepare_assets.ManifestValidationTests.test_unknown_top_level_key_rejected) ... ok
+test_valid_manifest_passes (test_prepare_assets.ManifestValidationTests.test_valid_manifest_passes) ... ok
+test_zero_bytes_rejected (test_prepare_assets.ManifestValidationTests.test_zero_bytes_rejected) ... ok
+test_stage_checksum_mismatch_writes_nothing (test_prepare_assets.StageTests.test_stage_checksum_mismatch_writes_nothing)
+A download whose bytes fail the manifest checksum leaves no file. ... ok
+test_stage_network_error_fails_closed (test_prepare_assets.StageTests.test_stage_network_error_fails_closed) ... ok
+test_stage_writes_verified_bytes (test_prepare_assets.StageTests.test_stage_writes_verified_bytes) ... ok
+test_matching_staged_file_passes (test_prepare_assets.VerifyTests.test_matching_staged_file_passes) ... ok
+test_missing_asset_fails_closed (test_prepare_assets.VerifyTests.test_missing_asset_fails_closed) ... ok
+test_substituted_model_fails_checksum (test_prepare_assets.VerifyTests.test_substituted_model_fails_checksum)
+The F20/F22 negative control: wrong bytes under the right name fail. ... ok
+test_installed_constructor_lifecycle (test_tesseract_worker.TesseractWorkerTests.test_installed_constructor_lifecycle) ... ok
+test_real_browser_verified_model_payload (test_tesseract_worker.TesseractWorkerTests.test_real_browser_verified_model_payload) ... ok
+test_real_browser_worker_lifecycle (test_tesseract_worker.TesseractWorkerTests.test_real_browser_worker_lifecycle) ... ok
+test_registered_cases_ignore_negative_control_override (test_tesseract_worker.TesseractWorkerTests.test_registered_cases_ignore_negative_control_override) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 7.089s
+
+OK
+ok   toolchain.node: .node-version=22.23.2
+ok   toolchain.python: .python-version=3.13.15
+ok   toolchain.bun: packageManager=bun@1.4.0
+ok   toolchain.python-agreement: native interpreter pin ==3.13.15 matches .python-version
+ok   bun.lock.coverage: all 15 manifest specs resolve to hashed lock entries
+ok   bun.lock.trusted-policy: trustedDependencies declared explicitly (0 entries)
+ok   bun.lock.linker: isolated linker enforced
+ok   bun.lock.install-policy: exact saves + release-age gate enforced
+ok   patch.manifest: exact pinned patch declaration matches
+ok   patch.lock: exact pinned patch declaration matches
+ok   patch.version: installed package is tesseract.js@7.0.0
+ok   patch.path: patch path matches provenance
+ok   patch.bytes: tesseract.js@7.0.0.patch SHA-256 matches recorded provenance
+ok   patch.targets: patch modifies only its two recorded source files
+ok   patch.files: constructor and public types are the complete patched file set
+ok   patch.installed.src/createWorker.js: createWorker.js SHA-256 matches recorded provenance
+ok   patch.installed.src/index.d.ts: index.d.ts SHA-256 matches recorded provenance
+ok   uv.lock.interpreter: uv.lock interpreter ==3.13.15
+ok   uv.lock.coverage: all 5 declared pins locked exactly
+ok   uv.lock.hashes: every locked package carries sha256 artifact hashes (15 packages)
+ok   assets: 212 staged files hash-verified; 8 assets all same-origin with license/source
+ok   base-image.oci.python:3.13.15-slim-trixie: python:3.13.15-slim-trixie pinned at immutable digests
+ok   base-image.actions: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 recorded at immutable 11d5960a3267…
+ok   no-cdn.serve-paths: all staged serve_prefixes are same-origin /-paths
+ok   no-cdn.sources: web sources carry no remote script/worker/fetch or CDN reference
+check_dependencies: 25 passed, 0 failed
+{
+  "task": "T02",
+  "beads_id": "pdf-t02",
+  "evaluated_commit": "14f062e887d49812fbd8e9369547bd99f6cba201",
+  "evaluated_at": "2026-09-12T07:17:31.220423+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 49,
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python scripts/check_dependencies.py --frozen",
+      "argv": [
+        "python3",
+        "scripts/check_dependencies.py",
+        "--frozen"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/check_dependencies.py",
+        "--frozen"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-q38",
+      "environment": {}
+    },
+    {
+      "segment": "python -m unittest discover -s tests/build -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/build",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-q38/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/build",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 49,
+        "passed": 49,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-q38",
+      "environment": {}
+    }
+  ]
+}

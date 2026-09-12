@@ -1,0 +1,127 @@
+From /home/wertyp/.local/share/homebase-factory/git/inkflip
+ * branch            work/codex/pdf-q38 -> FETCH_HEAD
+ * [new branch]      work/codex/pdf-q38 -> origin/work/codex/pdf-q38
+Preparing worktree (new branch 'verify/codex/pdf-q38')
+HEAD is now at 8b91890 Record source-bound language payload verification
+v22.23.2
+1.4.0
+bun install v1.4.0 (34cbb9a40)
+Resolving dependencies
+Resolved, downloaded and extracted [1]
+
++ @axe-core/playwright@4.13.0
++ @playwright/test@1.57.0
++ ajv@8.18.0
++ oxfmt@0.67.0
++ oxlint@1.82.0
++ typescript@6.0.2
++ wrangler@4.131.0
+
+91 packages installed [2.54s]
+TAP version 13
+# Subtest: already aborted signal prevents worker creation
+ok 1 - already aborted signal prevents worker creation
+  ---
+  duration_ms: 7.443928
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled load and settles readiness
+ok 2 - abort physically terminates a stalled load and settles readiness
+  ---
+  duration_ms: 2.35438
+  type: 'test'
+  ...
+# Subtest: load rejection releases the worker and settles readiness
+ok 3 - load rejection releases the worker and settles readiness
+  ---
+  duration_ms: 1.127599
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled loadLanguage and settles readiness
+ok 4 - abort physically terminates a stalled loadLanguage and settles readiness
+  ---
+  duration_ms: 1.329388
+  type: 'test'
+  ...
+# Subtest: loadLanguage rejection releases the worker and settles readiness
+ok 5 - loadLanguage rejection releases the worker and settles readiness
+  ---
+  duration_ms: 2.612312
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled initialize and settles readiness
+ok 6 - abort physically terminates a stalled initialize and settles readiness
+  ---
+  duration_ms: 1.197093
+  type: 'test'
+  ...
+# Subtest: initialize rejection releases the worker and settles readiness
+ok 7 - initialize rejection releases the worker and settles readiness
+  ---
+  duration_ms: 0.908363
+  type: 'test'
+  ...
+# Subtest: raw worker error rejects initialization and releases its transport
+ok 8 - raw worker error rejects initialization and releases its transport
+  ---
+  duration_ms: 1.37003
+  type: 'test'
+  ...
+# Subtest: termination rejects an outstanding job and is idempotent
+ok 9 - termination rejects an outstanding job and is idempotent
+  ---
+  duration_ms: 2.374428
+  type: 'test'
+  ...
+# Subtest: delayed image loading cannot send a new job after cancellation
+ok 10 - delayed image loading cannot send a new job after cancellation
+  ---
+  duration_ms: 1.877124
+  type: 'test'
+  ...
+# Subtest: successful initialization and recognition preserve the existing protocol
+ok 11 - successful initialization and recognition preserve the existing protocol
+  ---
+  duration_ms: 1.922144
+  type: 'test'
+  ...
+# Subtest: mixed language payloads keep bytes for loading and codes for initialization
+ok 12 - mixed language payloads keep bytes for loading and codes for initialization
+  ---
+  duration_ms: 1.224042
+  type: 'test'
+  ...
+# Subtest: reinitialization normalizes new object payloads without changing their model bytes
+ok 13 - reinitialization normalizes new object payloads without changing their model bytes
+  ---
+  duration_ms: 1.233749
+  type: 'test'
+  ...
+# Subtest: string language initialization remains unchanged
+ok 14 - string language initialization remains unchanged
+  ---
+  duration_ms: 0.822317
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 149.474189
+test_exact_record_and_installed_bytes_pass (test_dependency_patch.DependencyPatchTests.test_exact_record_and_installed_bytes_pass) ... ok
+test_missing_lock_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_lock_declaration_fails) ... ok
+test_missing_manifest_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_manifest_declaration_fails) ... ok
+test_missing_patch_fails (test_dependency_patch.DependencyPatchTests.test_missing_patch_fails) ... ok
+test_modified_patch_fails (test_dependency_patch.DependencyPatchTests.test_modified_patch_fails) ... ok
+test_unpatched_or_modified_constructor_fails (test_dependency_patch.DependencyPatchTests.test_unpatched_or_modified_constructor_fails) ... ok
+test_unrecorded_patch_target_fails_even_with_updated_digest (test_dependency_patch.DependencyPatchTests.test_unrecorded_patch_target_fails_even_with_updated_digest) ... ok
+test_wrong_installed_version_fails (test_dependency_patch.DependencyPatchTests.test_wrong_installed_version_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.065s
+
+OK

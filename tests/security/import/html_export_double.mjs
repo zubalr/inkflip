@@ -81,7 +81,8 @@ export function renderHtmlReport(report, sanitizedPngs = new Map()) {
     if (asset.media_type === 'image/png' && asset.purpose === 'crop') {
       const clean = sanitizedPngs.get(asset.id);
       // Only the sanitized re-encode is embedded, never the raw import bytes.
-      const data = clean ? b64(clean.png) : asset.data_base64;
+      if (!clean) throw new Error('Missing sanitized PNG for ' + asset.id);
+      const data = b64(clean.png);
       s.push(
         '<section><h2>Included source excerpt</h2><p>Original rendered crop, not a certified redaction.</p>',
         '<img alt="Rendered excerpt for the recorded finding; text alternatives are the named readings above." src="data:image/png;base64,' +

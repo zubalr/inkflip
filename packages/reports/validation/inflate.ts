@@ -60,9 +60,9 @@ class InflateError extends ContractError {
   }
 }
 
-const fail = (message: string): never => {
+function fail(message: string): never {
   throw new InflateError(message);
-};
+}
 
 class BitReader {
   /** Index of the next byte in `data` to consume. */
@@ -112,8 +112,9 @@ class BitReader {
 /**
  * Build a canonical decoding table from a list of code lengths.
  * `checkComplete` applies the zlib dynamic-table rule: the code set must
- * be complete, except that a distance table holding a single used code
- * may be incomplete. Fixed tables defined by RFC 1951 (which include a
+ * be complete, except that a distance table may be empty for literal-only
+ * blocks or hold a single used code. Decoding a length with an empty
+ * distance table still fails in decode(). Fixed tables defined by RFC 1951 (which include a
  * legitimately incomplete distance table) skip the check.
  */
 function buildTable(
@@ -125,7 +126,7 @@ function buildTable(
   let maxLen = 0;
   for (const len of lengths) {
     if (len > MAX_BITS) fail('Code length exceeds 15 bits');
-    count[len]++;
+    count[len] = count[len]! + 1;
     if (len > maxLen) maxLen = len;
   }
   let left = 1;
@@ -134,7 +135,7 @@ function buildTable(
     left -= count[len]!;
     if (left < 0) fail('Over-subscribed Huffman code set');
   }
-  if (checkComplete && left > 0 && (!isDist || maxLen !== 1)) {
+  if (checkComplete && left > 0 && (!isDist || maxLen > 1)) {
     fail('Incomplete Huffman code set');
   }
   const offs = new Uint16Array(MAX_BITS + 1);
@@ -143,7 +144,12 @@ function buildTable(
   }
   const symbol = new Uint16Array(lengths.length);
   for (let s = 0; s < lengths.length; s++) {
-    if (lengths[s] !== 0) symbol[offs[lengths[s]!]++] = s;
+    const length = lengths[s]!;
+    if (length !== 0) {
+      const offset = offs[length]!;
+      symbol[offset] = s;
+      offs[length] = offset + 1;
+    }
   }
   return { count, symbol };
 }
