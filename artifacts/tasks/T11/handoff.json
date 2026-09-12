@@ -1,0 +1,95 @@
+{
+  "task": "T11",
+  "beads_id": "pdf-t11",
+  "worker": "devin-t11",
+  "branch": "work/devin/t11",
+  "base_commit": "219a469",
+  "implementation_commit": "2e35681b5197e259e02649cb0a05647aa2df67ee",
+  "evidence_commit": "this file is committed after the implementation commit; see git log",
+  "disposition": "implemented_pending_review",
+  "ready_for_review": true,
+  "changed_paths": [
+    "apps/web/src/state/index.ts",
+    "apps/web/src/state/store.ts",
+    "packages/runtime/README.md",
+    "packages/runtime/src/authority.ts",
+    "packages/runtime/src/backpressure.ts",
+    "packages/runtime/src/checks.ts",
+    "packages/runtime/src/cleanup.ts",
+    "packages/runtime/src/coordinator.ts",
+    "packages/runtime/src/errors.ts",
+    "packages/runtime/src/index.ts",
+    "packages/runtime/src/limits.ts",
+    "packages/runtime/src/messages.ts",
+    "packages/runtime/src/view.ts",
+    "packages/runtime/tsconfig.json",
+    "tests/runtime/fakes.mjs",
+    "tests/runtime/runtime.test.mjs",
+    "artifacts/tasks/T11/commands.log",
+    "artifacts/tasks/T11/handoff.json",
+    "artifacts/tasks/T11/receipt.json",
+    "artifacts/tasks/T11/run.json"
+  ],
+  "commands": [
+    {
+      "command": "node --test tests/runtime/*.test.mjs",
+      "exit": 0,
+      "collected": 45,
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "note": "registered acceptance command (TEST-11); 45 test() sites over the real coordinator admission path; fakes build genuine contract WorkerMessages via MessageFactory"
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T11 --report artifacts/tasks/T11/run.json",
+      "exit": 0,
+      "collected": 45,
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "note": "post-commit run on the committed tree; evaluated_commit=2e35681; failures=[] evidence_errors=[]"
+    },
+    {
+      "command": "./node_modules/.bin/tsc -b tsconfig.json --force",
+      "exit": 0,
+      "note": "whole project-reference graph compiles clean including packages/runtime"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit -p apps/web/tsconfig.json",
+      "exit": 1,
+      "note": "28 pre-existing errors on base 219a469 (missing @types/react, absent from frozen bun.lock); verified identical with T11 stashed; zero diagnostics under src/state/"
+    },
+    {
+      "command": "bun run verify",
+      "exit": 0,
+      "note": "30 unittest cases (bootstrap + native-bootstrap + coordination) plus self-check over 16 registered commands; no pre-existing failure on this base"
+    },
+    {
+      "command": "./node_modules/.bin/oxlint packages/runtime/src apps/web/src/state tests/runtime",
+      "exit": 1,
+      "note": "environment-blocked: optional platform binding @oxlint/binding-wasm32-wasi absent from installed tree (same as T04); not part of registered acceptance"
+    },
+    {
+      "command": "git status --porcelain -- planning/ ; git status --porcelain -- bun.lock native/uv.lock",
+      "exit": 0,
+      "note": "both empty: planning/ byte-identical, lockfiles unmodified"
+    }
+  ],
+  "invariants": {
+    "I05": "every planned check reaches exactly one terminal CheckResult (queued -> running -> terminal; terminalize() rejects re-terminalization); unknown/cyclic dependency graphs are rejected at plan issue so nothing can wait forever; queued work cancelled by the user still receives a terminal cancelled result",
+    "I07": "generation-first MessageAuthority rejects stale generation/document/run/job and non-increasing seq before application; generation increments BEFORE teardown/replacement/cancel; the snapshot is built only from admitted bookkeeping so stale events cannot reach presentation (asserted: stale chunk occurrence ids absent from the post-replace view)",
+    "I17": "a failure ends only its own check (resource_limit, protocol, crash past retry budget); completed sibling results and already-committed occurrences are retained through partial/cancelled outcomes and through clear/replace only when the document itself is discarded"
+  },
+  "fixture_families": ["F20", "F21", "F22"],
+  "test_record": "TEST-11",
+  "limitations": [
+    "100 ms / 500 ms cancellation targets measured in-process on the real coordinator with real timers (~30 ms total observed); browser-integrated measurement requires the worker embedder landing in a later task — the CancelReceipt boundary exists for that re-measurement",
+    "oxlint/oxfmt platform binding missing in this environment (T04-documented; not in registered acceptance)",
+    "apps/web --noEmit: 28 pre-existing base errors (missing @types/react); zero under src/state/",
+    "tests executed under system Node v26.7.0; repo pins 22.23.2 (not installed)",
+    "review.md absent pending coordinator-dispatched independent review; workers do not self-approve"
+  ],
+  "no_merge": true,
+  "no_self_approval": true,
+  "notes": "Implementation commit 2e35681 carries packages/runtime + apps/web/src/state + tests/runtime only. Evidence is committed separately after this file. Coordinator owns Beads state, review dispatch, merge and acceptance."
+}
