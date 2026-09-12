@@ -12,6 +12,7 @@ export interface WorkspaceProps {
   initialDoc?: ViewerDoc | null;
   onImportReport?: (doc: ViewerDoc) => void;
   onOpenFile?: (file: File) => void;
+  onCloseDoc?: () => void;
 }
 
 const EXAMPLE_DOC: ViewerDoc = {
@@ -289,12 +290,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   initialDoc,
   onImportReport,
   onOpenFile,
+  onCloseDoc,
 }) => {
   const [doc, setDoc] = useState<ViewerDoc | null>(
-    initialDoc !== undefined ? initialDoc : initialWithExample ? EXAMPLE_DOC : null,
+    initialDoc || (initialWithExample ? EXAMPLE_DOC : null),
   );
   const [docTitle, setDocTitle] = useState<string>(
-    initialDoc !== undefined
+    initialDoc
       ? "Imported Report"
       : initialWithExample
         ? "Invoice-Example.pdf"
@@ -339,7 +341,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               !occ ||
               typeof occ.page_index !== "number" ||
               !occ.geometry ||
-              !Array.isArray(occ.geometry.polygon)
+              (occ.geometry.polygon !== null && !Array.isArray(occ.geometry.polygon))
             ) {
               setImportError(
                 "Invalid report JSON: occurrence missing required geometry or page_index.",
@@ -536,6 +538,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 setDocTitle("Workspace");
                 setImportError(null);
                 setPdfNotice(null);
+                onCloseDoc?.();
               }}
             >
               Close Document

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Home } from "./pages/Home";
 import { Workspace } from "./pages/Workspace";
+import type { ViewerDoc } from "./features/viewer/types";
 
 export type Route = "home" | "workspace";
 
@@ -21,6 +22,7 @@ export default function App() {
   const initial = getInitialRoute();
   const [route, setRoute] = useState<Route>(initial.route);
   const [withExample, setWithExample] = useState<boolean>(initial.withExample);
+  const [activeDoc, setActiveDoc] = useState<ViewerDoc | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -45,7 +47,20 @@ export default function App() {
   };
 
   if (route === "workspace") {
-    return <Workspace onNavigateHome={navigateToHome} initialWithExample={withExample} />;
+    return (
+      <Workspace
+        onNavigateHome={navigateToHome}
+        initialWithExample={withExample}
+        initialDoc={activeDoc}
+        onImportReport={(doc) => setActiveDoc(doc)}
+        onOpenFile={(_file) => {
+          setActiveDoc(null);
+        }}
+        onCloseDoc={() => {
+          setActiveDoc(null);
+        }}
+      />
+    );
   }
 
   return <Home onNavigateWorkspace={navigateToWorkspace} />;
