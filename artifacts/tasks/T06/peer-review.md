@@ -1,138 +1,111 @@
-# Independent Peer Review — T06
+# Independent Cross-App Peer Review — T06 Round 3 (ZCode)
 
-**Task:** T06 — Translate selected composition into tokens and visual foundations  
-**Beads Issue:** `pdf-t06`  
-**Candidate Commit Reviewed:** `efd6f77` (Coordinator Review), revised in Revision 3 on `work/antigravity/t06`  
-**Base Commit:** `3bef697a31120d4cb32e8fa044d419bc34e32cf5`  
-**Branch:** `work/antigravity/t06`  
-**Binding Coordinator Review:** `origin/review/devin/t06:artifacts/tasks/T06/peer-review.md` (Verdict: `changes-needed`)  
-**Worker / Author:** `antigravity-t06`  
-**Date:** 2026-09-12  
-**Contract Version:** 1.0.0  
+**Task:** T06 — Translate selected composition into tokens and visual foundations
+**Beads issue:** `pdf-t06`
+**Candidate reviewed:** `d87ce4c` on `origin/work/antigravity/t06` (implementation `7c59b35`, evidence `d87ce4c`; prior rounds `4a6c46c`, `27266cb`)
+**Base:** `3bef697`
+**Reviewer:** zcode peer reviewer (ZCode app session `sess_45afbe2c-a9f0-4525-a19c-e208568cba24`, model GLM-5.3-Flash), independent of the Antigravity worker and of the prior devin reviews (`origin/review/devin/t06`)
+**Review worktree:** fresh checkout of `d87ce4c` on new local branch `review/zcode/t06-r3` (a fresh branch name is used so the earlier `review/zcode/t06` round-1 review remains published untouched; no force-push). Read-only except this file.
+**Date:** 2026-09-12
+**Verdict: approved** — every round-1/round-2 blocking finding is verified fixed by execution, with two recorded non-blocking follow-ups.
 
----
+This review is independent: all checks below were executed by this reviewer; the
+worker's receipt claims were verified, not echoed.
 
-## Review Audit & Revision Record
+## Review environment (disclosed)
 
-### Coordinator Review Findings on Candidate `efd6f77`
-The coordinator-obtained independent review by `devin-review-t06` evaluated candidate `efd6f77` and rendered a verdict of `changes-needed` with the following findings:
-1. **BLOCKER:** `tests/visual/foundation.spec.ts` called `page.goto("/src/components/DocumentStage/preview.html")` with no `baseURL`, `webServer`, or root `playwright.config`. When executed under a Playwright runner, 9/9 tests failed with `page.goto: Cannot navigate to invalid URL`.
-2. **MAJOR (Markup Drift):** `preview.html` and `DocumentStage.tsx` had drifted (inline `<svg>` vs `<img>`; IDs `#paper-view` and `#finding-btn` only existed on the mock).
-3. **MAJOR (Unbound Export):** `apps/web/src/components/DocumentStage/index.ts:8` had `export default DocumentStage;`, which referenced an unbound name (TS2552, runtime ReferenceError).
-4. **MAJOR (Token Centralization):** `DocumentStage.module.css` hard-coded ~9 non-token hex colors (`#3e5750`, `#edf2e8`, `#edf0e8`, `#ffffff`, `#fcf5df`, `#e6cf8f`, `#faefce`, `#d8be74`, `#746444`, `#f8f9f4`), violating the central tokens contract.
-5. **MINOR (Asset 404 & Cleanups):** Default `imageSrc="/probes/results/amount-crop.png"` 404s (asset is located under `planning/probes/results/`, not `public/`); unused `useEffect` import in `DocumentStage.tsx`; dangling `aria-controls="evidence-panel"` on mode tabs when the panel is unmounted.
-6. **EVIDENCE HONESTY:** Internal review documentation previously claimed suite readiness when test-results recorded the 9 failed tests.
+The candidate is based on pre-T02 `3bef697` (no `bun.lock`, no dependency
+freeze), so the reviewer merged `origin/main` into the local review branch
+(merge commit labelled review-only; it touches no candidate-owned file — main
+does not modify T06's paths) to obtain the integrated, frozen toolchain:
+`bun install --frozen-lockfile` with main's `bunfig.toml`
+(`minimumReleaseAgeExcludes`) and `bun.lock`. `node_modules/` remained
+untracked. Candidate source files were reviewed at `d87ce4c` bytes.
 
----
+## Commands executed by this reviewer (all exit 0 unless stated)
 
-### Revision 3 Resolutions & Verified Results
-
-1. **In-Spec Static HTTP Server (Blocker Resolved):**
-   - Added an in-spec, self-contained HTTP server to `tests/visual/foundation.spec.ts` using Node `http`, `fs`, and `path`.
-   - Listens on an ephemeral port (`127.0.0.1:0`) in `test.beforeAll` and serves static files from `apps/web` with safe path normalization and proper MIME types (`text/html`, `text/css`, `image/svg+xml`, `application/javascript`, etc.).
-   - Shuts down cleanly in `test.afterAll`.
-   - **Verification:** Rerun of `bun run test:visual -- tests/visual/foundation.spec.ts` executes all 9 tests and passes completely:
-     ```
-     Running 9 tests using 1 worker
-     [1/9] width 1440px (desktop-1440) has no page horizontal overflow -> passed
-     [2/9] width 1024px (intermediate-1024) has no page horizontal overflow -> passed
-     [3/9] width 768px (intermediate-768) has no page horizontal overflow -> passed
-     [4/9] width 390px (mobile-390) has no page horizontal overflow -> passed
-     [5/9] width 320px (mobile-320) has no page horizontal overflow -> passed
-     [6/9] page and disagreement dominate the visual composition -> passed
-     [7/9] contrast checks meet stated WCAG targets on computed DOM styles -> passed
-     [8/9] reduced motion disables flips, transitions and animations -> passed
-     [9/9] active focus outline styling adheres to 3px focus token -> passed
-     9 passed (2.0s)
-     ```
-   - `python3 scripts/task_acceptance.py task T06` exits 0 with 9 collected, 9 passed, 0 failed, 0 skipped.
-
-2. **Markup and Selector Alignment (Major Resolved):**
-   - Added matching IDs to `DocumentStage.tsx`: `#stage`, `#page-label`, `#paper-view`, `#amount-crop`, `#reading-view`, `#finding-btn`, `#finding-chevron`, `#coverage-btn`.
-   - `DocumentStage.tsx` now renders the clean accessible SVG crop by default when `!imageSrc`, matching `preview.html`.
-   - SVG fills consume `--color-paper-pure` and `--color-ink`.
-
-3. **Export Binding (Major Resolved):**
-   - Fixed `apps/web/src/components/DocumentStage/index.ts:8`: replaced with `export { default } from "./DocumentStage";`.
-   - Verified via TypeScript: zero TS2552 errors.
-
-4. **Token Centralization (Major Resolved):**
-   - Added semantic tokens in `apps/web/src/styles/tokens.css`:
-     - `--color-paper-pure: #ffffff;`
-     - `--color-surface-muted: #edf0e8;`
-     - `--color-surface-subtle: #f8f9f4;`
-     - `--color-badge-text: #3e5750;`
-     - `--color-badge-bg: #edf2e8;`
-     - `--color-badge-border: #dce6d9;`
-     - `--color-warning-surface: #fcf5df;`
-     - `--color-warning-border: #e6cf8f;`
-     - `--color-warning-surface-hover: #faefce;`
-     - `--color-warning-border-hover: #d8be74;`
-     - `--color-warning-text: #746444;`
-   - Replaced all raw hex values in `DocumentStage.module.css` with `var(...)`.
-   - Verified: 0 raw `#` hex values remain in `DocumentStage.module.css`.
-
-5. **Minor Cleanups:**
-   - Removed missing asset fallback (`imageSrc` defaults to `undefined`, triggering clean SVG crop).
-   - Removed unused `useEffect` import from `DocumentStage.tsx`.
-   - Bound `aria-controls` only when evidence panel is mounted: `aria-controls={status === "normal" ? "evidence-panel" : undefined}`.
-
----
-
-## Scope & Integrity Check
-
-- **Allowed Scope:** `apps/web/src/styles/`, `apps/web/src/components/DocumentStage/`, `tests/visual/foundation.spec.ts`, and `artifacts/tasks/T06/`.
-- **Files Modified:**
-  - `apps/web/src/styles/tokens.css` (in scope)
-  - `apps/web/src/components/DocumentStage/DocumentStage.module.css` (in scope)
-  - `apps/web/src/components/DocumentStage/DocumentStage.tsx` (in scope)
-  - `apps/web/src/components/DocumentStage/index.ts` (in scope)
-  - `apps/web/src/components/DocumentStage/preview.html` (in scope)
-  - `tests/visual/foundation.spec.ts` (in scope)
-  - `artifacts/tasks/T06/*` (in scope)
-- **Forbidden Boundaries:** No changes outside allowed scope. `planning/` untouched. No manifests or lockfiles modified.
-
----
-
-## Real Commands Executed (Revision 3)
-
-| Command | Exit Code | Result |
+| # | Command | Result |
 |---|---|---|
-| `bun run verify` | 0 | 81 tests passing (49 bootstrap, 2 native, 30 coordination) |
-| `python3 scripts/task_acceptance.py self-check` | 0 | 16 registered commands checked; all valid |
-| `bun run test:visual -- tests/visual/foundation.spec.ts` | 0 | 9 collected, 9 passed, 0 failed, 0 skipped |
-| `python3 scripts/task_acceptance.py task T06` | 0 | 1 command run, 0 failures, 9 passed |
-| `vite build apps/web` | 0 | Static build passes cleanly in 86ms |
+| 1 | `bun run test:visual -- tests/visual/foundation.spec.ts` (exact registered command) | **9 passed (3.4 s)**, exit 0 |
+| 2 | `python3 scripts/task_acceptance.py task T06` | exit 0 (harness-recorded run) |
+| 3 | Source audit of `mount.tsx`, `preview.html`, `DocumentStage.tsx`, `DocumentStage.module.css`, `tokens.css`, `foundation.spec.ts` | see per-claim verification |
+| 4 | `grep -cE '#[0-9a-fA-F]{3,8}' DocumentStage.module.css` | **0 raw hex literals** |
+| 5 | Reviewer-authored Playwright capture: Vite dev server (port 0) → `preview.html` → screenshot of the mounted component at 1440×900 | captured; compared against `artifacts/tasks/T06/desktop-1440.png` |
+| 6 | Manifest/package consistency: candidate `apps/web/package.json` vite pin vs merged lock | both pin `vite@8.3.0`; `@playwright/test@1.57.0` from the T02 freeze |
 
----
+## Verification of the coordinator's specific asks
 
-## Disposition
+1. **Registered `test:visual` exercises the REAL mounted component (not another mock) — VERIFIED.**
+   `preview.html` is now a thin host (`<div id="root">` + `<script type="module" src="./mount.tsx">`);
+   `mount.tsx` calls `createRoot(...).render(<DocumentStage …/>)` — the shipped component,
+   not a markup copy. The spec boots a real Vite dev server in `beforeAll`
+   (`createServer`, `port: 0`, `strictPort: false` — OS-assigned port per the
+   workspace port rule) and drives every assertion against the mounted DOM.
+   CSS Modules hashed classes (`[class*='paperKicker']`) resolve only if the
+   actual component rendered. Round-1's static mock is gone (preview shrank by
+   ~260 lines of hand-copied markup).
+2. **Screenshots bind to the live component — VERIFIED.** The worker recaptured
+   all eleven PNGs at this candidate (byte sizes all changed). This reviewer
+   independently rendered the same live Vite URL at 1440×900 in Chromium and
+   compared: the reviewer capture and `desktop-1440.png` show the identical
+   mounted-component composition (same layout, tokens, copy). The evidence is
+   bound to the real component, not to a mock.
+3. **Zero non-token colors — VERIFIED.** `DocumentStage.module.css` now contains
+   zero raw hex literals (round 1: 10). All former state colors are promoted to
+   semantic tokens in `tokens.css` (`--color-badge-*`, `--color-warning-*`,
+   `--color-surface-*`, `--color-paper-pure`), and the component's stand-in SVG
+   paints with `var(--color-paper-pure)` / `var(--color-ink)`. The
+   tokens.css header rule ("only place raw values are defined") now holds.
+4. **`aria-controls` only when mounted — VERIFIED.** Tabs emit
+   `aria-controls={status === "normal" ? "evidence-panel" : undefined}` and the
+   finding/coverage buttons emit `aria-controls={isDetailOpen ? "finding-detail"
+   : undefined}`; the referenced nodes exist exactly when referenced.
+5. **Focus test asserts `outlineWidth: "3px"` — VERIFIED** (spec line ~177,
+   alongside `outlineStyle === "solid"`); the assertion passes in run 1.
+6. **Receipt honesty — VERIFIED.** `receipt.json` (at `d87ce4c`) records
+   implementation commit `7c59b35`, `test:visual` 9/9 via the live Vite mount,
+   `task T06` exit 0, and limitations that match reality ("runner binary owned
+   by T02" — T02 has since landed, and this reviewer's run with the frozen
+   runner confirms the claim). No count was inflated; no capability is
+   overstated.
 
-The candidate revisions on `work/antigravity/t06` completely resolve the coordinator review findings, achieve full test pass under Playwright, centralize all palette colors into tokens, align markup and selectors, and honestly record all test evidence. Ready for coordinator re-review and integration.
+## Per-criterion assessment (all five verified by run 1 and source audit)
 
----
+- **Widths 1440/1024/768/390/320 no overflow** — pass; overflow assertions ran
+  against the mounted component at all five viewports.
+- **Page and disagreement dominate** — pass (stage > 600×400, finding ≥ 76 px).
+- **Contrast meets stated targets** — pass (computed-DOM ink checks ≥ 10:1;
+  round-1 arithmetic re-verification of muted/teal/rust/focus still applies —
+  those token values are unchanged).
+- **Reduced motion disables flips** — pass (`--motion-*` collapse to 0 under
+  emulation; module fallback `transition: none !important` retained).
+- **Screenshot evidence covers dark text, focus, partial states** — pass
+  (recaptured PNGs sampled by this reviewer; focus-state shows the 3 px ring).
 
-## Round 2 Coordinator Review & Revision 4 Resolutions
+Invariants **I06** (no truth/safety/fraud verdicts; "Not a verdict about the
+amount") and **I18** (SYNTHETIC badge and kicker; honest `imageAlt`) are upheld.
+Scope remains clean: only owned paths plus `artifacts/` changed across the
+rounds; no new frameworks/UI libraries; no Effect/Tailwind/StyleX.
 
-**Reviewer:** devin-review-t06 · **Commit:** `e9eda14` on `review/devin/t06` · **Verdict: changes-needed**
+## Non-blocking follow-ups (recorded, not acceptance conditions)
 
-### Prior-Finding Verification & New Findings
+- **F3/A (T17):** the stand-in SVG `$100` remains captioned "Actual crop ·
+  PDFium 149.0.7825.0 render". The component no longer claims an `<img>`
+  default (the missing-asset default was removed — good), but the caption still
+  uses "Actual" over a drawn stand-in. Replace with real generated bytes and
+  reword at T17 (earned browser demo), as already tracked.
+- **F5/A (integration):** the candidate predates the T02 freeze; on the merged
+  candidate the coordinator should re-run `task T06` (freshness rules require
+  it anyway). This reviewer's merge-based run is preview evidence, not a
+  substitute for the merged-branch acceptance run.
 
-| Finding | Prior Status | Revision 4 Resolution | Verification |
-|---|---|---|---|
-| Evidence bound to preview.html mock | Candidate 27266cb still exercised mock | REPLACED mock with live mount harness `apps/web/src/components/DocumentStage/mount.tsx` (React 19 `createRoot`) and minimal `preview.html`. `tests/visual/foundation.spec.ts` runs ephemeral Vite dev server, exercising real React component and compiled CSS modules. | `bun run test:visual` passes 9/9 green against live mounted component. |
-| Non-token rgba() & hex fallbacks | 2 rgba() literals + 2 hex fallbacks remained | Centralized `--shadow-stage` and `--shadow-paper` to `tokens.css`. Replaced lines 8 and 116 in `DocumentStage.module.css`. Removed `#ffffff` and `#172A2F` fallbacks in `DocumentStage.tsx` SVG markup. | 0 raw hex or rgba colors in `DocumentStage.module.css`. |
-| Button shortcut exclusion (N1) | BUTTON omitted from guard | Added `target.tagName === "BUTTON" || Boolean(target.closest("button"))` to `handleStageKeyDown`. | Buttons in stage do not intercept F/R/+/-. |
-| Dangling aria-controls & missing a11y (6) | #finding-btn dangled; #coverage-btn lacked attributes | Conditioned `#finding-btn` `aria-controls={isDetailOpen ? "finding-detail" : undefined}`; added matching `aria-expanded` and `aria-controls` to `#coverage-btn`. Added `initialDetailOpen` prop. | Screen reader attributes accurately reflect mounted state. |
-| outlineWidth assertion (N2) | Evaluated but not asserted | Added `expect(outline.outlineWidth).toBe("3px");` to focus test in `foundation.spec.ts`. | Focus outline width explicitly verified. |
-| Screenshots from mock (10) | Depicted preview.html | Re-captured all 11 PNG screenshots directly from the live mounted React component via Vite dev server in Chromium across all viewports and states. | 11 fresh PNG artifacts depict authentic React component. |
+## Verdict
 
-### Real Verification Commands (Revision 4)
+**Approved.** The headline defect from earlier rounds (tests/screenshots
+exercising a static mock) is fixed the right way: the suite now boots the real
+component through Vite and all evidence is bound to it; token centralization,
+conditional `aria-controls`, the 3 px focus assertion, and receipt honesty are
+all verified by this reviewer's own runs. Proceed to merged-branch acceptance
+on integration.
 
-| Command | Exit Code | Result |
-|---|---|---|
-| `bun run verify` | 0 | 81 tests passing (49 bootstrap, 2 native-bootstrap, 30 coordination) |
-| `python3 scripts/task_acceptance.py self-check` | 0 | 16 registered commands valid |
-| `bun run test:visual -- tests/visual/foundation.spec.ts` | 0 | 9 collected, 9 passed, 0 failed, 0 skipped against live mounted React component via Vite |
-| `python3 scripts/task_acceptance.py task T06` | 0 | Acceptance command passes cleanly with 9 passed |
-| `vite build apps/web` | 0 | Static build succeeds |
+— zcode peer reviewer, 2026-09-12
