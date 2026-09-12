@@ -7,25 +7,67 @@
   "pass": 1,
   "branch": "work/zcode/t28",
   "base": "546accd220a09e0fa071850671b532918d67f8b5",
-  "implementation_commit": "3863dde",
+  "implementation_commit": "cf01857",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t28 at push time (implementation 1050c33 + review-revision commit + evidence commits). Review 1a00561 (review/devin/t28, changes-required) findings P1 and P2 are addressed in this revision.",
+  "review_scope": "branch head work/zcode/t28 at push time (implementation 1050c33 + review revisions 3863dde and cf01857 + evidence commits). Review 1a00561 P1/P2 and the round-2 follow-up findings (evidence namespace, /BM claim correction, /CA stroke alpha, stale fields) are addressed.",
   "deliverables": {
     "native/inkflip/checks/structure.py": "bounded structural observation check over PDFium: per-text-object render mode (raw Tr integer + PDF-semantics interpreted name), fill/stroke color, font base name, bounded text snippet, axis-aligned object boxes mapped to canonical page space; inspectable page properties (effective view, UserUnit, rotation, physical size) via the pypdf dictionary adapter path; off-crop text objects keep raw unclipped geometry; approximate top-level opaque-rectangle overlap experiment; finite object/form/text budgets; typed terminals and per-occurrence limitations",
     "native/tests/structure/test_structure.py": "TEST-28 suite: 17 tests + 14 subtests over committed fixtures (F03 scan, F02 covered overlap control, F07 user-unit) and hand-assembled minimal PDFs for Tr sweep 0..7, F04-style white-contrast controls, off-crop geometry, ExtGState alpha and nested Form XObjects"
   },
   "executable_example": "uv run --project native python -c \"import sys; sys.path.insert(0,'native'); from inkflip.readers import pdfium; from inkflip.checks import structure; h=pdfium.open_document(open('fixtures/development/scan-correct.pdf','rb').read(),None,1); out=[]; r=structure.extract(h,{'id':'demo','page_index':0,'reader_ids':[structure.READER_ID],'capability':'object_render_mode','region_id':None},out.extend); print(r['status'], r['produced_occurrence_count']); h.close()\"",
   "executed_commands": [
-    {"command": "uv run --project native python -m pytest native/tests/structure -q", "exit": 0, "counts": {"passed": 17, "subtests_passed": 14}},
-    {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 128, "subtests_passed": 160}},
-    {"command": "bun run test:native", "exit": 0, "counts": {"passed": 128}},
-    {"command": "bun run verify", "exit": 0},
-    {"command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json", "exit": 0, "counts": {"collected": 17, "passed": 17, "failed": 0, "skipped": 0}, "note": "run.json binds evaluated_commit 1050c33 on a clean tree"}
+    {
+      "command": "uv run --project native python -m pytest native/tests/structure -q",
+      "exit": 0,
+      "counts": {
+        "passed": 20,
+        "subtests_passed": 14
+      }
+    },
+    {
+      "command": "uv run --project native python -m pytest native/tests -q",
+      "exit": 0,
+      "counts": {
+        "passed": 131,
+        "subtests_passed": 160
+      }
+    },
+    {
+      "command": "bun run test:native",
+      "exit": 0,
+      "counts": {
+        "passed": 131
+      }
+    },
+    {
+      "command": "bun run verify",
+      "exit": 0
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json",
+      "exit": 0,
+      "counts": {
+        "collected": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      },
+      "note": "run.json binds the current revision commit on a clean tree"
+    }
   ],
   "measured_decisions": [
-    {"decision": "Render-mode raw Tr passthrough recorded with PDF-semantics names", "reason": "Empirically verified on PDFium 149.0.7825.0: `3 Tr` (invisible) reads back as raw 3 while pypdfium2 names 3 FILL_STROKE; mapping through the enum would misreport invisible text. Both raw and name travel on every observation; the Tr sweep test pins it."},
-    {"decision": "No hidden/visible verdict exists in this check", "reason": "CAPABILITIES.md gives native overlap the approximate opaque-rectangle experiment with no automatic hidden/safe label; tests assert the F03/F04 controls (invisible layer, white-on-dark vs white-on-light) produce no verdict-bearing output."},
-    {"decision": "Top-level traversal only; nested forms recorded, not entered", "reason": "READER_ADAPTER_CONTRACT.md requires a finite nesting/object budget; form contents and alpha compositing are recorded as unsupported instead of a claimed comprehensive inspection."}
+    {
+      "decision": "Render-mode raw Tr passthrough recorded with PDF-semantics names",
+      "reason": "Empirically verified on PDFium 149.0.7825.0: `3 Tr` (invisible) reads back as raw 3 while pypdfium2 names 3 FILL_STROKE; mapping through the enum would misreport invisible text. Both raw and name travel on every observation; the Tr sweep test pins it."
+    },
+    {
+      "decision": "No hidden/visible verdict exists in this check",
+      "reason": "CAPABILITIES.md gives native overlap the approximate opaque-rectangle experiment with no automatic hidden/safe label; tests assert the F03/F04 controls (invisible layer, white-on-dark vs white-on-light) produce no verdict-bearing output."
+    },
+    {
+      "decision": "Top-level traversal only; nested forms recorded, not entered",
+      "reason": "READER_ADAPTER_CONTRACT.md requires a finite nesting/object budget; form contents and alpha compositing are recorded as unsupported instead of a claimed comprehensive inspection."
+    }
   ],
   "review_attention": [
     "The render-mode interpretation table is PDF content-stream semantics, deliberately NOT the pypdfium2 enum names; raw integer always accompanies it.",
@@ -51,13 +93,74 @@
       "P2_per_occurrence_compositing": "FIXED with both review-accepted routes: (a) per-occurrence — objects participating in transparency (alpha or soft mask family) are now flagged per occurrence via FPDFPageObj_HasTransparency with the limitation 'transparency compositing (alpha or soft mask) not inspected; unsupported compositing recorded for this object'; a new test proves the transparent object is flagged while a q/Q-scoped opaque object on the same page is not; (b) explicit receipt limitation — blend modes (/BM, e.g. Multiply) are not detectable per object on this binding (setter-only API) and optional-content (/OC BDC) membership has no per-object getter, so the receipt records an explicit limitation that such contexts may emit ordinary records and a completed check never certifies compositing coverage (no false 'all checked'). Manifest already declares the same scope."
     },
     "executed_commands_linux": [
-      {"command": "uv run --project native python -m pytest native/tests/structure -q", "exit": 0, "counts": {"passed": 18, "subtests_passed": 14}},
-      {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0},
-      {"command": "bun run test:native", "exit": 0},
-      {"command": "bun run verify", "exit": 0},
-      {"command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json", "exit": 0}
+      {
+        "command": "uv run --project native python -m pytest native/tests/structure -q",
+        "exit": 0,
+        "counts": {
+          "passed": 18,
+          "subtests_passed": 14
+        }
+      },
+      {
+        "command": "uv run --project native python -m pytest native/tests -q",
+        "exit": 0
+      },
+      {
+        "command": "bun run test:native",
+        "exit": 0
+      },
+      {
+        "command": "bun run verify",
+        "exit": 0
+      },
+      {
+        "command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json",
+        "exit": 0
+      }
     ],
     "p3_optional_items": "Not changed: checks/__init__.py kept (reviewer: harmless); form-only page under non-mode capabilities still emits completed/0 (optional finding; the record is a completed page scan with zero matching observations, not a claimed comprehensive check).",
     "handoff_state": "ready_for_review=true on revision 3863dde; worker yields for fresh review; Devin owns acceptance"
+  },
+  "review_revision_round_2": {
+    "recorded_at": "2026-09-12",
+    "review": "Devin follow-up on revision 3863dde: evidence paths outside the T28 namespace; /BM 'not detectable' claim empirically false (HasTransparency flags non-Normal blends); /CA stroking-alpha residual gap; stale receipt/handoff fields",
+    "revision_commit": "cf01857",
+    "addressed_findings": {
+      "evidence_namespace": "FIXED: acceptance_criteria_evidence evidence lists now cite only artifacts/tasks/T28/* files (new criterion-evidence-current.md itemizing per-criterion proof points, plus commands.log and run.json).",
+      "bm_claim_correction": "FIXED: the '/BM not detectable (setter-only)' claim was wrong and is retracted everywhere (module docstring, manifest limitation, receipt limitation, handoff). HasTransparency empirically flags non-Normal blend modes; a new test pins /BM /Multiply per-occurrence flagging against a scoped plain object.",
+      "stroking_alpha": "FIXED symmetrically: stroke alpha below 255 now records 'stroke alpha compositing not inspected' (Tr-1 object under CA 0.5 flagged; fill-only sibling not).",
+      "stale_fields": "FIXED: receipt worker.implementation_commit -> cf01857; receipt commands table and handoff executed_commands refreshed to actual counts (20 structure / 131 native + 160 subtests)."
+    },
+    "executed_commands_linux": [
+      {
+        "command": "uv run --project native python -m pytest native/tests/structure -q",
+        "exit": 0,
+        "counts": {
+          "passed": 20,
+          "subtests_passed": 14
+        }
+      },
+      {
+        "command": "uv run --project native python -m pytest native/tests -q",
+        "exit": 0,
+        "counts": {
+          "passed": 131,
+          "subtests_passed": 160
+        }
+      },
+      {
+        "command": "bun run test:native",
+        "exit": 0
+      },
+      {
+        "command": "bun run verify",
+        "exit": 0
+      },
+      {
+        "command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json",
+        "exit": 0
+      }
+    ],
+    "handoff_state": "ready_for_review=true on revision cf01857; worker yields for fresh review; Devin owns acceptance"
   }
 }

@@ -30,13 +30,15 @@ Discipline implemented here:
 * Off-crop objects keep their raw/native geometry: canonical coordinates are
   mapped but never clipped to the effective view, the raw user-space box is
   recorded, and the limitation states that page display remains the crop.
-* Unsupported compositing is explicitly recorded: objects that participate
-  in transparency (alpha or soft mask, via ``FPDFPageObj_HasTransparency``)
-  carry a per-occurrence limitation, nested Form XObjects are recorded
-  without traversal, and blend modes (``/BM``; the installed binding exposes
-  only a setter) plus optional-content (``/OC`` BDC) membership are not
-  detectable per object at all — an explicit task-receipt limitation states
-  that such objects may emit ordinary records (no false "all checked").
+* Unsupported compositing is explicitly recorded per occurrence:
+  ``FPDFPageObj_HasTransparency`` flags objects participating in
+  transparency — alpha fills, soft masks AND non-Normal blend modes
+  (empirically verified: /BM /Multiply and /Screen objects are flagged) —
+  and such objects carry the unsupported-compositing limitation themselves.
+  Stroking alpha below full opacity is flagged symmetrically. The one
+  context with no per-object getter on this binding is optional-content
+  (``/OC`` BDC) membership; an explicit task-receipt limitation states that
+  such objects may emit ordinary records (no false "all checked").
 * Finite budgets: top-level page objects, per-object text snippets and
   emitted chunks are bounded; exceeding an object budget is a typed
   ``resource_limit`` terminal that keeps all prior evidence (I17). Every
@@ -197,10 +199,12 @@ def describe() -> dict:
                 "render-mode integers follow content-stream Tr semantics; the "
                 "installed PDFium returns the raw Tr value, so both the raw "
                 "integer and the interpreted name are recorded per object",
-                "arbitrary clipping, blends, transparency groups, optional "
-                "content and historical revisions are not inspected; alpha "
-                "compositing and nested Form XObjects are recorded as "
-                "unsupported, never as visible or hidden",
+                "per-occurrence compositing flags cover transparency and "
+                "non-Normal blend modes (HasTransparency); comprehensive "
+                "clipping, blend, transparency-group, optional-content and "
+                "historical-revision inspection is not performed, and /OC BDC "
+                "membership has no per-object getter, so such objects may "
+                "emit ordinary records",
                 "no universal hidden/visible verdict exists in this check",
             ],
         },
@@ -433,10 +437,15 @@ def _run_check(handle, plan, capability, page_index, meta, page, textpage, emit_
             ]
             if fill is not None and fill[3] < 255:
                 limitations.append("alpha compositing not inspected; fill alpha below 255")
+            if stroke is not None and stroke[3] < 255:
+                limitations.append(
+                    "stroke alpha compositing not inspected; stroke alpha below 255"
+                )
             if pdfium_raw.FPDFPageObj_HasTransparency(obj):
                 limitations.append(
-                    "transparency compositing (alpha or soft mask) not inspected; "
-                    "unsupported compositing recorded for this object"
+                    "transparency compositing (alpha, soft mask or non-Normal "
+                    "blend mode) not inspected; unsupported compositing "
+                    "recorded for this object"
                 )
             text_records.append(
                 {
