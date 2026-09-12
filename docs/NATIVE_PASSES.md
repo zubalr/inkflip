@@ -31,6 +31,13 @@ fetching the relay's current code. A failed state read is a blocker. Mac publish
 code and native Dolt state, then `homebase_relay.py publish`; the coordinator
 polls `homebase_relay.py collect` to receive ZCode checkpoints. These helpers
 transfer existing Git/Beads objects and do not manage model execution or task state.
+While any ZCode grant is active, every coordination cycle runs
+`homebase_relay.py collect <task>` (or checks `refs/heads/hb/inkflip/<task>` on
+the handoff remote) before reporting that lane's state; local and origin
+`work/*` refs only advance after a collect, so they cannot show a new inbound
+checkpoint. Record actual delivered/collected/reviewing/feedback states; when
+polling is not continuous, report the last collected state honestly rather than
+claiming a live wait.
 
 Dispatch only from clean, published canonical Mac main with
 `git config inkflip.role integrator`. Homebase's role is `worker`. These settings

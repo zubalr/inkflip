@@ -111,6 +111,13 @@ these guards to branch refs, so they permit native snapshot rollover.
    original assigned GitHub branch after ancestry checks. It does not accept or
    merge work. Devin orders independent review, resolves findings, integrates
    and records actual acceptance before dispatching dependent work.
+   Every coordinator cycle that involves an app with an active grant MUST run
+   `homebase_relay.py collect <task>` for that task, or first check the exact
+   inbound `refs/heads/hb/inkflip/<task>` on the handoff remote. Never infer
+   "worker pickup pending" or "still waiting" from local or origin `work/*`
+   refs — they only advance after a collect. If the coordinator cannot
+   continuously poll, it reports the last actual collected state and says so
+   honestly instead of claiming a live loop.
 
 Assigned Antigravity or independent SWE reviewers inspect ZCode independently; every implementation,
 including Devin edits, receives an independent actual reviewer. Use real session identities in evidence. Homebase reviewers
