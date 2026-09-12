@@ -1,0 +1,45 @@
+{
+  "task": "T28",
+  "beads_id": "pdf-t28",
+  "title": "Implement bounded native structural observations",
+  "worker": "zcode-t28 (ZCode Goal on Homebase)",
+  "app": "zcode",
+  "pass": 1,
+  "branch": "work/zcode/t28",
+  "base": "546accd220a09e0fa071850671b532918d67f8b5",
+  "implementation_commit": "1050c33255dc065af4ca9b9759be9208b16e35f2",
+  "ready_for_review": true,
+  "review_scope": "implementation_commit 1050c33 (native/inkflip/checks/structure.py + native/tests/structure/test_structure.py) plus the evidence commit on this branch",
+  "deliverables": {
+    "native/inkflip/checks/structure.py": "bounded structural observation check over PDFium: per-text-object render mode (raw Tr integer + PDF-semantics interpreted name), fill/stroke color, font base name, bounded text snippet, axis-aligned object boxes mapped to canonical page space; inspectable page properties (effective view, UserUnit, rotation, physical size) via the pypdf dictionary adapter path; off-crop text objects keep raw unclipped geometry; approximate top-level opaque-rectangle overlap experiment; finite object/form/text budgets; typed terminals and per-occurrence limitations",
+    "native/tests/structure/test_structure.py": "TEST-28 suite: 17 tests + 14 subtests over committed fixtures (F03 scan, F02 covered overlap control, F07 user-unit) and hand-assembled minimal PDFs for Tr sweep 0..7, F04-style white-contrast controls, off-crop geometry, ExtGState alpha and nested Form XObjects"
+  },
+  "executable_example": "uv run --project native python -c \"import sys; sys.path.insert(0,'native'); from inkflip.readers import pdfium; from inkflip.checks import structure; h=pdfium.open_document(open('fixtures/development/scan-correct.pdf','rb').read(),None,1); out=[]; r=structure.extract(h,{'id':'demo','page_index':0,'reader_ids':[structure.READER_ID],'capability':'object_render_mode','region_id':None},out.extend); print(r['status'], r['produced_occurrence_count']); h.close()\"",
+  "executed_commands": [
+    {"command": "uv run --project native python -m pytest native/tests/structure -q", "exit": 0, "counts": {"passed": 17, "subtests_passed": 14}},
+    {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 128, "subtests_passed": 160}},
+    {"command": "bun run test:native", "exit": 0, "counts": {"passed": 128}},
+    {"command": "bun run verify", "exit": 0},
+    {"command": "python3 scripts/task_acceptance.py task T28 --report artifacts/tasks/T28/run.json", "exit": 0, "counts": {"collected": 17, "passed": 17, "failed": 0, "skipped": 0}, "note": "run.json binds evaluated_commit 1050c33 on a clean tree"}
+  ],
+  "measured_decisions": [
+    {"decision": "Render-mode raw Tr passthrough recorded with PDF-semantics names", "reason": "Empirically verified on PDFium 149.0.7825.0: `3 Tr` (invisible) reads back as raw 3 while pypdfium2 names 3 FILL_STROKE; mapping through the enum would misreport invisible text. Both raw and name travel on every observation; the Tr sweep test pins it."},
+    {"decision": "No hidden/visible verdict exists in this check", "reason": "CAPABILITIES.md gives native overlap the approximate opaque-rectangle experiment with no automatic hidden/safe label; tests assert the F03/F04 controls (invisible layer, white-on-dark vs white-on-light) produce no verdict-bearing output."},
+    {"decision": "Top-level traversal only; nested forms recorded, not entered", "reason": "READER_ADAPTER_CONTRACT.md requires a finite nesting/object budget; form contents and alpha compositing are recorded as unsupported instead of a claimed comprehensive inspection."}
+  ],
+  "review_attention": [
+    "The render-mode interpretation table is PDF content-stream semantics, deliberately NOT the pypdfium2 enum names; raw integer always accompanies it.",
+    "F04/F05/F06 fixture families are catalog 'specified' on this base: criteria covered with committed fixtures plus hand-assembled in-memory minimal PDFs; committed families remain a fixture-lane request.",
+    "Occurrence.raw_text carries the object's extracted text for object_render_mode observations only; page-property, overlap, off-crop and form records are structural observations with structured locators and basis strings."
+  ],
+  "limitations": [
+    "Printed structural properties only; no blending, OCG, transparency-group or historical-revision inspection.",
+    "Object boxes are PDFium-reported axis-aligned user-space bounds mapped once by the canonical transform; API geometry, not exact visible ink.",
+    "No OCR, rendering or model use in this task."
+  ],
+  "dependency_requests": [
+    "Fixture owner lane: committed F04/F05/F06 families per catalog recipes when assigned."
+  ],
+  "attribution": "No external material reused; contract-cited source ideas are credited in planning/research/SOURCES.md.",
+  "state_note": "Worker does not write Beads; Devin is the sole state owner. Requested transition on review approval: in_review -> accepted after merged-branch acceptance per docs/ACCEPTANCE.md."
+}
