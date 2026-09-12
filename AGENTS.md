@@ -1,6 +1,7 @@
 # PDF inspector implementation
 
-Read `docs/NATIVE_PASSES.md` before starting, resuming, reviewing, or integrating a task.
+Read `docs/NATIVE_PASSES.md` and `docs/HOMEBASE.md` before starting, resuming,
+reviewing, integrating, or transferring a task.
 Read `planning/PROJECT_BRIEF.md` and `planning/architecture/GLOSSARY_AND_INVARIANTS.md`
 once per session, then only the assigned task's inputs.
 
@@ -20,21 +21,26 @@ once per session, then only the assigned task's inputs.
 
 - Beads owns live status, dependencies, claims, notes and acceptance. Product task
   T01 maps to pdf-t01. Static planning and passes.json are not live task state.
-- Devin Local is the sole integration lead and Beads writer. Antigravity and
-  ZCode consume assignments through `scripts/native_pass.py status APP`.
+- Codex/Astra on the Mac is the sole integration lead and Beads writer. Devin
+  Local SWE-2 and Homebase ZCode consume assignments; Antigravity is inactive.
   Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
-  Five active workers/reviewers maximum: Devin 2, Antigravity 2, ZCode 1. Active
-  work by a lead counts; idle coordination does not. Writers yield for review.
+  The owner replaced fixed worker maxima with adaptive concurrency. Admit
+  useful independent work with disjoint ownership, available compute and review
+  capacity. Account for native descendants in Beads; no recursive unbounded
+  spawning. Writers yield before review. Native platform limits still apply.
 - One branch, one writer, one isolated checkout. Preserve existing work. Never
-  reset, clean, force-push or overwrite another checkout. Local worktrees share
-  the canonical Beads database; only the coordinator pulls/pushes its remote.
+  reset, clean, force-push or overwrite another checkout. Mac worktrees share
+  the canonical Beads database. Homebase pulls a native read replica through
+  the project SSH relay; only the Mac coordinator publishes authoritative state.
 - The owner explicitly approved private GitHub access, source sharing with the
-  selected three harnesses, commits, pushes, review and integration. Only Devin
+  selected harnesses, commits, pushes, review and integration. The current
+  execution uses Astra, Local SWE-2 and Homebase ZCode; Cloud is stopped. Only Astra
   accepts/closes product tasks after independent review and real merged checks.
   T54 public publication/deployment and messages to people require approval.
-- Continue ready work within the captured pass; do not stop at each ticket.
+- Continue ready work through the defined passes; do not stop at each ticket.
+  Advance only after the current pass checkpoint and required gates pass.
   Beads pass checkpoints require listed tasks and actual gate evidence.
 - Worktrees are not an access boundary for held-out evaluation labels.
 

@@ -1,0 +1,28 @@
+# T26 executed command transcript
+date: 2026-09-12T00:59:23Z  host: macOS 26.5.2 arm64  python: Python 3.14.7  uv: uv 0.9.5 (d5f39331a 2025-10-21)
+interpreter: uv-managed CPython 3.13.15 (frozen native/.venv; pypdfium2 5.8.0, pypdf 6.18.0, pytest 9.1.1)
+
+$ uv run --project native python -m pytest native/tests/readers -q   (T26 contract command)
+......................                                         [100%]
+22 passed, 10 subtests passed in 0.24s
+exit: 0
+
+$ bun run test:native   (registry group; whole native suite incl. readers)
+- generated xml file: /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-ofpn5_4r/results -
+============================== 53 passed in 0.31s ==============================
+exit: 0
+
+$ python3 scripts/task_acceptance.py task T26
+exit: 0
+counts: []
+
+$ bun run verify
+exit: 0
+self-check: 16 commands in config/acceptance-commands.json
+
+# Engine behaviors measured on T05 fixtures during implementation (also encoded as tests):
+- mapping-amount: PDFium expands ToUnicode glyph 0x31 -> '1,0'; the three scalars report one identical charbox and coalesce into a single occurrence.
+- covered-amount: PDFium merges covered+replacement text into '$1,00000'; preserved verbatim.
+- get_size(): rotated crop dims WITHOUT UserUnit (userunit-10 still reports 520x400); physical dims derived from pypdf metadata and scaled once by /UserUnit.
+- pypdf: covered-amount extract_text -> '$1,000$100' (planning-observed behavior reproduced); page-level only.
+- encrypted (pypdf-written) and malformed inputs raise typed parser_error failures; no partial results escape.

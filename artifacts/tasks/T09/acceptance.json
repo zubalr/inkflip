@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "task_id": "T09",
+  "beads_id": "pdf-t09",
+  "disposition": "accepted",
+  "evaluated_commit": "927b07049ffc65842a5c537f9b294d8fc9402133",
+  "evaluated_at": "2026-09-12T02:43:46.906349+00:00",
+  "contract_digest": "2d8d58b1f7cf2fed2f1fc113210f482702e7e9b1705e464c1b5f7c0a75996843",
+  "worker": "devin-t09",
+  "commands": [
+    {
+      "segment": "bun run test:browser -- tests/readers/pdfjs.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/pdfjs.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/pdfjs.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/home/ubuntu/repos/inkflip",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T09/commands.log": "7ebb9a52ceae94db79c3db37325e0d3ad6b2921283f8ceb76fef2c68e3f70985",
+    "artifacts/tasks/T09/coordinator-commands.log": "392eb93a5226d76a9c36a222750eb9a5f19a4a781a13e486942a20cdf4c21b9c",
+    "artifacts/tasks/T09/peer-review.md": "8cc9c6ae3bd1b045b9996c81d770c5f264c6e30c8b8c3fb757204ebf893fd2e6",
+    "artifacts/tasks/T09/receipt.json": "a3b391b20739d424317d1e1ab60e85718488fe2344398d79276f8def419a2924",
+    "artifacts/tasks/T09/review.md": "8cc9c6ae3bd1b045b9996c81d770c5f264c6e30c8b8c3fb757204ebf893fd2e6",
+    "artifacts/tasks/T09/run.json": "4b6f115669e810cde54a747e7a1e52b8bfdaba0e2c916a0ecbd572446b895e5e"
+  },
+  "criteria": {
+    "Real mapping and clean PDFs processed through bytes": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ],
+    "raw text not injected": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ],
+    "occurrence geometry/rotation/UserUnit verified": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ],
+    "no full glyph-paint provenance claim": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ],
+    "render cancellation releases task/canvas": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ],
+    "unavailable structure check is unsupported.": [
+      "artifacts/tasks/T09/run.json",
+      "artifacts/tasks/T09/commands.log"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-cloud-review-t09"
+    ],
+    "path": "artifacts/tasks/T09/review.md"
+  }
+}

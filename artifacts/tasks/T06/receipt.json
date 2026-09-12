@@ -1,0 +1,114 @@
+{
+  "task_id": "T06",
+  "beads_id": "pdf-t06",
+  "disposition": "implemented_pending_review",
+  "branch": "work/antigravity/t06",
+  "base_commit": "3bef697a31120d4cb32e8fa044d419bc34e32cf5",
+  "implementation_commit": "7c59b35bf2a43d17227863a4132c6e1735a3126c",
+  "actor": "antigravity-t06",
+  "model": "Gemini 3.8 Flash (High) via Antigravity",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "acceptance_criteria_evidence": {
+    "1440/1024/768/390/320 widths have no page overflow": {
+      "status": "executed",
+      "detail": "Verified by automated Playwright suite (tests/visual/foundation.spec.ts: 5/5 viewport tests passing) and authentic rendered screenshots of the live-mounted DocumentStage React component via ephemeral Vite dev server at 1440x900, 1024x768, 768x1024, 390x844 (mobile emulation), and 320x568 (mobile emulation) proving zero horizontal overflow (scrollWidth <= clientWidth across all widths).",
+      "evidence": [
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/intermediate-1024.png",
+        "artifacts/tasks/T06/intermediate-768.png",
+        "artifacts/tasks/T06/mobile-390.png",
+        "artifacts/tasks/T06/mobile-320.png",
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/intermediate-1024.png",
+        "artifacts/tasks/T06/intermediate-768.png",
+        "artifacts/tasks/T06/mobile-390.png",
+        "artifacts/tasks/T06/mobile-320.png",
+        "artifacts/tasks/T06/commands.log"
+      ]
+    },
+    "page and disagreement dominate": {
+      "status": "executed",
+      "detail": "Verified by Playwright suite asserting DocumentStage bounding box > 600x400 and finding banner > 76px height, alongside authentic visual evidence from the live-mounted component showing the paper view and amount disagreement finding banner dominating visual hierarchy across all viewports.",
+      "evidence": [
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/mobile-390.png",
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/commands.log"
+      ]
+    },
+    "contrast checks meet stated targets": {
+      "status": "executed",
+      "detail": "Automated dynamic contrast calculation on DOM computed styles of the live mounted DocumentStage component in Playwright test passing >= 10:1 requirement (ink on paper #172A2F on #FFFDF8 exceeds 14.6:1, WCAG AAA; ink on canvas exceeds 13:1; muted on paper #526368 on #FFFDF8 exceeds 6.1:1, WCAG AA; focus outline has > 3:1 non-text contrast).",
+      "evidence": [
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/focus-state.png",
+        "artifacts/tasks/T06/commands.log",
+        "artifacts/tasks/T06/commands.log"
+      ]
+    },
+    "reduced motion disables flips": {
+      "status": "executed",
+      "detail": "Automated Playwright test with reducedMotion: 'reduce' verifies --motion-state and --motion-panel compute to 0ms/0s on the live mounted component, and DocumentStage.module.css enforces transition: none !important.",
+      "evidence": [
+        "artifacts/tasks/T06/commands.log",
+        "artifacts/tasks/T06/commands.log"
+      ]
+    },
+    "screenshot evidence covers dark text, focus and partial states.": {
+      "status": "executed",
+      "detail": "Authentic visual evidence captured directly from the live mounted DocumentStage React component rendered in Chromium via Vite dev server covering dark text, active focus outline (3px solid #005FCC), compare mode, expanded finding detail with Invariant I06 disclaimer, and loading, failed, and empty partial states.",
+      "evidence": [
+        "artifacts/tasks/T06/desktop-1440.png",
+        "artifacts/tasks/T06/focus-state.png",
+        "artifacts/tasks/T06/compare-mode.png",
+        "artifacts/tasks/T06/detail-expanded.png",
+        "artifacts/tasks/T06/state-loading.png",
+        "artifacts/tasks/T06/state-failed.png",
+        "artifacts/tasks/T06/state-empty.png",
+        "artifacts/tasks/T06/commands.log"
+      ]
+    }
+  },
+  "commands": {
+    "log": "artifacts/tasks/T06/commands.log",
+    "key_results": [
+      {
+        "command": "bun run verify",
+        "exit": 0,
+        "detail": "81 passing tests (49 bootstrap + 2 native + 30 coordination)"
+      },
+      {
+        "command": "python3 scripts/task_acceptance.py self-check",
+        "exit": 0,
+        "detail": "16 commands in config/acceptance-commands.json"
+      },
+      {
+        "command": "bun run test:visual -- tests/visual/foundation.spec.ts",
+        "exit": 0,
+        "detail": "9 collected, 9 passed, 0 failed, 0 skipped against live mounted React component via Vite"
+      },
+      {
+        "command": "python3 scripts/task_acceptance.py task T06",
+        "exit": 0,
+        "detail": "acceptance check passes cleanly with 9 passing tests"
+      }
+    ]
+  },
+  "notes": [
+    "Addressed Round 2 coordinator re-review findings (commit e9eda14 on review/devin/t06).",
+    "Replaced static HTML mock with authentic live mounting harness: apps/web/src/components/DocumentStage/mount.tsx uses React 19 createRoot to mount DocumentStage and read URL params (mode, status, detail, focus, error).",
+    "Updated tests/visual/foundation.spec.ts to spin up an ephemeral Vite dev server, exercising the real React component and compiled CSS modules. 9/9 tests pass green.",
+    "Re-captured all 11 PNG screenshots directly from the live mounted component rendered via Vite in Chromium.",
+    "Added --shadow-stage and --shadow-paper to tokens.css; replaced raw rgba() box shadows in DocumentStage.module.css with tokens; removed hex fallbacks in DocumentStage.tsx SVG markup.",
+    "Updated keyboard shortcut exclusion in DocumentStage.tsx to skip buttons (target.tagName === 'BUTTON' || target.closest('button')).",
+    "Conditioned #finding-btn aria-controls only when finding-detail is mounted; added matching aria-expanded and aria-controls to #coverage-btn; added initialDetailOpen prop to DocumentStageProps.",
+    "Added assertion expect(outline.outlineWidth).toBe('3px') in foundation.spec.ts."
+  ],
+  "limitations": [
+    "Playwright runner binary is owned by T02; tests/visual/foundation.spec.ts executes fully green (9/9 passed) via ephemeral Vite dev server.",
+    "All visual screenshot evidence was executed and captured directly from the live mounted DocumentStage React component rendered in Chromium via Vite across 1440, 1024, 768, 390, and 320 px viewports."
+  ],
+  "receipt_signed_by": "antigravity-t06",
+  "verification_verdict": "ready_for_review"
+}

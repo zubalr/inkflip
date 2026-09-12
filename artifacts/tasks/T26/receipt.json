@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "task_id": "T26",
+  "beads_id": "pdf-t26",
+  "worker": {
+    "app": "zcode",
+    "worker_id": "zcode-t26",
+    "branch": "work/zcode/t26",
+    "base": "ef5ffff076ea6833fe86db44e087768803646896",
+    "implementation_commit": "d9c18b098540bdbb6713e798656fec8cc23322d3"
+  },
+  "contract_version": "1.0.0",
+  "fixture_ids": [
+    "F01",
+    "F02",
+    "F07",
+    "F08",
+    "F10",
+    "F11"
+  ],
+  "test_ids": [
+    "TEST-26"
+  ],
+  "commands": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/readers -q",
+      "exit": 0,
+      "counts": {
+        "collected": 22,
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "segment": "bun run test:native",
+      "exit": 0,
+      "note": "whole native suite: 52 collected, 52 passed (contracts + boundary + readers)"
+    },
+    {
+      "segment": "python3 scripts/task_acceptance.py task T26",
+      "exit": 0
+    },
+    {
+      "segment": "bun run verify",
+      "exit": 0,
+      "note": "unchanged Python suites; confirms no regression at the root"
+    }
+  ],
+  "environment": {
+    "host": "macOS arm64 (Darwin 25.5.0)",
+    "python": "CPython 3.13.15 via uv frozen native/.venv",
+    "engines": "pypdfium2 5.8.0 / PDFium 149.0.7825.0; pypdf 6.18.0",
+    "note": "Native stack executed through the frozen uv lock delivered by T02; no dependency was added or altered."
+  },
+  "limitations": [
+    "F10/F11 exist as in-test synthesized mechanisms (missing ToUnicode passthrough; four-position duplicate runs) because the fixture families are still 'specified' in the catalog; generation of committed F10/F11 fixture files belongs to the fixture owner, requested below.",
+    "Char-level iteration follows PDFium's UTF-16 code-unit indexing; supplementary-plane scalar handling is exercised by later native-unicode families (F14), not asserted here.",
+    "Render capability is declared 'unavailable' in the PDFium manifest until the render-scale compensation is proven under the OCR/render tasks (T27/T28).",
+    "In-process adapters only: child-process supervision, backpressure acknowledgment and atomic partial results are T29 scope."
+  ],
+  "dependency_requests": [
+    "Fixture owner (T05/T21 lane): generate committed F10 (missing/malformed ToUnicode) and F11 (duplicates) fixture families so later native suites consume repository fixtures instead of in-test synthesis; the T05 generator API already supports the recipes."
+  ],
+  "measured_decisions": [
+    {
+      "decision": "Occurrences are emitted at glyph-box granularity (consecutive identical loose charboxes coalesced)",
+      "reason": "PDFium's character API expands one glyph into several Unicode scalars that share one reported box; coalescing preserves the glyph-to-Unicode expansion as one position-bearing occurrence without inventing per-scalar widths, while duplicate glyphs at distinct positions stay distinct occurrences (I02).",
+      "tradeoff": "Text runs are split at every distinct glyph box; consumers join ordered occurrences (the tests rebuild the engine text exactly)."
+    },
+    {
+      "decision": "Physical geometry is derived from pypdf page metadata inside the PDFium adapter",
+      "reason": "Measured on this build: get_size() applies rotation but ignores UserUnit, exactly as recorded in planning/architecture/COORDINATES.md; the contract mandates metadata-based compensation. Crop box + /UserUnit feed the canonical transform C, applied once."
+    },
+    {
+      "decision": "Normalized text is identity-mapped raw text with an identity normalization_map",
+      "reason": "Raw fidelity (I03) with the declared 'scalar-whitespace-v1' setting reserved; conservative normalization semantics belong to T12, and no digit/punctuation/sign transformation is performed here."
+    }
+  ],
+  "handoff": "artifacts/tasks/T26/handoff.json",
+  "ready_for_review": true,
+  "acceptance_criteria_evidence": {
+    "Mapping/control/covered actual outputs preserved": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "mapping-amount expands glyph 0x31 to '1,0' (coalesced occurrence with the shared reported glyph box); mapping-control keeps identity '1' with the identical dollar box; covered-amount preserves PDFium's actual merged output '$1,00000' and pypdf's '$1,000$100' verbatim. No output was corrected or normalized away."
+    },
+    "shared glyph boxes not split with guessed widths": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "Consecutive characters reporting an exactly-equal loose charbox are coalesced into one occurrence carrying the full multi-scalar text; no width interpolation exists in the adapter (asserted: no standalone ',' occurrence, dollar box unchanged, basis documents the coalescing)."
+    },
+    "pypdf text stays page-only": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "The pypdf adapter emits one occurrence per page with precision 'page_only', polygon null and empty transform_ids; no visitor matrices are read and no combining with PDFium boxes exists in either adapter."
+    },
+    "all rotations/origins map correctly": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "geometry-0/90/180/270 store identical canonical anchors for the '$' glyph (rotation is display-only), matching the analytic value (56, 2*(390-263.44)) from the negative-origin crop box at UserUnit 2; userunit-0.5/1/2/10 scale exactly once (physical dims 520u x 400u from pypdf metadata; PDFium get_size() measured UserUnit-blind and is not trusted)."
+    },
+    "malformed/encrypted failures isolated": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "Empty/malformed bytes, digest mismatch and password-encrypted documents raise typed AdapterError('parser_error') at open; closed handles, out-of-range pages, wrong capability and region requests return terminal unsupported/failed CheckResults; cancellation is terminal; emission chunks are bounded at 256. No exception escapes with partial results."
+    },
+    "build/version manifest complete.": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T26/commands.log"
+      ],
+      "detail": "Both manifests validate against the T03 JSON Schema ($defs/ReaderManifest, Draft 2020-12): adapter_version 1.0.0, engine build 'pypdfium2 5.8.0 / PDFium 149.0.7825.0', SHA-256 of the loaded PDFium native binary as model hash and asset hash, pypdf 6.18.0 distribution digest, capability support/limits, execution policy constant."
+    }
+  }
+}

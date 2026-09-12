@@ -1,0 +1,179 @@
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { test, expect } from "@playwright/test";
+
+/**
+ * TEST-06: Visual foundation & DocumentStage tests.
+ * Requirements:
+ * - 1440/1024/768/390/320 widths have no page overflow
+ * - Page and disagreement dominate
+ * - Contrast checks meet stated targets
+ * - Reduced motion disables flips
+ * - Active focus outline styling adheres to 3px focus token
+ */
+
+const PREVIEW_PATH = "/src/components/DocumentStage/preview.html";
+
+const VIEWPORTS = [
+  { width: 1440, height: 900, name: "desktop-1440" },
+  { width: 1024, height: 768, name: "intermediate-1024" },
+  { width: 768, height: 1024, name: "intermediate-768" },
+  { width: 390, height: 844, name: "mobile-390" },
+  { width: 320, height: 568, name: "mobile-320" },
+];
+
+const WEB_ROOT = path.resolve(process.cwd(), "apps/web");
+
+let viteServer: any;
+let baseUrl: string;
+
+test.beforeAll(async () => {
+  const viteModulePath = path.resolve(WEB_ROOT, "node_modules/vite/dist/node/index.js");
+  const { createServer } = await import(pathToFileURL(viteModulePath).href);
+  viteServer = await createServer({
+    root: WEB_ROOT,
+    server: {
+      port: 0,
+      strictPort: false,
+    },
+    logLevel: "silent",
+  });
+  await viteServer.listen();
+  baseUrl = viteServer.resolvedUrls.local[0].replace(/\/$/, "");
+});
+
+test.afterAll(async () => {
+  if (viteServer) {
+    await viteServer.close();
+  }
+});
+
+test.describe("T06: Visual Foundations & Responsive Layout", () => {
+  for (const vp of VIEWPORTS) {
+    test(`width ${vp.width}px (${vp.name}) has no page horizontal overflow`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+
+      await page.waitForSelector('[role="region"][aria-label="Document examination stage"]');
+
+      const overflow = await page.evaluate(() => {
+        const doc = document.documentElement;
+        const body = document.body;
+        const scrollWidth = Math.max(doc.scrollWidth, body.scrollWidth);
+        const clientWidth = doc.clientWidth;
+        return {
+          hasOverflow: scrollWidth > clientWidth,
+          scrollWidth,
+          clientWidth,
+          diff: scrollWidth - clientWidth,
+        };
+      });
+
+      expect(overflow.hasOverflow).toBe(false);
+      expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
+    });
+  }
+
+  test("page and disagreement dominate the visual composition", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+
+    const stage = page.locator('[role="region"][aria-label="Document examination stage"]');
+    await expect(stage).toBeVisible();
+
+    const box = await stage.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      expect(box.width).toBeGreaterThan(600);
+      expect(box.height).toBeGreaterThan(400);
+    }
+
+    const finding = page.locator('#finding-btn');
+    await expect(finding).toBeVisible();
+    const findingBox = await finding.boundingBox();
+    expect(findingBox).not.toBeNull();
+    if (findingBox) {
+      expect(findingBox.height).toBeGreaterThanOrEqual(76);
+    }
+  });
+
+  test("contrast checks meet stated WCAG targets on computed DOM styles", async ({ page }) => {
+    await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+    await page.waitForSelector('[role="region"][aria-label="Document examination stage"]');
+
+    function rgbStringToLuminance(rgbStr: string): number {
+      const match = rgbStr.match(/\d+/g);
+      if (!match) return 0;
+      const [r, g, b] = match.map((v) => parseInt(v, 10) / 255);
+      const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    }
+
+    function computeContrast(rgb1: string, rgb2: string): number {
+      const l1 = rgbStringToLuminance(rgb1);
+      const l2 = rgbStringToLuminance(rgb2);
+      const bright = Math.max(l1, l2);
+      const dark = Math.min(l1, l2);
+      return (bright + 0.05) / (dark + 0.05);
+    }
+
+    const contrastValues = await page.evaluate(() => {
+      const body = document.body;
+      const paper = document.querySelector("#paper-view") || body;
+      const bodyStyle = getComputedStyle(body);
+      const paperStyle = getComputedStyle(paper);
+      const kicker = document.querySelector("[class*='paperKicker']") || document.querySelector(".paperKicker");
+      const kickerStyle = kicker ? getComputedStyle(kicker) : bodyStyle;
+
+      return {
+        bodyBg: bodyStyle.backgroundColor,
+        bodyColor: bodyStyle.color,
+        paperBg: paperStyle.backgroundColor,
+        paperColor: paperStyle.color,
+        kickerColor: kickerStyle.color,
+      };
+    });
+
+    const inkOnPaper = computeContrast(contrastValues.paperColor, contrastValues.paperBg);
+    expect(inkOnPaper).toBeGreaterThanOrEqual(10.0);
+
+    const inkOnCanvas = computeContrast(contrastValues.bodyColor, contrastValues.bodyBg);
+    expect(inkOnCanvas).toBeGreaterThanOrEqual(10.0);
+  });
+
+  test("reduced motion disables flips, transitions and animations", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`${baseUrl}${PREVIEW_PATH}`);
+    await page.waitForSelector('[role="region"][aria-label="Document examination stage"]');
+
+    const motionValues = await page.evaluate(() => {
+      const rootStyle = getComputedStyle(document.documentElement);
+      return {
+        motionState: rootStyle.getPropertyValue("--motion-state").trim(),
+        motionPanel: rootStyle.getPropertyValue("--motion-panel").trim(),
+      };
+    });
+
+    expect(["0ms", "0s"]).toContain(motionValues.motionState);
+    expect(["0ms", "0s"]).toContain(motionValues.motionPanel);
+  });
+
+  test("active focus outline styling adheres to 3px focus token", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto(`${baseUrl}${PREVIEW_PATH}?focus=tab`);
+
+    const focusedTab = page.locator("#tab-page");
+    await expect(focusedTab).toBeFocused();
+
+    const outline = await focusedTab.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        outlineStyle: style.outlineStyle,
+        outlineWidth: style.outlineWidth,
+      };
+    });
+
+    expect(outline.outlineStyle).toBe("solid");
+    expect(outline.outlineWidth).toBe("3px");
+  });
+});

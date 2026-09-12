@@ -1,0 +1,129 @@
+/* AppHeader styles. Consumes central semantic design tokens from tokens.css.
+   Ownership: T07. */
+
+.header {
+  height: var(--layout-header);
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 100;
+  width: 100%;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  gap: var(--space-4);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-ink);
+}
+
+.brand:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: var(--space-5);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.5px;
+}
+
+.brandDescriptor {
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.navLink {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  color: var(--color-muted);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  min-height: var(--control-min-height);
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--motion-state), background var(--motion-state);
+}
+
+.navLink:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-muted);
+}
+
+.navLink:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.mobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-min-height);
+  height: var(--control-min-height);
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  cursor: pointer;
+  font-size: var(--space-5);
+}
+
+.mobileMenuBtn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.mobileDrawer {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-line);
+  box-shadow: var(--shadow-stage);
+  padding: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobileDrawerOpen {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .desktopNav {
+    display: none;
+  }
+
+  .mobileMenuBtn {
+    display: inline-flex;
+  }
+}

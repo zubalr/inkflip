@@ -1,0 +1,67 @@
+/* Notice styles. Consumes central semantic design tokens from tokens.css.
+   Ownership: T07. */
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+  font-family: var(--font-ui);
+  line-height: var(--line-body);
+}
+
+.notice:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.error {
+  border-left: 4px solid var(--color-rust);
+  background: var(--color-paper);
+}
+
+.warning {
+  border-left: 4px solid var(--color-warning-border);
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+}
+
+.info {
+  border-left: 4px solid var(--color-teal);
+  background: var(--color-surface-subtle);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  font-weight: 600;
+  font-size: var(--text-body);
+  color: var(--color-ink);
+}
+
+.description {
+  font-size: var(--text-body);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.disclaimer {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin: var(--space-1) 0 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
