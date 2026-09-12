@@ -11,8 +11,16 @@
     "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 = original wave-0 implementation; 12bc8acca01aa2faa3948d3c60df43eefcbf5c57 = wave-1 review fixes; 5ba110b = wave-2 review fixes (green-verified by Erdos as 1e7c8db); 2ea6233 = current source revision after wave-3 review fixes (2026-09-12, Linux)"
   },
   "contract_version": "1.0.0",
-  "fixture_ids": ["F01", "F03", "F14", "F15", "F20"],
-  "test_ids": ["TEST-27"],
+  "fixture_ids": [
+    "F01",
+    "F03",
+    "F14",
+    "F15",
+    "F20"
+  ],
+  "test_ids": [
+    "TEST-27"
+  ],
   "criteria": [
     {
       "criterion": "No URL or runtime model fetch",
@@ -62,12 +70,20 @@
     {
       "segment": "uv run --project native python -m pytest native/tests/ocr -q",
       "exit": 0,
-      "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}
+      "counts": {
+        "collected": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      }
     },
     {
       "segment": "uv run --project native python -m pytest native/tests -q",
       "exit": 0,
-      "counts": {"passed": 73, "subtests_passed": 126}
+      "counts": {
+        "passed": 73,
+        "subtests_passed": 126
+      }
     },
     {
       "segment": "bun run test:native",
@@ -126,23 +142,38 @@
       {
         "segment": "uv run --project native python -m pytest native/tests/ocr -q",
         "exit": 0,
-        "counts": {"passed": 20, "failed": 0}
+        "counts": {
+          "passed": 20,
+          "failed": 0
+        }
       },
       {
         "segment": "TESSDATA_PREFIX=/usr/share/tessdata uv run --project native python -m pytest native/tests/ocr -q",
         "exit": 0,
-        "counts": {"passed": 20, "failed": 0}
+        "counts": {
+          "passed": 20,
+          "failed": 0
+        }
       },
       {
         "segment": "uv run --project native python -m pytest native/tests -q",
         "exit": 1,
-        "counts": {"failed": 5, "passed": 72, "subtests_passed": 122},
+        "counts": {
+          "failed": 5,
+          "passed": 72,
+          "subtests_passed": 122
+        },
         "detail": "Exactly the 5 known T26 PDFium geometry failures on Linux amd64 (test_rotations_store_identical_canonical_anchors + 4 UserUnit subtests of test_userunit_scales_exactly_once); captured verbatim in artifacts/tasks/T27/native-tests-linux-baseline.log. T26-owned file, out of T27 scope; no test weakened or changed."
       },
       {
         "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
         "exit": 0,
-        "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0},
+        "counts": {
+          "collected": 20,
+          "passed": 20,
+          "failed": 0,
+          "skipped": 0
+        },
         "detail": "Fresh Linux merged-candidate report written to artifacts/tasks/T27/run.json."
       },
       {
@@ -178,12 +209,50 @@
       "merged_main": "cd79351 (f8dc228 Merge reviewed T26 portable font geometry assertions)",
       "merge_commit": "45821e6347a888c52e05a5ef7d5a79a40d79851d",
       "commands": [
-        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 73, "subtests_passed": 126, "failed": 0}, "detail": "The 5 former T26 Linux geometry failures are RESOLVED by the approved test-only font-oracle fix; zero failures remain in the full native suite."},
-        {"segment": "bun run test:native", "exit": 0, "detail": "73 passed; exit 0 on Linux amd64 for the first time on this branch."},
-        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20, "failed": 0}},
-        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 20, "passed": 20, "failed": 0, "skipped": 0}, "detail": "Fresh report regenerated on the post-fix merged candidate."},
-        {"segment": "bun run verify", "exit": 1, "detail": "Unchanged environment finding: the only failures are the 17 relay-guard tests (6+11, all tests/coordination/test_homebase_relay.py) caused by running the suite inside a linked task worktree; bootstrap 49/49 and native-bootstrap 2/2 pass; the 'skipped=1' text in the log is the intentional inner subprocess of the PASSING integrity test test_all_skipped_gate_scenarios_fail, not a skipped required case."},
-        {"segment": "psm6 spot-check rerun on the post-fix tree (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "detail": "Identical result: PSM 3, 6 and 11 all read the same 16 words including '$100'."}
+        {
+          "segment": "uv run --project native python -m pytest native/tests -q",
+          "exit": 0,
+          "counts": {
+            "passed": 73,
+            "subtests_passed": 126,
+            "failed": 0
+          },
+          "detail": "The 5 former T26 Linux geometry failures are RESOLVED by the approved test-only font-oracle fix; zero failures remain in the full native suite."
+        },
+        {
+          "segment": "bun run test:native",
+          "exit": 0,
+          "detail": "73 passed; exit 0 on Linux amd64 for the first time on this branch."
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests/ocr -q",
+          "exit": 0,
+          "counts": {
+            "passed": 20,
+            "failed": 0
+          }
+        },
+        {
+          "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
+          "exit": 0,
+          "counts": {
+            "collected": 20,
+            "passed": 20,
+            "failed": 0,
+            "skipped": 0
+          },
+          "detail": "Fresh report regenerated on the post-fix merged candidate."
+        },
+        {
+          "segment": "bun run verify",
+          "exit": 1,
+          "detail": "Unchanged environment finding: the only failures are the 17 relay-guard tests (6+11, all tests/coordination/test_homebase_relay.py) caused by running the suite inside a linked task worktree; bootstrap 49/49 and native-bootstrap 2/2 pass; the 'skipped=1' text in the log is the intentional inner subprocess of the PASSING integrity test test_all_skipped_gate_scenarios_fail, not a skipped required case."
+        },
+        {
+          "segment": "psm6 spot-check rerun on the post-fix tree (artifacts/tasks/T27/psm6-spotcheck.log)",
+          "exit": 0,
+          "detail": "Identical result: PSM 3, 6 and 11 all read the same 16 words including '$100'."
+        }
       ],
       "note": "The original pre-fix failed-run baseline remains verbatim in artifacts/tasks/T27/native-tests-linux-baseline.log (committed at a6f6b1d); it documents the Linux platform drift that the approved T26 correction resolves. No T27 source, schema or fixture changed in this round."
     },
@@ -208,13 +277,57 @@
         "F10_scale_only_transform_model": "RECORDED as the stated limitation and Astra contract question: only scale-only named renders (raster_scale_px_per_pt) are supported; a rotated named render cannot be represented and is not claimed."
       },
       "executed_commands_linux": [
-        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 36, "failed": 0}, "detail": "20 original + 16 new wave-1 regression tests."},
-        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126, "failed": 0}},
-        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 89}},
-        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "detail": "Report bound to evaluated_commit 12bc8ac; the harness first refused an uncommitted-tree run ('blocked: commit implementation changes before recording acceptance evidence') and passed only after the source commit."},
-        {"segment": "bun run verify", "exit": 1, "detail": "Only the known 17 relay-guard linked-worktree environment failures (6+11, all tests/coordination/test_homebase_relay.py); bootstrap 49/49 and native-bootstrap 2/2 pass."},
-        {"segment": "psm6 spot-check rerun on the revised candidate (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "detail": "Identical: PSM 3, 6 and 11 all read the identical 16 words including '$100'."},
-        {"segment": "process hygiene after timeout/cancel runs", "exit": 0, "detail": "0 stray tesseract processes; 0 leftover inkflip-ocr-* directories."}
+        {
+          "segment": "uv run --project native python -m pytest native/tests/ocr -q",
+          "exit": 0,
+          "counts": {
+            "passed": 36,
+            "failed": 0
+          },
+          "detail": "20 original + 16 new wave-1 regression tests."
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests -q",
+          "exit": 0,
+          "counts": {
+            "passed": 89,
+            "subtests_passed": 126,
+            "failed": 0
+          }
+        },
+        {
+          "segment": "bun run test:native",
+          "exit": 0,
+          "counts": {
+            "passed": 89
+          }
+        },
+        {
+          "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
+          "exit": 0,
+          "counts": {
+            "collected": 36,
+            "passed": 36,
+            "failed": 0,
+            "skipped": 0
+          },
+          "detail": "Report bound to evaluated_commit 12bc8ac; the harness first refused an uncommitted-tree run ('blocked: commit implementation changes before recording acceptance evidence') and passed only after the source commit."
+        },
+        {
+          "segment": "bun run verify",
+          "exit": 1,
+          "detail": "Only the known 17 relay-guard linked-worktree environment failures (6+11, all tests/coordination/test_homebase_relay.py); bootstrap 49/49 and native-bootstrap 2/2 pass."
+        },
+        {
+          "segment": "psm6 spot-check rerun on the revised candidate (artifacts/tasks/T27/psm6-spotcheck.log)",
+          "exit": 0,
+          "detail": "Identical: PSM 3, 6 and 11 all read the identical 16 words including '$100'."
+        },
+        {
+          "segment": "process hygiene after timeout/cancel runs",
+          "exit": 0,
+          "detail": "0 stray tesseract processes; 0 leftover inkflip-ocr-* directories."
+        }
       ],
       "model_asset_divergence": "Review checklist item 10: the local Linux eng.traineddata served to the engine hashes to sha256 daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047, which differs from the planning/config/model-assets.json pinned 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2 (macOS reference asset). The adapter hashes and passes the exact local file (I13-honest); reconciling pinned assets per platform install belongs to T46 parity.",
       "remaining_limits": "Unchanged from the prior rounds: printed-English OCR only; child-only timeout kill and in-memory TSV capture (T29 supervision); scale-only transform model (F10 question held by Astra); DEFAULT_PSM=3 kept pending Astra's PSM contract decision (Linux spot-check diverges from the macOS rationale)."
@@ -225,10 +338,38 @@
       "merged_main": "500abfc (includes the independently approved shared linked-worktree verify fix pdf-27v candidate 1aec931)",
       "merge_commit": "442f3cd2a67b33f5f2b58a12431a1c35c4121507",
       "executed_commands_linux": [
-        {"segment": "bun run verify", "exit": 0, "detail": "Linux linked task worktree: bootstrap 49/49 OK, native-bootstrap 2/2 OK, coordination 64/64 OK - 115 tests, zero failures, zero skipped required cases. The prior 17 relay-guard failures are resolved by the approved shared fix; the worker did not touch the reserved harness."},
-        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 89}},
-        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126, "failed": 0}},
-        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "detail": "Bound to evaluated_commit 442f3cd on a clean tree."}
+        {
+          "segment": "bun run verify",
+          "exit": 0,
+          "detail": "Linux linked task worktree: bootstrap 49/49 OK, native-bootstrap 2/2 OK, coordination 64/64 OK - 115 tests, zero failures, zero skipped required cases. The prior 17 relay-guard failures are resolved by the approved shared fix; the worker did not touch the reserved harness."
+        },
+        {
+          "segment": "bun run test:native",
+          "exit": 0,
+          "counts": {
+            "passed": 89
+          }
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests -q",
+          "exit": 0,
+          "counts": {
+            "passed": 89,
+            "subtests_passed": 126,
+            "failed": 0
+          }
+        },
+        {
+          "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
+          "exit": 0,
+          "counts": {
+            "collected": 36,
+            "passed": 36,
+            "failed": 0,
+            "skipped": 0
+          },
+          "detail": "Bound to evaluated_commit 442f3cd on a clean tree."
+        }
       ],
       "resource_handshake_acknowledgement": "Worker acknowledges (2026-09-12): no heavy OCR/corpus/performance run is in flight or queued in this checkout; all registered verification for this candidate is complete; no NEW heavy OCR/corpus suites will be started until Astra returns the reservation; light source/stub regression work may continue per grant. The reservation state itself is coordinator-owned Beads state and was not modified by the worker. Ready for Astra's T10 browser-OCR verification turn.",
       "psm_decision": "DEFAULT_PSM=3 remains, per Astra: Linux PSM-6 success is recorded evidence (psm6-spotcheck.log), not a requirement to change the default; platform-specific observations are explicit in the module comment and manifest."
@@ -246,9 +387,29 @@
         "W2_5_fallback_fixture": "FIXED: binary at root/bin/tesseract, existing decoy root/share/tessdata lacking the requested language, target root/bin/tessdata holding it, TESSDATA_PREFIX removed inside the test; the green test now actually exercises first-candidate-does-not-shadow-second."
       },
       "executed_commands_linux": [
-        {"segment": "uv run --project native python -m pytest native/tests/ocr --collect-only -q", "exit": 0, "counts": {"collected": 52}, "detail": "Suite collects cleanly on the committed revision (36 prior + 16 wave-2 tests)."},
-        {"segment": "uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine selection>' (12 real-engine tests deselected)", "exit": 0, "counts": {"passed": 40, "subtests_passed": 13, "failed": 0}, "detail": "Stub/tiny-render regression evidence only, per the heavy-OCR hold."},
-        {"segment": "bun run verify", "exit": 0, "detail": "115 coordination/bootstrap tests, zero failures, no OCR involved."}
+        {
+          "segment": "uv run --project native python -m pytest native/tests/ocr --collect-only -q",
+          "exit": 0,
+          "counts": {
+            "collected": 52
+          },
+          "detail": "Suite collects cleanly on the committed revision (36 prior + 16 wave-2 tests)."
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine selection>' (12 real-engine tests deselected)",
+          "exit": 0,
+          "counts": {
+            "passed": 40,
+            "subtests_passed": 13,
+            "failed": 0
+          },
+          "detail": "Stub/tiny-render regression evidence only, per the heavy-OCR hold."
+        },
+        {
+          "segment": "bun run verify",
+          "exit": 0,
+          "detail": "115 coordination/bootstrap tests, zero failures, no OCR involved."
+        }
       ],
       "honest_gaps": "Final OCR verification (full 52-test suite incl. the 12 real-engine tests, full native suite, acceptance harness) bound to the ULTIMATE candidate remains PENDING until Astra returns the heavy OCR slot after T10 yields. T27 remains unaccepted."
     },
@@ -258,17 +419,133 @@
       "final_candidate": "da1efb6125e4a4f45c75a09ce889bbe06b8736e9",
       "integration": "work/zcode/t27 fast-forwarded e0e7d4c -> f7d7e8f (ancestor check passed: same approved source 2ea6233 + independent review artifacts), then merged published main 008ed36 (descendant of 1f0d900); clean merge, ancestry preserved; source 2ea6233 byte-identical",
       "executed_commands_linux": [
-        {"segment": "bun install --frozen-lockfile && uv sync --project native --frozen", "exit": 0},
-        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 58, "subtests_passed": 20, "failed": 0}, "detail": "FULL suite including all 12 real-engine tests"},
-        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 111, "subtests_passed": 146, "failed": 0}},
-        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 111}},
-        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 58, "passed": 58, "failed": 0, "skipped": 0}, "detail": "run.json binds evaluated_commit da1efb6 on a clean tree"},
-        {"segment": "bun run verify", "exit": 0, "detail": "zero failures/skips across bootstrap, native-bootstrap and coordination suites"},
-        {"segment": "process hygiene", "exit": 0, "detail": "0 stray tesseract children, 0 leftover inkflip-ocr-* dirs"}
+        {
+          "segment": "bun install --frozen-lockfile && uv sync --project native --frozen",
+          "exit": 0
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests/ocr -q",
+          "exit": 0,
+          "counts": {
+            "passed": 58,
+            "subtests_passed": 20,
+            "failed": 0
+          },
+          "detail": "FULL suite including all 12 real-engine tests"
+        },
+        {
+          "segment": "uv run --project native python -m pytest native/tests -q",
+          "exit": 0,
+          "counts": {
+            "passed": 111,
+            "subtests_passed": 146,
+            "failed": 0
+          }
+        },
+        {
+          "segment": "bun run test:native",
+          "exit": 0,
+          "counts": {
+            "passed": 111
+          }
+        },
+        {
+          "segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json",
+          "exit": 0,
+          "counts": {
+            "collected": 58,
+            "passed": 58,
+            "failed": 0,
+            "skipped": 0
+          },
+          "detail": "run.json binds evaluated_commit da1efb6 on a clean tree"
+        },
+        {
+          "segment": "bun run verify",
+          "exit": 0,
+          "detail": "zero failures/skips across bootstrap, native-bootstrap and coordination suites"
+        },
+        {
+          "segment": "process hygiene",
+          "exit": 0,
+          "detail": "0 stray tesseract children, 0 leftover inkflip-ocr-* dirs"
+        }
       ],
       "review_record": "artifacts/tasks/T27/review.md is a verbatim provenance copy of the actual wave-4 independent review verdict (Erdos approval of e0e7d4c/source 2ea6233); no approval invented",
       "resource_release": "EXPLICIT RELEASE (2026-09-12): no heavy OCR/corpus/performance run in flight or queued after the final merged checks; all requested commands exited; reservation is coordinator-owned Beads state, untouched by the worker. Parent will collect, accept, and refresh predecessor receipts."
     }
   },
-  "ready_for_review": true
+  "ready_for_review": true,
+  "acceptance_criteria_evidence": {
+    "No URL or runtime model fetch": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T27/run.json",
+        "artifacts/tasks/T27/commands.log",
+        "artifacts/tasks/T27/criterion-evidence-current.md",
+        "artifacts/tasks/T27/wave3-full-review.md",
+        "artifacts/tasks/T27/wave4/independent-review.md"
+      ],
+      "detail": "Current proof is the registered 58-case Linux run on da1efb6 and the independent review chain; see criterion-evidence-current.md. Earlier root criteria/commands/environment remain historical."
+    },
+    "missing model/binary/unreadable page differ": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T27/run.json",
+        "artifacts/tasks/T27/commands.log",
+        "artifacts/tasks/T27/criterion-evidence-current.md",
+        "artifacts/tasks/T27/wave3-full-review.md",
+        "artifacts/tasks/T27/wave4/independent-review.md"
+      ],
+      "detail": "Current proof is the registered 58-case Linux run on da1efb6 and the independent review chain; see criterion-evidence-current.md. Earlier root criteria/commands/environment remain historical."
+    },
+    "malicious filename cannot become an option": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T27/run.json",
+        "artifacts/tasks/T27/commands.log",
+        "artifacts/tasks/T27/criterion-evidence-current.md",
+        "artifacts/tasks/T27/wave3-full-review.md",
+        "artifacts/tasks/T27/wave4/independent-review.md"
+      ],
+      "detail": "Current proof is the registered 58-case Linux run on da1efb6 and the independent review chain; see criterion-evidence-current.md. Earlier root criteria/commands/environment remain historical."
+    },
+    "crop padding/resize inverses correct": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T27/run.json",
+        "artifacts/tasks/T27/commands.log",
+        "artifacts/tasks/T27/criterion-evidence-current.md",
+        "artifacts/tasks/T27/wave3-full-review.md",
+        "artifacts/tasks/T27/wave4/independent-review.md"
+      ],
+      "detail": "Current proof is the registered 58-case Linux run on da1efb6 and the independent review chain; see criterion-evidence-current.md. Earlier root criteria/commands/environment remain historical."
+    },
+    "native OCR retains raw punctuation and all occurrences.": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/tasks/T27/run.json",
+        "artifacts/tasks/T27/commands.log",
+        "artifacts/tasks/T27/criterion-evidence-current.md",
+        "artifacts/tasks/T27/wave3-full-review.md",
+        "artifacts/tasks/T27/wave4/independent-review.md"
+      ],
+      "detail": "Current proof is the registered 58-case Linux run on da1efb6 and the independent review chain; see criterion-evidence-current.md. Earlier root criteria/commands/environment remain historical."
+    }
+  },
+  "current_verification": {
+    "evaluated_commit": "da1efb6125e4a4f45c75a09ce889bbe06b8736e9",
+    "platform": "Homebase Linux",
+    "ocr_tests": 58,
+    "ocr_subtests": 20,
+    "native_tests": 111,
+    "native_subtests": 146,
+    "source_unchanged_from_approved": "e0e7d4c513832bd7fb23aac4f6f0822f2f1a6214",
+    "historical_root_sections": [
+      "criteria",
+      "commands",
+      "environment"
+    ],
+    "evidence": "artifacts/tasks/T27/criterion-evidence-current.md"
+  }
 }
