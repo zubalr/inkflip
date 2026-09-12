@@ -15,6 +15,7 @@ import io
 import json
 import sys
 import unittest
+from contextlib import closing
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -260,50 +261,23 @@ class TestPdfiumGeometry(unittest.TestCase):
                     self.assertAlmostEqual(point[1], reference[1], delta=1e-2 * u)
 
     def test_missing_mapping_output_passes_through_unchanged(self):
-        """F10 mechanism: with no ToUnicode CMap the engine's raw output is
+        """F10 committed variants: the engine's actual raw output is
         passed through verbatim; the adapter never substitutes a fallback."""
-        gen = load_generator()
-        body = b"BT /F0 16 Tf 48 352 Td (SYNTHETIC EXAMPLE) Tj ET\n"
-        objs = [
-            b"<< /Type /Catalog /Pages 2 0 R >>",
-            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 520 400] "
-            b"/Resources << /Font << /F0 4 0 R >> >> /Contents 5 0 R >>",
-            b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-            gen.stream(body),
-        ]
-        data = gen.pdf(objs)
-        _, occurrences = run_pdfium(data)
         from pypdfium2 import PdfDocument
 
-        doc = PdfDocument(data)
-        textpage = doc[0].get_textpage()
-        engine_text = textpage.get_text_range(0, textpage.count_chars())
-        textpage.close()
-        doc.close()
-        self.assertTrue(occurrences)
-        self.assertEqual(joined_text(occurrences), engine_text.replace("\r", "").replace("\n", ""))
+        for variant in ("control", "absent", "malformed"):
+            with self.subTest(variant=variant):
+                data = fixture_bytes(f"development/mapping-missing-{variant}.pdf")
+                _, occurrences = run_pdfium(data)
+                with PdfDocument(data) as doc:
+                    with closing(doc[0]) as page:
+                        with closing(page.get_textpage()) as textpage:
+                            engine_text = textpage.get_text_range(0, textpage.count_chars())
+                self.assertTrue(occurrences)
+                self.assertEqual(joined_text(occurrences), engine_text.replace("\r", "").replace("\n", ""))
 
     def test_duplicate_occurrences_keep_distinct_boxes_and_ordinals(self):
-        gen = load_generator()
-        body = (
-            b"BT /F0 16 Tf 48 352 Td (SYNTHETIC EXAMPLE) Tj ET\n"
-            + b"".join(
-                f"BT /F0 12 Tf 48 {300 - step * 60} Td ($100) Tj ET\n".encode()
-                for step in range(4)
-            )
-        )
-        # A clean minimal PDF built with the generator's deterministic writer;
-        # same glyph, four distinct painted positions (F11 mechanism).
-        objs = [
-            b"<< /Type /Catalog /Pages 2 0 R >>",
-            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 520 400] "
-            b"/Resources << /Font << /F0 4 0 R >> >> /Contents 5 0 R >>",
-            b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-            gen.stream(body),
-        ]
-        data = gen.pdf(objs)
+        data = fixture_bytes("development/duplicates-four.pdf")
         _, occurrences = run_pdfium(data)
         dollars = [o for o in occurrences if o["raw_text"] == "$"]
         self.assertEqual(len(dollars), 4)

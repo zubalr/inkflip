@@ -1,0 +1,20 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/unreadable-control.pdf",
+  "family": "unreadable",
+  "fixture_id": "F17",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F17",
+    "intent": {
+      "raster_text": null,
+      "region": "unreadable deterministic pattern"
+    },
+    "variant": "noise",
+    "version": "g78.1"
+  },
+  "observation": "no plausible missing-value defaults",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}
