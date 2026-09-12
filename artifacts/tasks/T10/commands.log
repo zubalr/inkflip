@@ -127,3 +127,88 @@ exit 1 — non-conforming under oxfmt defaults, but PRE-EXISTING: the
 # tests/readers/tesseract.spec.ts (expect 11/11), python3
 # scripts/task_acceptance.py task T10 [--report run.json],
 # bun run verify, bun run build:web.
+
+# ---------------------------------------------------------------------
+# Session 3 — devin local SWE-2 subagent (coordinator: Astra)
+# Astra's approved arithmetic+render+pixel revision of 32f098e/4282857.
+# Authorization update mid-session: T10 now holds the SOLE heavy OCR
+# reservation (ZCode's T27 c14e4b0 collected, no-more-heavy queued), so
+# the full heavy sequence ran here. Port 5191 is the reservation's
+# browser port; the spec harness binds OS-assigned ports per run.
+# Toolchain: node v26.7.0, bun 1.4.0, playwright 1.57.0.
+# ---------------------------------------------------------------------
+
+$ git fetch origin && git merge origin/main   # coordinator-authorized
+exit 0 — clean merge of main 500abfc, 0 conflicts -> merge a5a270f.
+
+$ node -e '<three-candidate arithmetic survey>'
+exit 0 — lower-edge candidates reproduce every case:
+  4896x6336: r=0.359069 -> 1758x2275 (0.35907 also, 0.359068 -> 1757)
+  9000x120: r=0.910223 -> 8192x109   8000x999: r=0.707375 -> 5659x706
+  50000x100: r=0.16384 -> 8192x16    8000x1000: r=0.707 -> 5656x707
+  440x240@50k: r=0.6875 -> 302x165   8192x4000@903: r=0.00525 -> 43x21
+  (previously 42x20 via below-interval fallback — 43x21 is within caps)
+  49x80@50px:  r=0.1125  -> 5x9 (fractional dest 5.5125x9)
+
+# Implementation (commit 831e0a1): recordedResizeK returns exactly
+# three candidates [m/1e6,(m+1)/1e6,(m-1)/1e6], m=ceil(lo*1e6); caller
+# re-derives floor dims per candidate with positive/cap checks, no
+# zero-clamping; reader.ts draws the source crop to the FRACTIONAL
+# destination crop*resizeK on the integer canvas in both drawImage
+# branches, measures the actual right/bottom remainder and reports
+# ocr_resize_clipped + CropPlan.resizeClipPx; imageSmoothingEnabled is
+# an explicit test seam (default true).
+
+$ bun x --no-install tsc -b tsconfig.json
+exit 0
+
+$ node artifacts/tasks/T10/repro-planCrop.mjs   # post-revision
+exit 0 — 6/6 PASS; matrix[0]===resizeK everywhere.
+
+$ node --test tests/readers/crop-math.mjs
+exit 0 — tests 13, pass 13, fail 0 (12 prior assertions unchanged +
+new fractional-destination clipping test).
+
+$ bun x --no-install playwright test tests/readers/crop-pixels.spec.ts
+exit 0 — 4/4 pass (1.4s; stub engine only, NO tesseract/worker/model):
+  ImageData branch: decoded PNG 5x9, ALL 45 px opaque black (old
+    integer-stretch would sample src x≈44.1 -> red at column 4);
+    resizeK=0.1125, matrix[0]=matrix[3]=0.1125, resizeClipPx=
+    [0.5125,0] (right clip only; 80*0.1125=9 exact); inverse map of
+    output center (4.5,4.5) -> canonical (40,40) inside src px [40,41).
+  CanvasImageSource branch: identical 5x9 all-black decode.
+  No-resize control: k=1, 49x80 out, seam bytes intact (x41 black,
+    x42 red), no ocr_resize_clipped limitation.
+  Crop-offset region [[34,10]-[41,26]] pad 8 -> crop (26,2) 23x32:
+    seam lands at output x=16 (black at 15, red at 16) — nonzero
+    source origin restored, no padding leaked, no clip limitation.
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts   @ 831e0a1+wt
+exit 1 — collected=11 passed=10 failed=1. The crop fix itself held:
+  'bounded raster/edge/pixel' now passed its line-934 floor assertion
+  but hit a LATENT spec bug at line 937 — api.planCropOnly returns a
+  Promise (tryV) that was never awaited (edgePlan.ok === undefined);
+  unreachable before because the test failed earlier at line 934.
+  Harness fix in 567b482 (await both planCropOnly calls).
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts   @ 567b482
+exit 0 — collected=11 passed=11 failed=0 skipped=0 (5.1s). Real
+  Tesseract worker/core/model over same-origin staged assets.
+
+$ python3 scripts/task_acceptance.py task T10 \
+    --report artifacts/tasks/T10/run.json                     @ 567b482
+exit 0 — commands_run=1, failures=[], evidence_errors=[],
+  tests {collected 11, passed 11, failed 0, skipped 0};
+  evaluated_commit=567b48215ada9d8ed868d4345fdeb7f48dedda7c.
+
+$ bun run verify                                              @ 567b482
+exit 0 — group: self-check (16 commands registered) + test:bootstrap
+  (49 tests OK) + test:native-bootstrap (64 tests OK) +
+  check:coordination OK.
+
+$ bun run build:web                                           @ 567b482
+exit 0 — vite build apps/web: 18 modules, dist written (532ms).
+
+# Reservation yielded: no heavy command in flight or queued.
+# Pending: independent review + coordinator acceptance receipt
+# (receipt.json requires reviewer != worker; not produced locally).

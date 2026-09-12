@@ -1,0 +1,46 @@
+{
+  "task": "T10",
+  "beads_id": "pdf-t10",
+  "evaluated_commit": "567b48215ada9d8ed868d4345fdeb7f48dedda7c",
+  "evaluated_at": "2026-09-12T05:05:35.457039+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/readers/tesseract.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/tesseract.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/tesseract.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 11 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/11] tests/readers/tesseract.spec.ts:579:1 \u203a real English crop OCR via staged same-origin assets (PSM 7)\n\u001b[1A\u001b[2Ktests/readers/tesseract.spec.ts:579:1 \u203a real English crop OCR via staged same-origin assets (PSM 7)\nPSM7 crop raw_text: AMOUNT DUE $108, a\n\n\u001b[1A\u001b[2Kengine reported: psm=null oem=null version=5.1.0-288-g2a9c1\n\n\u001b[1A\u001b[2K[2/11] tests/readers/tesseract.spec.ts:706:1 \u203a full-page PSM-6 OCR, reusable worker, deterministic occurrence ids\n\u001b[1A\u001b[2Ktests/readers/tesseract.spec.ts:706:1 \u203a full-page PSM-6 OCR, reusable worker, deterministic occurrence ids\nPSM6 page raw_text: QUARTERLY\u2019 SUMMARY INVOICE 2a26-8417 AMOUNT CUE $168. 6 ISSUED 2426-89-81 PAGE 1 OF 1\n\n\u001b[1A\u001b[2K[3/11] tests/readers/tesseract.spec.ts:787:1 \u203a worker init failure is a terminal failure, never unreadable_pixels\n\u001b[1A\u001b[2K[4/11] tests/readers/tesseract.spec.ts:859:1 \u203a model integrity failure and corrupted cache are rejected\n\u001b[1A\u001b[2K[5/11] tests/readers/tesseract.spec.ts:922:1 \u203a offline-unavailable is a distinct asset state, not an unreadable page\n\u001b[1A\u001b[2K[6/11] tests/readers/tesseract.spec.ts:966:1 \u203a bounded raster/edge/pixel counts enforced and recorded\n\u001b[1A\u001b[2K[7/11] tests/readers/tesseract.spec.ts:1045:1 \u203a run OCR pixel budget bounds later checks honestly\n\u001b[1A\u001b[2K[8/11] tests/readers/tesseract.spec.ts:1109:1 \u203a word boxes map back through the recorded chain; confidence is diagnostic\n\u001b[1A\u001b[2K[9/11] tests/readers/tesseract.spec.ts:1213:1 \u203a cold, memory, and cached model states are distinct; removal is explicit\n\u001b[1A\u001b[2K[10/11] tests/readers/tesseract.spec.ts:1272:1 \u203a one transient retry on a fresh worker; cancel terminates the worker\n\u001b[1A\u001b[2K[11/11] tests/readers/tesseract.spec.ts:1385:1 \u203a check-level transient retry rebuilds the worker once and succeeds\n\u001b[1A\u001b[2K  11 passed (4.6s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/readers/tesseract.spec.ts\n(node:91905) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:91908) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 11,
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t10",
+      "environment": {}
+    }
+  ]
+}
