@@ -222,6 +222,12 @@ export interface OcrCheckOutput {
 }
 
 export interface OcrHandle {
+  /**
+   * Per-reader-unique diagnostic label (contract `[A-Za-z0-9._-]+`).
+   * Admission never keys on this string — every guard binds the handle
+   * OBJECT the reader installed, so a foreign reader's colliding id or
+   * a forged same-shaped object can never drive or close this reader.
+   */
   readonly id: string;
   readonly documentSha256: string;
   readonly generation: number;
@@ -580,10 +586,12 @@ export class TesseractOcrReader {
       );
       this.guard(scope);
       const handle: OcrHandle = {
-        // Handle ids must be unique per open even when two same-generation
-        // opens land in the same clock tick: every `.id` guard below keys on
-        // this string, so mint the monotonic op number alongside the
-        // timestamp. Format stays contract-valid `[A-Za-z0-9._-]+`.
+        // The id stays unique per open of THIS reader even when two
+        // same-generation opens land in one clock tick (the monotonic
+        // op number distinguishes them) — it is a diagnostic label, not
+        // the admission key. Guards bind the handle OBJECT itself, so a
+        // same-id handle minted by another reader or forged by a caller
+        // is refused. Format stays contract-valid `[A-Za-z0-9._-]+`.
         id: `ocrh_${input.generation}_${Math.floor(this.now())}_${scope.op}`,
         documentSha256: input.documentSha256,
         generation: input.generation,
@@ -699,7 +707,9 @@ export class TesseractOcrReader {
     if (this.opSeq !== scope.op) {
       throw new OcrError(OCR_REASON.USER_CANCEL, 'operation superseded');
     }
-    if (scope.handle !== null && this.handle?.id !== scope.handle.id) {
+    // Identity, not the id string: only the handle OBJECT this reader
+    // installed is current — a foreign or forged same-id handle differs.
+    if (scope.handle !== null && this.handle !== scope.handle) {
       throw new OcrError(OCR_REASON.USER_CANCEL, 'handle superseded');
     }
   }
@@ -966,7 +976,7 @@ export class TesseractOcrReader {
     selections: readonly OcrSelection[],
   ): CheckPlan[] {
     requireOcr(
-      this.handle !== null && this.handle.id === handle.id,
+      this.handle !== null && this.handle === handle,
       OCR_REASON.UNSUPPORTED,
       'plan() requires this reader’s open handle',
     );
@@ -1036,7 +1046,7 @@ export class TesseractOcrReader {
     // Admission before scoping: a closed reader or a foreign handle
     // fails fast — it must not supersede a live operation's scope.
     requireOcr(
-      !this.closed && this.handle?.id === handle.id,
+      !this.closed && this.handle === handle,
       OCR_REASON.UNSUPPORTED,
       'extract() requires this reader’s open handle',
     );
@@ -1188,7 +1198,7 @@ export class TesseractOcrReader {
     attempt: number,
   ): Promise<OcrCheckOutput> {
     requireOcr(
-      this.handle !== null && this.handle.id === handle.id,
+      this.handle !== null && this.handle === handle,
       OCR_REASON.UNSUPPORTED,
       'extract() requires this reader’s current handle',
     );
@@ -1422,7 +1432,10 @@ export class TesseractOcrReader {
 
   /** `close()` — terminate the worker and release the handle. */
   async close(handle?: OcrHandle): Promise<void> {
-    if (handle !== undefined && this.handle?.id !== handle.id) {
+    // Identity binds the OBJECT this reader installed: a stale handle,
+    // a foreign reader's colliding-id handle, or a forged same-shaped
+    // copy is ignored — it can never retire this reader's worker.
+    if (handle !== undefined && this.handle !== handle) {
       return; // a stale handle cannot close a newer generation's worker
     }
     // Invalidate admission before cleanup, then WAKE every pending
