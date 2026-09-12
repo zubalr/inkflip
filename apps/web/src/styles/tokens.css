@@ -13,6 +13,19 @@
   --color-focus: #005fcc;
   --color-mark: #f0ca69;
 
+  /* Semantic surfaces and component tokens */
+  --color-paper-pure: #ffffff;
+  --color-surface-muted: #edf0e8;
+  --color-surface-subtle: #f8f9f4;
+  --color-badge-text: #3e5750;
+  --color-badge-bg: #edf2e8;
+  --color-badge-border: #dce6d9;
+  --color-warning-surface: #fcf5df;
+  --color-warning-border: #e6cf8f;
+  --color-warning-surface-hover: #faefce;
+  --color-warning-border-hover: #d8be74;
+  --color-warning-text: #746444;
+
   /* Spacing scale (px). */
   --space-1: 4px;
   --space-2: 8px;
@@ -24,10 +37,12 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  /* Corner radii. */
+  /* Corner radii and shadows. */
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-stage: 20px;
+  --shadow-stage: 0 12px 32px rgba(23, 42, 47, 0.06);
+  --shadow-paper: 0 5px 10px rgba(30, 56, 44, 0.04);
 
   /* Type. */
   --font-display: Georgia, "Times New Roman", serif;
@@ -52,3 +67,11 @@
   /* Breakpoints are consumed in media queries (custom properties do not
      apply there): 1100px desktop-min, 768px intermediate-min, 320px floor. */
 }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-state: 0ms;
+    --motion-panel: 0ms;
+  }
+}
+
