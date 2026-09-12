@@ -162,11 +162,13 @@ test('region+padded crop under a tight pixel cap', () => {
   assertRecordedResize(p, bounds, 'region 440x240/50k');
 });
 
-test('sub-precision interval: no six-decimal value fits, fallback stays consistent', () => {
+test('sub-precision interval: lower-edge candidate yields 43x21 within cap', () => {
   // crop 8192x4000 with a 903-px cap realizes k≈0.0052495 -> ideal
-  // 43x20; feasible interval [0.005249023,0.00525) holds NO multiple of
-  // 1e-6, so the recorded factor falls back below the interval and the
-  // realized size is re-derived (42x20) — record and output consistent.
+  // 43x20; the feasible interval [0.005249023,0.00525) holds NO multiple
+  // of 1e-6, so no representable factor keeps the ideal size. The
+  // lower-edge candidate 0.00525 (ceil of the interval's lower bound)
+  // floor-derives 43x21 = 903 px — legitimately larger than the ideal
+  // height, exactly at the pixel cap, still floor-exact and recorded.
   const bounds = { maxRasterPixels: 903, maxRasterEdge: 8192 };
   const p = plan(8192, 4000, bounds);
   assertRecordedResize(p, bounds, '8192x4000/903');
@@ -321,6 +323,34 @@ test('floor-equality fuzz over seeded regions on a fixed page', () => {
   }
   assert.equal(checked, 200);
   assert.ok(downscaled > 20, `region fuzz covered ${downscaled} downscales`);
+});
+
+test('fractional-destination clipping is recorded in output px', () => {
+  // 4896x6336 @4M -> k=0.359069, realized 1758x2275; the drawn
+  // destination is 1758.001824x2275.061184 -> clips 0.001824 right and
+  // 0.061184 bottom output px (each in [0,1)).
+  const p = plan(4896, 6336);
+  assert.equal(p.resizeK, 0.359069);
+  const [clipR, clipB] = p.resizeClipPx;
+  assert.ok(Math.abs(clipR - 0.001824) < 1e-9, `right clip ${clipR}`);
+  assert.ok(Math.abs(clipB - 0.061184) < 1e-9, `bottom clip ${clipB}`);
+  assert.ok(clipR >= 0 && clipR < 1 && clipB >= 0 && clipB < 1);
+  assert.ok(p.limitations.join(' ').includes('ocr_resize_clipped'));
+  // Consistency: clip amounts equal frac(crop * resizeK) by definition.
+  assert.equal(p.cropWidthPx * p.resizeK - p.outWidthPx, clipR);
+  assert.equal(p.cropHeightPx * p.resizeK - p.outHeightPx, clipB);
+
+  // Mixed edge: right destination is exactly 8192 (clip 0) while the
+  // bottom clips 0.384 — the limitation fires on the bottom amount.
+  const exact = plan(50000, 100); // k=0.16384: 50000*k=8192 exactly
+  assert.equal(exact.resizeClipPx[0], 0);
+  assert.ok(Math.abs(exact.resizeClipPx[1] - 0.384) < 1e-9);
+  assert.ok(exact.limitations.join(' ').includes('ocr_resize_clipped'));
+
+  // No downscale -> [0,0] and no clipping limitation.
+  const none = plan(1200, 900);
+  assert.deepEqual(none.resizeClipPx, [0, 0]);
+  assert.ok(!none.limitations.join(' ').includes('ocr_resize_clipped'));
 });
 
 test('transform chain shape is preserved', () => {

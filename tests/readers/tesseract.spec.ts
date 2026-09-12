@@ -898,12 +898,13 @@ test('bounded raster/edge/pixel counts enforced and recorded', async ({ page }) 
     if (!checks.ok) return { planError: checks.error };
     const run = await api.extract(readerId, checks.value[0].id);
     // Synthetic oversized-edge raster through planCrop: hard cap applies.
-    const edgePlan = api.planCropOnly(readerId, docIdArg, 0, null, {
+    // (planCropOnly returns a Promise like every tryV seam — await it.)
+    const edgePlan = await api.planCropOnly(readerId, docIdArg, 0, null, {
       widthPx: 9000,
       heightPx: 120,
       rasterId: 'synthetic_edge',
     });
-    const degenerate = api.planCropOnly(readerId, docIdArg, 0, {
+    const degenerate = await api.planCropOnly(readerId, docIdArg, 0, {
       id: 'reg_degenerate',
       polygon: [
         [5, 5],
