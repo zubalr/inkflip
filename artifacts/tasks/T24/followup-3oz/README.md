@@ -14,3 +14,7 @@ The 104-test full suite includes one actual Chromium case: a browser bundle of t
 - [RFC 1951, section 3.2.7](https://www.rfc-editor.org/rfc/rfc1951#section-3.2.7): literal-only blocks may lack distance codes. The generated stream is independently accepted by Node zlib before it reaches the owned decoder.
 
 No external code or new dependency is introduced. Existing source-level complexity outside the changed path is retained; newly introduced production helper functions have complexity at most ten under the stated branch-count measure.
+
+## Source-bound merged verification
+
+Source `656848e` merged published main into candidate `9f60ea01e0c61e00c2e185bed729a307d4bd096f`. That committed candidate passed frozen Bun install without lock drift, strict reports package typecheck, the registered T24 command (104 Node tests including the Chromium case, followed by1000 fixed-seed fuzz cases), and115 verify tests. See `registered-run.json`, `registered-task.log`, `registered-fuzz/`, `merged-install.log`, `merged-typecheck.log`, and `merged-verify.log`. The registered fuzzer output was again preserved here and the older tracked T24 fuzz artifacts restored byte-for-byte. Existing T24 acceptance remains stale until the integrated refresh. Independent reviewer Averroes (`01a09460-9c54-7f40-bf7e-0241d6d8e394`) is reviewing exact9f60 in a separate checkout; no verdict claimed yet.

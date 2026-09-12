@@ -1,0 +1,71 @@
+{"accepted": 172, "crashes": 0, "egress": 0, "rejected": 828, "unexpected_accepts": 0, "unexpected_rejects": 0}
+verdict=pass cases=1000 seed=8090 max_case_ms=60.84 wall_s=3.62 out=/Users/zubair/Code/Projects/pdf project/worktrees/pdf-3oz/artifacts/tasks/T24/fuzz
+{
+  "task": "T24",
+  "beads_id": "pdf-t24",
+  "evaluated_commit": "9f60ea01e0c61e00c2e185bed729a307d4bd096f",
+  "evaluated_at": "2026-09-12T06:48:06.492221+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 104,
+    "passed": 104,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "node --test tests/security/import/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/security/import/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-uk_oun55/results",
+        "--test",
+        "tests/security/import/followup-3oz.test.mjs",
+        "tests/security/import/html-browser.test.mjs",
+        "tests/security/import/html.test.mjs",
+        "tests/security/import/import.test.mjs",
+        "tests/security/import/png.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 104,
+        "passed": 104,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-3oz",
+      "environment": {}
+    },
+    {
+      "segment": "python scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000",
+      "argv": [
+        "python3",
+        "scripts/fuzz_reports.py",
+        "--fixed-seed",
+        "8090",
+        "--cases",
+        "1000"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/fuzz_reports.py",
+        "--fixed-seed",
+        "8090",
+        "--cases",
+        "1000"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-3oz",
+      "environment": {}
+    }
+  ]
+}
