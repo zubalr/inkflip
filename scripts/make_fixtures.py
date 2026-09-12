@@ -27,6 +27,10 @@ Families (planning/quality/fixture-catalog.json), with clean twins:
                        raster-only and displaced-layer siblings.
                        (development)
 
+The g78.1 catalog follow-up adds F04/F05/F06/F10/F11/F17/F18/F19/F21
+PDF controls and F20 JSON process scenarios. The original recipe version and
+all original PDF/expectation bytes remain frozen.
+
 Every written PDF gains a sibling machine-expectation JSON recording
 generator intent, control relation and (for the scan family) exact text-layer
 anchors. fixtures/manifest.json records the generator source hash, recipe,
@@ -64,7 +68,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Minimal deterministic PDF writing (port of planning/probes/make_fixtures.py)
 # ---------------------------------------------------------------------------
 
-def pdf(objects: list[bytes]) -> bytes:
+def pdf(objects: list[bytes], trailer: str = "") -> bytes:
     b = bytearray(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
     offsets = [0]
     for n, obj in enumerate(objects, 1):
@@ -75,7 +79,7 @@ def pdf(objects: list[bytes]) -> bytes:
     for off in offsets[1:]:
         b.extend(f"{off:010d} 00000 n \n".encode())
     b.extend(
-        f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{pos}\n%%EOF\n".encode()
+        f"trailer\n<< /Size {len(offsets)} /Root 1 0 R{trailer} >>\nstartxref\n{pos}\n%%EOF\n".encode()
     )
     return bytes(b)
 
@@ -471,22 +475,208 @@ def expectation_for(entry: dict) -> dict:
     return exp
 
 
+# Catalog follow-up recipes are independent of the frozen original five families.
+# Payloads may be PDF or JSON: F20 is a process/event fixture, not a fake PDF.
+def fixed_page(body: bytes, box: str = "0 0 320 240") -> list[bytes]:
+    return [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        (f"<< /Type /Page /Parent 2 0 R /MediaBox [{box}] "
+         "/Resources << /Font << /F0 4 0 R >> >> /Contents 5 0 R >>").encode(),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+        stream(body),
+    ]
+
+
+def fixed_text(value: str = "$100", matrix: str = "1 0 0 1 48 120") -> bytes:
+    return f"BT /F0 24 Tf {matrix} Tm ({value}) Tj ET\n".encode("ascii")
+
+
+def rc4(key: bytes, data: bytes) -> bytes:
+    """Original bounded R2 fixture cipher; never used for application security."""
+    state = list(range(256))
+    j = 0
+    for i in range(256):
+        j = (j + state[i] + key[i % len(key)]) % 256
+        state[i], state[j] = state[j], state[i]
+    out = bytearray()
+    i = j = 0
+    for value in data:
+        i = (i + 1) % 256
+        j = (j + state[i]) % 256
+        state[i], state[j] = state[j], state[i]
+        out.append(value ^ state[(state[i] + state[j]) % 256])
+    return bytes(out)
+
+
+def encrypted_page() -> bytes:
+    """PDF 1.7 algorithms 3.1–3.5, revision 2; fixed harmless unlock 'fixture'."""
+    pad = bytes.fromhex("28bf4e5e4e758a4164004e56fffa01082e2e00b6d0683e802f0ca9fe6453697a")
+    user = (b"fixture" + pad)[:32]
+    owner_key = hashlib.md5((b"fixture-owner" + pad)[:32]).digest()[:5]
+    owner = rc4(owner_key, user)
+    ident = hashlib.md5(b"Inkflip original bounded encryption fixture").digest()
+    permissions = (-4).to_bytes(4, "little", signed=True)
+    key = hashlib.md5(user + owner + permissions + ident).digest()[:5]
+    obj_key = hashlib.md5(key + b"\x05\x00\x00\x00\x00").digest()[:10]
+    objects = fixed_page(fixed_text())
+    objects[4] = stream(rc4(obj_key, fixed_text()))
+    objects.append(("<< /Filter /Standard /V 1 /R 2 /Length 40 /P -4 "
+                    f"/O <{owner.hex()}> /U <{rc4(key, pad).hex()}> >>").encode())
+    return pdf(objects, f" /Encrypt 6 0 R /ID [<{ident.hex()}> <{ident.hex()}>]")
+
+
+def raster_page(pixels: bytes, width: int, height: int) -> bytes:
+    encoded = runlength_encode(pixels)
+    objects = fixed_page(b"q 272 0 0 160 24 40 cm /Im0 Do Q\n")
+    objects[2] = objects[2].replace(b"/Font <<", b"/XObject << /Im0 6 0 R >> /Font <<")
+    objects.append((f"<< /Type /XObject /Subtype /Image /Width {width} /Height {height} "
+                    "/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /RunLengthDecode "
+                    f"/Length {len(encoded)} >>\nstream\n").encode() + encoded + b"\nendstream")
+    return pdf(objects)
+
+
+def catalog_entry(fid: str, variant: str, payload: bytes, intent: dict,
+                  extension: str = "pdf") -> dict:
+    catalog = json.loads((ROOT / "planning/quality/fixture-catalog.json").read_text())
+    family = next(item for item in catalog if item["id"] == fid)
+    split = {"public_demo": "public", "development": "development"}[family["split"]]
+    stem = f"{split}/{family['family']}"
+    return {
+        "name": f"{stem}-{variant}.{extension}", "fixture_id": fid,
+        "family": family["family"], "split": split,
+        "control": None if variant == "control" else f"{stem}-control.{extension}",
+        "recipe": {"version": "g78.1", "group_id": fid, "variant": variant, "intent": intent},
+        "observation": family["expected_invariant"], "payload": payload,
+    }
+
+
+def json_payload(value: dict) -> bytes:
+    return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+
+
+def structural_entries() -> list[dict]:
+    text = fixed_text()
+    white = b"1 1 1 rg\n" + text
+    dark = b"0 0 0 rg 24 96 200 60 re f\n"
+    cover = b"1 1 1 rg 24 96 200 60 re f\n"
+    triangle = b"q 48 110 m 108 150 l 168 110 l h W n\n" + text + b"Q\n"
+    definitions = [
+        ("F04", "control", dark + white, {"visible": "$100", "contrast": "white on black"}),
+        ("F04", "white", white, {"visible": "", "contrast": "white on white", "native_intent": "$100"}),
+        ("F05", "control", cover + b"0 0 0 rg\n" + text, {"order": ["fill", "text"]}),
+        ("F05", "after", text + cover, {"order": ["text", "fill"]}),
+        ("F06", "control", text, {"visibility": "full"}),
+        ("F06", "partial", text + b"1 1 1 rg 78 110 24 36 re f\n", {"visibility": "partial cover", "cover": [78, 110, 24, 36]}),
+        ("F06", "triangle", triangle, {"visibility": "nonrectangular clip; bounding-box approximation insufficient"}),
+        ("F11", "control", text, {"occurrences": [[48, 120]], "text": "$100"}),
+        ("F11", "four", b"".join(fixed_text(matrix=f"1 0 0 1 {x} {y}") for x, y in [(48, 180), (200, 180), (48, 60), (200, 60)]),
+         {"occurrences": [[48, 180], [200, 180], [48, 60], [200, 60]], "text": "$100"}),
+    ]
+    return [catalog_entry(fid, variant, pdf(fixed_page(body)), intent)
+            for fid, variant, body, intent in definitions]
+
+
+def missing_map_entries() -> list[dict]:
+    # Keep all painted glyphs identical; only the Unicode map changes.
+    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+            b"/CMapName /Owned def /CMapType 2 def\n"
+            b"1 begincodespacerange <00> <FF> endcodespacerange\n"
+            b"3 beginbfchar <24> <0024> <31> <0031> <30> <0030> endbfchar\n"
+            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
+    result = []
+    for variant, mapping in [("control", cmap), ("absent", None), ("malformed", b"begincmap 1 beginbfchar <31> <ZZZZ> endbfchar endcmap\n")]:
+        objects = fixed_page(fixed_text())
+        if mapping is not None:
+            objects[3] = objects[3].replace(b" >>", b" /ToUnicode 6 0 R >>")
+            objects.append(stream(mapping))
+        result.append(catalog_entry("F10", variant, pdf(objects),
+                      {"painted": "$100", "mapping": variant,
+                       "raw_output": "record reader API verbatim, including fallback or failure"}))
+    return result
+
+
+def failure_entries() -> list[dict]:
+    valid = pdf(fixed_page(fixed_text()))
+    noise = bytes(0 if ((i * 73 + i // 128 * 19) % 17) < 8 else 255 for i in range(128 * 64))
+    return [
+        catalog_entry("F17", "control", scan_pdf("raster-only"), {"raster_text": SCAN_LINES}),
+        catalog_entry("F17", "blank", raster_page(bytes([255]) * 8192, 128, 64), {"raster_text": None, "region": "blank; no default value"}),
+        catalog_entry("F17", "noise", raster_page(noise, 128, 64), {"raster_text": None, "region": "unreadable deterministic pattern"}),
+        catalog_entry("F18", "control", valid, {"load": "valid"}),
+        catalog_entry("F18", "encrypted", encrypted_page(), {"load": "locked without credential", "test_credential": "fixture", "encryption": "Standard R2 RC4-40; synthetic only"}),
+        catalog_entry("F18", "truncated", valid[:80], {"load": "incomplete header/page tree; failure"}),
+        catalog_entry("F18", "malformed", pdf([b"<< /Type /Catalog /Pages 2 0 R >>", b"null"]), {"load": "invalid page tree; reader-specific failure, never all-clear"}),
+        catalog_entry("F19", "control", valid, {"box": [0, 0, 320, 240], "render_max_edge": 512}),
+        catalog_entry("F19", "extreme", pdf(fixed_page(fixed_text(), "0 0 1000000000 1000000000")),
+                      {"box": [0, 0, 1000000000, 1000000000], "render_max_edge": 512,
+                       "unbounded_render_forbidden": True, "requested_pixels_at_72dpi": 1000000000000000000}),
+    ]
+
+
+def fault_entries() -> list[dict]:
+    result = []
+    # Consumers drive these fake process scenarios under their own supervisor.
+    # No engine/model initializes; the reusable executable double lives in tests.
+    for variant in ("control", "model-failure", "crash", "hang", "cancel", "stale"):
+        scenario = {"scenario": variant, "max_wall_ms": 1000, "generation": 2,
+                    "preserved_result": {"job": "completed-first", "text": "$100"},
+                    "events": [{"generation": 2, "job": "completed-first", "state": "completed"}]}
+        terminal = {"control": "completed", "model-failure": "failed", "crash": "failed",
+                    "hang": "timed_out", "cancel": "cancelled", "stale": "completed"}[variant]
+        scenario["expected_terminal"] = terminal
+        result.append(catalog_entry("F20", variant, json_payload(scenario),
+                                    {"kind": "bounded fake process/event input", "terminal": terminal}, "json"))
+    return result
+
+
+def canary_entries() -> list[dict]:
+    # Marker channels are distinct; source digest is derived after PDF generation.
+    body = fixed_text("INKFLIP-CANARY-TEXT-7B2").replace(b"24 Tf", b"12 Tf")
+    objects = fixed_page(body)
+    objects[0] = objects[0].replace(b" >>", b" /Metadata 6 0 R >>")
+    objects[2] = objects[2].replace(b" /Contents", b" /Annots [7 0 R] /Contents")
+    metadata = b'<canary>INKFLIP-CANARY-METADATA-8C3</canary>'
+    objects.append(stream(metadata).replace(b"<< /Length", b"<< /Type /Metadata /Subtype /XML /Length"))
+    objects.append(b"<< /Type /Annot /Subtype /Text /Rect [20 20 40 40] /Contents (INKFLIP-CANARY-ANNOTATION-9D4) >>")
+    payload = pdf(objects)
+    return [
+        catalog_entry("F21", "control", pdf(fixed_page(b"")), {"actions": "same local actions with no document content", "egress": "none"}),
+        catalog_entry("F21", "channels", payload,
+                      {"egress": "none", "storage": "no document-derived persistence",
+                       "channels": {"text": "INKFLIP-CANARY-TEXT-7B2", "metadata": "INKFLIP-CANARY-METADATA-8C3",
+                                    "annotation": "INKFLIP-CANARY-ANNOTATION-9D4", "filename": "network-canary-channels.pdf",
+                                    "hash": hashlib.sha256(payload).hexdigest(),
+                                    "crop": "rendered text marker pixels", "report": "actual report containing text marker"}}),
+    ]
+
+
+def followup_entries() -> list[dict]:
+    return structural_entries() + missing_map_entries() + failure_entries() + fault_entries() + canary_entries()
+
+
+def entry_payload(entry: dict) -> bytes:
+    if "payload" in entry:
+        return entry["payload"]
+    recipe = dict(entry["recipe"])
+    wants_fiducial = "fiducial" in recipe
+    recipe.pop("fiducial", None)
+    if entry["family"] == "searchable-scan":
+        return scan_pdf(recipe["layer"])
+    return make(fiducial=wants_fiducial, **recipe)
+
+
 def build_tree() -> dict[str, bytes]:
     """Return every generated file keyed by its path under fixtures/."""
     files: dict[str, bytes] = {}
     entries = []
     generator_sha = hashlib.sha256((ROOT / "scripts/make_fixtures.py").read_bytes()).hexdigest()
-    for entry in recipes():
-        recipe = dict(entry["recipe"])
-        wants_fiducial = "fiducial" in recipe
-        recipe.pop("fiducial", None)
-        if entry["family"] == "searchable-scan":
-            data = scan_pdf(recipe["layer"])
-        else:
-            data = make(fiducial=wants_fiducial, **recipe)
+    for entry in recipes() + followup_entries():
+        data = entry_payload(entry)
         name = entry["name"]
         files[name] = data
-        expect_name = name.replace(".pdf", ".expect.json")
+        expect_name = str(Path(name).with_suffix(".expect.json"))
         expect = expectation_for(entry)
         files[expect_name] = (json.dumps(expect, indent=2, sort_keys=True) + "\n").encode()
         manifest_entry = {
@@ -510,6 +700,7 @@ def build_tree() -> dict[str, bytes]:
         "generator": "scripts/make_fixtures.py",
         "generator_version": GENERATOR_VERSION,
         "generator_sha256": generator_sha,
+        "catalog_sha256": hashlib.sha256((ROOT / "planning/quality/fixture-catalog.json").read_bytes()).hexdigest(),
         "seed": "none; recipes are fully deterministic",
         "determinism": "byte-identical on every platform; no timestamps or random IDs",
         "rights": RIGHTS,

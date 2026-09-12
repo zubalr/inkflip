@@ -1,0 +1,21 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/mapping-missing-control.pdf",
+  "family": "mapping-missing",
+  "fixture_id": "F10",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F10",
+    "intent": {
+      "mapping": "malformed",
+      "painted": "$100",
+      "raw_output": "record reader API verbatim, including fallback or failure"
+    },
+    "variant": "malformed",
+    "version": "g78.1"
+  },
+  "observation": "preserve raw API output/missingness",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

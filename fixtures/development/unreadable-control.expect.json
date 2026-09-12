@@ -1,0 +1,25 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "unreadable",
+  "fixture_id": "F17",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F17",
+    "intent": {
+      "raster_text": [
+        "QUARTERLY SUMMARY",
+        "INVOICE 2026-0417",
+        "AMOUNT DUE $100.00",
+        "ISSUED 2026-09-01",
+        "PAGE 1 OF 1"
+      ]
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "no plausible missing-value defaults",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

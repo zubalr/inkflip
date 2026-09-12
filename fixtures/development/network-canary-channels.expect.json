@@ -1,0 +1,29 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/network-canary-control.pdf",
+  "family": "network-canary",
+  "fixture_id": "F21",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F21",
+    "intent": {
+      "channels": {
+        "annotation": "INKFLIP-CANARY-ANNOTATION-9D4",
+        "crop": "rendered text marker pixels",
+        "filename": "network-canary-channels.pdf",
+        "hash": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
+        "metadata": "INKFLIP-CANARY-METADATA-8C3",
+        "report": "actual report containing text marker",
+        "text": "INKFLIP-CANARY-TEXT-7B2"
+      },
+      "egress": "none",
+      "storage": "no document-derived persistence"
+    },
+    "variant": "channels",
+    "version": "g78.1"
+  },
+  "observation": "zero content egress/storage",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

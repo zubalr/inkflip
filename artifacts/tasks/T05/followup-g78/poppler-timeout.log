@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-g78/artifacts/tasks/T05/followup-g78/inspect_priority.py", line 78, in <module>
+    main()
+  File "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-g78/artifacts/tasks/T05/followup-g78/inspect_priority.py", line 60, in main
+    results = [observe(e) for e in manifest['entries'] if e['recipe'].get('version') == 'g78.1' and e['path'].endswith('.pdf')]
+               ^^^^^^^^^^
+  File "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-g78/artifacts/tasks/T05/followup-g78/inspect_priority.py", line 34, in observe
+    run = subprocess.run(command, capture_output=True, text=True, timeout=30)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override/pdftoppm', '-f', '1', '-singlefile', '-scale-to', '512', '-png', '/Users/zubair/Code/Projects/pdf project/worktrees/pdf-g78/fixtures/development/white-contrast-control.pdf', '/Users/zubair/Code/Projects/pdf project/worktrees/pdf-g78/artifacts/tasks/T05/followup-g78/renders/white-contrast-control']' timed out after 30 seconds
