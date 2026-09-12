@@ -1,0 +1,46 @@
+{
+  "task": "T06",
+  "beads_id": "pdf-t06",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:44.692415+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 9,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:visual -- tests/visual/foundation.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:visual",
+        "--",
+        "tests/visual/foundation.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:visual",
+        "--",
+        "tests/visual/foundation.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 9 tests using 1 worker\n\n\n\n\n\n\u001b[1A\u001b[2K[1/9] tests/visual/foundation.spec.ts:53:5 \u203a T06: Visual Foundations & Responsive Layout \u203a width 1440px (desktop-1440) has no page horizontal overflow\n\u001b[1A\u001b[2K[2/9] tests/visual/foundation.spec.ts:53:5 \u203a T06: Visual Foundations & Responsive Layout \u203a width 1024px (intermediate-1024) has no page horizontal overflow\n\u001b[1A\u001b[2K[3/9] tests/visual/foundation.spec.ts:53:5 \u203a T06: Visual Foundations & Responsive Layout \u203a width 768px (intermediate-768) has no page horizontal overflow\n\u001b[1A\u001b[2K[4/9] tests/visual/foundation.spec.ts:53:5 \u203a T06: Visual Foundations & Responsive Layout \u203a width 390px (mobile-390) has no page horizontal overflow\n\u001b[1A\u001b[2K[5/9] tests/visual/foundation.spec.ts:53:5 \u203a T06: Visual Foundations & Responsive Layout \u203a width 320px (mobile-320) has no page horizontal overflow\n\u001b[1A\u001b[2K[6/9] tests/visual/foundation.spec.ts:77:3 \u203a T06: Visual Foundations & Responsive Layout \u203a page and disagreement dominate the visual composition\n\u001b[1A\u001b[2K[7/9] tests/visual/foundation.spec.ts:100:3 \u203a T06: Visual Foundations & Responsive Layout \u203a contrast checks meet stated WCAG targets on computed DOM styles\n\u001b[1A\u001b[2K[8/9] tests/visual/foundation.spec.ts:144:3 \u203a T06: Visual Foundations & Responsive Layout \u203a reduced motion disables flips, transitions and animations\n\u001b[1A\u001b[2K[9/9] tests/visual/foundation.spec.ts:161:3 \u203a T06: Visual Foundations & Responsive Layout \u203a active focus outline styling adheres to 3px focus token\n\u001b[1A\u001b[2K  9 passed (3.4s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:visual tests/visual/foundation.spec.ts\n\u001b[1A\u001b[2K(node:16589) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:16589) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}

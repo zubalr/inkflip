@@ -1,0 +1,44 @@
+{
+  "task": "T11",
+  "beads_id": "pdf-t11",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:52.031793+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 51,
+    "passed": 51,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "node --test tests/runtime/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/runtime/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-9d0xj7cz/results",
+        "--test",
+        "tests/runtime/runtime.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "tests": {
+        "collected": 51,
+        "passed": 51,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "task": "T04",
+  "beads_id": "pdf-t04",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:39.709490+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 47,
+    "passed": 47,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "node --test tests/geometry/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/geometry/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-en8f1qji/results",
+        "--test",
+        "tests/geometry/followup-iy2.test.mjs",
+        "tests/geometry/geometry.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "tests": {
+        "collected": 47,
+        "passed": 47,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+$ python3 scripts/task_acceptance.py task T09 --report /Users/zubair/Code/Projects/pdf project/original/artifacts/tasks/T09/refresh-20260912/run.json
+$ python3 scripts/task_acceptance.py run test:browser tests/readers/pdfjs.spec.ts
+[1A[2K(node:16696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1A[2K(node:16696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 1 worker
+
+
+
+
+
+[1A[2K[1/10] tests/readers/pdfjs.spec.ts:184:1 › pinned pair + describe() identity and honest capabilities
+[1A[2Ktests/readers/pdfjs.spec.ts:184:1 › pinned pair + describe() identity and honest capabilities
+pinned pdf.mjs sha256=91e29f812c593904e8d48d022db5ddf93e3443575d4765ac9bfbb42494cfbd8d
+
+[1A[2Kpinned pdf.worker.mjs sha256=df3bf6bf6b8b8dac8a4042d8c4ecf1cf21e1d197e0fe231c192122409eba656b
+
+[1A[2K[2/10] tests/readers/pdfjs.spec.ts:232:1 › F01 mapping vs control: bytes in, raw text out, identical raster
+[1A[2K[3/10] tests/readers/pdfjs.spec.ts:367:1 › F02 covered vs control: hidden layer kept raw, raster unaffected
+[1A[2K[4/10] tests/readers/pdfjs.spec.ts:432:1 › F07 rotations and origins: page records, R*C verification, raster dims
+[1A[2K[5/10] tests/readers/pdfjs.spec.ts:560:1 › F08 UserUnit values: no double scaling, fiducial square lands exactly
+[1A[2K[6/10] tests/readers/pdfjs.spec.ts:632:1 › render cancellation releases task and canvas; later renders unaffected
+[1A[2K[7/10] tests/readers/pdfjs.spec.ts:699:1 › text extraction mid-walk cancel retains produced evidence
+[1A[2K[8/10] tests/readers/pdfjs.spec.ts:748:1 › unavailable capabilities terminate unsupported with named reasons
+[1A[2K[9/10] tests/readers/pdfjs.spec.ts:787:1 › open verifies digest; closing one generation spares the next
+[1A[2K[10/10] tests/readers/pdfjs.spec.ts:837:1 › F10/F11 absent from T05 tree; ordinal identity preserves duplicates
+[1A[2Ktests/readers/pdfjs.spec.ts:837:1 › F10/F11 absent from T05 tree; ordinal identity preserves duplicates
+F10/F11: not generated in T05 tree; substitutes = F01/F02 raw preservation + ordinal identity check below
+
+[1A[2K  10 passed (3.2s)
+{
+  "task": "T09",
+  "beads_id": "pdf-t09",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:51.737748+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 10,
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/readers/pdfjs.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/pdfjs.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/readers/pdfjs.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+$ python3 scripts/task_acceptance.py task T12 --report /Users/zubair/Code/Projects/pdf project/original/artifacts/tasks/T12/refresh-20260912/run.json
+{
+  "task": "T12",
+  "beads_id": "pdf-t12",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:52.299363+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 36,
+    "passed": 36,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "node --test tests/alignment/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/alignment/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-3gv3e1dp/results",
+        "--test",
+        "tests/alignment/alignment.test.mjs",
+        "tests/alignment/normalization.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 36,
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}

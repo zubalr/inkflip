@@ -1,0 +1,69 @@
+{
+  "task": "T05",
+  "beads_id": "pdf-t05",
+  "evaluated_commit": "52e4fa04bba2f7915fc934d3c713e92e50c2d65e",
+  "evaluated_at": "2026-09-12T07:51:40.486197+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 38,
+    "passed": 38,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python scripts/make_fixtures.py --check",
+      "argv": [
+        "python3",
+        "scripts/make_fixtures.py",
+        "--check"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/make_fixtures.py",
+        "--check"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "check ok: 33 files in /Users/zubair/Code/Projects/pdf project/original/fixtures match deterministic regeneration\n",
+      "stderr": "",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    },
+    {
+      "segment": "python -m unittest discover -s tests/fixtures -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/fixtures",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/original/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/fixtures",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "test_control_paints_final_amount_once (test_fixtures.TestCoveredText.test_control_paints_final_amount_once) ... ok\ntest_cover_is_opaque_white_fill (test_fixtures.TestCoveredText.test_cover_is_opaque_white_fill) ... ok\ntest_cover_paint_order_is_text_cover_replacement (test_fixtures.TestCoveredText.test_cover_paint_order_is_text_cover_replacement) ... ok\ntest_known_reader_observations_are_labeled_not_invented (test_fixtures.TestCoveredText.test_known_reader_observations_are_labeled_not_invented) ... ok\ntest_check_mode_detects_tampering (test_fixtures.TestDeterminism.test_check_mode_detects_tampering) ... ok\ntest_check_mode_passes_on_committed_tree (test_fixtures.TestDeterminism.test_check_mode_passes_on_committed_tree) ... ok\ntest_manifest_declares_determinism_without_seed_or_timestamp (test_fixtures.TestDeterminism.test_manifest_declares_determinism_without_seed_or_timestamp) ... ok\ntest_two_regenerations_are_byte_identical (test_fixtures.TestDeterminism.test_two_regenerations_are_byte_identical) ... ok\ntest_all_rotations_present_with_negative_origin_and_userunit_two (test_fixtures.TestGeometryFamily.test_all_rotations_present_with_negative_origin_and_userunit_two) ... ok\ntest_control_is_zero_origin_rotation_zero_userunit_one (test_fixtures.TestGeometryFamily.test_control_is_zero_origin_rotation_zero_userunit_one) ... ok\ntest_rotation_family_shares_identical_content (test_fixtures.TestGeometryFamily.test_rotation_family_shares_identical_content) ... ok\ntest_every_mechanism_has_an_existing_control (test_fixtures.TestManifestIntegrity.test_every_mechanism_has_an_existing_control) ... ok\ntest_expectation_files_bind_to_their_fixture (test_fixtures.TestManifestIntegrity.test_expectation_files_bind_to_their_fixture) ... ok\ntest_generator_hash_matches_source_file (test_fixtures.TestManifestIntegrity.test_generator_hash_matches_source_file) ... ok\ntest_manifest_hashes_and_lengths_match_disk (test_fixtures.TestManifestIntegrity.test_manifest_hashes_and_lengths_match_disk) ... ok\ntest_required_fixture_ids_and_families_are_covered (test_fixtures.TestManifestIntegrity.test_required_fixture_ids_and_families_are_covered) ... ok\ntest_splits_match_catalog (test_fixtures.TestManifestIntegrity.test_splits_match_catalog) ... ok\ntest_extraction_intent_differs_while_painting_matches (test_fixtures.TestMappingControl.test_extraction_intent_differs_while_painting_matches) ... ok\ntest_observation_declares_text_raster_divergence (test_fixtures.TestMappingControl.test_observation_declares_text_raster_divergence) ... ok\ntest_paint_operators_are_identical (test_fixtures.TestMappingControl.test_paint_operators_are_identical) ... ok\ntest_tounicode_differs_exactly_at_amount_glyph (test_fixtures.TestMappingControl.test_tounicode_differs_exactly_at_amount_glyph) ... ok\ntest_filename_appears_nowhere_in_fixture_bytes (test_fixtures.TestNoFilenameConditioning.test_filename_appears_nowhere_in_fixture_bytes) ... ok\ntest_renamed_copy_is_byte_identical_and_content_addressed (test_fixtures.TestNoFilenameConditioning.test_renamed_copy_is_byte_identical_and_content_addressed) ... ok\ntest_test_fixtures_command_is_registered_and_active (test_fixtures.TestRegistryRegistration.test_test_fixtures_command_is_registered_and_active) ... ok\ntest_manifest_rights_cover_every_entry (test_fixtures.TestRightsAndPrivacy.test_manifest_rights_cover_every_entry) ... ok\ntest_no_embedded_font_programs_anywhere (test_fixtures.TestRightsAndPrivacy.test_no_embedded_font_programs_anywhere) ... ok\ntest_no_private_or_challenge_answer_data (test_fixtures.TestRightsAndPrivacy.test_no_private_or_challenge_answer_data) ... ok\ntest_correct_layer_is_invisible_and_matches_expectation (test_fixtures.TestSearchableScan.test_correct_layer_is_invisible_and_matches_expectation) ... ok\ntest_correct_scan_records_no_alarm_intent (test_fixtures.TestSearchableScan.test_correct_scan_records_no_alarm_intent) ... ok\ntest_decoded_raster_equals_generator_drawing (test_fixtures.TestSearchableScan.test_decoded_raster_equals_generator_drawing) ... ok\ntest_layer_words_are_exactly_the_raster_words_in_order (test_fixtures.TestSearchableScan.test_layer_words_are_exactly_the_raster_words_in_order) ... ok\ntest_raster_only_sibling_has_no_text_operators (test_fixtures.TestSearchableScan.test_raster_only_sibling_has_no_text_operators) ... ok\ntest_scan_siblings_share_one_split (test_fixtures.TestSearchableScan.test_scan_siblings_share_one_split) ... ok\ntest_shifted_layer_is_displaced_by_declared_offset (test_fixtures.TestSearchableScan.test_shifted_layer_is_displaced_by_declared_offset) ... ok\ntest_word_anchor_boxes_contain_matching_raster_ink (test_fixtures.TestSearchableScan.test_word_anchor_boxes_contain_matching_raster_ink) ... ok\ntest_all_units_declared_with_fiducial_square (test_fixtures.TestUserUnitFamily.test_all_units_declared_with_fiducial_square) ... ok\ntest_family_shares_identical_fiducial_content (test_fixtures.TestUserUnitFamily.test_family_shares_identical_fiducial_content) ... ok\ntest_unit_one_is_the_manifest_control (test_fixtures.TestUserUnitFamily.test_unit_one_is_the_manifest_control) ... ok\n\n----------------------------------------------------------------------\nRan 38 tests in 0.490s\n\nOK\n",
+      "tests": {
+        "collected": 38,
+        "passed": 38,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original",
+      "environment": {}
+    }
+  ]
+}
