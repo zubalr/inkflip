@@ -4,8 +4,8 @@
  "worker": "devin-local-swe2-t10 (Devin Local SWE-2 subagent, coordinator Astra); session 1 was devin-cloud-t10",
  "branch": "work/devin/t10",
  "base": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
- "state": "green-checkpoint",
- "ready_for_review": true,
+ "state": "wave4-revision-light-checkpoint",
+ "ready_for_review": false,
  "checkpoint": {
   "completed": [
    "Merged current canonical main 500abfc (coordinator-authorized) -> merge commit a5a270f, zero conflicts. Prior merge 65e84da -> 50dddc0 and prior impl/evidence 32f098e/4282857 preserved in ancestry.",
@@ -18,7 +18,8 @@
    "First post-revision heavy run @831e0a1+worktree: 10/11 \u2014 the new arithmetic held (line-934 floor assertion passed) but surfaced the latent unawaited-planCropOnly spec bug at line 937; fixed in 567b482, suite then 11/11. Classified as a spec harness defect, not product code \u2014 assertions unchanged, only awaits added."
   ],
   "next_steps": [
-   "Independent review by a reviewer other than this worker; coordinator produces the acceptance receipt (record_acceptance requires reviewer != worker and a review commit/path \u2014 not created locally).",
+   "Independent review by a reviewer other than this worker; coordinator produces the acceptance receipt (record_acceptance requires reviewer != worker and a review commit/path - not created locally).",
+   "When the heavy reservation returns from Homebase ZCode (T27), run the full registered sequence on the final clean commit, in order: bun run test:browser -- tests/readers/tesseract.spec.ts; python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json; bun run verify; bun run build:web. The 41-test file includes the excluded real-engine cases.",
    "If review requests changes: rework on this branch, rerun the registered checks, record real results."
   ],
   "limitations": [
@@ -134,6 +135,57 @@
     "cmd": "bun run build:web",
     "exit": 0,
     "note": "vite 8.3.0, 205ms, index-DLl647JV.js 191.77kB"
+   },
+   {
+    "cmd": "git merge origin/main",
+    "exit": 0,
+    "note": "main 1f0d900 (q38 initializeInternal repair) -> merge 744f527, clean"
+   },
+   {
+    "cmd": "bun x --no-install tsc -b tsconfig.json",
+    "exit": 0,
+    "note": "post wave-4 edits"
+   },
+   {
+    "cmd": "bun x --no-install oxlint packages/readers-tesseract/src/ tests/readers/tesseract.spec.ts tests/readers/t10-pixel-harness.ts",
+    "exit": 0,
+    "note": "0 warnings 0 errors"
+   },
+   {
+    "cmd": "node --test tests/readers/crop-math.mjs",
+    "exit": 0,
+    "collected": 13,
+    "passed": 13,
+    "failed": 0
+   },
+   {
+    "cmd": "node artifacts/tasks/T10/repro-planCrop.mjs",
+    "exit": 0,
+    "note": "6/6 ALL OK"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 -g 'light:' --grep-invert 'a stale or corrupt cache slot|the engine consumes the verified slot|close during a real open'",
+    "exit": 1,
+    "collected": 25,
+    "passed": 21,
+    "failed": 4,
+    "note": "attempt 1: settle-hook install race in new lease code; fixed - hook is now the sole installer"
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 -g 'a stalled raster resolves|a late init success|a hung recognize|superseded open'",
+    "exit": 0,
+    "collected": 4,
+    "passed": 4,
+    "failed": 0
+   },
+   {
+    "cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 -g 'light:' --grep-invert 'a stale or corrupt cache slot|the engine consumes the verified slot|close during a real open'",
+    "exit": 0,
+    "collected": 25,
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "note": "attempt 2: all allowed light cases incl. 4 ported stub lifecycle probes + payload/IDB controls"
    }
   ],
   "commits": {
@@ -187,5 +239,37 @@
    }
   }
  },
- "disposition": "WAVE-3 REVISION GREEN \u2014 Astra-rejected candidate 87e2073 reworked (review: /private/tmp/inkflip-t10-wave2-review.md). All six authorized fixes applied plus the adjudicated pdf-ebz deadline/cancellation boundary. Full registered suite executed by the sole heavy-OCR reservation holder at fa59348: bun run test:browser -- tests/readers/tesseract.spec.ts -> 35/35 (11 real-OCR incl. real patched worker init, verified-bytes payload, real recognize; 24 light). task_acceptance.py task T10 -> run.json, exit 0, failures none. bun run verify exit 0 (115 checks). bun run build:web exit 0. Two first-pass failures were a test-harness provenance defect (synthetic-harness rasters fed to pdfjs-bound readers -> correct render_error); fixed in fa59348 by binding consumers to the actual producer, no assertion weakened. READY FOR REVIEW \u2014 independent review + coordinator acceptance receipt remain; NOT accepted. No push, no Beads writes. Reservation released: nothing running or queued."
+ "disposition": "WAVE-4 REVISION - LIGHT CHECKPOINT. Pauli's wave-3 findings reworked per Astra direction on top of merged q38: verified model bytes now ride the {code,data} engine payload with cacheMethod 'none' (shared-cache replacement cannot change engine bytes); operation-scoped terminal signals + WorkerLease lifetimes close the stale-cleanup, close-wakeup, late-model and callback-admission holes. Allowed checks only under the ZCode heavy hold: tsc 0, oxlint 0, crop-math 13/13, repro-planCrop 6/6, playwright light subset 25/25 incl. the 4 ported stub probes and new payload/IDB controls. Real-engine registered cases (2 prior + new real provenance pair) NOT run - awaiting explicit slot return. NOT ready for review and NOT accepted. No push, no Beads writes.",
+ "wave4": {
+  "review_of": "7699f9752d82f97251c86f53e15407b5b087668d (Pauli wave-3 review, changes required)",
+  "direction": "/private/tmp/inkflip-t10-wave4.txt",
+  "precondition": "pdf-q38 language-payload repair on main 1f0d900 (source 14f062e), merged as 744f527; installed patched createWorker.js verified (initializeInternal sends .code, loadLanguage consumes object .data)",
+  "fixes_applied": [
+   "engine.ts: [{code:lang,data:verifiedBytes.slice()}] snapshot payload + cacheMethod 'none'; the adapter-verified bytes ARE the engine input (no worker fetch/cache path); prepareForEngine mandatory IDB write/read-back, cachePath-equality requirement and wrong exact-bytes comments removed",
+   "model-cache.ts: prepare(signal) is epoch- and signal-guarded after EVERY internal await and before EVERY state/memory/cache mutation; remove() bumps epoch first, deletes the slot, and a post-write invalidation cleans up its own late write; IDB unavailable/write-fail -> honest memory-only (ready_memory + model_cache_unavailable limitation), never missing_model",
+   "reader.ts: OpScope{op,deadlineAt,cancel,ctl,handle,lease} with an owned terminal signal fired by close/supersession/caller-cancel (deadline stays timeout); liveScopes admission set; WorkerLease{owner,ctl,init,joiners,settled,worker} where the settle hook is the ONLY installer (install iff current+unaborted+unfilled else orphan-terminate); progress AND error callbacks admitted only by a current nonterminal scope (jobScopes map recognize events to their owning extract); op-scoped cleanup - a stale open/extract never clears a newer handle, never kills an installed/shared worker, never zeroes live run accounting; extract rejects foreign handles before scoping"
+  ],
+  "test_changes": [
+   "worker init payload test now asserts [{code:'eng',data:Uint8Array}] with byteLength+sha256 equal to the prepared model and cacheMethod 'none'",
+   "former unavailable/failed-IDB mandatory-failure cases converted to truthful memory-only success controls (model_cache_unavailable limitation + verified payload delivered)",
+   "'close during a real open' expectation updated to user_cancel (owned terminal signal), still excluded under the hold",
+   "4 ported independent stub lifecycle probes registered under 'light: independent lifecycle probes (stub engine)' via in-page __rv seam",
+   "Pauli's real cache-provenance pair registered under 'independent real cache provenance (real engine)': engine FS sha == reported sha even with same-origin cache replacement on createWorker entry; exactly one model request"
+  ],
+  "light_results": {
+   "tsc -b tsconfig.json": "exit 0",
+   "oxlint changed files": "0 warnings 0 errors",
+   "node --test tests/readers/crop-math.mjs": "13/13",
+   "node artifacts/tasks/T10/repro-planCrop.mjs": "6/6 ALL OK",
+   "playwright light (allowed subset)": "25/25 (~5.5s) after one settle-hook race fix"
+  },
+  "excluded_under_hold": [
+   "a stale or corrupt cache slot is replaced before the engine sees it",
+   "the engine consumes the verified slot - never a second divergent copy",
+   "close during a real open aborts the raw worker init",
+   "independent real cache provenance: unchanged cache control + cache replacement after verification cannot change engine bytes"
+  ],
+  "collection": "41 registered tests (11 real-OCR + 24 light reworked + 4 stub probes + 2 real provenance probes)",
+  "heavy_reservation": "NOT held - belongs to Homebase ZCode (T27). No heavy command in flight or queued. Full registered sequence awaits explicit slot transfer."
+ }
 }

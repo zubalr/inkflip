@@ -378,3 +378,109 @@ exit 0 — vite 8.3.0, 18 modules, dist/assets/index-DLl647JV.js
   191.77 kB gzip 60.54 kB, built in 205ms.
 
 # RELEASE: no heavy command in flight or queued after this block.
+
+
+# ============================================================
+# WAVE-4 REVISION — model-provenance + operation-scoped lifetime
+# repair (Astra wave-4 direction; Pauli wave-3 review findings).
+# Heavy reservation belongs to Homebase ZCode (T27) — LIGHT
+# CHECKS ONLY in this block: source/typecheck/math/stub/pixel.
+# Real-engine registered cases are present but NOT run here
+# (excluded under the hold; see excluded list below).
+# ============================================================
+
+$ git merge origin/main
+exit 0 — merge commit 744f527; main 1f0d900 carries the reviewed
+  pdf-q38 language-payload repair (14f062e): patched
+  initializeInternal normalizes object Lang payloads to their
+  .code for Init(), while loadLanguage consumes the object .data
+  bytes. Verified installed: src/createWorker.js:149-153,
+  worker-script/index.js:102,153-155. Frozen install unchanged.
+
+# Implementation (uncommitted in this block):
+#  engine.ts — worker gets [{code:lang,data:verifiedBytes.slice()}]
+#    + cacheMethod 'none'; the adapter-verified snapshot IS the
+#    engine input (worker writes it verbatim to /eng.traineddata;
+#    no fetch/cache branch for object payloads). prepareForEngine,
+#    mandatory read-back and cachePath-equality coupling removed.
+#  model-cache.ts — prepare(signal): epoch + signal checked after
+#    every internal await and before every state/memory/cache
+#    mutation; a superseded/removed preparation can neither
+#    publish states nor recreate a deleted slot (post-write
+#    invalidate -> best-effort delete of our own write). remove()
+#    bumps epoch first. IDB unavailable/write-fail -> truthful
+#    memory-only success with model_cache_unavailable limitation.
+#  reader.ts — OpScope gains an OWNED terminal AbortController
+#    (close/supersession/caller-cancel fire it; deadline stays
+#    timeout); liveScopes + jobScopes admission for progress AND
+#    error callbacks; WorkerLease {owner, ctl, init, joiners,
+#    settled, worker} — the settle hook is the ONLY installer
+#    (install into live unaborted slot OR self-terminate orphan);
+#    op-scoped cleanup everywhere (stale open/extract can never
+#    clear a newer handle, kill a shared/installed worker, or
+#    zero live accounting); extract rejects foreign handles
+#    before scoping.
+
+$ bun x --no-install tsc -b tsconfig.json
+exit 0
+
+$ bun x --no-install oxlint packages/readers-tesseract/src/ \
+    tests/readers/tesseract.spec.ts tests/readers/t10-pixel-harness.ts
+exit 0 — 0 warnings, 0 errors (after removing a backtick inside a
+  template-literal comment, an unused import, and a useless spread).
+
+$ node --test tests/readers/crop-math.mjs
+exit 0 — 13/13 pass.
+
+$ node artifacts/tasks/T10/repro-planCrop.mjs
+exit 0 — ALL OK (6/6 candidates, matrix[0]===resizeK everywhere).
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 \
+    -g 'light:' --grep-invert \
+    'a stale or corrupt cache slot|the engine consumes the verified slot|close during a real open'
+  [attempt 1]
+exit 1 — 21 passed / 4 failed: stale-settle-hook race terminated
+  every produced worker before its awaiter could install
+  (.then handlers run before the awaiting continuation):
+  'a stalled raster resolves to timeout' terminateCount 2!=1,
+  'a late init success' 3!=2, 'a hung recognize' 3!=2,
+  'superseded open' terminated [true]!=[false].
+  CLASSIFICATION: product defect in the new lease code — fixed by
+  making the settle hook the ONLY installer (install iff lease is
+  current+unaborted+unfilled, else orphan-terminate); awaiters
+  validate, never install. No assertion weakened.
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 \
+    -g 'a stalled raster resolves|a late init success|a hung recognize|superseded open'
+exit 0 — 4/4 pass (2.2s).
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts --workers=1 \
+    -g 'light:' --grep-invert \
+    'a stale or corrupt cache slot|the engine consumes the verified slot|close during a real open'
+  [attempt 2]
+exit 0 — 25/25 pass (~5.5s), including:
+  - 4 ported independent stub lifecycle probes (close settles a
+    stalled raster fast w/ user_cancel; late model prep cannot
+    publish or recreate deleted data after close+remove; superseded
+    open cannot clear the newer handle/worker; late init progress
+    AND error callbacks dropped after timeout w/ signal aborted).
+  - worker init payload: [{code:'eng',data:Uint8Array snapshot}]
+    whose byteLength+sha256 equal the prepared model exactly,
+    cacheMethod 'none', AbortSignal present, PNG bytes input.
+  - idbFactory none / writeFail -> truthful ready_memory success
+    with model_cache_unavailable limitation + verified payload.
+
+# EXCLUDED UNDER THE HOLD (registered but not run — real engine):
+#   'a stale or corrupt cache slot is replaced before the engine
+#    sees it' (real worker init)
+#   'the engine consumes the verified slot — never a second
+#    divergent copy' (real worker init + route counting)
+#   'close during a real open aborts the raw worker init'
+#   'independent real cache provenance' describe — the new Pauli
+#    pair: unchanged-cache control + cache-replacement-after-
+#    verification (asserts engine FS sha == reported sha, exactly
+#    one model request). Registered, awaits the slot transfer.
+#
+# Registered collection now: 41 tests (11 real-OCR + 24 prior light
+# reworked + 4 stub lifecycle probes + 2 real provenance probes).
+# No heavy command in flight or queued; reservation NOT held.
