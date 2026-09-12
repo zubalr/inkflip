@@ -824,7 +824,13 @@ test('worker init failure is a terminal failure, never unreadable_pixels', async
     const openBad = await api.open(bad.readerId, 'doc-sha-1', 1);
 
     // B) Healthy reader OCRs a genuinely blank raster: completed-empty.
-    const good = api.makeReader({ docId: docIdArg });
+    // The blank raster is produced by the synthetic harness, so the
+    // reader consuming it is bound to that producer id — configured
+    // renderer identity is checked against the raster at extraction.
+    const good = api.makeReader({
+      docId: docIdArg,
+      renderReaderId: 'synthetic-harness',
+    });
     const openGood = await api.open(good.readerId, 'doc-sha-1', 1);
     let blankRun = null;
     if (openGood.ok) {
@@ -1039,13 +1045,30 @@ test('word boxes map back through the recorded chain; confidence is diagnostic',
     if (!open.ok) return { openError: open.error };
     const checks = await api.plan(readerId, [
       { pageIndex: 0, purpose: 'line', region },
-      { pageIndex: 0, purpose: 'region', region },
     ]);
     if (!checks.ok) return { planError: checks.error };
     const lineRun = await api.extract(readerId, checks.value[0].id);
-    const noiseRaster = await api.rasterize(docIdArg, 0, 2, 'noise');
-    const noiseRun = await api.extract(readerId, checks.value[1].id);
     await api.close(readerId);
+
+    // The noise raster is synthetic-harness output — a pdfjs-bound
+    // reader must not consume it. A second reader bound to the actual
+    // producer runs its own check on the same page slot.
+    const noiseRaster = await api.rasterize(docIdArg, 0, 2, 'noise');
+    const noiseReader = api.makeReader({
+      docId: docIdArg,
+      renderReaderId: 'synthetic-harness',
+    });
+    const noiseOpen = await api.open(noiseReader.readerId, 'doc-sha-1', 1);
+    let noiseRun = null;
+    if (noiseOpen.ok) {
+      const noiseChecks = await api.plan(noiseReader.readerId, [
+        { pageIndex: 0, purpose: 'region', region },
+      ]);
+      if (noiseChecks.ok) {
+        noiseRun = await api.extract(noiseReader.readerId, noiseChecks.value[0].id);
+      }
+      await api.close(noiseReader.readerId);
+    }
 
     if (!lineRun.ok) return { lineError: lineRun.error };
     const output = lineRun.value.output;
@@ -1098,6 +1121,8 @@ test('word boxes map back through the recorded chain; confidence is diagnostic',
   // Noise raster: the engine either finds no text (unreadable_pixels —
   // honest completed-empty) or emits scored occurrences; never a truth
   // claim either way.
+  expect(out.noiseRun, 'synthetic-harness reader open/plan/extract').not.toBeNull();
+  expect(out.noiseRun.ok).toBe(true);
   const noise = out.noiseRun.value.output;
   expect(['completed']).toContain(noise.check.status);
   if (noise.occurrences.length === 0) {
