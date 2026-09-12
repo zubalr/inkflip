@@ -1,0 +1,38 @@
+/* IconButton styles. Consumes central semantic design tokens from tokens.css.
+   Ownership: T07. */
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-min-height);
+  height: var(--control-min-height);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--motion-state), border-color var(--motion-state), color var(--motion-state);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+
+.iconButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bordered {
+  border-color: var(--color-line);
+  background: var(--color-paper);
+}

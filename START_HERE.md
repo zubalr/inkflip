@@ -1,50 +1,34 @@
-# Start one session in each app
+# Astra coordinates the native worker team
 
 Private repository: https://github.com/zubalr/inkflip
 
-Start **Devin Local first** in Devin Desktop, using the existing project directory
-and SWE-2 Max. Use Normal mode and enable Subagents (Preview). Paste
-`prompts/DEVIN.md`. Then paste `prompts/ANTIGRAVITY.md` in Antigravity and
-`prompts/ZCODE.md` in ZCode. Each file is the complete entry prompt.
+Continue the existing **Codex/Astra task** as the sole coordinator, Beads writer,
+GitHub publisher and integrator. Its durable entry prompt is `prompts/CODEX.md`.
+Astra owns hard implementation and independent acceptance, delegates substantial
+implementation to **Devin Local SWE-2 Max** on the Mac, and bounded volume work
+to **ZCode Goal mode** on Homebase.
 
-Prepared local folders (relative to the parent `pdf project` directory):
+Worker entry prompts are `prompts/DEVIN.md` and `prompts/ZCODE.md`. Both require
+current Beads grants and canonical instructions; earlier Devin-as-lead prompts
+are superseded. Do not run another integration lead. Read `docs/HOMEBASE.md`
+for paths, native execution, transport and the initial work sequence.
 
-| App | Folder | Starting branch |
-| --- | --- | --- |
-| Devin Local | `original` | `main` |
-| Antigravity | `worktrees/pdf-t06` | `session/antigravity` |
-| ZCode | `worktrees/pdf-t05` | `session/zcode` |
+The owner explicitly removed fixed worker maxima. Astra sizes each wave to
+ready independent work, machine resources and review capacity. SWE may run
+native general subagents, Astra may use Codex subagents, and ZCode may use its
+available native parallelism. Each writer needs an isolated worktree and scope.
+Native platform limits remain; additional agents must serve concrete work.
 
-Keep the Devin coordinator in the existing `original` folder. The session creates
-isolated task worktrees when needed; leave the canonical checkout available for
-integration. All three apps read the same Beads database. Use the current prompt
-files; previously copied Cloud prompts are superseded.
+Keep the Mac awake and Codex running for local coordination and same-task
+heartbeat continuation. Leave Cloud, Antigravity and the old Mac ZCode stopped.
+Never reboot, shut down, suspend or power-cycle Homebase.
 
-The owner selected Local because the [SWE-2 promotion](https://devin.ai/pricing)
-applies to Desktop and CLI through October 10, 2026 (verified September 12 in
-Qatar). It does not authorize Cloud usage. Follow the model and subagent rules in
-`docs/NATIVE_PASSES.md`; recheck the offer if resuming after it expires.
+Homebase receives code and native read-only Beads state from a local Git relay
+and returns checkpoint branches over SSH. It needs no personal GitHub login.
+The actual source/state transfer, T27 checkpoint return and retry were verified.
+The local SWE CLI exposes model selection, session resume and ACP; its actual
+runtime control must be verified before a swarm is considered launched.
 
-The app model, GitHub access and native Teamwork/goal confirmation are UI choices;
-prompt text cannot grant account access or bypass those dialogs. The sessions
-arrange their own branches, delegation, handoffs, reviews, commits and integration.
-You do not paste a prompt for each T-number. See `docs/NATIVE_PASSES.md`.
-
-| Pass | Result | Tasks after accepted T01 |
-| --- | --- | --- |
-| 1 | Browser investigation through G1, plus native foundations | 25 |
-| 2 | Complete browser experience and native regression through G2/G3 | 12 |
-| 3 | Quality, experiments and pre-release review | 16 |
-
-T54 is the separate publication/deployment decision. These are intended work
-boundaries, not guarantees within a provider quota/session limit. Reuse the same
-prompt to resume; Beads determines where to continue. Do not use historical
-T01/T02/T03/T05/T06 entry prompts.
-
-The current implementation is the accepted T01 scaffold. Product work begins at
-T02. Check the existing scaffold with:
-
-```sh
-python3 scripts/task_acceptance.py run verify
-python3 scripts/coordination.py task T02
-```
+`execution/passes.json` owns static allocation; Beads owns current work, notes
+and acceptance. Advance passes only after actual gates. Preserve unfinished work
+on quota or external blockers. Public deployment T54 remains an owner decision.

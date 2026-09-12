@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "task_id": "T07",
+  "beads_id": "pdf-t07",
+  "disposition": "accepted",
+  "evaluated_commit": "50ff46efaad0e4ab3a2f0ff23a01e5495ffd7ef3",
+  "evaluated_at": "2026-09-12T02:39:47.337262+00:00",
+  "contract_digest": "e893ed882d1aeb125789da1fc102a80fe8b3b67f7e5c0a6375c6950e82dc441f",
+  "worker": "antigravity-t07",
+  "commands": [
+    {
+      "segment": "bun run test:a11y -- tests/a11y/primitives.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:a11y",
+        "--",
+        "tests/a11y/primitives.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:a11y",
+        "--",
+        "tests/a11y/primitives.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/home/ubuntu/repos/inkflip",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T07/commands.log": "a0cdafd882db69cebec1b88d5f4095f2d7aabb52aef631289b0b9e0b400281dc",
+    "artifacts/tasks/T07/coordinator-commands.log": "a437af02c70c77f9ebfda634c615d25561d89979d929fdf55d67c59c2f7ffdd6",
+    "artifacts/tasks/T07/focus-outline.png": "33a974d80c170c54f7a741d5a13a7346f28de11120f1fb200081d55a32bac801",
+    "artifacts/tasks/T07/modal-open.png": "7ccade757d45d1835770fc1563cbc21c41683ec469da0ee5ee6fc3b0ab3c18e2",
+    "artifacts/tasks/T07/peer-review.md": "6a492643f93e9d04630838673aa8615a751875c47e800d12770b3905d19b698b",
+    "artifacts/tasks/T07/primitives-overview.png": "11d723880c671af41d945ad309cf51f5cd0fe41ac91e68c91d91e69c64f8a9b2",
+    "artifacts/tasks/T07/receipt.json": "2f324a1c553aa092474602ace36854a7f0e5d8ee0508f74c543773a54463e364",
+    "artifacts/tasks/T07/replace-dialog.png": "fd4f668fda695d62b84506d19f019f58e6bfab399775362a386676144c6e1980",
+    "artifacts/tasks/T07/review.md": "6a492643f93e9d04630838673aa8615a751875c47e800d12770b3905d19b698b",
+    "artifacts/tasks/T07/run.json": "b238f073b01d020b1dc9e2235d68ca732bbe22435178d5a222b91448344181f6"
+  },
+  "criteria": {
+    "Keyboard can reach/operate all controls": [
+      "artifacts/tasks/T07/commands.log",
+      "artifacts/tasks/T07/primitives-overview.png"
+    ],
+    "Escape/focus return works": [
+      "artifacts/tasks/T07/commands.log",
+      "artifacts/tasks/T07/modal-open.png"
+    ],
+    "no focus trap outside modal": [
+      "artifacts/tasks/T07/commands.log",
+      "artifacts/tasks/T07/modal-open.png"
+    ],
+    "dynamic progress does not announce every OCR token": [
+      "artifacts/tasks/T07/commands.log",
+      "artifacts/tasks/T07/primitives-overview.png"
+    ],
+    "no serious/critical automated violations in primitives.": [
+      "artifacts/tasks/T07/commands.log",
+      "artifacts/tasks/T07/primitives-overview.png",
+      "artifacts/tasks/T07/focus-outline.png",
+      "artifacts/tasks/T07/modal-open.png",
+      "artifacts/tasks/T07/replace-dialog.png"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-cloud-review-t07"
+    ],
+    "path": "artifacts/tasks/T07/review.md"
+  }
+}
