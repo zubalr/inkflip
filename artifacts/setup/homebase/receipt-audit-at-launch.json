@@ -1,0 +1,50 @@
+[
+  {
+    "task": "T01",
+    "validation": "stale receipt: validation inputs changed (.github/workflows/ci.yml, AGENTS.md, apps/web/package.json, apps/web/src/styles/tokens.css, bun.lock)"
+  },
+  {
+    "task": "T02",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/acceptance-commands.json)"
+  },
+  {
+    "task": "T03",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/acceptance-commands.json)"
+  },
+  {
+    "task": "T04",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/homebase.json)"
+  },
+  {
+    "task": "T05",
+    "validation": "stale receipt: validation inputs changed (.github/workflows/ci.yml, AGENTS.md, apps/web/package.json, apps/web/src/styles/tokens.css, bun.lock)"
+  },
+  {
+    "task": "T06",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, bun.lock, bunfig.toml, config/homebase.json, packages/readers-pdfjs/tsconfig.json)"
+  },
+  {
+    "task": "T07",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, bun.lock, bunfig.toml, config/homebase.json, packages/readers-pdfjs/tsconfig.json)"
+  },
+  {
+    "task": "T09",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, bun.lock, bunfig.toml, config/homebase.json, scripts/homebase_pre_push.py)"
+  },
+  {
+    "task": "T11",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/homebase.json)"
+  },
+  {
+    "task": "T12",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/homebase.json)"
+  },
+  {
+    "task": "T24",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, apps/web/src/styles/tokens.css, bun.lock, bunfig.toml, config/homebase.json)"
+  },
+  {
+    "task": "T26",
+    "validation": "stale receipt: validation inputs changed (AGENTS.md, bun.lock, bunfig.toml, config/homebase.json, packages/readers-pdfjs/tsconfig.json)"
+  }
+]

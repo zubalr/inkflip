@@ -1,0 +1,68 @@
+{
+  "observed_at": "2026-09-12T04:06:00Z",
+  "scope": "native setup launch evidence; not product acceptance or live task state",
+  "source_commit": "65e84da4ae25c6f292ef265ed5b0d69c7982a824",
+  "coordination_review": {
+    "reviewer": "Confucius / 01a09395-53bf-7810-9309-38dd115497df",
+    "result": "no actionable findings",
+    "registered_verify": {
+      "passed": 114,
+      "bootstrap": 49,
+      "native_bootstrap": 2,
+      "coordination": 63
+    },
+    "report": "astra-adaptive-review.md"
+  },
+  "source_state_relay": {
+    "result": "published source and native Dolt; Homebase fast-forwarded canonical main and native status --sync returned T27",
+    "main": "65e84da4ae25c6f292ef265ed5b0d69c7982a824",
+    "dolt_ref": "b84d261cf9366cdcc0a6fc383829fe6ea67b97a1"
+  },
+  "swe": {
+    "app": "Devin Desktop",
+    "session": "equable-muskox",
+    "title": "Inkflip Native Pass: SWE-2 Max Integrator Lead",
+    "current_role": "SWE implementation swarm under Astra",
+    "selected_parent_model": "SWE-2 Max",
+    "mode": "Local",
+    "native_children": [
+      {
+        "id": "24843e3f",
+        "role": "T10 planCrop fix",
+        "observed_state": "In progress"
+      },
+      {
+        "id": "a21ec7ce",
+        "role": "T27 source review",
+        "observed_state": "In progress"
+      }
+    ],
+    "child_model_basis": "native general-profile inheritance documented; separate child model IDs not exposed",
+    "old_writers": "Native lead read T09 ea0b2f40 and T10 d6100472 as canceled before launching; checkpoints preserved",
+    "control_limitation": "CLI print and resume smoke work, but CLI resume of this legacy desktop session failed to start ACP agent session. Native app prompt, response and two actual child launches verified."
+  },
+  "zcode": {
+    "host": "Homebase",
+    "app": "ZCode",
+    "selected_model": "GLM-5.3-Flash",
+    "effort": "Max",
+    "goal": "Complete all Astra-granted Inkflip ZCode deliverables across the three defined passes",
+    "observed_state": "Native Goal created and Working; read canonical prompt and synced T27 grant, then merged published main into saved T27 branch at ca2dbb1 and began dependency/check preparation",
+    "initial_task": "T27",
+    "limitation": "No completed product checkpoint or Goal completion claimed at launch"
+  },
+  "astra_continuation": {
+    "automation_id": "continue-inkflip-coordination",
+    "kind": "same-task heartbeat",
+    "interval_minutes": 5,
+    "state": "ACTIVE",
+    "approval": "Owner explicitly approved after initial automatic review rejection; creation and view succeeded",
+    "limitation": "Local continuation needs Mac and Codex running; first scheduled wake not yet observed"
+  },
+  "remaining_product_work": [
+    "T10 implementation and heavy browser verification",
+    "T27 current Linux checks and final independent review",
+    "T26 font-dependent test oracle correction under pdf-932",
+    "Refresh all 12 currently accepted task receipts after current candidates integrate, then continue product passes"
+  ]
+}
