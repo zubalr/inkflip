@@ -44,7 +44,14 @@
       "evidence": [
         "artifacts/tasks/T15/commands.log",
         "artifacts/tasks/T15/network-receipt.json",
-        "artifacts/tasks/T15/capture/",
+        "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+        "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+        "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+        "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+        "artifacts/tasks/T15/capture/04-warm-harness.json",
+        "artifacts/tasks/T15/capture/05-offline-harness.json",
+        "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+        "artifacts/tasks/T15/capture/07-offline-cold-model.json",
         "artifacts/tasks/T15/run.json"
       ]
     },
@@ -70,7 +77,14 @@
       "evidence": [
         "artifacts/tasks/T15/commands.log",
         "artifacts/tasks/T15/network-receipt.json",
-        "artifacts/tasks/T15/capture/",
+        "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+        "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+        "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+        "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+        "artifacts/tasks/T15/capture/04-warm-harness.json",
+        "artifacts/tasks/T15/capture/05-offline-harness.json",
+        "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+        "artifacts/tasks/T15/capture/07-offline-cold-model.json",
         "artifacts/tasks/T15/run.json"
       ]
     },
@@ -80,7 +94,14 @@
       "evidence": [
         "artifacts/tasks/T15/commands.log",
         "artifacts/tasks/T15/network-receipt.json",
-        "artifacts/tasks/T15/capture/"
+        "artifacts/tasks/T15/capture/00-cold-boot-index.json",
+        "artifacts/tasks/T15/capture/01-cold-open-mount.json",
+        "artifacts/tasks/T15/capture/02-cold-harness-ocr-export.json",
+        "artifacts/tasks/T15/capture/03-cold-import-reopen.json",
+        "artifacts/tasks/T15/capture/04-warm-harness.json",
+        "artifacts/tasks/T15/capture/05-offline-harness.json",
+        "artifacts/tasks/T15/capture/06-offline-cold-nav.json",
+        "artifacts/tasks/T15/capture/07-offline-cold-model.json"
       ]
     }
   },
