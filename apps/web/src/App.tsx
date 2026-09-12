@@ -1,36 +1,67 @@
-import styles from "./styles/App.module.css";
+import React, { useState, useEffect } from "react";
+import { Home } from "./pages/Home";
+import { Workspace } from "./pages/Workspace";
+import type { ViewerDoc } from "./features/viewer/types";
+
+export type Route = "home" | "workspace";
 
 export default function App() {
-  return (
-    <>
-      <header className={styles.header}>
-        <span className={styles.brand}>
-          <span className={styles.mark} aria-hidden="true">
-            if
-          </span>
-          inkflip
-          <span className={styles.descriptor}>PDF reading inspector</span>
-        </span>
-      </header>
-      <main className={styles.main}>
-        <p className={styles.eyebrow}>One document. More than one reading.</p>
-        <h1 className={styles.headline}>
-          Your PDF can look right and <em>read wrong</em>.
-        </h1>
-        <p className={styles.lede}>
-          Compare the page with named text readings. Find a difference, inspect
-          its source, and keep the evidence on your device.
-        </p>
-        <section className={styles.scaffold} aria-label="Scaffold status">
-          <h2>Bootstrap scaffold</h2>
-          <p>
-            This checkout builds the workspace, command harness and visual
-            foundation only. Document opening, readers, comparison and export
-            are implemented by later tasks. Nothing here processes or transmits
-            a file.
-          </p>
-        </section>
-      </main>
-    </>
-  );
+  const getInitialRoute = (): { route: Route; withExample: boolean } => {
+    const hash = window.location.hash.toLowerCase();
+    const pathname = window.location.pathname.toLowerCase();
+    const search = window.location.search.toLowerCase();
+
+    const withExample = search.includes("example=true") || hash.includes("example=true");
+
+    if (hash.includes("workspace") || pathname.includes("workspace")) {
+      return { route: "workspace", withExample };
+    }
+    return { route: "home", withExample: false };
+  };
+
+  const initial = getInitialRoute();
+  const [route, setRoute] = useState<Route>(initial.route);
+  const [withExample, setWithExample] = useState<boolean>(initial.withExample);
+  const [activeDoc, setActiveDoc] = useState<ViewerDoc | null>(null);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const current = getInitialRoute();
+      setRoute(current.route);
+      setWithExample(current.withExample);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigateToWorkspace = (loadExample = true) => {
+    setWithExample(loadExample);
+    setRoute("workspace");
+    window.location.hash = loadExample ? "#/workspace?example=true" : "#/workspace";
+  };
+
+  const navigateToHome = () => {
+    setRoute("home");
+    window.location.hash = "#/";
+  };
+
+  if (route === "workspace") {
+    return (
+      <Workspace
+        onNavigateHome={navigateToHome}
+        initialWithExample={withExample}
+        initialDoc={activeDoc}
+        onImportReport={(doc) => setActiveDoc(doc)}
+        onOpenFile={(_file) => {
+          setActiveDoc(null);
+        }}
+        onCloseDoc={() => {
+          setActiveDoc(null);
+        }}
+      />
+    );
+  }
+
+  return <Home onNavigateWorkspace={navigateToWorkspace} />;
 }
