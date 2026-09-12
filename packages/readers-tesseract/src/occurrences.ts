@@ -82,11 +82,14 @@ function bboxPolygonCanonical(
   ) {
     return null;
   }
+  // Perimeter order TL,TR,BR,BL — a TL,TR,BL,BR ordering would be a
+  // self-crossing bow-tie whose shoelace area is zero, which the
+  // contract validator rightly rejects as degenerate geometry.
   const corners: Point[] = [
     [b.x0, b.y0],
     [b.x1, b.y0],
-    [b.x0, b.y1],
     [b.x1, b.y1],
+    [b.x0, b.y1],
   ];
   return corners.map((p) => {
     const [x, y] = apply(ocr2canon, p);

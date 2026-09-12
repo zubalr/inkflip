@@ -5,10 +5,11 @@
  * tesseract.js: the resolved package is an `apps/web` dependency
  * frozen in bun.lock by T02, and the adapter receives the concrete
  * module (`import Tesseract from 'tesseract.js'`) from its caller.
- * This keeps the contract-honest wiring — `createWorker('eng',
- * OEM.LSTM_ONLY, { workerPath, corePath, langPath, gzip:false,
- * workerBlobURL:false, cacheMethod:'readOnly', logger })` — inside the
- * adapter while the library itself stays an app-owned dependency.
+ * This keeps the contract-honest wiring — `createWorker(
+ * [{ code:'eng', data:'eng' }], OEM.LSTM_ONLY, { workerPath, corePath,
+ * langPath, gzip:false, workerBlobURL:false, cacheMethod:'readOnly',
+ * logger })` — inside the adapter while the library itself stays an
+ * app-owned dependency.
  *
  * The worker options below are the entire reason the adapter exists:
  * explicit same-origin staged paths and `workerBlobURL:false` so no
@@ -84,13 +85,39 @@ export interface TesseractEngineWorker {
 }
 
 /**
+ * The tesseract.js v7 `Lang` object payload (`{ code, data }`).
+ *
+ * On the pinned 7.0.0 worker this shape has one non-obvious contract
+ * (verified against `src/worker-script/index.js` empirically):
+ * `loadLanguage` uses `code` for the traineddata file name and reads
+ * `data` ONLY on a cache miss, while `initialize` maps each payload to
+ * `payload.data` as the Init() language name. Supplying real bytes in
+ * `data` is therefore misinterpreted as a language name and fails
+ * initialization — the adapter passes `data === code` and delivers the
+ * verified traineddata bytes through the pre-seeded cache slot (see
+ * `createEngineWorker`).
+ */
+export interface EngineLangPayload {
+  /** Engine language code, e.g. 'eng' — also the Init() lang name. */
+  readonly code: string;
+  /**
+   * Cache-miss fallback content consumed by upstream `loadLanguage`.
+   * Must equal `code` on pinned 7.0.0: a miss writes these bytes as
+   * `${code}.traineddata`, so the language code itself is a 3-byte
+   * poison payload that fails Init() honestly — a miss can never
+   * silently become an unverified model download.
+   */
+  readonly data: string;
+}
+
+/**
  * Structural match for the tesseract.js module namespace. The
  * concrete module from apps/web's locked dependency satisfies this;
  * tests inject the real staged build.
  */
 export interface TesseractEngineModule {
   createWorker(
-    langs: string | readonly string[],
+    langs: string | readonly string[] | readonly EngineLangPayload[],
     oem: number,
     options: Record<string, unknown>,
     config?: unknown,
