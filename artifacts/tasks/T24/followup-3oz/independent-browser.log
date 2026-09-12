@@ -1,0 +1,16 @@
+TAP version 13
+# Subtest: browser-bundled guard accepts a portable report whose fixed CSS and PNGs render without network resources
+ok 1 - browser-bundled guard accepts a portable report whose fixed CSS and PNGs render without network resources
+  ---
+  duration_ms: 796.190292
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1210.389792
