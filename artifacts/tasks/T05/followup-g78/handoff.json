@@ -1,0 +1,86 @@
+{
+  "task": "T05",
+  "bead": "pdf-g78",
+  "worker": "Codex fixture worker",
+  "branch": "work/codex/pdf-g78",
+  "base": "008ed367d6d7b462b72f00a22d8d2e40b89e442e",
+  "implementation_commit": "fd822d95266272d548f0ba279edd49424b55840c",
+  "ready_for_review": true,
+  "checkpoint_only": true,
+  "whole_bead_complete": false,
+  "writer_yielded": true,
+  "added_families": [
+    "F04",
+    "F05",
+    "F06",
+    "F10",
+    "F11",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21"
+  ],
+  "remaining_families": [
+    "F09",
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F22",
+    "F23",
+    "F24",
+    "F25",
+    "F26"
+  ],
+  "commands": [
+    {
+      "command": "python3 scripts/make_fixtures.py --check",
+      "exit": 0,
+      "count": 91,
+      "unit": "generated files",
+      "evidence": "artifacts/tasks/T05/followup-g78/generate-check.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/fixtures -v",
+      "exit": 0,
+      "count": 50,
+      "unit": "tests",
+      "evidence": "artifacts/tasks/T05/followup-g78/tests.log"
+    },
+    {
+      "command": "python3 scripts/task_acceptance.py run test:fixtures",
+      "exit": 0,
+      "count": 50,
+      "unit": "tests",
+      "evidence": "artifacts/tasks/T05/followup-g78/registered-tests.log"
+    },
+    {
+      "command": "/Users/zubair/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 artifacts/tasks/T05/followup-g78/inspect_priority.py",
+      "exit": 0,
+      "count": 23,
+      "unit": "PDF observations (21 PNGs, 2 expected render failures)",
+      "evidence": "artifacts/tasks/T05/followup-g78/reader-render-observations.json"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit": 0
+    }
+  ],
+  "evidence": [
+    "artifacts/tasks/T05/followup-g78/priority-contact-sheet.png",
+    "artifacts/tasks/T05/followup-g78/review.md",
+    "artifacts/tasks/T05/followup-g78/complexity.json",
+    "artifacts/tasks/T05/followup-g78/baseline-hashes.json"
+  ],
+  "limitations": [
+    "Eleven families remain; resume same branch after parent review/handoff.",
+    "Bundled Poppler timed out; actual bounded PNGs use PDFium 153.0.7999.0 / pypdfium2 5.13.0. Raw text uses bundled pypdf 6.10.0, not native frozen adapter acceptance.",
+    "F20 proves controlled double behavior, not production supervisor; F21 consumers still need actual no-egress/no-document-action checks.",
+    "No OCR/model init, native/browser acceptance, GitHub publication or Beads mutation."
+  ],
+  "dependency_requests": [
+    "F13/F14: inspect already-pinned staged fonts/notices before embedding; defer only dependent font families if repertoire/rights cannot be established. No dependency added."
+  ]
+}
