@@ -27,7 +27,6 @@
         "tests/browser/open.spec.ts:457 '1000-page boundary: real generated PDF opens; 1001 is a distinct error'"
       ],
       "evidence": [
-        "tests/browser/open.spec.ts",
         "artifacts/tasks/T08/commands.log",
         "artifacts/tasks/T08/run.json"
       ]
@@ -39,7 +38,6 @@
         "tests/browser/open.spec.ts:243 'wrong MIME, wrong header, encrypted and malformed are distinct errors'"
       ],
       "evidence": [
-        "tests/browser/open.spec.ts",
         "artifacts/tasks/T08/commands.log",
         "artifacts/tasks/T08/run.json"
       ]
@@ -52,7 +50,6 @@
         "tests/browser/open.spec.ts:927 'clear releases the document and returns the drop zone to idle'"
       ],
       "evidence": [
-        "tests/browser/open.spec.ts",
         "artifacts/tasks/T08/commands.log",
         "artifacts/tasks/T08/run.json"
       ]
@@ -65,7 +62,6 @@
         "tests/browser/open.spec.ts:403 'mobile profile: 10MiB gate and 5-page selection cap'"
       ],
       "evidence": [
-        "tests/browser/open.spec.ts",
         "artifacts/tasks/T08/commands.log",
         "artifacts/tasks/T08/run.json"
       ]
@@ -77,7 +73,6 @@
         "tests/browser/open.spec.ts:831 'no document data reaches the URL, storage or any network request'"
       ],
       "evidence": [
-        "tests/browser/open.spec.ts",
         "artifacts/tasks/T08/commands.log",
         "artifacts/tasks/T08/run.json"
       ]
