@@ -1,8 +1,8 @@
 {
   "task": "T16",
   "beads_id": "pdf-t16",
-  "evaluated_commit": "35f524b13a093e106301c344933919a079321da3",
-  "evaluated_at": "2026-09-12T11:56:41.629354+00:00",
+  "evaluated_commit": "c2ce2d4b66e00797adef81d5c7c005d204361653",
+  "evaluated_at": "2026-09-12T12:20:28.404168+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-qqx9svqg/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-7vcw9ps9/results",
         "--test",
         "tests/reports/export.test.mjs"
       ],
@@ -37,7 +37,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t16",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ]
