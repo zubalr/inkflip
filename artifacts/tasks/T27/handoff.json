@@ -52,7 +52,7 @@
       "Partial review's low-sev tessdata observation does not reproduce in the current environment: suite passes 20/20 with and without TESSDATA_PREFIX; local model-hash test passes in both runs."
     ],
     "t27_scoped_fixes_applied": "None required: no confirmed T27-scoped code finding from the partial review (verdict was 'incomplete - run stopped', scope audit clean) or from the Linux verification. T27 source is byte-identical to reviewed 394e65c.",
-    "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance"
+    "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [
     {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 20}, "host": "macOS arm64 (implementation-time run)"},
