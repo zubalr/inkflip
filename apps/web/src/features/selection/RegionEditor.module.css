@@ -1,0 +1,106 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-family: var(--font-ui);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.surfaceWrap {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-muted);
+  padding: var(--space-2);
+}
+
+.surface {
+  position: relative;
+  touch-action: none;
+  cursor: crosshair;
+  background: var(--color-paper-pure);
+}
+
+.canvas {
+  display: block;
+  image-rendering: auto;
+}
+
+.regionRect {
+  position: absolute;
+  border: 2px solid var(--color-teal);
+  background: rgba(0, 108, 103, 0.12);
+  pointer-events: none;
+}
+
+.paddedRect {
+  position: absolute;
+  border: 1px dashed var(--color-rust);
+  pointer-events: none;
+}
+
+.limitation {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-rust);
+}
+
+.fields {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.fieldInput {
+  width: 7em;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  background: var(--color-paper-pure);
+  color: var(--color-ink);
+}
+
+.labelField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  max-width: 24em;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-rust);
+}
+
+.committed {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-teal);
+  font-variant-numeric: tabular-nums;
+}

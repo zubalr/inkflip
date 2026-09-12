@@ -1,0 +1,74 @@
+/**
+ * Canonical user-facing strings for the open feature.
+ *
+ * Source of truth: `planning/product/copy.json` (state labels are shared with
+ * RUNTIME_LIFECYCLE.md). The planning package is frozen, so the strings are
+ * mirrored here verbatim — if the two ever disagree, copy.json wins and this
+ * file must be corrected through the contract owner, not edited ad hoc.
+ */
+
+export const OPEN_COPY = {
+  /** input.drop — the drop-zone invitation. */
+  drop: "Drop one PDF here, or choose a file",
+  /** input.private — privacy statement shown before reading. */
+  private: "Your file is processed in this browser. It is not uploaded.",
+  /** input.validation — progress while sniffing the candidate. */
+  validation: "Checking the file…",
+  /** input.metadata — progress while the reader loads page metadata. */
+  metadata: "Opening the page information…",
+  /** input.notpdf — wrong declared type and/or missing %PDF- header. */
+  notPdf:
+    "This file could not be opened as a PDF. Choose a PDF you are permitted to inspect.",
+  /** input.toobig — {limit} is replaced with the human limit label. */
+  tooBig:
+    "This file exceeds the {limit} local browser limit. Choose a smaller file or use the local CLI.",
+  /** input.encrypted — password-protected input is unsupported. */
+  encrypted:
+    "Encrypted PDFs are not supported in this release. Open an unencrypted copy you are permitted to inspect.",
+  /** input.malformed — the reader could not open the file. */
+  malformed:
+    "The reader could not open this PDF. No document check was completed.",
+  /** pages.toomany — document exceeds the supported page count. */
+  tooManyPages:
+    "This PDF exceeds the supported page count. No pages were silently skipped.",
+  /** input.replace.* — replacement confirmation (also T07 dialog copy). */
+  replaceTitle: "Open a different PDF?",
+  replaceBody:
+    "This clears the current file and its unsaved report from the workspace. Download the evidence first to keep it.",
+  replaceConfirm: "Clear and open file",
+  replaceCancel: "Keep this file",
+  /** clear.action / clear.done — workspace clearing labels. */
+  clearAction: "Clear this file",
+} as const;
+
+export const SELECTION_COPY = {
+  /** pages.title */
+  title: "Choose what to check",
+  /** pages.summary — {selected}/{total} interpolation. */
+  summary: "{selected} of {total} pages selected",
+  /** pages.native.limit — shown whenever the run cap bites. */
+  nativeLimit:
+    "Check up to {limit} pages in this run. Other pages remain not checked.",
+  /** pages.start */
+  start: "Compare selected pages",
+  /** pages.region / hint / expanded */
+  region: "Select a region",
+  regionHint:
+    "Drag a region on the page, or enter its boundaries with the keyboard.",
+  regionExpanded:
+    "OCR includes the outlined padding around this region.",
+} as const;
+
+/** `{name}` interpolation matching copy.json templates. */
+export function fill(template: string, values: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key]! : match,
+  );
+}
+
+/** Human-readable byte limit for messages (e.g. "20 MiB"). */
+export function byteLimitLabel(bytes: number): string {
+  if (bytes % (1024 * 1024) === 0) return `${bytes / (1024 * 1024)} MiB`;
+  if (bytes % 1024 === 0) return `${bytes / 1024} KiB`;
+  return `${bytes} bytes`;
+}

@@ -1,0 +1,50 @@
+.drop {
+  border: 2px dashed var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  transition:
+    border-color var(--motion-state) ease,
+    background var(--motion-state) ease;
+}
+
+.dragging {
+  border-color: var(--color-teal);
+  background: var(--color-surface-subtle);
+}
+
+.busy {
+  opacity: 0.85;
+}
+
+.invite {
+  margin: 0;
+  font-size: 18px;
+  color: var(--color-ink);
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.privacy {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.phase {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-teal);
+}
