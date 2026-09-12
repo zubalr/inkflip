@@ -1,186 +1,186 @@
 {
- "version": 1,
- "repository": "zubalr/inkflip",
- "default_branch": "main",
- "state_authority": "Beads",
- "integration_owner": "devin",
- "max_active_workers": null,
- "worker_budgets": {
-  "codex": 0,
-  "devin": null,
-  "antigravity": null,
-  "zcode": null
- },
- "apps": {
-  "devin": {
-   "role": "Mac Devin Local SWE-2 sole orchestrator, hard implementation and integrator",
-   "tasks": [
-    "T02",
-    "T03",
-    "T04",
-    "T08",
-    "T09",
-    "T10",
-    "T11",
-    "T12",
-    "T15",
-    "T16",
-    "T18",
-    "T22",
-    "T23",
-    "T24",
-    "T25",
-    "T29",
-    "T30",
-    "T31",
-    "T32",
-    "T33",
-    "T34",
-    "T36",
-    "T39",
-    "T40",
-    "T43",
-    "T46",
-    "T48",
-    "T51",
-    "T52",
-    "T53",
-    "T55"
-   ],
-   "branch_prefix": "work/devin/",
-   "port": 5182
+  "version": 1,
+  "repository": "zubalr/inkflip",
+  "default_branch": "main",
+  "state_authority": "Beads",
+  "integration_owner": "devin",
+  "max_active_workers": null,
+  "worker_budgets": {
+    "codex": 0,
+    "devin": null,
+    "antigravity": null,
+    "zcode": null
   },
-  "antigravity": {
-   "role": "Mac interface, accessibility, visual implementation and independent review under Devin",
-   "tasks": [
-    "T06",
-    "T07",
-    "T13",
-    "T14",
-    "T17",
-    "T19",
-    "T20",
-    "T37",
-    "T38",
-    "T49",
-    "T50"
-   ],
-   "branch_prefix": "work/antigravity/",
-   "port": 5186
+  "apps": {
+    "devin": {
+      "role": "Mac Devin Local SWE-2 sole orchestrator, hard implementation and integrator",
+      "tasks": [
+        "T02",
+        "T03",
+        "T04",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T15",
+        "T16",
+        "T18",
+        "T22",
+        "T23",
+        "T24",
+        "T25",
+        "T29",
+        "T30",
+        "T31",
+        "T32",
+        "T33",
+        "T34",
+        "T36",
+        "T39",
+        "T40",
+        "T43",
+        "T46",
+        "T48",
+        "T51",
+        "T52",
+        "T53",
+        "T55"
+      ],
+      "branch_prefix": "work/devin/",
+      "port": 5182
+    },
+    "antigravity": {
+      "role": "Mac interface, accessibility, visual implementation and independent review under Devin",
+      "tasks": [
+        "T06",
+        "T07",
+        "T13",
+        "T14",
+        "T17",
+        "T19",
+        "T20",
+        "T37",
+        "T38",
+        "T49",
+        "T50"
+      ],
+      "branch_prefix": "work/antigravity/",
+      "port": 5186
+    },
+    "zcode": {
+      "role": "Homebase ZCode Goal: bounded native readers, fixtures, repeated verification and experiments under Devin",
+      "tasks": [
+        "T05",
+        "T21",
+        "T26",
+        "T27",
+        "T28",
+        "T35",
+        "T41",
+        "T42",
+        "T44",
+        "T45",
+        "T47"
+      ],
+      "branch_prefix": "work/zcode/",
+      "port": 5185
+    },
+    "codex": {
+      "role": "Inactive after transfer; preserved historical grants only",
+      "tasks": [],
+      "branch_prefix": "work/codex/",
+      "port": 5181
+    }
   },
-  "zcode": {
-   "role": "Homebase ZCode Goal: bounded native readers, fixtures, repeated verification and experiments under Devin",
-   "tasks": [
-    "T05",
-    "T21",
-    "T26",
-    "T27",
-    "T28",
-    "T35",
-    "T41",
-    "T42",
-    "T44",
-    "T45",
-    "T47"
-   ],
-   "branch_prefix": "work/zcode/",
-   "port": 5185
-  },
-  "codex": {
-   "role": "Inactive after transfer; preserved historical grants only",
-   "tasks": [],
-   "branch_prefix": "work/codex/",
-   "port": 5181
-  }
- },
- "passes": [
-  {
-   "id": 1,
-   "title": "Working browser investigation and parallel native foundations",
-   "tasks": [
-    "T02",
-    "T03",
-    "T04",
-    "T05",
-    "T06",
-    "T07",
-    "T08",
-    "T09",
-    "T10",
-    "T11",
-    "T12",
-    "T13",
-    "T14",
-    "T15",
-    "T16",
-    "T17",
-    "T18",
-    "T22",
-    "T24",
-    "T26",
-    "T27",
-    "T28",
-    "T29",
-    "T31",
-    "T36"
-   ],
-   "gates": [
-    "G1"
-   ]
-  },
-  {
-   "id": 2,
-   "title": "Complete browser experience and native regression workflow",
-   "tasks": [
-    "T19",
-    "T20",
-    "T21",
-    "T23",
-    "T25",
-    "T30",
-    "T32",
-    "T33",
-    "T34",
-    "T35",
-    "T51",
-    "T52"
-   ],
-   "gates": [
-    "G2",
-    "G3"
-   ]
-  },
-  {
-   "id": 3,
-   "title": "Measured quality, experiments and release preparation",
-   "tasks": [
-    "T37",
-    "T38",
-    "T39",
-    "T40",
-    "T41",
-    "T42",
-    "T43",
-    "T44",
-    "T45",
-    "T46",
-    "T47",
-    "T48",
-    "T49",
-    "T50",
-    "T53",
-    "T55"
-   ],
-   "gates": [
-    "G4",
-    "pre-release"
-   ]
-  }
- ],
- "completed_bootstrap": [
-  "T01"
- ],
- "owner_release": [
-  "T54"
- ]
+  "passes": [
+    {
+      "id": 1,
+      "title": "Working browser investigation and parallel native foundations",
+      "tasks": [
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17",
+        "T18",
+        "T22",
+        "T24",
+        "T26",
+        "T27",
+        "T28",
+        "T29",
+        "T31",
+        "T36"
+      ],
+      "gates": [
+        "G1"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Complete browser experience and native regression workflow",
+      "tasks": [
+        "T19",
+        "T20",
+        "T21",
+        "T23",
+        "T25",
+        "T30",
+        "T32",
+        "T33",
+        "T34",
+        "T35",
+        "T51",
+        "T52"
+      ],
+      "gates": [
+        "G2",
+        "G3"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Measured quality, experiments and release preparation",
+      "tasks": [
+        "T37",
+        "T38",
+        "T39",
+        "T40",
+        "T41",
+        "T42",
+        "T43",
+        "T44",
+        "T45",
+        "T46",
+        "T47",
+        "T48",
+        "T49",
+        "T50",
+        "T53",
+        "T55"
+      ],
+      "gates": [
+        "G4",
+        "pre-release"
+      ]
+    }
+  ],
+  "completed_bootstrap": [
+    "T01"
+  ],
+  "owner_release": [
+    "T54"
+  ]
 }

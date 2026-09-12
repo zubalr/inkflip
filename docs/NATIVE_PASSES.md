@@ -36,8 +36,9 @@ Dispatch only from clean, published canonical Mac main with
 `git config inkflip.role integrator`. Homebase's role is `worker`. These settings
 are accident guards, not security identities. Keep writers in isolated task
 checkouts. Before publishing Beads, commit pending native Dolt transitions and
-resolve any sync error. Do not use historical `coordination.py start`/`start-review`
-for native admission.
+resolve any sync error. The historical `coordination.py start`/`start-review`
+self-claim commands are retired and refuse; native admission runs only
+through `native_pass.py dispatch` from the canonical integration checkout.
 
 Use the exact T02 toolchain and frozen locks; dependency installation and Linux
 support require actual execution on the target platform. Read current Beads

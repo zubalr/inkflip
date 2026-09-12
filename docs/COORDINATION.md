@@ -4,7 +4,9 @@ The active cross-app protocol is `docs/NATIVE_PASSES.md`. It supersedes the
 old manual, per-task local admission workflow. The owner approved the private
 remote, commits, pushes, selected harnesses and coordinator integration.
 `coordination.py` still supplies effective contracts and shared validation
-helpers; its historical start commands are not cross-machine admission.
+helpers; its historical start commands are not cross-machine admission and
+now refuse — the coordinator admits work only through `native_pass.py
+dispatch` from the canonical integration checkout.
 
 ## Repository and OSS quality
 

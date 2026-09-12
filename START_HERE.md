@@ -1,34 +1,40 @@
-# Astra coordinates the native worker team
+# Devin Local coordinates the native worker team
 
 Private repository: https://github.com/zubalr/inkflip
 
-Continue the existing **Codex/Astra task** as the sole coordinator, Beads writer,
-GitHub publisher and integrator. Its durable entry prompt is `prompts/CODEX.md`.
-Astra owns hard implementation and independent acceptance, delegates substantial
-implementation to **Devin Local SWE-2 Max** on the Mac, and bounded volume work
-to **ZCode Goal mode** on Homebase.
+Continue the existing **Devin Local SWE-2 Max session** on the Mac as the sole
+coordinator, hard-work owner, Beads writer, private GitHub publisher and
+integrator. Its durable entry prompt is `prompts/DEVIN.md`. **Antigravity** on
+the Mac owns the browser interface/accessibility path and independent review;
+**ZCode** works through its existing Goal on Homebase. Codex has yielded all
+project mutations and keeps its heartbeat paused. Do not run another
+integration lead. Earlier Astra-led and stop instructions are superseded.
 
-Worker entry prompts are `prompts/DEVIN.md` and `prompts/ZCODE.md`. Both require
-current Beads grants and canonical instructions; earlier Devin-as-lead prompts
-are superseded. Do not run another integration lead. Read `docs/HOMEBASE.md`
-for paths, native execution, transport and the initial work sequence.
+Worker entry prompts are `prompts/ANTIGRAVITY.md` and `prompts/ZCODE.md`. Both
+require current Beads grants and canonical instructions. Read `AGENTS.md`,
+`docs/NATIVE_PASSES.md` and `docs/HOMEBASE.md` for paths, native execution,
+transport and the current work sequence.
 
-The owner explicitly removed fixed worker maxima. Astra sizes each wave to
-ready independent work, machine resources and review capacity. SWE may run
-native general subagents, Astra may use Codex subagents, and ZCode may use its
-available native parallelism. Each writer needs an isolated worktree and scope.
-Native platform limits remain; additional agents must serve concrete work.
+The project has no fixed numeric worker ceiling. The coordinator sizes each
+wave to independent scope, memory/load, independent review throughput and
+actual running descendants — never historical cards. Devin uses native general
+subagents, Antigravity uses its installed native facilities, and ZCode uses
+its existing Goal delegation. Configured finite budgets still bound their app
+(codex stays zero); native provider/session limits remain. Each writer needs
+a named role, an isolated worktree, a disjoint scope, and unique ports/output
+paths. Do not spawn idle recursive supervisors or a parallel tracker.
 
-Keep the Mac awake and Codex running for local coordination and same-task
-heartbeat continuation. Leave Cloud, Antigravity and the old Mac ZCode stopped.
-Never reboot, shut down, suspend or power-cycle Homebase.
+Only the canonical integration checkout on main dispatches with
+`scripts/native_pass.py dispatch`. The historical `coordination.py
+start`/`start-review` self-claim commands are retired and refuse; workers
+never claim Beads themselves. One heavy OCR/corpus/performance run executes
+at a time, with its holder recorded in Beads and an explicit release.
 
-Homebase receives code and native read-only Beads state from a local Git relay
-and returns checkpoint branches over SSH. It needs no personal GitHub login.
-The actual source/state transfer, T27 checkpoint return and retry were verified.
-The local SWE CLI exposes model selection, session resume and ACP; its actual
-runtime control must be verified before a swarm is considered launched.
+Homebase receives code and native read-only Beads state from a local Git
+relay and returns checkpoint branches over SSH. It needs no personal GitHub
+login. Never reboot, shut down, suspend or power-cycle Homebase.
 
 `execution/passes.json` owns static allocation; Beads owns current work, notes
-and acceptance. Advance passes only after actual gates. Preserve unfinished work
-on quota or external blockers. Public deployment T54 remains an owner decision.
+and acceptance. Advance passes only after actual gates. Preserve unfinished
+work on quota or external blockers. Public deployment T54 remains an owner
+decision.
