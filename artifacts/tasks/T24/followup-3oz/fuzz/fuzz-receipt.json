@@ -1,0 +1,209 @@
+{
+  "by_category": {
+    "archive": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 66
+    },
+    "artifact_gate": {
+      "accept": 15,
+      "crash": 0,
+      "egress": 0,
+      "reject": 0
+    },
+    "artifact_not_report": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 18
+    },
+    "asset_fake": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 36
+    },
+    "asset_meta": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 50
+    },
+    "baseline": {
+      "accept": 58,
+      "crash": 0,
+      "egress": 0,
+      "reject": 0
+    },
+    "bigjson": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 4
+    },
+    "bigstring": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 19
+    },
+    "bitflip": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 81
+    },
+    "corpus_path": {
+      "accept": 4,
+      "crash": 0,
+      "egress": 0,
+      "reject": 29
+    },
+    "deepnest": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 38
+    },
+    "dupkey": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 26
+    },
+    "garbage": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 51
+    },
+    "hostile_string": {
+      "accept": 50,
+      "crash": 0,
+      "egress": 0,
+      "reject": 0
+    },
+    "markup": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 35
+    },
+    "numbers": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 29
+    },
+    "pdf": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 18
+    },
+    "png_ancillary": {
+      "accept": 20,
+      "crash": 0,
+      "egress": 0,
+      "reject": 0
+    },
+    "png_bomb": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 11
+    },
+    "png_corrupt": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 62
+    },
+    "polyglot": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 36
+    },
+    "prototype": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 47
+    },
+    "structure": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 57
+    },
+    "surrogates": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 10
+    },
+    "tar": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 16
+    },
+    "truncate": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 76
+    },
+    "utf16": {
+      "accept": 0,
+      "crash": 0,
+      "egress": 0,
+      "reject": 13
+    },
+    "whitespace": {
+      "accept": 25,
+      "crash": 0,
+      "egress": 0,
+      "reject": 0
+    }
+  },
+  "cases_requested": 1000,
+  "counts": {
+    "accepted": 172,
+    "crashes": 0,
+    "egress": 0,
+    "rejected": 828,
+    "unexpected_accepts": 0,
+    "unexpected_rejects": 0
+  },
+  "driver_stderr_tail": "",
+  "egress_attempts": [],
+  "max_case_ms": 30.09,
+  "reject_codes": {
+    "ARCHIVE": 94,
+    "ASSET": 65,
+    "DEPTH": 38,
+    "DUPLICATE_KEY": 26,
+    "HASH": 13,
+    "JSON": 146,
+    "KIND": 71,
+    "NONFINITE": 12,
+    "NUMBER": 11,
+    "PATH": 29,
+    "PNG": 66,
+    "PROTOTYPE": 47,
+    "SCHEMA": 124,
+    "SIZE": 23,
+    "SOURCE": 3,
+    "UNICODE": 60
+  },
+  "seed": 8090,
+  "stream_sha256": "c779dbd99a1e0f0b528191473cf8e316539b81ab3f270e26b6cfeea75c9d2bba",
+  "task": "T24",
+  "tool": "scripts/fuzz_reports.py",
+  "unexpected": [],
+  "verdict": "pass",
+  "wall_s": 3.58
+}

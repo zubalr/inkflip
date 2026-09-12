@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: CSP refuses noneWithWildcard
+ok 1 - CSP refuses noneWithWildcard
+  ---
+  duration_ms: 1.5765
+  type: 'test'
+  ...
+# Subtest: CSP refuses duplicate
+ok 2 - CSP refuses duplicate
+  ---
+  duration_ms: 0.167208
+  type: 'test'
+  ...
+# Subtest: CSP refuses directiveSubstring
+ok 3 - CSP refuses directiveSubstring
+  ---
+  duration_ms: 0.055459
+  type: 'test'
+  ...
+# Subtest: CSP refuses imageHost
+ok 4 - CSP refuses imageHost
+  ---
+  duration_ms: 0.048042
+  type: 'test'
+  ...
+# Subtest: CSP refuses scriptOverride
+ok 5 - CSP refuses scriptOverride
+  ---
+  duration_ms: 0.110917
+  type: 'test'
+  ...
+# Subtest: CSP refuses styleWildcard
+ok 6 - CSP refuses styleWildcard
+  ---
+  duration_ms: 0.06075
+  type: 'test'
+  ...
+# Subtest: CSP must be a real early meta attribute, never text in another value
+ok 7 - CSP must be a real early meta attribute, never text in another value
+  ---
+  duration_ms: 0.186583
+  type: 'test'
+  ...
+# Subtest: CSS tripwire checks encoded/comment-separated constructs: @\\69mport "https://example.invalid/x";
+ok 8 - CSS tripwire checks encoded/comment-separated constructs: @\\69mport "https://example.invalid/x";
+  ---
+  duration_ms: 0.670167
+  type: 'test'
+  ...
+# Subtest: CSS tripwire checks encoded/comment-separated constructs: p{background:u\\72l(https://example.invalid/x)}
+ok 9 - CSS tripwire checks encoded/comment-separated constructs: p{background:u\\72l(https://example.invalid/x)}
+  ---
+  duration_ms: 0.40775
+  type: 'test'
+  ...
+# Subtest: CSS tripwire checks encoded/comment-separated constructs: p{background:url/**/(https://example.invalid/x)}
+ok 10 - CSS tripwire checks encoded/comment-separated constructs: p{background:url/**/(https://example.invalid/x)}
+  ---
+  duration_ms: 0.390208
+  type: 'test'
+  ...
+# Subtest: CSS tripwire checks encoded/comment-separated constructs: p{x:vbscript:alert(1)}
+ok 11 - CSS tripwire checks encoded/comment-separated constructs: p{x:vbscript:alert(1)}
+  ---
+  duration_ms: 0.22
+  type: 'test'
+  ...
+# Subtest: styles must close and match their exact CSP hash
+ok 12 - styles must close and match their exact CSP hash
+  ---
+  duration_ms: 0.472542
+  type: 'test'
+  ...
+# Subtest: PNG refuses malformed chunk ordering: duplicateHeader
+ok 13 - PNG refuses malformed chunk ordering: duplicateHeader
+  ---
+  duration_ms: 0.541459
+  type: 'test'
+  ...
+# Subtest: PNG refuses malformed chunk ordering: paletteAfterData
+ok 14 - PNG refuses malformed chunk ordering: paletteAfterData
+  ---
+  duration_ms: 0.117042
+  type: 'test'
+  ...
+# Subtest: PNG refuses malformed chunk ordering: splitData
+ok 15 - PNG refuses malformed chunk ordering: splitData
+  ---
+  duration_ms: 0.045334
+  type: 'test'
+  ...
+# Subtest: PNG refuses duplicate transparency on an otherwise valid RGB image
+ok 16 - PNG refuses duplicate transparency on an otherwise valid RGB image
+  ---
+  duration_ms: 0.123958
+  type: 'test'
+  ...
+# Subtest: consecutive IDAT chunks and ignored ancillary metadata remain valid
+ok 17 - consecutive IDAT chunks and ignored ancillary metadata remain valid
+  ---
+  duration_ms: 0.899875
+  type: 'test'
+  ...
+# Subtest: valid literal-only deflate accepts an empty distance table
+ok 18 - valid literal-only deflate accepts an empty distance table
+  ---
+  duration_ms: 0.611667
+  type: 'test'
+  ...
+# Subtest: import string limits cover keys, array strings and only real root asset payloads
+ok 19 - import string limits cover keys, array strings and only real root asset payloads
+  ---
+  duration_ms: 112.702834
+  type: 'test'
+  ...
+# Subtest: imports cannot opt out of identity verification
+ok 20 - imports cannot opt out of identity verification
+  ---
+  duration_ms: 30.580208
+  type: 'test'
+  ...
+# Subtest: unpaired surrogates cannot be replaced during string input encoding
+ok 21 - unpaired surrogates cannot be replaced during string input encoding
+  ---
+  duration_ms: 0.144875
+  type: 'test'
+  ...
+# Subtest: reports package self-reference resolves its maintained validation entry
+ok 22 - reports package self-reference resolves its maintained validation entry
+  ---
+  duration_ms: 86.10975
+  type: 'test'
+  ...
+# Subtest: HTML image references require a complete strict PNG data URL
+ok 23 - HTML image references require a complete strict PNG data URL
+  ---
+  duration_ms: 0.767958
+  type: 'test'
+  ...
+# Subtest: the export test double refuses missing sanitized image bytes
+ok 24 - the export test double refuses missing sanitized image bytes
+  ---
+  duration_ms: 0.420542
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 363.816375

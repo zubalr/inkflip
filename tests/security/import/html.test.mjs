@@ -158,9 +158,10 @@ const VALID_SUFFIX = '</main></body></html>';
 test('guard accepts a minimal conforming document', () => {
   const doc = VALID_PREFIX + '<p>hi</p>' + VALID_SUFFIX;
   assert.equal(code(() => assertScriptFreeHtml(doc)), null);
+  const png = makePng({ width: 1, height: 1, pixelRows: [[[1, 2, 3, 255]]] });
   const withImg =
     VALID_PREFIX +
-    '<img alt="x" src="data:image/png;base64,iVBORw0KGgo=">' +
+    '<img alt="x" src="data:image/png;base64,' + Buffer.from(png).toString('base64') + '">' +
     VALID_SUFFIX;
   assert.equal(code(() => assertScriptFreeHtml(withImg)), null);
 });

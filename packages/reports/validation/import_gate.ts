@@ -131,34 +131,36 @@ export function sniffImportKind(data: Uint8Array): void {
  * `preAuditAssets`/`auditAssets`). Depth was already bounded by
  * `loadsStrict`.
  */
-export function importStringBounds(value: unknown, depth = 0): void {
+function boundedString(value: string, maxChars: number): void {
+  let count = 0;
+  for (const _char of value) {
+    count++;
+    require(count <= maxChars, 'SIZE', `String exceeds ${maxChars} characters`);
+  }
+}
+
+function visitStrings(value: unknown, depth: number, assets: Set<unknown>): void {
   require(depth <= IMPORT_LIMITS.maxDepth, 'DEPTH', 'Nesting exceeds limit');
-  if (Array.isArray(value)) {
-    for (const item of value) importStringBounds(item, depth + 1);
+  if (typeof value === 'string') {
+    boundedString(value, IMPORT_LIMITS.maxStringChars);
     return;
   }
   if (typeof value !== 'object' || value === null) return;
-  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof item === 'string') {
-      if (key === 'data_base64') {
-        require(
-          item.length <= MAX_BASE64_CHARS,
-          'SIZE',
-          'Encoded asset exceeds per-asset limit',
-        );
-        continue;
-      }
-      let count = 0;
-      for (const _ch of item) count++;
-      require(
-        count <= IMPORT_LIMITS.maxStringChars,
-        'SIZE',
-        `String exceeds ${IMPORT_LIMITS.maxStringChars} characters`,
-      );
+  const entries = Array.isArray(value) ? value.entries() : Object.entries(value);
+  for (const [key, item] of entries) {
+    boundedString(String(key), IMPORT_LIMITS.maxStringChars);
+    if (assets.has(value) && key === 'data_base64' && typeof item === 'string') {
+      boundedString(item, MAX_BASE64_CHARS);
     } else {
-      importStringBounds(item, depth + 1);
+      visitStrings(item, depth + 1, assets);
     }
   }
+}
+
+export function importStringBounds(value: unknown, depth = 0): void {
+  const root = value as { assets?: unknown } | null;
+  const assets = new Set(Array.isArray(root?.assets) ? root.assets : []);
+  visitStrings(value, depth, assets);
 }
 
 /**
@@ -173,6 +175,8 @@ export function importArtifact(
   data: string | Uint8Array,
   checkHashes = true,
 ): unknown {
+  require(checkHashes, 'HASH', 'Imported artifacts require hash verification');
+  require(data.length <= IMPORT_LIMITS.maxJsonBytes, 'SIZE', 'JSON too large');
   const bytes = typeof data === 'string' ? TE.encode(data) : data;
   require(
     bytes.length <= IMPORT_LIMITS.maxJsonBytes,
@@ -180,25 +184,26 @@ export function importArtifact(
     'JSON too large',
   );
   sniffImportKind(bytes);
-  const value = loadsStrict(bytes);
+  // Preserve string input for the strict parser: TextEncoder replaces lone surrogates.
+  const value = loadsStrict(data);
   importStringBounds(value);
   preAuditAssets(value);
   auditPrototypeKeys(value);
-  validate(value, checkHashes);
+  validate(value);
   return value;
 }
 
 export interface ImportResult {
-  /** The fully validated report (identity/hash verified by default). */
+  /** The fully validated report (identity/hash verified). */
   report: Report;
   /** Decoded-asset accounting and sanitized PNG re-encodes by asset id. */
   assets: AssetAudit;
 }
 
 /**
- * Full import pipeline for an untrusted report artifact. `checkHashes`
- * mirrors `validate` — it exists for producer-side tooling; the import
- * boundary should always leave it enabled.
+ * Full import pipeline for an untrusted report artifact. The legacy
+ * checkHashes argument may only be true; producer-side validation belongs
+ * at the contracts.validate seam, never this untrusted-input boundary.
  */
 export function importReport(
   data: string | Uint8Array,

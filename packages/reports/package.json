@@ -5,9 +5,10 @@
   "type": "module",
   "description": "Evidence projection and portable JSON / script-free HTML report serialization.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./validation/index.ts",
+    "./validation": "./validation/index.ts"
   },
-  "types": "./src/index.ts",
+  "types": "./validation/index.ts",
   "scripts": {
     "typecheck": "tsc -b"
   }
