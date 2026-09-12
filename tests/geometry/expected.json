@@ -1,0 +1,1938 @@
+{
+  "clip": {
+    "cases": [
+      {
+        "clipped_area": 1200,
+        "clipped_bounds": [
+          10,
+          10,
+          50,
+          40
+        ],
+        "clipped_vertices": [
+          [
+            10,
+            10
+          ],
+          [
+            50,
+            10
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            10,
+            40
+          ]
+        ],
+        "name": "fully_inside",
+        "polygon": [
+          [
+            10,
+            10
+          ],
+          [
+            50,
+            10
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            10,
+            40
+          ]
+        ],
+        "status": "inside"
+      },
+      {
+        "clipped_area": 1500,
+        "clipped_bounds": [
+          0,
+          10,
+          50,
+          40
+        ],
+        "clipped_vertices": [
+          [
+            0,
+            10
+          ],
+          [
+            50,
+            10
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            0,
+            40
+          ]
+        ],
+        "name": "straddles_left_edge",
+        "polygon": [
+          [
+            -20,
+            10
+          ],
+          [
+            50,
+            10
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            -20,
+            40
+          ]
+        ],
+        "status": "partial"
+      },
+      {
+        "clipped_area": 2000,
+        "clipped_bounds": [
+          0,
+          0,
+          50,
+          40
+        ],
+        "clipped_vertices": [
+          [
+            0,
+            0
+          ],
+          [
+            50,
+            0
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            0,
+            40
+          ]
+        ],
+        "name": "straddles_top_left_corner",
+        "polygon": [
+          [
+            -20,
+            -10
+          ],
+          [
+            50,
+            -10
+          ],
+          [
+            50,
+            40
+          ],
+          [
+            -20,
+            40
+          ]
+        ],
+        "status": "partial"
+      },
+      {
+        "clipped_area": 8000,
+        "clipped_bounds": [
+          0,
+          0,
+          100,
+          80
+        ],
+        "clipped_vertices": [
+          [
+            0,
+            0
+          ],
+          [
+            100,
+            0
+          ],
+          [
+            100,
+            80
+          ],
+          [
+            0,
+            80
+          ]
+        ],
+        "name": "covers_whole_view",
+        "polygon": [
+          [
+            -10,
+            -10
+          ],
+          [
+            200,
+            -10
+          ],
+          [
+            200,
+            100
+          ],
+          [
+            -10,
+            100
+          ]
+        ],
+        "status": "partial"
+      },
+      {
+        "clipped_area": 0,
+        "clipped_bounds": null,
+        "clipped_vertices": null,
+        "name": "fully_outside",
+        "polygon": [
+          [
+            -200,
+            10
+          ],
+          [
+            -150,
+            10
+          ],
+          [
+            -150,
+            40
+          ],
+          [
+            -200,
+            40
+          ]
+        ],
+        "status": "outside"
+      },
+      {
+        "clipped_area": 0,
+        "clipped_bounds": null,
+        "clipped_vertices": null,
+        "name": "below_view_out_of_crop",
+        "polygon": [
+          [
+            10,
+            700
+          ],
+          [
+            90,
+            700
+          ],
+          [
+            90,
+            760
+          ],
+          [
+            10,
+            760
+          ]
+        ],
+        "status": "outside"
+      }
+    ],
+    "view": [
+      0,
+      0,
+      100,
+      80
+    ]
+  },
+  "css": {
+    "canonical_point": [
+      56,
+      340
+    ],
+    "cases": [
+      {
+        "backing": [
+          28,
+          170
+        ],
+        "css": [
+          28,
+          170
+        ],
+        "dpr": 1,
+        "zoom": 0.5
+      },
+      {
+        "backing": [
+          35,
+          212.5
+        ],
+        "css": [
+          28,
+          170
+        ],
+        "dpr": 1.25,
+        "zoom": 0.5
+      },
+      {
+        "backing": [
+          56,
+          340
+        ],
+        "css": [
+          28,
+          170
+        ],
+        "dpr": 2,
+        "zoom": 0.5
+      },
+      {
+        "backing": [
+          84,
+          510
+        ],
+        "css": [
+          28,
+          170
+        ],
+        "dpr": 3,
+        "zoom": 0.5
+      },
+      {
+        "backing": [
+          56,
+          340
+        ],
+        "css": [
+          56,
+          340
+        ],
+        "dpr": 1,
+        "zoom": 1
+      },
+      {
+        "backing": [
+          70,
+          425
+        ],
+        "css": [
+          56,
+          340
+        ],
+        "dpr": 1.25,
+        "zoom": 1
+      },
+      {
+        "backing": [
+          112,
+          680
+        ],
+        "css": [
+          56,
+          340
+        ],
+        "dpr": 2,
+        "zoom": 1
+      },
+      {
+        "backing": [
+          168,
+          1020
+        ],
+        "css": [
+          56,
+          340
+        ],
+        "dpr": 3,
+        "zoom": 1
+      },
+      {
+        "backing": [
+          70,
+          425
+        ],
+        "css": [
+          70,
+          425
+        ],
+        "dpr": 1,
+        "zoom": 1.25
+      },
+      {
+        "backing": [
+          87.5,
+          531.25
+        ],
+        "css": [
+          70,
+          425
+        ],
+        "dpr": 1.25,
+        "zoom": 1.25
+      },
+      {
+        "backing": [
+          140,
+          850
+        ],
+        "css": [
+          70,
+          425
+        ],
+        "dpr": 2,
+        "zoom": 1.25
+      },
+      {
+        "backing": [
+          210,
+          1275
+        ],
+        "css": [
+          70,
+          425
+        ],
+        "dpr": 3,
+        "zoom": 1.25
+      },
+      {
+        "backing": [
+          112,
+          680
+        ],
+        "css": [
+          112,
+          680
+        ],
+        "dpr": 1,
+        "zoom": 2
+      },
+      {
+        "backing": [
+          140,
+          850
+        ],
+        "css": [
+          112,
+          680
+        ],
+        "dpr": 1.25,
+        "zoom": 2
+      },
+      {
+        "backing": [
+          224,
+          1360
+        ],
+        "css": [
+          112,
+          680
+        ],
+        "dpr": 2,
+        "zoom": 2
+      },
+      {
+        "backing": [
+          336,
+          2040
+        ],
+        "css": [
+          112,
+          680
+        ],
+        "dpr": 3,
+        "zoom": 2
+      },
+      {
+        "backing": [
+          224,
+          1360
+        ],
+        "css": [
+          224,
+          1360
+        ],
+        "dpr": 1,
+        "zoom": 4
+      },
+      {
+        "backing": [
+          280,
+          1700
+        ],
+        "css": [
+          224,
+          1360
+        ],
+        "dpr": 1.25,
+        "zoom": 4
+      },
+      {
+        "backing": [
+          448,
+          2720
+        ],
+        "css": [
+          224,
+          1360
+        ],
+        "dpr": 2,
+        "zoom": 4
+      },
+      {
+        "backing": [
+          672,
+          4080
+        ],
+        "css": [
+          224,
+          1360
+        ],
+        "dpr": 3,
+        "zoom": 4
+      }
+    ],
+    "dprs": [
+      1,
+      1.25,
+      2,
+      3
+    ],
+    "zooms": [
+      0.5,
+      1,
+      1.25,
+      2,
+      4
+    ]
+  },
+  "pages": {
+    "geometry-0": {
+      "C": [
+        2,
+        0,
+        0,
+        -2,
+        -40,
+        780
+      ],
+      "C_inverse": [
+        0.5,
+        0,
+        0,
+        -0.5,
+        20,
+        390
+      ],
+      "D": [
+        2,
+        0,
+        0,
+        -2,
+        -40,
+        780
+      ],
+      "O_crop_500_60_k2": [
+        6,
+        0,
+        0,
+        -6,
+        -1120,
+        2220
+      ],
+      "P_scale_1_5": [
+        3,
+        0,
+        0,
+        -3,
+        -60,
+        1170
+      ],
+      "R": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "canonical_size_pt": [
+        960,
+        700
+      ],
+      "crop_box": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "display_size": [
+        960,
+        700
+      ],
+      "effective_view": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "maps": {
+        "below_crop": {
+          "canonical": [
+            80,
+            740
+          ],
+          "display": [
+            80,
+            740
+          ],
+          "ocr_crop_500_60_k2": [
+            -760,
+            2100
+          ],
+          "pdf_user": [
+            60,
+            20
+          ],
+          "raster_1_5": [
+            120,
+            1110
+          ],
+          "recovered_canonical": [
+            80,
+            740
+          ]
+        },
+        "beyond_right": {
+          "canonical": [
+            1020,
+            180
+          ],
+          "display": [
+            1020,
+            180
+          ],
+          "ocr_crop_500_60_k2": [
+            2060,
+            420
+          ],
+          "pdf_user": [
+            530,
+            300
+          ],
+          "raster_1_5": [
+            1530,
+            270
+          ],
+          "recovered_canonical": [
+            1020,
+            180
+          ]
+        },
+        "negative_origin": {
+          "canonical": [
+            -40,
+            780
+          ],
+          "display": [
+            -40,
+            780
+          ],
+          "ocr_crop_500_60_k2": [
+            -1120,
+            2220
+          ],
+          "pdf_user": [
+            0,
+            0
+          ],
+          "raster_1_5": [
+            -60,
+            1170
+          ],
+          "recovered_canonical": [
+            -40,
+            780
+          ]
+        },
+        "text_anchor": {
+          "canonical": [
+            56,
+            340
+          ],
+          "display": [
+            56,
+            340
+          ],
+          "ocr_crop_500_60_k2": [
+            -832,
+            900
+          ],
+          "pdf_user": [
+            48,
+            220
+          ],
+          "raster_1_5": [
+            84,
+            510
+          ],
+          "recovered_canonical": [
+            56,
+            340
+          ]
+        },
+        "view_bottom_right": {
+          "canonical": [
+            960,
+            700
+          ],
+          "display": [
+            960,
+            700
+          ],
+          "ocr_crop_500_60_k2": [
+            1880,
+            1980
+          ],
+          "pdf_user": [
+            500,
+            40
+          ],
+          "raster_1_5": [
+            1440,
+            1050
+          ],
+          "recovered_canonical": [
+            960,
+            700
+          ]
+        },
+        "view_top_left": {
+          "canonical": [
+            0,
+            0
+          ],
+          "display": [
+            0,
+            0
+          ],
+          "ocr_crop_500_60_k2": [
+            -1000,
+            -120
+          ],
+          "pdf_user": [
+            20,
+            390
+          ],
+          "raster_1_5": [
+            0,
+            0
+          ],
+          "recovered_canonical": [
+            0,
+            0
+          ]
+        }
+      },
+      "media_box": [
+        -20,
+        -30,
+        520,
+        420
+      ],
+      "recover_matrix": [
+        0.3333333333333333,
+        0,
+        0,
+        0.3333333333333333,
+        333.3333333333333,
+        40
+      ],
+      "rotation": 0,
+      "user_unit": 2
+    },
+    "geometry-180": {
+      "C": [
+        2,
+        0,
+        0,
+        -2,
+        -40,
+        780
+      ],
+      "C_inverse": [
+        0.5,
+        0,
+        0,
+        -0.5,
+        20,
+        390
+      ],
+      "D": [
+        -2,
+        0,
+        0,
+        2,
+        1000,
+        -80
+      ],
+      "O_crop_500_60_k2": [
+        -6,
+        0,
+        0,
+        6,
+        2000,
+        -360
+      ],
+      "P_scale_1_5": [
+        -3,
+        0,
+        0,
+        3,
+        1500,
+        -120
+      ],
+      "R": [
+        -1,
+        0,
+        0,
+        -1,
+        960,
+        700
+      ],
+      "canonical_size_pt": [
+        960,
+        700
+      ],
+      "crop_box": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "display_size": [
+        960,
+        700
+      ],
+      "effective_view": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "maps": {
+        "below_crop": {
+          "canonical": [
+            80,
+            740
+          ],
+          "display": [
+            880,
+            -40
+          ],
+          "ocr_crop_500_60_k2": [
+            1640,
+            -240
+          ],
+          "pdf_user": [
+            60,
+            20
+          ],
+          "raster_1_5": [
+            1320,
+            -60
+          ],
+          "recovered_canonical": [
+            80,
+            740
+          ]
+        },
+        "beyond_right": {
+          "canonical": [
+            1020,
+            180
+          ],
+          "display": [
+            -60,
+            520
+          ],
+          "ocr_crop_500_60_k2": [
+            -1180,
+            1440
+          ],
+          "pdf_user": [
+            530,
+            300
+          ],
+          "raster_1_5": [
+            -90,
+            780
+          ],
+          "recovered_canonical": [
+            1020,
+            180
+          ]
+        },
+        "negative_origin": {
+          "canonical": [
+            -40,
+            780
+          ],
+          "display": [
+            1000,
+            -80
+          ],
+          "ocr_crop_500_60_k2": [
+            2000,
+            -360
+          ],
+          "pdf_user": [
+            0,
+            0
+          ],
+          "raster_1_5": [
+            1500,
+            -120
+          ],
+          "recovered_canonical": [
+            -40,
+            780
+          ]
+        },
+        "text_anchor": {
+          "canonical": [
+            56,
+            340
+          ],
+          "display": [
+            904,
+            360
+          ],
+          "ocr_crop_500_60_k2": [
+            1712,
+            960
+          ],
+          "pdf_user": [
+            48,
+            220
+          ],
+          "raster_1_5": [
+            1356,
+            540
+          ],
+          "recovered_canonical": [
+            56,
+            340
+          ]
+        },
+        "view_bottom_right": {
+          "canonical": [
+            960,
+            700
+          ],
+          "display": [
+            0,
+            0
+          ],
+          "ocr_crop_500_60_k2": [
+            -1000,
+            -120
+          ],
+          "pdf_user": [
+            500,
+            40
+          ],
+          "raster_1_5": [
+            0,
+            0
+          ],
+          "recovered_canonical": [
+            960,
+            700
+          ]
+        },
+        "view_top_left": {
+          "canonical": [
+            0,
+            0
+          ],
+          "display": [
+            960,
+            700
+          ],
+          "ocr_crop_500_60_k2": [
+            1880,
+            1980
+          ],
+          "pdf_user": [
+            20,
+            390
+          ],
+          "raster_1_5": [
+            1440,
+            1050
+          ],
+          "recovered_canonical": [
+            0,
+            0
+          ]
+        }
+      },
+      "media_box": [
+        -20,
+        -30,
+        520,
+        420
+      ],
+      "recover_matrix": [
+        -0.3333333333333333,
+        0,
+        0,
+        -0.3333333333333333,
+        626.6666666666666,
+        660
+      ],
+      "rotation": 180,
+      "user_unit": 2
+    },
+    "geometry-270": {
+      "C": [
+        2,
+        0,
+        0,
+        -2,
+        -40,
+        780
+      ],
+      "C_inverse": [
+        0.5,
+        0,
+        0,
+        -0.5,
+        20,
+        390
+      ],
+      "D": [
+        0,
+        -2,
+        -2,
+        0,
+        780,
+        1000
+      ],
+      "O_crop_500_60_k2": [
+        0,
+        -6,
+        -6,
+        0,
+        1340,
+        2880
+      ],
+      "P_scale_1_5": [
+        0,
+        -3,
+        -3,
+        0,
+        1170,
+        1500
+      ],
+      "R": [
+        0,
+        -1,
+        1,
+        0,
+        0,
+        960
+      ],
+      "canonical_size_pt": [
+        960,
+        700
+      ],
+      "crop_box": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "display_size": [
+        700,
+        960
+      ],
+      "effective_view": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "maps": {
+        "below_crop": {
+          "canonical": [
+            80,
+            740
+          ],
+          "display": [
+            740,
+            880
+          ],
+          "ocr_crop_500_60_k2": [
+            1220,
+            2520
+          ],
+          "pdf_user": [
+            60,
+            20
+          ],
+          "raster_1_5": [
+            1110,
+            1320
+          ],
+          "recovered_canonical": [
+            80,
+            740
+          ]
+        },
+        "beyond_right": {
+          "canonical": [
+            1020,
+            180
+          ],
+          "display": [
+            180,
+            -60
+          ],
+          "ocr_crop_500_60_k2": [
+            -460,
+            -300
+          ],
+          "pdf_user": [
+            530,
+            300
+          ],
+          "raster_1_5": [
+            270,
+            -90
+          ],
+          "recovered_canonical": [
+            1020,
+            180
+          ]
+        },
+        "negative_origin": {
+          "canonical": [
+            -40,
+            780
+          ],
+          "display": [
+            780,
+            1000
+          ],
+          "ocr_crop_500_60_k2": [
+            1340,
+            2880
+          ],
+          "pdf_user": [
+            0,
+            0
+          ],
+          "raster_1_5": [
+            1170,
+            1500
+          ],
+          "recovered_canonical": [
+            -40,
+            780
+          ]
+        },
+        "text_anchor": {
+          "canonical": [
+            56,
+            340
+          ],
+          "display": [
+            340,
+            904
+          ],
+          "ocr_crop_500_60_k2": [
+            20,
+            2592
+          ],
+          "pdf_user": [
+            48,
+            220
+          ],
+          "raster_1_5": [
+            510,
+            1356
+          ],
+          "recovered_canonical": [
+            56,
+            340
+          ]
+        },
+        "view_bottom_right": {
+          "canonical": [
+            960,
+            700
+          ],
+          "display": [
+            700,
+            0
+          ],
+          "ocr_crop_500_60_k2": [
+            1100,
+            -120
+          ],
+          "pdf_user": [
+            500,
+            40
+          ],
+          "raster_1_5": [
+            1050,
+            0
+          ],
+          "recovered_canonical": [
+            960,
+            700
+          ]
+        },
+        "view_top_left": {
+          "canonical": [
+            0,
+            0
+          ],
+          "display": [
+            0,
+            960
+          ],
+          "ocr_crop_500_60_k2": [
+            -1000,
+            2760
+          ],
+          "pdf_user": [
+            20,
+            390
+          ],
+          "raster_1_5": [
+            0,
+            1440
+          ],
+          "recovered_canonical": [
+            0,
+            0
+          ]
+        }
+      },
+      "media_box": [
+        -20,
+        -30,
+        520,
+        420
+      ],
+      "recover_matrix": [
+        0,
+        0.3333333333333333,
+        -0.3333333333333333,
+        0,
+        920,
+        333.3333333333333
+      ],
+      "rotation": 270,
+      "user_unit": 2
+    },
+    "geometry-90": {
+      "C": [
+        2,
+        0,
+        0,
+        -2,
+        -40,
+        780
+      ],
+      "C_inverse": [
+        0.5,
+        0,
+        0,
+        -0.5,
+        20,
+        390
+      ],
+      "D": [
+        0,
+        2,
+        2,
+        0,
+        -80,
+        -40
+      ],
+      "O_crop_500_60_k2": [
+        0,
+        6,
+        6,
+        0,
+        -1240,
+        -240
+      ],
+      "P_scale_1_5": [
+        0,
+        3,
+        3,
+        0,
+        -120,
+        -60
+      ],
+      "R": [
+        0,
+        1,
+        -1,
+        0,
+        700,
+        0
+      ],
+      "canonical_size_pt": [
+        960,
+        700
+      ],
+      "crop_box": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "display_size": [
+        700,
+        960
+      ],
+      "effective_view": [
+        20,
+        40,
+        500,
+        390
+      ],
+      "maps": {
+        "below_crop": {
+          "canonical": [
+            80,
+            740
+          ],
+          "display": [
+            -40,
+            80
+          ],
+          "ocr_crop_500_60_k2": [
+            -1120,
+            120
+          ],
+          "pdf_user": [
+            60,
+            20
+          ],
+          "raster_1_5": [
+            -60,
+            120
+          ],
+          "recovered_canonical": [
+            80,
+            740
+          ]
+        },
+        "beyond_right": {
+          "canonical": [
+            1020,
+            180
+          ],
+          "display": [
+            520,
+            1020
+          ],
+          "ocr_crop_500_60_k2": [
+            560,
+            2940
+          ],
+          "pdf_user": [
+            530,
+            300
+          ],
+          "raster_1_5": [
+            780,
+            1530
+          ],
+          "recovered_canonical": [
+            1020,
+            180
+          ]
+        },
+        "negative_origin": {
+          "canonical": [
+            -40,
+            780
+          ],
+          "display": [
+            -80,
+            -40
+          ],
+          "ocr_crop_500_60_k2": [
+            -1240,
+            -240
+          ],
+          "pdf_user": [
+            0,
+            0
+          ],
+          "raster_1_5": [
+            -120,
+            -60
+          ],
+          "recovered_canonical": [
+            -40,
+            780
+          ]
+        },
+        "text_anchor": {
+          "canonical": [
+            56,
+            340
+          ],
+          "display": [
+            360,
+            56
+          ],
+          "ocr_crop_500_60_k2": [
+            80,
+            48
+          ],
+          "pdf_user": [
+            48,
+            220
+          ],
+          "raster_1_5": [
+            540,
+            84
+          ],
+          "recovered_canonical": [
+            56,
+            340
+          ]
+        },
+        "view_bottom_right": {
+          "canonical": [
+            960,
+            700
+          ],
+          "display": [
+            0,
+            960
+          ],
+          "ocr_crop_500_60_k2": [
+            -1000,
+            2760
+          ],
+          "pdf_user": [
+            500,
+            40
+          ],
+          "raster_1_5": [
+            0,
+            1440
+          ],
+          "recovered_canonical": [
+            960,
+            700
+          ]
+        },
+        "view_top_left": {
+          "canonical": [
+            0,
+            0
+          ],
+          "display": [
+            700,
+            0
+          ],
+          "ocr_crop_500_60_k2": [
+            1100,
+            -120
+          ],
+          "pdf_user": [
+            20,
+            390
+          ],
+          "raster_1_5": [
+            1050,
+            0
+          ],
+          "recovered_canonical": [
+            0,
+            0
+          ]
+        }
+      },
+      "media_box": [
+        -20,
+        -30,
+        520,
+        420
+      ],
+      "recover_matrix": [
+        0,
+        -0.3333333333333333,
+        0.3333333333333333,
+        0,
+        40,
+        366.6666666666667
+      ],
+      "rotation": 90,
+      "user_unit": 2
+    },
+    "geometry-control": {
+      "C": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "C_inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "D": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "O_crop_500_60_k2": [
+        3,
+        0,
+        0,
+        -3,
+        -1000,
+        1080
+      ],
+      "P_scale_1_5": [
+        1.5,
+        0,
+        0,
+        -1.5,
+        0,
+        600
+      ],
+      "R": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "crop_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "display_size": [
+        520,
+        400
+      ],
+      "effective_view": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "maps": {
+        "below_crop": {
+          "canonical": [
+            60,
+            380
+          ],
+          "display": [
+            60,
+            380
+          ],
+          "ocr_crop_500_60_k2": [
+            -820,
+            1020
+          ],
+          "pdf_user": [
+            60,
+            20
+          ],
+          "raster_1_5": [
+            90,
+            570
+          ],
+          "recovered_canonical": [
+            60,
+            380
+          ]
+        },
+        "beyond_right": {
+          "canonical": [
+            530,
+            100
+          ],
+          "display": [
+            530,
+            100
+          ],
+          "ocr_crop_500_60_k2": [
+            590,
+            180
+          ],
+          "pdf_user": [
+            530,
+            300
+          ],
+          "raster_1_5": [
+            795,
+            150
+          ],
+          "recovered_canonical": [
+            530,
+            100
+          ]
+        },
+        "negative_origin": {
+          "canonical": [
+            0,
+            400
+          ],
+          "display": [
+            0,
+            400
+          ],
+          "ocr_crop_500_60_k2": [
+            -1000,
+            1080
+          ],
+          "pdf_user": [
+            0,
+            0
+          ],
+          "raster_1_5": [
+            0,
+            600
+          ],
+          "recovered_canonical": [
+            0,
+            400
+          ]
+        },
+        "text_anchor": {
+          "canonical": [
+            48,
+            180
+          ],
+          "display": [
+            48,
+            180
+          ],
+          "ocr_crop_500_60_k2": [
+            -856,
+            420
+          ],
+          "pdf_user": [
+            48,
+            220
+          ],
+          "raster_1_5": [
+            72,
+            270
+          ],
+          "recovered_canonical": [
+            48,
+            180
+          ]
+        },
+        "view_bottom_right": {
+          "canonical": [
+            500,
+            360
+          ],
+          "display": [
+            500,
+            360
+          ],
+          "ocr_crop_500_60_k2": [
+            500,
+            960
+          ],
+          "pdf_user": [
+            500,
+            40
+          ],
+          "raster_1_5": [
+            750,
+            540
+          ],
+          "recovered_canonical": [
+            500,
+            360
+          ]
+        },
+        "view_top_left": {
+          "canonical": [
+            20,
+            10
+          ],
+          "display": [
+            20,
+            10
+          ],
+          "ocr_crop_500_60_k2": [
+            -940,
+            -90
+          ],
+          "pdf_user": [
+            20,
+            390
+          ],
+          "raster_1_5": [
+            30,
+            15
+          ],
+          "recovered_canonical": [
+            20,
+            10
+          ]
+        }
+      },
+      "media_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "recover_matrix": [
+        0.3333333333333333,
+        0,
+        0,
+        0.3333333333333333,
+        333.3333333333333,
+        40
+      ],
+      "rotation": 0,
+      "user_unit": 1
+    }
+  },
+  "provenance": "Derived by tests/geometry/derive_expectations.py using exact fractions.Fraction arithmetic plus closed-form per-rotation equations; independent of packages/geometry. The matrix path and closed-form path are asserted equal for every mapped point before emission.",
+  "rotation_corner_map": {
+    "0": [
+      0,
+      0
+    ],
+    "180": [
+      960,
+      700
+    ],
+    "270": [
+      0,
+      960
+    ],
+    "90": [
+      700,
+      0
+    ]
+  },
+  "skew": {
+    "expected_bounds": [
+      13,
+      14,
+      122,
+      84
+    ],
+    "expected_polygon": [
+      [
+        13,
+        14
+      ],
+      [
+        113,
+        54
+      ],
+      [
+        122,
+        84
+      ],
+      [
+        22,
+        44
+      ]
+    ],
+    "rect": [
+      [
+        10,
+        10
+      ],
+      [
+        110,
+        10
+      ],
+      [
+        110,
+        40
+      ],
+      [
+        10,
+        40
+      ]
+    ],
+    "tm": [
+      1,
+      0.4,
+      0.3,
+      1,
+      0,
+      0
+    ]
+  },
+  "userunit": {
+    "0.5": {
+      "canonical_size_pt": [
+        260,
+        200
+      ],
+      "fiducial_physical_size_pt": [
+        50,
+        50
+      ],
+      "fiducial_polygon": [
+        [
+          186,
+          25
+        ],
+        [
+          236,
+          25
+        ],
+        [
+          236,
+          75
+        ],
+        [
+          186,
+          75
+        ]
+      ],
+      "text_anchor_canonical": [
+        24,
+        90
+      ],
+      "user_unit": 0.5
+    },
+    "1": {
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "fiducial_physical_size_pt": [
+        100,
+        100
+      ],
+      "fiducial_polygon": [
+        [
+          372,
+          50
+        ],
+        [
+          472,
+          50
+        ],
+        [
+          472,
+          150
+        ],
+        [
+          372,
+          150
+        ]
+      ],
+      "text_anchor_canonical": [
+        48,
+        180
+      ],
+      "user_unit": 1
+    },
+    "10": {
+      "canonical_size_pt": [
+        5200,
+        4000
+      ],
+      "fiducial_physical_size_pt": [
+        1000,
+        1000
+      ],
+      "fiducial_polygon": [
+        [
+          3720,
+          500
+        ],
+        [
+          4720,
+          500
+        ],
+        [
+          4720,
+          1500
+        ],
+        [
+          3720,
+          1500
+        ]
+      ],
+      "text_anchor_canonical": [
+        480,
+        1800
+      ],
+      "user_unit": 10
+    },
+    "2": {
+      "canonical_size_pt": [
+        1040,
+        800
+      ],
+      "fiducial_physical_size_pt": [
+        200,
+        200
+      ],
+      "fiducial_polygon": [
+        [
+          744,
+          100
+        ],
+        [
+          944,
+          100
+        ],
+        [
+          944,
+          300
+        ],
+        [
+          744,
+          300
+        ]
+      ],
+      "text_anchor_canonical": [
+        96,
+        360
+      ],
+      "user_unit": 2
+    }
+  }
+}
