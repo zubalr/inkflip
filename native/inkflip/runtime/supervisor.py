@@ -15,7 +15,11 @@ abuse", "Resource exhaustion") for the local corpus/CLI path:
   is only a backstop.
 * **Output caps** on stdout/stderr are enforced live: the parent drains the
   pipes through a ``selectors`` loop, counts every byte, keeps only a bounded
-  head+tail sample, and kills the group when a stream exceeds its cap.
+  head+tail sample, and kills the group when a stream exceeds its cap. A
+  post-reap mirror covers the hole where the excess was only drained in
+  ``_drain_until_eof`` after the leader exited (e.g. while the loop was
+  blocked in a sibling's stray-descendant cleanup): recorded stream bytes
+  over cap classify ``output_limit``, never ``completed``.
 * **Memory bound** is layered and honest: ``RLIMIT_AS`` where the platform
   accepts it (Linux), ``RLIMIT_FSIZE``/``RLIMIT_CORE``/``RLIMIT_CPU`` where
   available, a parent-side RSS probe (``/proc`` on Linux, ``libproc``
@@ -25,8 +29,9 @@ abuse", "Resource exhaustion") for the local corpus/CLI path:
   index. A container remains the hardened route (THREAT_MODEL).
 * **Minimal environment**: the child receives a fixed allowlist (locale,
   thread-count pins at 1, TMPDIR into its private scratch) plus explicitly
-  declared per-job extras whose *names* are journaled. No proxy tokens, cloud
-  credentials or inherited ambient variables reach a parse child.
+  declared per-job extras whose *names* are journaled and which may not
+  redeclare fixed keys. No proxy tokens, cloud credentials or inherited
+  ambient variables reach a parse child.
 * **One bounded retry**: failures classified as transient (nonzero exit,
   signal crash, wall timeout, spawn error) get at most ``limits.retries``
   extra attempt (default 1) with a fresh worker and fresh scratch, and only
@@ -89,6 +94,24 @@ HAS_WAIT4 = hasattr(os, "wait4")
 
 JOB_KEY_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 PRODUCES_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,255}$")
+
+# Fixed child-environment values (THREAT_MODEL: no ambient variables reach a
+# parse child; thread libraries pinned to one thread). TMPDIR is also fixed
+# but bound per attempt to the private scratch, so it is set dynamically.
+_FIXED_ENV_VALUES = {
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "PYTHONIOENCODING": "utf-8",
+}
+# Per-job env extras may add names but may NEVER redeclare these — a TMPDIR
+# override would escape the scratch bound and a *_NUM_THREADS override would
+# defeat the single-thread pin silently (the journal records only key names).
+FIXED_ENV_KEYS = frozenset(_FIXED_ENV_VALUES) | {"TMPDIR"}
 
 # Terminal job statuses (aligned with RUNTIME_LIFECYCLE check terminals).
 STATUS_COMPLETED = "completed"
@@ -178,7 +201,12 @@ class JobSpec:
     child writes inside its private scratch that the parent validates and
     commits atomically under ``<out>/reports/<key>.json``. ``env`` is an
     explicit per-job allowlist of extra variables merged over the minimal
-    base environment; its keys are journaled.
+    base environment; it may add names only — redeclaring a fixed key
+    (FIXED_ENV_KEYS: locale, TMPDIR, the *_NUM_THREADS pins,
+    PYTHONIOENCODING) is refused, since an override would silently defeat
+    the scratch/thread bounds while the journaled key set looked identical.
+    Only key names are journaled; the resume config digest binds names and
+    values (a hash — values are never persisted).
     """
 
     key: str
@@ -204,6 +232,12 @@ class JobSpec:
             for k, v in self.env.items()
         ):
             raise SupervisionError(f"job {self.key}: env must be a flat string dict")
+        collisions = sorted(set(self.env) & FIXED_ENV_KEYS)
+        if collisions:
+            raise SupervisionError(
+                f"job {self.key}: env extras cannot redeclare fixed "
+                f"child-env keys {collisions}"
+            )
         for name, value in (
             ("wall_seconds", self.wall_seconds),
             ("memory_bytes", self.memory_bytes),
@@ -368,18 +402,11 @@ def _minimal_env(scratch: Path, extra: dict) -> dict:
 
     Parse-only jobs must not inherit proxy tokens, cloud credentials or broad
     ambient variables (THREAT_MODEL). Thread libraries are pinned to one
-    thread per child; TMPDIR is the private scratch."""
-    env = {
-        "LANG": "C.UTF-8",
-        "LC_ALL": "C.UTF-8",
-        "TMPDIR": str(scratch),
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "MKL_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-        "PYTHONIOENCODING": "utf-8",
-    }
+    thread per child; TMPDIR is the private scratch. ``extra`` is validated
+    upstream (JobSpec.validate refuses collisions with FIXED_ENV_KEYS), so
+    the update below can only add names, never silently redeclare them."""
+    env = dict(_FIXED_ENV_VALUES)
+    env["TMPDIR"] = str(scratch)
     env.update(extra)
     return env
 
@@ -611,7 +638,10 @@ class Supervisor:
         return {
             "key": job.key,
             "argv": list(job.argv),
-            "env_keys": sorted(job.env),
+            # Names AND values: only the digest is persisted, so binding the
+            # declared values costs nothing and a changed env value can no
+            # longer silently reuse prior evidence on resume.
+            "env": dict(sorted(job.env.items())),
             "produces": job.produces,
             "wall_seconds": job.wall_seconds or self.limits.wall_seconds,
             "memory_bytes": job.memory_bytes or self.limits.memory_bytes,
@@ -835,6 +865,16 @@ class Supervisor:
                 KIND_MEMORY_LIMIT,
                 f"resident memory exceeded {child.memory_limit}-byte bound",
             )
+        # Post-reap mirror of the live overflow kill (the memory bound has the
+        # same shape via peak_rss below): a stream can cross its cap through
+        # bytes drained only in _drain_until_eof — e.g. while the loop was
+        # blocked in a sibling's stray-descendant cleanup — so the verdict
+        # must not depend on killed_cause having been set in time. A job
+        # whose recorded stream total exceeds the cap is never "completed".
+        if child.stdout.overflow or child.stderr.overflow:
+            over = "stdout" if child.stdout.overflow else "stderr"
+            cap = child.stdout.cap if child.stdout.overflow else child.stderr.cap
+            return STATUS_FAILED, KIND_OUTPUT_LIMIT, f"{over} exceeded {cap}-byte cap"
         stderr_sample = bytes(child.stderr.tail[-256:]) + bytes(child.stderr.head[:256])
         if child.signal is not None:
             if child.signal == "SIGXFSZ":

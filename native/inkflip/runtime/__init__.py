@@ -23,6 +23,7 @@ inside child processes, never in supervisor threads.
 """
 from .artifacts import Journal, atomic_write_bytes, config_digest, read_journal, sha256_bytes, sha256_file
 from .supervisor import (
+    FIXED_ENV_KEYS,
     KIND_CRASH,
     KIND_EXIT,
     KIND_INTERRUPTED,
@@ -50,6 +51,7 @@ from .supervisor import (
 )
 
 __all__ = [
+    "FIXED_ENV_KEYS",
     "Journal",
     "JobRecord",
     "JobSpec",

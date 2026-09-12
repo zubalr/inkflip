@@ -19,7 +19,10 @@ environment allowlist. The parent enforces:
   `ru_maxrss`; unsupported facilities are recorded in `index.json`
   (`rlimit_support`), never silently skipped;
 - **output caps** — stdout/stderr drained and counted live, bounded sample
-  only; over-cap → group kill, `output_limit`;
+  only; over-cap → group kill, `output_limit`. A post-reap mirror also
+  classifies `output_limit` when the excess is only drained after the
+  leader exits (e.g. the loop was blocked in a sibling's stray cleanup) —
+  a job is never `completed` with recorded stream bytes over the cap;
 - **stray descendants** — after the leader is reaped the group is probed and
   leftover members killed;
 - **Ctrl-C** — SIGINT/SIGTERM to the supervisor cancels: live groups die,
@@ -77,3 +80,10 @@ The CLI task (T30+) maps `cancelled` to exit 130, `failed` to exit 4,
   noted residual (container covers it).
 - `preexec_fn` applies rlimits best-effort in the child; the parent's
   `rlimit_support` probe records what the platform actually accepted.
+- A supervisor killed hard (SIGKILL/power loss) cannot reap: committed
+  `reports/` and the append-only `journal.jsonl` stay intact (a torn final
+  journal line is tolerated on read), but `index.json` is absent, so
+  `resume=True` is honestly refused and a fresh run refuses the non-empty
+  directory — recovery is a new run directory, never a clobber or silent
+  reuse. Orphaned setsid'd children of the dead supervisor persist and are
+  out of scope for the next run (a container covers them).
