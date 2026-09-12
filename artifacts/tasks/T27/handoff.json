@@ -7,10 +7,10 @@
   "pass": 1,
   "branch": "work/zcode/t27",
   "base": "726d61c0c",
-  "implementation_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57",
-  "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 was the original wave-0 implementation (macOS); 12bc8ac is the current source revision after the wave-1 review fixes (Linux); both are preserved in branch history with their dated evidence rounds.",
+  "implementation_commit": "5ba110b",
+  "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 = original wave-0 implementation (macOS); 12bc8acca01aa2faa3948d3c60df43eefcbf5c57 = wave-1 review fixes; 5ba110b = current source revision after the wave-2 review fixes (resize inversion, output budget, typed boundary, canonical_to_raster geometry). All prior rounds are dated history only.",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t27 at push time (= source revision 12bc8ac + merges ca2dbb1 (main 65e84da), 45821e6 (main cd79351 font-oracle fix) and 442f3cd (main 500abfc shared verify fix) + evidence commits); T27 sources are byte-identical since 12bc8ac; final candidate binding and OCR rerun follow after the heavy slot returns",
+  "review_scope": "branch head work/zcode/t27 at push time (= current source revision 5ba110b + main merges ca2dbb1/45821e6/442f3cd + evidence commits). The immutable candidate 1e7c8db (source 5ba110b) is under independent review by Erdos in a separate Linux checkout, holding the heavy OCR reservation; ZCode holds no heavy run.",
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -128,6 +128,19 @@
       "honest_gaps": "Final OCR verification bound to the ultimate candidate pending the heavy slot; T27 remains unaccepted; worker yields on light-only discipline.",
       "handoff_state": "ready_for_review=true (source revision wave-2 5ba110b); worker yields; Astra owns acceptance"
     },
+    "wave3_evidence_only_checkpoint": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra wave-3 review grant: collected 1e7c8db (source 5ba110b); heavy OCR reservation transferred to the independent reviewer Erdos (separate Linux checkout of exact 1e7c8db) for the real 52-test OCR suite, full native suite and registered acceptance; ZCode corrects ARTIFACTS ONLY, reruns no OCR, changes no source",
+      "artifact_corrections_applied": [
+        "handoff implementation_commit now binds the actual current source revision 5ba110b (was stale at 12bc8ac); prior revisions kept as explicit history",
+        "current counts rewritten to 52 collected / 40 stub + 13 subtests executed / real-engine OCR, full native suite and acceptance PENDING the heavy slot (was quoting the superseded 36/89/115 round as current)",
+        "the resolved F10 geometry decision replaces the stale scale-only limitation wording",
+        "older rounds remain explicitly dated history; nothing deleted; run.json freshness claims unchanged"
+      ],
+      "source_state": "Unchanged: no source or test edits in this checkpoint (evidence-only); T27 sources remain byte-identical to 5ba110b as collected in 1e7c8db",
+      "resource_state": "ZCode holds no heavy run and claims no slot change in Beads; the reviewer Erdos holds the heavy OCR reservation on immutable 1e7c8db",
+      "handoff_state": "ready_for_review=true (source revision 5ba110b); worker yielded; Astra owns acceptance"
+    },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
   "executed_commands": [
@@ -147,8 +160,8 @@
     "native/tests/ocr/test_ocr.py"
   ],
   "deliverables": {
-    "native/inkflip/readers/tesseract.py": "rendered-region OCR adapter: fixed argv with explicitly pinned -l/--tessdata-dir, shell=False, neutral private filenames, validated language identifiers, per-language local model resolution with authoritative TESSDATA_PREFIX, typed region/crop validation, padded-crop planning with recorded inverse transforms, page-scoped verbatim raw words with diagnostic confidence, pre-decode pixel budget, exact word cap, distinct typed failure terminals",
-    "native/tests/ocr/test_ocr.py": "TEST-27 suite: 36 tests over real tesseract 5.5.3 runs on T05 fixture renders (F01 amount line, F03 scan pixel-only independence, F08 UserUnit render compensation, failure-mode matrix, option-injection defense, schema conformance) plus 16 wave-1 review regression tests (region/crop validation, budget ordering, word cap, model selection, I/O faults)"
+    "native/inkflip/readers/tesseract.py": "rendered-region OCR adapter (source revision 5ba110b): fixed argv with explicitly pinned -l/--tessdata-dir, shell=False, neutral private filenames, validated language identifiers, per-language local model resolution with authoritative TESSDATA_PREFIX, typed region/crop validation, effective-resize inversion from actual destination dimensions, pre-allocation output budget, padded-crop planning with recorded inverse transforms, canonical_to_raster affine geometry (Scale(s)*R, validated/snapshotted/inverted at open, four-corner quad mapping, handle provenance enforced), page-scoped verbatim raw words with diagnostic confidence, distinct typed failure terminals",
+    "native/tests/ocr/test_ocr.py": "TEST-27 suite: 52 tests collected — 20 original real-engine contract tests, 16 wave-1 review regression tests, 16 wave-2 stub/tiny-render regression tests (effective resize, output budget, typed boundary incl. model_integrity and malformed TSV, canonical_to_raster rotations/shear/numeric example, corrected fallback layout)"
   },
   "measured_decisions": [
     {"decision": "Native full-page default PSM 3 instead of the browser PSM 6 prescription", "reason": "Measured (macOS): PSM 6 drops the isolated '$100' amount line on the F01 render; PSM 3/11 find it. PSM is recorded per invocation (raw_source_locator tag); single-line user regions use PSM 7 as the contract requires.", "linux_observation_2026_09_12": "Spot-check on Linux tesseract 5.5.3 (artifacts/tasks/T27/psm6-spotcheck.log): PSM 3, 6 and 11 all read the identical 16 words including '$100'. The Mac rationale does not reproduce on Linux; default kept at PSM 3, contract decision escalated to the coordinator."},
@@ -160,9 +173,9 @@
   ],
   "limitations": [
     "Printed English OCR only; no non-Latin script recognition is claimed (F14 preservation stays with native text readers).",
-    "Current counts (2026-09-12, Linux amd64, source revision 12bc8ac + merged mains): 36/36 OCR contract tests, 89 native tests + 126 subtests, bun run verify 115/115 in the linked worktree, bun run test:native exit 0. The former T26 PDFium geometry baseline failures are RESOLVED by the approved font-oracle fix (merged main); the original failed-run log is preserved as dated history.",
-    "PENDING: the final OCR verification bound to the ULTIMATE accepted candidate has not been rerun while T10 holds the heavy OCR reservation (no real OCR/model/corpus suites until Astra grants it back); the current green OCR runs bind to 442f3cd-era candidates whose T27 sources are byte-identical to 12bc8ac.",
-    "Child-only timeout kill and in-memory TSV capture are T29 supervision scope; scale-only transform model is the F10 contract question held by Astra; DEFAULT_PSM=3 kept with explicit platform-specific observations."
+    "CURRENT STATE (source revision 5ba110b, Linux amd64, 2026-09-12): 52 tests collected; 40 stub/tiny-render tests + 13 subtests executed and green under the no-heavy hold; 12 real-engine tests, the full native suite (89 + 126 subtests), and the registered acceptance harness are PENDING the heavy OCR slot, which Astra transferred to the independent reviewer Erdos for execution on the immutable candidate 1e7c8db in a separate Linux checkout. Counts quoted from older rounds (36/89/115) are dated history only.",
+    "The former scale-only geometry limitation is RESOLVED by the approved F10 decision: precise OCR geometry now requires the recorded canonical_to_raster affine (Scale(s)*R); scale-only metadata is a legacy diagnostic yielding unknown geometry. Child-only timeout kill and in-memory TSV capture remain T29 supervision scope.",
+    "The former T26 PDFium geometry baseline failures were RESOLVED by the approved font-oracle fix (merged main); the original failed-run log is preserved as dated history (native-tests-linux-baseline.log, commit a6f6b1d)."
   ],
   "dependency_requests": [
     "Fixture owner lane: committed F14/F15 families when assigned.",

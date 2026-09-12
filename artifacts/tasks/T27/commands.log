@@ -211,3 +211,20 @@ $ uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine s
 $ bun run verify
   -> exit 0 (bootstrap + native-bootstrap + coordination 64/64; no OCR)
 ================================================================================
+
+================================================================================
+WAVE-3 EVIDENCE-ONLY CHECKPOINT (Astra wave-3 review grant, 2026-09-12)
+Collected candidate: 1e7c8db (source 5ba110b). Heavy OCR reservation
+transferred by Astra to the independent reviewer Erdos (separate Linux
+checkout of exact 1e7c8db) for the real 52-test OCR suite, full native suite
+and registered acceptance. ZCode: ARTIFACTS ONLY, no OCR rerun, no source
+change.
+Artifact corrections applied to handoff.json / receipt.json:
+- implementation_commit now 5ba110b (was stale 12bc8ac); history preserved.
+- Current counts: 52 collected / 40 stub + 13 subtests executed green /
+  real-engine OCR + full native + acceptance PENDING heavy slot. Older
+  36/89/115 rounds kept as dated history only.
+- Resolved F10 decision (canonical_to_raster geometry) replaces the stale
+  scale-only limitation wording.
+Worker holds no heavy run; yielded; no Beads writes. T27 remains unaccepted.
+================================================================================

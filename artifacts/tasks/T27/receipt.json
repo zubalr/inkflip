@@ -7,8 +7,8 @@
     "worker_id": "zcode-t27",
     "branch": "work/zcode/t27",
     "base": "726d61c0c",
-    "implementation_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57",
-    "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 was the original wave-0 implementation; 12bc8ac is the current source revision after wave-1 review fixes (2026-09-12, Linux)"
+    "implementation_commit": "5ba110b",
+    "implementation_commit_history": "394e65c07be89e2a867b0b316fe46940f927dbf9 = original wave-0 implementation; 12bc8acca01aa2faa3948d3c60df43eefcbf5c57 = wave-1 review fixes; 5ba110b = current source revision after wave-2 review fixes (2026-09-12, Linux)"
   },
   "contract_version": "1.0.0",
   "fixture_ids": ["F01", "F03", "F14", "F15", "F20"],
