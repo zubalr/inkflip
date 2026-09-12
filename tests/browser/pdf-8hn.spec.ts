@@ -454,3 +454,71 @@ test('F2b: surfaces OCR cap notice before starting and warns on omitted region p
   expect(ocrChecks.map((c) => c.page).sort()).toEqual([0, 1, 2, 3, 4]);
 });
 
+// ---------------------------------------------------------------------------
+// Fix 2d: Mixed selection with region prioritization matches notice and plan
+// ---------------------------------------------------------------------------
+test('F2d: mixed selection with region on page 8 prioritizes page 8 for OCR and notice matches plan', async ({
+  page,
+}) => {
+  await openPreview(page);
+  await offerFile(page, 'eight.pdf', buildPdf({ pages: 8 }));
+  await waitForDocument(page, 8);
+
+  // Select all 8 pages
+  await page.locator('[data-testid=select-all]').click();
+  await expect(page.locator('[data-testid=pages-summary]')).toHaveText(
+    '8 of 8 pages selected',
+  );
+
+  // Navigate to page 8 and add an explicit region
+  await page.locator('[data-testid=preview-page]').fill('8');
+  await page.locator('[data-testid=preview-page]').press('Enter');
+  await page.locator('[data-testid=region-x0]').fill('50');
+  await page.locator('[data-testid=region-y0]').fill('50');
+  await page.locator('[data-testid=region-x1]').fill('200');
+  await page.locator('[data-testid=region-y1]').fill('200');
+  await page.locator('[data-testid=region-apply]').click();
+  await expect(page.locator('[data-testid=region-committed]')).toBeVisible();
+
+  // The notice must explain region prioritization and list pages 8, 1, 2, 3, 4
+  const notice = page.locator('#ocr-limit-notice');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText('prioritizing explicit regions');
+  await expect(notice).toContainText('8, 1, 2, 3, 4');
+
+  // Start run
+  await page.locator('[data-testid=start-run]').click();
+  await expect(page.locator('[data-testid=plan]')).toBeVisible();
+
+  // Verify the checks in the plan
+  const checks = await page
+    .locator('[data-testid=plan-checks] li')
+    .evaluateAll((els) =>
+      els.map((el) => ({
+        id: el.getAttribute('data-check-id'),
+        page: Number(el.getAttribute('data-page')),
+        capability: el.getAttribute('data-capability'),
+        region: el.getAttribute('data-region'),
+      })),
+    );
+
+  const nativeChecks = checks.filter((c) => c.capability === 'native_text');
+  const renderChecks = checks.filter((c) => c.capability === 'render');
+  const ocrChecks = checks.filter((c) => c.capability === 'ocr');
+
+  // All 8 pages get native_text and render
+  expect(nativeChecks.length).toBe(8);
+  expect(renderChecks.length).toBe(8);
+
+  // Exactly 5 pages get OCR, with page 8 (index 7) prioritized over pages 5, 6, 7 (indices 4, 5, 6)
+  expect(ocrChecks.length).toBe(5);
+  const plannedOcrPageIndices = ocrChecks.map((c) => c.page);
+  expect(plannedOcrPageIndices).toEqual([7, 0, 1, 2, 3]);
+
+  // Page 8 OCR check binds the user region
+  const page8Ocr = ocrChecks.find((c) => c.page === 7);
+  expect(page8Ocr).toBeDefined();
+  expect(page8Ocr!.region).toBeTruthy();
+});
+
+

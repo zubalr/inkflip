@@ -393,9 +393,9 @@ export function OpenWorkspace({
               title={`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run`}
               id="ocr-limit-notice"
             >
-              {`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run. The first ${profile.maxOcrPagesPerRun} selected pages (${plannedOcrPages
+              {`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run (prioritizing explicit regions). Pages ${plannedOcrPages
                 .map((p) => p + 1)
-                .join(", ")}) will include OCR; all ${selectedPages.length} selected pages will be checked with native text and rendering.`}
+                .join(", ")} will include OCR; all ${selectedPages.length} selected pages will be checked with native text and rendering.`}
             </Notice>
           ) : null}
 
