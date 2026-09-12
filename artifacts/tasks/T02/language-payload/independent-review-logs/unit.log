@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: already aborted signal prevents worker creation
+ok 1 - already aborted signal prevents worker creation
+  ---
+  duration_ms: 4.0235
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled load and settles readiness
+ok 2 - abort physically terminates a stalled load and settles readiness
+  ---
+  duration_ms: 0.653167
+  type: 'test'
+  ...
+# Subtest: load rejection releases the worker and settles readiness
+ok 3 - load rejection releases the worker and settles readiness
+  ---
+  duration_ms: 0.508334
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled loadLanguage and settles readiness
+ok 4 - abort physically terminates a stalled loadLanguage and settles readiness
+  ---
+  duration_ms: 0.435917
+  type: 'test'
+  ...
+# Subtest: loadLanguage rejection releases the worker and settles readiness
+ok 5 - loadLanguage rejection releases the worker and settles readiness
+  ---
+  duration_ms: 0.959542
+  type: 'test'
+  ...
+# Subtest: abort physically terminates a stalled initialize and settles readiness
+ok 6 - abort physically terminates a stalled initialize and settles readiness
+  ---
+  duration_ms: 0.536042
+  type: 'test'
+  ...
+# Subtest: initialize rejection releases the worker and settles readiness
+ok 7 - initialize rejection releases the worker and settles readiness
+  ---
+  duration_ms: 0.403292
+  type: 'test'
+  ...
+# Subtest: raw worker error rejects initialization and releases its transport
+ok 8 - raw worker error rejects initialization and releases its transport
+  ---
+  duration_ms: 0.341792
+  type: 'test'
+  ...
+# Subtest: termination rejects an outstanding job and is idempotent
+ok 9 - termination rejects an outstanding job and is idempotent
+  ---
+  duration_ms: 0.62925
+  type: 'test'
+  ...
+# Subtest: delayed image loading cannot send a new job after cancellation
+ok 10 - delayed image loading cannot send a new job after cancellation
+  ---
+  duration_ms: 0.565459
+  type: 'test'
+  ...
+# Subtest: successful initialization and recognition preserve the existing protocol
+ok 11 - successful initialization and recognition preserve the existing protocol
+  ---
+  duration_ms: 0.618625
+  type: 'test'
+  ...
+# Subtest: mixed language payloads keep bytes for loading and codes for initialization
+ok 12 - mixed language payloads keep bytes for loading and codes for initialization
+  ---
+  duration_ms: 0.231458
+  type: 'test'
+  ...
+# Subtest: reinitialization normalizes new object payloads without changing their model bytes
+ok 13 - reinitialization normalizes new object payloads without changing their model bytes
+  ---
+  duration_ms: 0.289417
+  type: 'test'
+  ...
+# Subtest: string language initialization remains unchanged
+ok 14 - string language initialization remains unchanged
+  ---
+  duration_ms: 0.239625
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 52.881625
