@@ -7,6 +7,15 @@ ok   bun.lock.coverage: all 15 manifest specs resolve to hashed lock entries
 ok   bun.lock.trusted-policy: trustedDependencies declared explicitly (0 entries)
 ok   bun.lock.linker: isolated linker enforced
 ok   bun.lock.install-policy: exact saves + release-age gate enforced
+ok   patch.manifest: exact pinned patch declaration matches
+ok   patch.lock: exact pinned patch declaration matches
+ok   patch.version: installed package is tesseract.js@7.0.0
+ok   patch.path: patch path matches provenance
+ok   patch.bytes: tesseract.js@7.0.0.patch SHA-256 matches recorded provenance
+ok   patch.targets: patch modifies only its two recorded source files
+ok   patch.files: constructor and public types are the complete patched file set
+ok   patch.installed.src/createWorker.js: createWorker.js SHA-256 matches recorded provenance
+ok   patch.installed.src/index.d.ts: index.d.ts SHA-256 matches recorded provenance
 ok   uv.lock.interpreter: uv.lock interpreter ==3.13.15
 ok   uv.lock.coverage: all 5 declared pins locked exactly
 ok   uv.lock.hashes: every locked package carries sha256 artifact hashes (15 packages)
@@ -15,7 +24,7 @@ ok   base-image.oci.python:3.13.15-slim-trixie: python:3.13.15-slim-trixie pinne
 ok   base-image.actions: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 recorded at immutable 11d5960a3267…
 ok   no-cdn.serve-paths: all staged serve_prefixes are same-origin /-paths
 ok   no-cdn.sources: web sources carry no remote script/worker/fetch or CDN reference
-check_dependencies: 16 passed, 0 failed
+check_dependencies: 25 passed, 0 failed
 
 Exit: 0
 
@@ -40,6 +49,14 @@ test_remote_worker_reference_fails (test_check_dependencies.NoCdnTests.test_remo
 test_missing_pin (test_check_dependencies.PinTests.test_missing_pin) ... ok
 test_multiline_pin_rejected (test_check_dependencies.PinTests.test_multiline_pin_rejected) ... ok
 test_single_version_line (test_check_dependencies.PinTests.test_single_version_line) ... ok
+test_exact_record_and_installed_bytes_pass (test_dependency_patch.DependencyPatchTests.test_exact_record_and_installed_bytes_pass) ... ok
+test_missing_lock_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_lock_declaration_fails) ... ok
+test_missing_manifest_declaration_fails (test_dependency_patch.DependencyPatchTests.test_missing_manifest_declaration_fails) ... ok
+test_missing_patch_fails (test_dependency_patch.DependencyPatchTests.test_missing_patch_fails) ... ok
+test_modified_patch_fails (test_dependency_patch.DependencyPatchTests.test_modified_patch_fails) ... ok
+test_unpatched_or_modified_constructor_fails (test_dependency_patch.DependencyPatchTests.test_unpatched_or_modified_constructor_fails) ... ok
+test_unrecorded_patch_target_fails_even_with_updated_digest (test_dependency_patch.DependencyPatchTests.test_unrecorded_patch_target_fails_even_with_updated_digest) ... ok
+test_wrong_installed_version_fails (test_dependency_patch.DependencyPatchTests.test_wrong_installed_version_fails) ... ok
 test_verify_action_on_live_checkout (test_prepare_assets.CliTests.test_verify_action_on_live_checkout)
 The committed staged assets verify in the real checkout. ... ok
 test_bad_sha256_rejected (test_prepare_assets.ManifestValidationTests.test_bad_sha256_rejected) ... ok
@@ -62,9 +79,13 @@ test_matching_staged_file_passes (test_prepare_assets.VerifyTests.test_matching_
 test_missing_asset_fails_closed (test_prepare_assets.VerifyTests.test_missing_asset_fails_closed) ... ok
 test_substituted_model_fails_checksum (test_prepare_assets.VerifyTests.test_substituted_model_fails_checksum)
 The F20/F22 negative control: wrong bytes under the right name fail. ... ok
+test_installed_constructor_lifecycle (test_tesseract_worker.TesseractWorkerTests.test_installed_constructor_lifecycle) ... ok
+test_real_browser_verified_model_payload (test_tesseract_worker.TesseractWorkerTests.test_real_browser_verified_model_payload) ... ok
+test_real_browser_worker_lifecycle (test_tesseract_worker.TesseractWorkerTests.test_real_browser_worker_lifecycle) ... ok
+test_registered_cases_ignore_negative_control_override (test_tesseract_worker.TesseractWorkerTests.test_registered_cases_ignore_negative_control_override) ... ok
 
 ----------------------------------------------------------------------
-Ran 37 tests in 0.056s
+Ran 49 tests in 7.073s
 
 OK
 
