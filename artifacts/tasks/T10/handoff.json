@@ -11,7 +11,7 @@
       "Merged current canonical main 500abfc (coordinator-authorized) -> merge commit a5a270f, zero conflicts. Prior merge 65e84da -> 50dddc0 and prior impl/evidence 32f098e/4282857 preserved in ancestry.",
       "Applied Astra's approved arithmetic+render+pixel revision in implementation commit 831e0a1: recordedResizeK now returns exactly three constant candidates at the feasible interval's lower edge (m=ceil(lo*1e6): m/1e6, (m+1)/1e6, (m-1)/1e6) — no midpoint, no enumeration; the caller re-derives floor(crop*r) per candidate with positive-integer and cap checks, never clamps zero dims, still fails resource_limit when unmatched. reader.ts cropToBlob draws the source crop to the FRACTIONAL destination crop*resizeK x crop*resizeK on the integer outW x outH canvas in BOTH drawImage branches, so the recorded ocr_resize factor is the real rendered scale; the clipped sub-pixel right/bottom remainder is measured on the actual difference (not six-decimal rounding) and reported as ocr_resize_clipped plus CropPlan/OcrCheckOutput.resizeClipPx; imageSmoothingEnabled is a narrow explicit test seam, default true.",
       "Tests commit 567b482: new tests/readers/crop-pixels.spec.ts — real Chromium, real adapter plan->planCrop->cropToBlob->stub engine boundary (captures the produced PNG blob; NO tesseract module/worker/model loaded). 49x80 fixture (x<42 black, x>=42 red) @50px cap -> k=0.1125 -> decoded 5x9 ALL opaque black (old integer-stretch x-scale 5/49 would sample src x≈44.1 -> red at col 4); resizeClipPx [0.5125,0]; ocr_resize matrix[0]=matrix[3]=0.1125; inverse map of output center (4.5,4.5) -> canonical (40,40) inside source pixel [40,41); ImageData AND CanvasImageSource branches; k=1 no-resize control (49x80, seam bytes intact, no clipping limitation); crop-offset region [[34,10]-[41,26]] pad 8 -> crop (26,2) 23x32, seam lands at output x=16 proving source-origin restore with no padding leak. crop-math.mjs subprecision comment corrected (lower-edge 0.00525 -> 43x21 at the 903px cap, legitimately not 42x20) + new resizeClipPx test. tesseract.spec.ts latent harness fix: api.planCropOnly returns a Promise and was never awaited — unreached before because the test failed earlier at the resizeK floor assertion.",
-      "HEAVY CHECKS EXECUTED (sole reservation holder; port 5191 reserved): bun run test:browser -- tests/readers/tesseract.spec.ts -> 11/11 pass exit 0 (5.1s; real staged tesseract.js 7.0.0 worker/core + sha256-pinned eng.traineddata; PSM7 raw 'AMOUNT DUE $108', PSM6 page OCR, identity/retry/cancel/model-state coverage). task_acceptance task T10 --report artifacts/tasks/T10/run.json -> exit 0, commands_run=1, failures=[], evidence_errors=[], tests {11/11}, evaluated_commit=567b48215ada9d8ed868d4345fdeb7f48dedda7c. bun run verify -> exit 0 (self-check 16 commands; bootstrap 49 tests OK; native-bootstrap 64 tests OK; check:coordination OK). bun run build:web -> exit 0 (vite, 18 modules, apps/web/dist).",
+      "HEAVY CHECKS EXECUTED (sole reservation holder; port 5191 reserved): bun run test:browser -- tests/readers/tesseract.spec.ts -> 11/11 pass exit 0 (5.1s; real staged tesseract.js 7.0.0 worker/core + sha256-pinned eng.traineddata; PSM7 raw 'AMOUNT DUE $108', PSM6 page OCR, identity/retry/cancel/model-state coverage). task_acceptance task T10 --report artifacts/tasks/T10/run.json -> exit 0, commands_run=1, failures=[], evidence_errors=[], tests {11/11}, evaluated_commit=567b48215ada9d8ed868d4345fdeb7f48dedda7c. bun run verify -> exit 0 (self-check 16 commands; test:bootstrap 49 tests OK; test:native-bootstrap 2 tests OK; check:coordination 64 tests OK — 115 tests total; corrected attribution: the 64-test suite is coordination, not native-bootstrap). bun run build:web -> exit 0 (vite, 18 modules, apps/web/dist).",
       "Light checks re-verified post-revision: tsc -b tsconfig.json exit 0; node --test tests/readers/crop-math.mjs exit 0 13/13; node artifacts/tasks/T10/repro-planCrop.mjs exit 0 6/6 (4896x6336->0.359069/1758x2275; 9000x120->0.910223/8192x109; 8000x999->0.707375/5659x706; 50000x100->0.16384/8192x16; 8000x1000->0.707/5656x707; 440x240@50k->0.6875/302x165); playwright crop-pixels.spec.ts 4/4."
     ],
     "failures": [
@@ -24,7 +24,7 @@
     "limitations": [
       "resizeClipPx measures output-pixel fractions only; the corresponding source/page-area content is proportionally larger under extreme downscale (stated in the limitation text).",
       "crop-pixels.spec.ts uses imageSmoothingEnabled=false (explicit test seam) for deterministic nearest-neighbor sampling; production keeps the canvas default (true). Stub engine boundary returns an empty completed hierarchy — real OCR assertions live in tesseract.spec.ts.",
-      "receipt.json intentionally absent — acceptance is the coordinator's action after independent review; run.json is the worker-side acceptance report only.",
+      "receipt.json is the worker-side criterion->evidence mapping only (acceptance_criteria_evidence, status executed, task-local paths); it is NOT the coordinator's acceptance.json and asserts no review approval — review.md/acceptance.json come from the independent reviewer (Pauli) and coordinator.",
       "oxfmt --check remains non-conforming package-wide (pre-existing at 61dbc3d); no reformat applied to avoid unrelated churn."
     ],
     "executed_commands": [
@@ -36,7 +36,7 @@
       {"cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts @831e0a1+wt", "exit": 1, "collected": 11, "passed": 10, "failed": 1, "note": "latent unawaited planCropOnly in spec; fixed in 567b482"},
       {"cmd": "bun run test:browser -- tests/readers/tesseract.spec.ts @567b482", "exit": 0, "collected": 11, "passed": 11, "failed": 0, "skipped": 0},
       {"cmd": "python3 scripts/task_acceptance.py task T10 --report artifacts/tasks/T10/run.json", "exit": 0, "note": "1 command, 11/11, evaluated_commit=567b482"},
-      {"cmd": "bun run verify", "exit": 0, "note": "self-check + bootstrap 49 + native-bootstrap 64 + check:coordination"},
+      {"cmd": "bun run verify", "exit": 0, "note": "self-check 16 commands + test:bootstrap 49 + test:native-bootstrap 2 + check:coordination 64 = 115 tests; corrected attribution"},
       {"cmd": "bun run build:web", "exit": 0, "note": "vite build apps/web, 18 modules"}
     ],
     "commits": {
@@ -48,6 +48,7 @@
     "evidence_paths": [
       "artifacts/tasks/T10/handoff.json",
       "artifacts/tasks/T10/commands.log",
+      "artifacts/tasks/T10/receipt.json",
       "artifacts/tasks/T10/repro-planCrop.mjs",
       "artifacts/tasks/T10/run.json",
       "tests/readers/crop-math.mjs",

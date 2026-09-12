@@ -1,0 +1,67 @@
+{
+  "task_id": "T10",
+  "beads_id": "pdf-t10",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t10",
+  "base_commit": "f0571f0bd64a446d219ca285ed3959e8f4c5855b",
+  "implementation_commit": "831e0a1",
+  "candidate_commit": "87e2073fb53db17cea0af3ed55cbe249f4e29456",
+  "evaluated_commit": "567b48215ada9d8ed868d4345fdeb7f48dedda7c",
+  "actor": "devin-local-swe2-t10",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "note": "Worker-side criterion->evidence mapping only. This is NOT the coordinator acceptance receipt (acceptance.json) and contains no review approval — independent review (Pauli) and the coordinator's receipt remain outstanding. The candidate under review is immutable at 87e2073.",
+  "acceptance_criteria_evidence": {
+    "Actual English crop OCR emitted with engine/settings/model identity": {
+      "status": "executed",
+      "detail": "Real Chromium (Playwright 1.57.0) drives the adapter over loopback HTTP: pdf.js renders the F03 scan through the named-renderer seam, then the real staged tesseract.js@7.0.0 worker/core + sha256-pinned tessdata-fast eng.traineddata OCR it. Test 'real English crop OCR via staged same-origin assets (PSM 7)' emits raw_text 'AMOUNT DUE $108' from a region crop; 'full-page PSM-6 OCR' emits the invoice body ('QUARTERLY' SUMMARY INVOICE 2a26-8417 AMOUNT CUE $168 ...'). Every OcrCheckOutput carries the full identity record: reader id, engine {name tesseract.js, packageVersion 7.0.0, reportedVersion 5.1.0-288-g2a9c1, oem, psmReported, adapterVersion 1.0.0}, model {id, version, sha256, state, provenance}, raster identity and the recorded raster_scale/crop_translation/ocr_resize transform chain. Counts: 11/11 in the registered suite and in the task acceptance run at 567b482.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log",
+        "artifacts/tasks/T10/handoff.json"
+      ]
+    },
+    "no default CDN": {
+      "status": "executed",
+      "detail": "The adapter constructs the engine only with explicit same-origin paths: workerPath /assets/tesseract/7.0.0/worker.min.js, corePath /assets/tesseract-core/7.0.0/, langPath /models/tessdata-fast-eng/7d4322bd/, gzip:false, workerBlobURL:false, cacheMethod:'readOnly' — no jsdelivr fallback can be constructed. The spec's harness logs every HTTP request the page makes and asserts all served paths are same-origin staged assets; the model bytes are fetched by the adapter itself from the pinned same-origin URL, sha256-verified against the frozen manifest BEFORE being committed to the worker-readable idb-keyval cache slot. Staged-asset digests are recorded in the ReaderManifest asset_hashes. Observed in the 11/11 run.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log"
+      ]
+    },
+    "initialization failure != unreadable page": {
+      "status": "executed",
+      "detail": "Distinct terminal outcomes are tested and observed: 'worker init failure is a terminal failure, never unreadable_pixels' injects a createWorker failure -> check status failed, reason init_crash, zero occurrences; a completed recognition that yields no words -> status completed, reason unreadable_pixels (an informational evidence outcome, never a failure and never retried). 'offline-unavailable is a distinct asset state' and 'model integrity failure and corrupted cache are rejected' cover the model-side terminal states (unavailable_offline, failed_integrity) — never conflated with an unreadable page. One transient retry applies to init/worker crashes only, on a fresh worker. Counts: those cases pass inside 11/11.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log"
+      ]
+    },
+    "bounded raster/edge/pixel counts": {
+      "status": "executed",
+      "detail": "Caps enforced in planCrop BEFORE pixels reach the engine: maxRasterPixels 4_000_000, maxRasterEdge 8192, maxRunOcrPixels 20_000_000, occurrence/raw-text caps, 30s check deadline. Measured this revision: 4896x6336 -> recorded k=0.359069 -> realized 1758x2275 (floor-exact, matrix[0]===resizeK); edge-cap 9000x120 -> 0.910223 -> 8192x109; 8000x999 -> 0.707375 -> 5659x706; 50000x100 -> 0.16384 -> 8192x16; region+pad 440x240 @50k -> 0.6875 -> 302x165; sub-precision 8192x4000 @903px -> 0.00525 -> 43x21 (at cap, floor-exact). Run-pixel budget: second identical check fails resource_limit while the completed first result stands (I17). Fractional-destination clipping is measured on the actual difference and reported as ocr_resize_clipped with resizeClipPx in OUTPUT pixels [right,bottom] each in [0,1) — e.g. [0.5125,0] for 49x80@50px -> 5x9; note the corresponding source content clipped is proportionally larger (the limitation text says so). Zero-dimension candidates are rejected, never clamped; unmatched plans fail resource_limit honestly. Evidence: registered suite 11/11 incl. 'bounded raster/edge/pixel counts enforced and recorded' + 'run OCR pixel budget'; repro script 6/6; pixel spec 4/4.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log",
+        "artifacts/tasks/T10/repro-planCrop.mjs",
+        "artifacts/tasks/T10/handoff.json"
+      ]
+    },
+    "cached/cold/offline distinguished": {
+      "status": "executed",
+      "detail": "ModelAssetManager reports the RUNTIME_LIFECYCLE asset states distinctly: not_prepared, downloading, verifying, ready_memory, ready_cached, failed_integrity, unavailable_offline — with explicit byte provenance memory/cache/network on every preparation. Verified live in 'cold, memory, and cached model states are distinct; removal is explicit': cold download -> ready_memory (network), re-prepare -> memory, fresh reader over the seeded idb-keyval slot -> ready_cached (cache), 'remove downloaded OCR data' deletes cache+memory explicitly; corrupted cache entry is deleted and reported then replaced by a verified download; offline fetch failure -> unavailable_offline, not unreadable page. All inside the 11/11 run.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log"
+      ]
+    },
+    "low confidence never asserted as ground truth.": {
+      "status": "executed",
+      "detail": "Engine confidence is a labeled diagnostic only: every occurrence carries engine_score (tesseract word confidence 0-100) with ENGINE_SCORE_MEANING text ('recognizer estimate for diagnostics — never asserted as ground truth'); words below 60 get a low_engine_score limitation and are listed in diagnostics.lowConfidenceIds while remaining emitted occurrences — nothing is suppressed or promoted on confidence. 'word boxes map back through the recorded chain; confidence is diagnostic' asserts meanConfidence in [0,100], flagged ids match exactly, and occurrence geometry maps through the recorded O=K*T*S*R*C chain with precision 'estimated'. Passing in the 11/11 run.",
+      "evidence": [
+        "artifacts/tasks/T10/run.json",
+        "artifacts/tasks/T10/commands.log"
+      ]
+    }
+  }
+}

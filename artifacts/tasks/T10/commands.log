@@ -203,8 +203,11 @@ exit 0 — commands_run=1, failures=[], evidence_errors=[],
 
 $ bun run verify                                              @ 567b482
 exit 0 — group: self-check (16 commands registered) + test:bootstrap
-  (49 tests OK) + test:native-bootstrap (64 tests OK) +
-  check:coordination OK.
+  (49 tests OK) + test:native-bootstrap (2 tests OK) +
+  check:coordination (64 tests OK) — 115 tests total.
+  [correction 2026-09-12: an earlier draft of this line mislabeled the
+  64-test suite as native-bootstrap; the 64 are the coordination tests.
+  Attribution corrected here; no result changed — verify exited 0.]
 
 $ bun run build:web                                           @ 567b482
 exit 0 — vite build apps/web: 18 modules, dist written (532ms).
