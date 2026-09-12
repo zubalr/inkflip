@@ -1,6 +1,8 @@
 T22 — Implement strict local JSON import and reopen flow
 Worker: devin-t22 · Branch: work/devin/t22 · Base: 3b70baa
-Implementation commits: 9742daf (source) + d802819 (tests, evaluated HEAD)
+Implementation commits: 9742daf (source) + d802819 (tests)
+Review round 1 (684374f, CHANGES-NEEDED → F1): fix 610eee3 (controller)
++ 6d3951b (spec, evaluated HEAD)
 All commands run in /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t22
 Dates: 2026-09-12 (UTC)
 
@@ -86,3 +88,58 @@ Manual exploration (not acceptance evidence)
   reader-swapped variant, hostile-string report (all strings inert,
   zero external images, no markers). These scratch scripts were deleted
   and are superseded by the committed spec.
+
+======================================================================
+REVIEW ROUND 1 — independent review 684374f (CHANGES-NEEDED, F1)
+======================================================================
+Finding F1 (medium): offerSource had no busy/generation guard — a
+pending byte read across replace applied the old report's attach to a
+different-document report (false attached/replay-ready display) and
+across clear resurrected a zombie report. Fixed in controller.ts
+(610eee3): busy entry guard + post-await binding to the captured
+report and generation; a superseded read is dropped with no event, no
+ownership and no attach — the newer action always wins. F4 batched:
+the suite now exercises source:sha256-mismatch (same-length corrupt
+PDF) alongside source:length-mismatch.
+
+======================================================================
+$ bun x --no-install oxfmt + oxfmt --check + oxlint  [revision gates]
+----------------------------------------------------------------------
+oxfmt applied to controller.ts + import.spec.ts; --check clean.
+oxlint: 0 warnings, 0 errors (96 rules, 7 files).
+exit=0
+
+======================================================================
+$ bun x --no-install tsc -b packages/reports        [revision]
+----------------------------------------------------------------------
+(composite declaration build — clean, no output)
+exit=0
+
+======================================================================
+$ bun run test:browser -- tests/reports/import.spec.ts   [revision — registered acceptance command]
+----------------------------------------------------------------------
+Running 12 tests using 1 worker
+  ✓   1 a real selected export reopens locally — no upload, scope/omissions shown
+  ✓   2 evidence export: missing source, chooser and unavailable readers are explicit
+  ✓   3 replayable export shows embedded source and the environment requirement
+  ✓   4 source attach requires exact bytes; mismatch is never attached
+  ✓   5 hash mismatch blocks replay: tampered report and asset are rejected
+  ✓   6 schema version refusal is explicit
+  ✓   7 hostile corpus: every input rejected, zero egress, nothing executed
+  ✓   8 comparison requires two exact local selections — no ids, no urls
+  ✓   9 a new report clears the previous generation before reopening
+  ✓  10 a pending source read cannot attach across a superseded generation
+  ✓  11 declared-size gate rejects before any byte is read
+  ✓  12 installed readers plus attached source make replay readiness explicit
+  12 passed (4.3s)
+exit=0
+
+======================================================================
+$ python3 scripts/task_acceptance.py task T22 --report artifacts/tasks/T22/run.json   [revision]
+----------------------------------------------------------------------
+evaluated_commit=6d3951b (test commit, HEAD at evaluation)
+commands_run=1  failures=[]  evidence_errors=[]
+tests: collected=12 passed=12 failed=0 skipped=0
+record[0]: "bun run test:browser -- tests/reports/import.spec.ts" exit=0
+run record rewritten to artifacts/tasks/T22/run.json
+exit=0

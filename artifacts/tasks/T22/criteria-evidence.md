@@ -1,8 +1,10 @@
 # T22 criterion → evidence map
 
 Registered command: `bun run test:browser -- tests/reports/import.spec.ts`
-— 11/11 pass, exit 0 at evaluated commit `d802819` (see `run.json`,
-`commands.log`).
+— 12/12 pass, exit 0 at evaluated commit `6d3951b` (see `run.json`,
+`commands.log`). Round 1 independent review (`684374f`,
+CHANGES-NEEDED→F1) was resolved by `610eee3` + `6d3951b`; see the
+review-round section below.
 
 The spec file is `tests/reports/import.spec.ts` (cited here by name —
 evidence arrays carry task-local artifact paths only).
@@ -65,10 +67,13 @@ through the real file input with the verbatim `import.invalid` copy and
 never opens (`fileState` returns to `idle`). A retained occurrence
 mutated without resealing fails `HASH` at the engine; a crop asset whose
 `data_base64` no longer matches its declared sha256 fails `ASSET`. On
-the source side, a different real PDF is rejected
-`source:length-mismatch`/`sha256-mismatch`, shows the verbatim
-`import.source.mismatch` copy, and is never attached — only the exact
-`mapping-amount.pdf` bytes (sha256-bound to `document`) attach.
+the source side, a different-length real PDF is rejected
+`source:length-mismatch` at the declared-size gate and a same-length
+corrupt copy of the original (last byte flipped — real `SOURCE_PDF`
+bytes, hash differs) is rejected `source:sha256-mismatch` after the
+digest runs — both show the verbatim `import.source.mismatch` copy and
+neither is ever attached. Only the exact `mapping-amount.pdf` bytes
+(sha256-bound to `document`) attach.
 
 ## comparison asks for exact locally selected source reports
 
@@ -89,6 +94,15 @@ ever accepted as input, and egress stays empty.
   observes generation+1; a `MessageFactory` message stamped with the old
   generation is rejected `stale_generation` by the coordinator
   authority; the replace path stands behind an explicit confirm dialog.
+- *"a pending source read cannot attach across a superseded
+  generation"* — F1 regression, deterministic via deferred
+  `arrayBuffer()`: `offerSource` during an in-flight report import is
+  refused `busy`; a source read pending across `offer(B)` (replace,
+  different document) resolves `superseded` — B's view keeps its own
+  missing-source state, `source-attached` never renders; a read pending
+  across `clear()` resolves `superseded` — `currentImport` stays null,
+  `fileState` stays `idle`, no zombie. Zero `source_attached` events
+  for stale reads.
 - *"declared-size gate rejects before any byte is read"* — a
   32 MiB+1 candidate is `too_large` with zero `arrayBuffer()` calls.
 - *"installed readers plus attached source make replay readiness
@@ -97,3 +111,29 @@ ever accepted as input, and egress stays empty.
   re-exported through the real engine) marks both readers `installed`,
   and attaching the original makes `replay-ready` visible — the honest
   positive side of the availability check.
+
+## Review round 1 → resolution
+
+Independent review `684374f` (review branch `review/devin/t22`,
+`artifacts/tasks/T22/review.md`) returned **CHANGES-NEEDED** on
+candidate `a2f7e3c` — all five criteria verified, one medium finding:
+
+- **F1 — `offerSource` missing busy/generation guard**
+  (`apps/web/src/features/import/controller.ts`): a pending byte read
+  across `offer(replace)` attached the old report's replay to a
+  different-document report (false `source_attached`/replay-ready
+  display under the new generation); across `clear()` it resurrected a
+  zombie `current` while `fileState` was `idle`. **Fixed** in `610eee3`:
+  `busy` entry guard (same discipline as `offer`/`offerCompareSide`)
+  plus post-`await` binding — if `this.current` or
+  `host.currentGeneration` changed during the read, the bytes are
+  dropped (`{ok:false, kind:"superseded"}`) with no attach, no
+  `host.own`, no event under the new generation; the newer action
+  always wins. Deterministic regression spec added in `6d3951b`
+  (deferred `arrayBuffer`; replace, clear and busy variants).
+- **F4 — suite gap batched**: the source-mismatch UI path previously
+  exercised only `length-mismatch`; the attach test now also offers a
+  same-length corrupt PDF and asserts `source:sha256-mismatch` through
+  the real file input.
+- Lower findings (F2–F3, F5–F9) are info/design-level and intentionally
+  not changed in this bounded revision — recorded for the coordinator.
