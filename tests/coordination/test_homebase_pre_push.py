@@ -13,6 +13,8 @@ import homebase_pre_push as hook
 
 
 class PrePushTests(unittest.TestCase):
+    task = "t27"
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -28,7 +30,7 @@ class PrePushTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
         self.git("init", "--bare", str(self.remote), cwd=self.root)
-        self.git("init", "-b", "work/zcode/t27", str(self.repo), cwd=self.root)
+        self.git("init", "-b", f"work/zcode/{self.task}", str(self.repo), cwd=self.root)
         self.base = self.commit("base")
         self.git("remote", "add", "handoff", str(self.remote))
         self.git("remote", "add", "origin", str(self.remote))
@@ -43,7 +45,7 @@ class PrePushTests(unittest.TestCase):
             "sys.exit(h.main())\n")
         self.wrapper.chmod(0o755)
         self.git("config", "core.hooksPath", str(hooks))
-        self.target = "refs/heads/hb/inkflip/t27"
+        self.target = f"refs/heads/hb/inkflip/{self.task}"
 
     def git(self, *args, cwd=None, success=True):
         result = subprocess.run(["git", *args], cwd=cwd or self.repo,
@@ -72,7 +74,7 @@ class PrePushTests(unittest.TestCase):
         self.git("push", "handoff", f"HEAD:{self.target}")
         self.assertEqual(self.git("rev-parse", self.target, cwd=self.remote), self.base)
         candidate = self.commit("candidate and evidence")
-        self.git("push", "handoff", f"refs/heads/work/zcode/t27:{self.target}")
+        self.git("push", "handoff", f"refs/heads/work/zcode/{self.task}:{self.target}")
         self.assertEqual(self.git("rev-parse", self.target, cwd=self.remote), candidate)
         self.assertEqual(self.git("show", f"{candidate}:evidence", cwd=self.remote), "candidate and evidence")
 
@@ -114,9 +116,12 @@ class PrePushTests(unittest.TestCase):
         self.git("push", "handoff", f":{self.target}", success=False)
         # Move the disposable checkout back without reset or overwriting a branch.
         self.git("checkout", "-b", "work/zcode/t01", self.base)
-        self.git("branch", "-m", "work/zcode/t27", "saved-candidate")
-        self.git("branch", "-m", "work/zcode/t27")
-        self.git("push", "--force", "handoff", f"HEAD:{self.target}", success=False)
+        self.git("branch", "-m", f"work/zcode/{self.task}", "saved-candidate")
+        self.git("branch", "-m", f"work/zcode/{self.task}")
+        for flag in ("--force", f"--force-with-lease={self.target}:{candidate}"):
+            with self.subTest(flag=flag):
+                self.git("push", flag, "handoff", f"HEAD:{self.target}", success=False)
+        self.git("push", "handoff", f"+HEAD:{self.target}", success=False)
         self.assertEqual(self.git("rev-parse", self.target, cwd=self.remote), candidate)
 
     def test_wrong_current_branch_and_detached_head_are_rejected(self):
@@ -161,6 +166,24 @@ class PrePushTests(unittest.TestCase):
         line = f"HEAD {self.base} {self.target} {hook.ZERO_SHA}"
         self.assertNotEqual(self.invoke(line, url="file://" + str(self.remote)).returncode, 0)
         self.assertEqual(self.invoke("\n" + line + "\n\n").returncode, 0)
+
+
+class FollowupPrePushTests(PrePushTests):
+    """Run the same installed-hook transport protections for a full follow-up ID."""
+    task = "pdf-g78"
+
+    def test_followup_identity_is_exact(self):
+        for target in ("refs/heads/hb/inkflip/g78", "refs/heads/hb/inkflip/PDF-G78",
+                       "refs/heads/hb/inkflip/pdf-g79", "refs/heads/work/zcode/pdf-g78"):
+            with self.subTest(target=target):
+                self.git("push", "handoff", f"HEAD:{target}", success=False)
+        for branch in ("work/zcode/g78", "work/zcode/PDF-G78", "work/devin/pdf-g78",
+                       "work/zcode/pdf-t27", "work/zcode/pdf-pass1", "work/zcode/pdf-g78/extra"):
+            with self.subTest(branch=branch):
+                self.git("branch", "-m", branch)
+                self.git("push", "handoff", f"HEAD:{self.target}", success=False)
+                self.assertNotEqual(self.invoke("").returncode, 0)
+        self.assertEqual(self.refs(), "")
 
 
 if __name__ == "__main__":

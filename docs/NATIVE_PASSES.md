@@ -110,6 +110,42 @@ relay alone handles native Git storage rollover for `refs/dolt/data` with an
 exact observed-SHA lease; see `docs/HOMEBASE.md`. Publish each ZCode grant
 to the Homebase relay before expecting its worker to see it.
 
+For a non-product follow-up, use its existing Beads ID and an explicit grant:
+
+```sh
+python3 scripts/native_pass.py dispatch-followup pdf-g78 --app zcode \
+  --mode audit --scope artifacts/followups/pdf-g78/ \
+  --instructions-file /tmp/inkflip-g78-audit.txt
+```
+
+Write the concrete assignment to the instructions file first. The issue must be
+open, unassigned and dependency-ready. Audit grants allow writes only to that
+follow-up's evidence directory. Implementation grants require explicit write
+scopes and the same exclusive ownership checks as product tasks. Grants retain
+their exact base, branch and pass. Workers cannot turn an audit into implementation.
+Do not use follow-ups to bypass product task ownership, pass gates or acceptance.
+
+`status APP` includes these grants in `assignments`, with `kind: followup`,
+the original `pdf-...` ID, `instructions`, `mode` and `allowed_scope`.
+An assignee without an execution grant appears in `undelivered`; notes alone
+do not authorize execution. Only Devin reconciles legacy note assignments:
+confirm the old writer has yielded, preserve its work, then publish a proper
+grant or record completed evidence. Do not clear a live assignment to redispatch it.
+
+After publishing a grant, verify it appears in the target worker's synced inbox.
+Then require a native-session acknowledgement or a committed checkpoint before
+reporting pickup. A successful relay publication proves delivery, not execution.
+Record acknowledgements, native session IDs and exact collected commits in Beads.
+Workers return these facts through evidence or their existing native messages.
+An overdue acknowledgement calls for inspection of the existing session, not a
+second writer. Resume only confirmed stopped work, retaining its branch and edits.
+
+If grant publication fails, preserve the local claim and repair publication.
+Commit pending Dolt transitions only when present, push state, and publish the
+relay before resuming the existing grant. Do not rerun dispatch to replace it.
+When a provider ends a worker turn, use its supported resume facility; an empty
+inbox or a shell process alone does not prove that native execution is waiting.
+
 Admit independent workers across the project, including native children,
 with no fixed numeric project ceiling; native provider and session limits
 still apply. Allocate by disjoint scope, memory/load, independent review

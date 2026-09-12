@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import unittest
+import native_followups as followups
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 
@@ -139,7 +140,8 @@ def admission_lock():
 
 def active_workers(issues: dict) -> list[dict]:
     return [i for i in issues.values()
-            if "execution:worker" in i.get("labels", []) and i.get("status") == "in_progress"]
+            if i.get("status") == "in_progress" and
+            ("execution:worker" in i.get("labels", []) or followups.execution_grant(i.get("id", "unknown"), i))]
 
 
 def scopes_overlap(left: str, right: str) -> bool:
@@ -151,9 +153,15 @@ def scopes_overlap(left: str, right: str) -> bool:
 def check_scope_ownership(task: dict, workers: list[dict], tasks: dict, overrides: dict) -> None:
     known = {bead_id(tid): effective_task(t, overrides) for tid, t in tasks.items()}
     for issue in workers:
-        if "execution:review" in issue.get("labels", []):
+        grant = followups.execution_grant(issue["id"], issue)
+        if "execution:review" in issue.get("labels", []) and grant.get("kind") != "followup":
             continue
         owner = known.get(issue["id"])
+        if owner is None:
+            if grant.get("kind") == "followup":
+                config = json.loads((ROOT / "execution/passes.json").read_text())
+                followups.validate_grant(issue["id"], grant, config)
+                owner = {"allowed_scope": grant["allowed_scope"]}
         if owner is None:
             raise ValueError(f"{issue['id']} has no known writer scope; coordinator must resolve it")
         conflicts = [(a, b) for a in task["allowed_scope"] for b in owner["allowed_scope"]
