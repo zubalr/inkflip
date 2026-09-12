@@ -4,15 +4,16 @@
   "disposition": "implemented_pending_review",
   "branch": "work/antigravity/t13",
   "base_commit": "96ab5351c953ec128b09a5be3da718f163447fa3",
-  "implementation_commit": "5f644caa0ad5c83145ac3501ab549f50ea89d96f",
+  "implementation_commit": "ab38b9e5afbda714477b9107a22ebde1bf80ef87",
   "actor": "antigravity-t13",
   "model": "Gemini 3.8 Flash via Antigravity",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-12",
+  "scope_notes": "Coordinator-sanctioned scope addition: apps/web/src/pages/Home.module.css and apps/web/src/pages/Workspace.module.css are companion CSS Modules required by the owned page components (P2-F3).",
   "acceptance_criteria_evidence": {
     "Click/keyboard finding selects correct duplicate/page after zoom/rotation": {
       "status": "executed",
-      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 1) and CanvasOverlay / ViewerStage implementation. Tests that zoom (150%) and 90\u00b0 clockwise rotation preserve exact canonical coordinate transformation. Selecting finding finding-dup-2 targets the second duplicate occurrence (\"INVOICE\", occ-p0-dup2, page 0, ordinal 1) with exact coordinate highlight (#highlight-occ-p0-dup2), displaying ordinal and page in the EvidenceSlip and changing selection state without string-search ambiguity (Invariant I04).",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 1) and CanvasOverlay / ViewerStage implementation. Tests that zoom (150%) and 90° clockwise rotation preserve exact canonical coordinate transformation. Selecting finding finding-dup-2 targets the second duplicate occurrence (\"$1,000.00\", occ-p0-dup2, page 0, ordinal 2) with exact coordinate highlight (#highlight-occ-p0-dup2), displaying ordinal and page in the EvidenceSlip. Keyboard navigation (N/P cycling and Enter on focused finding item) selects and navigates without string-search ambiguity (Invariant I04, P3-F4).",
       "evidence": [
         "artifacts/tasks/T13/commands.log",
         "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png",
@@ -21,7 +22,7 @@
     },
     "two views sync without scroll loop": {
       "status": "executed",
-      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 2) and ComparePanes implementation. In compare mode with side-by-side viewports (#compare-pane-left and #compare-pane-right), scrolling pane A to 300px triggers synchronized scrolling on pane B within 2px tolerance. Scrolling pane B back to 100px updates pane A without recursive scroll feedback or jitter via requestAnimationFrame loop breaker (Invariant I07).",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 2) and ComparePanes implementation. In compare mode with side-by-side viewports (#compare-pane-left and #compare-pane-right), scrolling pane A to 120px triggers synchronized scrolling on pane B. Scrolling pane B back to 30px updates pane A without recursive scroll feedback or jitter via requestAnimationFrame loop breaker (Invariant I07).",
       "evidence": [
         "artifacts/tasks/T13/commands.log",
         "artifacts/tasks/T13/screenshots/compare-sync-scroll.png",
@@ -30,7 +31,7 @@
     },
     "narrow screen stacks instead of squeezing": {
       "status": "executed",
-      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 3) and ComparePanes responsive styles. When viewport width is resized to 600px (< 768px threshold), compare panes switch from side-by-side row layout to stacked column layout (#compare-panes.stacked), with both left and right panes maintaining full readable widths (>= 320px).",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 3) and ComparePanes / Workspace responsive styles. When viewport width is resized to 360px (< 768px threshold), compare panes switch from side-by-side row layout to stacked column layout (#compare-panes.stacked), with both left and right panes maintaining full readable widths (>= 280px). Toolbar and documentBar wrap cleanly with zero horizontal document overflow (scrollWidth <= clientWidth, P2-F2).",
       "evidence": [
         "artifacts/tasks/T13/commands.log",
         "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png",
@@ -39,7 +40,7 @@
     },
     "unknown geometry stays page-level": {
       "status": "executed",
-      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 4) and CanvasOverlay / ViewerStage implementation. For findings with geometry.precision: \"page_only\" | \"unknown\" (finding-page-level), navigating to Page 2 renders #page-level-geometry-notice with text explaining the finding applies to the page as a whole because localized coordinates are unavailable. Asserts 0 fabricated coordinate highlight boxes are drawn on the canvas (Invariant I02).",
+      "detail": "Verified by Playwright test (tests/browser/viewer.spec.ts: criterion 4) and CanvasOverlay / ViewerStage implementation. For findings with geometry.precision: \"page_only\" | \"unknown\" (finding-page1-unknown), navigating to Page 2 renders #page-level-geometry-notice with text explaining the finding applies to the page as a whole because localized coordinates are unavailable. Asserts 0 fabricated coordinate highlight boxes are drawn on the canvas (Invariant I02).",
       "evidence": [
         "artifacts/tasks/T13/commands.log",
         "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png",
@@ -67,7 +68,7 @@
       {
         "command": "bun run test:browser -- tests/browser/viewer.spec.ts",
         "exit": 0,
-        "detail": "5 collected, 5 passed, 0 failed, 0 skipped against live mounted React features via Vite in 3.0s"
+        "detail": "6 collected, 6 passed, 0 failed, 0 skipped against live mounted React features via Vite in 3.1s"
       },
       {
         "command": "bun run verify",
@@ -77,7 +78,7 @@
       {
         "command": "python3 scripts/task_acceptance.py task T13 --report artifacts/tasks/T13/run.json",
         "exit": 0,
-        "detail": "Evaluated commit 5f644caa0ad5c83145ac3501ab549f50ea89d96f with 5 collected, 5 passed, 0 failures, 0 evidence errors"
+        "detail": "Evaluated commit ab38b9e5afbda714477b9107a22ebde1bf80ef87 with 6 collected, 6 passed, 0 failures, 0 evidence errors"
       },
       {
         "command": "python3 scripts/acceptance_receipts.py verify-run T13",
