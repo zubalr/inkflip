@@ -92,6 +92,73 @@ class TestLabelGate(unittest.TestCase):
         with self.assertRaises(custody.CustodyError):
             custody.resolve_labels(store, ROOT, nested)
 
+    def test_label_root_inside_any_git_worktree_refused(self):
+        # Review P2-2: a root inside ANOTHER worktree — including a real
+        # LINKED worktree of the same repository — is one commit away from
+        # committed; not custody. Built with actual git worktree plumbing.
+        pages = {helpers.page_key("d0"): {"truth": "supported_failure"}}
+        _, _, label_root, plan = make_eval_fixture(self.root, pages)
+        payload = (label_root / "eval-labels.json").read_bytes()
+
+        # 1. A second repository's plain checkout.
+        sibling = self.root / "sibling-checkout"
+        subprocess.run(["git", "init", str(sibling)],
+                       capture_output=True, check=True)
+        inner_root = sibling / "custodian-labels"
+        inner_root.mkdir()
+        (inner_root / "eval-labels.json").write_bytes(payload)
+        for root in (sibling, inner_root):
+            with self.assertRaises(custody.CustodyError, msg=str(root)):
+                custody.resolve_labels(plan["label_store"], ROOT, root)
+
+        # 2. A REAL linked worktree created by `git worktree add` — the
+        #    reviewer's demonstrated gap: `.git` is a file pointing into
+        #    the sibling repo's .git/worktrees, not a directory.
+        main_repo = self.root / "main-repo"
+        subprocess.run(["git", "init", str(main_repo)],
+                       capture_output=True, check=True)
+        subprocess.run(["git", "-C", str(main_repo), "-c", "user.email=t@t",
+                        "-c", "user.name=t", "commit", "--allow-empty",
+                        "-m", "init"], capture_output=True, check=True)
+        linked = self.root / "linked-worktree"
+        subprocess.run(["git", "-C", str(main_repo), "worktree", "add",
+                        str(linked), "--detach"],
+                       capture_output=True, check=True)
+        linked_root = linked / "custodian-labels"
+        linked_root.mkdir()
+        (linked_root / "eval-labels.json").write_bytes(payload)
+        self.assertTrue((linked / ".git").is_file())  # linked-worktree marker
+        for root in (linked, linked_root):
+            with self.assertRaises(custody.CustodyError, msg=str(root)):
+                custody.resolve_labels(plan["label_store"], ROOT, root)
+
+        # 3. A stale `.git` FILE marker git itself cannot resolve is still
+        #    refused by the marker-walk fallback.
+        fake = self.root / "stale-worktree"
+        (fake / "custodian-labels").mkdir(parents=True)
+        (fake / ".git").write_text(
+            "gitdir: /nonexistent/repo/.git/worktrees/x\n")
+        with self.assertRaises(custody.CustodyError):
+            custody.resolve_labels(plan["label_store"], ROOT,
+                                   fake / "custodian-labels")
+
+        # The legitimate outside-checkout root still resolves.
+        labels, _ = custody.resolve_labels(plan["label_store"], ROOT, label_root)
+        self.assertEqual(sorted(labels["pages"]), sorted(pages))
+
+    def test_inside_git_worktree_helper(self):
+        self.assertFalse(custody._inside_git_worktree(self.root))  # plain tmp
+        self.assertTrue(custody._inside_git_worktree(ROOT))  # this checkout
+        self.assertTrue(custody._inside_git_worktree(
+            ROOT / "evaluation" / "manifests"))
+        sibling = self.root / "sibling"
+        subprocess.run(["git", "init", str(sibling)],
+                       capture_output=True, check=True)
+        self.assertTrue(custody._inside_git_worktree(sibling))
+        self.assertTrue(custody._inside_git_worktree(sibling / "deeper"))
+        (sibling / "deeper").mkdir()
+        self.assertTrue(custody._inside_git_worktree(sibling / "deeper"))
+
     def test_digest_mismatch_refused(self):
         pages = {helpers.page_key("d0"): {"truth": "supported_failure"}}
         _, _, label_root, plan = make_eval_fixture(self.root, pages)
@@ -194,6 +261,22 @@ class TestNoLabelContentInArtifacts(unittest.TestCase):
         result2["per_page_truth"] = {"x": "clean"}
         with self.assertRaises(custody.CustodyError):
             report.serialize_report(result2, self.labels)
+
+    def test_key_scan_splits_camelcase_tokens(self):
+        # Review P3: incidentRef/perPageTruth/consentRef/expectedFinding
+        # expose the same held-out content as their snake_case spellings.
+        for key in ("incidentRef", "perPageTruth", "consentRef",
+                    "expectedFinding", "pageMechanism", "LabelStore"):
+            self.assertTrue(custody._forbidden_key(key), key)
+        for key in ("labels_sha256", "unlabeled", "candidate",
+                    "useful_precision_point", "finding_ids"):
+            self.assertFalse(custody._forbidden_key(key), key)
+        bad = {"outer": [{"incidentRef": "ACME-9"}, {"perPageTruth": {"0": "clean"}}]}
+        self.assertTrue(custody.scan_forbidden_keys(bad))
+        result, _ = self._run_eval()
+        result["perPageTruth"] = {"0": "clean"}
+        with self.assertRaises(custody.CustodyError):
+            report.serialize_report(result, self.labels)
 
     def test_label_secrets_collection_catches_nested_content(self):
         secrets = custody.label_secret_values(self.labels)

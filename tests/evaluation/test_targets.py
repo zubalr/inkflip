@@ -194,6 +194,127 @@ class TestVerdictsFromRealRuns(unittest.TestCase):
             custody.check_labels_cover_corpus(
                 short, manifest.corpus_page_keys(self.corpus))
 
+    def test_pinned_candidate_freeze_enforced(self):
+        # A plan that pins the freeze refuses any other candidate; a plan
+        # that leaves fields null stays advisory only.
+        pinned = dict(self.plan["candidate_freeze"])
+        pinned.update({"commit": "b" * 40, "lock_sha256": "c" * 64,
+                       "config_sha256": "d" * 64})
+        plan = helpers.make_plan(label_store=self.plan["label_store"],
+                                 candidate_freeze=pinned)
+        readings = [helpers.reading(d, resolution="useful_finding",
+                                    finding_ids=["f"])
+                    for d in ("d0", "d1")] + [helpers.reading("c0")]
+        with self.assertRaises(report.RunError):
+            self._evaluate(readings, plan=plan)  # run commits "aa..", plan pins "bb.."
+        run = helpers.make_run(readings, self.corpus_sha,
+                               commit="b" * 40)
+        run["candidate"]["lock_sha256"] = "c" * 64
+        run["candidate"]["config_sha256"] = "d" * 64
+        labels, labels_sha = custody.resolve_labels(
+            self.plan["label_store"], helpers.ROOT, self.label_root)
+        result = report.evaluate(plan, self.corpus, run, labels, labels_sha,
+                                 self.corpus_sha)
+        self.assertTrue(result["summary"]["all_met"])
+        # Partial pin (commit only): mismatched lock is advisory, wrong
+        # commit still refused.
+        partial = helpers.make_plan(
+            label_store=self.plan["label_store"],
+            candidate_freeze={"commit": "b" * 40, "lock_sha256": None,
+                              "config_sha256": None})
+        result = report.evaluate(partial, self.corpus, run, labels, labels_sha,
+                                 self.corpus_sha)
+        self.assertTrue(result["summary"]["all_met"])
+        run["candidate"]["commit"] = "a" * 40
+        with self.assertRaises(report.RunError):
+            report.evaluate(partial, self.corpus, run, labels, labels_sha,
+                            self.corpus_sha)
+
+
+class TestAlignmentSamplingUnit(unittest.TestCase):
+    """Regression for review P2-1: alignment pools pages, not readings.
+
+    The reviewer's exact demonstrated flip: 5 pages at 0.1px + 5 pages at
+    3.9px is honestly p95=3.9 (UNMET); re-reading ONLY the good pages 30x
+    must not turn it into p95=0.1 (MET) — the sampling unit is the page.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.docs = [f"good{i}" for i in range(5)] + [f"bad{i}" for i in range(5)]
+        entries = [helpers.corpus_entry(d) for d in self.docs]
+        self.corpus = helpers.corpus_manifest("evaluation", entries)
+        self.corpus_path = helpers.write_manifest(root / "eval.corpus.json",
+                                                  self.corpus)
+        self.corpus_sha = manifest.file_digest(self.corpus_path)
+        self.labels = helpers.labels_file({
+            helpers.page_key(d): {"truth": "supported_failure"}
+            for d in self.docs})
+        store, payload = helpers.make_label_store(self.labels)
+        self.plan = helpers.make_plan(
+            label_store=store,
+            targets=[{"id": "t_alignment_p95", "metric": "alignment_p95_px",
+                      "comparator": "<=", "threshold": 2.0},
+                     {"id": "t_cov", "metric": "supported_coverage",
+                      "comparator": ">=", "threshold": 0.5}])
+        (root / "labels").mkdir()
+        (root / "labels" / "eval-labels.json").write_bytes(payload)
+        self.label_root = root / "labels"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _evaluate(self, readings):
+        labels, labels_sha = custody.resolve_labels(
+            self.plan["label_store"], helpers.ROOT, self.label_root)
+        return report.evaluate(
+            self.plan, self.corpus, helpers.make_run(readings, self.corpus_sha),
+            labels, labels_sha, self.corpus_sha)
+
+    def _verdict(self, result):
+        return next(v for v in result["targets"]
+                    if v["metric"] == "alignment_p95_px")
+
+    def test_rereading_good_pages_cannot_flip_verdict(self):
+        def one_pass():
+            return [helpers.reading(d, resolution="useful_finding",
+                                    finding_ids=["f"],
+                                    alignment_errors_px=[0.1])
+                    for d in self.docs[:5]] + \
+                   [helpers.reading(d, resolution="useful_finding",
+                                    finding_ids=["f"],
+                                    alignment_errors_px=[3.9])
+                    for d in self.docs[5:]]
+        single = self._evaluate(one_pass())
+        self.assertEqual(single["metrics"]["alignment_px"]["n"], 10)
+        self.assertAlmostEqual(single["metrics"]["alignment_px"]["p95"], 3.9)
+        self.assertEqual(self._verdict(single)["verdict"], "UNMET")
+        # 30x re-reads of ONLY the good pages: n and p95 must not move.
+        inflated = one_pass() + [
+            helpers.reading(d, run_id=f"re-{k}", resolution="useful_finding",
+                            finding_ids=["f"], alignment_errors_px=[0.1])
+            for k in range(29) for d in self.docs[:5]]
+        self.assertEqual(len(inflated), 155)  # the reviewer's exact corpus
+        result = self._evaluate(inflated)
+        self.assertEqual(result["samples"]["unique_pages"], 10)
+        self.assertEqual(result["metrics"]["alignment_px"]["n"], 10)
+        self.assertAlmostEqual(result["metrics"]["alignment_px"]["p95"], 3.9)
+        verdict = self._verdict(result)
+        self.assertEqual(verdict["verdict"], "UNMET")
+        self.assertAlmostEqual(verdict["observed"], 3.9)
+
+    def test_alignment_sample_count_is_pages_not_readings(self):
+        from evaluation.protocol.report import _metric_samples
+        readings = [
+            helpers.reading("good0", run_id=f"r{k}", resolution="useful_finding",
+                            finding_ids=["f"], alignment_errors_px=[0.1])
+            for k in range(30)]
+        result = self._evaluate(readings)
+        self.assertEqual(result["metrics"]["alignment_px"]["n"], 1)
+        self.assertEqual(_metric_samples(result["metrics"])
+                         ["alignment_p95_px"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
