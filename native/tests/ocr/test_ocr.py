@@ -561,6 +561,45 @@ class TestWave2TsvBoundary(unittest.TestCase):
         self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
         self.assertEqual(occurrences, [])
 
+    def test_short_row_after_valid_chunk_is_typed(self):
+        good = "\n".join([TSV_HEADER, tsv_row(1, 5, 5, 10, 8), tsv_row(2, 30, 5, 12, 8)])
+        # 7-column header, truncated 6-field word row: skipping it would
+        # silently lose coverage.
+        result, occurrences = self._typed_case(good + "\n" + "5\t90\tlost\t0\t0\t1\n")
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+        self.assertEqual(result["produced_occurrence_count"], 2)
+        self.assertEqual(len(occurrences), 2)
+
+    def test_nonpositive_word_extents_fail_typed(self):
+        for label, row in (
+            ("zero_width", tsv_row(3, 0, 0, 0, 1)),
+            ("zero_height", tsv_row(3, 0, 0, 1, 0)),
+            ("negative_width", tsv_row(3, 5, 0, -1, 1)),
+            ("negative_height", tsv_row(3, 0, 5, 1, -1)),
+        ):
+            with self.subTest(case=label):
+                good = "\n".join([TSV_HEADER, tsv_row(1, 5, 5, 10, 8), tsv_row(2, 30, 5, 12, 8)])
+                result, occurrences = self._typed_case(good + "\n" + row + "\n")
+                self.assertEqual(result["status"], "failed")
+                self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+                self.assertEqual(result["produced_occurrence_count"], 2)
+                self.assertEqual(len(occurrences), 2)
+
+    def test_257_valid_words_survive_later_malformed_row(self):
+        # More than one full 256-word chunk: accumulated counts and ids must
+        # survive a parser failure on a later row.
+        good = "\n".join(
+            [TSV_HEADER] + [tsv_row(i, i % 50, (i * 7) % 40, 10, 8, text=f"w{i}") for i in range(1, 258)]
+        )
+        result, occurrences = self._typed_case(good + "\n" + tsv_row(258, 5, 5, 10, 8, conf="nan") + "\n")
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("parser_error"), result["reason"])
+        self.assertEqual(result["produced_occurrence_count"], 257)
+        self.assertEqual(len(occurrences), 257)
+        self.assertEqual(len(result["retained_occurrence_ids"]), 257)
+        self.assertEqual(len(set(result["retained_occurrence_ids"])), 257)
+
 
 class TestReviewRevisionsWave1(unittest.TestCase):
     """Wave-1 independent source review findings, regression-tested at the
@@ -850,68 +889,123 @@ class TestWave2CanonicalGeometry(unittest.TestCase):
         self.assertAlmostEqual(polygon[0][0], 56.0, places=6)
         self.assertAlmostEqual(polygon[0][1], 340.0, places=6)
 
-    def _rotation_render(self, rotation: int, scale: float = 0.5):
+    def test_f08_fiducial_all_four_rotations(self):
+        """F08 UserUnit-2 named render with independent closed-form fiducials:
+        user 372,250..472,350 -> physical canonical (744,100)..(944,300); the
+        recorded matrix maps them into the actual rendered ink, and every
+        emitted corner must equal the expected canonical quad exactly. This
+        kills displacement mutants (e.g. +10000 pt) and pins the recorded
+        matrix to the actual named render instead of accepting either
+        rotation direction."""
+        configs = {
+            0: ([0.5, 0.0, 0.0, 0.5, 0.0, 0.0], (372, 50, 100, 100),
+                [[744.0, 100.0], [944.0, 100.0], [944.0, 300.0], [744.0, 300.0]]),
+            90: ([0.0, 0.5, -0.5, 0.0, 400.0, 0.0], (250, 372, 100, 100),
+                 [[744.0, 300.0], [744.0, 100.0], [944.0, 100.0], [944.0, 300.0]]),
+            180: ([-0.5, 0.0, 0.0, -0.5, 520.0, 400.0], (48, 250, 100, 100),
+                  [[944.0, 300.0], [744.0, 300.0], [744.0, 100.0], [944.0, 100.0]]),
+            270: ([0.0, -0.5, 0.5, 0.0, 0.0, 520.0], (50, 48, 100, 100),
+                  [[944.0, 100.0], [944.0, 300.0], [744.0, 300.0], [744.0, 100.0]]),
+        }
+        fixture = FIXTURES / "development/userunit-2.pdf"
         from pypdfium2 import PdfDocument
 
-        doc = PdfDocument((FIXTURES / "development/scan-correct.pdf").read_bytes())
-        page = doc[0]
-        image = page.render(scale=scale, rotation=rotation).to_pil()
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        doc.close()
-        return buffer.getvalue(), image.size
-
-    def test_all_four_rotations_with_real_tiny_renders(self):
-        base_png, base_size = self._rotation_render(0)
-        base_image = Image.open(io.BytesIO(base_png))
-        canonical_w = base_size[0] / 0.5
-        canonical_h = base_size[1] / 0.5
-        # R matrices for clockwise rotation in top-left canonical space.
-        rotation_matrices = {
-            0: [0.5, 0.0, 0.0, 0.5, 0.0, 0.0],
-            90: [0.0, 0.5, -0.5, 0.0, canonical_h * 0.5, 0.0],
-            180: [-0.5, 0.0, 0.0, -0.5, canonical_w * 0.5, canonical_h * 0.5],
-            270: [0.0, -0.5, 0.5, 0.0, 0.0, canonical_w * 0.5],
-        }
-        for rotation in (90, 180, 270):
+        for rotation, (matrix, box, expected) in configs.items():
             with self.subTest(rotation=rotation):
-                png, size = self._rotation_render(rotation)
-                # Independent orientation evidence: compare the actual render
-                # against PIL rotations of the unrotated bitmap (exact pixels).
-                cw = base_image.transpose(Image.ROTATE_270 if rotation == 90 else Image.ROTATE_90) if rotation in (90, 270) else base_image.transpose(Image.ROTATE_180)
-                ccw = base_image.transpose(Image.ROTATE_90 if rotation == 90 else Image.ROTATE_270) if rotation in (90, 270) else base_image.transpose(Image.ROTATE_180)
-                rendered = Image.open(io.BytesIO(png))
-                self.assertEqual(rendered.size, cw.size)
-                rendered_bytes = rendered.tobytes()
-                self.assertTrue(
-                    rendered_bytes == cw.tobytes() or rendered_bytes == ccw.tobytes(),
-                    "rendered rotation must match a PIL rotation of the base render",
-                )
-                clockwise = rendered_bytes == cw.tobytes()
-                if clockwise:
-                    matrix = rotation_matrices[rotation]
+                doc = PdfDocument(fixture.read_bytes())
+                page = doc[0]
+                image = page.render(scale=1, rotation=rotation).to_pil().copy()
+                bitmap_dims = image.size
+                doc.close()
+                if rotation in (90, 270):
+                    self.assertEqual(bitmap_dims, (400, 520))
                 else:
-                    # A counterclockwise render equals the opposite CW matrix.
-                    matrix = rotation_matrices[{90: 270, 270: 90, 180: 180}[rotation]]
-                handle = self._open(png, {"canonical_to_raster": matrix})
-                self.assertIsNotNone(handle.canonical_from_raster)
-                result, occurrences = self._stub_ocr(handle, (10, 10, 30, 12))
+                    self.assertEqual(bitmap_dims, (520, 400))
+                # The recorded matrix must agree with the actual rendered ink:
+                # a small window just inside the box's lower edge carries the
+                # fiducial mark (dark pixels), so the box sits on real ink at
+                # the matrix-predicted raster location.
+                gray = image.convert("L")
+                x, y, w, h = box
+                ink = min(
+                    gray.getpixel((xx, yy))
+                    for xx in range(x - 1, x + 3)
+                    for yy in range(y + 48, y + 53)
+                )
+                self.assertLess(ink, 200, f"no fiducial ink at matrix-predicted location, rot {rotation}")
+                buffer = io.BytesIO()
+                image.save(buffer, format="PNG")
+                handle = self._open(buffer.getvalue(), {"canonical_to_raster": matrix})
+                result, occurrences = self._stub_ocr(handle, box)
                 handle.close()
                 self.assertEqual(result["status"], "completed")
-                polygon = occurrences[0]["geometry"]["polygon"]
-                self.assertEqual(len(polygon), 4)
-                # Every corner must round-trip through the recorded matrix to
-                # a finite, bounded canonical point inside the page extent.
-                inverse = tr._contract_inverse(matrix)
-                for corner in ((10, 10), (40, 10), (40, 22), (10, 22)):
-                    canonical = tr._contract_apply(inverse, corner)
-                    self.assertTrue(math.isfinite(canonical[0]) and math.isfinite(canonical[1]))
-                    self.assertLess(abs(canonical[0]), 1e5)
-                    self.assertLess(abs(canonical[1]), 1e5)
-                for point in polygon:
-                    self.assertTrue(math.isfinite(point[0]) and math.isfinite(point[1]))
+                self.assertEqual(len(occurrences), 1)
+                # Exact corner equality: a displaced-geometry mutant
+                # (+10000 pt on any emitted coordinate) fails here.
+                self.assertEqual(occurrences[0]["geometry"]["polygon"], expected)
                 self.assertEqual(occurrences[0]["geometry"]["precision"], "estimated")
-                self.assertIn("canonical-render-inverse", occurrences[0]["geometry"]["transform_ids"])
+
+    def test_huge_int_inputs_fail_typed_without_overflow(self):
+        huge = 10**309  # exceeds sys.float_info.max; math.isfinite would raise
+        with self.assertRaises(tr.AdapterError) as ctx:
+            self._open(raster_png(150, 80), {"canonical_to_raster": [huge, 0, 0, 1, 0, 0]})
+        self.assertEqual(ctx.exception.reason, "geometry_unavailable")
+        with self.assertRaises(tr.AdapterError) as ctx:
+            self._open(raster_png(150, 80), {"raster_scale_px_per_pt": huge})
+        self.assertEqual(ctx.exception.reason, "geometry_unavailable")
+        handle = self._open(
+            raster_png(150, 80), {"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]}
+        )
+        crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM)
+        with self.assertRaises(tr.AdapterError) as ctx:
+            tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM, resize=(huge, 1))
+        self.assertEqual(ctx.exception.reason, "geometry_unavailable")
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, 5, 5, 10, 8) + "\n")
+            bad_scale = dataclasses.replace(crop, raster_scale=huge)
+            result, _ = run_stub_ocr(handle, stub, crop=bad_scale)
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(result["reason"].startswith("geometry_unavailable"), result["reason"])
+            bad_inverse = dataclasses.replace(crop, canonical_from_raster=[huge, 0, 0, 1, 0, 0])
+            result, _ = run_stub_ocr(handle, stub, crop=bad_inverse)
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(result["reason"].startswith("geometry_unavailable"), result["reason"])
+        handle.close()
+
+    def test_caller_inverse_field_validated_before_conversion(self):
+        handle = self._open(
+            raster_png(150, 80), {"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]}
+        )
+        crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM)
+        # A bare int is not a 6-component sequence: typed refusal, never a
+        # raw TypeError from tuple conversion.
+        not_a_sequence = dataclasses.replace(crop, canonical_from_raster=42)
+        with tempfile.TemporaryDirectory() as folder:
+            stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, 5, 5, 10, 8) + "\n")
+            result, occurrences = run_stub_ocr(handle, stub, crop=not_a_sequence)
+        handle.close()
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(result["reason"].startswith("geometry_unavailable"), result["reason"])
+        self.assertEqual(occurrences, [])
+
+    def test_resize_io_and_memory_failures_are_typed(self):
+        handle = self._open(
+            raster_png(150, 80), {"canonical_to_raster": [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]}
+        )
+        crop = tr.plan_crop(handle, (10, 10, 95, 45), psm=tr.SINGLE_LINE_PSM, resize=(2.0, 2.0))
+        for label, effect, reason in (
+            ("oserror", OSError("injected allocation failure"), "unreadable_pixels"),
+            ("memoryerror", MemoryError("injected"), "resource_limit"),
+        ):
+            with self.subTest(case=label):
+                with tempfile.TemporaryDirectory() as folder:
+                    stub = make_stub_engine(Path(folder), TSV_HEADER + "\n" + tsv_row(1, 5, 5, 10, 8) + "\n")
+                    with mock.patch.object(Image.Image, "resize", side_effect=effect):
+                        result, occurrences = run_stub_ocr(handle, stub, crop=crop)
+                self.assertEqual(result["status"], "failed")
+                self.assertTrue(result["reason"].startswith(reason), result["reason"])
+                self.assertEqual(occurrences, [])
+        handle.close()
 
     def test_shear_quad_is_not_axis_aligned(self):
         png = raster_png(100, 100)

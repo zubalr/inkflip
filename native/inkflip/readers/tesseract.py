@@ -47,6 +47,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass, replace as dataclasses_replace
 from io import BytesIO
@@ -165,11 +166,12 @@ class CropPlan:
 
 
 def _finite_number(value: object) -> bool:
-    return (
-        not isinstance(value, bool)
-        and isinstance(value, (int, float))
-        and math.isfinite(value)
-    )
+    """Finite real number within float range. Bounded comparison only:
+    math.isfinite on an arbitrary Python bigint raises OverflowError, so
+    10**309 and friends are rejected before any float conversion."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    return -sys.float_info.max <= value <= sys.float_info.max
 
 
 def _validate_matrix(matrix: object) -> tuple[float, ...]:
@@ -210,7 +212,11 @@ def _matrix_roundtrip_ok(
 ) -> bool:
     """Round-trip raster corners through inverse and forward within the
     contract budget, and keep the recovered canonical extent bounded."""
-    scale_estimate = math.sqrt(abs(matrix[0] * matrix[3] - matrix[1] * matrix[2]))
+    determinant = matrix[0] * matrix[3] - matrix[1] * matrix[2]
+    try:
+        scale_estimate = math.sqrt(abs(determinant))
+    except (OverflowError, ValueError):
+        return False
     if not math.isfinite(scale_estimate) or scale_estimate <= 0:
         return False
     tolerance_px = ROUNDTRIP_TOLERANCE_PT * scale_estimate
@@ -393,7 +399,7 @@ def open_raster(
         raise AdapterError("unreadable_pixels", "raster is not a decodable image") from error
     if render_meta is not None:
         scale = render_meta.get("raster_scale_px_per_pt")
-        if scale is not None and (not isinstance(scale, (int, float)) or scale <= 0):
+        if scale is not None and (not _finite_number(scale) or scale <= 0):
             raise AdapterError("geometry_unavailable", "invalid recorded raster scale")
     canonical_to_raster = None
     canonical_from_raster = None
@@ -465,19 +471,24 @@ def _validate_crop_plan(crop: CropPlan, handle: RasterHandle) -> None:
         _validate_resize_factors(crop.effective_resize)
     if crop.raster_scale is not None:
         scale = crop.raster_scale
-        if (
-            isinstance(scale, bool)
-            or not isinstance(scale, (int, float))
-            or not math.isfinite(scale)
-            or scale <= 0
-        ):
+        if not _finite_number(scale) or scale <= 0:
             raise AdapterError("geometry_unavailable", "recorded raster scale must be positive")
     if crop.canonical_from_raster is not None:
-        # A caller-built inverse never wins: it must match the handle's
-        # validated snapshot exactly, or the plan is refused.
+        # Validate shape and values BEFORE any conversion; a caller-built
+        # inverse never wins: it must match the handle's validated snapshot
+        # exactly, or the plan is refused.
+        inverse = crop.canonical_from_raster
+        if not isinstance(inverse, (tuple, list)) or len(inverse) != 6:
+            raise AdapterError(
+                "geometry_unavailable", "crop transform must be a 6-component sequence"
+            )
+        if not all(_finite_number(component) for component in inverse):
+            raise AdapterError(
+                "geometry_unavailable", "crop transform components must be finite numbers"
+            )
         if (
             handle.canonical_from_raster is None
-            or tuple(crop.canonical_from_raster) != tuple(handle.canonical_from_raster)
+            or tuple(float(component) for component in inverse) != handle.canonical_from_raster
         ):
             raise AdapterError(
                 "geometry_unavailable",
@@ -537,7 +548,9 @@ def _parse_tsv(tsv: str):
     for line in lines[1:]:
         parts = line.split("\t")
         if len(parts) < len(header):
-            continue
+            # A truncated row would silently lose coverage if skipped: fail
+            # the check typed instead of overstating completeness.
+            raise AdapterError("parser_error", "truncated TSV row")
         try:
             level = int(parts[col["level"]])
         except ValueError as error:
@@ -562,6 +575,10 @@ def _parse_tsv(tsv: str):
         for value in (left, top, width, height):
             if abs(value) > TSV_COORD_LIMIT:
                 raise AdapterError("parser_error", "TSV coordinate out of representable range")
+        if width <= 0 or height <= 0:
+            # A zero or negative extent is a degenerate/reversed box: typed
+            # terminal, never estimated invalid geometry or silent success.
+            raise AdapterError("parser_error", "nonpositive TSV word extent")
         yield text, conf, left, top, width, height
 
 
@@ -655,7 +672,12 @@ def extract(
     if dest_w * dest_h > MAX_RASTER_PIXELS:
         return result("failed", "resource_limit: resize target exceeds the pixel budget", 0, [])
     if (dest_w, dest_h) != (src_w, src_h):
-        cropped = cropped.resize((dest_w, dest_h))
+        try:
+            cropped = cropped.resize((dest_w, dest_h))
+        except MemoryError as error:
+            return result("failed", "resource_limit: resize allocation exceeded the pixel budget", 0, [])
+        except OSError as error:
+            return result("failed", "unreadable_pixels: resized raster could not be produced", 0, [])
     # The recorded inverse must describe the resize actually performed: the
     # requested factors are rounded to integer destination dimensions.
     crop = dataclasses_replace(
