@@ -239,3 +239,111 @@ serialization guards, the adjudication record, and the evidence chain —
 is verified sound. The protocol is well-built; the two P2s are exactly
 the kind of silent-denominator defects this machinery exists to catch,
 so they should be closed before acceptance.
+
+---
+
+# Round 2 — re-review of the fixes (verdict: **approved**)
+
+- **Candidate under review:** merge `853b579` (= writer `6e927f2` + this
+  review's `968b692`), incorporating impl fix `8105ac3`, regression tests
+  `1bcdaa5`, refreshed evidence `6e927f2`.
+- **Method:** fetched `work/devin/t36` from the writer worktree and
+  merged into `review/devin/t36`; replayed every original attack against
+  the new code plus new edge probes (`/tmp/t36-review/*round2*`).
+
+## P2-1 (alignment per-reading pooling) — FIXED, verified adversarially
+
+My exact demonstrated corpus, replayed unchanged: 5 pages at 0.1px + 5
+pages at 3.9px, then 30× re-reads of only the good pages (155 readings).
+
+- Before fix: rigged run produced `n=155, p95=0.1` → `t_alignment_p95`
+  flipped UNMET→MET.
+- After fix (`report.py:179-187`, per-page `max()` collapse before
+  pooling): rigged run now produces `n=10, p95=3.9, max=3.9` — identical
+  to the honest single-read run. **Verdict stays UNMET.** No flip.
+- Collapse is real, not special-cased: a page with readings `[0.1, 9.9]`
+  contributes 9.9; 1 bad + 50 good re-reads still contribute the bad
+  value (max is the conservative direction — re-reads cannot dilute
+  within a page either, consistent with `occurrence_preservation`'s
+  `min`); `metric_samples` n now counts pages-with-measurements (2 pages
+  from 52 readings), so `min_samples` can't be gamed by re-reads.
+- Regression test `test_rereading_good_pages_cannot_flip_verdict` uses my
+  exact 155-reading corpus and asserts p95=3.9 UNMET — real test.
+
+## P2-2 (sibling-worktree label root) — FIXED, verified adversarially
+
+`_inside_git_worktree` (`custody.py:68-85`) shells
+`git -C <root> rev-parse --is-inside-work-tree` (timeout=10, check=False,
+no shell, `OSError`/`SubprocessError` → fallback) plus a `.git`-marker
+ancestor walk. Verified:
+
+- Real linked worktree (`git worktree add --detach` from this checkout,
+  `.git` file form) → **refused**.
+- Pre-existing real sibling worktree `original/worktrees/pdf-t31` →
+  **refused** (the exact original gap).
+- Nested dir inside a linked worktree → **refused**.
+- Stale `.git`-file marker pointing nowhere (git can't resolve it) →
+  **refused** by the marker-walk fallback.
+- Plain `git clone` of another repo → **refused** (fails closed on ANY
+  git worktree; a custodian keeping labels under version control
+  anywhere is refused — strict but the safe direction).
+- Plain outside-checkout dir → **still resolves** (no false positive);
+  same with `git` absent from PATH (fallback alone: marker dir refused,
+  plain dir resolves).
+- `.git`-dir interior and bare-repo dirs are accepted — git reports
+  "false" (inside git dir, not a work tree). Consistent with the stated
+  rule (not a checkout; files there can't be committed via a work tree).
+  Recorded as a P3 note only.
+
+## Nonblocking items — all resolved
+
+- camelCase keys: `incidentRef`, `perPageTruth`, `consentRef`,
+  `expectedFinding` now refused by `_key_tokens` case-boundary splitting;
+  `labelsSha256`, `metadata`, `unlabeled` still permitted.
+- `candidate_freeze`: pinned fields enforced field-for-field in
+  `evaluate()` (`report.py:357-367`); mismatched pinned commit →
+  `RunError`; null fields stay advisory with the run's candidate recorded
+  openly. Partial pins verified (commit-only pin refuses wrong commit).
+- `expected_occurrences: 0` + unread now counts as lost (`not counts or
+  min(counts) != expected`); docstring aligned — silence can't confirm
+  preservation even when the expectation is zero.
+- Evidence prose corrected to 30+9 entries (verified against the frozen
+  manifests: 30 development + 9 public_demo = 39).
+
+## Reproduced counts
+
+- `python3 -m unittest discover -s tests/evaluation -v` → **Ran 91 tests,
+  OK** (91 passed, 0 failed, 0 skipped).
+- `python3 scripts/task_acceptance.py task T36` → 91/91/0/0, exit 0.
+- `python3 scripts/task_acceptance.py task T36 --report
+  artifacts/tasks/T36/review-run.json` → fresh run bound to merge HEAD
+  `853b579`, 91/91/0/0 (committed alongside this review).
+- Writer's `run.json` binds `1bcdaa5` (impl+tests; `6e927f2` above it is
+  evidence-only) — consistent with the evidence-only-delta freshness
+  rule; my review-run binds the merge HEAD that contains all of it.
+- `status --plan evaluation/manifests/evaluation.plan.json` still
+  reports 10/10 targets UNMET, exit 1.
+- Ungated `--labels` path (development split) still evaluates correctly
+  — no custody regression for non-gated splits.
+- Receipt `acceptance_criteria_evidence` still resolves all five exact
+  criteria; a new `review_round` field honestly records the round-1
+  changes-required and the fixes.
+
+## Round-2 findings
+
+- **P1:** none. **P2:** none — both round-1 P2s closed and verified by
+  replayed attacks plus new probes.
+- **P3 (new, informational):** a label root inside a `.git` dir interior
+  or a bare repository is accepted (git reports "false" — not a work
+  tree, not a checkout). The stated rule is about checkouts; acceptable,
+  noted for completeness. And foreign-repo roots are refused — strict,
+  fail-closed, intended.
+
+## Verdict: **approved**
+
+The fixes are real and conservative: the alignment pool is now
+page-scoped with worst-case per-page semantics matching the module's own
+sampling-unit invariant, and the custody gate now enforces "outside
+every worktree" with a real-worktree regression test. All five contract
+criteria verified adversarially; 91/91 tests reproduced; evidence chain
+intact.
