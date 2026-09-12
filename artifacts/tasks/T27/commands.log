@@ -228,3 +228,29 @@ Artifact corrections applied to handoff.json / receipt.json:
   scale-only limitation wording.
 Worker holds no heavy run; yielded; no Beads writes. T27 remains unaccepted.
 ================================================================================
+
+================================================================================
+WAVE-3 REVISION ROUND (Astra wave-3 revision grant, 2026-09-12)
+Review inputs: Erdos full Linux review of 1e7c8db (review/codex/t27-wave3,
+9539aa0): ALL real suites PASS (52 OCR + 13 subtests, 105 native, 115 verify,
+registered acceptance 52/52, F08 anchors all rotations) with 3 bounded
+regression-fidelity findings. Heavy reservation released by Erdos, assigned
+to T10 SWE source: ZCode ran NO real OCR this round; stub/tiny-render only.
+Revision commit: 2ea6233
+Fixes: W3-1 complete TSV rows (short rows typed, no silent coverage loss) +
+strictly positive word extents (degenerate/reversed boxes typed, 257-word
+retention proven); W3-2 bigint-safe finite checks via bounded comparison
+(10**309 matrix/resize/scale/inverse-field all typed, no raw OverflowError),
+caller inverse validated before conversion (bare 42 typed); W3-3 narrow
+resize OSError->unreadable_pixels / MemoryError->resource_limit boundary with
+injected valid-2x cases; W3-4 weak rotation test replaced by F08 userunit-2
+fiducial regression (independent closed-form anchors, rendered-ink agreement,
+exact quad equality for 0/90/180/270 - kills the +10000 pt mutant).
+================================================================================
+$ uv run --project native python -m pytest native/tests/ocr --collect-only -q
+  -> 58 tests collected (52 prior + 7 wave-3 additions - 1 replaced)
+$ uv run --project native python -m pytest native/tests/ocr -q -k '<non-engine selection>'
+  -> 46 passed, 20 subtests passed, 12 deselected (real-engine) (exit 0)
+$ bun run verify
+  -> exit 0 (bootstrap + native-bootstrap + coordination 64/64; no OCR)
+================================================================================
