@@ -225,6 +225,27 @@ class TestOccurrencePreservation(unittest.TestCase):
         self.assertEqual(result["preserved"], 1)
         self.assertEqual(result["lost"], [helpers.page_key("dup3")])
 
+    def test_zero_expected_still_needs_a_measurement(self):
+        # Review P3: silence cannot confirm preservation even when the
+        # declared expectation is zero — an unread page is lost, while a
+        # completed reading reporting 0 is measured evidence.
+        labels = helpers.labels_file({
+            helpers.page_key("empty0"): {"truth": "supported_failure",
+                                         "expected_occurrences": 0},
+        })
+        unread = metrics.occurrence_preservation(
+            metrics.collapse_readings([]), labels)
+        self.assertEqual(unread["fraction"], 0.0)
+        self.assertEqual(unread["lost"], [helpers.page_key("empty0")])
+        # A completed read that reports no count is still silence.
+        silent = metrics.occurrence_preservation(
+            metrics.collapse_readings([helpers.reading("empty0")]), labels)
+        self.assertEqual(silent["fraction"], 0.0)
+        measured = metrics.occurrence_preservation(
+            metrics.collapse_readings(
+                [helpers.reading("empty0", occurrence_count=0)]), labels)
+        self.assertEqual(measured["fraction"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

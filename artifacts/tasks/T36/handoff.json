@@ -6,22 +6,30 @@
   "app": "devin",
   "branch": "work/devin/t36",
   "base": "01690c01474eee7d31584cad68e92097565b804b",
-  "implementation_commit": "04b39692178e5d9a358ae00b60f636bf070b7018",
-  "test_commit": "33fb81b208288e1234b16892f9196d2986696dc7",
+  "implementation_commit": "8105ac3",
+  "implementation_commit_history": "04b39692178e5d9a358ae00b60f636bf070b7018 = original implementation; 8105ac3 = review 968b692 fixes (P2-1 page-unit alignment pooling, P2-2 any-worktree label-root refusal, camelCase key scan, pinned candidate_freeze enforcement, expected=0 measurement requirement)",
+  "test_commit": "1bcdaa5a7061973e09c3cd9154ef24076ffd885f",
   "evidence_commit": "this file is committed after the test commit; see git log on work/devin/t36",
-  "head_under_test": "33fb81b208288e1234b16892f9196d2986696dc7",
+  "head_under_test": "1bcdaa5a7061973e09c3cd9154ef24076ffd885f",
   "ready_for_review": true,
+  "review_round": {
+    "review": "artifacts/tasks/T36/review.md @ review/devin/t36 (968b692), changes-required",
+    "p2_1": "alignment_px pooled per-reading errors - re-reading only good pages 30x flipped honest p95=3.9 UNMET to p95=0.1 MET on declared t_alignment_p95. FIXED: one worst observed error per page before pooling; regression replays the reviewer's exact 155-reading corpus and the verdict stays UNMET; metric_samples counts unique pages.",
+    "p2_2": "label root inside a sibling worktree of the same repository was accepted - only this checkout's path was tested. FIXED: git rev-parse --is-inside-work-tree on the resolved path + .git-marker ancestor walk fallback; regression uses a real `git worktree add --detach` linked worktree.",
+    "p3s": "camelCase keys (incidentRef/perPageTruth/expectedFinding) now caught by key-token splitting on case boundaries; a plan that pins candidate_freeze fields enforces them field-for-field (null stays explicitly advisory); expected_occurrences=0 now requires a measurement - silence counts as lost (doc aligned); prose corrected to 30+9 entries (total 39 unchanged and verified).",
+    "remaining_p3s_documented": "lineage audit is declaration-bound (undetectable ancestry that shares no group_id/edge/bytes - custodian owns declarations); any-resolved OR semantics keeps failed statuses on the page record (repeat_digests guards nondeterminism); both accepted/documented by the reviewer as designed."
+  },
   "scope_delivered": {
     "evaluation/protocol/__init__.py": "package doc, PROTOCOL_VERSION/SCHEMA_VERSION",
     "evaluation/protocol/lineage.py": "transitive sibling clustering (group ids, control edges, identical bytes), split_violations/assert_no_leakage, naive vs grouped assignment demonstrators",
     "evaluation/protocol/manifest.py": "closed corpus_manifest + evaluation_plan validation, content-addressed page keys/effective groups, deterministic corpus freezing from fixtures/manifest.json",
     "evaluation/protocol/metrics.py": "declared-page denominators, collapse_readings dedup, Wilson intervals, grouped bootstrap CI, check accounting, clean-alert and occurrence-preservation metrics",
-    "evaluation/protocol/custody.py": "outside-checkout pinned label gate, permissioned consent check, corpus/label coverage equality, forbidden-key + label-content scan on every serialization",
+    "evaluation/protocol/custody.py": "any-worktree-aware pinned label gate, permissioned consent check, corpus/label coverage equality, camelCase-aware forbidden-key + label-content scan on every serialization",
     "evaluation/protocol/diagnosis.py": "blinded review forms, >=2-reviewer adjudication preserving disagreements, counterbalanced assignments, per-tester task order, diagnosis summary",
-    "evaluation/protocol/report.py": "closed inspection_run validation, corpus binding, metric computation, target verdicts (UNMET until a real bound run), leak-scanning serializer",
-    "evaluation/manifests/": "development.corpus.json (32 entries) + public.corpus.json (7 entries) frozen byte-exact from fixtures/manifest.json, evaluation.plan.json (10 declared targets, population minimums, pinned label-store descriptor, retirement policy), README custody rules",
+    "evaluation/protocol/report.py": "closed inspection_run validation, corpus binding, pinned candidate_freeze enforcement, per-page-max alignment pooling, metric computation, target verdicts (UNMET until a real bound run), leak-scanning serializer",
+    "evaluation/manifests/": "development.corpus.json (30 entries) + public.corpus.json (9 entries) frozen byte-exact from fixtures/manifest.json, evaluation.plan.json (10 declared targets, population minimums, pinned label-store descriptor, retirement policy), README custody rules",
     "scripts/evaluate_inspector.py": "custodian CLI: emit-corpus (+--check), verify-splits, status, evaluate, review-form, adjudicate",
-    "tests/evaluation/": "8 stdlib-only files, 84 tests, all five contract criteria plus intervals/diagnosis/freeze"
+    "tests/evaluation/": "8 stdlib-only files, 91 tests, all five contract criteria plus intervals/diagnosis/freeze and review regressions"
   },
   "commands": [
     {
@@ -29,18 +37,18 @@
       "executed_as": "python3 -m unittest discover -s tests/evaluation -v",
       "note": "no `python` on this host; registry maps python -> python3 (config/acceptance-commands.json interpreters)",
       "exit": 0,
-      "counts": {"collected": 84, "passed": 84, "failed": 0, "skipped": 0}
+      "counts": {"collected": 91, "passed": 91, "failed": 0, "skipped": 0}
     },
     {
       "command": "python3 scripts/task_acceptance.py task T36 --report artifacts/tasks/T36/run.json",
       "exit": 0,
-      "counts": {"collected": 84, "passed": 84, "failed": 0, "skipped": 0},
-      "note": "run.json binds evaluated_commit 33fb81b208288e1234b16892f9196d2986696dc7 on clean inputs"
+      "counts": {"collected": 91, "passed": 91, "failed": 0, "skipped": 0},
+      "note": "run.json binds evaluated_commit 1bcdaa5a7061973e09c3cd9154ef24076ffd885f on clean inputs"
     },
     {
       "command": "python3 scripts/evaluate_inspector.py emit-corpus --split development|public --out <committed manifest> --check",
       "exit": 0,
-      "note": "both committed corpora byte-match fixtures/manifest.json"
+      "note": "both committed corpora byte-match fixtures/manifest.json (30 + 9 entries)"
     },
     {
       "command": "python3 scripts/evaluate_inspector.py verify-splits evaluation/manifests/development.corpus.json evaluation/manifests/public.corpus.json",
@@ -53,9 +61,9 @@
       "note": "all 10 declared targets UNMET (no_evaluation_run) - honest nonzero while unmet"
     },
     {
-      "command": "permissioned evaluate end-to-end (synthetic corpus + labels, label root outside checkout)",
+      "command": "permissioned evaluate end-to-end (synthetic corpus + labels)",
       "exit": 0,
-      "note": "MET verdict from a bound run; incident/consent refs asserted absent from the emitted report; missing and in-tree label roots refused (exit 2). Transcript: custody-demo.txt"
+      "note": "MET verdict from a bound run with label root outside checkout; incident/consent refs asserted absent; missing, in-checkout AND linked-sibling-worktree roots all refused (exit 2). Transcript: custody-demo.txt"
     }
   ],
   "limitations": [
@@ -63,9 +71,10 @@
     "The protocol is exercised on synthetic corpora/labels plus the frozen T05 fixtures; no real inspection engine exists to produce inspection_run records yet, so evaluate() was verified on synthetic bound runs, not a real inspector output.",
     "Development/public_demo scoring expects a labels file in the eval-labels schema (--labels); deriving dev truth from T05 expectation files is a documented bridge, not implemented here (not required by the criteria).",
     "Alignment p95/max and repeatability metrics are wired through run-provided alignment_errors_px/repeat_digests; real fiducial measurement belongs to the inspection engine tasks.",
+    "Lineage audit is declaration-bound: siblings sharing no group_id/control edge/identical bytes are undetectable by any manifest audit (reviewer P3, accepted as designed; the custodian owns group declarations).",
     "F01 mapping-control and F07 geometry-control are byte-identical in the frozen T05 fixtures, so F01+F07 correctly union into one lineage cluster (conservative: wider bootstrap intervals, same split). If the fixture catalog intends them independent, the bytes must diverge upstream in the generator - recorded, not hidden.",
     "Python: contract command uses `python`; this host provides only `python3` (3.14.7). The acceptance registry maps it; recorded here for honesty.",
-    "No independent review exists yet: review.md/acceptance.json are coordinator-written artifacts produced at acceptance time; this handoff is a worker receipt, not acceptance."
+    "No acceptance review exists yet on the post-fix head: review.md/acceptance.json are coordinator-written artifacts produced at acceptance time; this handoff is a worker receipt, not acceptance. The pre-fix review 968b692 is addressed by 8105ac3+1bcdaa5."
   ],
   "dependency_requests": [],
   "acceptance_notes": "A worker receipt is not coordinator acceptance. acceptance_receipts.criterion_evidence consumes receipt.json's acceptance_criteria_evidence dict (exact criterion keys, status executed, task-local evidence paths); record_acceptance additionally requires the verified run.json (bound), commands.log, and a committed independent review.md from a reviewer != worker."

@@ -176,8 +176,15 @@ def compute_metrics(readings: list[dict], labels: dict, groups: dict[str, str],
     boot = grouped_bootstrap_ci(resolved_values, support_groups) if resolved_values else None
     coverage["grouped_bootstrap"] = list(boot[:2]) + [boot[2]] if boot else None
 
+    # The sampling unit is the page, not the reading: collapse every
+    # page's per-reading errors to its worst observed value BEFORE pooling,
+    # so re-reading only well-aligned pages can never dilute p95 or inflate
+    # the measured n (independent review P2: 30x re-reads of good pages
+    # flipped honest p95=3.9 UNMET to p95=0.1 MET).
     align_errors = [
-        v for page in pages.values() for v in page["alignment_errors_px"]
+        max(page["alignment_errors_px"])
+        for page in pages.values()
+        if page["alignment_errors_px"]
     ]
     metrics = {
         "supported_coverage": coverage,
@@ -347,6 +354,18 @@ def evaluate(plan: dict, corpus: dict, run: dict, labels: dict,
              adjudication: dict | None = None) -> dict:
     """Score a bound run against the frozen corpus and custodian labels."""
     validate_run(run)
+    # A plan that pins a candidate freeze enforces it: the run's candidate
+    # triple must equal the pinned values field-for-field. Null plan fields
+    # mean "not frozen yet" — the run's own candidate is still recorded
+    # openly in the report, so an advisory freeze hides nothing.
+    freeze = plan.get("candidate_freeze") or {}
+    for name in ("commit", "lock_sha256", "config_sha256"):
+        pinned = freeze.get(name)
+        if pinned is not None and run["candidate"].get(name) != pinned:
+            raise RunError(
+                f"candidate.{name} does not match the plan's pinned "
+                "candidate freeze; a different candidate needs a new "
+                "evaluation version")
     if run["corpus_manifest_sha256"] != corpus_sha256:
         raise RunError(
             "run is not bound to this corpus manifest: "

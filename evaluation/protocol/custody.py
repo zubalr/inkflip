@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 
 LABEL_ROOT_ENV = "INKFLIP_EVAL_LABEL_ROOT"
@@ -64,6 +65,27 @@ def _inside(child: Path, parent: Path) -> bool:
         return False
 
 
+def _inside_git_worktree(path: Path) -> bool:
+    """Whether ``path`` sits inside ANY git work tree.
+
+    Sibling worktrees share one repository but each has its own work-tree
+    root, so comparing against this checkout alone is not the invariant
+    (worktrees are not an access boundary — AGENTS.md). Ask git first; if
+    git cannot answer, walk ancestors for a ``.git`` marker — a linked
+    worktree carries it as a file, a primary checkout as a directory.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--is-inside-work-tree"],
+            capture_output=True, check=False, timeout=10)
+        if result.returncode == 0:
+            return result.stdout.decode().strip() == "true"
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return any((candidate / ".git").exists()
+               for candidate in (path, *path.parents))
+
+
 def resolve_labels(label_store: dict, repo_root: Path,
                    label_root: str | os.PathLike | None = None) -> tuple[dict, str]:
     """Resolve held-out labels for a gated split. Fails closed.
@@ -84,10 +106,11 @@ def resolve_labels(label_store: dict, repo_root: Path,
     repo = Path(repo_root).resolve()
     if not root.is_dir():
         raise CustodyError(f"label root is not a directory: {root}")
-    if root == repo or _inside(root, repo):
+    if root == repo or _inside(root, repo) or _inside_git_worktree(root):
         raise CustodyError(
             "held-out labels inside a repository checkout are not custody; "
-            "the label root must live outside every worktree"
+            "the label root must live outside every worktree of the "
+            "repository, not just this checkout"
         )
     name = label_store.get("labels_file") or "eval-labels.json"
     candidate = (root / name).resolve()
@@ -200,11 +223,24 @@ def assert_labels_not_emitted(serialized: str, labels: dict | None) -> None:
             )
 
 
+def _key_tokens(key: str) -> set[str]:
+    """Tokenize a report key on separators AND camelCase boundaries.
+
+    ``incidentRef``, ``perPageTruth`` and ``expectedFinding`` expose the
+    same held-out content as their snake_case spellings; splitting only on
+    non-alphanumerics would see ``incidentref`` as one harmless token.
+    Whole-token matching still keeps ``labels_sha256`` and ``unlabeled``
+    permitted.
+    """
+    spaced = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", key)
+    spaced = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", "_", spaced)
+    return {t for t in re.split(r"[^0-9A-Za-z]+", spaced.lower()) if t}
+
+
 def _forbidden_key(key: str) -> bool:
     if key in FORBIDDEN_REPORT_KEYS:
         return True
-    tokens = {t for t in re.split(r"[^0-9A-Za-z]+", key.lower()) if t}
-    return bool(tokens & FORBIDDEN_KEY_TOKENS)
+    return bool(_key_tokens(key) & FORBIDDEN_KEY_TOKENS)
 
 
 def scan_forbidden_keys(obj, path: str = "$") -> list[str]:

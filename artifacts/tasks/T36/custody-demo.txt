@@ -1,18 +1,23 @@
 # T36 custody/CLI demonstration (synthetic corpus, synthetic labels)
+# post-review state: any-worktree refusal + page-unit pooling
 
-$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/run.json --label-root /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/labels --out /Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t36/artifacts/tasks/T36/permissioned-eval.json   # permissioned split, label root OUTSIDE checkout
+$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/run.json --label-root /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/labels --out /Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t36/artifacts/tasks/T36/permissioned-eval.json   # permissioned split, label root OUTSIDE checkout
    MET  t_cov                            supported_coverage >= 0.5 (observed 1.0000; measured)
 evaluated 3 unique pages (3 readings, 3 groups): 1 MET, 0 UNMET
 exit: 0
 
 assert: incident_ref/consent_ref absent from emitted report  -> OK
 
-$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/run.json   # no label root -> fails closed
+$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/run.json   # no label root -> fails closed
 refused: held-out labels require an explicit label root (--label-root or INKFLIP_EVAL_LABEL_ROOT); failing closed
 exit: 2
 
-$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpnow9r5hy/run.json --label-root .   # in-tree label root -> refused
-refused: held-out labels inside a repository checkout are not custody; the label root must live outside every worktree
+$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/run.json --label-root .   # in-tree label root -> refused
+refused: held-out labels inside a repository checkout are not custody; the label root must live outside every worktree of the repository, not just this checkout
+exit: 2
+
+$ evaluate_inspector.py evaluate --plan /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/plan.json --corpus /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/corpus.json --run /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/run.json --label-root /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/tmpddv_0xni/linked/custodian-labels   # label root inside a LINKED sibling worktree -> refused (P2-2 fix)
+refused: held-out labels inside a repository checkout are not custody; the label root must live outside every worktree of the repository, not just this checkout
 exit: 2
 
 $ evaluate_inspector.py status --plan evaluation/manifests/evaluation.plan.json   # committed plan, no run -> all UNMET
