@@ -1,0 +1,43 @@
+T10 commands.log — devin-cloud-t10 (Devin Cloud session 5641af15b25d46e49f2dd6e2c76c3293)
+Stopped mid-task by coordinator (Cloud run ended for quota). All counts below are real
+executed results; the suite is NOT green — do not treat this as acceptance evidence.
+
+# Toolchain (pinned, verified on this VM)
+node v22.23.2 | bun 1.4.0 | uv 0.12.13 | python3 3.13.15 (installed under ~/.local/bin)
+
+$ git checkout -b work/devin/t10 origin/work/devin/t10   # head f5a151e
+exit 0
+$ bun install --frozen-lockfile
+exit 0 (87 packages)
+$ bun x playwright install chromium
+exit 0 (Chromium Headless Shell 143.0.7499.4)
+$ uv sync --frozen --project native
+exit 0
+$ bun x --no-install tsc -b tsconfig.json
+exit 0
+
+# Real harness runs
+$ bun run test:browser -- tests/readers/tesseract.spec.ts    @ f5a151e
+exit 1 — collected=11 passed=2 failed=9 skipped=0
+  All 9 failures identical: page.evaluate TypeError
+  "Cannot perform %TypedArray%.prototype.set on a detached ArrayBuffer"
+  in harness loadDoc — pdf.js getDocument() transfers/detaches the input
+  ArrayBuffer before contracts.sha256(bytes) runs. Harness-seam bug, not
+  adapter behavior. Fixed by 3fdfb0f: pass pdf.js bytes.slice().
+
+$ bun run test:browser -- tests/readers/tesseract.spec.ts    @ 3fdfb0f
+exit 1 — collected=11 passed=10 failed=1 skipped=0
+  Passing: real PSM-7 crop OCR w/ identity + same-origin-only requests;
+  PSM-6 page OCR + worker reuse + deterministic ids; init_crash vs
+  unreadable_pixels; model_integrity + corrupted-cache rejection;
+  offline distinct; run pixel budget; geometry/confidence semantics;
+  cold/memory/cached + explicit removal; transient retry + cancel.
+  Failing: 'bounded raster/edge/pixel counts enforced and recorded' —
+  spec.ts:934 expect(outWidthPx).toBe(floor(cropWidthPx * resizeK)):
+  outWidthPx=1758 but floor(4896*resizeK)=1757. Real adapter defect in
+  packages/readers-tesseract/src/crop.ts planCrop: recorded
+  resizeK=round6(min(outW/cropW,outH/cropH)) falls below the width
+  realization. Next worker: record resizeK inside
+  [max(outW/cropW,outH/cropH), min((outW+1)/cropW,(outH+1)/cropH))
+  (midpoint + floor check) so floor reproduces outW/outH exactly, then
+  rerun the suite; then task_acceptance --report run.json, receipt.json.
