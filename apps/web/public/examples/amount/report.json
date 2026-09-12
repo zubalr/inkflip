@@ -1,0 +1,433 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "7ec6d550ecd493e27a34453ee8e75cc876348c1634103eb24f2957c202c84912",
+  "document": {
+    "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+    "byte_length": 1437,
+    "page_count": 1,
+    "display_name": "mapping-amount.pdf",
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "reader-pdfjs",
+      "name": "PDF.js",
+      "version": "6.3.289",
+      "build": "pdfjs-dist 6.3.289",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "Browser native text extraction via PDF.js getTextContent"
+          ]
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "Executed pinned browser reader (pdfjs-dist@6.3.289)."
+      ]
+    },
+    {
+      "id": "reader-tesseract",
+      "name": "Tesseract.js",
+      "version": "7.0.0",
+      "build": "tesseract.js 7.0.0; English tessdata_fast",
+      "adapter_version": "1.0.0",
+      "method": "ocr",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": "eng",
+        "psm": 7,
+        "render_reader_id": "reader-pdfjs",
+        "raster_dpi": 144,
+        "annotation_mode": "none"
+      },
+      "capabilities": [
+        {
+          "name": "ocr",
+          "support": "supported",
+          "limits": [
+            "Selected-crop OCR via Tesseract.js worker"
+          ]
+        }
+      ],
+      "model_hashes": [
+        "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      ],
+      "limitations": [
+        "Executed browser reader with staged Tesseract.js 7.0.0."
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "crop_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "effective_view_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "box_source": "Generated fixed source and PDF page metadata",
+      "user_unit": 1,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "raw_to_canonical_transform_id": "t_canonical",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_canonical",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "Fixed source geometry; API character extents"
+    },
+    {
+      "id": "t_raster",
+      "page_index": 0,
+      "from_space": "canonical:p0",
+      "to_space": "raster:amount",
+      "matrix": [
+        2,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "inverse": [
+        0.5,
+        0,
+        0,
+        0.5,
+        0,
+        0
+      ],
+      "operation": "raster_scale",
+      "precision": "exact",
+      "source": "PDF.js page.render(scale=2)"
+    },
+    {
+      "id": "t_crop",
+      "page_index": 0,
+      "from_space": "raster:amount",
+      "to_space": "crop:amount",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        -80,
+        -244
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        80,
+        244
+      ],
+      "operation": "crop_translation",
+      "precision": "exact",
+      "source": "Fixed selected input crop [80,244,400,390] pixels"
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "o_pdfjs_amount",
+      "reader_id": "reader-pdfjs",
+      "page_index": 0,
+      "ordinal": 2,
+      "raw_text": "$1,000",
+      "normalized_text": "$1,000",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 6,
+          "normalized_start": 0,
+          "normalized_end": 6,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            49.536,
+            142.8
+          ],
+          [
+            152.928,
+            142.8
+          ],
+          [
+            152.928,
+            185.472
+          ],
+          [
+            49.536,
+            185.472
+          ]
+        ],
+        "transform_ids": [
+          "t_canonical"
+        ],
+        "basis": "PDF.js text content bounds for mapped token; characters share box."
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "PDF.js TextItem index 2",
+      "limitations": [
+        "Region attribution is explicit; no automatic alignment was executed."
+      ]
+    },
+    {
+      "id": "o_tesseract_amount",
+      "reader_id": "reader-tesseract",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "$100",
+      "normalized_text": "$100",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            50.0,
+            144.0
+          ],
+          [
+            152.0,
+            144.0
+          ],
+          [
+            152.0,
+            185.0
+          ],
+          [
+            50.0,
+            185.0
+          ]
+        ],
+        "transform_ids": [
+          "t_canonical",
+          "t_raster",
+          "t_crop"
+        ],
+        "basis": "Tesseract.js bbox inverted through crop, raster and canonical transforms."
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract:line:0:word:0",
+      "limitations": [
+        "Estimated OCR bounding polygon; confidence is diagnostic only."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-amount-diff",
+      "kind": "reading_difference",
+      "title": "Amount reads differently ($1,000 vs $100)",
+      "explanation": "PDF.js native text extraction returned \u201c$1,000\u201d due to font ToUnicode mapping. Tesseract.js OCR of the rendered crop recognized \u201c$100\u201d.",
+      "page_index": 0,
+      "occurrence_ids": [
+        "o_pdfjs_amount",
+        "o_tesseract_amount"
+      ],
+      "check_ids": [
+        "c_native",
+        "c_ocr"
+      ],
+      "alignment": "page_level",
+      "region_id": "region_amount",
+      "priority": "selected",
+      "basis": "Actual recorded reader outputs from pinned browser readers.",
+      "limitations": [
+        "Automatic alignment unsupported for uncalibrated crop."
+      ]
+    }
+  ],
+  "annotations": [],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [
+      {
+        "id": "region_amount",
+        "page_index": 0,
+        "geometry": {
+          "precision": "exact",
+          "space": "canonical_page",
+          "polygon": [
+            [
+              40.0,
+              122.0
+            ],
+            [
+              200.0,
+              122.0
+            ],
+            [
+              200.0,
+              195.0
+            ],
+            [
+              40.0,
+              195.0
+            ]
+          ],
+          "transform_ids": [
+            "t_canonical"
+          ],
+          "basis": "Selected crop boundary in canonical points"
+        },
+        "label": "Selected amount crop"
+      }
+    ],
+    "checks": [
+      {
+        "id": "c_native",
+        "page_index": 0,
+        "reader_ids": [
+          "reader-pdfjs"
+        ],
+        "capability": "native_text",
+        "region_id": "region_amount"
+      },
+      {
+        "id": "c_ocr",
+        "page_index": 0,
+        "reader_ids": [
+          "reader-tesseract"
+        ],
+        "capability": "ocr",
+        "region_id": "region_amount"
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "desktop",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "c_native",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "o_pdfjs_amount"
+      ]
+    },
+    {
+      "id": "c_ocr",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "o_tesseract_amount"
+      ]
+    }
+  ],
+  "execution": {
+    "execution_id": "94b59f8e-32d9-474d-ae09-29dd07f7c4c7",
+    "run_key": "02858a6317e447086a137cbe58e5baccc55360eba8a353c5b38f0e742fff5936",
+    "status": "complete",
+    "started_at": "2026-09-12T17:00:00Z",
+    "duration_ms": 142,
+    "environment": "Chromium 131 / WebAssembly; PDF.js 6.3.289; Tesseract.js 7.0.0",
+    "result_origin": "prepared_actual_run",
+    "errors": []
+  },
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "crops",
+      "document_hash",
+      "settings",
+      "coverage",
+      "filename"
+    ],
+    "omissions": [
+      "Original PDF excluded.",
+      "Filename excluded."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  },
+  "assets": [],
+  "limitations": [
+    "Prepared browser evidence demo for mapping-amount.pdf (F01).",
+    "Automatic alignment unsupported for uncalibrated crop; manual crop alignment verified."
+  ]
+}

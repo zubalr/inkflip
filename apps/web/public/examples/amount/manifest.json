@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "example_id": "amount",
+  "family": "mapping-amount",
+  "fixture_id": "F01",
+  "card_title": "The amount that reads differently",
+  "mechanism": "Font ToUnicode maps the displayed 1 to 1,0; visual $100 becomes extracted $1,000",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "provenance": "prepared",
+  "prepared_at": "2026-09-12T17:00:00Z",
+  "timing": {
+    "duration_ms": 142,
+    "method": "browser_measured",
+    "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
+  },
+  "files": {
+    "source": {
+      "filename": "mapping-amount.pdf",
+      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "byte_length": 1437,
+      "download_url": "/examples/amount/mapping-amount.pdf"
+    },
+    "control": {
+      "filename": "mapping-control.pdf",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "byte_length": 1429,
+      "download_url": "/examples/amount/mapping-control.pdf",
+      "renders_identical": true
+    },
+    "covered_source": {
+      "filename": "covered-amount.pdf",
+      "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+      "byte_length": 1504,
+      "download_url": "/examples/amount/covered-amount.pdf"
+    },
+    "covered_control": {
+      "filename": "covered-control.pdf",
+      "sha256": "cf003f5a746ace7ea6efab9c86733b267159cd8f6bc0343f6a09f0233d95d03d",
+      "byte_length": 1429,
+      "download_url": "/examples/amount/covered-control.pdf"
+    }
+  },
+  "readers": {
+    "pdfjs": {
+      "name": "PDF.js",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "native_text",
+      "extracted_amount": "$1,000",
+      "extracted_control_amount": "$100",
+      "raw_text": [
+        "SYNTHETIC EXAMPLE",
+        "No real transaction. Reader behavior only.",
+        "$1,000",
+        "Rendered marks and extracted text are separate."
+      ]
+    },
+    "tesseract": {
+      "name": "Tesseract.js",
+      "version": "7.0.0",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "ocr",
+      "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "extracted_amount": "$100",
+      "extracted_control_amount": "$100",
+      "raw_text": "$100"
+    }
+  },
+  "findings": [
+    {
+      "id": "finding-amount-diff",
+      "title": "Amount reads differently ($1,000 vs $100)",
+      "explanation": "PDF.js native text extraction returned \u201c$1,000\u201d due to font ToUnicode mapping. Tesseract.js OCR of the rendered crop recognized \u201c$100\u201d.",
+      "category": "reading_difference",
+      "page_index": 0
+    }
+  ],
+  "report_file": "report.json"
+}
