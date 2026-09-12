@@ -1,0 +1,119 @@
+T24 — Harden malicious report, text and image boundaries
+Worker: devin-t24 · Branch: work/devin/t24 · Base: c12e680
+Implementation commit: 2300cb62415a5fc40957b15f6bb7d9c971e3010a
+All commands run in /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t24
+Dates: 2026-09-12 (UTC)
+
+======================================================================
+$ node --test tests/security/import/*.test.mjs
+----------------------------------------------------------------------
+ℹ tests 79
+ℹ suites 0
+ℹ pass 79
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+exit=0
+
+Suite inventory (79 tests, all pass):
+  html.test.mjs   8  — delivered reports render script-free; hostile
+                       fields inert/escaped; markup raw-text fidelity
+                       (I03); minimal-doc accept; every active-content
+                       construct rejected; CSP weakened rejected;
+                       hostile CSS rejected; embedded crops are the
+                       sanitized re-encode.
+  import.test.mjs 28 — archive/markup/PDF/UTF-16 byte boundary; JSON
+                       polyglots; oversized JSON pre-decode; truncation;
+                       duplicate keys; depth; nonfinite/unsafe numbers;
+                       surrogates/control chars; >2M-char strings;
+                       prototype keys (object + textual); executable/
+                       plugin/command fields closed-schema rejected;
+                       execution_policy const; shell strings inert;
+                       corpus PATH traversal; display_name sanitizing;
+                       isSafeRelativePath; asset count/base64/decoded
+                       accounting; hash+length+MIME checks; all valid
+                       examples import; invalid examples rejected;
+                       non-report artifacts via importArtifact only;
+                       hash-exclusion semantics; no network/exec.
+  png.test.mjs    43 — color-type/bit-depth matrix (0,2,3,4,6 ×
+                       1,2,4,8,16); Adam7 interlaced set; 1x1/tiny
+                       edges; all five filters; sanitize re-encode
+                       (8-bit RGBA, ancillary-free, deterministic);
+                       inflateZlib vs platform zlib at all levels;
+                       crc32 known vector; pixel/edge limits at IHDR
+                       pre-allocation; decompression bomb; bad
+                       signature/magic; CRC failures; truncation at
+                       every stage; trailing garbage + PNG/archive
+                       polyglots; unknown critical chunks; malformed
+                       IHDR; oversized chunk length; non-letter types;
+                       malformed zlib; invalid filter byte; palette/
+                       tRNS rules; IHDR-first/IEND-empty.
+
+======================================================================
+$ python scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000
+----------------------------------------------------------------------
+{"accepted": 172, "crashes": 0, "egress": 0, "rejected": 828,
+ "unexpected_accepts": 0, "unexpected_rejects": 0}
+verdict=pass cases=1000 seed=8090 max_case_ms=26.28 wall_s=2.75
+out=artifacts/tasks/T24/fuzz
+exit=0
+
+Bounded receipt: artifacts/tasks/T24/fuzz/fuzz-receipt.json
+  stream_sha256 = c779dbd99a1e0f0b528191473cf8e316539b81ab3f270e26b6cfeea75c9d2bba
+  (deterministic: identical for the same seed; verified across two runs)
+  verdict = pass; egress_attempts = []
+  per-category totals (accept/reject), all 28 categories covered:
+    baseline 58/0, whitespace 25/0, artifact_gate 15/0,
+    hostile_string 50/0, png_ancillary 20/0, corpus_path 4/29,
+    artifact_not_report 0/18, archive 0/66, tar 0/16, markup 0/35,
+    pdf 0/18, utf16 0/13, polyglot 0/36, garbage 0/51, surrogates 0/10,
+    truncate 0/76, bitflip 0/81, dupkey 0/26, prototype 0/47,
+    structure 0/57, deepnest 0/38, numbers 0/29, bigstring 0/19,
+    bigjson 0/4, png_corrupt 0/62, png_bomb 0/11, asset_meta 0/50,
+    asset_fake 0/36
+  reject codes: JSON 146, SCHEMA 124, ARCHIVE 94, KIND 71, PNG 66,
+    ASSET 65, UNICODE 60, PROTOTYPE 47, DEPTH 38, PATH 29,
+    DUPLICATE_KEY 26, SIZE 23, HASH 13, NONFINITE 12, NUMBER 11,
+    SOURCE 3
+  case log: artifacts/tasks/T24/fuzz/fuzz-cases.jsonl (1000 rows)
+
+Determinism spot-check (same seed, separate run):
+  $ python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 200 --out /tmp/fz1
+  $ python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 200 --out /tmp/fz2
+  stream_sha256 identical: 422e9f9eaeef5cb2b62c524e0aa80223a5d1a296d2244c914e98f04f5973bb65
+  counts identical. Additional seeds 1234/42 (500 cases each): verdict=pass.
+
+======================================================================
+$ python3 scripts/task_acceptance.py run verify
+----------------------------------------------------------------------
+Ran 49 tests  (tests/bootstrap + harness integrity + receipts + results) — OK
+Ran 2 tests   (native/tests/bootstrap boundary) — OK
+Ran 30 tests  (tests/coordination admission/override) — OK
+self-check: 16 commands in config/acceptance-commands.json — ok
+exit=0
+
+======================================================================
+$ python3 scripts/task_acceptance.py task T24 --report artifacts/tasks/T24/run.json
+----------------------------------------------------------------------
+Re-executed both registered commands at implementation commit
+2300cb62415a5fc40957b15f6bb7d9c971e3010a:
+  node --test tests/security/import/*.test.mjs → exit 0, 79/79
+  python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000 → exit 0
+run.json: commands_run=2, failures=[], tests 79/79/0/0
+exit=0
+
+======================================================================
+Environment notes / not-run
+----------------------------------------------------------------------
+- `bun x --no-install tsc -b packages/reports` NOT RUN: node_modules is
+  not installed in this worktree (bun.lock untouched, no install
+  performed per lockfile freeze). `build:packages` is a `declared`
+  command that fails explicitly until T02 prerequisites land — it is
+  not part of `run verify`. All validation code is executed at runtime
+  by node --test (Node 26 type-stripping), which exercises every module.
+- No network used anywhere: fuzzer spawns a local `node` subprocess
+  only; the driver arms fetch/WebSocket/net/tls/dgram/child_process
+  tripwires and reports zero attempts.
+- planning/ is byte-identical; no lockfiles, shared schemas, or other
+  tasks' paths were modified.
