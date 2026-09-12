@@ -1,11 +1,42 @@
 # T13 independent review — page/text/compare viewer & root app composition
 
 - **Reviewer:** independent reviewer (Devin Local subagent, coordinator-requested); not the writer (worker: `antigravity-t13`)
-- **Round-2 candidate:** `af685aa` evidence on `ab38b9e` fix (merged into this branch as `d1f8583`); round-1 candidate was `5d68193`
-- **Checkout:** `original/worktrees/review-devin-t13` (path differs from dispatch text; canonical worktree confirmed via `git worktree list`)
-- **Round-2 verdict: changes-required** — the report-import entry is now real and most round-1 findings are fixed, but the same fix introduced a **fabricated PDF-open path** (canned findings shown under the user's filename), the overflow fix did not cover the Home page, and malformed import JSON crashes the whole app.
+- **Round-3 candidate:** `baf3b13` evidence on `9c161e1` fix (merged into this branch); earlier rounds: `af685aa`/`ab38b9e` (R2), `5d68193`/`5f644ca` (R1)
+- **Checkout:** `original/worktrees/review-devin-t13`
+- **Round-3 verdict: changes-required** — every round-2 finding is verifiably fixed (PDF path is now honest + genuinely validated, Home/workspace overflow is 0px at 360px, malformed JSON fails closed under a real error boundary, 9/9 suite green), but the new import shape-gate added this round **rejects canonical reports containing page-level (`polygon: null`) occurrences** — a self-inconsistent overreach that must be relaxed before acceptance.
 
-## Round-2 verification (`ab38b9e` + `af685aa`)
+## Round-3 verification (`9c161e1` + `baf3b13`)
+
+| Check | Result |
+|---|---|
+| `bun run test:browser -- tests/browser/viewer.spec.ts` | **9/9 pass (4.3s)** — includes new P1/P2 regression tests the writer added |
+| `run.json` binding | binds `9c161e1bf3…`, 9/9, exit 0; `receipt.json` `implementation_commit` matches |
+| `acceptance_criteria_evidence` | all 5 keys resolve via `criterion_evidence()` |
+| Scope `96ab535..baf3b13` | only the five sanctioned files + viewer dir + 2 sanctioned page CSS modules + artifacts — clean |
+
+### Round-2 findings — verification results
+
+- **P1 fabricated PDF path — FIXED.** `handlePdfCandidate` now runs T08's real `resolveProfile()` + `validateCandidate()` (size gate → ≤1 KiB `%PDF-` header sniff, no canned doc on any path). Probed: valid-header `my-tax-return.pdf` → `#pdf-received-notice` *"PDF received: my-tax-return.pdf. In-browser inspection pipeline is unavailable in this viewer build. Open an exported report (.inkflip.json) to inspect findings."* — `stage=0`, zero findings, header shows "No document loaded". 25 MiB `MZ`-binary named `x.pdf` → `#import-error` *"This file exceeds the 20 MiB local browser limit"*, no mount. No fabrication anywhere.
+- **P2 Home 154px overflow — FIXED.** `.navLinks` wraps at ≤767px, links hide ≤480px, `.page` gets `overflow-x:hidden`, `.actionRow` stacks ≤390px. Measured `scrollWidth − clientWidth = 0` on Home at 360px **and** on Workspace with an imported doc mounted.
+- **P2 degenerate-JSON crash — FIXED.** `handleImportReportText` now shape-gates (object, nonempty `pages`, per-page `index`+`canonical_size_pt`, per-occurrence `page_index`+`geometry`, per-finding `id`+`occurrence_ids`) and `ViewerErrorBoundary` wraps `ViewerStage` with `#import-error` fallback. Probed 6 malformed inputs (`{"pages":[],"findings":[]}`, occurrence without `geometry`, page without `canonical_size_pt`, finding without `id`, `pages:"x"`, primitive `42`) — **all fail closed**: app stays mounted (`#root` children=1), `stage=0`, `#import-error` visible. No white screen.
+- **P3s — resolved/accepted.** `document.display_name` honored (fixture has `null` → filename fallback, correct); `onOpenFile`/`onImportReport` remain unwired props (harmless API seam, noted); FileDrop "Drop one PDF" copy is T08-owned and the notice now discloses the JSON path.
+
+### Round-3 findings
+
+- **P1 — Import gate rejects canonical `polygon: null` occurrences.** `Workspace.tsx` occurrence check requires `Array.isArray(occ.geometry.polygon)`; canonical schema says `Geometry.polygon` is `anyOf: [point-array, null]` — `null` is the valid encoding for `page_only`/`unknown` precision (the app's own `EXAMPLE_DOC` ships `occ-p1-pagelevel` with `polygon: null`, and criterion 4 tests exactly this). Probe: a canonical report containing a page-level occurrence → rejected with *"occurrence missing required geometry or page_index"*. Consequence: any T16-exported report containing a page-level finding **cannot be reopened** — breaks Journey D and is self-inconsistent (the example doc itself wouldn't round-trip). Fix: accept `polygon === null` (page-level) or validate point-tuples properly, e.g. `polygon === null || (Array.isArray(polygon) && polygon.length >= 3 && polygon.every(pt => Array.isArray(pt) && pt.length >= 2))`.
+- **P3 — FileDrop→PDF path untested for non-PDF drops.** `handleFileCandidate` routes any non-`.json` drop to `handlePdfCandidate` — correct in code (validation catches it) but only the input path is covered by the suite. Advisory.
+- **P3 — `onOpenFile`/`onImportReport` props still unwired by `App.tsx`.** Dead API surface; either wire or drop before integration. Advisory.
+
+### Round-3 verdict rationale
+
+All round-2 blockers are genuinely fixed and verified adversarially; the suite is 9/9 with real regression coverage. One defect remains: the new import gate rejects a canonical occurrence shape — a functional break in the report-import entry the last two rounds were about, with a one-condition fix. Returning to worker for that; expect a fast close next round. Probe spec preserved at `artifacts/tasks/T13/independent-review-probe-r3.spec.ts` (run under `tests/browser/` during review).
+
+---
+
+## Round-2 (superseded — kept for the record)
+
+- **Round-2 candidate:** `af685aa` evidence on `ab38b9e` fix; round-1 candidate was `5d68193`
+- **Round-2 verdict: changes-required** — the report-import entry is now real and most round-1 findings are fixed, but the same fix introduced a **fabricated PDF-open path** (canned findings shown under the user's filename), the overflow fix did not cover the Home page, and malformed import JSON crashes the whole app.
 
 | Check | Result |
 |---|---|
