@@ -380,4 +380,94 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     expect(await notice.textContent()).toContain("my-tax-return.pdf");
     expect(await notice.textContent()).toContain("inspection pipeline is unavailable");
   });
+
+  test("canonical report import accepts page-level occurrences with polygon: null (P1)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+
+    const fs = await import("node:fs");
+    const testDir = path.resolve(process.cwd(), "test-results");
+    fs.mkdirSync(testDir, { recursive: true });
+
+    // Canonical report with a page-level occurrence having polygon: null
+    const pageLevelReport = {
+      pages: [
+        {
+          index: 0,
+          canonical_size_pt: [612, 792],
+          limitations: ["Page-level inspection only"],
+        },
+      ],
+      readers: [],
+      occurrences: [
+        {
+          id: "occ-page-level-1",
+          reader_id: "reader-test",
+          page_index: 0,
+          ordinal: 1,
+          raw_text: "Page Level Notice",
+          normalized_text: "Page Level Notice",
+          geometry: {
+            precision: "page_only",
+            space: "canonical_page",
+            polygon: null,
+          },
+        },
+      ],
+      findings: [
+        {
+          id: "finding-page-level",
+          title: "Page-level structural observation",
+          description: "Whole page finding without coordinates",
+          category: "structural",
+          page_index: 0,
+          occurrence_ids: ["occ-page-level-1"],
+        },
+      ],
+    };
+
+    const reportPath = path.resolve(testDir, "page-level-report.json");
+    fs.writeFileSync(reportPath, JSON.stringify(pageLevelReport));
+    await page.locator("#input-import-report").setInputFiles(reportPath);
+
+    // Must mount viewer stage cleanly without rejecting polygon: null
+    await page.waitForSelector("#viewer-stage");
+    await expect(page.locator("#document-paper")).toBeVisible();
+    await expect(page.locator("#import-error")).toHaveCount(0);
+
+    // Verify closing returns to intake state
+    await page.locator("#btn-close-doc").click();
+    await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
+  });
+
+  test("FileDrop drag-and-drop handles PDF candidate validation (P3)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${baseUrl}/#/workspace`);
+    const drop = page.locator('[data-testid="file-drop"]');
+    await expect(drop).toBeVisible();
+
+    // Drag-drop a valid PDF file via FileDrop
+    const pdfBytes = new TextEncoder().encode("%PDF-1.4\n%test-drag-bytes\n");
+    const dataTransfer = await page.evaluateHandle((bytes) => {
+      const dt = new DataTransfer();
+      const f = new File([new Uint8Array(bytes)], "dropped-document.pdf", {
+        type: "application/pdf",
+      });
+      dt.items.add(f);
+      return dt;
+    }, Array.from(pdfBytes));
+
+    await drop.dispatchEvent("drop", { dataTransfer });
+    await page.waitForTimeout(500);
+
+    // Viewer stage must NOT mount canned findings
+    await expect(page.locator("#viewer-stage")).toHaveCount(0);
+    // Explicit pipeline status notice must be rendered
+    const notice = page.locator("#pdf-received-notice");
+    await expect(notice).toBeVisible();
+    expect(await notice.textContent()).toContain("dropped-document.pdf");
+  });
 });
