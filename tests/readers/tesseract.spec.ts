@@ -36,10 +36,26 @@ import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
+import {
+  expectCropOffset,
+  expectDownscaledFixture,
+  expectNoResizeControl,
+  PIXEL_ENTRY_SNIPPET,
+  runPixelCase,
+} from './t10-pixel-harness.ts';
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PUBLIC = join(ROOT, 'apps', 'web', 'public');
 const PDFJS_BUILD = join(ROOT, 'apps', 'web', 'node_modules', 'pdfjs-dist', 'legacy', 'build');
-const TESS_DIST = join(ROOT, 'apps', 'web', 'node_modules', 'tesseract.js', 'dist');
+/**
+ * The engine module is bundled from the pinned package ENTRY (not the
+ * pre-built dist bundle) so the adapter under test exercises the
+ * checked-in tesseract.js@7.0.0 sources — including the WorkerOptions
+ * signal lifecycle patch — rather than a stale prebuilt artifact.
+ */
+const TESSERACT_ENTRY = join(
+  ROOT, 'apps', 'web', 'node_modules', 'tesseract.js', 'src', 'index.js',
+);
 const FIXTURE_DEV = join(ROOT, 'fixtures', 'development');
 const FIXTURE_PUBLIC = join(ROOT, 'fixtures', 'public');
 const TESS_PKG = join(ROOT, 'packages', 'readers-tesseract', 'src');
@@ -100,9 +116,8 @@ const PAGE_HTML = `<!doctype html>
   globalThis.__t10error = null;
   Promise.all([
     import('/vendor/pdfjs/pdf.mjs').then((m) => { globalThis.__pdfjs = m; }),
-    import('/vendor/tesseract/tesseract.esm.min.js').then((m) => {
-      globalThis.__tesseract = m.default ?? m;
-    }),
+    // The tesseract.js module ships inside /bundle.js (bundled from the
+    // pinned package entry, not a prebuilt dist artifact).
     import('/bundle.js'),
   ]).then(() => { globalThis.__t10ready = true; })
     .catch((e) => { globalThis.__t10error = String(e && e.stack || e); });
@@ -126,6 +141,10 @@ function entrySource(): string {
 import * as adapter from ${JSON.stringify(join(TESS_PKG, 'index.ts'))};
 import * as geom from ${JSON.stringify(join(GEOM_PKG, 'index.ts'))};
 import * as contracts from ${JSON.stringify(join(CONTRACTS_PKG, 'index.ts'))};
+// Pinned engine entry — src/index.js is the CJS package entry; its
+// default export is the Tesseract module object.
+import Tesseract from ${JSON.stringify(TESSERACT_ENTRY)};
+globalThis.__tesseract = Tesseract;
 
 const MODEL = ${JSON.stringify(MODEL)};
 const PATHS = ${JSON.stringify(PATHS)};
@@ -308,12 +327,20 @@ const api = {
       assetHashes: ASSET_HASHES,
       profile: 'desktop',
       runKey: 't10-run-' + (opts.runKey || 'default'),
+      // The named renderer whose rasters this reading is configured
+      // for — bound at construction, validated again at extraction.
+      renderReaderId: opts.renderReaderId || 'pdfjs-6_3_289-render',
       rasterSource,
       budget: opts.budget,
       hooks: {
         onProgress: (e) => hooks.progress.push({ status: e.status, progress: e.progress }),
         onModelState: (s) => hooks.models.push(s),
         onError: (d) => hooks.errors.push(d),
+        ...(opts.idbFactory === 'none'
+          ? { idbFactory: null }
+          : opts.idbFactory === 'writeFail'
+            ? { idbFactory: pxWriteFailIdb() }
+            : {}),
       },
     });
     const readerId = 'rdr_' + (++state.n);
@@ -397,6 +424,26 @@ const api = {
     });
   },
 
+  // close() racing an in-flight open(): openStart begins open and
+  // records the pending promise on the reader record; closeDuringOpen
+  // runs close() and then settles it. The Node side waits for the real
+  // raw Worker to appear (page.workers()) between the calls so the
+  // abort provably lands inside engine initialization — a late init
+  // must never attach a worker to a closed reader.
+  async openStart(readerId) {
+    const rec = state.readers.get(readerId);
+    rec.pendingOpen = tryV(() =>
+      rec.reader.open({ documentSha256: 'doc-sha-1', generation: 1 }));
+    return 'started';
+  },
+  async closeDuringOpen(readerId) {
+    const rec = state.readers.get(readerId);
+    const closeRes = await tryV(() => rec.reader.close());
+    const openRes = await rec.pendingOpen;
+    rec.pendingOpen = null;
+    return { openRes, closeRes, stats: api.readerStats(readerId) };
+  },
+
   readerStats(readerId) {
     const rec = state.readers.get(readerId);
     return {
@@ -404,6 +451,7 @@ const api = {
       workerInitCount: rec.reader.workerInits,
       modelStates: rec.hooks.models.slice(),
       engineErrors: rec.hooks.errors.slice(),
+      progress: rec.hooks.progress.slice(),
     };
   },
 
@@ -449,6 +497,8 @@ const api = {
   },
 };
 
+${PIXEL_ENTRY_SNIPPET}
+
 globalThis.__t10 = api;
 `;
 }
@@ -484,9 +534,6 @@ async function startHarness(): Promise<Harness> {
         const name = pathname.slice('/vendor/pdfjs/'.length);
         if (!/^[A-Za-z0-9._-]+$/.test(name)) return send(403, 'forbidden');
         return send(200, readFileSync(join(PDFJS_BUILD, name)), mimeFor(name));
-      }
-      if (pathname === '/vendor/tesseract/tesseract.esm.min.js') {
-        return send(200, readFileSync(join(TESS_DIST, 'tesseract.esm.min.js')), mimeFor('x.js'));
       }
       if (pathname.startsWith('/assets/') || pathname.startsWith('/models/')) {
         const file = join(PUBLIC, pathname);
@@ -1216,4 +1263,567 @@ test('check-level transient retry rebuilds the worker once and succeeds', async 
   // Exactly one healthy worker exists after the retry (the exploded one
   // never counted, and no third worker was built).
   expect(out.stats.workerInitCount).toBe(2); // open() worker + retried worker
+});
+
+// ===========================================================================
+// LIGHT coverage — stub-engine / worker-init-only checks. These run under
+// the SAME harness and bundle; select them alone with `-g 'light:'`. No
+// recognize() call on a real model is ever made in this section (the only
+// real-engine tests below stop at worker initialization, an allowed light
+// check; the heavy recognize suite stays above).
+// ===========================================================================
+
+test.describe('light: crop pixel regressions — recorded factor is the drawn factor (stub engine)', () => {
+  test('ImageData source branch', async ({ page }) => {
+    const out = await runPixelCase(
+      page,
+      { branch: 'imagedata', budget: { maxRasterPixels: 50, maxRasterEdge: 8192 } },
+      [4.5, 4.5],
+    );
+    expectDownscaledFixture(out);
+  });
+
+  test('CanvasImageSource branch', async ({ page }) => {
+    const out = await runPixelCase(
+      page,
+      { branch: 'canvas', budget: { maxRasterPixels: 50, maxRasterEdge: 8192 } },
+      [4.5, 4.5],
+    );
+    expectDownscaledFixture(out);
+  });
+
+  test('no-resize control: k=1 full crop, exact bytes, no clipping limitation', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, { branch: 'imagedata' });
+    expectNoResizeControl(out);
+  });
+
+  test('crop-offset region: nonzero source origin restored, no padding artifacts', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      branch: 'imagedata',
+      region: {
+        id: 'seam-window',
+        label: 'region',
+        polygon: [
+          [34, 10],
+          [41, 10],
+          [41, 26],
+          [34, 26],
+        ],
+      },
+    });
+    expectCropOffset(out);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: configured renderer identity (stub engine)', () => {
+  test('plan/extract/describe identities agree on the configured renderer', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {});
+    expect(out.open?.ok).toBe(true);
+    expect(out.run?.ok).toBe(true);
+    const check = out.checks![0];
+    const output = out.output!;
+    // The configured render reader id is bound into plan-time reader
+    // ids, the emitted reader record, and the raster identity — one
+    // value, established before any plan was finalized.
+    expect(check.reader_ids).toEqual([output.reader.id]);
+    expect(out.manifest?.ok).toBe(true);
+    expect(out.manifest!.value!.reader.id).toBe(output.reader.id);
+    expect(output.reader.settings.render_reader_id).toBe('synthetic-fixture');
+    expect(output.raster.renderReaderId).toBe('synthetic-fixture');
+  });
+
+  test('a raster produced by a different renderer fails render_error, never re-identified', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      rasterRenderReaderId: 'some-other-renderer',
+    });
+    expect(out.open?.ok).toBe(true);
+    expect(out.run?.ok).toBe(true);
+    const output = out.output!;
+    expect(output.check.status).toBe('failed');
+    expect(output.check.reason).toBe('render_error');
+    expect(output.check.produced_occurrence_count).toBe(0);
+    // And the emitted reader identity still names the configured
+    // renderer — the reading was never silently reassigned.
+    expect(output.reader.settings.render_reader_id).toBe('synthetic-fixture');
+  });
+
+  test('missing or malformed configured ids are rejected at construction', async ({
+    page,
+  }) => {
+    for (const bad of ['', 'Bad Id!', 'x'.repeat(80)]) {
+      const out = await runPixelCase(page, { renderReaderId: bad });
+      expect(out.construct?.ok).toBe(false);
+      expect(out.construct?.reason).toBe('unsupported');
+      expect(out.open).toBeNull();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: occurrence geometry and assembled report (stub engine)', () => {
+  const WORD_RESULT = {
+    text: 'HELLO',
+    blocks: [
+      {
+        bbox: { x0: 2, y0: 2, x1: 20, y1: 12 },
+        paragraphs: [
+          {
+            bbox: { x0: 2, y0: 2, x1: 20, y1: 12 },
+            lines: [
+              {
+                bbox: { x0: 2, y0: 2, x1: 20, y1: 12 },
+                words: [
+                  {
+                    text: 'HELLO',
+                    confidence: 90,
+                    bbox: { x0: 2, y0: 2, x1: 20, y1: 12 },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  test('word polygon is TL,TR,BR,BL with nonzero signed area', async ({ page }) => {
+    const out = await runPixelCase(page, { stubResult: WORD_RESULT });
+    expect(out.run?.ok).toBe(true);
+    const output = out.output!;
+    expect(output.check.status).toBe('completed');
+    expect(output.occurrences).toHaveLength(1);
+    const occ = output.occurrences![0];
+    expect(occ.raw_text).toBe('HELLO');
+    expect(occ.raw_source_locator).toBe(
+      'tesseract.js/blocks[0].paragraphs[0].lines[0].words[0]',
+    );
+    // Raster == canonical at s=1/rot=0 (raster->canonical is
+    // R^-1*S^-1 — the C flip belongs to user->canonical, not this
+    // chain). Exact perimeter order TL,TR,BR,BL — no bow-tie.
+    expect(occ.geometry.polygon).toEqual([
+      [2, 2],
+      [20, 2],
+      [20, 12],
+      [2, 12],
+    ]);
+    // Signed shoelace area is nonzero (|18*10| = 180).
+    const p = occ.geometry.polygon!;
+    const shoelace =
+      p.reduce(
+        (a, pt, i) => a + pt[0] * p[(i + 1) % p.length][1] - p[(i + 1) % p.length][0] * pt[1],
+        0,
+      ) / 2;
+    expect(Math.abs(shoelace)).toBe(180);
+    // The occurrence reader id is the configured identity — same as
+    // plan and output.
+    expect(occ.reader_id).toBe(output.reader.id);
+    expect(out.checks![0].reader_ids).toEqual([occ.reader_id]);
+  });
+
+  test('an assembled evidence report with OCR geometry passes contract validation', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, { stubResult: WORD_RESULT });
+    expect(out.run?.ok).toBe(true);
+    const validated = await page.evaluate(
+      ({ output, built, checks, docSha }) => {
+        const api = (globalThis as any).__t10;
+        const toHex = (b: Uint8Array) =>
+          Array.from(b).map((x) => x.toString(16).padStart(2, '0')).join('');
+        const assembled = {
+          kind: 'report',
+          schema_version: '1.0.0',
+          report_id: toHex(
+            api.contracts.sha256(new TextEncoder().encode('stub-report')),
+          ),
+          document: {
+            sha256: docSha,
+            byte_length: 4,
+            page_count: 1,
+            display_name: null,
+            source_asset_id: null,
+          },
+          readers: [output.reader],
+          pages: [built.page],
+          transforms: [built.canonical, ...output.transforms],
+          occurrences: output.occurrences,
+          findings: [],
+          annotations: [],
+          plan: {
+            version: '1.0.0',
+            selected_pages: [0],
+            regions: [],
+            checks,
+            normalization_version: 'scalar-whitespace-v1',
+            alignment_version: 'region-match-v1',
+            profile: 'desktop',
+            budget: {
+              max_raster_pixels: 4000000,
+              max_run_ocr_pixels: 20000000,
+              timeout_ms: 30000,
+              max_retries: 1,
+            },
+          },
+          checks: [output.check],
+          execution: {
+            execution_id: '94b59f8e-32d9-474d-ae09-29dd07f7c4c7',
+            run_key:
+              '72cf7c0239a8135437126710e23f1a5736fe222c7761678abdf057ca609e1a83',
+            status: 'complete',
+            started_at: '2026-09-12T00:00:00.000000+00:00',
+            duration_ms: 10,
+            environment: 'Chromium (playwright harness)',
+            result_origin: 'live',
+            errors: [],
+          },
+          export: {
+            mode: 'evidence',
+            scope: 'selection',
+            included: ['selected_text', 'document_hash', 'settings', 'coverage'],
+            omissions: [],
+            replay: 'requires_original',
+            origin_report_id: null,
+          },
+          assets: [],
+          limitations: output.limitations,
+        };
+        api.contracts.validateReport(assembled, false);
+        return assembled;
+      },
+      {
+        output: out.output,
+        built: out.built,
+        checks: out.checks,
+        docSha: out.docSha,
+      },
+    );
+    expect(validated.occurrences).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: UTF-8 raw-text run budget (stub engine)', () => {
+  test('raw text cap counts UTF-8 bytes, not UTF-16 units', async ({ page }) => {
+    // 'é' is 1 UTF-16 code unit but 2 UTF-8 bytes. A 1-byte cap must
+    // reject it; a 2-byte cap must accept it. '😀' is 2 units/4 bytes —
+    // a 3-byte cap rejects it even though .length says 2.
+    const tight = await runPixelCase(page, {
+      stubResult: { text: 'é', blocks: [] },
+      budget: { maxRawTextBytesPerRun: 1 },
+    });
+    expect(tight.run?.ok).toBe(true);
+    expect(tight.output!.check.status).toBe('failed');
+    expect(tight.output!.check.reason).toBe('resource_limit');
+
+    const exact = await runPixelCase(page, {
+      stubResult: { text: 'é', blocks: [] },
+      budget: { maxRawTextBytesPerRun: 2 },
+    });
+    expect(exact.run?.ok).toBe(true);
+    expect(exact.output!.check.status).toBe('completed');
+    expect(exact.output!.raw.text).toBe('é');
+
+    const emoji = await runPixelCase(page, {
+      stubResult: { text: '😀', blocks: [] },
+      budget: { maxRawTextBytesPerRun: 3 },
+    });
+    expect(emoji.run?.ok).toBe(true);
+    expect(emoji.output!.check.status).toBe('failed');
+    expect(emoji.output!.check.reason).toBe('resource_limit');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: verified model bytes reach the engine', () => {
+  test('worker init payload: object language + readOnly verified cache slot (stub)', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {});
+    expect(out.run?.ok).toBe(true);
+    const c = out.captured;
+    // The engine was launched with the v7 Lang object payload — code
+    // names the language; data==code means a cache miss can only ever
+    // write a poison stub (no fetch branch exists for object payloads).
+    expect(c.workerLangs).toEqual([{ code: 'eng', data: 'eng' }]);
+    const opts = c.workerOptions!;
+    expect(opts.cacheMethod).toBe('readOnly');
+    expect(opts.gzip).toBe(false);
+    expect(opts.workerBlobURL).toBe(false);
+    expect(opts.workerPath).toBe('/stub/worker.js');
+    expect(opts.corePath).toBe('/stub/core/');
+    expect(opts.langPath).toBe('/stub/models/');
+    expect(opts.cachePath).toBe('inkflip/stub');
+    // The concrete-lifetime signal is a real AbortSignal handed to the
+    // engine — wired but not aborted on the happy path.
+    expect(opts.signal).toBe('AbortSignal');
+    expect(c.signalAbortedAtCreate).toBe(false);
+    // The engine input is prepared PNG bytes, not a URL/blob/loader.
+    expect(c.imageClass).toBe('Uint8Array');
+    expect((c.imageBytes?.length ?? 0) > 8).toBe(true);
+    // The produced bytes are a real PNG (\x89PNG\r\n\x1a\n).
+    expect(c.imageBytes!.slice(0, 8)).toEqual([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+  });
+
+  test('a stale or corrupt cache slot is replaced before the engine sees it', async ({
+    page,
+  }) => {
+    // Seed a corrupt slot first; open() must detect, delete, refetch,
+    // re-verify, commit — and only then let a worker init consume it.
+    // A real worker init succeeding proves the slot held valid bytes
+    // (a corrupt slot would fail the engine's Init honestly).
+    const res = await page.evaluate(async () => {
+      const api = (globalThis as any).__t10;
+      await api.seedCorruptCache();
+      const { readerId } = api.makeReader({ docId: 'unused' });
+      const open = await api.open(readerId, 'doc-sha-1', 1);
+      const stats = api.readerStats(readerId);
+      await api.close(readerId);
+      return { open, stats };
+    });
+    expect(res.open.ok, JSON.stringify(res.open.error)).toBe(true);
+    expect(res.stats.workerInitCount).toBe(1);
+    expect(res.stats.modelState).toBe('ready_memory');
+    // The corrupt slot was reported, not silently trusted.
+    expect(
+      res.open.value.model.limitations.join(' '),
+    ).toContain('cache_integrity');
+  });
+
+  test('the engine consumes the verified slot — never a second divergent copy', async ({
+    page,
+  }) => {
+    // First request serves the real pinned bytes; any SECOND request
+    // would serve divergent bytes. If the engine fetched its own copy
+    // it would get the corrupt body and init would fail — and any
+    // fetch at all would increment `served` past 1.
+    let served = 0;
+    const realBytes = readFileSync(
+      join(PUBLIC, 'models', 'tessdata-fast-eng', '7d4322bd', 'eng.traineddata'),
+    );
+    await page.route(
+      '**/models/tessdata-fast-eng/7d4322bd/eng.traineddata',
+      (route) => {
+        served += 1;
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/octet-stream',
+          body: served === 1 ? realBytes : Buffer.from('divergent-not-a-model'),
+        });
+      },
+    );
+    const res = await page.evaluate(async () => {
+      const api = (globalThis as any).__t10;
+      const { readerId } = api.makeReader({ docId: 'unused' });
+      const open = await api.open(readerId, 'doc-sha-1', 1);
+      const stats = api.readerStats(readerId);
+      await api.close(readerId);
+      return { open, stats };
+    });
+    await page.unroute('**/models/tessdata-fast-eng/7d4322bd/eng.traineddata');
+    expect(res.open.ok, JSON.stringify(res.open.error)).toBe(true);
+    // Real worker init succeeded — proving the slot held valid bytes.
+    expect(res.stats.workerInitCount).toBe(1);
+    // Exactly ONE traineddata request happened: the adapter's own
+    // verified download. The engine never fetched a second copy.
+    expect(served).toBe(1);
+  });
+
+  test('unavailable model cache fails honestly before any engine work', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, { idbFactory: 'none' });
+    expect(out.open?.ok).toBe(false);
+    expect(out.open?.error?.reason).toBe('missing_model');
+    // No worker was ever created — the gate fires first.
+    expect(out.captured.createWorkerCount ?? 0).toBe(0);
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+  });
+
+  test('a failed cache write fails honestly before any engine work', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, { idbFactory: 'writeFail' });
+    expect(out.open?.ok).toBe(false);
+    expect(out.open?.error?.reason).toBe('missing_model');
+    expect(out.captured.createWorkerCount ?? 0).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: operation deadline and cancellation lifecycle', () => {
+  test('a stalled raster resolves to timeout inside one deadline', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      stallRaster: true,
+      budget: { checkTimeoutMs: 200 },
+    });
+    expect(out.open?.ok).toBe(true);
+    expect(out.run?.ok).toBe(true);
+    expect(out.output!.check.status).toBe('timeout');
+    expect(out.output!.check.reason).toBe('timeout');
+    // Bounded — the op returned near its deadline, not parked forever.
+    expect(out.elapsedMs!).toBeGreaterThanOrEqual(150);
+    expect(out.elapsedMs!).toBeLessThan(4000);
+    // The deadline teardown terminated the already-created worker.
+    expect(out.captured.terminateCount).toBe(1);
+  });
+
+  test('cancel during a stalled raster returns user_cancel, fast', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      stallRaster: true,
+      cancelAfterMs: 60,
+      budget: { checkTimeoutMs: 10_000 },
+    });
+    expect(out.output!.check.status).toBe('cancelled');
+    expect(out.output!.check.reason).toBe('user_cancel');
+    expect(out.elapsedMs!).toBeLessThan(3000);
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+  });
+
+  test('a hung engine init at extract time fails timeout and terminates', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      engineAfterOpen: 'hangInit',
+      budget: { checkTimeoutMs: 200 },
+      settleMs: 50,
+    });
+    expect(out.open?.ok).toBe(true);
+    expect(out.output!.check.status).toBe('timeout');
+    expect(out.output!.check.reason).toBe('timeout');
+    expect(out.elapsedMs!).toBeLessThan(4000);
+    // The init was abandoned; its (never-resolving) worker never
+    // recognized anything and never overlapped another init.
+    // createWorkerCount: 1 (open's stub) + 1 (the hung swap-in).
+    expect(out.captured.createWorkerCount).toBe(2);
+    expect(out.captured.maxConcurrentInits).toBe(1);
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+  });
+
+  test('cancel during engine init returns user_cancel and aborts the engine signal', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      engineAfterOpen: 'hangInit',
+      cancelAfterMs: 60,
+      budget: { checkTimeoutMs: 10_000 },
+      settleMs: 50,
+    });
+    expect(out.output!.check.status).toBe('cancelled');
+    expect(out.output!.check.reason).toBe('user_cancel');
+    // The abort signal reached the engine's createWorker options and
+    // carried our typed cancel reason.
+    expect(out.captured.workerOptions?.signal).toBe('AbortSignal');
+    expect(out.captured.abortReason).toBe('user_cancel');
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+    expect(out.chunks).toEqual([]);
+  });
+
+  test('a late init success terminates its own worker and installs nothing', async ({
+    page,
+  }) => {
+    const out = await runPixelCase(page, {
+      engineAfterOpen: 'lateInit',
+      lateInitMs: 250,
+      budget: { checkTimeoutMs: 100 },
+      settleMs: 400,
+    });
+    expect(out.output!.check.status).toBe('timeout');
+    // The late-resolving worker terminated itself — never installed.
+    // createWorkerCount: open's stub + the late one; terminateCount:
+    // the open worker's swap teardown + the late self-termination.
+    expect(out.captured.createWorkerCount).toBe(2);
+    expect(out.captured.terminateCount).toBe(2);
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+  });
+
+  test('a retry runs inside the operation deadline, not a fresh budget', async ({
+    page,
+  }) => {
+    // createWorker #1 rejects (transient init_crash), #2 hangs. If the
+    // retry drew a full fresh timeout the op would take ~2x the
+    // deadline; instead it ends near 1x.
+    const out = await runPixelCase(page, {
+      engineAfterOpen: 'flakyHang',
+      budget: { checkTimeoutMs: 400 },
+      settleMs: 50,
+    });
+    expect(out.output!.check.status).toBe('timeout');
+    // open's stub + flaky reject + the retried (hung) init.
+    expect(out.captured.createWorkerCount).toBe(3);
+    expect(out.elapsedMs!).toBeGreaterThanOrEqual(350);
+    expect(out.elapsedMs!).toBeLessThan(750);
+  });
+
+  test('a hung recognize is terminated at the deadline', async ({ page }) => {
+    const out = await runPixelCase(page, {
+      engineAfterOpen: 'hangRecognize',
+      budget: { checkTimeoutMs: 200 },
+    });
+    expect(out.output!.check.status).toBe('timeout');
+    expect(out.captured.recognizeCount).toBe(1);
+    // Worker-level teardown: the swapped-out open worker plus the
+    // hung recognize's worker — both terminated.
+    expect(out.captured.terminateCount).toBe(2);
+  });
+
+  test('cancel before extract never touches the engine', async ({ page }) => {
+    const out = await runPixelCase(page, { cancelBeforeExtract: true });
+    expect(out.run?.ok).toBe(true);
+    expect(out.output!.check.status).toBe('cancelled');
+    expect(out.output!.check.reason).toBe('user_cancel');
+    expect(out.captured.recognizeCount ?? 0).toBe(0);
+    expect(out.chunks).toEqual([]);
+  });
+
+  test('close during a real open aborts the raw worker init', async ({ page }) => {
+    // REAL engine: the in-flight createWorker's raw Worker is
+    // hard-terminated; nothing is installed on a closed reader.
+    const baseline = page.workers().length;
+    await page.evaluate(async () => {
+      const api = (globalThis as any).__t10;
+      const { readerId } = api.makeReader({ docId: 'unused' });
+      (globalThis as any).__tmpReaderId = readerId;
+      return api.openStart(readerId);
+    });
+    // Wait until the raw engine Worker actually exists — the patched
+    // createWorker registers its abort listener in the same synchronous
+    // block as spawnWorker, so a visible worker is always abort-covered.
+    await expect
+      .poll(() => page.workers().length, { timeout: 15_000 })
+      .toBe(baseline + 1);
+    const res = await page.evaluate(() => {
+      const api = (globalThis as any).__t10;
+      return api.closeDuringOpen((globalThis as any).__tmpReaderId);
+    });
+    expect(res.openRes.ok).toBe(false);
+    // The aborted raw transport surfaces our typed reason — never a
+    // half-open handle and never a fabricated reading.
+    expect(res.openRes.error.reason).toBe('worker_crash');
+    expect(res.stats.workerInitCount).toBe(0);
+    // The real raw worker is gone — not leaked.
+    await expect
+      .poll(() => page.workers().length, { timeout: 5_000 })
+      .toBe(baseline);
+  });
 });
