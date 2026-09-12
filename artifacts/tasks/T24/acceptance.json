@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task_id": "T24",
+  "beads_id": "pdf-t24",
+  "disposition": "accepted",
+  "evaluated_commit": "7a9c6032e08057ab6c6f80ec911f035b498e345e",
+  "evaluated_at": "2026-09-12T00:49:09.104123+00:00",
+  "contract_digest": "5e64b2bbaac6979c2c389062ed2a17ca25e32afcd94202622e5e39e57bbabe6a",
+  "worker": "devin-subagent-t24",
+  "commands": [
+    {
+      "segment": "node --test tests/security/import/*.test.mjs",
+      "argv": [
+        "node",
+        "--test",
+        "tests/security/import/*.test.mjs"
+      ],
+      "executed_argv": [
+        "node",
+        "--test-reporter=junit",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-2uzxgpsm/results",
+        "--test",
+        "tests/security/import/html.test.mjs",
+        "tests/security/import/import.test.mjs",
+        "tests/security/import/png.test.mjs"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 79,
+        "passed": 79,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    },
+    {
+      "segment": "python scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000",
+      "argv": [
+        "python3",
+        "scripts/fuzz_reports.py",
+        "--fixed-seed",
+        "8090",
+        "--cases",
+        "1000"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/fuzz_reports.py",
+        "--fixed-seed",
+        "8090",
+        "--cases",
+        "1000"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T24/commands.log": "b088b4a9e6039f8da9f7b23158143d459ce3700a87b977eef5e63506c85c8098",
+    "artifacts/tasks/T24/coordinator-commands.log": "4adb83dfd6e18ebcb274de5b0ed69b5077c5d631a922eb1472471800bf8a9ad3",
+    "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl": "344e6c3c1ee35679fd8c3aa783275e14ba1d25de4f96d794f9fa134c31e6a56c",
+    "artifacts/tasks/T24/fuzz/fuzz-receipt.json": "1eca36325a7a24721015db3f09aed54e0a50541d27be5d128bdfecf96c90aae0",
+    "artifacts/tasks/T24/peer-review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
+    "artifacts/tasks/T24/receipt.json": "f5584a47d80dc5a181e9445be08b14cecdba181625d382c6cb9f1711dc0b1559",
+    "artifacts/tasks/T24/review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
+    "artifacts/tasks/T24/run.json": "7673d0fa55a79a8bdf12161ed346cb5321c53975e7cb9ba9450e29a5ec53f4b5"
+  },
+  "criteria": {
+    "Controlled oversized/truncated/HTML/SVG/polyglot/prototype/path inputs fail before dangerous allocation or resource use": [
+      "artifacts/tasks/T24/commands.log",
+      "artifacts/tasks/T24/run.json",
+      "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl"
+    ],
+    "bounded fuzz receipts show no unexpected accepts/crashes/egress": [
+      "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl",
+      "artifacts/tasks/T24/commands.log"
+    ],
+    "HTML export opens script-free": [
+      "artifacts/tasks/T24/commands.log",
+      "artifacts/tasks/T24/run.json"
+    ],
+    "no archive decompression surface.": [
+      "artifacts/tasks/T24/commands.log",
+      "artifacts/tasks/T24/fuzz/fuzz-receipt.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "devin-review-t24"
+    ],
+    "path": "artifacts/tasks/T24/review.md"
+  }
+}
