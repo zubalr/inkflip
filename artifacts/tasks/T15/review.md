@@ -3,7 +3,8 @@
 - **Reviewer:** independent read-only reviewer (Devin Local subagent, coordinator-requested); not the writer (`devin-t15` / `4b09fb92`), never ran this code before this review.
 - **Candidate:** `0bf638d589ba270ebd046357cab6ea1051274452` (impl `7804dc4`, tests `ed960fd`, evidence `0bf638d`; base `21be4c9`)
 - **Review checkout:** `worktrees/pdf-t15` @ `work/devin/t15`, HEAD `0bf638d`, clean tree before and after review (evidence regenerated during reproduction was restored; only this file is added).
-- **Verdict: changes-required.** All five acceptance criteria verify and the captured evidence is genuinely strong — real production build, real collaborators, independent server-side log, three honestly distinct modes, marker-free committed artifacts. Two defects in the *proof machinery* must be fixed before G1 rests on this receipt: the offline inspector passes on absent evidence (F1), and request headers — the one unconstrained carrier left on an allowlisted GET — are captured nowhere while the README claims they are (F2). Both fixes are small and well-specified; everything else is low/info.
+- **Round-1 verdict: changes-required.** All five acceptance criteria verify and the captured evidence is genuinely strong — real production build, real collaborators, independent server-side log, three honestly distinct modes, marker-free committed artifacts. Two defects in the *proof machinery* must be fixed before G1 rests on this receipt: the offline inspector passes on absent evidence (F1), and request headers — the one unconstrained carrier left on an allowlisted GET — are captured nowhere while the README claims they are (F2). Both fixes are small and well-specified; everything else is low/info.
+- **Round-2 verdict (current): approved** — F1 and F2 resolved at `9cc6356`/`8bcbc12`, verified on candidate `d11db83`; every blocking probe now fails closed and the round-1 P3s are fixed or honestly bounded in the receipt's limitation list. See the Round-2 section below.
 
 ## Reproduced commands (this worktree, real counts)
 
@@ -77,3 +78,50 @@
 ## What would change the verdict
 
 Fix F1 (inspector requires evidence presence) and F2 (capture+scan request headers or correct+bound the README claim); F3–F5 are one-line hardenings worth taking in the same pass. The remaining items are documentation-level. The underlying captured evidence, mode design, canary model, allowlist enforcement, redaction and scope discipline are sound and reproduced.
+
+---
+
+# Round 2 — re-review of `d11db83` (worker `9cc6356` inspector + `8bcbc12` spec/README + `d11db83` evidence)
+
+Reviewed in this worktree on `work/devin/t15` @ `d11db83`, clean tree; all findings below re-verified by rerunning the suite and re-running **my own** mutated-capture probes (the worker's probe table was not trusted).
+
+## Reproduced commands (round 2)
+
+| Command | Worker claim | Reproduced |
+|---|---|---|
+| `bun run test:privacy -- tests/privacy/local.spec.ts` | 4/4 | **4/4 pass, 0 fail/skip, exit 0** via `task_acceptance.py task T15 --report /tmp/t15-r2-run.json` — `evaluated_commit=d11db83`, `collected 4/passed 4`, no failures/evidence errors |
+| `python3 scripts/inspect_network_receipt.py` (standalone on fresh captures) | verdict=pass, 13/13, 47 req | **verdict=pass, checks=13 failed=0, requests=47, exit 0** — two new checks `capture_evidence_present` + `model_fetch_provenance` present and passing |
+| Fresh-run digest equivalence | digests only | all 12 committed-receipt `sha256_16` values recomputed from the live canary — **all match** (the report-id/run-key/export-name digests are deterministic across runs; only download bytes vary) |
+| Committed-artifact marker scan (independent) | marker-free | **0 hits** across all markers × 7 encodings in all committed `artifacts/tasks/T15/` files at `d11db83` |
+| `node_modules/.bin/oxlint` | 0/0 | 0 warnings, 0 errors |
+
+## Round-2 probe results (my mutations of the fresh raw captures, `expect !=0`)
+
+| Probe (class) | Round-1 result | Round-2 result |
+|---|---|---|
+| Strip `legs`+`storage` from all captures / empty one capture / `legs` key absent / `legs:[]` (F1) | **pass (defect)** | **exit 1 — fail closed** ✓ |
+| Remove a required journey leg (clear / error / reopen removed entirely) | n/a | **exit 1** — union enforced ✓ |
+| Marker in `requests[].headers` on an allowlisted GET; marker in `server_log[].headers`; `headers` key removed or `null` (F2) | channel absent | **exit 1**; headers now recorded from `allHeaders()` on every request/failure **and** in the server access log — verified real browser + wire headers in committed captures (incl. on the two offline-blocked requests) |
+| Marker in `legs[].detail` (F3) | pass | **exit 1** ✓ |
+| `form.submit` + novel `bluetooth.request` egress kinds (F4) | pass | **exit 1** — closed `EGRESS_FORBIDDEN`/`EGRESS_SAME_ORIGIN` sets, unknown kinds violate ✓ |
+| Foreign host only in `request_failures`; foreign host in `responses` (F5) | pass | **exit 1** — wire checks extended ✓ |
+| Marker split across console lines; whitespace-smeared marker; halves adjacent across channels (F6) | pass | **exit 1** — joined + whitespace-collapsed sweep ✓ |
+| base64-wrapped marker in console; base64 marker inside a request header (F6) | pass | **exit 1** — `B64_TOKEN_RE` decode+rescan ✓ |
+| `webrtc` egress record; recorded `dialogs` entry (F7) | unmonitored | **exit 1** — constructor tripwire + dialog=violation ✓ |
+| Warm-mode model request (even cache-satisfied, zero server hits); all model evidence removed; offline served model path (F9) | in-test only | **exit 1** — `model_fetch_provenance` re-derives from wire evidence ✓ |
+| `dialogs`/`storage`/any required key absent; request missing `url`; leg missing `ok` | — | **exit 1** ✓ |
+| Marker in `downloads[].filename` (a marker *not* declared `allowed_channels`) | — | **exit 1** — the downloads allowance stays scoped to the three report-derived markers ✓ |
+| Benign `#fragment` URL (no marker) | — | exit 0 — correct: fragments never reach the wire |
+
+## Round-2 findings
+
+- **R2-F1 — P3 — `storage:{}` still passes vacuously.** `capture_evidence_present` requires the `storage` key but not its sub-fields; a `{}` satisfies both it and `storage_document_free`. Narrower residue of F1 — the producer (`storageDump`) always emits the full sub-structure (verified in committed captures), so this needs a hand-edited/broken capture. One-line tightening: require the storage sub-keys. Not blocking.
+- **R2-F2 — P3 — bounded residual escapes, now honestly recorded.** Marker halves with non-whitespace junk between them, and base64-of-UTF-16 marker, still evade (probes exit 0); markers beyond the raised truncation bounds (console 2000, details/ws 1000) likewise. The receipt now carries an explicit "log-text bound" limitation and the joined/collapsed/b64-decode sweeps shrink the window to exactly this class — acceptable as bounded.
+- **R2-F3 — info — `model_fetch_provenance` detail says "exactly once"** while the check accepts ≥1 cold model request. Semantics are right (the wire path must be exercised and warm/offline must be clean); wording nuance only.
+- **Weakening check — PASS.** The diff is strictly additive: all 11 original checks retained + 2 new; forbidden-egress set grew (webrtc/webtransport/form.submit), unknown kinds flip from ignored to violations; truncations *raised* (more content scanned, not less); in-test assertions added (headers non-null, dialogs empty, failure wire checks, legs/detail/dialog/response haystacks, split sweep); `mode:"online"` is a new honest label, not a relaxed requirement — `cold,warm,offline` are still required and the offline flag semantics are unchanged. No assertion was loosened to pass.
+- **F7/F8/F10/F11 confirmed closed:** `webrtc`/`webtransport`/`form.submit`/`requestSubmit` constructors are tripwired in `armEgress`; capture `06` is now `mode:"online"`; `allowed_channels` is echoed per marker id in the committed receipt (`["downloads"]` for the three report-derived markers, `[]` elsewhere); docs say 11 markers; the two new limitations (constructor-level WebRTC/WebTransport guarantee, log-text truncation bound) are recorded verbatim in the canary manifest and receipt.
+- **F2 depth note:** `allHeaders()` is resolved in `endCapture` for every request/failure entry, `null` fails closed in-test (`assertCaptureClean`) *and* in the inspector (`capture_evidence_present`); the static server independently logs `req.headers` — the two layers genuinely see the wire now. Committed captures carry real header sets (sec-fetch-*, sec-ch-ua, origin, host, empty `referer` consistent with `no-referrer`).
+
+## Round-2 verdict: **approved**
+
+F1 (fail-open validator) and F2 (unmonitored header channel + README overclaim) are resolved and probe-verified fail-closed; F3–F5 are fixed; F6/F7 are fixed to the bounded level now recorded as receipt limitations; F8–F11 are closed. The committed evidence reproduces deterministically (4/4 tests, 13/13 checks, 47 requests, marker-free artifacts), scope stayed inside `tests/privacy/` + `scripts/inspect_network_receipt.py` + task artifacts, `planning/` untouched, and nothing was weakened to pass. The G1 own-file no-egress claim now rests on a validator that fails closed on absent, hollowed, or smuggled evidence.
