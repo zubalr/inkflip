@@ -93,7 +93,7 @@ $ git status --porcelain                                # pre-commit
 # gitignored.
 
 ############################################################
-# Tally
+# Tally (round 1)
 #   node --test tests/runtime/*.test.mjs : 45/45 pass, exit 0
 #   task_acceptance.py task T11 --report : 45/45, exit 0 (run.json)
 #   tsc -b tsconfig.json (whole graph)   : clean, exit 0
@@ -106,4 +106,62 @@ $ git status --porcelain                                # pre-commit
 #     (missing optional platform binding; not in acceptance)
 #   tests executed under system Node v26.7.0; repo pins 22.23.2
 #     (not installed in this environment)
+############################################################
+
+############################################################
+# REVIEW ROUND 2 — independent review changes-needed
+# Implementation commit: 89b7577 (see git log)
+# Findings F1-F5 fixed + F6 documented + F7 applied, each with a
+# regression test proven fail-before / pass-after.
+############################################################
+
+============================================================
+$ node --test tests/runtime/*.test.mjs     # pre-fix verification
+tests 51 / pass 45 / fail 6                 [exit 1]
+# Regression proof: with ONLY the three edited source files stashed
+# (coordinator.ts, checks.ts, backpressure.ts — tests kept), exactly
+# the six new regression tests fail and all 45 prior tests still pass:
+#   x empty check plan rejected (F5)
+#   x reasonless/statusless terminal rejected before mutation (F2)
+#   x raster downgrade frees live-raster slot (F4)
+#   x depth-3 dependency chain settles in any plan order (F3)
+#   x retried job armed with its own deadline watchdog (F1)
+#   x rejectionStats returns a copy (F7)
+
+============================================================
+$ node --test tests/runtime/*.test.mjs     # post-fix state
+tests 51  pass 51  fail 0  skipped 0        [exit 0]
+# Fixes: dispatchCheck() shared by initial dispatch AND retry (armed
+# watchdog on retried jobs); semanticallyValid() rejects illegal
+# check_terminal payloads before admission (no seq consumed, no
+# partial mutation); propagateSkips iterates to fixpoint;
+# TransferLedger frees raster hold on pdf_bytes downgrade; empty
+# plans rejected PLAN; rejectionStats returns a copy. README records
+# the F6-adjudicated interpretation (committed chunks of a cancelled
+# check stay retained — they were contract-validated evidence).
+
+============================================================
+$ python3 scripts/task_acceptance.py task T11 \
+    --report artifacts/tasks/T11/run.json
+{"task":"T11","evaluated_commit":"89b7577f8e23...",
+ "commands_run":1,"failures":[],"evidence_errors":[],
+ "tests":{"collected":51,"passed":51,"failed":0,"skipped":0}}   [exit 0]
+# run.json refreshed: evaluated_commit = 89b7577 (round-2 fix commit).
+
+============================================================
+$ ./node_modules/.bin/tsc -b tsconfig.json --force        [exit 0]
+# Whole graph still compiles clean.
+$ bun run verify                                         [exit 0]
+# 30 unittest + self-check over 16 registered commands — clean.
+$ git status --porcelain -- planning/ bun.lock native/uv.lock
+# EMPTY — reserved paths and lockfiles still untouched.
+
+############################################################
+# Tally (round 2, current)
+#   node --test tests/runtime/*.test.mjs : 51/51 pass, exit 0
+#   task_acceptance.py task T11 --report : 51/51, exit 0 (run.json)
+#   tsc -b tsconfig.json (whole graph)   : clean, exit 0
+#   bun run verify                       : exit 0
+#   regression proof                     : 6/6 new tests fail on
+#     pre-fix source, all pass after fix (stash-verified)
 ############################################################

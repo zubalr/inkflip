@@ -4,10 +4,27 @@
   "disposition": "implemented_pending_review",
   "branch": "work/devin/t11",
   "base_commit": "219a469",
-  "implementation_commit": "2e35681b5197e259e02649cb0a05647aa2df67ee",
+  "implementation_commit": "89b7577f8e2350c7dc8ccd239ba05a35253a4276",
   "actor": "devin-t11",
   "contract_version": "1.0.0",
   "recorded_at": "2026-09-12",
+  "review_rounds": [
+    {
+      "round": 2,
+      "verdict": "changes_needed",
+      "fix_commit": "89b7577f8e2350c7dc8ccd239ba05a35253a4276",
+      "findings": {
+        "F1": "MEDIUM retry dispatch armed no check-deadline watchdog (hung retry could never settle, I05) — fixed: dispatchCheck() shared by initial dispatch and retry",
+        "F2": "MEDIUM schema-valid but semantically illegal check_terminal (null status; non-completed + null reason) threw mid-apply after seq consumption — fixed: semanticallyValid() rejects as malformed BEFORE admission, zero mutation",
+        "F3": "MEDIUM propagateSkips single pass stalled depth>=2 cascades in non-topological plan order — fixed: iterated to fixpoint",
+        "F4": "LOW TransferLedger leaked the raster hold on pdf_bytes downgrade — fixed: rasterHolders.delete on downgrade",
+        "F5": "LOW empty check plan never settled — fixed: rejected with PLAN at issue",
+        "F6": "adjudicated accepted — committed chunks of a cancelled check stay retained (contract-validated evidence); interpretation recorded in README",
+        "F7": "nit applied — rejectionStats getter returns a copy"
+      },
+      "regression_proof": "with only the three edited source files stashed, exactly the 6 new tests fail (45 pass); all 51 pass after the fix — recorded in commands.log"
+    }
+  ],
   "acceptance_criteria_evidence": {
     "Stale results after replace/cancel cannot render": {
       "status": "executed",

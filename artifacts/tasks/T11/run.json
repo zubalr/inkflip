@@ -1,14 +1,14 @@
 {
   "task": "T11",
   "beads_id": "pdf-t11",
-  "evaluated_commit": "2e35681b5197e259e02649cb0a05647aa2df67ee",
-  "evaluated_at": "2026-09-12T01:15:57.099640+00:00",
+  "evaluated_commit": "89b7577f8e2350c7dc8ccd239ba05a35253a4276",
+  "evaluated_at": "2026-09-12T01:28:09.922024+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 45,
-    "passed": 45,
+    "collected": 51,
+    "passed": 51,
     "failed": 0,
     "skipped": 0
   },
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-147s0ugj/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-nqhj2mou/results",
         "--test",
         "tests/runtime/runtime.test.mjs"
       ],
@@ -32,8 +32,8 @@
       "stdout": "",
       "stderr": "",
       "tests": {
-        "collected": 45,
-        "passed": 45,
+        "collected": 51,
+        "passed": 51,
         "failed": 0,
         "skipped": 0
       },
