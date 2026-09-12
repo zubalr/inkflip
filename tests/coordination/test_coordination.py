@@ -2,7 +2,6 @@ import copy
 import importlib.util
 import json
 import tempfile
-import threading
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
