@@ -107,3 +107,44 @@ $ psm6 spot-check rerun on the post-fix tree (psm6-spotcheck.log)
   psm=6: words=16 '$100' present=True
   psm=11: words=16 '$100' present=True   (identical to the pre-fix round)
 ================================================================================
+
+================================================================================
+WAVE-1 REVIEW REVISION ROUND (Astra adjudication, 2026-09-12)
+Revision commit: 12bc8ac (T27 source only; evidence commits follow)
+Review inputs: independent SWE review 6f48c10a (review/devin/t27-wave1,
+preliminary on OLD c884b59) + Astra adjudication. Review header metadata
+errors (date 2026-09-13, 'macOS arm64 (Homebase)') NOT copied.
+Fixes: F1 (-l pinned), F2 (region_id typed unsupported; non-schema region
+channel removed), F3 (typed geometry_unavailable for malformed regions),
+F4 (caller CropPlan re-validated), F5 (page-scoped occurrence ids), F6
+(budget before decode), F7 (exact 5000-word cap), F11 (per-language tessdata
+probing, explicit TESSDATA_PREFIX authoritative, engine pinned via
+-l/--tessdata-dir, manifest records model identity), F12 (typed parser_error
+for workdir/save I/O faults). F8/F9 recorded (T29); F10 recorded (Astra
+question: scale-only named renders supported, raster_scale_px_per_pt).
+================================================================================
+$ uv run --project native python -m pytest native/tests/ocr -q
+  -> 36 passed (exit 0)  [20 original + 16 wave-1 regression tests]
+$ uv run --project native python -m pytest native/tests -q
+  -> 89 passed, 126 subtests passed (exit 0)
+$ bun run test:native
+  -> 89 passed (exit 0)
+$ python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json
+  -> first attempt blocked by the harness ('commit implementation changes
+  before recording acceptance evidence') - committed 12bc8ac, then:
+  -> exit 0; collected 36 / passed 36 / failed 0 / skipped 0;
+  evaluated_commit 12bc8ac
+$ bun run verify
+  -> exit 1: ONLY the 17 known relay-guard linked-worktree environment
+  failures (6+11, all test_homebase_relay.py); bootstrap 49/49 OK,
+  native-bootstrap 2/2 OK
+$ psm6 spot-check rerun (psm6-spotcheck.log)
+  psm=3/6/11: identical 16-word sequences, '$100' present under all three
+$ process hygiene (after timeout/cancel runs)
+  0 stray tesseract children; 0 leftover inkflip-ocr-* dirs
+$ model identity (review checklist item 10)
+  local eng.traineddata sha256 = daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047
+  planning/config/model-assets.json pins 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2
+  (macOS reference) - platform installs differ; the adapter hashes and passes
+  the exact local file (I13-honest); T46 parity reconciles pinned assets.
+================================================================================

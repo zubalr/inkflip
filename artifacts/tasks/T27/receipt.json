@@ -37,7 +37,7 @@
       "evidence": [
         "native/tests/ocr/test_ocr.py"
       ],
-      "detail": "Language identifiers are validated against ^[a-z0-9_-]{1,32}$ ('eng --psm 8' is rejected as a terminal unsupported); the crop is saved under the neutral adapter-generated name input.png inside a private mkdtemp directory removed afterwards; the spied invocation argv is exactly [tesseract, <tmp>/input.png, stdout, --psm 3, tsv] with shell=False, so no caller-controlled string reaches the command line."
+      "detail": "Language identifiers are validated against ^[a-z0-9_-]{1,32}$ ('eng --psm 8' is rejected as a terminal unsupported); the crop is saved under the neutral adapter-generated name input.png inside a private mkdtemp directory removed afterwards; the spied invocation argv is exactly [tesseract, <tmp>/input.png, stdout, --psm 3, -l eng, --tessdata-dir <resolved tessdata>, tsv] with shell=False, so no caller-controlled string reaches the command line; the language and tessdata directory are pinned explicitly in argv so the recorded model identity is what the engine loads (wave-1 F1/F11)."
     },
     {
       "criterion": "crop padding/resize inverses correct",
@@ -185,6 +185,38 @@
         {"segment": "psm6 spot-check rerun on the post-fix tree (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "detail": "Identical result: PSM 3, 6 and 11 all read the same 16 words including '$100'."}
       ],
       "note": "The original pre-fix failed-run baseline remains verbatim in artifacts/tasks/T27/native-tests-linux-baseline.log (committed at a6f6b1d); it documents the Linux platform drift that the approved T26 correction resolves. No T27 source, schema or fixture changed in this round."
+    },
+    "wave1_revision_round": {
+      "recorded_at": "2026-09-12",
+      "worker": "zcode-t27 (ZCode Goal, Homebase)",
+      "review_inputs": "Independent SWE source review 6f48c10a on review/devin/t27-wave1 (artifact artifacts/tasks/T27/preliminary-review-wave1.md, preliminary on OLD c884b59) plus Astra adjudication in Beads. Metadata hygiene: the review header's 'Date: 2026-09-13' and 'Platform: macOS arm64 (Homebase)' are inaccurate (actual source reviewer ran on the Mac on 2026-09-12); these errors are not copied into this evidence.",
+      "revision_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57",
+      "addressed_findings": {
+        "F1_language_never_in_argv": "FIXED: argv is now [tesseract, <private>/input.png, stdout, --psm <n>, -l <language>, --tessdata-dir <resolved>, tsv]; the language is a regex-validated single element, so no injection; engine selection is pinned instead of implicit.",
+        "F2_region_id_ignored": "FIXED: a region-scoped plan without an explicitly resolved crop returns typed 'unsupported' instead of silently widening to full-page OCR; the non-schema plan['region'] channel is removed.",
+        "F3_malformed_region_raw_crash": "FIXED: plan_crop validates region shape (4-value integer sequence inside the raster) before unpacking; every arity/type violation is a typed geometry_unavailable.",
+        "F4_unvalidated_caller_crop_plan": "FIXED: caller-built CropPlans are re-validated at extract entry (psm allowlist, region/padded rects integer and inside the raster, resize positive finite, raster_scale positive finite); hostile psm is 'unsupported', geometry violations are 'failed'/geometry_unavailable.",
+        "F5_page_less_occurrence_ids": "FIXED: ids are tesseract-native-<digest12>-p<page>-ocr-<ordinal>, mirroring the pdfium sibling.",
+        "F6_pixel_cap_after_decode": "FIXED: the 40 Mpx budget is checked on the declared size before image.load(); AdapterError re-raises preserve typed terminals.",
+        "F7_word_budget_off_by_one": "FIXED: the cap is checked before emitting word N+1; 5001 words terminate as resource_limit with exactly 5000 emitted; exactly 5000 completes.",
+        "F11_tessdata_precedence": "FIXED: per-language probing (a directory without the requested model never shadows a later one); explicit TESSDATA_PREFIX is authoritative and never silently overridden or supplemented; symlink-resolved binary candidates; the engine is invoked with explicit -l/--tessdata-dir so the hashed file is exactly what the engine loads; the manifest records the model identity. Tests cover missing requested model under an explicit prefix (no fallback), explicit-prefix hashing + argv pinning, and per-language fallback selection.",
+        "F12_tempdir_save_raw_io": "FIXED: workdir creation and cropped-raster write faults are typed 'parser_error' terminals (the contract's declared reason taxonomy has no dedicated I/O code; mapping noted for the coordinator).",
+        "Cloud_F1_symlinked_binary": "RESOLVED with F11: symlink-resolved candidates plus explicit --tessdata-dir; the suite passes with and without TESSDATA_PREFIX on this host.",
+        "F8_unbounded_capture_output": "RECORDED, not built: T29 supervision scope per adjudication; limitation restated in the manifest.",
+        "F9_cancel_during_subprocess": "RECORDED, not built: in-adapter timeout kills the direct child only; process-group kill is T29.",
+        "F10_scale_only_transform_model": "RECORDED as the stated limitation and Astra contract question: only scale-only named renders (raster_scale_px_per_pt) are supported; a rotated named render cannot be represented and is not claimed."
+      },
+      "executed_commands_linux": [
+        {"segment": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 36, "failed": 0}, "detail": "20 original + 16 new wave-1 regression tests."},
+        {"segment": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126, "failed": 0}},
+        {"segment": "bun run test:native", "exit": 0, "counts": {"passed": 89}},
+        {"segment": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "detail": "Report bound to evaluated_commit 12bc8ac; the harness first refused an uncommitted-tree run ('blocked: commit implementation changes before recording acceptance evidence') and passed only after the source commit."},
+        {"segment": "bun run verify", "exit": 1, "detail": "Only the known 17 relay-guard linked-worktree environment failures (6+11, all tests/coordination/test_homebase_relay.py); bootstrap 49/49 and native-bootstrap 2/2 pass."},
+        {"segment": "psm6 spot-check rerun on the revised candidate (artifacts/tasks/T27/psm6-spotcheck.log)", "exit": 0, "detail": "Identical: PSM 3, 6 and 11 all read the identical 16 words including '$100'."},
+        {"segment": "process hygiene after timeout/cancel runs", "exit": 0, "detail": "0 stray tesseract processes; 0 leftover inkflip-ocr-* directories."}
+      ],
+      "model_asset_divergence": "Review checklist item 10: the local Linux eng.traineddata served to the engine hashes to sha256 daa0c97d651c19fba3b25e81317cd697e9908c8208090c94c3905381c23fc047, which differs from the planning/config/model-assets.json pinned 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2 (macOS reference asset). The adapter hashes and passes the exact local file (I13-honest); reconciling pinned assets per platform install belongs to T46 parity.",
+      "remaining_limits": "Unchanged from the prior rounds: printed-English OCR only; child-only timeout kill and in-memory TSV capture (T29 supervision); scale-only transform model (F10 question held by Astra); DEFAULT_PSM=3 kept pending Astra's PSM contract decision (Linux spot-check diverges from the macOS rationale)."
     }
   },
   "ready_for_review": true

@@ -1,14 +1,14 @@
 {
   "task": "T27",
   "beads_id": "pdf-t27",
-  "evaluated_commit": "45821e6347a888c52e05a5ef7d5a79a40d79851d",
-  "evaluated_at": "2026-09-12T04:23:30.088624+00:00",
+  "evaluated_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57",
+  "evaluated_at": "2026-09-12T04:49:16.316578+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 20,
-    "passed": 20,
+    "collected": 36,
+    "passed": 36,
     "failed": 0,
     "skipped": 0
   },
@@ -36,15 +36,15 @@
         "pytest",
         "native/tests/ocr",
         "-q",
-        "--junitxml=/tmp/inkflip-tests-im_ei4bj/results"
+        "--junitxml=/tmp/inkflip-tests-vt0ynf4u/results"
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "....................                                                     [100%]\n20 passed in 5.09s\n",
+      "stdout": "....................................                                     [100%]\n36 passed in 6.76s\n",
       "stderr": "",
       "tests": {
-        "collected": 20,
-        "passed": 20,
+        "collected": 36,
+        "passed": 36,
         "failed": 0,
         "skipped": 0
       },

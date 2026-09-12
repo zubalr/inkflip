@@ -9,7 +9,7 @@
   "base": "726d61c0c",
   "implementation_commit": "394e65c07be89e2a867b0b316fe46940f927dbf9",
   "ready_for_review": true,
-  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merges ca2dbb1 (main 65e84da) and 45821e6 (main cd79351 with approved T26 font-oracle fix) + evidence commits); final review must bind to this new exact candidate",
+  "review_scope": "branch head work/zcode/t27 at push time (= implementation_commit 394e65c + merges ca2dbb1 (main 65e84da) and 45821e6 (main cd79351 with approved T26 font-oracle fix) + wave-1 revision 12bc8ac + evidence commits); final review must bind this new exact candidate",
   "checkpoint": {
     "recorded_at": "2026-09-13 (overnight handoff)",
     "status": "implementation and evidence pushed (ffe7313); NOT yet reviewed or accepted - T27 remains an open/in-review task in Beads and this worker does not claim acceptance",
@@ -65,6 +65,29 @@
         {"command": "psm6 spot-check rerun", "exit": 0, "note": "identical: PSM 3/6/11 all read '$100' (16 words) on Linux"}
       ],
       "evidence_freshness": "Pre-fix failed-run baseline preserved verbatim (artifacts/tasks/T27/native-tests-linux-baseline.log, committed a6f6b1d); post-fix run.json regenerated on this exact merged tree; psm6-spotcheck.log regenerated."
+    },
+    "wave1_revision_checkpoint": {
+      "recorded_at": "2026-09-12",
+      "grant": "Astra review adjudication 2026-09-12: reproduce wave-1 findings at the real API seam, add regression tests, fix before final handoff; return exact new candidate, real counts, addressed-finding map, remaining limits; final review must bind new code",
+      "revision_commit": "12bc8acca01aa2faa3948d3c60df43eefcbf5c57 (source; evidence commits follow on this branch)",
+      "addressed_findings_map": "See receipt.json linux_verification.wave1_revision_round.addressed_findings: F1-F7 and F11+F12 fixed with 16 regression tests; Cloud-F1 symlink case resolved with F11; F8/F9 recorded as T29 scope; F10 recorded as the Astra contract question with exact supported metadata (scale-only named renders, raster_scale_px_per_pt).",
+      "executed_commands_linux": [
+        {"command": "uv run --project native python -m pytest native/tests/ocr -q", "exit": 0, "counts": {"passed": 36, "failed": 0}},
+        {"command": "uv run --project native python -m pytest native/tests -q", "exit": 0, "counts": {"passed": 89, "subtests_passed": 126, "failed": 0}},
+        {"command": "bun run test:native", "exit": 0},
+        {"command": "python3 scripts/task_acceptance.py task T27 --report artifacts/tasks/T27/run.json", "exit": 0, "counts": {"collected": 36, "passed": 36, "failed": 0, "skipped": 0}, "note": "bound to evaluated_commit 12bc8ac; harness correctly blocked the earlier uncommitted-tree attempt"},
+        {"command": "bun run verify", "exit": 1, "note": "only the 17 known relay-guard linked-worktree environment failures; bootstrap 49/49, native-bootstrap 2/2"},
+        {"command": "psm6 spot-check rerun", "exit": 0, "note": "identical: PSM 3/6/11 all read '$100' (16 words)"},
+        {"command": "process hygiene check", "exit": 0, "note": "0 stray tesseract children, 0 leftover inkflip-ocr-* dirs after timeout/cancel runs"}
+      ],
+      "notes_for_final_review": [
+        "The suite grew 20 -> 36 tests; all prior assertions still hold (argv shape updated to the pinned 10-element form).",
+        "The frozen schema pins adapter_version const '1.0.0', so the revision does not bump it; behavior changes are documented here and in receipt.json.",
+        "Review-header metadata errors (date 2026-09-13, 'macOS arm64 (Homebase)') were not copied; this worker's rounds are all 2026-09-12 Linux amd64.",
+        "Local eng.traineddata (daa0c97d...) differs from the planning-pinned asset (7d4322bd...): T46 parity question, adapter records the actual local model it passes to the engine.",
+        "F12 I/O faults map to 'parser_error' because the contract taxonomy has no I/O reason code; flagged as a minor contract question."
+      ],
+      "handoff_state": "ready_for_review=true; worker yields; final review must bind this branch's pushed head (revision 12bc8ac + evidence commits); Astra owns acceptance; heavy OCR/corpus reservation may be released after collection (no further heavy runs queued)."
     },
     "handoff_state": "ready_for_review=true; worker yields; final independent review must bind to this branch's pushed head; Astra owns acceptance. Worker has no further heavy OCR/corpus runs queued for this grant: after collecting this candidate the coordinator may release the T27 heavy-OCR/corpus reservation (it is coordinator-owned Beads state; this note is the worker's release signal, not a state write)."
   },
