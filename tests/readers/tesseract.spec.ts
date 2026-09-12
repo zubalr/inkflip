@@ -187,7 +187,10 @@ const api = {
     pdfjs.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.mjs';
     const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
     const task = pdfjs.getDocument({
-      data: bytes,
+      // pdf.js transfers its input ArrayBuffer to the pdf worker,
+      // detaching it; give it a copy so the document bytes we hash
+      // and retain stay immutable (I01).
+      data: bytes.slice(),
       cMapUrl: '/assets/pdfjs/6.3.289/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: '/assets/pdfjs/6.3.289/standard_fonts/',
