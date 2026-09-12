@@ -1,0 +1,10 @@
+{
+  "native/tests/readers/test_readers.py": "5e183bd0c09a52e3e08b78aa41d537ae9556802e5d43e4546b6a15e7b626991f",
+  "artifacts/tasks/T26/font-oracle/linux-fixed.log": "634268248290acef0a8e854fcff60643adba7ce6c90857d5f23a6fd78e3ec3e0",
+  "artifacts/tasks/T26/font-oracle/linux-mutations.log": "b1cf199a031d939ca8fbb416af027e42a0d2e336fea8d37e43358a1cc059cde1",
+  "artifacts/tasks/T26/font-oracle/linux-original.log": "40cae132aa1fbe79c5db0a97c06235ea09c4ed0a14ae56c3a3fab3435d348af1",
+  "artifacts/tasks/T26/font-oracle/mac-fixed.log": "71a2a50cc16f601b32b0bcb0cfc0ca1ffd87967d80ca67cc94f38c0b88549a36",
+  "artifacts/tasks/T26/font-oracle/mac-mutations.log": "093c02e9e624384d05747b21dd3b62f4e13ec17061a25f0e62f9a36565c5188b",
+  "artifacts/tasks/T26/font-oracle/mac-original.log": "cd75ee4249202ba4ddeb8b14420fce7072e3073b43de5f5d091dcdd88accea94",
+  "artifacts/tasks/T26/font-oracle/mutation_probe.py": "2533ba60053910ae0292da67c5f5477aaaf15dd5f6a45816cefc48fee2e27671"
+}
