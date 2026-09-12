@@ -4,7 +4,7 @@
 implementer's own verification record, not an approval; the coordinator
 replaces it with the committed independent review at acceptance time.
 
-**Candidate:** `7cda7a60f8ad63d42a2b59f08a7d250f8e6b57bd` on
+**Candidate:** `7cda7a671c82e563e9bcc18f17dd63f6acb71f95` on
 `work/devin/t04` (base `c12e680`).
 
 ## What was built
