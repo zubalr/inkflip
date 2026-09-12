@@ -6,10 +6,10 @@
  * frozen in bun.lock by T02, and the adapter receives the concrete
  * module (`import Tesseract from 'tesseract.js'`) from its caller.
  * This keeps the contract-honest wiring — `createWorker(
- * [{ code:'eng', data:'eng' }], OEM.LSTM_ONLY, { workerPath, corePath,
- * langPath, gzip:false, workerBlobURL:false, cacheMethod:'readOnly',
- * logger })` — inside the adapter while the library itself stays an
- * app-owned dependency.
+ * [{ code:'eng', data:<verified bytes> }], OEM.LSTM_ONLY, { workerPath,
+ * corePath, langPath, gzip:false, workerBlobURL:false,
+ * cacheMethod:'none', signal, logger })` — inside the adapter while
+ * the library itself stays an app-owned dependency.
  *
  * The worker options below are the entire reason the adapter exists:
  * explicit same-origin staged paths and `workerBlobURL:false` so no
@@ -102,27 +102,23 @@ export interface TesseractEngineWorker {
 /**
  * The tesseract.js v7 `Lang` object payload (`{ code, data }`).
  *
- * On the pinned 7.0.0 worker this shape has one non-obvious contract
- * (verified against `src/worker-script/index.js` empirically):
- * `loadLanguage` uses `code` for the traineddata file name and reads
- * `data` ONLY on a cache miss, while `initialize` maps each payload to
- * `payload.data` as the Init() language name. Supplying real bytes in
- * `data` is therefore misinterpreted as a language name and fails
- * initialization — the adapter passes `data === code` and delivers the
- * verified traineddata bytes through the pre-seeded cache slot (see
- * `createEngineWorker`).
+ * On the pinned+patched 7.0.0 worker this shape delivers the verified
+ * model bytes directly: `loadLanguage` writes `data` verbatim as
+ * `${code}.traineddata` into the worker filesystem (object payloads
+ * have no fetch branch), and the pdf-q38-patched `initialize` job
+ * maps each payload to `code` for the Init() language name. With
+ * `cacheMethod:'none'` the worker never touches the shared idb-keyval
+ * cache at all — the adapter-verified bytes ARE the engine input, so
+ * no same-origin cache write can ever change what Init() consumes.
  */
 export interface EngineLangPayload {
   /** Engine language code, e.g. 'eng' — also the Init() lang name. */
   readonly code: string;
   /**
-   * Cache-miss fallback content consumed by upstream `loadLanguage`.
-   * Must equal `code` on pinned 7.0.0: a miss writes these bytes as
-   * `${code}.traineddata`, so the language code itself is a 3-byte
-   * poison payload that fails Init() honestly — a miss can never
-   * silently become an unverified model download.
+   * The SHA-256-verified traineddata bytes, snapshotted by
+   * `createEngineWorker` — the actual engine input.
    */
-  readonly data: string;
+  readonly data: Uint8Array;
 }
 
 /**
@@ -161,6 +157,12 @@ export interface CreateEngineWorkerInput {
   readonly lang: string;
   readonly paths: EnginePaths;
   /**
+   * The adapter-verified traineddata bytes (SHA-256 checked against
+   * the frozen manifest at preparation). A snapshot copy is handed to
+   * the engine — it is the only model channel the worker uses.
+   */
+  readonly modelBytes: Uint8Array;
+  /**
    * Concrete-lifetime abort for THIS worker. The pdf-ebz-patched
    * tesseract.js@7.0.0 `WorkerOptions.signal`: observed before spawn
    * and for the worker's whole life — aborting synchronously
@@ -183,22 +185,16 @@ export interface CreateEngineWorkerInput {
  * - `gzip:false` — the staged eng.traineddata is uncompressed;
  * - `workerBlobURL:false` — the worker script loads from its real
  *   same-origin URL, not an opaque blob indirection;
- * - `langs` is the v7 `Lang` payload array `[{code, data}]` — NOT a
- *   language string. For object payloads the pinned worker's
- *   `loadLanguage` has no fetch branch at all (fetching exists only
- *   for string langs), so a model download can never replace the
- *   adapter-verified bytes inside the engine.
- * - `cacheMethod:'readOnly'` — the worker reads exactly the
- *   `${cachePath}/${lang}.traineddata` cache slot that the adapter
- *   seeds with SHA-256-verified bytes (see model-cache.ts
- *   `prepareForEngine`) and never writes it. The adapter gates worker
- *   creation on that slot containing the verified payload, so the
- *   engine input is the verified bytes or initialization fails.
- *   `cacheMethod:'none'` is NOT usable on pinned 7.0.0: with no cache
- *   read, `loadLanguage` would write `data` verbatim and `initialize`
- *   maps `payload.data` to the Init() language name — so `data` must
- *   equal `code`. A cache miss therefore writes a 3-byte poison file
- *   and Init fails honestly instead of fetching unverified bytes.
+ * - `langs` is the v7 `Lang` payload `[{code, data}]` — NOT a
+ *   language string. A SNAPSHOT of `input.modelBytes` is placed in
+ *   `data`: the patched worker writes those bytes verbatim to
+ *   `./eng.traineddata` (object payloads have no fetch branch) and
+ *   the q38-patched `initialize` job sends `code` as the Init
+ *   language name. The engine input is exactly the adapter-verified
+ *   payload — not a shared cache slot another writer could race.
+ * - `cacheMethod:'none'` — the worker performs no cache read or
+ *   write; the adapter's own verified cache (model-cache.ts) is a
+ *   warm-start store for future preparations only.
  * - `signal` (pdf-ebz patched `WorkerOptions.signal`) owns this
  *   worker's concrete lifetime: abort hard-terminates the raw worker
  *   and rejects readiness/pending jobs even mid-initialization.
@@ -208,7 +204,11 @@ export function createEngineWorker(
   input: CreateEngineWorkerInput,
 ): Promise<TesseractEngineWorker> {
   const { engine, lang, paths } = input;
-  const langs: readonly EngineLangPayload[] = [{ code: lang, data: lang }];
+  // Snapshot: later mutation of the adapter's in-memory copy can never
+  // alter the bytes already committed to this engine boundary.
+  const langs: readonly EngineLangPayload[] = [
+    { code: lang, data: input.modelBytes.slice() },
+  ];
   return engine.createWorker(langs, engine.OEM.LSTM_ONLY, {
     workerPath: paths.workerPath,
     corePath: paths.corePath,
@@ -216,7 +216,7 @@ export function createEngineWorker(
     cachePath: paths.cachePath,
     gzip: false,
     workerBlobURL: false,
-    cacheMethod: 'readOnly',
+    cacheMethod: 'none',
     ...(input.signal !== undefined ? { signal: input.signal } : {}),
     logger: (m: { status?: unknown; progress?: unknown; userJobId?: unknown }) => {
       if (typeof m?.status === 'string' && typeof m?.progress === 'number') {

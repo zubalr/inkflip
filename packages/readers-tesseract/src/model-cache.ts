@@ -8,29 +8,30 @@
  *
  * Byte provenance is explicit. The adapter itself downloads the pinned
  * same-origin traineddata URL, verifies the manifest SHA-256, and only
- * then commits the bytes to the worker-readable cache — "verify before
- * committing a model to cache". The cache slot is the same
- * idb-keyval store (`keyval-store`/`keyval`) that the pinned
- * tesseract.js@7.0.0 worker reads with `cacheMethod:'readOnly'`, keyed
- * `${cachePath}/${lang}.traineddata`; that way the engine consumes the
- * exact verified bytes instead of refetching.
+ * then (optionally) commits the bytes to an adapter-owned
+ * warm-start cache — "verify before committing a model to cache". The
+ * cache slot is the same idb-keyval store (`keyval-store`/`keyval`)
+ * tesseract.js conventions use, keyed `${cachePath}/${lang}.traineddata`,
+ * but the engine never reads it: workers are created with
+ * `cacheMethod:'none'` and a `{code, data}` language payload carrying
+ * the verified bytes themselves (see engine.ts `createEngineWorker`).
+ * An unavailable or failing IndexedDB therefore degrades to honest
+ * memory-only preparation — never a model failure.
  *
- * The slot is the ONLY model channel the engine may use. The reader
- * calls `prepareForEngine()` immediately before each worker creation:
- * it requires the slot to exist and re-verifies its contents. The
- * worker is launched with a v7 `Lang` object payload — the pinned
- * worker script has no fetch branch for object languages — so a cache
- * miss fails initialization honestly rather than downloading
- * unverified bytes. If IndexedDB is unavailable or the verified
- * payload cannot be committed/read back, `prepareForEngine` throws:
- * the engine receives the exact verified bytes or the run fails.
+ * Preparation owns its asynchronous side effects: a caller-supplied
+ * `AbortSignal` (the operation's terminal signal) plus a manager
+ * `epoch` bumped by `remove()` are checked after every internal await
+ * and before every state/memory/cache mutation, so a superseded or
+ * removed preparation can neither publish states nor recreate a
+ * deleted cache entry. A cancellation is never reclassified as an
+ * offline/cache warning.
  *
  * A mismatched cache entry is deleted and reported, then replaced by a
  * fresh download (RUNTIME_LIFECYCLE: "A mismatched cache entry is
  * deleted and reported; retry requires a fresh download").
  */
 import { sha256 } from '../../contracts/src/index.ts';
-import { OcrError, OCR_REASON, requireOcr } from './errors.ts';
+import { OcrError, OCR_REASON } from './errors.ts';
 import type { OcrReason } from './errors.ts';
 
 /** RUNTIME_LIFECYCLE.md "Asset and cache states" labels. */
@@ -169,6 +170,12 @@ export class ModelAssetManager {
   private state: ModelState = 'not_prepared';
   private readonly store: KeyvalStore | null;
   private readonly limitations: string[] = [];
+  /**
+   * Manager epoch — bumped by `remove()`. A preparation snapshots it
+   * at entry; any later drift means this preparation's results must
+   * never publish or persist.
+   */
+  private epoch = 0;
 
   constructor(
     private readonly model: ModelIdentity,
@@ -207,10 +214,37 @@ export class ModelAssetManager {
    * Ensure verified model bytes are available. Idempotent: already
    * verified in-memory bytes are reused without a network or cache
    * round-trip (`ready_memory` / provenance `memory`).
+   *
+   * `signal` is the calling operation's terminal signal: together with
+   * the manager `epoch` (bumped by `remove()`) it is checked after
+   * EVERY internal await and before every state/memory/cache mutation,
+   * so a dead preparation can neither publish states nor recreate a
+   * deleted cache slot — and cancellation is never reclassified as an
+   * offline/cache warning.
    */
-  async prepare(): Promise<PreparedModel> {
+  async prepare(signal?: AbortSignal): Promise<PreparedModel> {
+    const epoch = this.epoch;
+    const alive = (): void => {
+      if (this.epoch !== epoch) {
+        throw new OcrError(
+          OCR_REASON.USER_CANCEL,
+          'model preparation invalidated by removeModelData',
+        );
+      }
+      if (signal?.aborted) {
+        throw new OcrError(
+          OCR_REASON.USER_CANCEL,
+          'model preparation cancelled',
+        );
+      }
+    };
+    const publish = (state: ModelState): void => {
+      alive();
+      this.setState(state);
+    };
+
     if (this.verifiedBytes !== null) {
-      this.setState('ready_memory');
+      publish('ready_memory');
       return {
         preparation: {
           state: 'ready_memory',
@@ -222,14 +256,15 @@ export class ModelAssetManager {
       };
     }
 
-    // 1) Probe the worker-readable cache; a hit still must verify.
+    // 1) Probe the warm-start cache; a hit still must verify.
     if (this.store !== null) {
       try {
         const cached = await this.store.get(this.cacheKey);
+        alive();
         if (cached instanceof Uint8Array && cached.length > 0) {
           if (this.verify(cached)) {
             this.verifiedBytes = cached;
-            this.setState('ready_cached');
+            publish('ready_cached');
             return {
               preparation: {
                 state: 'ready_cached',
@@ -243,11 +278,14 @@ export class ModelAssetManager {
           // Mismatched cache entry: delete and report; a fresh
           // download below is the only permitted recovery.
           await this.store.del(this.cacheKey);
+          alive();
           this.limitations.push(
             'cache_integrity: deleted mismatched cached model entry',
           );
         }
       } catch (error) {
+        if (error instanceof OcrError) throw error;
+        alive();
         this.limitations.push(
           `model_cache_unavailable: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -255,15 +293,18 @@ export class ModelAssetManager {
     }
 
     // 2) Cold path: download the pinned same-origin bytes ourselves.
-    this.setState('downloading');
+    publish('downloading');
     const fetchImpl = this.hooks.fetchImpl ?? fetch;
     let response: Response;
     try {
       response = await fetchImpl(this.model.sourcePath, {
         cache: 'no-store',
         credentials: 'same-origin',
+        ...(signal !== undefined ? { signal } : {}),
       });
     } catch (error) {
+      // Cancellation/invalidation is never reclassified as offline.
+      alive();
       const online = this.hooks.online
         ? this.hooks.online()
         : (typeof navigator === 'undefined' ? true : navigator.onLine !== false);
@@ -277,6 +318,7 @@ export class ModelAssetManager {
           `${error instanceof Error ? error.message : String(error)}`,
       );
     }
+    alive();
     if (!response.ok) {
       this.setState('not_prepared');
       throw new OcrError(
@@ -285,8 +327,9 @@ export class ModelAssetManager {
       );
     }
 
-    this.setState('verifying');
+    publish('verifying');
     const bytes = new Uint8Array(await response.arrayBuffer());
+    alive();
     if (!this.verify(bytes)) {
       this.setState('failed_integrity');
       throw new OcrError(
@@ -295,18 +338,36 @@ export class ModelAssetManager {
       );
     }
 
-    // 3) Commit verified bytes to the worker-readable cache.
+    // 3) Commit verified bytes to the optional warm-start cache. The
+    //    engine never reads this slot — failure degrades to memory-only.
     if (this.store !== null) {
       try {
-        await this.store.set(this.cacheKey, bytes);
+        alive();
+        await this.store.set(this.cacheKey, bytes.slice());
+        if (this.epoch !== epoch || signal?.aborted) {
+          // Died during the write — remove the resurrected slot so a
+          // completed remove() is not silently undone.
+          try {
+            await this.store.del(this.cacheKey);
+          } catch {
+            // best-effort cleanup of our own write
+          }
+          throw new OcrError(
+            OCR_REASON.USER_CANCEL,
+            'model preparation invalidated during cache commit',
+          );
+        }
       } catch (error) {
+        if (error instanceof OcrError) throw error;
+        alive();
         this.limitations.push(
           `model_cache_unavailable: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
+    alive();
     this.verifiedBytes = bytes;
-    this.setState('ready_memory');
+    publish('ready_memory');
     return {
       preparation: {
         state: 'ready_memory',
@@ -319,66 +380,14 @@ export class ModelAssetManager {
   }
 
   /**
-   * Engine-boundary gate: guarantee that the worker-readable cache
-   * slot holds the exact verified payload before a worker is created.
-   *
-   * Why this exists: the pinned worker consumes
-   * `${cachePath}/${lang}.traineddata` from idb-keyval — and nothing
-   * else (the `Lang` object payload it is launched with has no fetch
-   * branch, and `cacheMethod:'readOnly'` never writes). So if this
-   * slot cannot be committed and read back verified, there is no
-   * honest way to feed the engine the verified model — the caller
-   * gets a typed `missing_model`/`model_integrity` failure instead of
-   * a silent second download or stale bytes.
-   */
-  async prepareForEngine(): Promise<PreparedModel> {
-    const prepared = await this.prepare();
-    requireOcr(
-      this.store !== null,
-      OCR_REASON.MISSING_MODEL,
-      'cannot deliver verified model bytes to the engine: the ' +
-        'worker-readable model cache (IndexedDB keyval-store) is ' +
-        'unavailable',
-    );
-    const store = this.store;
-    // Commit a snapshot copy so later mutation of the in-memory bytes
-    // cannot alter what the worker reads.
-    try {
-      await store.set(this.cacheKey, prepared.bytes.slice());
-    } catch (error) {
-      throw new OcrError(
-        OCR_REASON.MISSING_MODEL,
-        'cannot deliver verified model bytes to the engine: ' +
-          'worker-readable cache write failed: ' +
-          `${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-    let check: unknown;
-    try {
-      check = await store.get(this.cacheKey);
-    } catch (error) {
-      throw new OcrError(
-        OCR_REASON.MISSING_MODEL,
-        'cannot deliver verified model bytes to the engine: ' +
-          'worker-readable cache read-back failed: ' +
-          `${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-    requireOcr(
-      check instanceof Uint8Array && this.verify(check),
-      OCR_REASON.MODEL_INTEGRITY,
-      'worker-readable model cache slot failed verification after ' +
-        'commit — refusing to let the engine consume unverified bytes',
-    );
-    return prepared;
-  }
-
-  /**
    * The "Remove downloaded OCR data" action: drops the persisted
    * cache entry and in-memory copy. Static model caching may survive
-   * Clear — deletion is explicit only.
+   * Clear — deletion is explicit only. Invalidates any in-flight
+   * preparation FIRST so a stale fetch cannot recreate the slot or
+   * republish states afterwards.
    */
   async remove(): Promise<void> {
+    this.epoch++;
     this.verifiedBytes = null;
     if (this.store !== null) {
       try {

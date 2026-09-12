@@ -288,16 +288,50 @@ const VALID_RENDER_READER_ID = /^[a-z0-9_-]{1,60}$/;
 const utf8 = new TextEncoder();
 
 /**
- * One operation's absolute deadline + cancellation scope. `handle` is
- * set once the handle being opened exists (open()); every guarded
- * await checks cancellation, the absolute deadline, reader closure,
- * operation supersession and handle validity.
+ * One operation's admission state and owned lifetime:
+ *
+ * - `op` — the reader's monotonic operation id; a newer operation
+ *   supersedes older live scopes.
+ * - `deadlineAt` — ONE absolute wall deadline covering the whole
+ *   operation including retries.
+ * - `cancel` — the caller's cancellation surface.
+ * - `ctl` — the scope's OWNED terminal signal: close, supersession
+ *   and caller-cancel fire it so pending awaits reject immediately
+ *   with the typed reason (deadline expiry stays `timeout`). Engine
+ *   callbacks check it for admission — nothing publishes from a dead
+ *   scope.
+ * - `handle` — for open(), the handle THIS operation installed; for
+ *   extract(), the handle it serves.
+ * - `lease` — the worker lease THIS operation created (joined leases
+ *   are owned by their creator); cleanup only ever retires it.
  */
 interface OpScope {
   readonly op: number;
   readonly deadlineAt: number;
   readonly cancel: OcrCancellation;
+  readonly ctl: AbortController;
   handle: OcrHandle | null;
+  lease: WorkerLease | null;
+}
+
+/**
+ * One worker lifetime: the in-flight `createWorker` init and/or the
+ * installed worker. The creating operation owns teardown while it is
+ * pending; once `worker` is installed the lease is the reader's
+ * reusable worker slot. `init` settling with no installer means the
+ * produced worker is unowned and terminates itself.
+ */
+interface WorkerLease {
+  /** The scope whose op created this init — owns init-stage callback admission. */
+  readonly owner: OpScope;
+  /** Concrete worker lifetime — the patched engine WorkerOptions.signal. */
+  readonly ctl: AbortController;
+  init: Promise<TesseractEngineWorker>;
+  /** Live scopes currently awaiting this init (joiners). */
+  joiners: number;
+  /** Whether `init` has settled (resolved or rejected). */
+  settled: boolean;
+  worker: TesseractEngineWorker | null;
 }
 
 /** Draw the crop region of a produced raster into a PNG Blob. */
@@ -391,24 +425,19 @@ export class TesseractOcrReader {
   private readonly cfg: OcrReaderConfig;
   private readonly budget: OcrBudget;
   private readonly modelManager: ModelAssetManager;
-  private worker: TesseractEngineWorker | null = null;
-  /** Concrete-lifetime controller for `this.worker` (engine signal). */
-  private workerCtl: AbortController | null = null;
-  /** A worker init in flight — joined, never overlapped. */
-  private workerInit: Promise<TesseractEngineWorker> | null = null;
   /**
-   * Concrete-lifetime controller for the in-flight init. Reachable
-   * from destroyWorker() so close()/deadline aborts the real raw
-   * worker even before install — the signal covers the worker's
-   * entire life, including constructor readiness.
+   * The current worker slot: a pending init and/or the installed
+   * reusable worker. Owned by its creating operation until install.
    */
-  private workerInitCtl: AbortController | null = null;
+  private lease: WorkerLease | null = null;
   private handle: OcrHandle | null = null;
   private closed = false;
   /** Monotonic current-operation token; a newer op supersedes older. */
   private opSeq = 0;
-  /** Engine jobId -> owning op, for progress attribution. */
-  private readonly jobOps = new Map<string, number>();
+  /** Every live operation scope — close/supersession wakes them. */
+  private readonly liveScopes = new Set<OpScope>();
+  /** Engine jobId -> owning operation scope, for callback admission. */
+  private readonly jobScopes = new Map<string, OpScope>();
   private workerInitCount = 0;
   private runOcrPixels = 0;
   private runOccurrences = 0;
@@ -424,14 +453,6 @@ export class TesseractOcrReader {
       OCR_REASON.UNSUPPORTED,
       `renderReaderId must match ${VALID_RENDER_READER_ID} ` +
         `(got ${JSON.stringify(config.renderReaderId)})`,
-    );
-    requireOcr(
-      config.paths.cachePath === config.model.cachePath,
-      OCR_REASON.UNSUPPORTED,
-      'paths.cachePath and model.cachePath must agree: the engine ' +
-        'consumes the adapter-verified cache slot by construction ' +
-        `(${JSON.stringify(config.paths.cachePath)} != ` +
-        `${JSON.stringify(config.model.cachePath)})`,
     );
     this.modelManager = new ModelAssetManager(config.model, {
       onState: (s) => config.hooks?.onModelState?.(s),
@@ -479,15 +500,21 @@ export class TesseractOcrReader {
    */
   async prepareModel(): Promise<ModelPreparation> {
     requireOcr(!this.closed, OCR_REASON.UNSUPPORTED, 'reader is closed');
-    const scope: OpScope = {
-      op: this.opSeq,
-      deadlineAt: this.now() + this.budget.openTimeoutMs,
-      cancel: cancellationOf(undefined),
-      handle: null,
-    };
-    return (
-      await this.withDeadline(this.modelManager.prepare(), scope)
-    ).preparation;
+    const scope = this.beginScope(
+      this.budget.openTimeoutMs,
+      cancellationOf(undefined),
+      null,
+    );
+    try {
+      return (
+        await this.withDeadline(
+          this.modelManager.prepare(scope.ctl.signal),
+          scope,
+        )
+      ).preparation;
+    } finally {
+      this.endScope(scope);
+    }
   }
 
   /**
@@ -539,16 +566,14 @@ export class TesseractOcrReader {
     readonly cancellation?: AbortSignal | OcrCancellation | (() => boolean);
   }): Promise<OcrHandle> {
     requireOcr(!this.closed, OCR_REASON.UNSUPPORTED, 'reader is closed');
-    const op = ++this.opSeq;
-    const scope: OpScope = {
-      op,
-      deadlineAt: this.now() + this.budget.openTimeoutMs,
-      cancel: cancellationOf(input.cancellation),
-      handle: null,
-    };
+    const scope = this.beginScope(
+      this.budget.openTimeoutMs,
+      cancellationOf(input.cancellation),
+      null,
+    );
     try {
       const prepared = await this.withDeadline(
-        this.modelManager.prepare(),
+        this.modelManager.prepare(scope.ctl.signal),
         scope,
       );
       this.guard(scope);
@@ -562,34 +587,100 @@ export class TesseractOcrReader {
       // Install before worker init so staleness guards can see it.
       this.handle = handle;
       scope.handle = handle;
+      await this.ensureWorker(scope);
+      this.guard(scope);
       // A new run gets a fresh budget and plan set; a healthy worker
       // from the previous run may be reused (same-generation reuse is
-      // allowed; file replacement terminates it via close()).
+      // allowed; file replacement terminates it via close()). Reset
+      // only after the final admission guard — a superseded open must
+      // never zero a live operation's accumulated accounting.
       this.runOcrPixels = 0;
       this.runOccurrences = 0;
       this.runRawTextBytes = 0;
       this.selections.clear();
       this.regionById.clear();
-      await this.ensureWorker(scope);
-      this.guard(scope);
       return handle;
     } catch (error) {
       const { reason, detail } = classifyError(error, OCR_REASON.INIT_CRASH);
-      // The failed open must not leave a half-usable handle or worker.
-      this.handle = null;
-      await this.destroyWorker();
+      // Retire ONLY what this operation installed: a stale or failed
+      // open must never clear a newer operation's handle or destroy a
+      // worker another live operation owns or has joined.
+      if (scope.handle !== null && this.handle === scope.handle) {
+        this.handle = null;
+      }
+      if (
+        scope.lease !== null &&
+        scope.lease.joiners === 0 &&
+        scope.lease.worker === null
+      ) {
+        await this.destroyLease(scope.lease);
+      }
       throw new OcrError(reason, `OCR open: ${detail}`);
+    } finally {
+      this.endScope(scope);
     }
   }
 
   /**
-   * Terminal-status guard: throws a typed reason once the operation
-   * is cancelled, past its absolute deadline, superseded by a newer
+   * Begin a new operation scope: it supersedes every older live scope
+   * (they are terminated so their pending awaits reject immediately),
+   * then joins the live set. `handle` is the handle this op serves
+   * (extract) — open() passes null and installs its own.
+   */
+  private beginScope(
+    timeoutMs: number,
+    cancel: OcrCancellation,
+    handle: OcrHandle | null,
+  ): OpScope {
+    const scope: OpScope = {
+      op: ++this.opSeq,
+      deadlineAt: this.now() + timeoutMs,
+      cancel,
+      ctl: new AbortController(),
+      handle,
+      lease: null,
+    };
+    for (const s of this.liveScopes) {
+      this.terminateScope(s, 'operation superseded');
+    }
+    this.liveScopes.add(scope);
+    return scope;
+  }
+
+  /**
+   * Mark a scope terminal and drop it from admission: late engine
+   * callbacks and post-return emissions can never publish under it.
+   */
+  private endScope(scope: OpScope): void {
+    this.liveScopes.delete(scope);
+    this.terminateScope(scope, 'operation complete');
+  }
+
+  /**
+   * Fire a scope's owned terminal signal — pending withDeadline awaits
+   * reject at once with the typed reason.
+   */
+  private terminateScope(scope: OpScope, message: string): void {
+    if (!scope.ctl.signal.aborted) {
+      scope.ctl.abort(new OcrError(OCR_REASON.USER_CANCEL, message));
+    }
+  }
+
+  /**
+   * Terminal-status guard: throws a typed reason once the operation's
+   * terminal signal fired (close/supersession/caller-cancel), it is
+   * cancelled, past its absolute deadline, superseded by a newer
    * operation, or detached from the live handle. Called after every
    * awaited step and before installing workers, starting recognition,
    * publishing progress, changing accounting, or emitting.
    */
   private guard(scope: OpScope): void {
+    if (scope.ctl.signal.aborted) {
+      const reason = scope.ctl.signal.reason;
+      throw reason instanceof OcrError
+        ? reason
+        : new OcrError(OCR_REASON.USER_CANCEL, 'operation terminated');
+    }
     if (scope.cancel.isCancelled()) {
       throw new OcrError(OCR_REASON.USER_CANCEL, 'cancelled');
     }
@@ -613,8 +704,10 @@ export class TesseractOcrReader {
   }
 
   /**
-   * Race one external await against the operation's absolute deadline
-   * and cancellation poll. The work promise keeps its handlers
+   * Race one external await against the operation's absolute deadline,
+   * caller-cancellation poll and OWNED terminal signal — close and
+   * supersession wake the pending await immediately instead of being
+   * discovered at the next poll. The work promise keeps its handlers
    * registered after losing, so a late settlement is consumed — never
    * an unhandled rejection — while its result is dropped by the
    * caller's next guard.
@@ -627,8 +720,22 @@ export class TesseractOcrReader {
     const ms = this.remaining(scope);
     let timer: ReturnType<typeof setTimeout> | undefined;
     let poll: ReturnType<typeof setInterval> | undefined;
+    let onTerm: (() => void) | undefined;
     try {
       return await new Promise<T>((resolve, reject) => {
+        onTerm = () => {
+          const reason = scope.ctl.signal.reason;
+          reject(
+            reason instanceof OcrError
+              ? reason
+              : new OcrError(OCR_REASON.USER_CANCEL, 'operation terminated'),
+          );
+        };
+        if (scope.ctl.signal.aborted) {
+          onTerm();
+          return;
+        }
+        scope.ctl.signal.addEventListener('abort', onTerm, { once: true });
         timer = setTimeout(
           () =>
             reject(
@@ -641,7 +748,7 @@ export class TesseractOcrReader {
         );
         poll = setInterval(() => {
           if (scope.cancel.isCancelled()) {
-            reject(new OcrError(OCR_REASON.USER_CANCEL, 'cancelled'));
+            this.terminateScope(scope, 'cancelled');
           }
         }, 25);
         work.then(resolve, reject);
@@ -649,23 +756,39 @@ export class TesseractOcrReader {
     } finally {
       if (timer !== undefined) clearTimeout(timer);
       if (poll !== undefined) clearInterval(poll);
+      if (onTerm !== undefined) {
+        scope.ctl.signal.removeEventListener('abort', onTerm);
+      }
     }
   }
 
   /**
-   * Worker-level progress is published only while its owning
-   * operation is still current: recognize progress carries our jobId
-   * (jobOps), init progress belongs to the op that created the
-   * worker; events from superseded ops or a closed reader are
-   * dropped.
+   * Callback admission: an engine progress/error event may publish
+   * only while its owning scope is the current, nonterminal operation
+   * of an open reader — timeout/close/supersession/completion all
+   * revoke admission, at OUR boundary (the patched worker's own
+   * post-stop drop is upstream's guard, not ours).
    */
-  private forwardProgress(e: EngineProgress, creatingOp: number): void {
-    if (this.closed) return;
-    const jobOp = typeof e.userJobId === 'string'
-      ? this.jobOps.get(e.userJobId)
-      : undefined;
-    const owner = jobOp ?? creatingOp;
-    if (owner !== this.opSeq) return;
+  private scopeAdmits(scope: OpScope | undefined): boolean {
+    return (
+      scope !== undefined &&
+      !this.closed &&
+      !scope.ctl.signal.aborted &&
+      this.liveScopes.has(scope) &&
+      scope.op === this.opSeq
+    );
+  }
+
+  /**
+   * Worker-level progress is published only while its owning
+   * operation admits callbacks: recognize progress carries our jobId
+   * (jobScopes), init progress belongs to the lease-owning scope.
+   */
+  private forwardProgress(e: EngineProgress, initOwner: OpScope): void {
+    const owner = typeof e.userJobId === 'string'
+      ? (this.jobScopes.get(e.userJobId) ?? initOwner)
+      : initOwner;
+    if (!this.scopeAdmits(owner)) return;
     this.cfg.hooks?.onProgress?.({
       checkId: null,
       status: e.status,
@@ -673,113 +796,151 @@ export class TesseractOcrReader {
     });
   }
 
+  /** Engine error reports — same scope admission as progress. */
+  private forwardError(detail: string, initOwner: OpScope): void {
+    if (!this.scopeAdmits(initOwner)) return;
+    this.cfg.hooks?.onError?.(detail);
+  }
+
   /** One reusable initialized model per active profile. */
   private async ensureWorker(scope: OpScope): Promise<TesseractEngineWorker> {
-    if (this.worker !== null) return this.worker;
+    const live = this.lease;
+    if (live !== null && live.worker !== null) return live.worker;
     this.guard(scope);
-    if (this.workerInit !== null) {
+    if (live !== null && !live.settled) {
       // An init already owns this slot — join it rather than start an
-      // overlapping initialization.
-      const joined = await this.withDeadline(this.workerInit, scope);
-      this.guard(scope);
-      return joined;
+      // overlapping initialization. Joiners do not own its teardown.
+      live.joiners++;
+      try {
+        const worker = await this.withDeadline(live.init, scope);
+        this.guard(scope);
+        // The settle hook installs or orphans the product; a joined
+        // awaiter only ever reads it — never installs.
+        requireOcr(
+          live.worker === worker,
+          OCR_REASON.WORKER_CRASH,
+          'worker init slot retired during join',
+        );
+        return worker;
+      } finally {
+        live.joiners--;
+      }
     }
-    const ctl = new AbortController();
-    const creatingOp = scope.op;
-    this.workerInitCtl = ctl;
-    const init = (async (): Promise<TesseractEngineWorker> => {
-      // Engine-boundary gate first: the worker-readable cache slot
-      // must already hold the verified payload — the engine's only
-      // model channel — before any worker exists.
-      await this.withDeadline(this.modelManager.prepareForEngine(), scope);
-      return createEngineWorker({
-        engine: this.cfg.engine,
-        lang: this.cfg.model.lang,
-        paths: this.cfg.paths,
-        signal: ctl.signal,
-        onProgress: (e) => this.forwardProgress(e, creatingOp),
-        onError: (d) => this.cfg.hooks?.onError?.(d),
-      });
+    // A settled slot with no worker (late-terminated or failed init)
+    // is retired before a fresh init is started.
+    if (live !== null) this.lease = null;
+
+    const lease: WorkerLease = {
+      owner: scope,
+      ctl: new AbortController(),
+      joiners: 0,
+      settled: false,
+      worker: null,
+      init: null as unknown as Promise<TesseractEngineWorker>,
+    };
+    lease.init = (async (): Promise<TesseractEngineWorker> => {
+      try {
+        // Verified model bytes are the engine's actual input: a
+        // snapshot of them rides inside the {code,data} payload with
+        // upstream cache access disabled — the shared idb-keyval slot
+        // cannot race or replace what the engine loads. The lease's
+        // own lifetime signal covers this internal preparation too.
+        const prepared = await this.modelManager.prepare(lease.ctl.signal);
+        return await createEngineWorker({
+          engine: this.cfg.engine,
+          lang: this.cfg.model.lang,
+          paths: this.cfg.paths,
+          modelBytes: prepared.bytes,
+          signal: lease.ctl.signal,
+          onProgress: (e) => this.forwardProgress(e, lease.owner),
+          onError: (d) => this.forwardError(d, lease.owner),
+        });
+      } finally {
+        lease.settled = true;
+      }
     })();
-    this.workerInit = init;
+    this.lease = lease;
+    // This operation owns the lease it created.
+    scope.lease = lease;
+    // The settle hook is the ONLY installer, and it runs before any
+    // awaiting continuation: a produced worker joins the live slot iff
+    // the lease is still current, unaborted and unfilled — otherwise it
+    // is unowned (a late init after teardown, a superseded slot) and
+    // terminates itself. This makes install/orphan atomic with the
+    // init settlement; awaiters only validate, never install.
+    lease.init.then(
+      (produced) => {
+        if (
+          !lease.ctl.signal.aborted &&
+          this.lease === lease &&
+          lease.worker === null
+        ) {
+          lease.worker = produced;
+          this.workerInitCount++;
+        } else {
+          void produced.terminate();
+        }
+      },
+      () => {},
+    );
     try {
-      const worker = await this.withDeadline(init, scope);
-      // Reject the stale install: if this op was superseded, closed or
-      // re-deadlined while the worker was initializing, the fresh
-      // worker is terminated by the catch below instead of installed.
+      const worker = await this.withDeadline(lease.init, scope);
+      // If this op was superseded, closed or re-deadlined while the
+      // worker initialized, the settle hook already decided the
+      // product's fate; only an installed worker is usable.
       this.guard(scope);
       requireOcr(
-        this.worker === null,
+        lease.worker === worker,
         OCR_REASON.WORKER_CRASH,
-        'worker slot occupied during init',
+        'worker init product was retired before install',
       );
-      this.worker = worker;
-      this.workerCtl = ctl;
-      this.workerInit = null;
-      this.workerInitCtl = null;
-      this.workerInitCount++;
       return worker;
     } catch (error) {
-      if (this.workerInit === init) this.workerInit = null;
-      if (this.workerInitCtl === ctl) this.workerInitCtl = null;
       const { reason, detail } = classifyError(error, OCR_REASON.INIT_CRASH);
-      if (!ctl.signal.aborted) {
-        ctl.abort(error instanceof OcrError ? error : new OcrError(reason, detail));
+      // The lease dies with its operation — unless a newer live scope
+      // joined the in-flight init or already installed its worker. An
+      // installed worker is the reader's shared slot, never ours to
+      // kill; a pending init with joiners belongs to them.
+      if (lease.joiners === 0 && lease.worker === null) {
+        if (this.lease === lease) this.lease = null;
+        if (!lease.ctl.signal.aborted) {
+          lease.ctl.abort(
+            error instanceof OcrError ? error : new OcrError(reason, detail),
+          );
+        }
       }
-      // Own the init promise to settlement: a late success terminates
-      // its own worker (never a newer one); a late rejection is
-      // consumed here.
-      init.then(
-        (late) => {
-          void late.terminate();
-        },
-        () => {},
-      );
       throw new OcrError(reason, `OCR worker init: ${detail}`);
     }
   }
 
-  private async destroyWorker(): Promise<void> {
-    const w = this.worker;
-    const ctl = this.workerCtl;
-    const init = this.workerInit;
-    const initCtl = this.workerInitCtl;
-    // Invalidate admission before cleanup settles.
-    this.worker = null;
-    this.workerCtl = null;
-    this.workerInit = null;
-    this.workerInitCtl = null;
-    // Abort the concrete lifetimes FIRST — an in-flight init's raw
-    // worker is hard-terminated by the patched engine even before the
-    // promise settles; an installed worker's signal does the same.
-    if (initCtl !== null && !initCtl.signal.aborted) {
-      initCtl.abort(
-        new OcrError(OCR_REASON.WORKER_CRASH, 'worker terminated'),
-      );
+  /**
+   * Tear down exactly one worker lifetime: abort its concrete signal
+   * (the patched engine hard-terminates the raw worker even
+   * mid-initialization), free the reader slot only if it still holds
+   * this lease, and terminate the installed worker. A pending init's
+   * late product self-terminates via the settle hook installed at
+   * creation.
+   */
+  private async destroyLease(lease: WorkerLease | null): Promise<void> {
+    if (lease === null) return;
+    if (this.lease === lease) this.lease = null;
+    if (!lease.ctl.signal.aborted) {
+      lease.ctl.abort(new OcrError(OCR_REASON.WORKER_CRASH, 'worker terminated'));
     }
-    if (ctl !== null && !ctl.signal.aborted) {
-      ctl.abort(
-        new OcrError(OCR_REASON.WORKER_CRASH, 'worker terminated'),
-      );
-    }
-    if (init !== null) {
-      // A still-pending init resolves late at best — its worker must
-      // terminate itself without touching a newer one; rejections are
-      // consumed so nothing escapes unhandled.
-      init.then(
-        (late) => {
-          void late.terminate();
-        },
-        () => {},
-      );
-    }
+    const w = lease.worker;
     if (w !== null) {
+      lease.worker = null;
       try {
         await w.terminate();
       } catch {
         // Termination is best-effort; the worker is gone either way.
       }
     }
+  }
+
+  /** Reader-global worker teardown — used by close() and tests. */
+  private async destroyWorker(): Promise<void> {
+    await this.destroyLease(this.lease);
   }
 
   /** `pages()` — supported geometry metadata comes from the renderer. */
@@ -866,18 +1027,19 @@ export class TesseractOcrReader {
     cancellation?: AbortSignal | OcrCancellation | (() => boolean),
   ): Promise<OcrCheckOutput> {
     const cancel = cancellationOf(cancellation);
-    const op = ++this.opSeq;
-    const started = this.now();
+    // Admission before scoping: a closed reader or a foreign handle
+    // fails fast — it must not supersede a live operation's scope.
+    requireOcr(
+      !this.closed && this.handle?.id === handle.id,
+      OCR_REASON.UNSUPPORTED,
+      'extract() requires this reader’s open handle',
+    );
     // ONE absolute deadline scopes the whole operation: raster
     // acquisition, crop encode, engine init, recognize, and the single
     // transient retry all draw from it — a retry receives only the
     // remaining budget, never a fresh full timeout.
-    const scope: OpScope = {
-      op,
-      deadlineAt: started + this.budget.checkTimeoutMs,
-      cancel,
-      handle,
-    };
+    const scope = this.beginScope(this.budget.checkTimeoutMs, cancel, handle);
+    const started = this.now();
     const emptyShell = (psmForRecord: OcrPsm): Omit<OcrCheckOutput, 'check'> => ({
       reader: this.readerFor(psmForRecord),
       engine: {
@@ -893,7 +1055,7 @@ export class TesseractOcrReader {
         version: this.cfg.model.version,
         sha256: this.cfg.model.sha256,
         state: this.modelState,
-        provenance: this.handle?.model.provenance ?? null,
+        provenance: scope.handle?.model.provenance ?? null,
       },
       raster: {
         rasterId: 'unproduced',
@@ -932,71 +1094,79 @@ export class TesseractOcrReader {
       },
       limitations: [],
     });
-    let resolved: { psm: OcrPsm; region: OcrRegionInput | null };
     try {
-      resolved = this.selectionFor(check);
-    } catch (error) {
-      const { reason } = classifyError(error, OCR_REASON.GEOMETRY_UNAVAILABLE);
-      return {
-        ...emptyShell(OCR_PSM.PAGE),
+      let resolved: { psm: OcrPsm; region: OcrRegionInput | null };
+      try {
+        resolved = this.selectionFor(check);
+      } catch (error) {
+        const { reason } = classifyError(error, OCR_REASON.GEOMETRY_UNAVAILABLE);
+        return {
+          ...emptyShell(OCR_PSM.PAGE),
+          check: {
+            id: check.id,
+            status: 'failed',
+            reason,
+            produced_occurrence_count: 0,
+            retained_occurrence_ids: [],
+          },
+        };
+      }
+      const { psm, region } = resolved;
+      const fail = (
+        reason: OcrReason,
+        extra?: Partial<OcrCheckOutput>,
+      ): OcrCheckOutput => ({
+        ...emptyShell(psm),
+        ...extra,
         check: {
           id: check.id,
-          status: 'failed',
+          status: reason === OCR_REASON.UNSUPPORTED ? 'unsupported'
+          : reason === OCR_REASON.USER_CANCEL ? 'cancelled'
+          : reason === OCR_REASON.TIMEOUT ? 'timeout'
+          : 'failed',
           reason,
           produced_occurrence_count: 0,
           retained_occurrence_ids: [],
         },
-      };
-    }
-    const { psm, region } = resolved;
-    const fail = (
-      reason: OcrReason,
-      extra?: Partial<OcrCheckOutput>,
-    ): OcrCheckOutput => ({
-      ...emptyShell(psm),
-      ...extra,
-      check: {
-        id: check.id,
-        status: reason === OCR_REASON.UNSUPPORTED ? 'unsupported'
-        : reason === OCR_REASON.USER_CANCEL ? 'cancelled'
-        : reason === OCR_REASON.TIMEOUT ? 'timeout'
-        : 'failed',
-        reason,
-        produced_occurrence_count: 0,
-        retained_occurrence_ids: [],
-      },
-    });
+      });
 
-    if (cancel.isCancelled()) {
-      return fail(OCR_REASON.USER_CANCEL);
-    }
-
-    let attempt = 0;
-    for (;;) {
-      try {
-        return await this.extractOnce(handle, check, psm, region,
-          emitChunk, scope, started, attempt);
-      } catch (error) {
-        const { reason, detail } = classifyError(error, OCR_REASON.WORKER_CRASH);
-        if (reason === OCR_REASON.TIMEOUT || reason === OCR_REASON.USER_CANCEL) {
-          await this.destroyWorker();
-          return fail(reason);
-        }
-        const transient = reason === OCR_REASON.INIT_CRASH ||
-          reason === OCR_REASON.WORKER_CRASH;
-        // A retry runs only inside the operation's remaining time.
-        if (
-          transient && attempt < this.budget.maxRetries &&
-          this.remaining(scope) > 0
-        ) {
-          // One transient retry, fresh worker only (RUNTIME_LIFECYCLE).
-          attempt++;
-          await this.destroyWorker();
-          continue;
-        }
-        if (transient) await this.destroyWorker();
-        return fail(reason, { limitations: [`engine: ${detail.slice(0, 200)}`] });
+      if (cancel.isCancelled()) {
+        return fail(OCR_REASON.USER_CANCEL);
       }
+
+      let attempt = 0;
+      for (;;) {
+        try {
+          return await this.extractOnce(handle, check, psm, region,
+            emitChunk, scope, started, attempt);
+        } catch (error) {
+          const { reason, detail } = classifyError(error, OCR_REASON.WORKER_CRASH);
+          // Cleanup ownership: only a still-current operation retires
+          // the reader's worker slot — a superseded/closed op leaves
+          // the newer operation's worker alone.
+          const ownsResources = !this.closed && this.opSeq === scope.op;
+          if (reason === OCR_REASON.TIMEOUT || reason === OCR_REASON.USER_CANCEL) {
+            if (ownsResources) await this.destroyWorker();
+            return fail(reason);
+          }
+          const transient = reason === OCR_REASON.INIT_CRASH ||
+            reason === OCR_REASON.WORKER_CRASH;
+          // A retry runs only inside the operation's remaining time.
+          if (
+            transient && ownsResources && attempt < this.budget.maxRetries &&
+            this.remaining(scope) > 0
+          ) {
+            // One transient retry, fresh worker only (RUNTIME_LIFECYCLE).
+            attempt++;
+            await this.destroyWorker();
+            continue;
+          }
+          if (transient && ownsResources) await this.destroyWorker();
+          return fail(reason, { limitations: [`engine: ${detail.slice(0, 200)}`] });
+        }
+      }
+    } finally {
+      this.endScope(scope);
     }
   }
 
@@ -1099,7 +1269,7 @@ export class TesseractOcrReader {
     const worker = await this.ensureWorker(scope);
     this.guard(scope);
     const jobId = `j_${check.id}_${attempt}`;
-    this.jobOps.set(jobId, scope.op);
+    this.jobScopes.set(jobId, scope);
     let result: { jobId: string; data: EngineRecognizePage };
     try {
       result = await this.withDeadline(
@@ -1112,7 +1282,7 @@ export class TesseractOcrReader {
         scope,
       );
     } finally {
-      this.jobOps.delete(jobId);
+      this.jobScopes.delete(jobId);
     }
     this.guard(scope);
     const data = result.data;
@@ -1197,7 +1367,7 @@ export class TesseractOcrReader {
         version: this.cfg.model.version,
         sha256: this.cfg.model.sha256,
         state: this.modelState,
-        provenance: this.handle?.model.provenance ?? null,
+        provenance: scope.handle?.model.provenance ?? null,
       },
       raster: {
         rasterId: raster.rasterId,
@@ -1243,12 +1413,17 @@ export class TesseractOcrReader {
     if (handle !== undefined && this.handle?.id !== handle.id) {
       return; // a stale handle cannot close a newer generation's worker
     }
-    // Invalidate admission before cleanup: any in-flight open/extract
-    // continuation observes terminal status (closed + superseded op +
-    // detached handle) before worker teardown settles.
+    // Invalidate admission before cleanup, then WAKE every pending
+    // operation: close fires each live scope's terminal signal so
+    // stalled awaits reject immediately with user_cancel — never a
+    // parked operation waiting out its deadline.
     this.closed = true;
     this.opSeq++;
     this.handle = null;
+    // terminateScope does not mutate liveScopes — iterate directly.
+    for (const s of this.liveScopes) {
+      this.terminateScope(s, 'reader closed');
+    }
     await this.destroyWorker();
   }
 }
