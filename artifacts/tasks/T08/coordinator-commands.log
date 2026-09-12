@@ -16,11 +16,11 @@ Running 13 tests using 1 worker
 [1A[2K[11/13] tests/browser/open.spec.ts:809:1 › huge page opens; region validation quotes its real bounds
 [1A[2K[12/13] tests/browser/open.spec.ts:833:1 › no document data reaches the URL, storage or any network request
 [1A[2K[13/13] tests/browser/open.spec.ts:929:1 › clear releases the document and returns the drop zone to idle
-[1A[2K  13 passed (10.5s)
+[1A[2K  13 passed (12.1s)
 $ python3 scripts/task_acceptance.py run test:browser tests/browser/open.spec.ts
-(node:55968) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:99726) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:55969) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:99734) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0
