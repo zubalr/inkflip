@@ -1,0 +1,71 @@
+{
+  "task": "T17",
+  "beads_id": "pdf-t17",
+  "evaluated_commit": "d39e607feda6f8d6c3443c678ac013435c5533b1",
+  "evaluated_at": "2026-09-12T17:43:18.476240+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 57,
+    "passed": 57,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/browser/amount.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/amount.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/amount.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 7 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/7] tests/browser/amount.spec.ts:61:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 1: renamed identical bytes produce same reading\n\u001b[1A\u001b[2K[2/7] tests/browser/amount.spec.ts:107:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 2: modified bytes cannot replay old prepared result\n\u001b[1A\u001b[2K[3/7] tests/browser/amount.spec.ts:148:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 3: live and prepared paths label provenance correctly\n\u001b[1A\u001b[2K[4/7] tests/browser/amount.spec.ts:181:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 4: real source downloadable and verifiable\n\u001b[1A\u001b[2K[5/7] tests/browser/amount.spec.ts:233:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 5: actual timing visible, not decorative scan animation\n\u001b[1A\u001b[2K[6/7] tests/browser/amount.spec.ts:271:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 6: clean counterpart renders equal under same renderer\n\u001b[1A\u001b[2K[7/7] tests/browser/amount.spec.ts:308:3 \u203a T17: Browser Amount Demo and Prepared Manifest \u203a criterion 7: accessibility check (WCAG AA)\n\u001b[1A\u001b[2K  7 passed (3.9s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/browser/amount.spec.ts\n(node:2871) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:2874) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t17",
+      "environment": {}
+    },
+    {
+      "segment": "bun run test:fixtures",
+      "argv": [
+        "bun",
+        "run",
+        "test:fixtures"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:fixtures"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:fixtures\ntest_completed_failure_crash_stale_preserve_first_result (test_catalog_followup.TestFaultDoubles.test_completed_failure_crash_stale_preserve_first_result) ... ok\ntest_hang_and_cancel_are_reaped_with_prior_result (test_catalog_followup.TestFaultDoubles.test_hang_and_cancel_are_reaped_with_prior_result) ... ok\ntest_canary_channels_bind_actual_source (test_catalog_followup.TestPriorityCatalog.test_canary_channels_bind_actual_source) ... ok\ntest_contrast_control_has_white_text_and_dark_background (test_catalog_followup.TestPriorityCatalog.test_contrast_control_has_white_text_and_dark_background) ... ok\ntest_duplicates_keep_four_positions (test_catalog_followup.TestPriorityCatalog.test_duplicates_keep_four_positions) ... ok\ntest_extreme_geometry_has_tiny_bytes_and_explicit_render_limit (test_catalog_followup.TestPriorityCatalog.test_extreme_geometry_has_tiny_bytes_and_explicit_render_limit) ... ok\ntest_invalid_and_encrypted_are_bounded_distinct_cases (test_catalog_followup.TestPriorityCatalog.test_invalid_and_encrypted_are_bounded_distinct_cases) ... ok\ntest_mapping_absence_and_malformed_are_not_missing_ink (test_catalog_followup.TestPriorityCatalog.test_mapping_absence_and_malformed_are_not_missing_ink) ... ok\ntest_original_pdfs_and_expectations_are_unchanged (test_catalog_followup.TestPriorityCatalog.test_original_pdfs_and_expectations_are_unchanged) ... ok\ntest_paint_order_changes_only_sequence (test_catalog_followup.TestPriorityCatalog.test_paint_order_changes_only_sequence) ... ok\ntest_partial_and_nonrectangular_clip_are_distinct (test_catalog_followup.TestPriorityCatalog.test_partial_and_nonrectangular_clip_are_distinct) ... ok\ntest_unreadable_has_no_native_text_or_plausible_default (test_catalog_followup.TestPriorityCatalog.test_unreadable_has_no_native_text_or_plausible_default) ... ok\ntest_control_paints_final_amount_once (test_fixtures.TestCoveredText.test_control_paints_final_amount_once) ... ok\ntest_cover_is_opaque_white_fill (test_fixtures.TestCoveredText.test_cover_is_opaque_white_fill) ... ok\ntest_cover_paint_order_is_text_cover_replacement (test_fixtures.TestCoveredText.test_cover_paint_order_is_text_cover_replacement) ... ok\ntest_known_reader_observations_are_labeled_not_invented (test_fixtures.TestCoveredText.test_known_reader_observations_are_labeled_not_invented) ... ok\ntest_check_mode_detects_tampering (test_fixtures.TestDeterminism.test_check_mode_detects_tampering) ... ok\ntest_check_mode_passes_on_committed_tree (test_fixtures.TestDeterminism.test_check_mode_passes_on_committed_tree) ... ok\ntest_manifest_declares_determinism_without_seed_or_timestamp (test_fixtures.TestDeterminism.test_manifest_declares_determinism_without_seed_or_timestamp) ... ok\ntest_two_regenerations_are_byte_identical (test_fixtures.TestDeterminism.test_two_regenerations_are_byte_identical) ... ok\ntest_all_rotations_present_with_negative_origin_and_userunit_two (test_fixtures.TestGeometryFamily.test_all_rotations_present_with_negative_origin_and_userunit_two) ... ok\ntest_control_is_zero_origin_rotation_zero_userunit_one (test_fixtures.TestGeometryFamily.test_control_is_zero_origin_rotation_zero_userunit_one) ... ok\ntest_rotation_family_shares_identical_content (test_fixtures.TestGeometryFamily.test_rotation_family_shares_identical_content) ... ok\ntest_every_mechanism_has_an_existing_control (test_fixtures.TestManifestIntegrity.test_every_mechanism_has_an_existing_control) ... ok\ntest_expectation_files_bind_to_their_fixture (test_fixtures.TestManifestIntegrity.test_expectation_files_bind_to_their_fixture) ... ok\ntest_generator_hash_matches_source_file (test_fixtures.TestManifestIntegrity.test_generator_hash_matches_source_file) ... ok\ntest_manifest_hashes_and_lengths_match_disk (test_fixtures.TestManifestIntegrity.test_manifest_hashes_and_lengths_match_disk) ... ok\ntest_required_fixture_ids_and_families_are_covered (test_fixtures.TestManifestIntegrity.test_required_fixture_ids_and_families_are_covered) ... ok\ntest_splits_match_catalog (test_fixtures.TestManifestIntegrity.test_splits_match_catalog) ... ok\ntest_extraction_intent_differs_while_painting_matches (test_fixtures.TestMappingControl.test_extraction_intent_differs_while_painting_matches) ... ok\ntest_observation_declares_text_raster_divergence (test_fixtures.TestMappingControl.test_observation_declares_text_raster_divergence) ... ok\ntest_paint_operators_are_identical (test_fixtures.TestMappingControl.test_paint_operators_are_identical) ... ok\ntest_tounicode_differs_exactly_at_amount_glyph (test_fixtures.TestMappingControl.test_tounicode_differs_exactly_at_amount_glyph) ... ok\ntest_filename_appears_nowhere_in_fixture_bytes (test_fixtures.TestNoFilenameConditioning.test_filename_appears_nowhere_in_fixture_bytes) ... ok\ntest_renamed_copy_is_byte_identical_and_content_addressed (test_fixtures.TestNoFilenameConditioning.test_renamed_copy_is_byte_identical_and_content_addressed) ... ok\ntest_test_fixtures_command_is_registered_and_active (test_fixtures.TestRegistryRegistration.test_test_fixtures_command_is_registered_and_active) ... ok\ntest_manifest_rights_cover_every_entry (test_fixtures.TestRightsAndPrivacy.test_manifest_rights_cover_every_entry) ... ok\ntest_no_embedded_font_programs_anywhere (test_fixtures.TestRightsAndPrivacy.test_no_embedded_font_programs_anywhere) ... ok\ntest_no_private_or_challenge_answer_data (test_fixtures.TestRightsAndPrivacy.test_no_private_or_challenge_answer_data) ... ok\ntest_correct_layer_is_invisible_and_matches_expectation (test_fixtures.TestSearchableScan.test_correct_layer_is_invisible_and_matches_expectation) ... ok\ntest_correct_scan_records_no_alarm_intent (test_fixtures.TestSearchableScan.test_correct_scan_records_no_alarm_intent) ... ok\ntest_decoded_raster_equals_generator_drawing (test_fixtures.TestSearchableScan.test_decoded_raster_equals_generator_drawing) ... ok\ntest_layer_words_are_exactly_the_raster_words_in_order (test_fixtures.TestSearchableScan.test_layer_words_are_exactly_the_raster_words_in_order) ... ok\ntest_raster_only_sibling_has_no_text_operators (test_fixtures.TestSearchableScan.test_raster_only_sibling_has_no_text_operators) ... ok\ntest_scan_siblings_share_one_split (test_fixtures.TestSearchableScan.test_scan_siblings_share_one_split) ... ok\ntest_shifted_layer_is_displaced_by_declared_offset (test_fixtures.TestSearchableScan.test_shifted_layer_is_displaced_by_declared_offset) ... ok\ntest_word_anchor_boxes_contain_matching_raster_ink (test_fixtures.TestSearchableScan.test_word_anchor_boxes_contain_matching_raster_ink) ... ok\ntest_all_units_declared_with_fiducial_square (test_fixtures.TestUserUnitFamily.test_all_units_declared_with_fiducial_square) ... ok\ntest_family_shares_identical_fiducial_content (test_fixtures.TestUserUnitFamily.test_family_shares_identical_fiducial_content) ... ok\ntest_unit_one_is_the_manifest_control (test_fixtures.TestUserUnitFamily.test_unit_one_is_the_manifest_control) ... ok\n\n----------------------------------------------------------------------\nRan 50 tests in 0.760s\n\nOK\n",
+      "tests": {
+        "collected": 50,
+        "passed": 50,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/pdf-t17",
+      "environment": {}
+    }
+  ]
+}

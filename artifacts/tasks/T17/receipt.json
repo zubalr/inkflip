@@ -1,0 +1,112 @@
+{
+  "task_id": "T17",
+  "beads_id": "pdf-t17",
+  "disposition": "implemented_pending_review",
+  "branch": "work/antigravity/t17",
+  "base_commit": "b2b5db3ad497c27ca7988dffcfdec618e697b89a",
+  "source_commit": "d39e607feda6f8d6c3443c678ac013435c5533b1",
+  "implementation_commit": "d39e607feda6f8d6c3443c678ac013435c5533b1",
+  "actor": "antigravity-t17",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-12",
+  "acceptance_criteria_evidence": {
+    "Renamed identical bytes produce same reading": {
+      "status": "executed",
+      "detail": "Uploading mapping-amount.pdf (F01) under an arbitrary name (renamed-accounting-invoice-2026.pdf) computes hash 04898afc... from byte contents, executing live reader extraction to produce $1,000. Renaming mapping-control.pdf to completely-different-name-control.pdf similarly produces $100 matching control bytes.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    },
+    "modified bytes cannot replay old prepared result": {
+      "status": "executed",
+      "detail": "Tampered bytes (appended comment bytes changing SHA-256) cause the client to detect hash mismatch against prepared manifest. Replaying canned output is refused; client presents #replay-notice with class tamper-warning and runs live reader extraction with replayedPrepared === false.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    },
+    "live and prepared paths label provenance correctly": {
+      "status": "executed",
+      "detail": "On initial page load, provenance badge displays 'prepared' with data-provenance='prepared' and class badge-prepared, with timing '142 ms'. Upon user file upload, provenance badge updates to 'live' with data-provenance='live' and class badge-live, reflecting actual measured execution time.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    },
+    "real source downloadable": {
+      "status": "executed",
+      "detail": "GET requests to /examples/amount/mapping-amount.pdf and mapping-control.pdf return HTTP 200 with application/pdf Content-Type and byte-for-byte matching SHA-256 digests. Manifest JSON and report JSON validate cleanly; report passes strict @inkflip/contracts checkSchema and validateReport checks.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    },
+    "actual timing visible, not decorative scan animation": {
+      "status": "executed",
+      "detail": "Timing display renders actual numeric milliseconds ('142 ms' prepared; live measured ms on upload). No decorative spinners, scan lines, or fake progress animations exist on the page.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    },
+    "clean counterpart renders equal under same renderer.": {
+      "status": "executed",
+      "detail": "Rendering mapping-amount.pdf and mapping-control.pdf to canvas at scale 2.0 via PDF.js results in exactly 0 differing pixels (100% pixel match). Extracted text under the same reader diverges ($1,000 for amount vs $100 for control), proving visual parity with extraction divergence.",
+      "evidence": [
+        "artifacts/tasks/T17/commands.log",
+        "artifacts/tasks/T17/run.json",
+        "artifacts/tasks/T17/criteria-evidence.md"
+      ]
+    }
+  },
+  "test_summary": {
+    "bun run test:browser -- tests/browser/amount.spec.ts && bun run test:fixtures": {
+      "exit": 0,
+      "collected": 57,
+      "passed": 57,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python3 scripts/task_acceptance.py task T17 --report artifacts/tasks/T17/run.json": {
+      "exit": 0,
+      "evaluated_commit": "d39e607feda6f8d6c3443c678ac013435c5533b1",
+      "commands_run": 2,
+      "failures": [],
+      "evidence_errors": []
+    },
+    "python3 scripts/prepare_examples.py --check": {
+      "exit": 0,
+      "detail": "OK: apps/web/public/examples/amount/ matches generation"
+    },
+    "bun run build:web": {
+      "exit": 0,
+      "detail": "Static web artifact built in 560ms, dist/examples/amount/ verified"
+    },
+    "bun run oxlint": {
+      "exit": 0,
+      "warnings": 3133,
+      "errors": 0
+    },
+    "bun run oxfmt --check tests/browser/amount.spec.ts": {
+      "exit": 0,
+      "detail": "All matched files use the correct format"
+    },
+    "bun run verify": {
+      "exit": 0,
+      "detail": "49 bootstrap/harness + 2 native-boundary + 65 coordination/homebase/native-pass + self-check (16 commands), all OK"
+    }
+  },
+  "limitations": [
+    "Prepared demo covers F01 (mapping-amount) and F02 (covered-amount) amount divergence families; other catalog families (e.g. geometry rotations, searchable scan shifts) belong to subsequent gallery cards.",
+    "Browser PDF.js canvas rendering at 2.0 scale confirms 0 pixel diff between mapping-amount.pdf and mapping-control.pdf. OCR crop verification on the card uses canned crop coordinate basis matching report.json."
+  ],
+  "dependency_requests": [],
+  "attribution": "Synthetic samples generated from Inkflip project fixtures; PDF.js 6.3.289 pinned browser reader. Docs/ATTRIBUTION.md needs no update.",
+  "review_status": "pending independent review — reviewer writes review.md per coordinator process"
+}
