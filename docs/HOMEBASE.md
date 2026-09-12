@@ -96,6 +96,14 @@ these guards to branch refs, so they permit native snapshot rollover.
    `python3 scripts/homebase_relay.py publish`. Do this after dispatch, a handoff
    note, acceptance, or any change Homebase must see. Failed publication blocks
    dependent execution; retain the existing claim and retry safely.
+   A handoff note also needs `bd dolt commit -m "Publish native app handoff"`
+   and `bd dolt push` before the relay command. The relay does not publish
+   local database edits for you. Its read-only `bd diff origin/main HEAD`
+   guard rejects locally committed issue changes missing from Beads' origin
+   tracking state, including changed grant notes. An unavailable comparison
+   is an error. An unchanged Git transport ref proves neither fresh grant
+   publication nor worker pickup: verify the expected issue update on the
+   Homebase replica after its pull, then require a worker acknowledgment.
 3. Homebase: fetch `origin`, fast-forward canonical main when clean, pull the
    native state replica, then read the ZCode grant and task contract. Create or
    resume its isolated task checkout at the exact saved branch/base. Install its

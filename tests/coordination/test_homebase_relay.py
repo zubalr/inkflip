@@ -45,6 +45,9 @@ class RelayTests(unittest.TestCase):
             "origin": str(self.origin), "homebase": str(self.homebase)}}
         self.issues = {"pdf-t27": {"status": "in_progress", "metadata": {"execution": {
             "app": "zcode", "branch": "work/zcode/t27", "base": self.base}}}}
+        beads_patch = patch.object(relay.c, "bd", return_value=[])
+        self.beads = beads_patch.start()
+        self.addCleanup(beads_patch.stop)
         for replacement in (patch.object(relay.c, "ROOT", self.mac),
                             patch.object(relay, "config", return_value=self.settings),
                             patch.object(relay.c, "issues_by_id", return_value=self.issues)):
@@ -266,6 +269,40 @@ class RelayTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "bd dolt push"):
             relay.publish()
         self.assertEqual(self.refs(self.homebase), {})
+
+    def test_publish_rejects_locally_committed_unpublished_grant(self):
+        # A pre-existing refs/dolt/data is insufficient: the coordinator's
+        # new grant exists in local Beads but was never pushed to origin.
+        self.beads.return_value = [{"IssueID": "pdf-g78", "DiffType": "modified"}]
+        with self.assertRaisesRegex(ValueError, "bd dolt push"):
+            relay.publish()
+        self.assertEqual(self.refs(self.homebase), {})
+        self.beads.assert_called_with(["diff", "origin/main", "HEAD"])
+
+    def test_publish_fails_closed_when_beads_comparison_is_unavailable(self):
+        for value in (None, {}, False, ""):
+            with self.subTest(value=value):
+                self.beads.return_value = value
+                with self.assertRaisesRegex(ValueError, "Beads"):
+                    relay.publish()
+                self.assertEqual(self.refs(self.homebase), {})
+        self.beads.side_effect = ValueError("Beads origin/main unavailable")
+        with self.assertRaisesRegex(ValueError, "Beads"):
+            relay.publish()
+        self.assertEqual(self.refs(self.homebase), {})
+
+    def test_beads_change_during_publication_cannot_report_success(self):
+        changed = [{"IssueID": "pdf-g78", "DiffType": "modified"}]
+        self.beads.side_effect = [[], changed]
+        with self.assertRaisesRegex(ValueError, "bd dolt push"):
+            relay.publish()
+        self.assertEqual(self.refs(self.homebase), {})
+        # A change after the atomic transfer still requires a retry, not a
+        # claim that the worker received the newest grant.
+        self.beads.side_effect = [[], [], changed]
+        with self.assertRaisesRegex(ValueError, "bd dolt push"):
+            relay.publish()
+        self.assertEqual(self.refs(self.homebase)["refs/dolt/data"], self.base)
 
     def test_publication_advances_code_and_state_without_following_tags(self):
         relay.publish()
