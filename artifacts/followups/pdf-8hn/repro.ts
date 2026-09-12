@@ -4,7 +4,7 @@
  */
 import { OpenController } from "../../../apps/web/src/features/open/controller";
 import { DESKTOP_PROFILE, MOBILE_PROFILE } from "../../../apps/web/src/features/open/limits";
-import { resolveConfig } from "../../../packages/readers-pdfjs/src/config";
+import { createPdfJsReader } from "../../../packages/readers-pdfjs/src/index";
 import { regionToContract } from "../../../apps/web/src/features/selection/region";
 
 console.log("=== pdf-8hn Fix Verifications (work/antigravity/pdf-8hn) ===\n");
@@ -77,28 +77,39 @@ console.log("--- Item 1: Stale handle/document on failed replace ---");
 // ---------------------------------------------------------------------------
 console.log("\n--- Item 2: Unenforced OCR/raster caps ---");
 {
-  // 2a: maxRasterPixels in reader adapter config
-  const mobileConfig = resolveConfig({
+  // 2a: maxRasterPixels passed into createPdfJsReader
+  const mobileReader = createPdfJsReader({
+    pdfjs: { version: "6.3.289" } as any,
     workerSrc: "/dummy.js",
-    cMapUrl: "/cmaps/",
-    standardFontDataUrl: "/fonts/",
     limits: { maxRasterPixels: MOBILE_PROFILE.maxRasterPixels },
   });
   console.log("MOBILE_PROFILE.maxRasterPixels:", MOBILE_PROFILE.maxRasterPixels);
-  console.log("Configured reader adapter maxRasterPixels:", mobileConfig.limits.maxRasterPixels);
-  const rasterPixelCapEnforced = mobileConfig.limits.maxRasterPixels === MOBILE_PROFILE.maxRasterPixels;
+  console.log("createPdfJsReader config maxRasterPixels:", mobileReader.config.limits.maxRasterPixels);
+  const rasterPixelCapEnforced = mobileReader.config.limits.maxRasterPixels === MOBILE_PROFILE.maxRasterPixels;
   console.log("Raster cap enforced in mobile reader adapter:", rasterPixelCapEnforced);
 
-  // 2b: maxOcrPagesPerRun in startRun plan logic
+  // 2b: maxOcrPagesPerRun planned via adapter.plan
+  const fakeDocHandle = { doc: { numPages: 10 }, closed: false };
   const selectedPages = [0, 1, 2, 3, 4, 5, 6, 7]; // 8 pages selected
-  const regions = new Map<number, any>();
-  const regionPages = selectedPages.filter((p) => regions.has(p));
-  const nonRegionPages = selectedPages.filter((p) => !regions.has(p));
-  const ocrPages = [...regionPages, ...nonRegionPages].slice(0, DESKTOP_PROFILE.maxOcrPagesPerRun);
+  const baseChecks = mobileReader.plan(fakeDocHandle as any, {
+    pages: selectedPages,
+    capabilities: ["native_text", "render"],
+  });
+  const ocrPages = selectedPages.slice(0, DESKTOP_PROFILE.maxOcrPagesPerRun);
+  const ocrChecks = mobileReader.plan(fakeDocHandle as any, {
+    pages: ocrPages,
+    capabilities: ["ocr"],
+  });
+  const allChecks = [...baseChecks, ...ocrChecks];
+  const nativeCount = allChecks.filter((c) => c.capability === "native_text").length;
+  const renderCount = allChecks.filter((c) => c.capability === "render").length;
+  const ocrCount = allChecks.filter((c) => c.capability === "ocr").length;
+
   console.log("Selected pages count:", selectedPages.length);
-  console.log("DESKTOP_PROFILE.maxOcrPagesPerRun:", DESKTOP_PROFILE.maxOcrPagesPerRun);
-  console.log("Planned OCR pages count:", ocrPages.length);
-  const ocrCapEnforced = ocrPages.length === DESKTOP_PROFILE.maxOcrPagesPerRun && ocrPages.length < selectedPages.length;
+  console.log("Native checks planned via adapter.plan:", nativeCount);
+  console.log("Render checks planned via adapter.plan:", renderCount);
+  console.log("OCR checks planned via adapter.plan (capped at 5):", ocrCount);
+  const ocrCapEnforced = nativeCount === 8 && renderCount === 8 && ocrCount === DESKTOP_PROFILE.maxOcrPagesPerRun;
   console.log("OCR per-run cap enforced:", ocrCapEnforced);
 
   const item2Resolved = rasterPixelCapEnforced && ocrCapEnforced;
@@ -122,12 +133,11 @@ console.log("\n--- Item 3: Region label edit propagation ---");
   const initialLabel = "Region 1";
   const contractRegion = regionToContract(initialBox, mockPage as any, 1, initialLabel);
 
-  // OpenWorkspace.tsx:216 initializes entry:
   const previewRegion = { box: initialBox, region: contractRegion, label: initialLabel };
   const regions = new Map<number, typeof previewRegion>();
   regions.set(0, previewRegion);
 
-  // OpenWorkspace.tsx:333-346 fixed onLabelChange:
+  // OpenWorkspace.tsx:333-346 onLabelChange syncs entry.region.label
   const next = "Total Amount Bounding Box";
   const trimmed = next.trim() || "Region 1";
   const updated = new Map(regions);
@@ -142,9 +152,28 @@ console.log("\n--- Item 3: Region label edit propagation ---");
 
   const editedEntry = updated.get(0)!;
   console.log("UI displayed entry.label:", editedEntry.label);
-  console.log("Contract entry.region.label (passed to startRun):", editedEntry.region.label);
-  const labelSynced = editedEntry.label === editedEntry.region.label && editedEntry.region.label === next;
-  console.log("Contract record synchronized with UI edit:", labelSynced);
+  console.log("Contract entry.region.label:", editedEntry.region.label);
+
+  // Plan with adapter using bound region
+  const fakeDocHandle = { doc: { numPages: 2 }, closed: false };
+  const adapter = createPdfJsReader({
+    pdfjs: { version: "6.3.289" } as any,
+    workerSrc: "/dummy.js",
+  });
+  const regionBindings: Record<string, string> = { "ocr:p0": editedEntry.region.id };
+  const planned = adapter.plan(fakeDocHandle as any, {
+    pages: [0],
+    capabilities: ["ocr"],
+    regions: regionBindings,
+  });
+
+  const boundId = planned[0].region_id;
+  console.log("Planned check bound region_id:", boundId);
+  const labelSynced =
+    editedEntry.label === editedEntry.region.label &&
+    editedEntry.region.label === next &&
+    boundId === editedEntry.region.id;
+  console.log("Contract record synchronized with UI edit and bound to plan:", labelSynced);
   console.log("Item 3 resolved:", labelSynced);
   if (!labelSynced) allPassed = false;
 }

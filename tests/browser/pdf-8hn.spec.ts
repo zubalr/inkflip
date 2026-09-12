@@ -386,3 +386,71 @@ test('F5: busy refusal emits rejected event and surfaces error', async ({
   expect(result.rejectedEvent.kind).toBe('open_failed');
   expect(result.rejectedEvent.error.detail).toBe('open:busy');
 });
+
+// ---------------------------------------------------------------------------
+// Fix 2b: Surface OCR cap notice and omitted region warnings before starting
+// ---------------------------------------------------------------------------
+test('F2b: surfaces OCR cap notice before starting and warns on omitted region pages', async ({
+  page,
+}) => {
+  await openPreview(page);
+  await offerFile(page, 'eight.pdf', buildPdf({ pages: 8 }));
+  await waitForDocument(page, 8);
+
+  // Select all 8 pages
+  await page.locator('[data-testid=select-all]').click();
+  await expect(page.locator('[data-testid=pages-summary]')).toHaveText(
+    '8 of 8 pages selected',
+  );
+
+  // With 8 selected pages and cap of 5, info notice surfaces before starting
+  const notice = page.locator('#ocr-limit-notice');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText('OCR is capped at 5 pages per run');
+
+  // Add regions to pages 1 through 6 using the numeric region inputs
+  for (let p = 1; p <= 6; p++) {
+    await page.locator('[data-testid=preview-page]').fill(String(p));
+    await page.locator('[data-testid=preview-page]').press('Enter');
+    await page.locator('[data-testid=region-x0]').fill('50');
+    await page.locator('[data-testid=region-y0]').fill('50');
+    await page.locator('[data-testid=region-x1]').fill('200');
+    await page.locator('[data-testid=region-y1]').fill('200');
+    await page.locator('[data-testid=region-apply]').click();
+    await expect(page.locator('[data-testid=region-committed]')).toBeVisible();
+  }
+
+  // Now 6 pages have regions. Page 6 exceeds the cap of 5.
+  // The notice updates to a warning specifying that page 6's OCR is omitted
+  await expect(notice).toContainText('Explicit regions on page 6 exceed the 5-page OCR limit');
+  await expect(notice).toContainText('OCR is omitted');
+
+  // Previewing page 6 shows the specific note
+  await expect(page.locator('[data-testid=preview-ocromitted]')).toBeVisible();
+  await expect(page.locator('[data-testid=preview-ocromitted]')).toContainText('exceeds the 5-page OCR cap');
+
+  // Start run
+  await page.locator('[data-testid=start-run]').click();
+  await expect(page.locator('[data-testid=plan]')).toBeVisible();
+
+  // All 8 pages have native_text and render checks
+  const checks = await page
+    .locator('[data-testid=plan-checks] li')
+    .evaluateAll((els) =>
+      els.map((el) => ({
+        id: el.getAttribute('data-check-id'),
+        page: Number(el.getAttribute('data-page')),
+        capability: el.getAttribute('data-capability'),
+      })),
+    );
+  const nativeChecks = checks.filter((c) => c.capability === 'native_text');
+  const renderChecks = checks.filter((c) => c.capability === 'render');
+  const ocrChecks = checks.filter((c) => c.capability === 'ocr');
+
+  expect(nativeChecks.length).toBe(8);
+  expect(renderChecks.length).toBe(8);
+  expect(ocrChecks.length).toBe(5);
+  // OCR checks are assigned to pages 0..4 (pages 1..5)
+  expect(ocrChecks.map((c) => c.page).sort()).toEqual([0, 1, 2, 3, 4]);
+});
+

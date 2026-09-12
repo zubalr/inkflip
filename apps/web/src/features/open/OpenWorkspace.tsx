@@ -237,6 +237,32 @@ export function OpenWorkspace({
     setPlan(startRun(controller.currentHandle, selection.pages(), contractRegions));
   }, [startRun, controller, selection, regions, selectionRev]);
 
+  const selectedPages = useMemo(
+    () => selection.pages(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selection, selectionRev],
+  );
+  const selectedRegionPages = useMemo(
+    () => selectedPages.filter((p) => regions.has(p)),
+    [selectedPages, regions],
+  );
+  const selectedNonRegionPages = useMemo(
+    () => selectedPages.filter((p) => !regions.has(p)),
+    [selectedPages, regions],
+  );
+  const plannedOcrPages = useMemo(
+    () =>
+      [...selectedRegionPages, ...selectedNonRegionPages].slice(
+        0,
+        profile.maxOcrPagesPerRun,
+      ),
+    [selectedRegionPages, selectedNonRegionPages, profile.maxOcrPagesPerRun],
+  );
+  const omittedRegionPages = useMemo(
+    () => selectedRegionPages.filter((p) => !plannedOcrPages.includes(p)),
+    [selectedRegionPages, plannedOcrPages],
+  );
+
   const previewMeta = doc?.pages[previewPage] ?? null;
   const previewRegion = regions.get(previewPage) ?? null;
 
@@ -309,11 +335,15 @@ export function OpenWorkspace({
                 }}
               />
             </label>
-            {!selection.has(previewPage) && (
+            {!selection.has(previewPage) ? (
               <span className={styles.previewNote} data-testid="preview-notselected">
                 Page {previewPage + 1} is not selected — its region will not be checked.
               </span>
-            )}
+            ) : omittedRegionPages.includes(previewPage) ? (
+              <span className={styles.previewNote} data-testid="preview-ocromitted">
+                Page {previewPage + 1} region exceeds the {profile.maxOcrPagesPerRun}-page OCR cap — native text and render checks will run, but OCR is omitted.
+              </span>
+            ) : null}
           </div>
 
           {rasterError && (
@@ -346,6 +376,28 @@ export function OpenWorkspace({
               }}
             />
           )}
+
+          {omittedRegionPages.length > 0 ? (
+            <Notice
+              type="warning"
+              title={`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run`}
+              id="ocr-limit-notice"
+            >
+              {`Explicit regions on page ${omittedRegionPages
+                .map((p) => p + 1)
+                .join(", ")} exceed the ${profile.maxOcrPagesPerRun}-page OCR limit. They will be checked with native text and rendering, but OCR is omitted.`}
+            </Notice>
+          ) : selectedPages.length > profile.maxOcrPagesPerRun ? (
+            <Notice
+              type="info"
+              title={`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run`}
+              id="ocr-limit-notice"
+            >
+              {`OCR is capped at ${profile.maxOcrPagesPerRun} pages per run. The first ${profile.maxOcrPagesPerRun} selected pages (${plannedOcrPages
+                .map((p) => p + 1)
+                .join(", ")}) will include OCR; all ${selectedPages.length} selected pages will be checked with native text and rendering.`}
+            </Notice>
+          ) : null}
 
           <div className={styles.startRow}>
             <Button
