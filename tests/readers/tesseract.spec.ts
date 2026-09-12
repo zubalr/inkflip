@@ -1574,18 +1574,24 @@ test.describe('light: UTF-8 raw-text run budget (stub engine)', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('light: verified model bytes reach the engine', () => {
-  test('worker init payload: object language + readOnly verified cache slot (stub)', async ({
+  test('worker init payload: verified bytes ride the {code,data} Lang object (stub)', async ({
     page,
   }) => {
     const out = await runPixelCase(page, {});
     expect(out.run?.ok).toBe(true);
     const c = out.captured;
-    // The engine was launched with the v7 Lang object payload — code
-    // names the language; data==code means a cache miss can only ever
-    // write a poison stub (no fetch branch exists for object payloads).
-    expect(c.workerLangs).toEqual([{ code: 'eng', data: 'eng' }]);
+    // The engine was launched with the v7 Lang object payload carrying
+    // the adapter-verified bytes themselves: code names the Init
+    // language, data is a Uint8Array snapshot whose length and SHA-256
+    // equal the prepared model's exactly.
+    expect(c.workerLangs).toEqual([{
+      code: 'eng',
+      dataClass: 'Uint8Array',
+      dataBytes: out.model!.byteLength,
+      dataSha256: out.model!.sha256,
+    }]);
     const opts = c.workerOptions!;
-    expect(opts.cacheMethod).toBe('readOnly');
+    expect(opts.cacheMethod).toBe('none');
     expect(opts.gzip).toBe(false);
     expect(opts.workerBlobURL).toBe(false);
     expect(opts.workerPath).toBe('/stub/worker.js');
@@ -1669,24 +1675,36 @@ test.describe('light: verified model bytes reach the engine', () => {
     expect(served).toBe(1);
   });
 
-  test('unavailable model cache fails honestly before any engine work', async ({
+  test('unavailable model cache degrades to memory-only, never a failure', async ({
     page,
   }) => {
+    // IndexedDB absent: preparation is memory-only, reported as a
+    // limitation, and the verified bytes still reach the engine.
     const out = await runPixelCase(page, { idbFactory: 'none' });
-    expect(out.open?.ok).toBe(false);
-    expect(out.open?.error?.reason).toBe('missing_model');
-    // No worker was ever created — the gate fires first.
-    expect(out.captured.createWorkerCount ?? 0).toBe(0);
-    expect(out.captured.recognizeCount ?? 0).toBe(0);
+    expect(out.open?.ok, JSON.stringify(out.open?.error)).toBe(true);
+    expect(out.open?.value?.model?.state).toBe('ready_memory');
+    expect(out.open?.value?.model?.provenance).toBe('network');
+    expect(out.open?.value?.model?.limitations?.join(' ')).toContain(
+      'model_cache_unavailable',
+    );
+    expect(out.run?.ok).toBe(true);
+    expect(out.output!.check.status).toBe('completed');
+    expect(out.captured.workerLangs?.[0]?.dataSha256).toBe(out.model!.sha256);
   });
 
-  test('a failed cache write fails honestly before any engine work', async ({
+  test('a failed cache write degrades to memory-only, never a failure', async ({
     page,
   }) => {
+    // Same honesty: the write failure is a recorded limitation, the
+    // verified download still initializes memory + engine.
     const out = await runPixelCase(page, { idbFactory: 'writeFail' });
-    expect(out.open?.ok).toBe(false);
-    expect(out.open?.error?.reason).toBe('missing_model');
-    expect(out.captured.createWorkerCount ?? 0).toBe(0);
+    expect(out.open?.ok, JSON.stringify(out.open?.error)).toBe(true);
+    expect(out.open?.value?.model?.state).toBe('ready_memory');
+    expect(out.open?.value?.model?.limitations?.join(' ')).toContain(
+      'model_cache_unavailable',
+    );
+    expect(out.output!.check.status).toBe('completed');
+    expect(out.captured.workerLangs?.[0]?.dataSha256).toBe(out.model!.sha256);
   });
 });
 
@@ -1842,13 +1860,274 @@ test.describe('light: operation deadline and cancellation lifecycle', () => {
       return api.closeDuringOpen((globalThis as any).__tmpReaderId);
     });
     expect(res.openRes.ok).toBe(false);
-    // The aborted raw transport surfaces our typed reason — never a
-    // half-open handle and never a fabricated reading.
-    expect(res.openRes.error.reason).toBe('worker_crash');
+    // close() fires the operation's terminal signal — the pending open
+    // rejects with user_cancel, the lease's concrete signal aborts the
+    // raw worker, and nothing installs on a closed reader.
+    expect(res.openRes.error.reason).toBe('user_cancel');
     expect(res.stats.workerInitCount).toBe(0);
     // The real raw worker is gone — not leaked.
     await expect
       .poll(() => page.workers().length, { timeout: 5_000 })
       .toBe(baseline);
   });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('light: independent lifecycle probes (stub engine)', () => {
+  // Faithful ports of the wave-3 independent reviewer's four
+  // reproduced lifecycle cases, against the in-page __rv seam (real
+  // adapter + real canvas/IndexedDB, stub engine only).
+  test('close settles a stalled raster without waiting for the deadline', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, delay } = (globalThis as any).__rv;
+      const x = make({
+        rasterSource: () => new Promise(() => {}),
+        budget: { checkTimeoutMs: 800, openTimeoutMs: 800, maxRetries: 0 },
+      });
+      const h = await x.reader.open({ documentSha256: 'review', generation: 1 });
+      const c = x.reader.plan(h, [{ pageIndex: 0, purpose: 'page' }])[0];
+      const t = performance.now();
+      let settled = false;
+      const p = x.reader.extract(h, c, () => {}).then((r: any) => {
+        settled = true;
+        return r;
+      });
+      await delay(20);
+      await x.reader.close(h);
+      await delay(100);
+      const settledAfterClose = settled;
+      const result = await p;
+      return { settledAfterClose, elapsedMs: performance.now() - t, check: result.check };
+    });
+    expect(out.settledAfterClose).toBe(true);
+    expect(out.check.reason).toBe('user_cancel');
+  });
+
+  test('late model preparation cannot publish or recreate deleted data after close', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, delay, wrap } = (globalThis as any).__rv;
+      let release: any;
+      let fetched = false;
+      const x = make({
+        hooks: {
+          fetchImpl: () => {
+            fetched = true;
+            return new Promise((r) => {
+              release = r;
+            });
+          },
+        },
+      });
+      const open = wrap(x.reader.open({ documentSha256: 'review', generation: 1 }));
+      while (!fetched) await delay(1);
+      await x.reader.close();
+      await x.reader.removeModelData();
+      const statesAtClose = x.events.states.slice();
+      release(new Response(x.model._bytes.slice()));
+      const result = await open;
+      await delay(30);
+      const store = new (globalThis as any).__t10.adapter.KeyvalStore(indexedDB);
+      const bytes = await store.get(x.model.cachePath + '/eng.traineddata');
+      return {
+        statesAtClose,
+        statesAfterClose: x.events.states.slice(statesAtClose.length),
+        modelState: x.reader.modelState,
+        cacheExists: bytes instanceof Uint8Array,
+        result,
+      };
+    });
+    expect(out.statesAfterClose).toEqual([]);
+    expect(out.cacheExists).toBe(false);
+  });
+
+  test('superseded open cannot clear the newer handle and worker', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, delay, wrap } = (globalThis as any).__rv;
+      let release: any;
+      let calls = 0;
+      let x: any;
+      x = make({
+        hooks: {
+          fetchImpl: () => {
+            calls++;
+            return calls === 1
+              ? new Promise((r) => {
+                  release = r;
+                })
+              : Promise.resolve(new Response(x.model._bytes.slice()));
+          },
+        },
+      });
+      const first = wrap(
+        x.reader.open({ documentSha256: 'same-document', generation: 1 }),
+      );
+      while (calls === 0) await delay(1);
+      const second = await wrap(
+        x.reader.open({ documentSha256: 'same-document', generation: 1 }),
+      );
+      release(new Response(x.model._bytes.slice()));
+      const firstResult = await first;
+      const plan = await wrap(
+        Promise.resolve().then(() =>
+          x.reader.plan(second.value, [{ pageIndex: 0, purpose: 'page' }]),
+        ),
+      );
+      const out = {
+        firstResult,
+        secondOk: second.ok,
+        plan,
+        terminated: x.events.workers.map((w: any) => w.terminated),
+      };
+      await x.reader.close();
+      return out;
+    });
+    expect(out.secondOk).toBe(true);
+    expect(out.plan.ok).toBe(true);
+    expect(out.terminated).toEqual([false]);
+  });
+
+  test('late init progress and error callbacks are dropped after timeout', async ({
+    page,
+  }) => {
+    const out = await page.evaluate(async () => {
+      const { make, wrap } = (globalThis as any).__rv;
+      let saved: any;
+      const x = make({
+        budget: { openTimeoutMs: 80, checkTimeoutMs: 600, maxRetries: 0 },
+        engine: {
+          OEM: { LSTM_ONLY: 1 },
+          PSM: {},
+          createWorker: (_l: any, _o: any, opts: any) => {
+            saved = opts;
+            return new Promise(() => {});
+          },
+        },
+      });
+      const result = await wrap(
+        x.reader.open({ documentSha256: 'review', generation: 1 }),
+      );
+      saved.logger({ status: 'late init progress', progress: 0.9, userJobId: 'upstream-init' });
+      saved.errorHandler('late init error');
+      const out = {
+        result,
+        progress: x.events.progress,
+        errors: x.events.errors,
+        aborted: saved.signal.aborted,
+      };
+      await x.reader.close();
+      return out;
+    });
+    expect(out.aborted).toBe(true);
+    expect(out.progress).toEqual([]);
+    expect(out.errors).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('independent real cache provenance (real engine)', () => {
+  // Pauli's real-worker probe pair: the engine's own filesystem must
+  // contain exactly the adapter-verified model bytes — even when a
+  // same-origin writer replaces the shared idb-keyval slot on entry to
+  // createWorker — and the model is downloaded exactly once.
+  for (const mutate of [false, true]) {
+    test(
+      mutate
+        ? 'cache replacement after verification cannot change engine bytes'
+        : 'unchanged cache control preserves exact engine bytes',
+      async ({ page }) => {
+        let modelRequests = 0;
+        page.on('request', (r) => {
+          if (r.url().endsWith('/eng.traineddata')) modelRequests++;
+        });
+        const { docId } = await loadScanDoc(page, 2);
+        const out = await page.evaluate(
+          async ({ docId, mutate, region }) => {
+            const g = globalThis as any;
+            const api = g.__t10;
+            const actualEngine = g.__tesseract;
+            const hash = (bytes: Uint8Array) =>
+              Array.from(api.contracts.sha256(bytes), (b: any) =>
+                b.toString(16).padStart(2, '0'),
+              ).join('');
+            const evidence: any = {};
+            g.__tesseract = {
+              ...actualEngine,
+              createWorker: async (langs: any, oem: any, options: any, config: any) => {
+                // Entry runs after the adapter's preparation finished —
+                // emulate another same-origin client writing the shared
+                // cache slot the OLD design consumed.
+                const store = new api.adapter.KeyvalStore(indexedDB);
+                const key = options.cachePath + '/eng.traineddata';
+                const before = await store.get(key);
+                evidence.verifiedSlot = {
+                  length: before.length,
+                  sha256: hash(before),
+                };
+                if (mutate) {
+                  const replacement = new Uint8Array(before.length + 1);
+                  replacement.set(before);
+                  await store.set(key, replacement);
+                  evidence.replacement = {
+                    length: replacement.length,
+                    sha256: hash(replacement),
+                  };
+                }
+                const worker = await actualEngine.createWorker(
+                  langs,
+                  oem,
+                  options,
+                  config,
+                );
+                // The real worker's WASM filesystem after Init(): this
+                // is the file loadLanguage wrote and Init consumed.
+                const file = await worker.FS('readFile', ['/eng.traineddata']);
+                evidence.engineFile = {
+                  length: file.data.length,
+                  sha256: hash(file.data),
+                };
+                return worker;
+              },
+            };
+            const { readerId } = api.makeReader({ docId });
+            let open, run;
+            try {
+              open = await api.open(readerId, 'review-doc', 1);
+              if (open.ok) {
+                const checks = await api.plan(readerId, [
+                  { pageIndex: 0, purpose: 'line', region },
+                ]);
+                run = await api.extract(readerId, checks.value[0].id);
+              }
+            } finally {
+              await api.close(readerId);
+              g.__tesseract = actualEngine;
+            }
+            return {
+              mutate,
+              evidence,
+              open,
+              check: run?.value?.output?.check,
+              reportedModel: run?.value?.output?.model,
+              rawText: run?.value?.output?.raw?.text,
+              expectedSha: api.MODEL.sha256,
+            };
+          },
+          { docId, mutate, region: AMOUNT_LINE_REGION },
+        );
+        expect(out.open.ok).toBe(true);
+        expect(out.check.status).toBe('completed');
+        expect(modelRequests).toBe(1);
+        expect(out.evidence.verifiedSlot.sha256).toBe(out.expectedSha);
+        expect(out.evidence.engineFile.sha256).toBe(out.reportedModel.sha256);
+      },
+    );
+  }
 });

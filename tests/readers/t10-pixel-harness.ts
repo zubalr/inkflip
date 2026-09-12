@@ -164,7 +164,24 @@ function pxEngine(kind, captured, input) {
     createWorker(langs, oem, options) {
       localCalls += 1;
       captured.createWorkerCount = (captured.createWorkerCount || 0) + 1;
-      captured.workerLangs = JSON.parse(JSON.stringify(langs));
+      // langs entries are {code, data} objects whose data field is the
+      // verified traineddata byte payload — record its class, length
+      // and sha256 so tests can prove the engine received THE
+      // adapter-verified bytes, not a cache-slot indirection.
+      captured.workerLangs = langs.map((l) => typeof l === 'string'
+        ? { code: l, dataClass: 'string', data: l }
+        : {
+            code: l.code,
+            dataClass: l.data instanceof Uint8Array
+              ? 'Uint8Array'
+              : typeof l.data,
+            dataBytes: l.data instanceof Uint8Array
+              ? l.data.byteLength
+              : null,
+            dataSha256: l.data instanceof Uint8Array
+              ? hex(contracts.sha256(l.data))
+              : null,
+          });
       captured.workerOptions = {
         workerPath: options.workerPath,
         corePath: options.corePath,
@@ -247,11 +264,12 @@ async function pxRunCase(input, unmapPt) {
     checks: null, run: null, output: null, manifest: null,
     decoded: null, imageClass: null, unmapped: null, built: null,
     chunks: null, modelStates: [], progress: [], errors: [],
-    elapsedMs: null, docSha: null,
+    elapsedMs: null, docSha: null, model: null,
   };
   const t0 = performance.now();
   const captured = out.captured;
   const model = pxModel();
+  out.model = { sha256: model.sha256, byteLength: model.byteLength };
   const renderId = input.renderReaderId ?? 'synthetic-fixture';
   const raster = {
     rasterId: 'px_' + (input.branch || 'canvas') + '_' + (++state.n),
@@ -371,6 +389,87 @@ globalThis.__px = {
   paths: pxPaths,
   writeFailIdb: pxWriteFailIdb,
 };
+
+// ---- lifecycle/provenance review seam (independent-probe port) ----
+// __rv.make(extra) builds a reader wired to an instrumented stub
+// engine and recording hooks; tests drive real open/extract/close
+// transitions against it. Mirrors the independent reviewer's probe
+// harness so those reproduced cases run in the registered file.
+const rvDelay = (ms) => new Promise((r) => setTimeout(r, ms));
+const rvWrap = async (promise) => {
+  try {
+    return { ok: true, value: await promise };
+  } catch (e) {
+    return { ok: false, reason: e && e.reason, message: String(e && e.message || e) };
+  }
+};
+globalThis.__rv = {
+  delay: rvDelay,
+  wrap: rvWrap,
+  make(extra) {
+    const x = extra || {};
+    const model = pxModel();
+    const events = { states: [], progress: [], errors: [], workers: [] };
+    const canvas = new OffscreenCanvas(32, 32);
+    canvas.getContext('2d').fillRect(0, 0, 32, 32);
+    const raster = {
+      rasterId: 'review_raster',
+      renderReaderId: 'review_renderer',
+      scalePxPerPt: 1,
+      widthPx: 32,
+      heightPx: 32,
+      image: canvas,
+      built: geom.buildPage({
+        index: 0, viewBox: [0, 0, 32, 32], userUnit: 1,
+        rotation: 0, boxSource: 'review',
+      }),
+    };
+    const engine = {
+      createWorker: async (_langs, _oem, opts) => {
+        const worker = {
+          opts,
+          terminated: false,
+          async terminate() { worker.terminated = true; },
+          recognize: async () => ({
+            jobId: 'stub',
+            data: {
+              text: '', blocks: [], confidence: null,
+              psm: '6', oem: 'LSTM_ONLY', version: 'stub',
+            },
+          }),
+        };
+        events.workers.push(worker);
+        return worker;
+      },
+      OEM: { LSTM_ONLY: 1 },
+      PSM: {},
+    };
+    const cfg = {
+      engine,
+      engineVersion: 'stub',
+      model,
+      paths: pxPaths(),
+      assetHashes: [],
+      renderReaderId: 'review_renderer',
+      profile: 'desktop',
+      runKey: 'review',
+      rasterSource: async () => raster,
+      budget: { openTimeoutMs: 600, checkTimeoutMs: 600, maxRetries: 0 },
+      ...x,
+      hooks: {
+        fetchImpl: async () => new Response(model._bytes.slice()),
+        onModelState: (s) => events.states.push(s),
+        onProgress: (e) => events.progress.push(e),
+        onError: (e) => events.errors.push(e),
+        ...(x.hooks || {}),
+      },
+    };
+    return {
+      reader: new adapter.TesseractOcrReader(cfg),
+      events, model, cfg, raster, engine,
+    };
+  },
+};
 `;
 
 // --------------------------------------------------------- node-side API ---
@@ -421,7 +520,13 @@ export interface PixelRunResult {
   input: PixelRunInput;
   captured: {
     createWorkerCount?: number;
-    workerLangs?: Array<{ code: string; data: string }>;
+    workerLangs?: Array<{
+      code: string;
+      dataClass: string;
+      data?: string;
+      dataBytes?: number | null;
+      dataSha256?: string | null;
+    }>;
     workerOptions?: Record<string, unknown>;
     pendingInits?: number;
     maxConcurrentInits?: number;
@@ -440,7 +545,13 @@ export interface PixelRunResult {
   } | null;
   open: {
     ok: boolean;
-    value?: unknown;
+    value?: {
+      model?: {
+        state?: string;
+        provenance?: string | null;
+        limitations?: string[];
+      };
+    };
     error?: { reason?: string | null; message?: string };
   } | null;
   plan: { ok: boolean; value?: Array<Record<string, unknown>>; error?: { reason?: string | null } } | null;
@@ -458,6 +569,7 @@ export interface PixelRunResult {
   errors: Array<Record<string, unknown>>;
   elapsedMs: number | null;
   docSha: string | null;
+  model: { sha256: string; byteLength: number } | null;
 }
 
 export interface PixelOutput {
