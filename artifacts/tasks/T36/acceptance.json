@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "task_id": "T36",
+  "beads_id": "pdf-t36",
+  "disposition": "accepted",
+  "evaluated_commit": "da3b31b8c42021866049eefa456640e503cf60ad",
+  "evaluated_at": "2026-09-12T17:11:59.148512+00:00",
+  "contract_digest": "e396742c0f8cd4ec080118d9ca181fd24cabb2d8d4d0da523b07a54ef74e6fd8",
+  "worker": "devin-t36",
+  "commands": [
+    {
+      "segment": "python -m unittest discover -s tests/evaluation -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/evaluation",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/integrate/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/evaluation",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 91,
+        "passed": 91,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T36/commands.log": "d0c96178d009aec9da9f40a4736fa7db1eaac5c190f77f6aff06ad730155b3a9",
+    "artifacts/tasks/T36/coordinator-commands.log": "8470a439eb8297a4a54f7303cb1856762d30c6048e0d108036d237ef468d7cad",
+    "artifacts/tasks/T36/custody-demo.txt": "d79f2531742864e797dab6ac036c3cd3ddcbc65ea7bcd520051ecaf4f537daa1",
+    "artifacts/tasks/T36/permissioned-eval.json": "e4be2bebe0bf157db3ec66c86fbd3495ee6c30b15c6a19d204c64352ec2d7ccc",
+    "artifacts/tasks/T36/receipt.json": "4d7e4c4641cd9e923bd03b572782f396622edbc51698cfa98a3f0c6586bfa100",
+    "artifacts/tasks/T36/review.md": "a63fa9e5e2e3ce47091a625b2e08c1ee8652169d91501d92884632267e1bb9b4",
+    "artifacts/tasks/T36/run.json": "3550bd95681bd4684225e96e518de8947222af1326db5e089096080e44185d84",
+    "artifacts/tasks/T36/unittest-output.txt": "7c5c0213124a0db1b71462de9679f255b99bb1aa276163c154878c87f7f1dee0"
+  },
+  "criteria": {
+    "No sibling leakage": [
+      "artifacts/tasks/T36/unittest-output.txt",
+      "artifacts/tasks/T36/run.json",
+      "artifacts/tasks/T36/commands.log",
+      "artifacts/tasks/T36/custody-demo.txt"
+    ],
+    "skipped/failed pages remain coverage denominator": [
+      "artifacts/tasks/T36/unittest-output.txt",
+      "artifacts/tasks/T36/run.json",
+      "artifacts/tasks/T36/commands.log"
+    ],
+    "repeated OCR readings are not independent samples": [
+      "artifacts/tasks/T36/unittest-output.txt",
+      "artifacts/tasks/T36/run.json",
+      "artifacts/tasks/T36/commands.log"
+    ],
+    "targets reported as unmet until real run": [
+      "artifacts/tasks/T36/unittest-output.txt",
+      "artifacts/tasks/T36/run.json",
+      "artifacts/tasks/T36/commands.log",
+      "artifacts/tasks/T36/custody-demo.txt"
+    ],
+    "small real incident data stays permissioned and out of public logs.": [
+      "artifacts/tasks/T36/unittest-output.txt",
+      "artifacts/tasks/T36/run.json",
+      "artifacts/tasks/T36/commands.log",
+      "artifacts/tasks/T36/custody-demo.txt",
+      "artifacts/tasks/T36/permissioned-eval.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "review/devin/t36"
+    ],
+    "path": "artifacts/tasks/T36/review.md"
+  }
+}
