@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "task_id": "T28",
+  "beads_id": "pdf-t28",
+  "disposition": "accepted",
+  "evaluated_commit": "634034cea4768a39fdd4e963dc2c1ac018d54126",
+  "evaluated_at": "2026-09-12T19:41:42.168670+00:00",
+  "contract_digest": "40a0738a336eec45645b7c14020621b9a7f731c4229ca400902020b61a4a91d4",
+  "worker": "zcode-t28",
+  "commands": [
+    {
+      "segment": "uv run --project native python -m pytest native/tests/structure -q",
+      "argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/structure",
+        "-q"
+      ],
+      "executed_argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/structure",
+        "-q",
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-7ls4fjjz/results"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T28/commands.log": "302b2d523bd60f38e7466c97db52d041ea73beec5901a97ea4a4b29c177a588b",
+    "artifacts/tasks/T28/coordinator-commands.log": "e59deb6c3dd35e9044f8d3b215e901b023a03a50f34e674beaa9ae6ff808b06e",
+    "artifacts/tasks/T28/criterion-evidence-current.md": "be61a16f4c4856031b4a07edfa3908d1e94c24c3ec74b7b414641f7c9bc88184",
+    "artifacts/tasks/T28/receipt.json": "4f6ed4a905ec8712d25362d5544c20c4128ddc804545f2a425c40eaec88333e0",
+    "artifacts/tasks/T28/review.md": "ff4dd4ca1a14d841139b0cda46cb9ee4cfc0812b7ce42dcfeb2e938ae1a874e2",
+    "artifacts/tasks/T28/run.json": "035f17c3334440fdfeb3d263a07cf3d1f155a269c3725c645394027fcc479c8d"
+  },
+  "criteria": {
+    "Invisible-over-border and white-on-dark controls cannot produce universal hidden/visible verdict": [
+      "artifacts/tasks/T28/criterion-evidence-current.md",
+      "artifacts/tasks/T28/commands.log",
+      "artifacts/tasks/T28/run.json"
+    ],
+    "no false \u201call checked\u201d": [
+      "artifacts/tasks/T28/criterion-evidence-current.md",
+      "artifacts/tasks/T28/commands.log",
+      "artifacts/tasks/T28/run.json"
+    ],
+    "off-crop observation uses raw/native geometry while page display remains crop": [
+      "artifacts/tasks/T28/criterion-evidence-current.md",
+      "artifacts/tasks/T28/commands.log",
+      "artifacts/tasks/T28/run.json"
+    ],
+    "unsupported compositing explicitly recorded.": [
+      "artifacts/tasks/T28/criterion-evidence-current.md",
+      "artifacts/tasks/T28/commands.log",
+      "artifacts/tasks/T28/run.json"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "review/devin/t28"
+    ],
+    "path": "artifacts/tasks/T28/review.md"
+  }
+}
