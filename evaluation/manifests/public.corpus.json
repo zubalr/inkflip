@@ -1,0 +1,89 @@
+{
+  "entries": [
+    {
+      "group_id": "f02-covered-text",
+      "key": "covered-amount",
+      "pages": [
+        0
+      ],
+      "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+      "source_path": "fixtures/public/covered-amount.pdf"
+    },
+    {
+      "group_id": "f02-covered-text",
+      "key": "covered-control",
+      "pages": [
+        0
+      ],
+      "sha256": "cf003f5a746ace7ea6efab9c86733b267159cd8f6bc0343f6a09f0233d95d03d",
+      "source_path": "fixtures/public/covered-control.pdf"
+    },
+    {
+      "group_id": "f07-origins-rotation",
+      "key": "geometry-0",
+      "pages": [
+        0
+      ],
+      "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+      "source_path": "fixtures/public/geometry-0.pdf"
+    },
+    {
+      "group_id": "f07-origins-rotation",
+      "key": "geometry-180",
+      "pages": [
+        0
+      ],
+      "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+      "source_path": "fixtures/public/geometry-180.pdf"
+    },
+    {
+      "group_id": "f07-origins-rotation",
+      "key": "geometry-270",
+      "pages": [
+        0
+      ],
+      "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+      "source_path": "fixtures/public/geometry-270.pdf"
+    },
+    {
+      "group_id": "f07-origins-rotation",
+      "key": "geometry-90",
+      "pages": [
+        0
+      ],
+      "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+      "source_path": "fixtures/public/geometry-90.pdf"
+    },
+    {
+      "group_id": "f07-origins-rotation",
+      "key": "geometry-control",
+      "pages": [
+        0
+      ],
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "source_path": "fixtures/public/geometry-control.pdf"
+    },
+    {
+      "group_id": "f01-mapping-amount",
+      "key": "mapping-amount",
+      "pages": [
+        0
+      ],
+      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "source_path": "fixtures/public/mapping-amount.pdf"
+    },
+    {
+      "group_id": "f01-mapping-amount",
+      "key": "mapping-control",
+      "pages": [
+        0
+      ],
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "source_path": "fixtures/public/mapping-control.pdf"
+    }
+  ],
+  "kind": "corpus_manifest",
+  "schema_version": "1.0.0",
+  "source_root_policy": "explicit_local_root_no_symlinks",
+  "split": "public_demo"
+}
