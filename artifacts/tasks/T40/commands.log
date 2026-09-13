@@ -1,0 +1,9 @@
+$ python3 scripts/task_acceptance.py task T40 --report artifacts/tasks/T40/receipt.json
+.......                                                                  [100%]
+7 passed in 2.10s
+=== Inkflip Native Containment Verification (T40) ===
+PASS: Dockerfile containment audit passed (non-root UID, thread clamps, entrypoint)
+PASS: Script hardening flags audit passed (network none, read-only, cap-drop, nonroot, limits)
+PASS: Container invocation dry-run command line verified
+PASS: Containment receipt saved to artifacts/containment/receipt.json
+All containment verification checks PASSED.
