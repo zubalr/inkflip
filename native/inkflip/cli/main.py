@@ -306,6 +306,34 @@ def inspect_document(
     if profile_id in ("desktop", "mobile", "native"):
         profile_enum = profile_id
 
+    # Check if a custom reader profile is requested
+    reader_profile = None
+    if profile_id not in ("desktop", "mobile", "native", "native-default"):
+        try:
+            from inkflip.profiles import load_profile
+            reader_profile = load_profile(profile_id)
+        except Exception:
+            reader_profile = None
+
+    if reader_profile is not None:
+        from inkflip.profiles import ProfileAdapter
+        padapter = ProfileAdapter(reader_profile)
+        pdesc = padapter.describe()
+        active_readers.append(pdesc["reader"])
+        try:
+            handle = pdfium.open_document(pdf_bytes, pdf_sha256, 1)
+            raw_pages = pdfium.pages(handle)
+            for idx in page_indices:
+                if idx < len(raw_pages):
+                    pages_meta.append(raw_pages[idx])
+            handle.close()
+        except Exception:
+            pass
+        ext_res = padapter.extract(source_path, page_indices)
+        occurrences.extend(ext_res.get("occurrences", []))
+        checks.extend(ext_res.get("checks", []))
+        readers = []
+
     # 1. PDFium
     if "pdfium" in readers:
         desc = pdfium.describe()

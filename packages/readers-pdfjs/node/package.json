@@ -1,0 +1,10 @@
+{
+  "name": "@inkflip/readers-pdfjs-node",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fixed Node PDF.js profile wrapper",
+  "exports": {
+    ".": "./bridge.mjs"
+  }
+}
