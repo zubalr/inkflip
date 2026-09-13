@@ -9,6 +9,7 @@ import type { ViewerMode, RotationDegree, ViewerDoc } from "./types";
 import { CanvasOverlay } from "./CanvasOverlay";
 import { ComparePanes } from "./ComparePanes";
 import { AccessibleTextLayer } from "./AccessibleTextLayer";
+import { AlignmentDetail } from "../findings/alignment/AlignmentDetail";
 import styles from "./ViewerStage.module.css";
 
 export interface ViewerStageProps {
@@ -78,9 +79,15 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
       if (finding.page_index !== undefined && finding.page_index !== pageIndex) {
         setPageIndex(finding.page_index);
       }
-      if (finding.occurrence_ids && finding.occurrence_ids.length > 0) {
+      if (
+        finding.occurrence_ids &&
+        finding.occurrence_ids.length > 0 &&
+        finding.alignment !== "ambiguous"
+      ) {
         setSelectedOccurrenceId(finding.occurrence_ids[0]);
       } else {
+        // Ambiguous findings keep every candidate equally marked; no
+        // single occurrence is pre-picked — never first-match-wins.
         setSelectedOccurrenceId(null);
       }
     },
@@ -357,6 +364,17 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                   <p style={{ fontSize: "var(--text-caption)", color: "var(--color-ink)" }}>
                     {f.explanation}
                   </p>
+
+                  {isSelected && (
+                    <AlignmentDetail
+                      finding={f}
+                      occurrences={doc.occurrences}
+                      readers={doc.readers}
+                      selectedOccurrenceId={selectedOccurrenceId}
+                      onSelectOccurrence={handleSelectOccurrence}
+                      returnFocusId={`finding-item-${f.id}`}
+                    />
+                  )}
 
                   {isSelected && onKeepEvidence && (
                     <button
