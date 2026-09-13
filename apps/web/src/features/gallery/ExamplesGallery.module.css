@@ -4,7 +4,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--space-4);
 }
 
@@ -21,10 +21,16 @@
   font-family: inherit;
 }
 
-.card:hover,
+.card:hover {
+  border-color: var(--color-teal, var(--color-line));
+  box-shadow: var(--shadow-paper);
+}
+
 .card:focus-visible {
   border-color: var(--color-teal, var(--color-line));
   box-shadow: var(--shadow-paper);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .cardTitle {
@@ -85,13 +91,23 @@
 }
 
 .close {
-  min-height: var(--control-min-height, 32px);
+  min-height: var(--control-min-height, 44px);
+  min-width: 44px;
   padding: 0 var(--space-3);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-control);
   background: var(--color-paper-pure);
+  color: var(--color-ink);
   cursor: pointer;
   font-size: var(--text-caption);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .detailGrid {
@@ -115,6 +131,14 @@
   color: var(--color-muted);
 }
 
+.findingsHeading {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
 .fileList,
 .findingList,
 .readerList {
@@ -130,26 +154,41 @@
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
+  flex-wrap: wrap;
+  word-break: break-all;
 }
 
 .fileList a {
   color: var(--color-ink);
+  text-decoration: underline;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.fileList a:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .sha {
   font-family: var(--font-mono, monospace);
   color: var(--color-muted);
   font-size: 11px;
+  word-break: break-all;
 }
 
 .findingList li {
   padding: var(--space-1) 0;
   color: var(--color-ink);
+  word-break: break-word;
 }
 
 .readerList li {
   padding: var(--space-1) 0;
   color: var(--color-ink);
+  word-break: break-word;
 }
 
 .rights {
@@ -168,8 +207,9 @@
 }
 
 .openBtn {
-  min-height: var(--control-min-height, 32px);
-  padding: 0 var(--space-3);
+  min-height: var(--control-min-height, 44px);
+  min-width: 44px;
+  padding: 0 var(--space-4);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-control);
   background: var(--color-teal, var(--color-paper-pure));
@@ -177,6 +217,14 @@
   cursor: pointer;
   font-size: var(--text-caption);
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.openBtn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .error {

@@ -86,7 +86,7 @@ function CardDetail({
                   </li>
                 ))}
               </ul>
-              <h4 style={{ marginTop: "var(--space-3)" }}>Findings</h4>
+              <h4 className={styles.findingsHeading}>Findings</h4>
               <ul className={styles.findingList}>
                 {manifest.findings.map((f) => (
                   <li key={f.id}>

@@ -75,6 +75,7 @@ export const AccessibleTextLayer: React.FC<AccessibleTextLayerProps> = ({
                     </span>
                     <button
                       type="button"
+                      className={styles.selectBtn}
                       onClick={() => onSelectOccurrence?.(occ)}
                       aria-pressed={isSelected}
                     >
