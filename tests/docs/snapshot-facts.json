@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "_purpose": "Dated, source-bound facts that the public documentation states. Each fact ties doc content to a dated evidence file. These are NOT permanent rules: when a fact legitimately changes, a reviewer updates the evidence file (new dated entry), this file (new as_of / patterns), and the docs in the same reviewed change. tests/docs/test_checker_negative.py proves both directions: a mismatched state fails, a legitimately transitioned state passes.",
+  "facts": [
+    {
+      "id": "test-browser-root-discovery-failure",
+      "as_of": "2026-09-13",
+      "claim": "bun run test:browser fails on this snapshot because root-level Playwright discovery sweeps a committed probe artifact with invalid module syntax",
+      "evidence": "artifacts/tasks/T49/commands.log",
+      "evidence_marker": "`bun run test:browser`\\s+-> FAILED, exit 1",
+      "per_doc": {
+        "docs/limitations.md": {
+          "must_contain": ["bun run test:browser` fails"],
+          "must_not_contain": ["bun run test:browser` passes"]
+        }
+      }
+    },
+    {
+      "id": "cold-setup-verified-never-used-host-unproven",
+      "as_of": "2026-09-13",
+      "claim": "fresh-clone setup verified with empty caches and offline processing; a never-used-host install (tool installation itself) is not yet proven",
+      "evidence": "artifacts/tasks/T49/commands.log",
+      "evidence_marker": "Cold setup evidence complete",
+      "per_doc": {
+        "docs/limitations.md": {
+          "must_contain": ["never-used machine is close but not fully proven|never-used host"],
+          "must_not_contain": []
+        },
+        "docs/quickstart.md": {
+          "must_contain": ["Cold-setup note \\(verified 2026-09-13\\)", "dead address"],
+          "must_not_contain": []
+        }
+      }
+    },
+    {
+      "id": "licensing-pending",
+      "as_of": "2026-09-13",
+      "claim": "root LICENSE/NOTICE and the copyright-holder decision are pending; no dedicated security-reporting channel exists; no 'licensed under MIT' assertion is made for this project",
+      "evidence": "artifacts/tasks/T47/licensing-status.md",
+      "evidence_marker": "## Current status: pending",
+      "per_doc": {
+        "README.md": {
+          "must_contain": ["not yet decided or shipped"],
+          "must_not_contain": ["licen[cs]ed under (the )?MIT"]
+        },
+        "CONTRIBUTING.md": {
+          "must_contain": ["pending"],
+          "must_not_contain": ["licen[cs]ed under (the )?MIT"]
+        },
+        "SECURITY.md": {
+          "must_contain": ["no dedicated security-reporting channel exists yet"],
+          "must_not_contain": ["licen[cs]ed under (the )?MIT"]
+        },
+        "docs/limitations.md": {
+          "must_contain": ["[Ll]icense.{0,160}pending|pending.{0,160}[Ll]icense"],
+          "must_not_contain": []
+        }
+      }
+    },
+    {
+      "id": "no-corpus-cli-privacy-claim",
+      "as_of": "2026-09-13",
+      "claim": "the network-disabled corpus/CLI execution is specified for the planned inkflip CLI, not implemented; docs must not present it as working",
+      "evidence": "planning/architecture/CLI_AND_REGRESSION.md",
+      "evidence_marker": "All commands below are required implementation contracts, not a claim that this planning package installs a finished CLI",
+      "per_doc": {
+        "README.md": {
+          "must_contain": ["is \\*specified\\* for the"],
+          "must_not_contain": ["Corpus and native work is a \\*\\*local command-line workflow\\*\\*"]
+        }
+      }
+    }
+  ]
+}

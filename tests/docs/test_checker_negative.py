@@ -28,6 +28,7 @@ def make_rules(**overrides) -> dict:
         "required_docs": ["README.md"],
         "checked_docs": ["README.md"],
         "forbidden_phrases": ["what AI sees"],
+        "required_phrases": {},
         "version_pins": [
             {
                 "name": "pdfjs-dist",
@@ -36,16 +37,46 @@ def make_rules(**overrides) -> dict:
                 "pin_json_path": "dependencies.pdfjs-dist",
             }
         ],
-        "license_rules": {
-            "must_match": {"README.md": "pending"},
-            "must_not_match": {"README.md": r"licen[cs]ed under (the )?MIT"},
-        },
-        "doc_facts": {
-            "README.md": {"must_contain": ["the widget works"], "must_not_contain": ["the widget is perfect"]}
-        },
+        "snapshot_facts_file": "tests/docs/snapshot-facts.json",
     }
     rules.update(overrides)
     return rules
+
+
+def write_widget_fact(root: Path, *, available: bool, as_of: str = "2026-09-13"):
+    """Write a coherent fact set (evidence + facts file + doc) for one state."""
+    if available:
+        evidence = "# Widget log\n\nwidget-status: available as of 2026-09-14\n"
+        doc_state = "The widget works now."
+        must_contain = ["widget works"]
+        must_not_contain = ["widget is unavailable"]
+    else:
+        evidence = "# Widget log\n\nwidget-status: unavailable as of 2026-09-13\n"
+        doc_state = "The widget is unavailable."
+        must_contain = ["widget is unavailable"]
+        must_not_contain = ["widget works"]
+    (root / "evidence" / "widget.log").parent.mkdir(parents=True, exist_ok=True)
+    (root / "evidence" / "widget.log").write_text(evidence)
+    facts = {
+        "facts": [
+            {
+                "id": "widget-state",
+                "as_of": as_of,
+                "claim": "widget availability state",
+                "evidence": "evidence/widget.log",
+                "evidence_marker": f"widget-status: {'available' if available else 'unavailable'}",
+                "per_doc": {
+                    "README.md": {
+                        "must_contain": must_contain,
+                        "must_not_contain": must_not_contain,
+                    }
+                },
+            }
+        ]
+    }
+    (root / "tests" / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "tests" / "docs" / "snapshot-facts.json").write_text(json.dumps(facts))
+    (root / "README.md").write_text(doc_state)
 
 
 class CheckerNegativeTests(unittest.TestCase):
@@ -120,25 +151,52 @@ class CheckerNegativeTests(unittest.TestCase):
         problems = check_claims.check_forbidden_phrases(self.root, make_rules())
         self.assertTrue(any("what AI sees" in p for p in problems))
 
-    def test_asserted_license_fails(self):
-        self.write("README.md", "pending decision note. Inkflip is licensed under MIT.")
-        problems = check_claims.check_pending_license_recorded(self.root, make_rules())
-        self.assertTrue(any("asserts a completed license" in p for p in problems))
+    def test_snapshot_fact_missing_evidence_marker_fails(self):
+        write_widget_fact(self.root, available=False)
+        # Evidence no longer carries the marker the fact cites (stale fact).
+        (self.root / "evidence" / "widget.log").write_text("# Widget log\n\n(empty)\n")
+        problems = check_claims.check_snapshot_facts(self.root, make_rules())
+        self.assertTrue(any("lacks marker" in p for p in problems), msg=problems)
 
-    def test_missing_pending_license_record_fails(self):
-        self.write("README.md", "no licensing status mentioned here at all")
-        problems = check_claims.check_pending_license_recorded(self.root, make_rules())
-        self.assertTrue(any("pending licensing decision is not recorded" in p for p in problems))
-
-    def test_contradicted_doc_fact_fails(self):
-        self.write("README.md", "the widget is perfect")
-        problems = check_claims.check_doc_facts(self.root, make_rules())
-        self.assertTrue(any("contradicted fact pattern present" in p for p in problems))
-
-    def test_missing_required_fact_fails(self):
+    def test_snapshot_fact_doc_omits_recorded_fact_fails(self):
+        write_widget_fact(self.root, available=False)
         self.write("README.md", "nothing about the widget")
-        problems = check_claims.check_doc_facts(self.root, make_rules())
-        self.assertTrue(any("required fact pattern absent" in p for p in problems))
+        problems = check_claims.check_snapshot_facts(self.root, make_rules())
+        self.assertTrue(any("no longer states the fact" in p for p in problems), msg=problems)
+
+    def test_snapshot_fact_doc_contradicts_recorded_state_fails(self):
+        write_widget_fact(self.root, available=False)
+        self.write("README.md", "The widget is unavailable. The widget works.")
+        problems = check_claims.check_snapshot_facts(self.root, make_rules())
+        self.assertTrue(any("contradicts the recorded state" in p for p in problems), msg=problems)
+
+    def test_snapshot_fact_consistent_state_passes(self):
+        write_widget_fact(self.root, available=False)
+        self.assertEqual(check_claims.check_snapshot_facts(self.root, make_rules()), [])
+
+    def test_snapshot_fact_legitimate_state_transition_passes(self):
+        """A reviewed state change must not be blocked by the checker: update
+        evidence, facts file and docs together and the check passes."""
+        write_widget_fact(self.root, available=False)
+        self.assertEqual(check_claims.check_snapshot_facts(self.root, make_rules()), [])
+        # The widget ships for real: evidence gains a dated entry, the facts
+        # file records the new state, and the doc is rewritten to match.
+        write_widget_fact(self.root, available=True, as_of="2026-09-14")
+        self.assertEqual(check_claims.check_snapshot_facts(self.root, make_rules()), [])
+
+    def test_transition_without_updating_facts_file_fails(self):
+        """Doc and evidence move to the new state but the facts file still
+        records the old one — a mismatched state must fail."""
+        write_widget_fact(self.root, available=False)
+        (self.root / "evidence" / "widget.log").write_text(
+            "# Widget log\n\nwidget-status: available as of 2026-09-14\n"
+        )
+        self.write("README.md", "The widget works now.")
+        problems = check_claims.check_snapshot_facts(self.root, make_rules())
+        self.assertTrue(problems, msg="stale facts file must be detected")
+        self.assertTrue(
+            any("lacks marker" in p or "no longer states" in p for p in problems), msg=problems
+        )
 
     def test_clean_tree_passes_all_checks(self):
         self.write(
@@ -149,10 +207,11 @@ class CheckerNegativeTests(unittest.TestCase):
         (self.root / "config" / "acceptance-commands.json").write_text(
             json.dumps({"commands": {"verify": {}}})
         )
+        write_widget_fact(self.root, available=False)
         self.write(
             "README.md",
-            "pending licensing note. the widget works. run `bun run verify`.\n"
-            "## Heading\n[internal](#heading)\n",
+            "The widget is unavailable. not a claim about PDFs in general. "
+            "run `bun run verify`.\n## Heading\n[internal](#heading)\n",
         )
         rules = make_rules()
         for name, fn in check_claims.CHECKS:

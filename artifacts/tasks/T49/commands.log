@@ -71,3 +71,51 @@ download cache was warm. Recorded as pending release work in limitations.md.
 
 - `python3 -m unittest discover -s tests/docs -v` -> 17 tests OK, exit 0
 - `python3 scripts/check_claims.py` -> all 8 checks ok, exit 0
+
+=====================================================================
+ADDENDUM 2026-09-13 — delivery-review corrections, new snapshot
+Branch work/zcode/distribution-completion (base 580ef63, origin/main).
+Supersedes the warm-cache statements above; corrections applied per the
+2026-09-13 targeted delivery review (REVIEW.md).
+
+## Corrected suite totals for `bun run verify` on this snapshot
+
+- tests/bootstrap          -> Ran 56 tests, OK
+- native/tests/bootstrap   -> Ran 2 tests, OK
+- tests/coordination       -> Ran 111 tests, OK
+- verify group total       -> 169 tests across three suites (+ 16-command
+  registry self-check). The earlier "111 total" copied the coordination
+  suite's own summary and was wrong as a group total.
+
+## Cold setup evidence (fresh clone, isolated empty caches)
+
+- Environment: fresh `git clone` of this branch; BUN_INSTALL_CACHE_DIR,
+  UV_CACHE_DIR, UV_PYTHON_INSTALL_DIR all pointed at new empty directories.
+- bun install --frozen-lockfile -> 86 packages fetched from the registry in
+  5.1s, exit 0 (network preparation; ~300 MB cache populated).
+- Host uv 0.9.5 with empty interpreter store: after excluding PATH
+  interpreters, it STILL resolved and downloaded the pinned CPython 3.13.15
+  on this host/date (live index lookup). This contradicts the recorded
+  assumption in config/test-toolchain.json ("0.9.5's index predates it");
+  the recorded >= 0.12.13 minimum stands and 0.9.5 behavior must not be
+  relied on.
+- Disposable uv==0.12.13 (pinned PyPI wheel, per the freeze's Linux proof):
+  resolved and downloaded CPython 3.13.15 into the empty store, created the
+  frozen native environment (13 locked packages), exit 0.
+- Offline processing: with HTTP(S)_PROXY pointed at a dead address
+  (127.0.0.1:9), `bun run verify` (169 tests OK), `bun run build` (exit 0),
+  `bun run test:native` (196 passed), and the docs checks all passed —
+  processing after install requires no network.
+
+Cold setup evidence complete: network preparation (bun install; uv
+interpreter/wheel provisioning) recorded separately from offline processing
+(verify/build/native/docs checks behind a dead proxy). Remaining unproven:
+a host where the tools themselves (bun, uv, compilers, browsers) have never
+been installed — that install step is outside this repository's control.
+
+## Failures re-verified on this snapshot (unchanged from the record above)
+
+- `bun run test:browser` -> FAILED, exit 1 (same root-discovery cause)
+- apps/web typecheck -> TS5097 errors; format:check -> exit 1 (no config)
+- test:regression / check:static-dist -> fail closed, exit 2 (T34/T48)
+=====================================================================

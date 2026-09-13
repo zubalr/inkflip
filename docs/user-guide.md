@@ -82,7 +82,15 @@ it:
    document is fraudulent" is not, and the app will not say anything like it.
 2. **Coverage is explicit.** The panel shows what was actually read
    (which pages, whether OCR ran) alongside what was not, so silence cannot
-   masquerade as a clean bill of health.
+   masquerade as a clean bill of health. Incomplete coverage is labeled
+   partial, never clean.
+3. **Occurrence candidates stay distinct.** When the same string appears at
+   several positions, each occurrence is individually addressable by its own
+   id and position — selection is by location, never by text matching, so
+   identical strings are never collapsed into one. Order-only differences
+   (the same readings in a different sequence) are classified separately
+   from genuinely different readings, and text that no reader found is
+   reported as unmatched rather than counted as missing.
 
 ## Cancel, replace, large documents
 

@@ -48,15 +48,17 @@ rediscover them:
   bundler resolves these); the standalone typecheck wiring needs repair.
 - **`apps/web` `format:check` fails (exit 1)**: no oxfmt config file exists
   yet, so the formatter's default check rejects the tree.
-- **A from-scratch install on a never-used machine has not been performed.**
-  The quickstart commands were verified twice: on the provisioned
-  macOS/arm64 development machine, and in a fresh clone with an empty
-  dependency tree (`bun install` → 86 packages, exit 0; then `bun run
-  verify`, `bun run build`, dev/preview servers, and the native suite — all
-  passing). Bun's download cache was warm in both cases, so cold-cache
-  install behavior was not measured. The full clean-environment install test
-  remains release work and install success is not claimed beyond what is
-  stated here (per
+- **Setup on a never-used machine is close but not fully proven.** The
+  quickstart procedure was verified on 2026-09-13 in a fresh clone with
+  isolated, **empty** Bun/uv caches and an empty uv interpreter store:
+  `bun install --frozen-lockfile` fetched 86 packages (network preparation),
+  a disposable `uv==0.12.13` resolved and downloaded the pinned CPython
+  3.13.15, and `bun run verify`, `bun run build`, and `bun run test:native`
+  were then re-executed with all proxies pointed at a dead address and
+  passed (processing after install needs no network). What remains unproven:
+  a host where no compiler toolchain, browser, or Bun/uv binary has ever
+  been installed — installing those tools themselves is outside this
+  repository's control and remains release work (per
   [planning/launch/README_AND_CASE_STUDY.md](../planning/launch/README_AND_CASE_STUDY.md),
   install success must not be claimed until that test exists).
 - **`apps/web/package.json` and root `package.json` still describe the
@@ -86,12 +88,22 @@ must not be presented as working:
 - **Accessibility and visual finish reviews**, measured **performance
   budgets**, **native containment/failure-recovery hardening**, and
   **browser/native parity verification** (T37–T40, T46).
-- **Distribution artifacts**: SBOM, vulnerability gate, root `LICENSE`,
-  `NOTICE`, complete third-party notice bundle for redistribution (T47).
+- **Distribution artifacts**: the final release-bundle SBOM, vulnerability
+  gate, root `LICENSE`, `NOTICE` and complete third-party notice bundle for
+  redistribution (T47 closure). A dated preparation inventory and checker
+  exist under [artifacts/sbom/zcode-preparation/](../artifacts/sbom/zcode-preparation/README.md)
+  and `scripts/check_distribution.py`; they are preparation tooling, not the
+  completed gate.
 - **Deployment preflight and any public deployment** (T48, and T54 which
   additionally requires an explicit owner decision).
 - **Gates G2–G5.** Only G1 (first integrated own-file evidence journey) has
   been earned so far.
+- **Experiment-derived reader improvements** (T43–T45, secondary reader /
+  RapidOCR / raster-geometry candidates): experiment receipts were recorded
+  on their authoring branch in 2026-09-13 deliveries but are **not part of
+  this snapshot**, and the 2026-09-13 delivery review found the
+  candidate-evidence claims incomplete; no experiment-derived capability is
+  present or claimed here.
 
 ## Method limits (what the tool cannot establish)
 
@@ -153,6 +165,7 @@ These are product invariants, not missing features:
 ## What this documentation still needs for final release
 
 Tracked as the T49/T50 release-refresh scope: re-verification of every
-command against the release tag, a clean-machine install test, screenshots
-re-tied to the tagged build, the finished capability matrix once T20/T21/T23
-land, and links checked together with the other documentation owners.
+command against the release tag, the never-used-host install test (see the
+known-failures list for what is already proven), screenshots re-tied to the
+tagged build, the finished capability matrix once T21/T23 land, and links
+checked together with the other documentation owners.

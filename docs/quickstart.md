@@ -6,17 +6,35 @@ that was **not** exercised is marked as such instead of claimed.
 
 ## Prerequisites
 
-| Tool | Used for | Version verified here | Notes |
-| --- | --- | --- | --- |
-| [Bun](https://bun.sh) | workspace install, scripts, dev server, bundling | Bun 1.4.0 | `packageManager` pin in `package.json`; Bun supplies its own JavaScript/TypeScript runtime, so no separate Node install is needed for the app or tests. |
-| [uv](https://docs.astral.sh/uv/) | pinned Python interpreter + native dependencies | 0.9.5 | `uv run --frozen` resolves the exact interpreter pinned in `.python-version` (3.13.15) and `native/uv.lock`; a missing patch version fails closed instead of drifting. |
-| Python 3 (system) | bootstrap/coordination check harness | 3.14.7 | The `bun run verify` bootstrap suites are standard-library only; any recent Python 3 works for them. Native product code uses the uv-managed 3.13.15, not your system Python. |
-| Playwright browsers | browser, privacy, a11y, visual suites | Chromium via `@playwright/test` 1.57.0 | Already exercised on this machine; a fresh machine needs `bun x playwright install chromium` (this specific step was not re-exercised here because the browser was already installed). |
+There are two distinct toolchains: **bootstrap tooling** (runs the check
+harness and coordination suites) and the **native runtime pin** (the audited
+interpreter the product's Python code runs on). Do not conflate them.
 
-The dependency freeze also documents Node 22 LTS and Python 3.13.15 as the
-supported toolchain ([docs/ATTRIBUTION.md](ATTRIBUTION.md)); the build and
-test commands below were additionally confirmed working on this machine's
-newer system Node, but the frozen pins are the release baseline.
+| Tool | Used for | Required version | Verified here |
+| --- | --- | --- | --- |
+| [Bun](https://bun.sh) | workspace install, scripts, dev server, bundling | 1.4.0 (`packageManager` pin) | Bun 1.4.0 |
+| Python 3 (system) | bootstrap/coordination check harness only | any recent Python 3; standard-library only | 3.14.7 (system) |
+| [uv](https://docs.astral.sh/uv/) | native project runner: resolves the pinned interpreter and frozen lock | **≥ 0.12.13** per the recorded toolchain freeze ([config/test-toolchain.json](../config/test-toolchain.json)) — a cold host needs it to resolve the pinned interpreter's download index; the Linux proof installs `uv==0.12.13` from the pinned PyPI wheel | 0.12.13 (disposable install) and 0.9.5 (host) — see the cold-setup note below |
+| Pinned CPython | native product interpreter | exactly 3.13.15 (`.python-version`, `native/pyproject.toml`) | 3.13.15, uv-managed; **not** your system Python |
+| Playwright browsers | browser, privacy, a11y, visual suites | Chromium via `@playwright/test` 1.57.0 | already installed on this machine; a fresh machine needs `bun x playwright install chromium` (not re-exercised here) |
+
+The frozen toolchain also records Node 22.23.2 (`.node-version`) as the
+comparison-runtime baseline; the build/test commands below additionally ran
+on this machine's newer system Node, which is an observation, not a support
+claim.
+
+**Cold-setup note (verified 2026-09-13).** In a fresh clone with isolated,
+empty Bun/uv caches and an empty uv interpreter store: `bun install
+--frozen-lockfile` fetched 86 packages (the network-preparation step), and a
+disposable `uv==0.12.13` resolved and downloaded CPython 3.13.15 from its
+index, then created the frozen native environment. After that, `bun run
+verify`, `bun run build`, `bun run test:native`, and the docs checks were all
+re-executed with `HTTP(S)_PROXY` pointed at a dead address and passed —
+processing after install requires no network. One observation contradicts the
+freeze's assumption: on this host and date, uv 0.9.5 *also* resolved the
+pinned interpreter from an empty store (its index lookup appears to be live),
+but that behavior cannot be relied on and the recorded ≥ 0.12.13 minimum
+stands.
 
 ## Install
 
@@ -27,22 +45,24 @@ bun install
 ```
 
 This installs all workspace dependencies with Bun's isolated linker using the
-frozen `bun.lock`. It was exercised in a **fresh clone of this snapshot with
-an empty dependency tree** (86 packages installed, exit 0) and additionally
-checked with `bun install --dry-run --frozen-lockfile` (exit 0) on the
-development machine. Because Bun's download cache was already warm from prior
-work on this machine, cold-cache install time and a never-used-machine run
-were not measured — that clean-environment test remains release work and is
-not claimed here (see [limitations.md](limitations.md#known-failures-in-this-snapshot)).
+frozen `bun.lock`. It was exercised in a **fresh clone with an empty
+dependency tree and an isolated, empty download cache** (86 packages fetched
+from the registry — this is the network-preparation step), and re-checked
+with `bun install --dry-run --frozen-lockfile` (exit 0). Everything after
+install was verified to run with the network cut off (dead proxy); see the
+cold-setup note above for the exact procedure and its 2026-09-13 evidence.
 
-For the native Python side there is nothing to install by hand:
+For the native Python side there is nothing to install by hand; the first
+frozen run provisions the pinned interpreter and environment (a
+network-preparation step on a cold host, using uv ≥ 0.12.13 per the freeze):
 
 ```sh
 uv run --frozen --project native python -c "import pypdf; print(pypdf.__version__)"
 ```
 
-prints `6.18.0` (verified). The first run on a new machine downloads the
-pinned CPython 3.13.15 and creates `native/.venv/` (git-ignored).
+prints `6.18.0` (verified cold: interpreter downloaded into an empty store,
+then 13 locked packages installed). This creates `native/.venv/`
+(git-ignored).
 
 ## Run the app
 
@@ -78,13 +98,16 @@ on this snapshot (macOS, arm64):
 
 | Command | Verified result |
 | --- | --- |
-| `bun run verify` | 111 tests pass in ~37 s (command-registry self-check, bootstrap, native bootstrap, coordination suites) |
+| `bun run verify` | 169 tests pass across three suites (56 bootstrap + 2 native bootstrap + 111 coordination) plus a 16-command registry self-check |
 | `bun run test:native` | 196 pytest tests pass in ~26 s (PDFium/pypdf/Tesseract adapters, structure, supervision, bridge) |
 | `bun run test:fixtures` | 70 tests pass in ~1 s (fixture generator + prepared example integrity) |
 | `bun run test:privacy` | 4 canary tests pass (cold / warm / offline / receipt no-egress against the real build) |
 | `bun run test:a11y` | 7 tests pass (accessible controls, dialogs, navigation) |
 | `bun run test:visual` | 9 tests pass (responsive layout, contrast, motion, focus) |
 | `bun run build` | production bundle built successfully |
+
+Suite totals are counted per suite (the coordination suite prints its own
+summary last; do not mistake it for the group total).
 
 Browser test files are executed per suite by the registry (for example
 `test:a11y` runs `tests/a11y`); `bun run test:browser` is currently broken on

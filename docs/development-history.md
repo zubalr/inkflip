@@ -58,7 +58,7 @@ task, each with its own branch, receipt and review files:
   Tesseract; T28 bounded structural observations; T29 supervised parent with
   atomic partial results; T31 the shared Node comparison bridge.
 
-### 2026-09-13 — gates, hardening, experiments (90 commits)
+### 2026-09-13 — gates, hardening, evidence UX (90+ commits)
 
 - **T17** earned the browser amount demo: the prepared synthetic example with
   its clean-mapping control, generated from this repo's own fixtures
@@ -71,13 +71,23 @@ task, each with its own branch, receipt and review files:
   hardened malicious report/text/image boundaries — with the earlier
   prerequisite receipts deliberately re-run and re-bound to the merged
   composition state rather than left stale.
-- **Experiments T41–T45** (P09, P11–P14) evaluated paint-order
-  counterexamples, targeted OCR escalation, a secondary browser reader, a
-  native RapidOCR complement, and original-preserving raster geometry — each
-  with an implementation commit, an evidence receipt and an independent
-  review record (`docs/experiments/`, `artifacts/tasks/`).
+- **T20** was accepted after a two-round independent review (blocker + three
+  majors found and fixed): every occurrence a finding names is individually
+  addressable, identical strings at distinct positions are never collapsed by
+  text matching, order-only duplication is separated from genuinely different
+  readings, unmatched text is never claimed missing, and incomplete coverage
+  is labeled partial (`artifacts/tasks/T20/`).
 - Native repairs (Tesseract worker cancellation, language-payload
-  initialization) were landed as reviewed follow-ups (`pdf-ebz`, `pdf-q38`).
+  initialization) were landed as reviewed follow-ups (`pdf-ebz`, `pdf-q38`),
+ and the CI runner setup was repaired on main (`.github/workflows/ci.yml`).
+- **Experiments T41–T45** (paint-order counterexamples, targeted OCR
+  escalation, a secondary browser reader, a native RapidOCR complement,
+  original-preserving raster geometry) were executed and receipted on their
+  authoring branch, but that evidence was **withdrawn from main** the same
+  day after a delivery review judged the candidate-evidence claims
+  incomplete (anonymous reviewer labels, candidate-dependent criteria marked
+  passed while blocked). No experiment-derived capability exists in this
+  snapshot; the tasks remain open for properly evidenced re-runs.
 
 ## How the work is organized
 

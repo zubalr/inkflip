@@ -12,13 +12,18 @@ CONTRIBUTING.md and SECURITY.md:
      apps/web/package.json when the doc shows it run from apps/web);
   6. no forbidden claim phrase (data-driven: tests/docs/claims-rules.json)
      appears — e.g. unsupported "safe/fraud/AI sees"/score/autonomy claims;
-  7. the licensing decision is recorded as pending, never asserted as done;
-  8. doc facts that must hold (e.g. limitations.md admits test:browser fails)
-     are present.
+  7. snapshot facts the docs state are dated and source-bound: each fact in
+     tests/docs/snapshot-facts.json must be backed by its dated evidence
+     record, and a doc may neither omit a recorded fact nor contradict it.
+     Facts are deliberately NOT permanent rules: when reality changes, the
+     evidence, the facts file and the docs change together in one reviewed
+     change, and this check accepts the new consistent state (the negative
+     tests prove both directions).
 
-The rules live in tests/docs/claims-rules.json, not in this file's logic, so
-tightening a rule never requires editing the checker. The checker validates
-files authored independently of it and is itself regression-tested against
+The rules live in tests/docs/claims-rules.json and
+tests/docs/snapshot-facts.json, not in this file's logic, so tightening a
+rule never requires editing the checker. The checker validates files
+authored independently of it and is itself regression-tested against
 deliberately broken input (tests/docs/test_checker_negative.py) so it cannot
 merely approve its own generated text.
 
@@ -220,38 +225,60 @@ def check_forbidden_phrases(root: Path, rules: dict) -> list[str]:
     return problems
 
 
-def check_pending_license_recorded(root: Path, rules: dict) -> list[str]:
+def check_snapshot_facts(root: Path, rules: dict) -> list[str]:
+    """Dated, source-bound facts: docs may state a fact only while a dated
+    evidence record supports it. These are not permanent rules — when a fact
+    legitimately changes, the evidence, tests/docs/snapshot-facts.json and
+    the docs change together in one reviewed change, and this check accepts
+    the new consistent state. See the file's _purpose for the contract."""
+    facts_path = root / rules["snapshot_facts_file"]
+    try:
+        facts = json.loads(facts_path.read_text())["facts"]
+    except (OSError, json.JSONDecodeError, KeyError):
+        return [f"snapshot facts file missing or malformed: {rules['snapshot_facts_file']}"]
     problems = []
-    for rel, must_not in rules["license_rules"]["must_not_match"].items():
-        path = root / rel
-        if not path.is_file():
+    for fact in facts:
+        fid = fact.get("id", "<unnamed>")
+        evidence = root / fact["evidence"]
+        if not evidence.is_file():
+            problems.append(f"fact {fid}: evidence file missing: {fact['evidence']}")
             continue
-        if re.search(must_not, path.read_text(), re.IGNORECASE):
-            problems.append(f"{rel}: asserts a completed license/copyright status (must stay pending)")
-    for rel, pattern in rules["license_rules"]["must_match"].items():
-        path = root / rel
-        if not path.is_file():
-            problems.append(f"{rel}: missing, cannot verify pending-license record")
-            continue
-        if not re.search(pattern, path.read_text(), re.IGNORECASE):
-            problems.append(f"{rel}: pending licensing decision is not recorded (pattern {pattern!r} absent)")
+        evidence_text = evidence.read_text()
+        marker = fact.get("evidence_marker")
+        if marker and not re.search(marker, evidence_text):
+            problems.append(
+                f"fact {fid}: evidence {fact['evidence']} lacks marker {marker!r} "
+                f"(as_of {fact.get('as_of')}); update evidence, facts file and docs together"
+            )
+        for rel, doc_rules in fact.get("per_doc", {}).items():
+            path = root / rel
+            if not path.is_file():
+                problems.append(f"fact {fid}: doc missing: {rel}")
+                continue
+            text = path.read_text()
+            for pattern in doc_rules.get("must_contain", []):
+                if not re.search(pattern, text, re.IGNORECASE):
+                    problems.append(f"fact {fid}: {rel} no longer states the fact (pattern {pattern!r} absent)")
+            for pattern in doc_rules.get("must_not_contain", []):
+                if re.search(pattern, text, re.IGNORECASE):
+                    problems.append(f"fact {fid}: {rel} contradicts the recorded state (pattern {pattern!r} present)")
     return problems
 
 
-def check_doc_facts(root: Path, rules: dict) -> list[str]:
+def check_required_phrases(root: Path, rules: dict) -> list[str]:
+    """Permanent claims-hygiene requirements (see claims-rules.json)."""
     problems = []
-    for rel, fact_rules in rules["doc_facts"].items():
+    for rel, patterns in rules.get("required_phrases", {}).items():
+        if rel.startswith("_"):
+            continue
         path = root / rel
         if not path.is_file():
-            problems.append(f"{rel}: missing, doc facts unverifiable")
+            problems.append(f"{rel}: missing, required phrases unverifiable")
             continue
         text = path.read_text()
-        for pattern in fact_rules.get("must_contain", []):
+        for pattern in patterns:
             if not re.search(pattern, text, re.IGNORECASE):
-                problems.append(f"{rel}: required fact pattern absent: {pattern!r}")
-        for pattern in fact_rules.get("must_not_contain", []):
-            if re.search(pattern, text, re.IGNORECASE):
-                problems.append(f"{rel}: contradicted fact pattern present: {pattern!r}")
+                problems.append(f"{rel}: required claims-hygiene phrasing absent: {pattern!r}")
     return problems
 
 
@@ -262,8 +289,8 @@ CHECKS = [
     ("version_pins", check_versions),
     ("registry_commands", check_registry_commands),
     ("forbidden_phrases", check_forbidden_phrases),
-    ("pending_license", check_pending_license_recorded),
-    ("doc_facts", check_doc_facts),
+    ("required_phrases", check_required_phrases),
+    ("snapshot_facts", check_snapshot_facts),
 ]
 
 

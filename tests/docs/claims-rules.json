@@ -88,42 +88,9 @@
       "pin_regex": "pypdfium2==([0-9.]+)"
     }
   ],
-  "license_rules": {
-    "must_match": {
-      "README.md": "not yet decided or shipped",
-      "SECURITY.md": "no dedicated security-reporting channel exists yet",
-      "docs/limitations.md": "licen[cs]e.{0,120}pending|pending.{0,120}licen[cs]e"
-    },
-    "must_not_match": {
-      "README.md": "licen[cs]ed under (the )?MIT",
-      "CONTRIBUTING.md": "licen[cs]ed under (the )?MIT",
-      "SECURITY.md": "licen[cs]ed under (the )?MIT"
-    }
-  },
-  "doc_facts": {
-    "docs/limitations.md": {
-      "must_contain": [
-        "bun run test:browser` fails",
-        "never-used machine has not been performed",
-        "cold-cache\\s+install behavior was not measured"
-      ],
-      "must_not_contain": [
-        "bun run test:browser` passes"
-      ]
-    },
-    "docs/quickstart.md": {
-      "must_contain": [
-        "empty dependency tree",
-        "were not measured"
-      ]
-    },
-    "README.md": {
-      "must_contain": [
-        "not\\s+a\\s+claim\\s+about\\s+PDFs\\s+in\\s+general"
-      ],
-      "must_not_contain": [
-        "test:browser` \\| passes"
-      ]
-    }
+  "snapshot_facts_file": "tests/docs/snapshot-facts.json",
+  "required_phrases": {
+    "_purpose": "Permanent claims-hygiene requirements (independent of snapshot state): the claims ledger requires synthetic-example claims to stay scoped to the tested file and named readers.",
+    "README.md": ["not\\s+a\\s+claim\\s+about\\s+PDFs\\s+in\\s+general"]
   }
 }

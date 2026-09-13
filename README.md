@@ -31,6 +31,10 @@ upload):
   to their exact evidence region.
 - See findings with plain-language explanations and explicit coverage: what
   was checked, what was not, and what a difference does and does not mean.
+  Every occurrence a finding names stays individually addressable: identical
+  strings at distinct positions are never collapsed, order-only duplication
+  is separated from genuinely different readings, and text no reader found is
+  labeled as unmatched rather than silently treated as missing.
 - Cancel or replace a running analysis without stale output; large documents
   and narrow windows stay usable.
 - Export a portable JSON report or a script-free HTML snapshot, reopen a saved
@@ -61,7 +65,7 @@ The commands below were executed against this exact snapshot (see
 
 | Command | Result on this snapshot |
 | --- | --- |
-| `bun run verify` | passes — 111 tests (registry, bootstrap, native bootstrap, coordination) |
+| `bun run verify` | passes — 169 tests across three suites (56 bootstrap + 2 native bootstrap + 111 coordination) |
 | `bun run build` | passes — production bundle in `apps/web/dist/` |
 | `bun run test:native` | passes — 196 native Python tests |
 | `bun run test:fixtures` | passes — 70 fixture-generator tests |
@@ -89,9 +93,12 @@ are in [docs/limitations.md](docs/limitations.md).
   offline error instead of silently reaching for the network.
 - Reports are portable JSON or script-free HTML with no external fetches.
   Original file bytes are never modified.
-- Corpus and native work is a **local command-line workflow**: paths are local
-  arguments, execution runs with the network disabled, and nothing is
-  uploaded.
+- The Python reader library is local engineering tooling run from this
+  checkout: importing and testing it performs no document upload. A corpus
+  workflow with enforced network-disabled execution is *specified* for the
+  planned `inkflip` CLI ([planning/architecture/CLI_AND_REGRESSION.md](planning/architecture/CLI_AND_REGRESSION.md))
+  and is **not implemented** in this snapshot; no corpus command exists yet
+  to make that promise about.
 
 What this does **not** mean: it is not a claim that a browser prevents all
 conceivable exfiltration, that any particular use of a document is lawful or
@@ -111,8 +118,10 @@ snapshot:
   baselines, and the local reader-upgrade CI example.
 - The complete six-example public gallery, export selection and annotations,
   and the deployment preflight.
-- Release gates G2–G5, an SBOM/third-party notice bundle, and the final
-  documentation pass against the release tag.
+- Release gates G2–G5 and the final documentation pass against the release
+  tag. A distribution inventory/SBOM *preparation* exists
+  ([artifacts/sbom/zcode-preparation/](artifacts/sbom/zcode-preparation/README.md));
+  the final release-bundle SBOM and notice set are completed at T47 closure.
 
 The honest, itemized list lives in [docs/limitations.md](docs/limitations.md).
 
@@ -127,9 +136,12 @@ bun run verify     # the currently implemented check suites
 cd apps/web && bun run dev   # development server; Ctrl-C stops it
 ```
 
-`bun install` was additionally exercised in a fresh clone of this snapshot
-with an empty dependency tree; a cold-cache, never-used-machine install test
-is part of the remaining release work and has not been claimed here.
+`bun install` was additionally exercised in a fresh clone with an empty
+dependency tree and an isolated, empty download cache (network preparation:
+86 packages fetched), after which the verify/build/native suites were
+re-executed with all network proxies pointed at a dead address and still
+passed. The recorded toolchain freeze and the remaining clean-machine scope
+are described in [docs/quickstart.md](docs/quickstart.md).
 
 ## Documentation
 

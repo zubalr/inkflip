@@ -47,7 +47,8 @@ class DocumentationChecks(unittest.TestCase):
         payload = json.loads(proc.stdout)
         self.assertTrue(payload["ok"], msg=json.dumps(payload["report"], indent=2))
         for check in ("required_docs", "links", "referenced_files", "version_pins",
-                      "registry_commands", "forbidden_phrases", "pending_license", "doc_facts"):
+                      "registry_commands", "forbidden_phrases", "required_phrases",
+                      "snapshot_facts"):
             self.assertIn(check, payload["report"])
             self.assertEqual(payload["report"][check], [], msg=f"{check} reported problems")
 
@@ -56,6 +57,18 @@ class DocumentationChecks(unittest.TestCase):
         self.assertTrue(rules["required_docs"], "no required docs configured")
         self.assertTrue(rules["forbidden_phrases"], "forbidden claim list is empty")
         self.assertGreaterEqual(len(rules["version_pins"]), 3, "too few version pin rules")
+        self.assertTrue(rules["snapshot_facts_file"], "snapshot facts file not configured")
+
+    def test_snapshot_facts_are_dated_and_source_bound(self):
+        facts = json.loads((REPO_ROOT / "tests" / "docs" / "snapshot-facts.json").read_text())
+        self.assertTrue(facts["facts"], "no snapshot facts configured")
+        for fact in facts["facts"]:
+            self.assertIn("as_of", fact, f"fact {fact.get('id')} lacks as_of date")
+            self.assertIn("evidence", fact, f"fact {fact.get('id')} lacks evidence path")
+            self.assertTrue(
+                (REPO_ROOT / fact["evidence"]).is_file(),
+                f"fact {fact.get('id')} evidence file does not exist",
+            )
 
 
 if __name__ == "__main__":
