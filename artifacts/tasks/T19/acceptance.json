@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "task_id": "T19",
+  "beads_id": "pdf-t19",
+  "disposition": "accepted",
+  "evaluated_commit": "c132da61a6206723a02b52e944436c674a7db84c",
+  "evaluated_at": "2026-09-13T10:49:56.461655+00:00",
+  "contract_digest": "0433023231f46b52cdea0369762efeef49602ade3ddbe8fd04d6c7eb6f8fe35c",
+  "worker": "devin-t19",
+  "commands": [
+    {
+      "segment": "bun run test:browser -- tests/browser/large-mobile.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/large-mobile.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/large-mobile.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate-agy-devin-20260913",
+      "environment": {}
+    }
+  ],
+  "evidence": {
+    "artifacts/tasks/T19/commands.log": "4f6cfb5bde44e7d0369a76733465a071ad0e859db5f867d2ff4ca307044cb296",
+    "artifacts/tasks/T19/coordinator-commands.log": "8fb367f63447febd7a6c1273b74055ebc947c7e11b7fda8df34bc1b66e456fc0",
+    "artifacts/tasks/T19/peer-review.md": "279514de4e1497ba6ae7725277680907313987e178b44cd86b7229c87b570295",
+    "artifacts/tasks/T19/receipt.json": "99c9effce7968f573ba633e1089db870287ede12c3b4f38cea4d1d45f4576d62",
+    "artifacts/tasks/T19/review.md": "279514de4e1497ba6ae7725277680907313987e178b44cd86b7229c87b570295",
+    "artifacts/tasks/T19/run.json": "44875aab4a6526cfd627ba303fa47dc63d87b67534ff6013fb86da067aca64db"
+  },
+  "criteria": {
+    "1,000-page metadata plan does not render all pages": [
+      "artifacts/tasks/T19/run.json",
+      "artifacts/tasks/T19/commands.log"
+    ],
+    "selected native/OCR limits visible": [
+      "artifacts/tasks/T19/run.json",
+      "artifacts/tasks/T19/commands.log"
+    ],
+    "320px and touch controls usable": [
+      "artifacts/tasks/T19/run.json",
+      "artifacts/tasks/T19/commands.log"
+    ],
+    "oversized edges rejected before allocation": [
+      "artifacts/tasks/T19/run.json",
+      "artifacts/tasks/T19/commands.log"
+    ],
+    "cancellation leaves coherent partial result and next-file health.": [
+      "artifacts/tasks/T19/run.json",
+      "artifacts/tasks/T19/commands.log"
+    ]
+  },
+  "review": {
+    "disposition": "approved",
+    "reviewers": [
+      "hypatia-codex-astra-01a09a5b-0393-78b3-9a8c-e5b1023680b6"
+    ],
+    "path": "artifacts/tasks/T19/review.md"
+  }
+}

@@ -250,6 +250,40 @@ const EXAMPLE_DOC: ViewerDoc = {
       basis: "Font dictionary parsing.",
       limitations: ["Page-level only; no localized bounding coordinates."],
     },
+    {
+      id: "finding-ambig-amounts",
+      kind: "reading_difference",
+      title: "Several locations could match this reading",
+      explanation:
+        "We could not select one location reliably. Compare the candidates without a precise-match claim.",
+      page_index: 0,
+      occurrence_ids: ["occ-p0-dup1", "occ-p0-dup2", "occ-p0-pypdf1"],
+      check_ids: ["chk-1", "chk-2"],
+      alignment: "ambiguous",
+      region_id: null,
+      priority: "ordinary",
+      basis:
+        "region-match-v1 bounded matching over retained reader occurrences; ambiguity reason tie.",
+      limitations: ["A difference does not establish which reading is correct."],
+    },
+    {
+      id: "finding-order-columns",
+      kind: "observed_structure",
+      title: "Same readings in a different emitted order",
+      explanation:
+        "The compared readers produced the same readings here in a different emitted sequence. This is an order difference — not a text difference and not, by itself, an accessibility verdict.",
+      page_index: 0,
+      occurrence_ids: ["occ-p0-dup1", "occ-p0-pypdf1"],
+      check_ids: ["chk-1"],
+      alignment: "not_applicable",
+      region_id: null,
+      priority: "informational",
+      basis:
+        "region-match-v1 bounded matching over retained reader occurrences; order-only difference (emission_order_differs, order distance 0.5000).",
+      limitations: [
+        "Reading-order differences do not establish an accessibility fault.",
+      ],
+    },
   ],
 };
 

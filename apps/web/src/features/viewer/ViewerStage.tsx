@@ -9,6 +9,8 @@ import type { ViewerMode, RotationDegree, ViewerDoc } from "./types";
 import { CanvasOverlay } from "./CanvasOverlay";
 import { ComparePanes } from "./ComparePanes";
 import { AccessibleTextLayer } from "./AccessibleTextLayer";
+import { AlignmentDetail } from "../findings/alignment/AlignmentDetail";
+import { isOrderOnlyFinding } from "../findings/alignment/classify.ts";
 import styles from "./ViewerStage.module.css";
 
 export interface ViewerStageProps {
@@ -78,9 +80,17 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
       if (finding.page_index !== undefined && finding.page_index !== pageIndex) {
         setPageIndex(finding.page_index);
       }
-      if (finding.occurrence_ids && finding.occurrence_ids.length > 0) {
+      if (
+        finding.occurrence_ids &&
+        finding.occurrence_ids.length > 0 &&
+        finding.alignment !== "ambiguous" &&
+        !isOrderOnlyFinding(finding)
+      ) {
         setSelectedOccurrenceId(finding.occurrence_ids[0]);
       } else {
+        // Ambiguous and order-only findings keep every candidate equally
+        // marked; no single occurrence is pre-picked — never
+        // first-match-wins.
         setSelectedOccurrenceId(null);
       }
     },
@@ -358,6 +368,17 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                     {f.explanation}
                   </p>
 
+                  {isSelected && (
+                    <AlignmentDetail
+                      finding={f}
+                      occurrences={doc.occurrences}
+                      readers={doc.readers}
+                      selectedOccurrenceId={selectedOccurrenceId}
+                      onSelectOccurrence={handleSelectOccurrence}
+                      returnFocusId={`finding-item-${f.id}`}
+                    />
+                  )}
+
                   {isSelected && onKeepEvidence && (
                     <button
                       id="btn-keep-evidence"
@@ -367,6 +388,14 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         onKeepEvidence(f);
+                      }}
+                      onKeyDown={(e) => {
+                        // Keep Enter/Space activating this button: the
+                        // card's keydown would preventDefault the native
+                        // activation and re-run finding selection.
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.stopPropagation();
+                        }
                       }}
                     >
                       Keep this evidence

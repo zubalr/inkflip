@@ -1,0 +1,54 @@
+{
+  "task_id": "T19",
+  "beads_id": "pdf-t19",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t19",
+  "base_commit": "25bb2b9d74acdba6bdd08cfdf52f2d7091ee6765",
+  "source_commit": "c132da61a6206723a02b52e944436c674a7db84c",
+  "implementation_commit": "c132da61a6206723a02b52e944436c674a7db84c",
+  "actor": "devin-t19",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-13",
+  "acceptance_criteria_evidence": {
+    "1,000-page metadata plan does not render all pages": {
+      "status": "executed",
+      "detail": "tests/browser/large-mobile.spec.ts test 1 opens a real generated 1,000-page PDF through the public workspace and asserts the page list mounts at most 48 rows (WINDOW_SIZE windowing in PagePicker), that a far page (950) stays reachable via the jump input, and that select-all is honestly capped at 20 with the limit notice visible. run.json records 6/6 passed including this leg.",
+      "evidence": [
+        "artifacts/tasks/T19/run.json",
+        "artifacts/tasks/T19/commands.log"
+      ]
+    },
+    "selected native/OCR limits visible": {
+      "status": "executed",
+      "detail": "tests/browser/large-mobile.spec.ts test 2 asserts the run-limits disclosure (data-testid=run-limits) shows the active profile and every enforced bound: file cap, document cap, native pages per run, OCR pages per run, raster pixel cap. The mobile-profile leg additionally asserts the explicit OCR consent control and the OCR-cap notices already present in OpenWorkspace.",
+      "evidence": [
+        "artifacts/tasks/T19/run.json",
+        "artifacts/tasks/T19/commands.log"
+      ]
+    },
+    "320px and touch controls usable": {
+      "status": "executed",
+      "detail": "tests/browser/large-mobile.spec.ts test 3 runs at a real 320x568 viewport: the mobile profile engages, page toggles measure >=44px, no horizontal overflow (scrollWidth == clientWidth), the OCR consent row renders, preview is on-demand, and the run remains startable. The page-change regression test added at c132da6 verifies a stale preview raster is cleared when the preview page changes.",
+      "evidence": [
+        "artifacts/tasks/T19/run.json",
+        "artifacts/tasks/T19/commands.log"
+      ]
+    },
+    "oversized edges rejected before allocation": {
+      "status": "executed",
+      "detail": "tests/browser/large-mobile.spec.ts test 4 offers a >20 MiB candidate (rejected on declared size before byte reads, intake surface preserved) and a 1,001-page document (rejected with the too_many_pages error). The adapter's pre-allocation raster cap is exercised by the preview path; nothing allocates before the guards pass.",
+      "evidence": [
+        "artifacts/tasks/T19/run.json",
+        "artifacts/tasks/T19/commands.log"
+      ]
+    },
+    "cancellation leaves coherent partial result and next-file health.": {
+      "status": "executed",
+      "detail": "tests/browser/large-mobile.spec.ts test 5 starts a multi-page run, cancels it mid-flight, asserts the honest cancelled state, returns to selection, then opens a different PDF through the confirmed replacement path (pages-summary shows 2 pages). Generation-first cleanup prevents stale writes.",
+      "evidence": [
+        "artifacts/tasks/T19/run.json",
+        "artifacts/tasks/T19/commands.log"
+      ]
+    }
+  }
+}

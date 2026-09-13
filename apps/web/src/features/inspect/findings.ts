@@ -212,13 +212,64 @@ export function deriveFindings(input: FindingsInput): Finding[] {
           : material
             ? "material_token"
             : "ordinary",
-        basis: `${ALIGNMENT_BASIS}; match cost ${match.components.cost.toFixed(4)}.`,
+        basis:
+          `${ALIGNMENT_BASIS}; match cost ${match.components.cost.toFixed(4)}` +
+          (match.provenance !== "one_to_one"
+            ? `; split/merge provenance ${match.provenance}`
+            : "") +
+          ".",
         limitations: [DIFFERENCE_DISCLAIMER],
+      });
+    }
+
+    // -- order-only differences stay order-only (T20) -------------------
+    // A matched pair whose emitted sequence disagrees is an order
+    // difference — never a text difference and not, by itself, an
+    // accessibility verdict. Surfaced as observed_structure so it is
+    // visible without being counted as changed content.
+    for (const [i, diff] of result.order_differences.entries()) {
+      const left = diff.left_occurrence_ids
+        .map((id) => occById.get(id))
+        .filter((o): o is Occurrence => o !== undefined);
+      const right = diff.right_occurrence_ids
+        .map((id) => occById.get(id))
+        .filter((o): o is Occurrence => o !== undefined);
+      if (left.length === 0 && right.length === 0) continue;
+      // "Order-only" is only honest when the paired readings are the
+      // same; a differing-text inversion is already surfaced as a
+      // reading_difference and must not be re-labeled as same-readings.
+      if (groupText(left) !== groupText(right)) continue;
+      const occIds = [...left, ...right].map((o) => o.id);
+      findings.push({
+        id: findingId({ order: alignCheck.id, entry: i }),
+        kind: "observed_structure",
+        title: "Same readings in a different emitted order",
+        explanation:
+          "The compared readers produced the same readings here in a different emitted sequence. This is an order difference — not a text difference and not, by itself, an accessibility verdict.",
+        page_index: page,
+        occurrence_ids: occIds,
+        check_ids: checkIds,
+        alignment: "not_applicable",
+        region_id: regionId,
+        priority: regionId !== null ? "selected" : "informational",
+        basis: `${ALIGNMENT_BASIS}; order-only difference (${diff.kind}, order distance ${diff.order_distance.toFixed(4)}).`,
+        limitations: ["Reading-order differences do not establish an accessibility fault."],
       });
     }
 
     // -- ambiguous units: abstention, never first-match-wins ------------
     for (const [i, entry] of result.ambiguous.entries()) {
+      // Name every evaluated candidate — rival pairings can touch
+      // occurrences outside the contested unit's own left/right spans,
+      // and dropping them would hide evaluated evidence.
+      const candidateIds = new Set<string>([
+        ...entry.left_occurrence_ids,
+        ...entry.right_occurrence_ids,
+      ]);
+      for (const cand of entry.candidates) {
+        for (const id of cand.left_occurrence_ids) candidateIds.add(id);
+        for (const id of cand.right_occurrence_ids) candidateIds.add(id);
+      }
       findings.push({
         id: findingId({ ambiguous: alignCheck.id, entry: i }),
         kind: "reading_difference",
@@ -226,10 +277,7 @@ export function deriveFindings(input: FindingsInput): Finding[] {
         explanation:
           "We could not select one location reliably. Compare the candidates without a precise-match claim.",
         page_index: page,
-        occurrence_ids: [
-          ...entry.left_occurrence_ids,
-          ...entry.right_occurrence_ids,
-        ],
+        occurrence_ids: [...candidateIds].filter((id) => occById.has(id)),
         check_ids: checkIds,
         alignment: "ambiguous",
         region_id: regionId,
