@@ -63,19 +63,28 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
   const namedOccs = selectedFinding
     ? occurrences.filter((o) => selectedFinding.occurrence_ids.includes(o.id))
     : [];
+  // A page-level finding can still name occurrences carrying estimated
+  // polygons — those draw highlight boxes, so claiming "no coordinates
+  // exist" would overclaim. Distinguish the two honest states.
+  const namedHavePolygons = namedOccs.some((o) => o.geometry.polygon !== null);
   const isPageLevelOnly =
     (selectedFinding &&
-      (selectedFinding.alignment === "page_level" ||
-        (namedOccs.length > 0 &&
-          namedOccs.every((o) => o.geometry.polygon === null)))) ||
+      (namedOccs.length > 0
+        ? namedOccs.every((o) => o.geometry.polygon === null)
+        : selectedFinding.alignment === "page_level")) ||
     (selectedOcc &&
       (selectedOcc.geometry.precision === "page_only" ||
         selectedOcc.geometry.precision === "unknown" ||
         selectedOcc.geometry.polygon === null));
+  const pageLevelNotice = isPageLevelOnly
+    ? "none"
+    : selectedFinding && selectedFinding.alignment === "page_level" && namedHavePolygons
+      ? "estimated"
+      : null;
 
   return (
     <div className={styles.wrapper}>
-      {isPageLevelOnly && (
+      {pageLevelNotice !== null && (
         <div
           id="page-level-geometry-notice"
           className={styles.pageLevelNotice}
@@ -86,8 +95,9 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
             ℹ️
           </span>
           <span>
-            This reading or observation applies to Page {page.index + 1} as a whole. No localized
-            bounding coordinates exist for this reader.
+            {pageLevelNotice === "estimated"
+              ? `This reading or observation applies to Page ${page.index + 1} as a whole. Highlighted positions are estimated placements, not localized evidence.`
+              : `This reading or observation applies to Page ${page.index + 1} as a whole. No localized bounding coordinates exist for this reader.`}
           </span>
         </div>
       )}
@@ -138,8 +148,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
               const isCandidateSet =
                 selectedFinding !== null &&
                 selectedFinding !== undefined &&
-                (selectedFinding.alignment === "ambiguous" ||
-                  isOrderOnlyFinding(selectedFinding));
+                (selectedFinding.alignment === "ambiguous" || isOrderOnlyFinding(selectedFinding));
               const isCandidate = !isChosen && isNamed && isCandidateSet;
               const isCoEvidence = !isChosen && isNamed && !isCandidateSet;
 

@@ -140,7 +140,7 @@
   background-color: var(--color-surface-subtle);
   padding: var(--space-3);
   border-radius: var(--radius-card);
-  transition: border-color var(--duration-fast) var(--ease-standard);
+  transition: border-color var(--motion-state) ease-out;
 }
 
 .findingCard:hover {

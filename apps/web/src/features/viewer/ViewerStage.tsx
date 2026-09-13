@@ -199,6 +199,22 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                   tabIndex={isSelected ? 0 : -1}
                   className={`${styles.modeTab} ${isSelected ? styles.modeTabSelected : ""}`}
                   onClick={() => setMode(m)}
+                  onKeyDown={(e) => {
+                    // Roving-tabindex tabs also need arrow-key movement:
+                    // without it the unselected tabs can never receive
+                    // keyboard focus (automatic activation follows focus).
+                    const order = ["page", "reading", "compare"] as const;
+                    const idx = order.indexOf(m);
+                    let next: number | null = null;
+                    if (e.key === "ArrowRight") next = (idx + 1) % order.length;
+                    else if (e.key === "ArrowLeft") next = (idx - 1 + order.length) % order.length;
+                    else if (e.key === "Home") next = 0;
+                    else if (e.key === "End") next = order.length - 1;
+                    if (next === null) return;
+                    e.preventDefault();
+                    setMode(order[next]);
+                    document.getElementById(`tab-mode-${order[next]}`)?.focus();
+                  }}
                 >
                   {m === "page" ? "Page" : m === "reading" ? "Reading" : "Compare"}
                 </button>
