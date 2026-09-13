@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import styles from "./Home.module.css";
+import { ExamplesGallery } from "../features/gallery/ExamplesGallery";
 
 export interface HomeProps {
   onNavigateWorkspace: (withExample?: boolean) => void;
+  onOpenExample?: (exampleId: string) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace }) => {
+export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }) => {
   const [exampleMode, setExampleMode] = useState<"page" | "reading">("page");
 
   return (
@@ -22,6 +24,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace }) => {
           </a>
 
           <nav className={styles.navLinks} aria-label="Main navigation">
+            <a href="#examples" className={styles.navLink}>
+              Examples
+            </a>
             <button
               type="button"
               className={styles.navLink}
@@ -176,6 +181,12 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace }) => {
             </article>
           </div>
         </section>
+
+        {onOpenExample !== undefined && (
+          <div id="examples">
+            <ExamplesGallery onOpenExample={onOpenExample} />
+          </div>
+        )}
 
         {/* Limitations & Invariants Section */}
         <section id="limits">

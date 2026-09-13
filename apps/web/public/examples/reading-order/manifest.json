@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "example_id": "reading-order",
+  "family": "reading-order",
+  "fixture_id": "F12",
+  "card_title": "The same readings in a different order",
+  "mechanism": "Two columns emitted right-then-left; the same text arrives in a different stream order without changing what was read",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "provenance": "prepared",
+  "timing": {
+    "duration_ms": 161,
+    "method": "browser_measured",
+    "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
+  },
+  "files": {
+    "source": {
+      "filename": "reading-order-reordered.pdf",
+      "sha256": "cdedafa22cf2a54386998ebea5e7d8c597f541fcd2c702f7909e16d43c2499df",
+      "byte_length": 766,
+      "download_url": "/examples/reading-order/reading-order-reordered.pdf",
+      "role": "Reordered stream",
+      "report_file": "report.json"
+    },
+    "control": {
+      "filename": "reading-order-control.pdf",
+      "sha256": "41a20c6a460fd9e7c91ffc500573a2ae32e97f9bb6ee5410a33d256b23ba9db4",
+      "byte_length": 766,
+      "download_url": "/examples/reading-order/reading-order-control.pdf",
+      "role": "Natural-order control",
+      "report_file": "report.control.json"
+    }
+  },
+  "readers": {
+    "pdf_js_text": {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "native_text"
+    },
+    "pdf_js_render": {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "render"
+    },
+    "tesseract_js": {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "ocr",
+      "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    }
+  },
+  "findings": [
+    {
+      "id": "f_6265c5a2b8c6fab8",
+      "title": "Same readings in a different emitted order",
+      "category": "observed_structure",
+      "page_index": 0
+    },
+    {
+      "id": "f_de15a04bd75ce9a8",
+      "title": "Same readings in a different emitted order",
+      "category": "observed_structure",
+      "page_index": 0
+    },
+    {
+      "id": "f_2910a6c20c9d981f",
+      "title": "Same readings in a different emitted order",
+      "category": "observed_structure",
+      "page_index": 0
+    },
+    {
+      "id": "f_4fa97dad1cfdefa6",
+      "title": "Same readings in a different emitted order",
+      "category": "observed_structure",
+      "page_index": 0
+    }
+  ],
+  "report_file": "report.json",
+  "report_id": "4f37fccd35f5f1c4d8ecb1dbf752bc7fb6ea1a48fc1338e0418cbbe62f6de4d6",
+  "run_key": "02db7ce08c16bd738dd5ade186ccf726f86d57dbc3c9d5bdb147b9e3706d1040"
+}

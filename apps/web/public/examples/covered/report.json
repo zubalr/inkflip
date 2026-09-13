@@ -1,12 +1,12 @@
 {
   "kind": "report",
   "schema_version": "1.0.0",
-  "report_id": "b159dbf84bc0af3e3c3fe2a52d8e514249199f51641829b94cb64658ebc54348",
+  "report_id": "05ca7d1ddf59cd73f775565e5748e80db6165027e15adbc25a85040c84e2d138",
   "document": {
-    "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
-    "byte_length": 1437,
+    "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+    "byte_length": 1504,
     "page_count": 1,
-    "display_name": "mapping-amount.pdf",
+    "display_name": "covered-amount.pdf",
     "source_asset_id": null
   },
   "readers": [
@@ -280,15 +280,16 @@
       "id": "chk_p0_native_text",
       "status": "completed",
       "reason": null,
-      "produced_occurrence_count": 7,
+      "produced_occurrence_count": 8,
       "retained_occurrence_ids": [
-        "o_72f7132299daa1ccb2621014f9df1b50",
-        "o_a658bfc15efd2ddc1ac9ea4ac97d01a7",
-        "o_e5d5df09897e96a3dfe8eee950c300b1",
-        "o_d664f22ea0becfddd0a24257b4d2e932",
-        "o_cd82f62f993a93103bf401d34c8977fc",
-        "o_d70a7db88487190408b86264f8ad3eee",
-        "o_16438263b080bde7a2f26ce8faf011cb"
+        "o_a302de7f24bf5dfa5e2bd34508f841b1",
+        "o_691ff6bd78b2cc57d1370c9d030e971f",
+        "o_822dd722c0d39cab6875e0d4b2f1a49f",
+        "o_2ce953a5f498c92e88fe1eebae19fa08",
+        "o_ad0a2d921d540f4b1f28c72c17313d7b",
+        "o_82970b852722e881edaf07440d5f6d45",
+        "o_d31bb8e72d32e2ea15d6c69347db46ec",
+        "o_834818463dbab514591a529fb6a6013c"
       ]
     },
     {
@@ -304,7 +305,7 @@
       "reason": null,
       "produced_occurrence_count": 1,
       "retained_occurrence_ids": [
-        "o_5f73c0ea1b0ec1e476188ce674a9bc56"
+        "o_29ceedfacef113958c2cf013fe900105"
       ]
     },
     {
@@ -317,7 +318,7 @@
   ],
   "occurrences": [
     {
-      "id": "o_72f7132299daa1ccb2621014f9df1b50",
+      "id": "o_a302de7f24bf5dfa5e2bd34508f841b1",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 0,
@@ -381,7 +382,7 @@
       ]
     },
     {
-      "id": "o_a658bfc15efd2ddc1ac9ea4ac97d01a7",
+      "id": "o_691ff6bd78b2cc57d1370c9d030e971f",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 1,
@@ -406,7 +407,7 @@
       ]
     },
     {
-      "id": "o_e5d5df09897e96a3dfe8eee950c300b1",
+      "id": "o_822dd722c0d39cab6875e0d4b2f1a49f",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 2,
@@ -526,7 +527,7 @@
       ]
     },
     {
-      "id": "o_d664f22ea0becfddd0a24257b4d2e932",
+      "id": "o_2ce953a5f498c92e88fe1eebae19fa08",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 3,
@@ -551,7 +552,7 @@
       ]
     },
     {
-      "id": "o_cd82f62f993a93103bf401d34c8977fc",
+      "id": "o_ad0a2d921d540f4b1f28c72c17313d7b",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 4,
@@ -563,6 +564,56 @@
           "raw_end": 6,
           "normalized_start": 0,
           "normalized_end": 6,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            190.171875
+          ],
+          [
+            194.784,
+            190.171875
+          ],
+          [
+            194.784,
+            136.546875
+          ],
+          [
+            48,
+            136.546875
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text4",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_82970b852722e881edaf07440d5f6d45",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 5,
+      "raw_text": "$100",
+      "normalized_text": "$100",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
           "operation": "identity"
         }
       ],
@@ -594,17 +645,17 @@
       },
       "engine_score": null,
       "source_asset_id": null,
-      "raw_source_locator": "pdfjs:getTextContent:p0:text4",
+      "raw_source_locator": "pdfjs:getTextContent:p0:text5",
       "limitations": [
         "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
         "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
       ]
     },
     {
-      "id": "o_d70a7db88487190408b86264f8ad3eee",
+      "id": "o_d31bb8e72d32e2ea15d6c69347db46ec",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
-      "ordinal": 5,
+      "ordinal": 6,
       "raw_text": "",
       "normalized_text": "",
       "normalization_map": [],
@@ -619,17 +670,17 @@
       },
       "engine_score": null,
       "source_asset_id": null,
-      "raw_source_locator": "pdfjs:getTextContent:p0:text5",
+      "raw_source_locator": "pdfjs:getTextContent:p0:text6",
       "limitations": [
         "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
         "degenerate TextItem extent (zero advance or thickness); position retained at item anchor only"
       ]
     },
     {
-      "id": "o_16438263b080bde7a2f26ce8faf011cb",
+      "id": "o_834818463dbab514591a529fb6a6013c",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
-      "ordinal": 6,
+      "ordinal": 7,
       "raw_text": "Rendered marks and extracted text are separate.",
       "normalized_text": "Rendered marks and extracted text are separate.",
       "normalization_map": [
@@ -753,14 +804,14 @@
       },
       "engine_score": null,
       "source_asset_id": null,
-      "raw_source_locator": "pdfjs:getTextContent:p0:text6",
+      "raw_source_locator": "pdfjs:getTextContent:p0:text7",
       "limitations": [
         "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
         "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
       ]
     },
     {
-      "id": "o_5f73c0ea1b0ec1e476188ce674a9bc56",
+      "id": "o_29ceedfacef113958c2cf013fe900105",
       "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
       "page_index": 0,
       "ordinal": 0,
@@ -973,8 +1024,9 @@
       "explanation": "pdf.js text returned “$1,000”. tesseract.js returned “$100”.",
       "page_index": 0,
       "occurrence_ids": [
-        "o_cd82f62f993a93103bf401d34c8977fc",
-        "o_5f73c0ea1b0ec1e476188ce674a9bc56"
+        "o_ad0a2d921d540f4b1f28c72c17313d7b",
+        "o_82970b852722e881edaf07440d5f6d45",
+        "o_29ceedfacef113958c2cf013fe900105"
       ],
       "check_ids": [
         "chk_p0_native_text",
@@ -983,7 +1035,7 @@
       "alignment": "unique",
       "region_id": "region_p0_1",
       "priority": "selected",
-      "basis": "region-match-v1 bounded matching over retained reader occurrences; match cost 0.1842.",
+      "basis": "region-match-v1 bounded matching over retained reader occurrences; match cost 0.4451; split/merge provenance many_to_one.",
       "limitations": [
         "A difference does not establish which reading is correct."
       ]
@@ -992,10 +1044,10 @@
   "annotations": [],
   "assets": [],
   "execution": {
-    "execution_id": "f6f5a53b-9647-4f24-97bd-c94a619535b3",
-    "run_key": "2a82d307a1756611d7cbc3a435de30a3bf6b3ad3c04c9de75bdfacddcb3afeed",
-    "started_at": "2026-09-13T12:25:01.527Z",
-    "duration_ms": 249,
+    "execution_id": "0b9fcd8f-173b-4570-910f-9672b5cb3085",
+    "run_key": "ea1d5f7733e63e926aaa4bd22f50b15af7cb1b5aace356c48e132e36f433259e",
+    "started_at": "2026-09-13T12:25:04.042Z",
+    "duration_ms": 132,
     "status": "complete",
     "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
     "result_origin": "live",

@@ -1,0 +1,38 @@
+T21 — six public examples + gallery (worker: devin-t21)
+Worktree: original/worktrees/pdf-t21, base c696948
+
+Implementation notes
+- Six example cards under apps/web/public/examples/{amount,duplicates,
+  geometry,reading-order,covered,scan}/ each with manifest.json,
+  report.json (real captured sealed reports from scripts/capture.mjs
+  matrix), and the real source PDF bytes.
+- scripts/prepare_examples.py rewritten data-driven: derives each card's
+  manifest from its captured report (fixture sha256, produced counts,
+  reader identities, languages actually executed) — no hand-typed claims.
+- apps/web/src/features/gallery/ — ExamplesGallery + loader + index;
+  cards render on Home; each card links #/workspace?example=<id>.
+- Workspace: initialExampleId prop fetches examples/<id>/report.json and
+  runs it through the real session.offerFile import gate (never mounted
+  directly); honest local error surface (role=alert) on fetch failure.
+- tests/gallery/gallery.test.mjs — 5 node:test legs: manifest validates
+  against canonical schema (AJV with $defs registered), PDF bytes match
+  manifest sha256, report findings/languages match manifest claims,
+  no padded cards (distinct fixture ids), total < static limit.
+- tests/gallery/smoke.spec.ts — browser leg: gallery renders six cards;
+  opening a card imports the real report and mounts the viewer.
+
+Commands executed (this worktree)
+
+$ node --test tests/gallery/gallery.test.mjs
+  pass 5 / fail 0
+
+$ bun run test:fixtures
+  70 tests passed (fixture manifest, baselines, hashes)
+
+$ bunx --no-install playwright test tests/gallery/smoke.spec.ts
+  1 passed — six cards render; example card import mounts viewer with
+  findings; assertions target T21-era selectors (export panel belongs
+  to T23, not present on this base).
+
+$ bun run build
+  clean

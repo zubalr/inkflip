@@ -1,12 +1,12 @@
 {
   "kind": "report",
   "schema_version": "1.0.0",
-  "report_id": "b159dbf84bc0af3e3c3fe2a52d8e514249199f51641829b94cb64658ebc54348",
+  "report_id": "bc0bad748d879a6965079776a84d68415c63dfdbfeb23e32982162f92774a14d",
   "document": {
-    "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+    "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
     "byte_length": 1437,
     "page_count": 1,
-    "display_name": "mapping-amount.pdf",
+    "display_name": "geometry-270.pdf",
     "source_asset_id": null
   },
   "readers": [
@@ -202,20 +202,20 @@
           "space": "canonical_page",
           "polygon": [
             [
-              40,
-              122
+              30,
+              230
             ],
             [
-              200,
-              122
+              300,
+              230
             ],
             [
-              200,
-              195
+              300,
+              380
             ],
             [
-              40,
-              195
+              30,
+              380
             ]
           ],
           "transform_ids": [
@@ -282,13 +282,13 @@
       "reason": null,
       "produced_occurrence_count": 7,
       "retained_occurrence_ids": [
-        "o_72f7132299daa1ccb2621014f9df1b50",
-        "o_a658bfc15efd2ddc1ac9ea4ac97d01a7",
-        "o_e5d5df09897e96a3dfe8eee950c300b1",
-        "o_d664f22ea0becfddd0a24257b4d2e932",
-        "o_cd82f62f993a93103bf401d34c8977fc",
-        "o_d70a7db88487190408b86264f8ad3eee",
-        "o_16438263b080bde7a2f26ce8faf011cb"
+        "o_c2743463a510909310e141c9fb7cff81",
+        "o_726e52472ae912c02af9f24d9ab87dcd",
+        "o_2c62798b9afbf564e5ae7688b4f0c053",
+        "o_8e9d1073786a99fba8a967bbc97e0786",
+        "o_41cbbfba73d63eb7f82eace88292c82a",
+        "o_26c8391a340e550d0f32911b5394d84d",
+        "o_cbf1bc694cf33b06b240e45a17816bd2"
       ]
     },
     {
@@ -302,9 +302,12 @@
       "id": "ocr_0_0",
       "status": "completed",
       "reason": null,
-      "produced_occurrence_count": 1,
+      "produced_occurrence_count": 4,
       "retained_occurrence_ids": [
-        "o_5f73c0ea1b0ec1e476188ce674a9bc56"
+        "o_dbb5208c5a741dc526b151b3199760b6",
+        "o_98d90f75d5ee703a1046578b000229e9",
+        "o_e6af86a6233e4b79df3378cb263ae535",
+        "o_9f50b7adb79a8e7205671e48a8e6d8b6"
       ]
     },
     {
@@ -317,7 +320,7 @@
   ],
   "occurrences": [
     {
-      "id": "o_72f7132299daa1ccb2621014f9df1b50",
+      "id": "o_c2743463a510909310e141c9fb7cff81",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 0,
@@ -351,20 +354,20 @@
         "space": "canonical_page",
         "polygon": [
           [
-            48,
-            51.390625
+            56,
+            82.78125
           ],
           [
-            218.704,
-            51.390625
+            397.408,
+            82.78125
           ],
           [
-            218.704,
-            33.515625
+            397.408,
+            47.03125
           ],
           [
-            48,
-            33.515625
+            56,
+            47.03125
           ]
         ],
         "transform_ids": [
@@ -381,7 +384,7 @@
       ]
     },
     {
-      "id": "o_a658bfc15efd2ddc1ac9ea4ac97d01a7",
+      "id": "o_726e52472ae912c02af9f24d9ab87dcd",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 1,
@@ -406,7 +409,7 @@
       ]
     },
     {
-      "id": "o_e5d5df09897e96a3dfe8eee950c300b1",
+      "id": "o_2c62798b9afbf564e5ae7688b4f0c053",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 2,
@@ -496,20 +499,20 @@
         "space": "canonical_page",
         "polygon": [
           [
-            48,
-            82.542969
+            56,
+            145.085938
           ],
           [
-            272.76,
-            82.542969
+            505.52,
+            145.085938
           ],
           [
-            272.76,
-            69.136719
+            505.52,
+            118.273438
           ],
           [
-            48,
-            69.136719
+            56,
+            118.273438
           ]
         ],
         "transform_ids": [
@@ -526,7 +529,7 @@
       ]
     },
     {
-      "id": "o_d664f22ea0becfddd0a24257b4d2e932",
+      "id": "o_8e9d1073786a99fba8a967bbc97e0786",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 3,
@@ -551,18 +554,18 @@
       ]
     },
     {
-      "id": "o_cd82f62f993a93103bf401d34c8977fc",
+      "id": "o_41cbbfba73d63eb7f82eace88292c82a",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 4,
-      "raw_text": "$1,000",
-      "normalized_text": "$1,000",
+      "raw_text": "$100",
+      "normalized_text": "$100",
       "normalization_map": [
         {
           "raw_start": 0,
-          "raw_end": 6,
+          "raw_end": 4,
           "normalized_start": 0,
-          "normalized_end": 6,
+          "normalized_end": 4,
           "operation": "identity"
         }
       ],
@@ -571,20 +574,20 @@
         "space": "canonical_page",
         "polygon": [
           [
-            48,
-            190.171875
+            56,
+            360.34375
           ],
           [
-            154.752,
-            190.171875
+            269.504,
+            360.34375
           ],
           [
-            154.752,
-            136.546875
+            269.504,
+            253.09375
           ],
           [
-            48,
-            136.546875
+            56,
+            253.09375
           ]
         ],
         "transform_ids": [
@@ -601,7 +604,7 @@
       ]
     },
     {
-      "id": "o_d70a7db88487190408b86264f8ad3eee",
+      "id": "o_26c8391a340e550d0f32911b5394d84d",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 5,
@@ -626,7 +629,7 @@
       ]
     },
     {
-      "id": "o_16438263b080bde7a2f26ce8faf011cb",
+      "id": "o_cbf1bc694cf33b06b240e45a17816bd2",
       "reader_id": "pdfjs-6_3_289-text",
       "page_index": 0,
       "ordinal": 6,
@@ -730,20 +733,20 @@
         "space": "canonical_page",
         "polygon": [
           [
-            48,
-            272.542969
+            56,
+            525.085938
           ],
           [
-            309.456,
-            272.542969
+            578.912,
+            525.085938
           ],
           [
-            309.456,
-            259.136719
+            578.912,
+            498.273438
           ],
           [
-            48,
-            259.136719
+            56,
+            498.273438
           ]
         ],
         "transform_ids": [
@@ -760,18 +763,18 @@
       ]
     },
     {
-      "id": "o_5f73c0ea1b0ec1e476188ce674a9bc56",
+      "id": "o_dbb5208c5a741dc526b151b3199760b6",
       "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
       "page_index": 0,
       "ordinal": 0,
-      "raw_text": "$100",
-      "normalized_text": "$100",
+      "raw_text": "‘e)",
+      "normalized_text": "‘e)",
       "normalization_map": [
         {
           "raw_start": 0,
-          "raw_end": 4,
+          "raw_end": 3,
           "normalized_start": 0,
-          "normalized_end": 4,
+          "normalized_end": 3,
           "operation": "identity"
         }
       ],
@@ -780,20 +783,20 @@
         "space": "canonical_page",
         "polygon": [
           [
-            48.5,
-            144
+            266,
+            273
           ],
           [
-            153,
-            144
+            266,
+            341
           ],
           [
-            153,
-            183.5
+            220,
+            341
           ],
           [
-            48.5,
-            183.5
+            220,
+            273
           ]
         ],
         "transform_ids": [
@@ -804,14 +807,184 @@
         "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
       },
       "engine_score": {
-        "value": 96,
+        "value": 0,
         "scale_min": 0,
         "scale_max": 100,
         "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
       },
       "source_asset_id": null,
       "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[0].words[0]",
-      "limitations": []
+      "limitations": [
+        "low_engine_score"
+      ]
+    },
+    {
+      "id": "o_98d90f75d5ee703a1046578b000229e9",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 1,
+      "raw_text": "©",
+      "normalized_text": "©",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            212.5,
+            273
+          ],
+          [
+            212.5,
+            341
+          ],
+          [
+            166.5,
+            341
+          ],
+          [
+            166.5,
+            273
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 54,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[0]",
+      "limitations": [
+        "low_engine_score"
+      ]
+    },
+    {
+      "id": "o_e6af86a6233e4b79df3378cb263ae535",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 2,
+      "raw_text": "—",
+      "normalized_text": "—",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            158.5,
+            274
+          ],
+          [
+            158.5,
+            340
+          ],
+          [
+            116.5,
+            340
+          ],
+          [
+            116.5,
+            274
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 39,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[0]",
+      "limitations": [
+        "low_engine_score"
+      ]
+    },
+    {
+      "id": "o_9f50b7adb79a8e7205671e48a8e6d8b6",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 3,
+      "raw_text": "GF",
+      "normalized_text": "GF",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            108,
+            269
+          ],
+          [
+            108,
+            347
+          ],
+          [
+            57,
+            347
+          ],
+          [
+            57,
+            269
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 0,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[3].words[0]",
+      "limitations": [
+        "low_engine_score"
+      ]
     }
   ],
   "transforms": [
@@ -821,20 +994,20 @@
       "from_space": "pdf_user:p0",
       "to_space": "canonical:p0",
       "matrix": [
-        1,
+        2,
         0,
         0,
-        -1,
-        0,
-        400
+        -2,
+        -40,
+        780
       ],
       "inverse": [
-        1,
+        0.5,
         0,
         0,
-        -1,
-        0,
-        400
+        -0.5,
+        20,
+        390
       ],
       "operation": "page_box_to_canonical",
       "precision": "exact",
@@ -846,24 +1019,24 @@
       "from_space": "canonical:p0",
       "to_space": "display:p0",
       "matrix": [
+        0,
+        -1,
         1,
         0,
         0,
-        1,
-        0,
-        0
+        960
       ],
       "inverse": [
-        1,
-        0,
         0,
         1,
+        -1,
         0,
+        960,
         0
       ],
       "operation": "display_rotation",
       "precision": "exact",
-      "source": "Document /Rotate 0 quarter-turn in top-left canonical space"
+      "source": "Document /Rotate 270 quarter-turn in top-left canonical space"
     },
     {
       "id": "t_p0_raster_r_p0_0",
@@ -900,20 +1073,20 @@
         0,
         0,
         1,
-        -65,
-        -229
+        -406,
+        -1266
       ],
       "inverse": [
         1,
         0,
         0,
         1,
-        65,
-        229
+        406,
+        1266
       ],
       "operation": "crop_translation",
       "precision": "exact",
-      "source": "OCR crop origin (65,229) raster pixels for ocr:ocr_ocr_0_0"
+      "source": "OCR crop origin (406,1266) raster pixels for ocr:ocr_ocr_0_0"
     },
     {
       "id": "t_p0_ocrresize_ocr_ocr_0_0",
@@ -947,17 +1120,17 @@
       "media_box": null,
       "crop_box": null,
       "effective_view_box": [
-        0,
-        0,
-        520,
-        400
+        20,
+        40,
+        500,
+        390
       ],
       "box_source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API",
-      "user_unit": 1,
-      "rotation": 0,
+      "user_unit": 2,
+      "rotation": 270,
       "canonical_size_pt": [
-        520,
-        400
+        960,
+        700
       ],
       "raw_to_canonical_transform_id": "t_p0_canonical",
       "limitations": [
@@ -970,11 +1143,14 @@
       "id": "f_3b9b34d179df717d",
       "kind": "reading_difference",
       "title": "This amount reads differently",
-      "explanation": "pdf.js text returned “$1,000”. tesseract.js returned “$100”.",
+      "explanation": "pdf.js text returned “$100”. tesseract.js returned “GF”.",
       "page_index": 0,
       "occurrence_ids": [
-        "o_cd82f62f993a93103bf401d34c8977fc",
-        "o_5f73c0ea1b0ec1e476188ce674a9bc56"
+        "o_41cbbfba73d63eb7f82eace88292c82a",
+        "o_9f50b7adb79a8e7205671e48a8e6d8b6",
+        "o_e6af86a6233e4b79df3378cb263ae535",
+        "o_98d90f75d5ee703a1046578b000229e9",
+        "o_dbb5208c5a741dc526b151b3199760b6"
       ],
       "check_ids": [
         "chk_p0_native_text",
@@ -983,7 +1159,7 @@
       "alignment": "unique",
       "region_id": "region_p0_1",
       "priority": "selected",
-      "basis": "region-match-v1 bounded matching over retained reader occurrences; match cost 0.1842.",
+      "basis": "region-match-v1 bounded matching over retained reader occurrences; match cost 0.3899; split/merge provenance one_to_many.",
       "limitations": [
         "A difference does not establish which reading is correct."
       ]
@@ -992,10 +1168,10 @@
   "annotations": [],
   "assets": [],
   "execution": {
-    "execution_id": "f6f5a53b-9647-4f24-97bd-c94a619535b3",
-    "run_key": "2a82d307a1756611d7cbc3a435de30a3bf6b3ad3c04c9de75bdfacddcb3afeed",
-    "started_at": "2026-09-13T12:25:01.527Z",
-    "duration_ms": 249,
+    "execution_id": "e89003c4-d81e-4c29-921d-e10e832d7335",
+    "run_key": "9bb35031950c23aedc4178fc4882638139f7404c9640062d279e7bd4b32c5bdb",
+    "started_at": "2026-09-13T12:29:29.246Z",
+    "duration_ms": 175,
     "status": "complete",
     "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
     "result_origin": "live",

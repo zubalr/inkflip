@@ -1,49 +1,49 @@
 {
   "schema_version": "1.0.0",
-  "example_id": "amount",
-  "family": "mapping-amount",
-  "fixture_id": "F01",
-  "card_title": "The amount that reads differently",
-  "mechanism": "Font ToUnicode maps the displayed 1 to 1,0; visual $100 becomes extracted $1,000",
+  "example_id": "covered",
+  "family": "covered-text",
+  "fixture_id": "F02",
+  "card_title": "The amount hidden under white paint",
+  "mechanism": "A painted white rectangle covers the printed amount; the render shows nothing while the text layer still carries it",
   "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
   "provenance": "prepared",
   "timing": {
-    "duration_ms": 249,
+    "duration_ms": 132,
     "method": "browser_measured",
     "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
   },
   "files": {
     "source": {
-      "filename": "mapping-amount.pdf",
-      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
-      "byte_length": 1437,
-      "download_url": "/examples/amount/mapping-amount.pdf",
+      "filename": "covered-amount.pdf",
+      "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+      "byte_length": 1504,
+      "download_url": "/examples/covered/covered-amount.pdf",
       "role": "Source document",
       "report_file": "report.json"
     },
     "control": {
-      "filename": "mapping-control.pdf",
-      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "filename": "covered-control.pdf",
+      "sha256": "cf003f5a746ace7ea6efab9c86733b267159cd8f6bc0343f6a09f0233d95d03d",
       "byte_length": 1429,
-      "download_url": "/examples/amount/mapping-control.pdf",
-      "role": "Clean control (renders identically)",
+      "download_url": "/examples/covered/covered-control.pdf",
+      "role": "Clean control",
       "report_file": "report.control.json"
     },
-    "unicode_native": {
-      "filename": "native-unicode-native.pdf",
-      "sha256": "5ae99c803de6701b334c3328dedde576e9ee425d4c0aa040d5b5c8da7349b159",
-      "byte_length": 1409,
-      "download_url": "/examples/amount/native-unicode-native.pdf",
-      "role": "Identity-H encoded companion",
-      "report_file": "report.native-unicode-native.json"
+    "contrast_white": {
+      "filename": "white-contrast-white.pdf",
+      "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
+      "byte_length": 630,
+      "download_url": "/examples/covered/white-contrast-white.pdf",
+      "role": "White-on-white detail companion",
+      "report_file": "report.white-contrast-white.json"
     },
-    "unicode_control": {
-      "filename": "native-unicode-control.pdf",
-      "sha256": "3456ae2c3cd0bac03c76656f7f0150b9e1be92ad384006d4b158a39feef7b421",
-      "byte_length": 626,
-      "download_url": "/examples/amount/native-unicode-control.pdf",
-      "role": "Identity-H clean control",
-      "report_file": "report.native-unicode-control.json"
+    "contrast_control": {
+      "filename": "white-contrast-control.pdf",
+      "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+      "byte_length": 657,
+      "download_url": "/examples/covered/white-contrast-control.pdf",
+      "role": "Contrast clean control",
+      "report_file": "report.white-contrast-control.json"
     }
   },
   "readers": {
@@ -82,6 +82,6 @@
     }
   ],
   "report_file": "report.json",
-  "report_id": "b159dbf84bc0af3e3c3fe2a52d8e514249199f51641829b94cb64658ebc54348",
-  "run_key": "2a82d307a1756611d7cbc3a435de30a3bf6b3ad3c04c9de75bdfacddcb3afeed"
+  "report_id": "05ca7d1ddf59cd73f775565e5748e80db6165027e15adbc25a85040c84e2d138",
+  "run_key": "ea1d5f7733e63e926aaa4bd22f50b15af7cb1b5aace356c48e132e36f433259e"
 }
