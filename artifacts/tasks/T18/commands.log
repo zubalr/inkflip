@@ -1,0 +1,145 @@
+T18 commands.log — exact commands and verbatim results
+Worktree: /Users/zubair/Code/Projects/pdf project/worktrees/pdf-t18
+Branch: work/devin/t18   Base: f25d3ee   Worker: devin-t18
+All commands run from the worktree root unless noted.
+
+======================================================================
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --list
+Listing tests:
+  tests/gates/g1.spec.ts:643:1 › G1 leg 1: real own-file open/read/select/plan/cancel/replace
+  tests/gates/g1.spec.ts:986:1 › G1 leg 2: OCR + source geometry on the real reader stack
+  tests/gates/g1.spec.ts:1218:1 › G1 leg 3: selected export → local reopen → offline OCR
+Total: 3 tests in 1 file
+Exit: 0
+
+======================================================================
+Run 1 (after first rewrite) — FAILED at leg 1
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --reporter=line
+Running 3 tests using 1 worker
+  1) tests/gates/g1.spec.ts:643:1 › G1 leg 1: real own-file open/read/select/plan/cancel/replace
+    Error: expect(received).toBe(expected) // Object.is equality
+    Expected: "exact"
+    Received: "estimated"
+      602 |   expect(amountOcc, "real extracted occurrences must contain the amount").toBeTruthy();
+      603 |   expect(amountOcc!.geometry.polygon!.length).toBeGreaterThan(2);
+    > 604 |   expect(amountOcc!.geometry.precision).toBe("exact");
+  1 failed, 2 did not run
+Exit: 1
+FIX: pdf.js TextItem extents are always `estimated` by contract
+(packages/readers-pdfjs/src/text.ts:236; OCR boxes likewise,
+packages/readers-tesseract/src/occurrences.ts:172). Changed the four
+precision assertions to "estimated" — the honest value, not a weaker one.
+
+======================================================================
+Run 2 — FAILED at leg 1
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --reporter=line
+  1) tests/gates/g1.spec.ts:643:1 › G1 leg 1 ...
+    Error: expect(received).toBe(expected)
+    Expected: 3
+    Received: 2
+    > 675 |   expect(dispatched.length).toBe(3);
+  1 failed, 2 did not run
+Exit: 1
+FIX: deriveDependencies (packages/runtime/src/checks.ts:73) gates `ocr`
+on the same page's `render` check, so only native_text + render dispatch
+immediately. Asserted 2 initial dispatches and made the feeder drain the
+OCR job from the coordinator outbox after render completes.
+
+======================================================================
+Run 3 — FAILED at leg 1
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --reporter=line
+  1) tests/gates/g1.spec.ts:643:1 › G1 leg 1 ...
+    Error: expect(received).toBe(expected)
+    Expected: "partial"
+    Received: null
+    > 724 |   expect(fed.status).toBe("partial");
+  1 failed, 2 did not run
+Exit: 1
+FIX: "worker_crash" is a TRANSIENT_REASONS member
+(packages/runtime/src/limits.ts:112) → the coordinator granted the single
+automatic retry and the run stayed running. Switched the failed OCR
+terminal to the never-retry reason "unsupported".
+
+======================================================================
+Run 4 — PASSED (registered adapted command)
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --reporter=line
+Running 3 tests using 1 worker
+  3 passed (3.7s)
+Exit: 0
+
+======================================================================
+Run 5 — PASSED, per-test durations (list reporter)
+$ bun x --no-install playwright test tests/gates/g1.spec.ts --reporter=list
+Running 3 tests using 1 worker
+  ✓  1 tests/gates/g1.spec.ts:643:1 › G1 leg 1: real own-file open/read/select/plan/cancel/replace (958ms)
+  ✓  2 tests/gates/g1.spec.ts:995:1 › G1 leg 2: OCR + source geometry on the real reader stack (774ms)
+  ✓  3 tests/gates/g1.spec.ts:1228:1 › G1 leg 3: selected export → local reopen → offline OCR (990ms)
+  3 passed (3.9s)
+Exit: 0
+NOTE: timings are real, not stubbed — tessdata-fast-eng (sha256
+7d4322bd…) over loopback + tesseract-core wasm on Apple Silicon is this
+fast for single-region OCR. Every OCR step returns through the real
+__t15 outcome wrapper and would fail loudly on a stub or a 404 asset.
+
+======================================================================
+$ git add tests/gates/g1.spec.ts artifacts/gates/G1/ && git commit
+[work/devin/t18 c3f2c84] T18: G1 gate spec green on real mounts (3/3 pass)
+ 10 files changed, 3538 insertions(+), 605 deletions(-)
+$ git push origin work/devin/t18
+ * [new branch]      work/devin/t18 -> work/devin/t18
+Exit: 0
+
+======================================================================
+Registered gate command — blocked at prerequisites on this branch (by design)
+$ python3 scripts/gate.py G1
+prerequisite unmet: Git evidence lookup failed
+(repeated once per required task — 18 lines total; see below)
+Exit: 1
+
+CAUSE: gate.py check_prerequisites → acceptance_receipts.validate()
+requires each required task's Beads-recorded accepted_commit to be a
+merge-base ancestor of HEAD. This branch is f25d3ee + the T18 spec
+commit; the coordinator's "receipt refresh" batches re-bound every
+accepted_commit to newer origin/main commits not in this history.
+Verified directly:
+
+$ git merge-base --is-ancestor <accepted_commit> HEAD
+  fca6a4c9 (T01): NOT ancestor
+  8582063 (T05): NOT ancestor
+  2c40083 (T15): NOT ancestor
+  f25d3ee (T17): ancestor      ← branch base
+  34d5dd7 (T22): NOT ancestor
+  f8fad07 (T24): NOT ancestor
+  … same pattern for all T01–T16 refresh commits
+
+PROOF THE GATE EXECUTES ON CANONICAL MAIN:
+$ python3 - <<'EOF'
+import sys; sys.path.insert(0,'scripts')
+import coordination, gate
+g = gate.load_gates()['G1']
+verified, errors = gate.check_prerequisites(g, coordination.issues_by_id(), ref='origin/main')
+print('verified:', len(verified)); [print('ERR:', e) for e in errors]
+EOF
+verified: 19
+Exit: 0
+→ All 19 required tasks (T01–T17, T22, T24) pass full receipt
+validation against origin/main. On the merged branch gate.py G1 will
+run the scenario: pnpm exec playwright test tests/gates/g1.spec.ts
+(adapted: bun x --no-install playwright test tests/gates/g1.spec.ts),
+which is exactly the command shown passing above. origin/main diff vs
+f25d3ee outside artifacts/.beads is only native/inkflip/checks/structure
+(T28) — nothing the spec touches, so the merged run is expected green.
+
+======================================================================
+Capture sanity (post-run evidence inspection)
+$ python3 - <<'EOF'   # per-capture record/violation counts
+00-open-journey.json     records:46 violations:0  serverLog:23
+01-geometry-ocr.json     records:45 violations:0  serverLog:22
+02-export-reopen.json    records:47 violations:20 serverLog:22
+03-cache-warm-ocr.json   records:15 violations:0  serverLog:7
+04-offline-warm.json     records:1  violations:0  serverLog:0  offline:true
+EOF
+All 20 violations in 02 are channel=downloads and whitelisted markers
+(canary text, document sha256, report_id, run_key) — the exported files
+legitimately carry them. Zero marker hits in request/console/storage/
+server-log channels.
