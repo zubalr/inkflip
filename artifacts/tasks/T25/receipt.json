@@ -1,0 +1,15 @@
+{
+  "task": "T25",
+  "beads_id": "pdf-t25",
+  "evaluated_commit": "2c5ce7d1c130359b32da9e786db60e4007a96a95",
+  "commands": ["bun run test:privacy -- tests/privacy/cache.spec.ts"],
+  "result": "8 collected / 8 passed / 0 failed / 0 skipped",
+  "criteria": {
+    "Cold/offline without model reports unavailable": "verified — cold-offline leg asserts zero caches on load, not_prepared after register, typed unavailable_offline model state, rejected own-file open",
+    "prepared offline own-file works without requests": "verified — prepared leg reloads the shell through the SW offline and completes the own-file run; server access log confirms zero requests",
+    "model update cannot reuse wrong hash": "verified — store-time integrity_mismatch refuses the wrong-hash generation; serve-time digest check evicts and degrades honestly",
+    "clear terminates workers/revokes URLs/removes requested caches, with no forensic erasure promise.": "verified — clear-file teardown events observed; remove deletes owned caches only; OFFLINE_LIMITATIONS asserted in result and DOM; forbidden-claims scan clean"
+  },
+  "review": "artifacts/tasks/T25/review.md — independent review APPROVE after Finding-1 provenance check resolved and five minor honesty fixes landed",
+  "limitations": "Review F7/F8 nits accepted: >240s orphan-prepare window and crash-between-index-flip-and-sweep window; both bounded, final state honest. Second acceptance-command leg (manual receipts) is Cursor-scoped."
+}
