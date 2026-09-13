@@ -36,6 +36,9 @@ from inkflip.readers import pdfium, pypdf as pypdf_reader, tesseract
 from inkflip.runtime.artifacts import atomic_write_bytes
 
 ALLOWLISTED_READERS = {"pdfium", "pypdf", "tesseract"}
+# planning/config/settings.json native.max_file_bytes — fail closed before allocating.
+NATIVE_MAX_FILE_BYTES = 104_857_600
+NATIVE_MAX_OUTPUT_BYTES = 67_108_864
 READER_MODULES = {
     "pdfium": pdfium,
     "pypdf": pypdf_reader,
@@ -200,7 +203,15 @@ def _extract_tesseract(
 ) -> tuple[dict, list[dict], list[dict], list[dict]]:
     desc = tesseract.describe()
     reader = desc["reader"]
-    model_digest, _trained = tesseract.model_digest(language="eng")
+    capability_reason: str | None = None
+    model_digest = None
+    try:
+        model_digest, _trained = tesseract.model_digest(language="eng")
+    except tesseract.AdapterError as error:
+        if "executable not found" in error.detail or error.reason == "unsupported":
+            capability_reason = f"missing_binary: {error.detail}"
+        else:
+            capability_reason = f"{error.reason}: {error.detail}"
     plans: list[dict] = []
     checks: list[dict] = []
     occurrences: list[dict] = []
@@ -219,12 +230,24 @@ def _extract_tesseract(
                     "region_id": "region_selected" if region else None,
                 }
             )
+            if capability_reason and "missing_binary" in capability_reason:
+                checks.append(
+                    {
+                        "id": check_id,
+                        "status": "unsupported",
+                        "reason": capability_reason,
+                        "produced_occurrence_count": 0,
+                        "retained_occurrence_ids": [],
+                    }
+                )
+                continue
             if model_digest is None:
                 checks.append(
                     {
                         "id": check_id,
                         "status": "failed",
-                        "reason": "missing_model: eng.traineddata is unavailable",
+                        "reason": capability_reason
+                        or "missing_model: eng.traineddata is unavailable",
                         "produced_occurrence_count": 0,
                         "retained_occurrence_ids": [],
                     }
@@ -437,6 +460,15 @@ def inspect_document(
 ) -> tuple[dict, int]:
     if not source_path.is_file():
         raise InspectError(f"Source file not found: {source_path}", 4)
+    try:
+        source_size = source_path.stat().st_size
+    except OSError as exc:
+        raise InspectError(f"Cannot stat source file {source_path}: {exc}", 4) from exc
+    if source_size > NATIVE_MAX_FILE_BYTES:
+        raise InspectError(
+            f"Source exceeds native.max_file_bytes {NATIVE_MAX_FILE_BYTES} (got {source_size})",
+            5,
+        )
     try:
         pdf_bytes = source_path.read_bytes()
     except OSError as exc:
@@ -670,10 +702,26 @@ def inspect_document(
     report["execution"]["errors"] = [err for err in errors if err][:100]
     sealed = core.seal(report)
     core.validate(sealed)
+    import json as _json
+
+    encoded = (_json.dumps(sealed, indent=2) + "\n").encode("utf-8")
+    if len(encoded) > NATIVE_MAX_OUTPUT_BYTES:
+        raise InspectError(
+            f"Report exceeds native.max_output_bytes_per_file {NATIVE_MAX_OUTPUT_BYTES} "
+            f"(got {len(encoded)})",
+            5,
+        )
     return sealed, exit_code
 
 
 def write_report(path: Path, report: dict) -> None:
     import json
 
-    atomic_write_bytes(path, (json.dumps(report, indent=2) + "\n").encode("utf-8"))
+    payload = (json.dumps(report, indent=2) + "\n").encode("utf-8")
+    if len(payload) > NATIVE_MAX_OUTPUT_BYTES:
+        raise InspectError(
+            f"Report exceeds native.max_output_bytes_per_file {NATIVE_MAX_OUTPUT_BYTES} "
+            f"(got {len(payload)})",
+            5,
+        )
+    atomic_write_bytes(path, payload)

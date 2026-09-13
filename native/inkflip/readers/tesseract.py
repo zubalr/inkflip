@@ -320,10 +320,17 @@ def _version(binary: Path) -> str:
 
 def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> dict:
     """Complete reader manifest (schema $defs/Reader + ReaderManifest)."""
-    binary = _binary_path(binary)
-    digest, trained = model_digest(binary, language)
-    version_line = _version(binary)
-    version = version_line.split()[-1] if version_line else ""
+    try:
+        resolved = _binary_path(binary)
+        digest, trained = model_digest(resolved, language)
+        version_line = _version(resolved)
+        version = version_line.split()[-1] if version_line else ""
+        binary_error = None
+    except AdapterError as error:
+        digest, trained = None, None
+        version_line = error.detail[:256]
+        version = ""
+        binary_error = error
     return {
         "kind": "reader_manifest",
         "schema_version": "1.0.0",
@@ -346,8 +353,11 @@ def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> di
             "capabilities": [
                 {
                     "name": "ocr",
-                    "support": "supported" if digest else "unavailable",
-                    "limits": [
+                    "support": "unavailable" if binary_error or not digest else "supported",
+                    "limits": (
+                        [f"missing_binary: {binary_error.detail}"]
+                        if binary_error
+                        else [
                         "printed English only; other scripts are preserved by "
                         "native text readers, not claimed from this OCR path",
                         "word confidence is an engine diagnostic, not a quality verdict",
@@ -367,6 +377,7 @@ def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> di
                         ]
                         if trained
                         else []
+                    )
                     ),
                 }
             ],

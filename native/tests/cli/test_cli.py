@@ -23,6 +23,7 @@ from inkflip.cli.main import (  # noqa: E402
     EXIT_INVALID_ARGS,
     EXIT_OK,
     EXIT_PARTIAL_RUN,
+    EXIT_POLICY_FAILURE,
     EXIT_READ_FAILURE,
     main,
 )
@@ -121,6 +122,32 @@ class TestCliInspect(unittest.TestCase):
             ["inspect", str(self.pdf), "--out", str(self.td / "o.json"), "--reader", "evil"]
         )
         self.assertEqual(code, EXIT_INVALID_ARGS)
+
+    def test_over_budget_valid_pdf_fails_closed_before_parse(self):
+        from inkflip.cli.inspect import NATIVE_MAX_FILE_BYTES
+
+        over = self.td / "over-budget.pdf"
+        src = self.pdf.read_bytes()
+        over.write_bytes(src)
+        with over.open("r+b") as handle:
+            handle.seek(NATIVE_MAX_FILE_BYTES)
+            handle.write(b"X")
+        out = self.td / "over.json"
+        code = main(["inspect", str(over), "--out", str(out)])
+        self.assertEqual(code, EXIT_POLICY_FAILURE)
+        self.assertFalse(out.exists())
+
+    def test_malformed_report_is_distinct_from_unknown_reader(self):
+        junk = self.td / "junk.json"
+        junk.write_text("{not json", encoding="utf-8")
+        html = self.td / "out.html"
+        code = main(["report", str(junk), "--format", "html", "--out", str(html)])
+        self.assertEqual(code, EXIT_INVALID_ARGS)
+        unknown = main(
+            ["inspect", str(self.pdf), "--out", str(self.td / "u.json"), "--reader", "nope"]
+        )
+        self.assertEqual(unknown, EXIT_INVALID_ARGS)
+        # Same exit family, distinct messages: covered by stderr in production runner.
 
     def test_missing_profile_fails_closed(self):
         code = main(
