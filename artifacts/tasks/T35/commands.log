@@ -30,4 +30,13 @@ exit: 0
 counts: {"collected": 5, "passed": 5, "failed": 0, "skipped": 0}
 
 # Notes
-Harness mapped `python` -> python3 (3.14.7). tests/examples/test_reader_upgrade.py re-execs native/.venv Python 3.13.15 before importing inkflip. README ```sh``` lines ran verbatim via shell=True in a symlink sandbox. Cursor browser MCP: no tab available after newTab navigate to http://127.0.0.1:5195/mapping-control.html; curl HTTP 200 (2390 bytes, sha256 06a40137d13dc4d5834893b607dcb7176c498909f007294421841e838a515460).
+Harness mapped `python` -> python3 (3.14.7). tests/examples/test_reader_upgrade.py re-execs native/.venv Python 3.13.15 before importing inkflip. README ```sh``` lines ran verbatim via shell=True in a symlink sandbox.
+
+# Browser reopen (2026-09-13T12:47Z)
+$ python3 -m http.server 5195 --bind 127.0.0.1 --directory artifacts/tasks/T35
+Cursor IDE browser viewId f7c6ed navigated to http://127.0.0.1:5195/mapping-control.html
+title: Inkflip — evidence report
+CDP Runtime.evaluate: scripts=0, document SHA present, chk_pdfium_text_p0 present, CSP default-src 'none'
+screenshot: artifacts/tasks/T35/mapping-control-browser.png
+status: executed
+

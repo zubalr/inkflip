@@ -10,5 +10,6 @@ placeholder so the required evidence path exists. It is not approval.
 Devin owns formal acceptance after independent review.
 
 Visual reopen of generated HTML in the Cursor-owned browser tab was
-**blocked** (`No browser tab available` after `newTab` navigate). HTTP
-fetch of the same artifact succeeded. See `browser-reopen.md`.
+executed after a later successful navigate to
+`http://127.0.0.1:5195/mapping-control.html`. See `browser-reopen.md`.
+That reopen is worker evidence, not independent review.

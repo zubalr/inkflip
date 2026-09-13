@@ -36,14 +36,15 @@
     },
     {
       "criterion": "output reopens in web viewer",
-      "status": "blocked",
+      "status": "executed",
       "evidence": [
         "artifacts/tasks/T35/browser-reopen.md",
         "artifacts/tasks/T35/mapping-control.html",
+        "artifacts/tasks/T35/mapping-control-browser.png",
         "artifacts/tasks/T35/commands.log",
         "artifacts/tasks/T35/run.json"
       ],
-      "detail": "Unittest asserts script-free HTML+CSP. HTTP GET http://127.0.0.1:5195/mapping-control.html returned 200 (2390 bytes, sha256 06a40137d13dc4d5834893b607dcb7176c498909f007294421841e838a515460). Cursor browser MCP: no tab available after newTab navigate. Visual reopen in that viewer is blocked; HTML generation and HTTP fetch executed."
+      "detail": "Unittest asserts script-free HTML+CSP. HTTP GET http://127.0.0.1:5195/mapping-control.html returned 200. Cursor IDE browser view f7c6ed loaded that URL: title Inkflip — evidence report, scripts=0, document SHA and chk_pdfium_text_p0 present. Screenshot artifacts/tasks/T35/mapping-control-browser.png."
     },
     {
       "criterion": "README commands copied verbatim into test.",
@@ -69,11 +70,12 @@
       "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
     },
     "output reopens in web viewer": {
-      "status": "blocked",
-      "detail": "Script-free HTML generated and served with HTTP 200. Cursor-owned browser tab could not be created (No browser tab available). Not claimed as visual reopen success.",
+      "status": "executed",
+      "detail": "Cursor-owned browser loaded http://127.0.0.1:5195/mapping-control.html. Rendered title, document SHA, chk_pdfium_text_p0, CSP, and zero scripts. Screenshot saved.",
       "evidence": [
         "artifacts/tasks/T35/browser-reopen.md",
         "artifacts/tasks/T35/mapping-control.html",
+        "artifacts/tasks/T35/mapping-control-browser.png",
         "artifacts/tasks/T35/commands.log",
         "artifacts/tasks/T35/run.json"
       ]
@@ -104,7 +106,6 @@
   },
   "limitations": [
     "Independent review is pending; this worker did not approve the work.",
-    "Visual Cursor browser reopen is blocked (no tab). HTTP fetch of mapping-control.html succeeded.",
     "Committed mapping-control.html is a default PDFium inspect of the same fixture, not the named-profile after HTML from the deleted unittest sandbox.",
     "Owned rules file is examples/reader-upgrade/upgrade-rules.json (docs/proposals/T35.md)."
   ],
