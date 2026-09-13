@@ -148,8 +148,24 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def input_digests() -> dict:
+    """SHA-256 of every consumed input — the identity of what was evaluated.
+
+    Outputs depend only on these digests (never on HEAD or wall-clock), so
+    two runs over identical repository content are byte-identical. The
+    evaluated commit is recorded separately in the task evidence."""
+    names = [
+        "config/resolved-assets.json",
+        "bun.lock",
+        "native/uv.lock",
+        "fixtures/manifest.json",
+        "package.json",
+        "apps/web/package.json",
+    ]
+    return {n: sha256_file(ROOT / n) for n in names}
+
+
 def build_inventory() -> dict:
-    commit = git_commit()
     assets_cfg = json.loads((ROOT / "config" / "resolved-assets.json").read_text())
     lock = parse_bun_lock()
     uv_lock = tomllib.loads((ROOT / "native" / "uv.lock").read_text())
@@ -270,7 +286,7 @@ def build_inventory() -> dict:
     return {
         "schema_version": "1.0.0",
         "kind": "inkflip-distribution-inventory",
-        "evaluated_commit": commit,
+        "inputs": input_digests(),
         "classification": {
             "shipped": "bytes that leave the repository or are compiled into the shipped bundle",
             "runtime-tooling": "frozen native environment distributed as source + lockfile",
@@ -308,7 +324,12 @@ def cdx_purl_ecosystem(name: str, version: str, ecosystem: str) -> str:
     return f"pkg:{ecosystem}/{name}@{version}"
 
 
-def build_cdx(inventory: dict, commit_time: str) -> dict:
+def build_cdx(inventory: dict) -> dict:
+    # Deterministic identity: serial derives from the input digests, and the
+    # timestamp is the manifest's recorded "as of" date — never wall-clock.
+    identity = hashlib.sha256(
+        json.dumps(inventory["inputs"], sort_keys=True).encode()
+    ).hexdigest()
     components = []
     for pkg in inventory["bundled_npm_packages"]:
         comp = {
@@ -341,10 +362,10 @@ def build_cdx(inventory: dict, commit_time: str) -> dict:
     return {
         "bomFormat": "CycloneDX",
         "specVersion": "1.5",
-        "serialNumber": f"urn:uuid:{hashlib.sha1(inventory['evaluated_commit'].encode()).hexdigest()[:8]}-0000-4000-8000-{hashlib.sha1(('sbom' + inventory['evaluated_commit']).encode()).hexdigest()[:12]}",
+        "serialNumber": f"urn:uuid:{identity[:8]}-0000-4000-8000-{identity[8:20]}",
         "version": 1,
         "metadata": {
-            "timestamp": commit_time,
+            "timestamp": "2026-09-13T00:00:00Z",  # as-of date of the recorded distribution manifest
             "tools": {"components": [{"type": "application", "name": "scripts/distribution/build_inventory.py", "version": "1.0.0"}]},
             "component": {
                 "bom-ref": "pkg:generic/inkflip@0.0.0",
@@ -354,7 +375,7 @@ def build_cdx(inventory: dict, commit_time: str) -> dict:
                 "comment": "local-first PDF reading inspector; static browser app + local native tooling. License/copyright finalization pending (T47).",
             },
             "properties": [
-                {"name": "inkflip:evaluated-commit", "value": inventory["evaluated_commit"]},
+                {"name": "inkflip:input-digests-sha256", "value": identity},
                 {"name": "inkflip:status", "value": "preparation (not the completed T47 gate)"},
             ],
         },
@@ -369,8 +390,7 @@ def main() -> int:
     args = parser.parse_args()
 
     inventory = build_inventory()
-    commit_time = git_commit_time(inventory["evaluated_commit"])
-    sbom = build_cdx(inventory, commit_time)
+    sbom = build_cdx(inventory)
 
     out_dir = ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)

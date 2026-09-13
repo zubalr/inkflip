@@ -12,11 +12,13 @@ SBOM for the snapshot recorded in `config/distribution-manifest.json`:
   exact frozen versions, with timestamps (network-preparation evidence; scan
   results are evidence, not a clean bill of health).
 
-Regeneration is deterministic — two runs over identical input produce
-byte-identical output:
+Regeneration is deterministic — outputs depend only on content digests of
+the consumed inputs (never on HEAD or wall-clock), so two runs over identical
+repository content are byte-identical regardless of commit:
 
 ```sh
 python3 scripts/distribution/build_inventory.py --out artifacts/sbom/zcode-preparation
+python3 scripts/distribution/build_inventory.py --check   # fail if outputs would change
 python3 scripts/check_distribution.py --release
 ```
 

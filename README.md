@@ -152,6 +152,7 @@ are described in [docs/quickstart.md](docs/quickstart.md).
 | [docs/developer-guide.md](docs/developer-guide.md) | Workspace layout, command harness, test suites, evidence rules |
 | [docs/architecture.md](docs/architecture.md) | Components, data flow, contracts, reader adapters, privacy design |
 | [docs/limitations.md](docs/limitations.md) | Implemented vs unavailable vs pending, reader limits, known failures |
+| [docs/distribution-preparation.md](docs/distribution-preparation.md) | What ships, license/notice evidence, the distribution gate, and how to rerun it |
 | [docs/development-history.md](docs/development-history.md) | How this was built, from Git history and task receipts |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to propose changes in this repository's workflow |
 | [SECURITY.md](SECURITY.md) | Security expectations and how to report a problem |

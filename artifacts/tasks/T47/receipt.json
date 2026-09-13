@@ -1,0 +1,57 @@
+{
+  "task": "T47",
+  "beads_id": "pdf-t47",
+  "stage": "preparation",
+  "disposition": "not_accepted",
+  "disposition_note": "Worker-level preparation only. T47 acceptance (gate G4) belongs to the coordinator after the dependent features land (T21/T25/T30/T43/T44), the owner LICENSE/copyright decision, and merged-state evidence. No release rights are claimed.",
+  "evaluated_commit_note": "This record describes the batch ending at the evidence commit on work/zcode/distribution-completion; outputs are content-digest-bound, see inventory inputs.",
+  "deliverables": {
+    "implemented": [
+      "config/distribution-manifest.json",
+      "scripts/check_distribution.py",
+      "scripts/distribution/build_inventory.py",
+      "tests/release/distribution/",
+      "licenses/ (per-copy provenance in licenses/README.md)",
+      "NOTICE",
+      "artifacts/sbom/zcode-preparation/ (inventory + CycloneDX 1.5 SBOM + advisory scans)",
+      "docs/distribution-preparation.md (integrator guide)"
+    ],
+    "explicitly_pending": [
+      "root LICENSE + copyright-holder decision (owner; recorded in artifacts/tasks/T47/licensing-status.md)",
+      "final release-bundle SBOM over the hashed deployed bundle (needs built dist at closure)",
+      "PyPI license texts (nothing bundled; revisit if wheels ship)",
+      "tr46@0.0.3 license text (upstream ships none; recorded as gap)",
+      "advisory re-run at closure (current evidence dated 2026-09-13)"
+    ]
+  },
+  "commands_run": 14,
+  "failures_expected": [
+    "distribution gate failed with exactly the pending NOTICE/license-evidence items before M4 (exit 1), then passed after they landed (exit 0)"
+  ],
+  "tests": {
+    "collected": 417,
+    "passed": 417,
+    "failed": 0,
+    "skipped": 0,
+    "per_suite": {
+      "tests/release (distribution checker)": 16,
+      "tests/docs": 20,
+      "bun run verify (bootstrap+native-bootstrap+coordination)": 169,
+      "bun run test:native": 196,
+      "bun run test:a11y": 7,
+      "bun run test:visual": 9
+    },
+    "note": "All green. bun run test:browser remains a documented failure (root-discovery defect) outside this batch's scope; test:regression and check:static-dist fail closed (T34/T48) as designed."
+  },
+  "advisories": {
+    "bun_audit": "clean (206 packages) at 2026-09-13T13:23:42Z",
+    "osv_querybatch": "0 advisories across 31 exact purls at 2026-09-13T13:24:18Z",
+    "note": "evidence, not a standing clean bill of health"
+  },
+  "unknowns": [],
+  "owner_inputs_needed": [
+    "LICENSE text + copyright holder for NOTICE (do not infer from Git authors)",
+    "decision on tr46@0.0.3 declaration-only license (no upstream text)",
+    "T47 closure re-verification at the merged release candidate"
+  ]
+}

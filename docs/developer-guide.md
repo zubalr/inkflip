@@ -83,6 +83,7 @@ python3 scripts/task_acceptance.py run verify   # the full active group (verifie
 | Visual | `bun run test:visual` | Layout, contrast, motion, focus styling |
 | Browser flows | per-spec with explicit path | Open/viewer/export/amount flows (see limitations for the registry issue) |
 | Docs checks | `python3 -m unittest discover -s tests/docs -v` && `python3 scripts/check_claims.py` | Links, referenced files, claim hygiene for this documentation |
+| Distribution gate | `python3 scripts/check_distribution.py --release` + `python3 -m unittest discover -s tests/release -v` | Declared shipped files match actual bytes; license evidence and NOTICE consistent ([distribution-preparation.md](distribution-preparation.md)) |
 
 Playwright suites build on the production bundles and per-suite configs under
 `tests/<area>/`. The privacy suite is the slowest (it makes a two-pass Vite

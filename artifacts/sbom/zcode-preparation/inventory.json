@@ -177,7 +177,6 @@
     "typescript",
     "wrangler"
   ],
-  "evaluated_commit": "b3b74a9529c1075d77b7a59bd7f33c9129869743",
   "excluded": {
     "private_or_generated": [
       "apps/web/dist (generated; rebuilt every build)",
@@ -909,6 +908,14 @@
       "split": "development"
     }
   ],
+  "inputs": {
+    "apps/web/package.json": "01e778d64a8f5e28d5afbb9c7eba6051df6dfc5762195bf5005e030f870678d2",
+    "bun.lock": "778cddfc01e363afe413e2369c6809fc74a21e6e230f44765bc8a041b39b9156",
+    "config/resolved-assets.json": "b8d3af7790cf74c35311c139613fd65d547a78e5f4198253d2c71c8c14336f95",
+    "fixtures/manifest.json": "a7f538a48b3e4badd2dff711f636a05fa58e7bdedef394bcf1a077df15de9b51",
+    "native/uv.lock": "dd128c84665e7e4b6b4ec6530ceb960f44cbce242e1e7d592fcfa2351a38ee73",
+    "package.json": "71d5f94ed1ab8425a64e8caef7880e74f61de1e6da64cc72835462276d58e407"
+  },
   "kind": "inkflip-distribution-inventory",
   "native_lock_packages": [
     {

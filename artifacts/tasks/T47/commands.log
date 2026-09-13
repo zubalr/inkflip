@@ -1,0 +1,71 @@
+T47 preparation — verified command record (2026-09-13, ZCode distribution-completion)
+
+Branch: work/zcode/distribution-completion (base: origin/main 580ef63, includes CI repair).
+Cherry-picked documentation commits preserved: 2d02796, 05d6505, 6713b91 (from
+work/antigravity/independent-volume-2 4981999/57eaa22/aea1d94; diffs verified before picking).
+
+## Inventory / SBOM (scripts/distribution/build_inventory.py)
+
+- python3 scripts/distribution/build_inventory.py
+  -> writes artifacts/sbom/zcode-preparation/{inventory.json,sbom.cdx.json}
+  Coverage: 212 staged asset files (digest-verified groups), 9 prepared example
+  files, 17 bundled npm packages (production closure, licenses read from the
+  installed distributions), 14 native lock packages, 80 fixture entries,
+  unknown bucket 0. Deterministic: outputs depend only on input-content
+  digests (sha256 of resolved-assets.json, bun.lock, native/uv.lock,
+  fixtures/manifest.json, both package.json manifests); SBOM timestamp is the
+  manifest as-of date; serial derives from the input digest.
+- Determinism proof (same content, two runs):
+  run-A/run-B sha256 identical for both outputs (0da221a1…, e67e5e41…).
+- NOTE: an earlier revision embedded HEAD/commit-time in the outputs and was
+  not stable across commits; fixed in this batch before the final artifacts.
+
+## Distribution gate (scripts/check_distribution.py --release)
+
+- Real snapshot tree -> exit 0: 9 groups, 3 shipped roots; every declared file
+  hash-verified; zero missing/hash-mismatch/undeclared; license evidence and
+  NOTICE consistent. Gate JSON output byte-identical across two runs.
+- Before NOTICE/licenses landed, the same gate reported exactly the expected
+  pending items (NOTICE + evidence missing) with exit 1 — no false pass.
+
+## Release checker tests
+
+- python3 -m unittest discover -s tests/release -v -> 16 tests OK:
+  valid distribution passes; hash tampering, size tampering, missing file,
+  undeclared asset, missing/empty license evidence, missing license
+  declaration, deleted NOTICE, notice inconsistency, private content,
+  symlink in shipped root, path escape, absolute path, missing manifest,
+  deterministic JSON output — all proven to fail.
+
+## Applicable registered verification (this batch's surface + current base)
+
+- bun run verify -> 169 tests OK (56 bootstrap + 2 native-bootstrap +
+  111 coordination) + 16-command registry self-check.
+- bun run build -> exit 0.
+- bun run test:native -> 196 passed.
+- bun run test:a11y -> 7 passed; bun run test:visual -> 9 passed (browser
+  code changed on this base via T20; cheap suites re-run to record current state).
+- bun run test:browser -> still exit 1 (documented root-discovery defect,
+  unchanged on this base; not this batch's scope).
+- python3 -m unittest discover -s tests/docs -> 20 tests OK;
+  python3 scripts/check_claims.py -> all 8 checks ok.
+
+## Advisory evidence (raw output committed)
+
+- bun audit v1.4.0 (2026-09-13T13:23:42Z): no vulnerabilities found (206
+  packages). Raw: artifacts/sbom/zcode-preparation/advisory-scan/bun-audit.txt
+- OSV querybatch (2026-09-13T13:24:18Z) against 31 exact purls (17 npm shipped
+  closure + 14 pypi lock packages, classified): 0 advisories.
+  Raw: artifacts/sbom/zcode-preparation/advisory-scan/osv-querybatch.json
+  Summary: artifacts/sbom/zcode-preparation/advisory-scan/SUMMARY.md
+
+## Cold setup (T49 addendum, same date)
+
+Fresh clone with isolated empty Bun/uv caches: bun install --frozen-lockfile
+fetched 86 packages (network preparation); disposable uv==0.12.13 resolved and
+downloaded the pinned CPython 3.13.15; verify/build/native then passed with
+all proxies pointed at a dead address (offline processing). Host uv 0.9.5 also
+resolved the pinned interpreter from an empty store on this host/date —
+recorded as an observation that contradicts the freeze's assumption; the
+recorded >=0.12.13 minimum stands. Details:
+artifacts/tasks/T49/commands.log (addendum).
