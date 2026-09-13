@@ -13,12 +13,12 @@ import type {
   CheckPlan,
   CheckResult,
   Finding,
-  NormalizationMapEntry,
   Occurrence,
   Page,
   Plan,
   Reader,
   Report,
+  Transform,
 } from "../../../../../packages/contracts/src/index.ts";
 import {
   seal,
@@ -47,22 +47,24 @@ export interface AssembleReportInput {
   readonly occurrences: readonly Occurrence[];
   readonly alignments: FindingsInput["alignments"];
   readonly runKey: string;
-  readonly runStatus: string;
+  readonly runStatus: Report["execution"]["status"];
   /** All pages' metadata (viewport + canonical transform). */
   readonly pages: readonly Page[];
+  /** Page-box, raster-scale and OCR-crop transform records. */
+  readonly transforms: readonly Transform[];
+  /** Environment string recorded on the execution block. */
+  readonly environment: string;
   readonly maxOcrPagesPerRun: number;
   /** Why OCR coverage was narrowed for this run (profile caps), or null. */
   readonly ocrCoverageNote: string | null;
 }
 
-function buildNormalizationMap(
-  occurrences: readonly Occurrence[],
-): NormalizationMapEntry[] {
-  const seen = new Map<string, NormalizationMapEntry>();
-  for (const occ of occurrences) {
-    if (!seen.has(occ.text_transform.transform_id)) {
-      seen.set(occ.text_transform.transform_id, occ.text_transform);
-    }
+function dedupeTransforms(
+  transforms: readonly Transform[],
+): Transform[] {
+  const seen = new Map<string, Transform>();
+  for (const t of transforms) {
+    if (!seen.has(t.id)) seen.set(t.id, t);
   }
   return [...seen.values()];
 }
@@ -98,7 +100,7 @@ function buildLimitations(input: AssembleReportInput): string[] {
  */
 export function assembleReport(input: AssembleReportInput): Report {
   const plansById = new Map(input.plan.checks.map((p) => [p.id, p]));
-  const regionsById = new Map(input.regions.map((r) => [r.region_id, r]));
+  const regionsById = new Map(input.regions.map((r) => [r.id, r]));
   const findings = deriveFindings({
     checks: input.checks,
     occurrences: input.occurrences,
@@ -109,15 +111,15 @@ export function assembleReport(input: AssembleReportInput): Report {
   });
 
   const report: Report = {
-    schema_version: "inkflip.report@1",
-    report_id: null,
-    created_at: new Date().toISOString(),
+    kind: "report",
+    schema_version: "1.0.0",
+    // seal() assigns the content digest.
+    report_id: "",
     document: {
       sha256: input.document.sha256,
       byte_length: input.document.byte_length,
       page_count: input.document.page_count,
-      filename: input.fileName,
-      opened_at: input.openedAtIso,
+      display_name: input.fileName,
       source_asset_id: null,
     },
     readers: [...input.readers],
@@ -129,63 +131,57 @@ export function assembleReport(input: AssembleReportInput): Report {
     },
     checks: [...input.checks],
     occurrences: [...input.occurrences],
-    normalization_map: buildNormalizationMap(input.occurrences),
+    transforms: dedupeTransforms(input.transforms),
     pages: input.pages.map((p) => ({ ...p })),
     findings,
     annotations: [],
     assets: [],
     execution: {
-      run_key: null,
+      execution_id: crypto.randomUUID(),
+      run_key: input.runKey,
       started_at: input.runStartedAtIso,
       duration_ms: Math.max(0, Math.round(input.durationMs)),
       status: input.runStatus,
+      environment: input.environment,
+      result_origin: "live",
       errors: input.checks
-        .filter((c) => c.status === "failed" || c.status === "timeout")
-        .map((c) => ({
-          check_id: c.id,
-          error_kind: c.status,
-          error_detail: c.reason ?? c.status,
-        })),
+        .filter(
+          (c) =>
+            c.status === "failed" ||
+            c.status === "timeout" ||
+            c.status === "cancelled",
+        )
+        .map((c) => `${c.id}: ${c.status}${c.reason ? ` — ${c.reason}` : ""}`),
     },
     limitations: buildLimitations(input),
     export: {
-      mode: "selected",
-      scope: "evidence_only",
-      replay: "requires_original",
-      document_hash: input.document.sha256,
-      settings: {
-        selection: "user-selected pages and drawn regions",
-        findings: "derived from retained reader evidence",
-        readers: input.readers.map((r) => `${r.id}@${r.version}`),
-        profile: { max_ocr_pages_per_run: input.maxOcrPagesPerRun },
-      },
-      coverage: {
-        selected_pages: [...input.selectedPages],
-        page_count: input.document.page_count,
-        checks: input.checks.length,
-        checks_completed: input.checks.filter((c) => c.status === "completed").length,
-        checks_unsupported: input.checks.filter((c) => c.status === "unsupported").length,
-        checks_failed: input.checks.filter((c) => c.status === "failed").length,
-        produced_occurrences: input.checks.reduce((n, c) => n + c.produced_occurrence_count, 0),
-        retained_occurrences: input.occurrences.length,
-      },
+      mode: "evidence",
+      scope: "selection",
       included: [
-        "document identity (SHA-256)",
-        "reader manifests",
-        "check plan and terminal results",
-        "retained occurrences with raw readings",
-        "findings derived from evidence",
-        "coverage and limitations",
+        "selected_text",
+        "document_hash",
+        "filename",
+        "settings",
+        "coverage",
       ],
-      omissions: ["source PDF bytes (opt-in)", "unselected pages"],
+      omissions: [
+        "Original PDF excluded (explicit opt-in only).",
+        "Page renders and OCR crops excluded.",
+        "Annotations excluded.",
+        "Pages outside the selection are not covered.",
+      ],
+      replay: "requires_original",
+      origin_report_id: null,
     },
   };
 
   const sealed = seal(report);
-  const verdict = validateReport(sealed);
-  if (!verdict.ok) {
-    const detail = verdict.issues.map((i) => `${i.code} ${i.path}`).join("; ");
-    throw new Error(`Assembled report failed validation: ${detail}`);
+  try {
+    validateReport(sealed);
+  } catch (error) {
+    throw new Error(
+      `Assembled report failed validation: ${error instanceof Error ? error.message : "invalid"}`,
+    );
   }
   return sealed;
 }

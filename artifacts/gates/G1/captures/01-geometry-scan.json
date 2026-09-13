@@ -1,5 +1,5 @@
 {
-  "label": "open-journey",
+  "label": "geometry-scan",
   "records": [
     {
       "channel": "requests",
@@ -16,7 +16,7 @@
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "content-type": "text/html; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "keep-alive": "timeout=5",
         "referrer-policy": "no-referrer",
         "transfer-encoding": "chunked",
@@ -46,7 +46,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/css"
       }
     },
@@ -63,7 +63,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
@@ -85,7 +85,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
@@ -107,7 +107,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "font/ttf"
       }
     },
@@ -129,7 +129,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "application/octet-stream"
       }
     },
@@ -151,7 +151,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
@@ -173,51 +173,13 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/tesseract/7.0.0/worker.min.js"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/tesseract/7.0.0/worker.min.js",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
       "url": "http://127.0.0.1:55050/assets/pdf.worker-DTrjDNvb.mjs"
     },
     {
@@ -228,7 +190,7 @@
         "referrer-policy": "no-referrer",
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
         "x-content-type-options": "nosniff"
@@ -247,45 +209,7 @@
         "referrer-policy": "no-referrer",
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
-        "content-type": "font/ttf",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/pdf.worker-DTrjDNvb.mjs"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/pdf.worker-DTrjDNvb.mjs",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "font/ttf",
         "cross-origin-resource-policy": "same-origin",
         "x-content-type-options": "nosniff"
@@ -304,7 +228,7 @@
         "referrer-policy": "no-referrer",
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
         "x-content-type-options": "nosniff"
@@ -323,83 +247,7 @@
         "referrer-policy": "no-referrer",
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/pdf.worker-DTrjDNvb.mjs"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/pdf.worker-DTrjDNvb.mjs",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:32 GMT",
-        "content-type": "font/ttf",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/tesseract/7.0.0/worker.min.js"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/tesseract/7.0.0/worker.min.js",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
-        "content-type": "text/javascript; charset=utf-8",
-        "cross-origin-resource-policy": "same-origin",
-        "x-content-type-options": "nosniff"
-      }
-    },
-    {
-      "channel": "requests",
-      "method": "GET",
-      "url": "http://127.0.0.1:55050/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
-    },
-    {
-      "channel": "responses",
-      "url": "http://127.0.0.1:55050/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
-      "status": 200,
-      "headers": {
-        "referrer-policy": "no-referrer",
-        "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
-        "cache-control": "public, max-age=86400, immutable",
-        "date": "Sun, 13 Sep 2026 03:02:33 GMT",
+        "date": "Sun, 13 Sep 2026 03:02:35 GMT",
         "content-type": "text/javascript; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
         "x-content-type-options": "nosniff"
@@ -413,7 +261,7 @@
   ],
   "violations": [],
   "offline": false,
-  "serverLogStart": 0,
+  "serverLogStart": 8,
   "serverLog": [
     "GET /index.html",
     "GET /assets/index-Bj_SMNio.js",

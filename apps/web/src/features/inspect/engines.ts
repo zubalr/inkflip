@@ -67,10 +67,12 @@ export function createImportEngine(): ImportEngine {
 
 export function createExportEngine(): ExportEngine {
   return {
-    projectReport,
-    buildExportPreview,
-    serializeReportJson,
-    renderReportHtml,
-    exportFileName,
+    project: (source, request) =>
+      projectReport(source as Report, request as never) as never,
+    preview: (report, options) =>
+      buildExportPreview(report as Report, options as never) as never,
+    serializeJson: (report) => serializeReportJson(report as Report),
+    renderHtml: (report) => renderReportHtml(report as Report),
+    fileName: (report, format) => exportFileName(report as Report, format),
   };
 }
