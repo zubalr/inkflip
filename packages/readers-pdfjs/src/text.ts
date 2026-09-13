@@ -37,7 +37,11 @@ import {
   classifyError,
   resourceLimitReason,
 } from './errors.ts';
-import { ensureReadableStreamAsyncIterator, isReadableStreamTypeError } from './streams.ts';
+import {
+  asReadableStreamAsyncIterable,
+  hasNativeReadableStreamAsyncIterator,
+  isReadableStreamTypeError,
+} from './streams.ts';
 import {
   isPdfJsTextItem,
   type PdfJsTextItem,
@@ -80,7 +84,9 @@ const ITEM_LIMITATIONS = [
 const EPS = 1e-9;
 
 async function collectTextContentStream(
-  stream: AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>,
+  stream:
+    | ReadableStream<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>
+    | AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>,
 ): Promise<{
   items: unknown[];
   styles: Record<string, PdfJsTextStyle>;
@@ -91,7 +97,7 @@ async function collectTextContentStream(
     styles: Object.create(null) as Record<string, PdfJsTextStyle>,
     lang: null as string | null,
   };
-  for await (const value of stream) {
+  for await (const value of asReadableStreamAsyncIterable(stream)) {
     textContent.lang ??= value.lang ?? null;
     Object.assign(textContent.styles, value.styles ?? {});
     textContent.items.push(...(value.items ?? []));
@@ -104,22 +110,30 @@ async function getTextContentCompat(page: {
   streamTextContent?: (params: {
     includeMarkedContent?: boolean;
     disableNormalization?: boolean;
-  }) => AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>;
+  }) =>
+    | ReadableStream<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>
+    | AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>;
 }): Promise<{
   items: unknown[];
   styles: Record<string, PdfJsTextStyle>;
   lang: string | null;
 }> {
-  ensureReadableStreamAsyncIterator();
   const params = { includeMarkedContent: true, disableNormalization: true };
-  try {
-    return await page.getTextContent(params);
-  } catch (error) {
-    if (!isReadableStreamTypeError(error) || typeof page.streamTextContent !== 'function') {
-      throw error;
+  const canIterateNatively = hasNativeReadableStreamAsyncIterator();
+  if (canIterateNatively) {
+    try {
+      return await page.getTextContent(params);
+    } catch (error) {
+      if (!isReadableStreamTypeError(error) || typeof page.streamTextContent !== 'function') {
+        throw error;
+      }
+      return collectTextContentStream(page.streamTextContent(params));
     }
+  }
+  if (typeof page.streamTextContent === 'function') {
     return collectTextContentStream(page.streamTextContent(params));
   }
+  return await page.getTextContent(params);
 }
 
 function itemQuadCanonical(

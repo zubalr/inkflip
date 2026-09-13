@@ -101,7 +101,7 @@
       "",
       "Rendered marks and extracted text are separate."
     ],
-    "ms": 24,
+    "ms": 25,
     "extractError": null,
     "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
   },
@@ -136,15 +136,16 @@
     "url": "/vendor/pdfjs/pdf.worker.mjs",
     "bytes": 2395522,
     "mentionsMainVersion": true,
-    "hasAsyncIterator": true
+    "hasAsyncIterator": false
   },
   "directText": {
     "ok": true,
     "items": 7,
     "typeofGetText": "function",
-    "hasStreamTextContent": true
+    "hasStreamTextContent": true,
+    "nativeAsyncIterator": false
   },
-  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-webkit-b0bPYU",
-  "harness": "http://127.0.0.1:58023",
+  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-webkit-Qz09lz",
+  "harness": "http://127.0.0.1:61520",
   "note": "Playwright WebKit automation with paired pdf.js worker; not a physical Safari device observation"
 }

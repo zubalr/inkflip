@@ -69,11 +69,17 @@ export interface PdfJsPage {
   streamTextContent?(params: {
     includeMarkedContent?: boolean;
     disableNormalization?: boolean;
-  }): AsyncIterable<{
-    items?: PdfJsContentItem[];
-    styles?: Record<string, PdfJsTextStyle>;
-    lang?: string | null;
-  }>;
+  }):
+    | ReadableStream<{
+        items?: PdfJsContentItem[];
+        styles?: Record<string, PdfJsTextStyle>;
+        lang?: string | null;
+      }>
+    | AsyncIterable<{
+        items?: PdfJsContentItem[];
+        styles?: Record<string, PdfJsTextStyle>;
+        lang?: string | null;
+      }>;
   render(params: Record<string, unknown>): PdfJsRenderTask;
   cleanup?(resetStats?: boolean): boolean;
 }

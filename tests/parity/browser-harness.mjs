@@ -37,23 +37,8 @@ const PAGE_HTML = `<!doctype html>
 <script type="module" src="/boot.mjs"></script>
 `;
 
-const BOOT_JS = `const proto = globalThis.ReadableStream && ReadableStream.prototype;
-globalThis.__t46ready = false;
+const BOOT_JS = `globalThis.__t46ready = false;
 globalThis.__t46error = null;
-if (proto && typeof proto[Symbol.asyncIterator] !== 'function') {
-  proto[Symbol.asyncIterator] = async function* () {
-    const reader = this.getReader();
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) return;
-        yield value;
-      }
-    } finally {
-      reader.releaseLock();
-    }
-  };
-}
 Promise.all([
   import('/vendor/pdfjs/pdf.mjs').then((m) => { globalThis.__pdfjs = m; }),
   import('/bundle.js'),
@@ -151,9 +136,6 @@ export async function extractInPage(page, request) {
   return page.evaluate(async ({ fixtureName, adapterArgs, pages, capabilities, regionId }) => {
     const { api } = globalThis.__t46;
     const pdfjs = globalThis.__pdfjs;
-    if (typeof api.ensureReadableStreamAsyncIterator === 'function') {
-      api.ensureReadableStreamAsyncIterator();
-    }
     const adapter = api.createPdfJsReader({ pdfjs, ...adapterArgs });
     const bytes = new Uint8Array(await (await fetch(`/fixtures/${fixtureName}`)).arrayBuffer());
     const sha = api.hexSha256(bytes);
@@ -176,12 +158,30 @@ export async function extractInPage(page, request) {
       const task = pdfjs.getDocument({ data: bytes.slice(), enableXfa: false, isEvalSupported: false });
       const doc = await task.promise;
       const page1 = await doc.getPage(1);
-      const tc = await page1.getTextContent({ includeMarkedContent: true, disableNormalization: true });
+      let tc;
+      try {
+        tc = await page1.getTextContent({ includeMarkedContent: true, disableNormalization: true });
+      } catch (error) {
+        if (typeof page1.streamTextContent !== 'function' || typeof api.asReadableStreamAsyncIterable !== 'function') {
+          throw error;
+        }
+        const collected = { items: [], styles: {}, lang: null };
+        for await (const chunk of api.asReadableStreamAsyncIterable(page1.streamTextContent({
+          includeMarkedContent: true,
+          disableNormalization: true,
+        }))) {
+          collected.lang ??= chunk.lang ?? null;
+          Object.assign(collected.styles, chunk.styles ?? {});
+          collected.items.push(...(chunk.items ?? []));
+        }
+        tc = collected;
+      }
       directText = {
         ok: true,
         items: tc.items.length,
         typeofGetText: typeof page1.getTextContent,
         hasStreamTextContent: typeof page1.streamTextContent === 'function',
+        nativeAsyncIterator: typeof ReadableStream.prototype[Symbol.asyncIterator] === 'function',
       };
       await task.destroy();
     } catch (error) {
