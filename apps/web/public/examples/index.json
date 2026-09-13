@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0.0",
+  "cards": [
+    {
+      "example_id": "amount",
+      "card_title": "The amount that reads differently",
+      "mechanism": "Font ToUnicode maps the displayed 1 to 1,0; visual $100 becomes extracted $1,000",
+      "fixture_id": "F01",
+      "family": "mapping-amount",
+      "manifest_url": "/examples/amount/manifest.json",
+      "report_url": "/examples/amount/report.json",
+      "source": {
+        "filename": "mapping-amount.pdf",
+        "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+        "byte_length": 1437,
+        "download_url": "/examples/amount/mapping-amount.pdf",
+        "role": "Source document",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 1,
+      "variant_count": 3,
+      "timing_ms": 249
+    },
+    {
+      "example_id": "covered",
+      "card_title": "The amount hidden under white paint",
+      "mechanism": "A painted white rectangle covers the printed amount; the render shows nothing while the text layer still carries it",
+      "fixture_id": "F02",
+      "family": "covered-text",
+      "manifest_url": "/examples/covered/manifest.json",
+      "report_url": "/examples/covered/report.json",
+      "source": {
+        "filename": "covered-amount.pdf",
+        "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+        "byte_length": 1504,
+        "download_url": "/examples/covered/covered-amount.pdf",
+        "role": "Source document",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 1,
+      "variant_count": 3,
+      "timing_ms": 132
+    },
+    {
+      "example_id": "scan",
+      "card_title": "A normal scan — and its invisible-layer siblings",
+      "mechanism": "A searchable scan carries an invisible text layer over the raster; raster-only and shifted siblings show when readings still agree",
+      "fixture_id": "F03",
+      "family": "searchable-scan",
+      "manifest_url": "/examples/scan/manifest.json",
+      "report_url": "/examples/scan/report.json",
+      "source": {
+        "filename": "scan-correct.pdf",
+        "sha256": "86a17f4a2ee4c4e75bd2eb406266b20ed3f960f644631841c5fad8b0e7ff4f5f",
+        "byte_length": 18686,
+        "download_url": "/examples/scan/scan-correct.pdf",
+        "role": "Searchable scan (correct layer)",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 5,
+      "variant_count": 2,
+      "timing_ms": 270
+    },
+    {
+      "example_id": "geometry",
+      "card_title": "The same ink at four rotations",
+      "mechanism": "Identical page content under 0/90/180/270 rotation; readers must reconcile geometry through the recorded transforms",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
+      "manifest_url": "/examples/geometry/manifest.json",
+      "report_url": "/examples/geometry/report.json",
+      "source": {
+        "filename": "geometry-90.pdf",
+        "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+        "byte_length": 1436,
+        "download_url": "/examples/geometry/geometry-90.pdf",
+        "role": "Source document (90°)",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 1,
+      "variant_count": 4,
+      "timing_ms": 272
+    },
+    {
+      "example_id": "reading-order",
+      "card_title": "The same readings in a different order",
+      "mechanism": "Two columns emitted right-then-left; the same text arrives in a different stream order without changing what was read",
+      "fixture_id": "F12",
+      "family": "reading-order",
+      "manifest_url": "/examples/reading-order/manifest.json",
+      "report_url": "/examples/reading-order/report.json",
+      "source": {
+        "filename": "reading-order-reordered.pdf",
+        "sha256": "cdedafa22cf2a54386998ebea5e7d8c597f541fcd2c702f7909e16d43c2499df",
+        "byte_length": 766,
+        "download_url": "/examples/reading-order/reading-order-reordered.pdf",
+        "role": "Reordered stream",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 4,
+      "variant_count": 1,
+      "timing_ms": 161
+    },
+    {
+      "example_id": "duplicates",
+      "card_title": "The same $100, four times",
+      "mechanism": "Four identical amounts at distinct positions stay individually addressable by occurrence — a string match must never collapse them",
+      "fixture_id": "F11",
+      "family": "duplicates",
+      "manifest_url": "/examples/duplicates/manifest.json",
+      "report_url": "/examples/duplicates/report.json",
+      "source": {
+        "filename": "duplicates-four.pdf",
+        "sha256": "036db55ee2f8c320252c7c9fb220daa38699387800e8a3bbf8c6bb73463feb1f",
+        "byte_length": 754,
+        "download_url": "/examples/duplicates/duplicates-four.pdf",
+        "role": "Source document (four identical amounts)",
+        "report_file": "report.json"
+      },
+      "readers": [
+        {
+          "name": "pdf.js text",
+          "version": "6.3.289",
+          "method": "native_text"
+        },
+        {
+          "name": "pdf.js render",
+          "version": "6.3.289",
+          "method": "render"
+        },
+        {
+          "name": "tesseract.js",
+          "version": "7.0.0",
+          "method": "ocr"
+        }
+      ],
+      "finding_count": 1,
+      "variant_count": 3,
+      "timing_ms": 127
+    }
+  ]
+}
