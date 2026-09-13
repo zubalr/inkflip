@@ -1,4 +1,4 @@
-"""T39 measurement driver unit tests (budgets and honest labeling)."""
+"""T39 measurement driver unit tests (honest naming and fail-closed accept)."""
 from __future__ import annotations
 
 import json
@@ -14,7 +14,6 @@ SCRIPT = ROOT / "scripts" / "measure_performance.py"
 
 class TestRasterBudgets(unittest.TestCase):
     def test_finite_positive_and_edge_pixel_caps(self) -> None:
-        sys.path.insert(0, str(ROOT / "scripts"))
         import importlib.util
 
         spec = importlib.util.spec_from_file_location("measure_performance", SCRIPT)
@@ -36,7 +35,7 @@ class TestRasterBudgets(unittest.TestCase):
 
 
 class TestMeasureDriver(unittest.TestCase):
-    def test_local_profile_writes_receipt_and_refuses_reference_claim(self) -> None:
+    def test_inventory_refuses_reference_claim(self) -> None:
         with tempfile.TemporaryDirectory(prefix="inkflip-t39-out-") as raw:
             out = Path(raw)
             proc = subprocess.run(
@@ -47,6 +46,8 @@ class TestMeasureDriver(unittest.TestCase):
                     "reference-desktop",
                     "--samples",
                     "3",
+                    "--mode",
+                    "inventory",
                     "--out",
                     str(out),
                 ],
@@ -60,9 +61,37 @@ class TestMeasureDriver(unittest.TestCase):
             data = json.loads(path.read_text())
             self.assertFalse(data["host"]["is_specified_reference_desktop"])
             self.assertIn("gap", data["host"])
-            hash_stage = data["measurement"]["stages"]["file_read_hash"]
+            self.assertFalse(data["accepting"])
+            hash_stage = data["measurement"]["stages"]["file_sha256"]
             self.assertEqual(hash_stage["n"], 3)
             self.assertEqual(hash_stage["distribution_claim"], "insufficient_samples")
+            self.assertEqual(data["measurement"]["stages"]["inspect_cli"]["n"], 3)
+            align = data["measurement"]["stages"]["alignment_cli"]
+            self.assertEqual(align["n"], 3)
+            self.assertTrue(align["measured"])
+
+    def test_accept_fails_for_unavailable_reference_profile(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="inkflip-t39-accept-") as raw:
+            out = Path(raw)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--profile",
+                    "reference-desktop",
+                    "--samples",
+                    "1",
+                    "--mode",
+                    "accept",
+                    "--out",
+                    str(out),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+            self.assertIn("ACCEPT-FAIL", proc.stderr)
 
 
 if __name__ == "__main__":

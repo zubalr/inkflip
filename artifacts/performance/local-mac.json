@@ -1,12 +1,12 @@
 {
   "kind": "inkflip-performance",
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "host": {
     "profile_requested": "local-mac",
     "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
     "machine": "arm64",
     "processor": "arm",
-    "python": "3.13.15",
+    "python": "3.14.7",
     "cpus_logical": 14,
     "physical_memory_bytes": 25769803776,
     "reference_desktop": {
@@ -15,9 +15,12 @@
       "display": "1366x768 or 1440x1000"
     },
     "is_specified_reference_desktop": false,
+    "is_physical_mobile": false,
     "note": "This host is not the specified 4-core/8 GiB reference desktop merely because a viewport can be emulated. Local numbers are labeled as this machine."
   },
   "samples_requested": 30,
+  "mode": "accept",
+  "accepting": true,
   "contention": "caller must keep competing OCR/container jobs idle; this process does not inspect other PIDs",
   "measurement": {
     "source": {
@@ -29,155 +32,105 @@
       ]
     },
     "stages": {
-      "file_read_hash": {
+      "file_sha256": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
-        "p50": 0.11083349818363786,
-        "p95": 0.13156264467397705,
-        "max": 0.14037502114661038,
-        "mean": 0.11074583453591913,
+        "measured": true,
+        "p50": 0.11295849981252104,
+        "p95": 0.15103316400200126,
+        "max": 0.19420901662670076,
+        "mean": 0.11658610213392724,
         "distribution_claim": "n>=30"
       },
-      "metadata_parse": {
+      "inspect_cli": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
-        "p50": 0.2163334866054356,
-        "p95": 0.2543290378525853,
-        "max": 0.4251670034136623,
-        "mean": 0.2270554987868915,
+        "measured": true,
+        "p50": 158.60947899636813,
+        "p95": 189.8032356097246,
+        "max": 205.17608302179724,
+        "mean": 162.62520693514185,
         "distribution_claim": "n>=30"
       },
-      "first_preview_and_extraction": {
+      "report_html": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
-        "p50": 132.36691649944987,
-        "p95": 137.63206685252953,
-        "max": 142.61612499831244,
-        "mean": 133.1790417326071,
+        "measured": true,
+        "p50": 149.31610399798956,
+        "p95": 169.16421510541113,
+        "max": 189.21637500170618,
+        "mean": 152.75572089885827,
         "distribution_claim": "n>=30"
       },
-      "report_serialization": {
+      "alignment_cli": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
-        "p50": 126.29397900309414,
-        "p95": 131.58699824271025,
-        "max": 137.6479169994127,
-        "mean": 127.05906529833253,
-        "distribution_claim": "n>=30"
-      },
-      "alignment": {
-        "n": 30,
-        "failures": 0,
-        "unit": "ms",
-        "p50": 2231.0350835177815,
-        "p95": 2266.4782227933756,
-        "max": 2286.175999994157,
-        "mean": 2233.1618222029647,
+        "measured": true,
+        "p50": 2490.2151040005265,
+        "p95": 7894.164543614894,
+        "max": 8982.025707984576,
+        "mean": 3231.415872268068,
         "distribution_claim": "n>=30",
-        "note": "shared Node alignment bridge via inkflip.baselines.engine._align_pages on the last inspect report; not a JS-heap claim",
+        "note": "shared Node alignment bridge via inkflip.baselines.engine._align_pages; not JS-heap",
         "last_compare": null
       },
-      "rasterization": {
+      "preview": {
         "n": 0,
-        "distribution_claim": "not_a_latency_distribution",
-        "budget_validation": {
-          "ok": true,
-          "reasons": [],
-          "width": 2000,
-          "height": 2000,
-          "mobile": false,
-          "pixel_budget": 4000000,
-          "edge_budget": 8192,
-          "live_buffers": 2,
-          "ocr_workers": 1,
-          "mobile_ocr_pages": 1,
-          "downsample_recorded": true
-        },
-        "infinite_rejected": {
-          "ok": false,
-          "reasons": [
-            "edge exceeds 8192",
-            "pixel budget exceeds 4000000"
-          ],
-          "width": Infinity,
-          "height": 100,
-          "mobile": false,
-          "pixel_budget": 4000000,
-          "edge_budget": 8192,
-          "live_buffers": 2,
-          "ocr_workers": 1,
-          "mobile_ocr_pages": 1,
-          "downsample_recorded": true
-        },
-        "mobile": {
-          "ok": false,
-          "reasons": [
-            "pixel budget exceeds 2000000"
-          ],
-          "width": 2000,
-          "height": 2000,
-          "mobile": true,
-          "pixel_budget": 2000000,
-          "edge_budget": 8192,
-          "live_buffers": 1,
-          "ocr_workers": 1,
-          "mobile_ocr_pages": 1,
-          "downsample_recorded": true
-        },
-        "note": "browser raster timings live in tests/performance/budgets.spec.ts; this records budget enforcement"
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
+      },
+      "render": {
+        "n": 0,
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
+      },
+      "extraction": {
+        "n": 0,
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
+      },
+      "raster": {
+        "n": 0,
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
       },
       "ocr": {
         "n": 0,
-        "distribution_claim": "not_run",
-        "note": "native tesseract OCR is an optional external reader; missing binary/model is a capability gap, not a p95"
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
       },
-      "entry_versus_lazy_downloads": {
+      "export": {
         "n": 0,
-        "distribution_claim": "not_applicable_native_cli",
-        "note": "native CLI has no browser entry/lazy model download; those cases are T25/T46 browser observations"
+        "failures": 0,
+        "unit": "ms",
+        "measured": false,
+        "distribution_claim": "missing",
+        "note": "stage was not executed"
       }
     },
-    "low_memory_injection": {
-      "method": "reject oversize raster before allocation; not a portable JS-heap OOM",
-      "oversize_raster": {
-        "ok": false,
-        "reasons": [
-          "edge exceeds 8192",
-          "pixel budget exceeds 4000000"
-        ],
-        "width": 9000,
-        "height": 9000,
-        "mobile": false,
-        "pixel_budget": 4000000,
-        "edge_budget": 8192,
-        "live_buffers": 2,
-        "ocr_workers": 1,
-        "mobile_ocr_pages": 1,
-        "downsample_recorded": true
-      },
-      "next_file_inspect_exit": 0,
-      "next_file_healthy": true
-    },
-    "replace_clear_cycles": {
-      "n": 10,
-      "rss_bytes_after_cycle": [
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968,
-        56147968
-      ],
-      "rss_grew_monotonically": false,
-      "note": "ru_maxrss is a high-water mark, not a portable total-memory claim from JS heap"
+    "cli_success": {
+      "inspect": 30,
+      "report": 30,
+      "samples_requested": 30
     },
     "budgets": {
       "browser": {
@@ -227,6 +180,142 @@
         "max_stdout_message_bytes": 1048576,
         "max_raster_edge": 16384
       }
+    },
+    "note": "CLI stages are new-process invocations. They are not persistent-browser workspace retention, product JS-heap, or replace/clear evidence. Browser behavior lives in tests/performance/budgets.spec.ts."
+  },
+  "browser": {
+    "kind": "inkflip-performance-browser",
+    "schema_version": "2.0.0",
+    "host": {
+      "profile_requested": "local-mac",
+      "browserName": "chromium",
+      "project": "",
+      "is_specified_reference_desktop": false,
+      "is_physical_mobile": false,
+      "note": "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference."
+    },
+    "setup_ms": 331,
+    "stages": {
+      "preview": {
+        "n": 30,
+        "failures": 0,
+        "measured": true,
+        "unit": "ms",
+        "p50": 497,
+        "p95": 535.5,
+        "max": 2010,
+        "distribution_claim": "n>=30"
+      },
+      "extraction": {
+        "n": 30,
+        "failures": 0,
+        "measured": true,
+        "unit": "ms",
+        "p50": 0.4000000059604645,
+        "p95": 0.655000007152557,
+        "max": 2.0999999940395355,
+        "distribution_claim": "n>=30"
+      },
+      "render": {
+        "n": 0,
+        "failures": 0,
+        "measured": false,
+        "distribution_claim": "missing",
+        "unit": "ms"
+      },
+      "raster": {
+        "n": 0,
+        "measured": true,
+        "distribution_claim": "not_a_latency_distribution",
+        "oversize_open_rejected": true,
+        "note": "20 MiB desktop byte cap rejected on the live workspace before allocation"
+      },
+      "ocr": {
+        "n": 0,
+        "failures": 0,
+        "measured": false,
+        "distribution_claim": "missing",
+        "unit": "ms"
+      },
+      "alignment": {
+        "n": 0,
+        "failures": 0,
+        "measured": false,
+        "distribution_claim": "missing",
+        "unit": "ms"
+      },
+      "export": {
+        "n": 0,
+        "failures": 0,
+        "measured": false,
+        "distribution_claim": "missing",
+        "unit": "ms"
+      }
+    },
+    "replace_clear_cycles": {
+      "n": 10,
+      "js_heap_used_bytes": [
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000,
+        386000000
+      ],
+      "note": "Chromium performance.memory when exposed; not parent-Python ru_maxrss across CLI children"
+    },
+    "cancel_next_file": {
+      "cancelled_visible": true,
+      "next_file_pages_summary": true
+    },
+    "mobile": {
+      "ocr_consent_visible": true,
+      "physical_device": false,
+      "viewport_emulation": "320x568",
+      "note": "Viewport emulation is not a physical 4 GiB mobile device"
+    },
+    "missing_model": {
+      "note": "OCR stage recorded missing; offline model prepare is T25, not claimed as T39 p95"
+    },
+    "session": {
+      "fileState": "selecting",
+      "generation": 0,
+      "doc": {
+        "label": "mobile.pdf",
+        "byteLength": 586,
+        "sha256": "48e075e755aba3fed026d501532b847186c5186b7e356a1e085a62b434b99265",
+        "pageCount": 1,
+        "pages": [
+          {
+            "index": 0,
+            "widthPt": 612,
+            "heightPt": 792,
+            "rotation": 0,
+            "canonicalTransformId": "t_p0_canonical"
+          }
+        ]
+      },
+      "report": null,
+      "reportSource": null,
+      "error": null,
+      "notice": null,
+      "run": null,
+      "occurrences": [],
+      "importedView": null,
+      "importedReplay": null,
+      "sourceAttached": false
+    },
+    "memory": {
+      "js_heap_used_bytes": 386000000,
+      "limits": {
+        "tracked_allocation_target_bytes": 268435456,
+        "measured_peak_rss_target_bytes": 536870912
+      }
     }
-  }
+  },
+  "problems": []
 }

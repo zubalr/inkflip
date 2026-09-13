@@ -1,0 +1,134 @@
+{
+  "kind": "inkflip-performance-browser",
+  "schema_version": "2.0.0",
+  "host": {
+    "profile_requested": "local-mac",
+    "browserName": "chromium",
+    "project": "",
+    "is_specified_reference_desktop": false,
+    "is_physical_mobile": false,
+    "note": "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference."
+  },
+  "setup_ms": 331,
+  "stages": {
+    "preview": {
+      "n": 30,
+      "failures": 0,
+      "measured": true,
+      "unit": "ms",
+      "p50": 497,
+      "p95": 535.5,
+      "max": 2010,
+      "distribution_claim": "n>=30"
+    },
+    "extraction": {
+      "n": 30,
+      "failures": 0,
+      "measured": true,
+      "unit": "ms",
+      "p50": 0.4000000059604645,
+      "p95": 0.655000007152557,
+      "max": 2.0999999940395355,
+      "distribution_claim": "n>=30"
+    },
+    "render": {
+      "n": 0,
+      "failures": 0,
+      "measured": false,
+      "distribution_claim": "missing",
+      "unit": "ms"
+    },
+    "raster": {
+      "n": 0,
+      "measured": true,
+      "distribution_claim": "not_a_latency_distribution",
+      "oversize_open_rejected": true,
+      "note": "20 MiB desktop byte cap rejected on the live workspace before allocation"
+    },
+    "ocr": {
+      "n": 0,
+      "failures": 0,
+      "measured": false,
+      "distribution_claim": "missing",
+      "unit": "ms"
+    },
+    "alignment": {
+      "n": 0,
+      "failures": 0,
+      "measured": false,
+      "distribution_claim": "missing",
+      "unit": "ms"
+    },
+    "export": {
+      "n": 0,
+      "failures": 0,
+      "measured": false,
+      "distribution_claim": "missing",
+      "unit": "ms"
+    }
+  },
+  "replace_clear_cycles": {
+    "n": 10,
+    "js_heap_used_bytes": [
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000,
+      386000000
+    ],
+    "note": "Chromium performance.memory when exposed; not parent-Python ru_maxrss across CLI children"
+  },
+  "cancel_next_file": {
+    "cancelled_visible": true,
+    "next_file_pages_summary": true
+  },
+  "mobile": {
+    "ocr_consent_visible": true,
+    "physical_device": false,
+    "viewport_emulation": "320x568",
+    "note": "Viewport emulation is not a physical 4 GiB mobile device"
+  },
+  "missing_model": {
+    "note": "OCR stage recorded missing; offline model prepare is T25, not claimed as T39 p95"
+  },
+  "session": {
+    "fileState": "selecting",
+    "generation": 0,
+    "doc": {
+      "label": "mobile.pdf",
+      "byteLength": 586,
+      "sha256": "48e075e755aba3fed026d501532b847186c5186b7e356a1e085a62b434b99265",
+      "pageCount": 1,
+      "pages": [
+        {
+          "index": 0,
+          "widthPt": 612,
+          "heightPt": 792,
+          "rotation": 0,
+          "canonicalTransformId": "t_p0_canonical"
+        }
+      ]
+    },
+    "report": null,
+    "reportSource": null,
+    "error": null,
+    "notice": null,
+    "run": null,
+    "occurrences": [],
+    "importedView": null,
+    "importedReplay": null,
+    "sourceAttached": false
+  },
+  "memory": {
+    "js_heap_used_bytes": 386000000,
+    "limits": {
+      "tracked_allocation_target_bytes": 268435456,
+      "measured_peak_rss_target_bytes": 536870912
+    }
+  }
+}
