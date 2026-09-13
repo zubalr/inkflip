@@ -1,8 +1,8 @@
 {
   "task": "T41",
   "beads_id": "pdf-t41",
-  "evaluated_commit": "d484425a3837f08414dbee51becc9d77c6301712",
-  "evaluated_at": "2026-09-13T13:02:24.802405+00:00",
+  "evaluated_commit": "eb2392a2618347876db003c685d3f7333de62d7f",
+  "evaluated_at": "2026-09-13T13:05:25.006200+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -33,7 +33,7 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "P09 Experiment completed in 0.0732s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
+      "stdout": "P09 Experiment completed in 0.1052s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
       "stderr": "",
       "tests": {
         "collected": 1,
@@ -56,8 +56,8 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "P09 Experiment completed in 0.0227s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
-      "stderr": "test_empty_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_empty_manifest_fails_terminal)\nReview counterexample: empty manifest must fail terminal. ... ok\ntest_held_out_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_held_out_manifest_fails_terminal)\nReview counterexample: held-out evaluation manifest must fail terminal. ... ok\ntest_ink_counterexample_triggered (__main__.TestPaintOrderExperiment.test_ink_counterexample_triggered)\nCriterion: negative result / counterexample complete. ... ok\ntest_no_held_out_leakage (__main__.TestPaintOrderExperiment.test_no_held_out_leakage)\nCriterion: candidate gain measured without held-out leakage. ... ok\ntest_occlusion_geometry_computation (__main__.TestPaintOrderExperiment.test_occlusion_geometry_computation)\nGeometric occlusion accurately computes full, partial, and zero intersection. ... ok\ntest_precision_coverage_runtime_recorded (__main__.TestPaintOrderExperiment.test_precision_coverage_runtime_recorded)\nCriterion: precision/coverage/runtime recorded. ... ok\ntest_resolve_manifest_explicit_missing_fails (__main__.TestPaintOrderExperiment.test_resolve_manifest_explicit_missing_fails)\nVerify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok\ntest_source_bytes_immutable (__main__.TestPaintOrderExperiment.test_source_bytes_immutable)\nInvariant I01: source fixture bytes remain immutable. ... ok\ntest_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_zero_hard_control_false_visibility)\nCriterion: Zero hard-control false visibility. ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.024s\n\nOK\n",
+      "stdout": "P09 Experiment completed in 0.0240s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
+      "stderr": "test_empty_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_empty_manifest_fails_terminal)\nReview counterexample: empty manifest must fail terminal. ... ok\ntest_held_out_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_held_out_manifest_fails_terminal)\nReview counterexample: held-out evaluation manifest must fail terminal. ... ok\ntest_ink_counterexample_triggered (__main__.TestPaintOrderExperiment.test_ink_counterexample_triggered)\nCriterion: negative result / counterexample complete. ... ok\ntest_no_held_out_leakage (__main__.TestPaintOrderExperiment.test_no_held_out_leakage)\nCriterion: candidate gain measured without held-out leakage. ... ok\ntest_occlusion_geometry_computation (__main__.TestPaintOrderExperiment.test_occlusion_geometry_computation)\nGeometric occlusion accurately computes full, partial, and zero intersection. ... ok\ntest_precision_coverage_runtime_recorded (__main__.TestPaintOrderExperiment.test_precision_coverage_runtime_recorded)\nCriterion: precision/coverage/runtime recorded. ... ok\ntest_resolve_manifest_explicit_missing_fails (__main__.TestPaintOrderExperiment.test_resolve_manifest_explicit_missing_fails)\nVerify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok\ntest_source_bytes_immutable (__main__.TestPaintOrderExperiment.test_source_bytes_immutable)\nInvariant I01: source fixture bytes remain immutable. ... ok\ntest_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_zero_hard_control_false_visibility)\nCriterion: Zero hard-control false visibility. ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.026s\n\nOK\n",
       "tests": {
         "collected": 9,
         "passed": 9,

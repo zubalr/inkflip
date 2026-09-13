@@ -1,8 +1,8 @@
 {
   "task": "T42",
   "beads_id": "pdf-t42",
-  "evaluated_commit": "d484425a3837f08414dbee51becc9d77c6301712",
-  "evaluated_at": "2026-09-13T13:02:30.415002+00:00",
+  "evaluated_commit": "eb2392a2618347876db003c685d3f7333de62d7f",
+  "evaluated_at": "2026-09-13T13:05:37.374120+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -33,7 +33,7 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=1.0659s, megapixels=5.5296MP\n",
+      "stdout": "P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=1.15s, megapixels=5.5296MP\n",
       "stderr": "",
       "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
@@ -51,7 +51,7 @@
       "cwd": ".",
       "exit": 0,
       "stdout": "",
-      "stderr": "test_acceptance_criteria_and_rejection_rationale (__main__.TestP11Experiment.test_acceptance_criteria_and_rejection_rationale) ... ok\ntest_empty_manifest_fails_terminal (__main__.TestP11Experiment.test_empty_manifest_fails_terminal)\nEmpty manifest must fail terminal. ... ok\ntest_empty_ocr_returns_zero_recoveries_and_corruptions (__main__.TestP11Experiment.test_empty_ocr_returns_zero_recoveries_and_corruptions)\nCounterexample test: mocked empty OCR must yield 0 recoveries and 0 corruptions. ... ok\ntest_experiment_runs_and_produces_valid_artifact (__main__.TestP11Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok\ntest_fixtures_exist_and_intact (__main__.TestP11Experiment.test_fixtures_exist_and_intact) ... ok\ntest_held_out_manifest_fails_terminal (__main__.TestP11Experiment.test_held_out_manifest_fails_terminal)\nHeld-out evaluation manifest must fail terminal. ... ok\ntest_pt_to_px_coordinate_transform (__main__.TestP11Experiment.test_pt_to_px_coordinate_transform)\nCoordinate transform correctly maps PDF bottom-left points to PIL top-left pixels. ... ok\ntest_resolve_manifest_explicit_missing_fails (__main__.TestP11Experiment.test_resolve_manifest_explicit_missing_fails)\nVerify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok\ntest_resource_budgets (__main__.TestP11Experiment.test_resource_budgets) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 1.047s\n\nOK\n",
+      "stderr": "test_acceptance_criteria_and_rejection_rationale (__main__.TestP11Experiment.test_acceptance_criteria_and_rejection_rationale) ... ok\ntest_empty_manifest_fails_terminal (__main__.TestP11Experiment.test_empty_manifest_fails_terminal)\nEmpty manifest must fail terminal. ... ok\ntest_empty_ocr_returns_zero_recoveries_and_corruptions (__main__.TestP11Experiment.test_empty_ocr_returns_zero_recoveries_and_corruptions)\nCounterexample test: mocked empty OCR must yield 0 recoveries and 0 corruptions. ... ok\ntest_experiment_runs_and_produces_valid_artifact (__main__.TestP11Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok\ntest_fixtures_exist_and_intact (__main__.TestP11Experiment.test_fixtures_exist_and_intact) ... ok\ntest_held_out_manifest_fails_terminal (__main__.TestP11Experiment.test_held_out_manifest_fails_terminal)\nHeld-out evaluation manifest must fail terminal. ... ok\ntest_pt_to_px_coordinate_transform (__main__.TestP11Experiment.test_pt_to_px_coordinate_transform)\nCoordinate transform correctly maps PDF bottom-left points to PIL top-left pixels. ... ok\ntest_resolve_manifest_explicit_missing_fails (__main__.TestP11Experiment.test_resolve_manifest_explicit_missing_fails)\nVerify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok\ntest_resource_budgets (__main__.TestP11Experiment.test_resource_budgets) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 1.021s\n\nOK\n",
       "tests": {
         "collected": 9,
         "passed": 9,

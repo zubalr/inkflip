@@ -1,5 +1,5 @@
 $ python3 experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09
-P09 Experiment completed in 0.0732s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
+P09 Experiment completed in 0.1052s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
 Candidate hard-control false visibility: 0 (zero FP: True)
 Candidate abstentions (unsupported compositing): 2
 Counterexample triggered on ink heuristic: True
@@ -7,7 +7,7 @@ Result written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidat
 Exit: 0
 
 $ python3 experiments/P09/test_experiment.py
-P09 Experiment completed in 0.0227s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
+P09 Experiment completed in 0.0240s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
 Candidate hard-control false visibility: 0 (zero FP: True)
 Candidate abstentions (unsupported compositing): 2
 Counterexample triggered on ink heuristic: True
@@ -32,7 +32,7 @@ test_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_
 Criterion: Zero hard-control false visibility. ... ok
 
 ----------------------------------------------------------------------
-Ran 9 tests in 0.024s
+Ran 9 tests in 0.026s
 
 OK
 Exit: 0
