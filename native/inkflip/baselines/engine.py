@@ -71,6 +71,7 @@ def _require_report(data: Any, path: Path) -> dict[str, Any]:
 
 def _run_reports(run_dir: Path) -> dict[str, dict[str, Any]]:
     reports: dict[str, dict[str, Any]] = {}
+    sources: dict[str, Path] = {}
     reports_dir = run_dir / "reports"
     search = []
     if reports_dir.is_dir():
@@ -80,7 +81,18 @@ def _run_reports(run_dir: Path) -> dict[str, dict[str, Any]]:
         if path.name in {"index.json", "identity.json", "rules.json"}:
             continue
         data = _load_json(path)
-        reports[path.stem.replace(".inkflip", "")] = _require_report(data, path)
+        key = path.stem.replace(".inkflip", "")
+        if key in sources:
+            # ``report.json`` and ``report.inkflip.json`` normalise to the same
+            # key. Silently keeping whichever the glob visited last loses
+            # evidence and makes the bundle depend on directory order, so an
+            # ambiguous run is refused instead.
+            raise BaselineError(
+                f"Ambiguous stored-run reports: {sources[key]} and {path} both normalise to "
+                f"the key {key!r}; refusing to replace evidence"
+            )
+        sources[key] = path
+        reports[key] = _require_report(data, path)
     return reports
 
 
