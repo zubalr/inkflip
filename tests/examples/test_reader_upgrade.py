@@ -21,8 +21,9 @@ NATIVE_PYTHON = ROOT / "native" / ".venv" / "bin" / "python"
 def _reexec_native() -> None:
     """The T35 command is `python -m unittest`; this host maps that to
     system python3, which lacks the frozen native extras. Re-enter the
-    committed native interpreter so imports and subprocesses match the
-    project lock. README shell lines stay verbatim.
+    committed native interpreter so the test process can import inkflip.
+    Subprocess example routes use the README/run.sh PATH setup instead of
+    this re-exec.
     """
     if not NATIVE_PYTHON.is_file():
         return
@@ -47,21 +48,105 @@ VERBATIM = [
     "inkflip compare baselines/before.json runs/after --rules examples/reader-upgrade/upgrade-rules.json --out comparisons/upgrade",
     "inkflip report runs/after/reports/mapping-control.json --format html --out runs/after/mapping-control.html --replace-output",
 ]
+SETUP_EXPORTS = [
+    'export PATH="$PWD/native/.venv/bin:$PWD/examples/reader-upgrade/bin:$PATH"',
+    'export PYTHONPATH="$PWD/native"',
+    'export INKFLIP_PROFILES_DIR="$PWD/profiles"',
+]
+RUN_SH = "sh examples/reader-upgrade/run.sh"
 
 
-def _readme_commands() -> list[str]:
+def _readme_sh_blocks() -> list[str]:
     text = README.read_text(encoding="utf-8")
-    blocks = re.findall(r"```sh\n(.*?)```", text, flags=re.S)
+    return re.findall(r"```sh\n(.*?)```", text, flags=re.S)
+
+
+def _readme_lines() -> list[str]:
     commands = []
-    for block in blocks:
+    for block in _readme_sh_blocks():
         for line in block.splitlines():
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
                 continue
-            if stripped == "sh examples/reader-upgrade/run.sh":
-                continue
             commands.append(stripped)
     return commands
+
+
+def ordinary_env() -> dict[str, str]:
+    """Login-like env: python3/uv may exist; `python` is not on PATH."""
+    path_parts = [
+        "/usr/bin",
+        "/bin",
+        "/usr/sbin",
+        "/sbin",
+        "/usr/local/bin",
+        str(Path.home() / ".local" / "bin"),
+        "/opt/homebrew/bin",
+    ]
+    env = {
+        "HOME": os.environ.get("HOME", ""),
+        "USER": os.environ.get("USER", ""),
+        "LOGNAME": os.environ.get("LOGNAME", ""),
+        "TMPDIR": os.environ.get("TMPDIR", "/tmp"),
+        "LANG": os.environ.get("LANG", "C.UTF-8"),
+        "LC_ALL": os.environ.get("LC_ALL", "en_US.UTF-8"),
+        "PATH": os.pathsep.join(path_parts),
+        "CDPATH": "",
+    }
+    for key in ("UV_CACHE_DIR", "XDG_CACHE_HOME", "SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    return env
+
+
+def make_sandbox() -> Path:
+    parent = Path(tempfile.mkdtemp(prefix="inkflip-t35-"))
+    sandbox = parent / "checkout with spaces"
+    sandbox.mkdir()
+    for name in ("scripts", "native", "planning", "packages"):
+        os.symlink(ROOT / name, sandbox / name)
+    dest = sandbox / "examples" / "reader-upgrade"
+    dest.parent.mkdir()
+    shutil.copytree(ROOT / "examples" / "reader-upgrade", dest, symlinks=True)
+    wrapper = dest / "bin" / "inkflip"
+    wrapper.chmod(wrapper.stat().st_mode | stat.S_IXUSR)
+    script = dest / "run.sh"
+    script.chmod(script.stat().st_mode | stat.S_IXUSR)
+    return sandbox
+
+
+def run_sh(script: str, cwd: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["/bin/sh", "-c", script],
+        cwd=cwd,
+        env=env if env is not None else ordinary_env(),
+        capture_output=True,
+        text=True,
+    )
+
+
+def assert_example_outputs(test: unittest.TestCase, sandbox: Path) -> None:
+    test.assertTrue((sandbox / "runs" / "before" / "index.json").is_file())
+    test.assertTrue((sandbox / "runs" / "after" / "index.json").is_file())
+    test.assertTrue((sandbox / "baselines" / "before.json").is_file())
+    test.assertTrue((sandbox / "comparisons" / "upgrade" / "comparison.json").is_file())
+    test.assertTrue((sandbox / "runs" / "after" / "mapping-control.html").is_file())
+    test.assertTrue((sandbox / "comparisons" / "upgrade" / "comparison.html").is_file())
+
+
+def assert_named_profile_identities(test: unittest.TestCase, sandbox: Path) -> None:
+    before = json.loads((sandbox / "runs" / "before" / "reports" / "mapping-control.json").read_text())
+    after = json.loads((sandbox / "runs" / "after" / "reports" / "mapping-control.json").read_text())
+    core.validate(before)
+    core.validate(after)
+    test.assertEqual(before["readers"][0]["version"], "5.9.0")
+    test.assertEqual(after["readers"][0]["version"], "6.18.0")
+    test.assertNotEqual(before["execution"]["environment"], after["execution"]["environment"])
+    test.assertIn("5.9.0", before["execution"]["environment"])
+    test.assertIn("6.18.0", after["execution"]["environment"])
+    html = (sandbox / "runs" / "after" / "mapping-control.html").read_text()
+    test.assertIn("6.18.0", html)
+    test.assertNotIn("chk_pdfium_text_p0", html)
 
 
 class TestReadmeCommandsCopiedVerbatim(unittest.TestCase):
@@ -69,77 +154,89 @@ class TestReadmeCommandsCopiedVerbatim(unittest.TestCase):
         text = README.read_text(encoding="utf-8")
         for command in VERBATIM:
             self.assertIn(command, text)
-        extracted = _readme_commands()
-        for command in VERBATIM:
+        extracted = _readme_lines()
+        for command in SETUP_EXPORTS + VERBATIM:
             self.assertIn(command, extracted)
+        self.assertIn(RUN_SH, extracted)
+        self.assertIn("native/.venv/bin", extracted[0])
+
+    def test_ordinary_shell_has_no_python_until_frozen_path(self):
+        sandbox = make_sandbox()
+        try:
+            missing = run_sh("command -v python >/dev/null; printf 'python_exit:%s\\n' $?", sandbox)
+            self.assertEqual(missing.returncode, 0, missing.stdout + missing.stderr)
+            self.assertIn("python_exit:1", missing.stdout + missing.stderr)
+            with_setup = run_sh(
+                "\n".join(SETUP_EXPORTS + ["command -v python", "python -c 'import sys; print(sys.executable)'"]),
+                sandbox,
+            )
+            self.assertEqual(with_setup.returncode, 0, with_setup.stdout + with_setup.stderr)
+            self.assertIn(".venv", with_setup.stdout.replace("\\", "/"))
+        finally:
+            shutil.rmtree(sandbox.parent, ignore_errors=True)
 
 
-@unittest.skipUnless(shutil.which("python") or True, "python launcher")
-class TestReaderUpgradeExample(unittest.TestCase):
+class TestDocumentedRoutesFailClosed(unittest.TestCase):
+    def test_python_command_missing_without_readme_exports(self):
+        sandbox = make_sandbox()
+        try:
+            proc = run_sh(VERBATIM[0], sandbox)
+            self.assertEqual(proc.returncode, 127)
+            combined = proc.stdout + proc.stderr
+            self.assertTrue(
+                "python: not found" in combined or "python: command not found" in combined,
+                combined,
+            )
+        finally:
+            shutil.rmtree(sandbox.parent, ignore_errors=True)
+
+    def test_run_sh_fails_when_frozen_interpreter_missing(self):
+        sandbox = make_sandbox()
+        try:
+            (sandbox / "native").unlink()
+            native = sandbox / "native"
+            native.mkdir()
+            proc = run_sh(RUN_SH, sandbox)
+            self.assertEqual(proc.returncode, 127)
+            self.assertIn("frozen native interpreter missing", proc.stderr)
+            self.assertIn("uv sync --project native", proc.stderr)
+        finally:
+            shutil.rmtree(sandbox.parent, ignore_errors=True)
+
+
+class TestReaderUpgradeManualSequence(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.sandbox = Path(tempfile.mkdtemp(prefix="inkflip-t35-"))
-        for name in ("scripts", "native", "planning", "examples", "packages"):
-            os.symlink(ROOT / name, cls.sandbox / name)
-        python = sys.executable
-        env = os.environ.copy()
-        env["PYTHONPATH"] = str(cls.sandbox / "native")
-        env["INKFLIP_PROFILES_DIR"] = str(cls.sandbox / "profiles")
-        env["INKFLIP_PYTHON"] = python
-        env["PATH"] = (
-            str(cls.sandbox / "examples" / "reader-upgrade" / "bin")
-            + os.pathsep
-            + str(Path(python).parent)
-            + os.pathsep
-            + env.get("PATH", "")
-        )
-        wrapper = cls.sandbox / "examples" / "reader-upgrade" / "bin" / "inkflip"
-        wrapper.chmod(wrapper.stat().st_mode | stat.S_IXUSR)
-        cls.env = env
+        cls.sandbox = make_sandbox()
+        cls.env = ordinary_env()
+        script_lines = list(SETUP_EXPORTS)
+        for command in VERBATIM:
+            if command.startswith("inkflip compare "):
+                script_lines.append(command + "; compare_status=$?")
+                script_lines.append("case $compare_status in 0|5) ;; *) exit $compare_status ;; esac")
+            else:
+                script_lines.append(command)
+        cls.proc = run_sh("\n".join(script_lines), cls.sandbox, cls.env)
         cls.setup_error = None
-        cls.logs = []
-        for command in _readme_commands():
-            if command.startswith("export "):
-                continue
-            proc = subprocess.run(
-                command,
-                shell=True,
-                cwd=cls.sandbox,
-                env=cls.env,
-                capture_output=True,
-                text=True,
+        if cls.proc.returncode not in (0, 5):
+            cls.setup_error = (
+                f"manual sequence\nexit {cls.proc.returncode}\n{cls.proc.stdout}\n{cls.proc.stderr}"
             )
-            cls.logs.append((command, proc.returncode, proc.stdout, proc.stderr))
-            allowed = (0, 5) if command.startswith("inkflip compare baselines/before.json runs/after ") else (0,)
-            if proc.returncode not in allowed:
-                cls.setup_error = f"{command}\nexit {proc.returncode}\n{proc.stdout}\n{proc.stderr}"
-                return
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.sandbox, ignore_errors=True)
+        shutil.rmtree(cls.sandbox.parent, ignore_errors=True)
 
     def setUp(self):
         if getattr(self, "setup_error", None):
             self.fail(self.setup_error)
 
     def test_example_runs_end_to_end_locally(self):
-        self.assertTrue((self.sandbox / "runs" / "before" / "index.json").is_file())
-        self.assertTrue((self.sandbox / "runs" / "after" / "index.json").is_file())
-        self.assertTrue((self.sandbox / "baselines" / "before.json").is_file())
-        self.assertTrue((self.sandbox / "comparisons" / "upgrade" / "comparison.json").is_file())
-        self.assertTrue((self.sandbox / "runs" / "after" / "mapping-control.html").is_file())
+        assert_example_outputs(self, self.sandbox)
+        self.assertIn("checkout with spaces", str(self.sandbox))
 
     def test_before_after_identities_differ(self):
-        before = json.loads((self.sandbox / "runs" / "before" / "reports" / "mapping-control.json").read_text())
-        after = json.loads((self.sandbox / "runs" / "after" / "reports" / "mapping-control.json").read_text())
-        core.validate(before)
-        core.validate(after)
-        self.assertEqual(before["readers"][0]["version"], "5.9.0")
-        self.assertEqual(after["readers"][0]["version"], "6.18.0")
-        self.assertNotEqual(before["execution"]["environment"], after["execution"]["environment"])
-        self.assertIn("5.9.0", before["execution"]["environment"])
-        self.assertIn("6.18.0", after["execution"]["environment"])
+        assert_named_profile_identities(self, self.sandbox)
 
     def test_output_reopens_as_script_free_html(self):
         html = (self.sandbox / "runs" / "after" / "mapping-control.html").read_text()
@@ -168,12 +265,58 @@ class TestReaderUpgradeExample(unittest.TestCase):
         command = (
             "inkflip compare baselines/before.json runs/after-mutated "
             "--rules examples/reader-upgrade/upgrade-rules.json "
-            f"--out {out}"
+            f"--out '{out}'"
         )
-        proc = subprocess.run(command, shell=True, cwd=self.sandbox, env=self.env, capture_output=True, text=True)
+        proc = run_sh("\n".join(SETUP_EXPORTS + [command]), self.sandbox, self.env)
         self.assertEqual(proc.returncode, 5, proc.stdout + proc.stderr)
         self.assertEqual(hashlib.sha256(baseline.read_bytes()).hexdigest(), before_digest)
         self.assertEqual(baseline.read_bytes(), before_bytes)
+
+    def test_corpus_processing_is_offline_after_install(self):
+        env = dict(self.env)
+        env.update(
+            {
+                "http_proxy": "http://127.0.0.1:1",
+                "https_proxy": "http://127.0.0.1:1",
+                "HTTP_PROXY": "http://127.0.0.1:1",
+                "HTTPS_PROXY": "http://127.0.0.1:1",
+                "ALL_PROXY": "http://127.0.0.1:1",
+            }
+        )
+        command = (
+            "inkflip corpus run --manifest examples/reader-upgrade/corpus.json "
+            "--source-root planning/fixtures --profile after --out runs/after-offline"
+        )
+        proc = run_sh("\n".join(SETUP_EXPORTS + [command]), self.sandbox, env)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertTrue((self.sandbox / "runs" / "after-offline" / "index.json").is_file())
+
+
+class TestReaderUpgradeRunSh(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.sandbox = make_sandbox()
+        cls.proc = run_sh(RUN_SH, cls.sandbox)
+        cls.setup_error = None
+        if cls.proc.returncode not in (0, 5):
+            cls.setup_error = (
+                f"{RUN_SH}\nexit {cls.proc.returncode}\n{cls.proc.stdout}\n{cls.proc.stderr}"
+            )
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.sandbox.parent, ignore_errors=True)
+
+    def setUp(self):
+        if getattr(self, "setup_error", None):
+            self.fail(self.setup_error)
+
+    def test_run_sh_from_ordinary_shell_with_spaces(self):
+        assert_example_outputs(self, self.sandbox)
+        assert_named_profile_identities(self, self.sandbox)
+        self.assertIn("checkout with spaces", str(self.sandbox))
+        html = (self.sandbox / "runs" / "after" / "mapping-control.html").read_text()
+        self.assertNotIn("<script", html.lower())
 
 
 if __name__ == "__main__":

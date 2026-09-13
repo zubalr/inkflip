@@ -5,13 +5,15 @@ service, account, or upload. Setup may download the pinned pypdf wheels because
 the operator invoked install. Corpus inspection, baseline creation and compare
 run offline.
 
-Put the `inkflip` wrapper on `PATH` and point Python at this checkout's native
-package before copying the commands below:
+The documented `python` name is this checkout's frozen native interpreter at
+`native/.venv/bin/python`. Create it with `uv sync --project native` if it is
+missing. Put that directory and the `inkflip` wrapper on `PATH`. Do not create
+a global `python` alias.
 
 ```sh
+export PATH="$PWD/native/.venv/bin:$PWD/examples/reader-upgrade/bin:$PATH"
 export PYTHONPATH="$PWD/native"
 export INKFLIP_PROFILES_DIR="$PWD/profiles"
-export PATH="$PWD/examples/reader-upgrade/bin:$PATH"
 ```
 
 ## Commands
@@ -26,7 +28,8 @@ inkflip compare baselines/before.json runs/after --rules examples/reader-upgrade
 inkflip report runs/after/reports/mapping-control.json --format html --out runs/after/mapping-control.html --replace-output
 ```
 
-Or run the same sequence as a script:
+Or run the same sequence as a script. `run.sh` applies the same frozen
+interpreter `PATH` itself, so it is usable from an ordinary shell:
 
 ```sh
 sh examples/reader-upgrade/run.sh

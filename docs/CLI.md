@@ -1,8 +1,10 @@
 # Native CLI
 
 The native command is `inkflip`. In this checkout run it as
-`PYTHONPATH=native python -m inkflip.cli` or through
-`examples/reader-upgrade/bin/inkflip` after putting that directory on `PATH`.
+`PYTHONPATH=native python -m inkflip.cli` after putting `native/.venv/bin` on
+`PATH`, or through `examples/reader-upgrade/bin/inkflip` after putting that
+directory and the frozen interpreter directory on `PATH`. The frozen venv
+supplies the local `python` name; do not create a global `python` alias.
 
 Source and output paths are local files only. Remote URL sources are refused.
 An output path that aliases the source, including a symlink or hard link, is
