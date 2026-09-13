@@ -206,7 +206,7 @@ export const Home: React.FC<HomeProps> = ({
             <p className={styles.featureText}>
               Inkflip highlights localized differences between reader implementations. A difference
               does not establish which reading is correct, and the absence of differences does not
-              constitute a document correctness or safety certification (Invariant I06).
+              constitute a document correctness or safety certification.
             </p>
           </div>
         </section>

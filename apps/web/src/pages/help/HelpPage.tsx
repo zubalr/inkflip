@@ -60,27 +60,32 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       title: "Command-Line Interface",
       summary: "Run batch corpus inspections, compare reader outputs, and replay sealed reports directly from the shell.",
       modalTitle: "Command-Line Interface Guide",
-      modalDescription: "Local terminal workflows for batch corpus inspections and companion comparisons.",
+      modalDescription: "Terminal workflows for batch corpus inspections across macOS native and Docker environments.",
       content: (
         <div className={styles.guideModalContent}>
           <div>
-            <h4>Local Inspection &amp; Execution Profiles</h4>
-            <p>Inspect a PDF using local engine profiles (browser, macOS-native companion, or reproducible Docker container workflow) without sending data to any remote service:</p>
+            <h4>Supported Delivery Targets</h4>
+            <p>Inkflip officially targets modern desktop web browsers, the macOS native companion runtime, and a reproducible Docker CLI workflow. Separate Windows and Linux desktop applications remain deferred.</p>
+          </div>
+          <div>
+            <h4>macOS Companion CLI</h4>
+            <p>Inspect a local PDF using native engine profiles (browser engine comparison or native Node runtime) directly on macOS:</p>
             <pre className={styles.guideCodeBlock}><code>python3 -m inkflip inspect &lt;pdf-file&gt; --profile browser|node</code></pre>
           </div>
           <div>
-            <h4>Report Generation</h4>
-            <p>Generate a sealed, portable inspection report containing findings and check statuses:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip report &lt;pdf-file&gt; -o report.json</code></pre>
+            <h4>Reproducible Docker CLI Workflow</h4>
+            <p>Run batch inspections in a reproducible, containerized environment with pinned dependencies and zero network access:</p>
+            <pre className={styles.guideCodeBlock}><code>docker run --rm --network none -v "$PWD":/data inkflip inspect /data/&lt;pdf-file&gt;</code></pre>
           </div>
           <div>
-            <h4>Evidence Replay</h4>
-            <p>Replay recorded findings from a previously generated report file:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip replay &lt;report.json&gt;</code></pre>
+            <h4>Report Generation &amp; Evidence Replay</h4>
+            <p>Generate a sealed, portable JSON inspection report or replay recorded findings without re-running engines:</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip report &lt;pdf-file&gt; -o report.json
+python3 -m inkflip replay &lt;report.json&gt;</code></pre>
           </div>
           <div>
             <h4>Fail-Closed Security</h4>
-            <p>The CLI strictly refuses remote URLs and network paths (exit code 2). All execution remains confined to local files and containers.</p>
+            <p>The CLI strictly refuses remote URLs and network paths (exit code 2). All execution remains confined to local files and isolated containers.</p>
           </div>
         </div>
       ),
@@ -165,9 +170,9 @@ export const HelpPage: React.FC<HelpPageProps> = ({
           <div>
             <h4>Integrated Engines</h4>
             <ul>
-              <li><strong>PDF.js:</strong> Client-side JavaScript content stream extraction.</li>
-              <li><strong>PDFium:</strong> High-fidelity native C++ text and geometry extraction.</li>
-              <li><strong>Tesseract OCR:</strong> Optical character recognition for scanned raster pages.</li>
+              <li><strong>PDF.js:</strong> Client-side JavaScript content stream extraction (in-browser and Node).</li>
+              <li><strong>PDFium:</strong> High-fidelity native C++ text and geometry extraction (macOS companion &amp; Docker CLI).</li>
+              <li><strong>Tesseract OCR:</strong> Optical character recognition for scanned raster pages (browser WASM &amp; native companion).</li>
             </ul>
           </div>
         </div>
@@ -304,11 +309,11 @@ export const HelpPage: React.FC<HelpPageProps> = ({
               </h3>
               <p className={styles.cardText}>
                 Your documents never leave your device. All rendering, text extraction, coordinate
-                mapping, and alignment checks run locally inside your browser sandbox, macOS companion runtime, or reproducible container.
+                mapping, and alignment checks run locally inside your browser sandbox, macOS companion runtime, or reproducible Docker container.
               </p>
               <ul className={styles.cardList}>
                 <li>No telemetry, analytics, or remote data transmission.</li>
-                <li>No remote servers or cloud storage dependencies.</li>
+                <li>Delivery targets: modern desktop browsers, macOS companion, and Docker CLI workflow.</li>
                 <li>Sandboxed Web Workers isolate reader engine execution.</li>
               </ul>
             </article>
@@ -327,7 +332,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
                   <strong>PDF.js:</strong> Standard browser client-side content stream extraction.
                 </li>
                 <li>
-                  <strong>PDFium:</strong> High-fidelity C++ engine extractions via companion runtime.
+                  <strong>PDFium:</strong> High-fidelity C++ engine extractions via macOS companion or Docker container.
                 </li>
                 <li>
                   <strong>Tesseract OCR:</strong> Pixel-level optical character recognition from rendered raster images.
@@ -417,6 +422,12 @@ export const HelpPage: React.FC<HelpPageProps> = ({
               <strong>Explicit Omission Reporting:</strong> When a reader engine fails, encounters
               unsupported PDF operators, or skips unparseable content, Inkflip explicitly records the
               condition as an omission or incomplete check. Silence is never substituted for missing coverage.
+            </p>
+            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
+              <strong>Platform Scope &amp; Availability:</strong> Official delivery targets are modern
+              desktop web browsers, the macOS native companion, and the reproducible Docker CLI workflow.
+              Separate Windows and Linux desktop GUI applications remain deferred; automated remediation
+              or silent modifications to PDF binaries are intentionally not supported.
             </p>
             <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
               <strong>Provenance &amp; Audit Trail:</strong> Exported inspection packages preserve reader
