@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# Local wrapper so the documented `inkflip` command name runs this checkout.
+set -eu
+ROOT="$(CDPATH= cd -- "$(dirname "$0")/../../.." && pwd)"
+export PYTHONPATH="${PYTHONPATH:-$ROOT/native}"
+if [ -n "${INKFLIP_PYTHON:-}" ]; then
+  exec "$INKFLIP_PYTHON" -m inkflip.cli "$@"
+fi
+exec python3 -m inkflip.cli "$@"

@@ -1,0 +1,22 @@
+{
+  "kind": "corpus_manifest",
+  "schema_version": "1.0.0",
+  "entries": [
+    {
+      "key": "mapping-amount",
+      "source_path": "mapping-amount.pdf",
+      "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "group_id": "mapping-family",
+      "pages": [0]
+    },
+    {
+      "key": "mapping-control",
+      "source_path": "mapping-control.pdf",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "group_id": "mapping-family",
+      "pages": [0]
+    }
+  ],
+  "source_root_policy": "explicit_local_root_no_symlinks",
+  "split": "public_demo"
+}
