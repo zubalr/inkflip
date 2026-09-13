@@ -49,7 +49,8 @@ manifest; `scripts/prepare_assets.py verify` re-hashes them. Sources:
 
 - **pdfjs-dist@6.3.289** (npm, Apache-2.0): `cmaps/` (169), `standard_fonts/`
   (16), `wasm/` incl. `LICENSE_OPENJPEG`/`LICENSE_JBIG2`/`LICENSE_QCMS` and
-  `LICENSE_PDFJS_*` notices, `iccs/` + `LICENSE`, package `LICENSE` — staged
+  `LICENSE_PDFJS_*` notices, `iccs/` + `LICENSE`, package `LICENSE`, plus
+  `quickjs-eval.{js,wasm}` (MIT QuickJS by Fabrice Bellard and Charlie Gordon) — staged
   under `apps/web/public/assets/pdfjs/6.3.289/`.
 - **tesseract.js@7.0.0** (npm, Apache-2.0): `dist/worker.min.js`,
   `dist/worker.min.js.LICENSE.txt`, `LICENSE.md` — staged under

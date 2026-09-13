@@ -844,7 +844,7 @@ class TestModelSelection(unittest.TestCase):
                 digest, path = tr.model_digest(binary, "eng")
             self.assertIsNotNone(digest)
             self.assertEqual(digest, hashlib.sha256(b"fallback-eng").hexdigest())
-            self.assertEqual(path.parent, target)
+            self.assertEqual(path.parent, target.resolve())
 
 
 class TestWave2CanonicalGeometry(unittest.TestCase):

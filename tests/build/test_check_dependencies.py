@@ -203,6 +203,9 @@ class BaseImageTests(unittest.TestCase):
 
 
 class NoCdnTests(unittest.TestCase):
+    def _mock_manifest(self):
+        return mock.patch("prepare_assets.load_manifest", return_value={"schema_version": "1.0.0", "assets": []})
+
     def test_remote_worker_reference_fails(self):
         reset_state()
         with tempfile.TemporaryDirectory() as tmp_name:
@@ -213,6 +216,75 @@ class NoCdnTests(unittest.TestCase):
             with mock.patch.object(check_dependencies, "ROOT", tmp):
                 run_quiet(check_dependencies.check_no_runtime_download)
         self.assertTrue(any("no-cdn" in f for f in check_dependencies.FAILURES))
+
+    def test_dynamic_import_fails(self):
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/loader.ts").write_text('const mod = await import("https://example.com/module.mjs");')
+            with mock.patch.object(check_dependencies, "ROOT", tmp), self._mock_manifest():
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_staged_asset_dynamic_import_and_fetch_fail(self):
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/public/assets").mkdir(parents=True)
+            (tmp / "apps/web/public/assets/vendor.js").write_text('import("https://cdn.example.com/plugin.js");')
+            with mock.patch.object(check_dependencies, "ROOT", tmp), self._mock_manifest():
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_staged_asset_remote_fetch_fails(self):
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/public/assets").mkdir(parents=True)
+            (tmp / "apps/web/public/assets/fetcher.js").write_text('fetch("https://remote.cdn/data.wasm");')
+            with mock.patch.object(check_dependencies, "ROOT", tmp), self._mock_manifest():
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_harmless_comments_and_notices_pass(self):
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/public/assets").mkdir(parents=True)
+            (tmp / "apps/web/src/safe.ts").write_text(
+                '// Upstream: https://cdn.jsdelivr.net/npm/package\n'
+                '/* License notice: see https://unpkg.com/browse/foo/LICENSE */\n'
+                '// Dynamic import example in comment: import("https://example.com")\n'
+                'export const localValue = 42;\n'
+            )
+            (tmp / "apps/web/public/assets/staged_safe.js").write_text(
+                '/*! Bundled from https://unpkg.com/pdfjs-dist under Apache-2.0 */\n'
+                '// http://www.apache.org/licenses/LICENSE-2.0\n'
+                'console.log("ready");\n'
+            )
+            with mock.patch.object(check_dependencies, "ROOT", tmp), self._mock_manifest():
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertFalse([f for f in check_dependencies.FAILURES if "no-cdn.sources" in f])
+
+    def test_same_origin_relative_paths_pass(self):
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/public/assets").mkdir(parents=True)
+            (tmp / "apps/web/src/app.ts").write_text(
+                'const worker = new Worker("/assets/worker.js");\n'
+                'const res = await fetch("/assets/model.bin");\n'
+                'const mod = await import("./local_feature.js");\n'
+            )
+            (tmp / "apps/web/public/assets/helper.js").write_text(
+                'fetch("/assets/sub.wasm");\n'
+            )
+            with mock.patch.object(check_dependencies, "ROOT", tmp), self._mock_manifest():
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertFalse([f for f in check_dependencies.FAILURES if "no-cdn.sources" in f])
 
 
 class LiveCheckoutTests(unittest.TestCase):
