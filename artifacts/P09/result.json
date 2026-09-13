@@ -1,0 +1,243 @@
+{
+  "experiment": "P09",
+  "task_id": "T41",
+  "status": "completed",
+  "disposition": "rejected_heuristic_recommendation",
+  "runtime_seconds": 0.0192,
+  "total_fixtures_evaluated": 9,
+  "metrics": {
+    "metadata_baseline": {
+      "precision": 0.5,
+      "false_visibility_count": 4,
+      "coverage": 9
+    },
+    "rectangular_ink_heuristic": {
+      "precision": 0.5714,
+      "false_visibility_count": 3,
+      "coverage": 9,
+      "counterexample_triggered": true
+    },
+    "bounded_paint_order_candidate": {
+      "precision": 1.0,
+      "false_visibility_count": 0,
+      "coverage": 9,
+      "zero_hard_control_false_visibility": true
+    }
+  },
+  "fixture_evaluations": [
+    {
+      "fixture_id": "F04",
+      "family": "white-contrast",
+      "variant": "control",
+      "path": "fixtures/development/white-contrast-control.pdf",
+      "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+      "ground_truth_visible": true,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": false
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 3958,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "invisible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F04",
+      "family": "white-contrast",
+      "variant": "white",
+      "path": "fixtures/development/white-contrast-white.pdf",
+      "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
+      "ground_truth_visible": false,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": true
+      },
+      "ink_heuristic": {
+        "verdict": "invisible",
+        "dark_pixel_count": 0,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "invisible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F05",
+      "family": "paint-order",
+      "variant": "control",
+      "path": "fixtures/development/paint-order-control.pdf",
+      "sha256": "db606229b121784e8e28d0ef33ed01a1f5135dc3b9c6d958b650991ae15ffe84",
+      "ground_truth_visible": true,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": false
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 429,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "visible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F05",
+      "family": "paint-order",
+      "variant": "after",
+      "path": "fixtures/development/paint-order-after.pdf",
+      "sha256": "3c474638423b2b9b9fa45c79b39abce40105fba5d20566ca9d231ae41fb9955d",
+      "ground_truth_visible": false,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": true
+      },
+      "ink_heuristic": {
+        "verdict": "invisible",
+        "dark_pixel_count": 0,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "invisible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "variant": "control",
+      "path": "fixtures/development/partial-clip-control.pdf",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "ground_truth_visible": true,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": false
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 429,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "visible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "variant": "partial",
+      "path": "fixtures/development/partial-clip-partial.pdf",
+      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
+      "ground_truth_visible": false,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": true
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 233,
+        "false_visibility": true
+      },
+      "candidate": {
+        "verdict": "invisible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "variant": "triangle",
+      "path": "fixtures/development/partial-clip-triangle.pdf",
+      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
+      "ground_truth_visible": false,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": true
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 208,
+        "false_visibility": true
+      },
+      "candidate": {
+        "verdict": "unsupported_compositing",
+        "unsupported_compositing": true,
+        "compositing_reason": "path_clipping_unsupported",
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F24",
+      "family": "overlap-ink",
+      "variant": "control",
+      "path": "fixtures/development/overlap-ink-control.pdf",
+      "sha256": "16323f7311b1c179a09ce8d4ba63de0a77d09f911035902adda93e1ea42a2e9e",
+      "ground_truth_visible": true,
+      "baseline": {
+        "verdict": "visible",
+        "false_visibility": false
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 488,
+        "false_visibility": false
+      },
+      "candidate": {
+        "verdict": "visible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    },
+    {
+      "fixture_id": "F24",
+      "family": "overlap-ink",
+      "variant": "invisible",
+      "path": "fixtures/development/overlap-ink-invisible.pdf",
+      "sha256": "449ce1d814e7d20704fb3c8e231edca555d591d3dbb86531921cf6e6535b81b1",
+      "ground_truth_visible": false,
+      "baseline": {
+        "verdict": "invisible",
+        "false_visibility": false
+      },
+      "ink_heuristic": {
+        "verdict": "visible",
+        "dark_pixel_count": 80,
+        "false_visibility": true
+      },
+      "candidate": {
+        "verdict": "invisible",
+        "unsupported_compositing": false,
+        "compositing_reason": null,
+        "false_visibility": false
+      }
+    }
+  ],
+  "invariants_enforced": {
+    "I04": "Geometry anchors preserved",
+    "I06": "Limits enforced honestly without unanchored rescue",
+    "I16": "Original observations preserved; agreement not treated as truth",
+    "I18": "No unverified visibility heuristic promoted to production"
+  },
+  "conclusion": "Rectangular-ink heuristics fail on overlapping non-text ink (e.g. F24 border crossing), causing fatal false visibility verdicts. Bounded paint-order candidate achieves zero hard-control false visibility (precision 1.0). However, general compositing remains complex and renderer-dependent; production continues to require explicit object render modes and distinct reader observations rather than a universal visibility oracle."
+}
