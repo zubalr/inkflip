@@ -5,7 +5,7 @@
       "3.13.15",
       "macOS-26.5.2-arm64-arm-64bit-Mach-O"
     ],
-    "node": "v26.7.0",
+    "node": "v22.23.2",
     "cpu": "arm64",
     "model": null
   },
@@ -50,7 +50,7 @@
         "pdfjs": "6.3.289",
         "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
       },
-      "note": "Playwright WebKit launched; pdf.js getTextContent hits a ReadableStream TypeError. This is not a physical Safari device result."
+      "note": "Playwright WebKit automation with paired pdf.js worker; not a physical Safari device observation"
     }
   ]
 }

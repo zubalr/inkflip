@@ -45,6 +45,10 @@ export type { ReaderIdentity } from './manifest.ts';
 export type { RenderedRaster } from './render.ts';
 export type { TextExtraction, TextExtractionDetail } from './text.ts';
 export { canonicalBounds } from './text.ts';
+export {
+  ensureReadableStreamAsyncIterator,
+  isReadableStreamTypeError,
+} from './streams.ts';
 export type {
   PdfJsContentItem,
   PdfJsDocument,

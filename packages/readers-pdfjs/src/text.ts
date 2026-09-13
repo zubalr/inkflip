@@ -37,6 +37,7 @@ import {
   classifyError,
   resourceLimitReason,
 } from './errors.ts';
+import { ensureReadableStreamAsyncIterator, isReadableStreamTypeError } from './streams.ts';
 import {
   isPdfJsTextItem,
   type PdfJsTextItem,
@@ -77,6 +78,49 @@ const ITEM_LIMITATIONS = [
 ];
 
 const EPS = 1e-9;
+
+async function collectTextContentStream(
+  stream: AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>,
+): Promise<{
+  items: unknown[];
+  styles: Record<string, PdfJsTextStyle>;
+  lang: string | null;
+}> {
+  const textContent = {
+    items: [] as unknown[],
+    styles: Object.create(null) as Record<string, PdfJsTextStyle>,
+    lang: null as string | null,
+  };
+  for await (const value of stream) {
+    textContent.lang ??= value.lang ?? null;
+    Object.assign(textContent.styles, value.styles ?? {});
+    textContent.items.push(...(value.items ?? []));
+  }
+  return textContent;
+}
+
+async function getTextContentCompat(page: {
+  getTextContent: HandlePage['proxy']['getTextContent'];
+  streamTextContent?: (params: {
+    includeMarkedContent?: boolean;
+    disableNormalization?: boolean;
+  }) => AsyncIterable<{ items?: unknown[]; styles?: Record<string, unknown>; lang?: string | null }>;
+}): Promise<{
+  items: unknown[];
+  styles: Record<string, PdfJsTextStyle>;
+  lang: string | null;
+}> {
+  ensureReadableStreamAsyncIterator();
+  const params = { includeMarkedContent: true, disableNormalization: true };
+  try {
+    return await page.getTextContent(params);
+  } catch (error) {
+    if (!isReadableStreamTypeError(error) || typeof page.streamTextContent !== 'function') {
+      throw error;
+    }
+    return collectTextContentStream(page.streamTextContent(params));
+  }
+}
 
 function itemQuadCanonical(
   item: PdfJsTextItem,
@@ -155,10 +199,7 @@ export async function extractText(
 ): Promise<TextExtraction> {
   let content;
   try {
-    content = await page.proxy.getTextContent({
-      includeMarkedContent: true,
-      disableNormalization: true,
-    });
+    content = await getTextContentCompat(page.proxy);
   } catch (error) {
     throw classifyError(error);
   }

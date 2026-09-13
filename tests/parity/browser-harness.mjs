@@ -34,15 +34,31 @@ const MIME = {
 const PAGE_HTML = `<!doctype html>
 <meta charset="utf-8">
 <title>inkflip t46 browser parity</title>
-<script type="module">
-  globalThis.__t46ready = false;
-  globalThis.__t46error = null;
-  Promise.all([
-    import('/vendor/pdfjs/pdf.mjs').then((m) => { globalThis.__pdfjs = m; }),
-    import('/bundle.js'),
-  ]).then(() => { globalThis.__t46ready = true; })
-    .catch((e) => { globalThis.__t46error = String(e && e.stack || e); });
-</script>
+<script type="module" src="/boot.mjs"></script>
+`;
+
+const BOOT_JS = `const proto = globalThis.ReadableStream && ReadableStream.prototype;
+globalThis.__t46ready = false;
+globalThis.__t46error = null;
+if (proto && typeof proto[Symbol.asyncIterator] !== 'function') {
+  proto[Symbol.asyncIterator] = async function* () {
+    const reader = this.getReader();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        yield value;
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  };
+}
+Promise.all([
+  import('/vendor/pdfjs/pdf.mjs').then((m) => { globalThis.__pdfjs = m; }),
+  import('/bundle.js'),
+]).then(() => { globalThis.__t46ready = true; })
+  .catch((e) => { globalThis.__t46error = String(e && e.stack || e); });
 `;
 
 function mimeFor(pathname) {
@@ -74,12 +90,20 @@ export async function startBrowserHarness() {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     const pathname = decodeURIComponent(url.pathname);
     const send = (status, body, type = "application/octet-stream") => {
-      res.writeHead(status, { "content-type": type, "cache-control": "no-store" });
+      res.writeHead(status, {
+        "content-type": type,
+        "cache-control": "no-store",
+        "content-security-policy":
+          "default-src 'none'; script-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' data: blob:; font-src 'self'; style-src 'none'; base-uri 'none'",
+      });
       res.end(body);
     };
     try {
       if (pathname === "/" || pathname === "/t46.html") {
         return send(200, PAGE_HTML, "text/html; charset=utf-8");
+      }
+      if (pathname === "/boot.mjs") {
+        return send(200, BOOT_JS, "text/javascript; charset=utf-8");
       }
       if (pathname === "/bundle.js") {
         return send(200, readFileSync(bundlePath), "text/javascript; charset=utf-8");
@@ -127,17 +151,38 @@ export async function extractInPage(page, request) {
   return page.evaluate(async ({ fixtureName, adapterArgs, pages, capabilities, regionId }) => {
     const { api } = globalThis.__t46;
     const pdfjs = globalThis.__pdfjs;
+    if (typeof api.ensureReadableStreamAsyncIterator === 'function') {
+      api.ensureReadableStreamAsyncIterator();
+    }
     const adapter = api.createPdfJsReader({ pdfjs, ...adapterArgs });
     const bytes = new Uint8Array(await (await fetch(`/fixtures/${fixtureName}`)).arrayBuffer());
     const sha = api.hexSha256(bytes);
+    const workerSrc = adapterArgs.workerSrc;
+    let workerIdentity = null;
+    try {
+      const workerText = await (await fetch(workerSrc)).text();
+      workerIdentity = {
+        url: workerSrc,
+        bytes: workerText.length,
+        mentionsMainVersion: workerText.includes(pdfjs.version),
+        hasAsyncIterator: typeof ReadableStream.prototype[Symbol.asyncIterator] === 'function',
+      };
+    } catch (error) {
+      workerIdentity = { url: workerSrc, error: String(error && error.message || error) };
+    }
     let directText = null;
     try {
-      pdfjs.GlobalWorkerOptions.workerSrc = adapterArgs.workerSrc;
-      const task = pdfjs.getDocument({ data: bytes.slice(), enableXfa: false });
+      pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+      const task = pdfjs.getDocument({ data: bytes.slice(), enableXfa: false, isEvalSupported: false });
       const doc = await task.promise;
       const page1 = await doc.getPage(1);
       const tc = await page1.getTextContent({ includeMarkedContent: true, disableNormalization: true });
-      directText = { ok: true, items: tc.items.length, typeofGetText: typeof page1.getTextContent };
+      directText = {
+        ok: true,
+        items: tc.items.length,
+        typeofGetText: typeof page1.getTextContent,
+        hasStreamTextContent: typeof page1.streamTextContent === 'function',
+      };
       await task.destroy();
     } catch (error) {
       directText = {
@@ -189,6 +234,25 @@ export async function extractInPage(page, request) {
       };
     }
     const described = adapter.describe();
+    let renderProbe = null;
+    const renderPlan = adapter.plan(handle, { pages, capabilities: ['render'] });
+    const planned = renderPlan[0];
+    if (planned) {
+      try {
+        const rendered = await adapter.extract(handle, planned, () => undefined);
+        renderProbe = {
+          status: rendered.result.status,
+          reason: rendered.result.reason,
+          widthPx: rendered.raster?.widthPx ?? null,
+          heightPx: rendered.raster?.heightPx ?? null,
+          hasPngLike: Boolean(rendered.raster?.imageData && rendered.raster.imageData.length > 0),
+          fontFace: typeof FontFace === 'function',
+          moduleWorker: typeof Worker === 'function',
+        };
+      } catch (error) {
+        renderProbe = { status: 'failed', reason: String(error && error.message || error) };
+      }
+    }
     await adapter.close(handle);
     return {
       sha256: sha,
@@ -198,6 +262,8 @@ export async function extractInPage(page, request) {
       results,
       warm,
       directText,
+      workerIdentity,
+      renderProbe,
     };
   }, { adapterArgs: ADAPTER_ARGS, pages: [0], capabilities: ["native_text"], regionId: null, ...request });
 }

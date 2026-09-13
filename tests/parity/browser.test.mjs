@@ -115,15 +115,10 @@ test("browser reader entry points run on available Playwright engines", { timeou
     assert.equal(extracted.pdfjs_version, "6.3.289");
     const text = extracted.results.find((r) => r.capability === "native_text");
     const ocr = extracted.results.find((r) => r.capability === "ocr");
-    const webkitTextBroken =
-      name === "webkit" &&
-      text.status !== "completed" &&
-      String(extracted.directText?.message || text.reason || "").includes("readableStream");
-    if (!webkitTextBroken) {
-      assert.equal(text.status, "completed", JSON.stringify({ text, pageErrors, directText: extracted.directText }));
-      assert.equal(ocr.status, "unsupported", JSON.stringify(ocr));
-    }
+    assert.equal(text.status, "completed", JSON.stringify({ text, pageErrors, directText: extracted.directText, workerIdentity: extracted.workerIdentity }));
+    assert.equal(ocr.status, "unsupported", JSON.stringify(ocr));
     assert.ok(typeof text.emitted === "number");
+    assert.equal(extracted.workerIdentity?.mentionsMainVersion, true, JSON.stringify(extracted.workerIdentity));
     const ua = await page.evaluate(() => navigator.userAgent);
     const evidenceRel = `artifacts/P15/${receiptId}.json`;
     const row = {
@@ -139,13 +134,14 @@ test("browser reader entry points run on available Playwright engines", { timeou
       text,
       ocr,
       warm: extracted.warm,
+      render: extracted.renderProbe,
+      workerIdentity: extracted.workerIdentity,
+      directText: extracted.directText,
       profile: launched.profile,
       harness: harness.base,
       note:
         name === "webkit"
-          ? webkitTextBroken
-            ? "Playwright WebKit launched; pdf.js getTextContent hits a ReadableStream TypeError. This is not a physical Safari device result."
-            : "Playwright WebKit automation; not a physical Safari device observation"
+          ? "Playwright WebKit automation with paired pdf.js worker; not a physical Safari device observation"
           : null,
     };
     writeJson(join(ARTIFACTS, `${receiptId}.json`), row);
@@ -166,8 +162,10 @@ test("browser reader entry points run on available Playwright engines", { timeou
 
   const chromiumOk = browserRows.find((r) => r.engine === "chromium" && r.text.status === "completed");
   const firefoxOk = browserRows.find((r) => r.engine === "firefox" && r.text.status === "completed");
+  const webkitOk = browserRows.find((r) => r.engine === "webkit" && r.text.status === "completed");
   assert.ok(chromiumOk, "Chromium pdf.js adapter extract must complete");
   assert.ok(firefoxOk, "Firefox pdf.js adapter extract must complete");
+  assert.ok(webkitOk, "WebKit pdf.js adapter extract must complete (ReadableStream async iterator repair)");
 
   const chromium = browserRows.find((r) => r.engine === "chromium");
   if (chromium) {

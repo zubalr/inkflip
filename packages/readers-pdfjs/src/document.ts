@@ -27,6 +27,7 @@ import {
   unsupportedReason,
 } from './errors.ts';
 import type { AdapterConfig } from './config.ts';
+import { ensureReadableStreamAsyncIterator } from './streams.ts';
 import type {
   PdfJsDocument,
   PdfJsLoadingTask,
@@ -106,6 +107,7 @@ export async function openDocument(
     'IDENTITY',
     'supplied document digest does not match the bytes',
   );
+  ensureReadableStreamAsyncIterator();
   // The library takes ownership of the buffer it is given; the original
   // stays immutable and untouched by construction (I01).
   const copy = input.bytes.slice();

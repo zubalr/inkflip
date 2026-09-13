@@ -1,0 +1,33 @@
+{
+  "kind": "playwright-browser-inventory",
+  "playwright": "1.57.0",
+  "cache": "~/Library/Caches/ms-playwright",
+  "installed": [
+    {
+      "revision": "chromium-1200",
+      "product": "Google Chrome for Testing 143.0.7499.4",
+      "role": "current Playwright 1.57 pin used for T46 chromium"
+    },
+    {
+      "revision": "chromium-1243",
+      "product": "Google Chrome for Testing 153.0.8010.12",
+      "role": "newer than the 1.57 pin; not previous-stable"
+    },
+    {
+      "revision": "firefox-1497",
+      "product": "firefox 144.0.2",
+      "role": "current Playwright 1.57 pin used for T46 firefox"
+    },
+    {
+      "revision": "webkit-2227",
+      "product": "webkit 26.0",
+      "role": "Playwright WebKit; not physical Safari"
+    }
+  ],
+  "missing": [
+    "Chromium previous-stable (a major before 143)",
+    "Firefox ESR (no Firefox.app under /Applications)",
+    "Safari previous major"
+  ],
+  "policy": "Did not replace the user's Safari/Chrome profiles or install into /Applications."
+}

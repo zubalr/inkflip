@@ -1,0 +1,22 @@
+Linux amd64 native T46 blocker — 2026-09-13
+
+Preferred host: ssh homebase (reachable)
+  uname: Linux homebase 7.1.9-arch1-2 x86_64
+  python3: 3.14.7 (/usr/bin/python3) — not the pinned CPython 3.13.15
+  python3.13: not installed
+  docker client: 29.7.2 linux/amd64
+  docker info: permission denied while trying to connect to the docker API
+    at unix:///var/run/docker.sock
+  user: wertyp groups=1000(wertyp),998(wheel) — not in docker group
+  disk: 176G free on /home
+
+Exact failed command:
+  ssh homebase 'docker info --format "{{.OSType}} {{.Architecture}} {{.ServerVersion}}"'
+  → permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+
+Did not: reboot, power-cycle, suspend, start dockerd as root, usermod -aG docker,
+alter global services, or create a VM.
+
+Local OrbStack is linux aarch64. A --platform linux/amd64 production image
+run is emulated functional T40 evidence, labeled as such, and is not this
+native x86_64 binary profile.
