@@ -108,3 +108,29 @@
 .selected .pageState {
   color: var(--color-teal);
 }
+
+/* Narrow-device: the window nav stacks and every control is full-width and
+   touch-sized; the page grid shrinks to two honest columns, never squeezed. */
+@media (max-width: 480px) {
+  .windowNav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .windowNav > * {
+    width: 100%;
+  }
+
+  .jumpLabel {
+    width: 100%;
+  }
+
+  .jumpInput {
+    flex: 1;
+    min-height: var(--control-min-height);
+  }
+
+  .pageList {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}

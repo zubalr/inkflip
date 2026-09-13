@@ -3,7 +3,7 @@ import Button from "../../components/Controls/Button";
 import Notice from "../../components/Controls/Notice";
 import ReplaceConfirmDialog from "../../components/Dialogs/ReplaceConfirmDialog";
 import styles from "./OpenWorkspace.module.css";
-import { OPEN_COPY, SELECTION_COPY, fill } from "./copy";
+import { LIMITS_COPY, OPEN_COPY, SELECTION_COPY, fill } from "./copy";
 import { FileDrop, type OpenPhase } from "./FileDrop";
 import type { OpenController } from "./controller";
 import type {
@@ -60,6 +60,7 @@ export interface OpenWorkspaceProps {
     handle: unknown,
     pages: readonly number[],
     regions: ReadonlyMap<number, ContractRegion>,
+    options?: { readonly ocrConsent?: boolean },
   ) => PlanOutcome;
 }
 
@@ -105,6 +106,12 @@ export function OpenWorkspace({
     new Map(),
   );
   const [plan, setPlan] = useState<PlanOutcome | null>(null);
+  // Mobile OCR is opt-in: the model download and CPU cost are real, so the
+  // low-memory profile requires an explicit consent before OCR is planned.
+  const [ocrConsent, setOcrConsent] = useState(false);
+  // Low-memory mode renders the preview raster only on explicit request.
+  const [previewRequested, setPreviewRequested] = useState(false);
+  const lowMemory = profile.id === "mobile";
 
   useEffect(() => host.subscribe(() => setView(host.snapshot())), [host]);
 
@@ -122,6 +129,8 @@ export function OpenWorkspace({
           setRasterError(null);
           setRegions(new Map());
           setPlan(null);
+          setOcrConsent(false);
+          setPreviewRequested(false);
           setSelectionRev((r) => r + 1);
         } else if (event.type === "rejected") {
           setDoc(null);
@@ -181,9 +190,12 @@ export function OpenWorkspace({
     if (candidate) void offer(candidate);
   }, [pending, offer]);
 
-  // Bounded preview raster for the region editor's page.
+  // Bounded preview raster for the region editor's page. In low-memory
+  // mode it renders only on explicit request — the auto-preview is real
+  // work a constrained device may not want.
   useEffect(() => {
     if (!doc || !renderPageRaster || !controller.currentHandle) return;
+    if (lowMemory && !previewRequested) return;
     if (previewPage < 0 || previewPage >= doc.pageCount) return;
     let cancelled = false;
     setRaster(null);
@@ -202,7 +214,7 @@ export function OpenWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [doc, previewPage, controller, renderPageRaster]);
+  }, [doc, previewPage, controller, renderPageRaster, lowMemory, previewRequested]);
 
   const regionSeq = useRef(0);
   const commitRegion = useCallback(
@@ -238,8 +250,12 @@ export function OpenWorkspace({
     for (const [pageIndex, entry] of regions) {
       if (selection.has(pageIndex)) contractRegions.set(pageIndex, entry.region);
     }
-    setPlan(startRun(controller.currentHandle, selection.pages(), contractRegions));
-  }, [startRun, controller, selection, regions, selectionRev]);
+    setPlan(
+      startRun(controller.currentHandle, selection.pages(), contractRegions, {
+        ocrConsent: !lowMemory || ocrConsent,
+      }),
+    );
+  }, [startRun, controller, selection, regions, selectionRev, lowMemory, ocrConsent]);
 
   const selectedPages = useMemo(
     () => selection.pages(),
@@ -316,6 +332,50 @@ export function OpenWorkspace({
             </div>
           </div>
 
+          <section
+            className={styles.limits}
+            aria-label={LIMITS_COPY.title}
+            data-testid="run-limits"
+            data-profile={profile.id}
+          >
+            <h3 className={styles.limitsTitle}>{LIMITS_COPY.title}</h3>
+            <ul className={styles.limitsList}>
+              <li>
+                {fill(LIMITS_COPY.mode, {
+                  mode:
+                    profile.id === "mobile"
+                      ? "mobile (low-memory mode)"
+                      : "desktop",
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.file, {
+                  limit: byteLabel(profile.maxFileBytes),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.pages, {
+                  limit: profile.maxDocumentPages.toLocaleString(),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.native, {
+                  limit: String(profile.maxNativePagesPerRun),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.ocr, {
+                  limit: String(profile.maxOcrPagesPerRun),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.raster, {
+                  limit: profile.maxRasterPixels.toLocaleString(),
+                })}
+              </li>
+            </ul>
+          </section>
+
           <PagePicker
             selection={selection}
             onChange={() => setSelectionRev((r) => r + 1)}
@@ -335,6 +395,7 @@ export function OpenWorkspace({
                   const n = Number.parseInt(event.currentTarget.value, 10);
                   if (Number.isInteger(n) && n >= 1 && n <= doc.pageCount) {
                     setPreviewPage(n - 1);
+                    setPreviewRequested(false);
                   }
                 }}
               />
@@ -349,6 +410,19 @@ export function OpenWorkspace({
               </span>
             ) : null}
           </div>
+
+          {lowMemory && !previewRequested && (
+            <div className={styles.previewRequest}>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setPreviewRequested(true)}
+                data-testid="render-preview"
+              >
+                {LIMITS_COPY.renderPreview}
+              </Button>
+            </div>
+          )}
 
           {rasterError && (
             <Notice type="warning" title="Preview render failed" id="raster-error">
@@ -402,6 +476,23 @@ export function OpenWorkspace({
                 .join(", ")} will include OCR; all ${selectedPages.length} selected pages will be checked with native text and rendering.`}
             </Notice>
           ) : null}
+
+          {lowMemory && (
+            <div className={styles.ocrConsent} data-testid="ocr-consent-row">
+              <label className={styles.ocrConsentLabel}>
+                <input
+                  type="checkbox"
+                  checked={ocrConsent}
+                  onChange={(event) => setOcrConsent(event.currentTarget.checked)}
+                  data-testid="ocr-consent"
+                />
+                {LIMITS_COPY.ocrConsentLabel}
+              </label>
+              <p className={styles.ocrConsentHint} data-testid="ocr-consent-hint">
+                {LIMITS_COPY.ocrConsentHint}
+              </p>
+            </div>
+          )}
 
           <div className={styles.startRow}>
             <Button

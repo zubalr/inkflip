@@ -302,6 +302,7 @@ export class InspectionSession {
     handle: unknown,
     pages: readonly number[],
     regions: ReadonlyMap<number, ContractRegion>,
+    options?: { readonly ocrConsent?: boolean },
   ): PlanOutcome => {
     const doc = this.doc;
     if (!doc) throw new Error("no document");
@@ -323,16 +324,22 @@ export class InspectionSession {
 
     // OCR eligibility: user-drawn region pages first, then the rest of
     // the selection, bounded by the profile cap — narrowing is recorded
-    // on the report, never silent (the AGY cap semantics).
+    // on the report, never silent (the AGY cap semantics). A mobile
+    // profile additionally requires explicit consent before the model
+    // load is planned at all.
+    const ocrAllowed = options?.ocrConsent !== false;
     const withRegion = this.selectedPages.filter((p) => regions.has(p));
     const withoutRegion = this.selectedPages.filter((p) => !regions.has(p));
-    const ocrPages = [...withRegion, ...withoutRegion].slice(
-      0,
-      this.profile.maxOcrPagesPerRun,
-    );
+    const ocrPages = ocrAllowed
+      ? [...withRegion, ...withoutRegion].slice(
+          0,
+          this.profile.maxOcrPagesPerRun,
+        )
+      : [];
     this.ocrPagesCount = ocrPages.length;
-    this.ocrNote =
-      ocrPages.length < this.selectedPages.length
+    this.ocrNote = !ocrAllowed
+      ? "OCR checks were not run — consent was not given on this device. Native text checks still ran on every selected page."
+      : ocrPages.length < this.selectedPages.length
         ? `OCR coverage limited to ${ocrPages.length} of ${this.selectedPages.length} selected page(s) by the ${this.profile.id} profile; text-layer checks still ran on every selected page.`
         : null;
 
