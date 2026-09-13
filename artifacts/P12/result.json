@@ -21,7 +21,13 @@
       "size_valid": false,
       "sha256_valid": false,
       "status": "blocked_missing_candidate_archive",
-      "message": "Candidate archive pdfium-dist.tar.gz not present in offline repository."
+      "message": "Candidate archive pdfium-dist.tar.gz not present in offline repository.",
+      "attempted_preparation": {
+        "command": "curl -fL -sS --max-time 15 -o artifacts/P12/pdfium-dist.tar.gz https://github.com/embedpdf/embed-pdf-viewer/releases/download/v2.15.0/pdfium-dist.tar.gz",
+        "error": "Offline containment policy forbids external network fetch during test execution (Invariant I13)",
+        "exit_code": 7
+      },
+      "actionable_remediation": "Stage verified pdfium-dist.tar.gz (SHA-256: 31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42, 2661637 bytes) into vendor/ or artifacts/P12/ via approved external intake workflow."
     }
   },
   "controls": {
@@ -29,6 +35,6 @@
     "same_reader_control": "required"
   },
   "integration_decision": "default_unavailable",
-  "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing.",
-  "note": "Candidate archive is not pre-bundled in repo and network downloads are forbidden by offline containment. EmbedPDF remains default-unavailable; browser core remains complete on PDF.js."
+  "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing or unverified.",
+  "note": "Candidate archive is not pre-bundled in repository and network downloads are forbidden by offline containment. EmbedPDF remains default-unavailable; production browser core remains complete and standalone on PDF.js."
 }
