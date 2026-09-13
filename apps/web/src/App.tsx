@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Home } from "./pages/Home";
 import { Workspace } from "./pages/Workspace";
+import { HelpPage } from "./pages/help";
 
-export type Route = "home" | "workspace";
+export type Route = "home" | "workspace" | "help";
 
 export default function App() {
   const getInitialRoute = (): {
@@ -19,6 +20,9 @@ export default function App() {
     const exampleId =
       exampleMatch && exampleMatch[1] !== "true" ? exampleMatch[1] : null;
 
+    if (hash.includes("help") || pathname.includes("help")) {
+      return { route: "help", withExample: false, exampleId: null };
+    }
     if (hash.includes("workspace") || pathname.includes("workspace")) {
       return { route: "workspace", withExample, exampleId };
     }
@@ -61,10 +65,26 @@ export default function App() {
     window.location.hash = "#/";
   };
 
+  const navigateToHelp = () => {
+    setRoute("help");
+    window.location.hash = "#/help";
+  };
+
+  if (route === "help") {
+    return (
+      <HelpPage
+        onNavigateHome={navigateToHome}
+        onNavigateWorkspace={navigateToWorkspace}
+      />
+    );
+  }
+
   if (route === "workspace") {
     return (
       <Workspace
+        key={`${withExample}-${exampleId ?? "default"}`}
         onNavigateHome={navigateToHome}
+        onNavigateHelp={navigateToHelp}
         initialWithExample={withExample}
         initialExampleId={exampleId}
       />
@@ -75,6 +95,7 @@ export default function App() {
     <Home
       onNavigateWorkspace={navigateToWorkspace}
       onOpenExample={navigateToExampleReport}
+      onNavigateHelp={navigateToHelp}
     />
   );
 }
