@@ -59,6 +59,25 @@ export const SELECTION_COPY = {
     "OCR includes the outlined padding around this region.",
 } as const;
 
+export const LIMITS_COPY = {
+  /** limits.title — the run-limits disclosure heading. */
+  title: "Run limits on this device",
+  /** limits.mode — {mode} is the profile label. */
+  mode: "Device mode: {mode}",
+  /** limits.entries — one line per enforced bound. */
+  file: "File size up to {limit}",
+  pages: "Documents up to {limit} pages",
+  native: "Native text checks on up to {limit} pages per run",
+  ocr: "OCR on up to {limit} pages per run",
+  raster: "Renders capped at {limit} pixels",
+  /** ocrConsent.* — mobile OCR is heavy; it runs only on explicit consent. */
+  ocrConsentLabel: "Allow OCR checks on this device",
+  ocrConsentHint:
+    "OCR loads a multi-megabyte model and uses significant CPU. Without consent the run still checks native text and rendering on the selected pages.",
+  /** preview.ondemand — low-memory mode renders the preview only on request. */
+  renderPreview: "Render preview",
+} as const;
+
 /** `{name}` interpolation matching copy.json templates. */
 export function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (match, key: string) =>
