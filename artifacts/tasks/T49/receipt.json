@@ -1,0 +1,76 @@
+{
+  "task": "T49",
+  "beads_id": "pdf-t49",
+  "stage": "preparation",
+  "evaluated_commit": "57eaa22ff10ab530859e4377922ffa4191c0714e",
+  "evaluated_commit_note": "docs-check tooling commit; documentation content commit is its parent 4981999d7c4ad663ccd5b28b3366a1d97f419622. Commands were run in the independent-volume-2 worktree against branch work/antigravity/independent-volume-2.",
+  "evaluated_at": "2026-09-13T13:55:00+00:00",
+  "disposition": "not_accepted",
+  "disposition_note": "Worker-level preparation record only. Beads acceptance remains with the coordinator after independent review; no acceptance is claimed here.",
+  "commands_run": 10,
+  "failures": [
+    {
+      "command": "bun run test:browser",
+      "exit_code": 1,
+      "cause": "root-level Playwright discovery sweeps committed probe artifacts (artifacts/tasks/T13/independent-review-probe-r2.spec.ts has invalid module syntax); harness correctly reports zero tests collected",
+      "documented_in": "docs/limitations.md"
+    },
+    {
+      "command": "apps/web: bun run typecheck",
+      "exit_code": 2,
+      "cause": "TS5097 errors on packages/runtime .ts-extension imports; production build passes",
+      "documented_in": "docs/limitations.md"
+    },
+    {
+      "command": "apps/web: bun run format:check",
+      "exit_code": 1,
+      "cause": "no oxfmt config file present",
+      "documented_in": "docs/limitations.md"
+    }
+  ],
+  "tests": {
+    "collected": 128,
+    "passed": 128,
+    "failed": 0,
+    "skipped": 0,
+    "note": "verify (111) + docs checks (17). The other green suites' counts are per-suite in commands.log: test:native 196, test:fixtures 70, test:a11y 7, test:visual 9, test:privacy 4."
+  },
+  "records": [
+    {
+      "segment": "documentation",
+      "files": [
+        "README.md",
+        "docs/quickstart.md",
+        "docs/user-guide.md",
+        "docs/developer-guide.md",
+        "docs/architecture.md",
+        "docs/limitations.md",
+        "docs/development-history.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md"
+      ],
+      "commit": "4981999"
+    },
+    {
+      "segment": "docs-check tooling",
+      "files": [
+        "scripts/check_claims.py",
+        "tests/docs/claims-rules.json",
+        "tests/docs/verified_commands.json",
+        "tests/docs/test_documentation.py",
+        "tests/docs/test_checker_negative.py"
+      ],
+      "commit": "57eaa22"
+    }
+  ],
+  "known_side_effects": "Running bun run test:privacy regenerates artifacts/tasks/T15/capture/* (committed evidence). Captures were restored to HEAD after verification runs.",
+  "pending_for_final_release": [
+    "clean-machine (cold-cache, never-used host) install test",
+    "re-verify every command against the release tag",
+    "screenshots re-tied to the tagged build; gallery completion may change them (T21)",
+    "capability matrix update when T20/T23 land; export selection changes user-guide flows",
+    "native CLI documentation once T30+ implement the inkflip command surface",
+    "root LICENSE/NOTICE + copyright statement (T47) — recorded as pending in README/SECURITY/CONTRIBUTING",
+    "SECURITY.md reporting channel to be named when a real one exists"
+  ]
+}

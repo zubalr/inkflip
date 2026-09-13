@@ -1,0 +1,73 @@
+T49 preparation — verified command record (2026-09-13, snapshot 57eaa22)
+
+All commands below were executed from the repository root of the
+independent-volume-2 worktree unless stated otherwise. Exit codes are the
+real ones observed. Full stdout/stderr for the aggregated run is retained in
+the session transcript; the material results are transcribed here.
+
+## Static analysis performed before writing the docs
+
+- beads task state reviewed (pdf-t49, pdf-t47 contracts via
+  `python3 scripts/coordination.py task T49|T47`) — no repo mutation.
+- Closed/open task inventory via `bd list --status closed|--status open`.
+- `python3 scripts/prepare_examples.py --check`
+  -> `OK: apps/web/public/examples/amount/ matches generation`, exit 0.
+
+## Suites verified in the worktree (snapshot 313889a + these commits)
+
+- `bun run verify`            -> OK, 111 tests in 36.5s, exit 0
+- `bun run build`             -> vite production build OK, exit 0
+- `bun run build:packages`    -> exit 0
+- `bun run build:web`         -> exit 0
+- `bun run test:native`       -> 196 passed in 26.3s, exit 0
+- `bun run test:fixtures`     -> 70 tests OK in 1.2s, exit 0
+- `bun run test:privacy`      -> 4 passed (cold/warm/offline/receipt), exit 0
+- `bun run test:a11y`         -> 7 passed in 2.5s, exit 0
+- `bun run test:visual`       -> 9 passed in 2.5s, exit 0
+- `bun run test:browser`      -> FAILED, exit 1 (registry runs Playwright with
+                                 no path from repo root; discovery sweeps
+                                 artifacts/tasks/T13/independent-review-probe-r2.spec.ts
+                                 which has invalid module syntax; harness
+                                 reports "zero tests collected"). Individual
+                                 browser specs pass with explicit paths per
+                                 task evidence. Documented in limitations.md.
+- `bun run test:regression`   -> fails closed, exit 2 (owner T34) — expected
+- `bun run check:static-dist` -> fails closed, exit 2 (owner T48) — expected
+- apps/web `bun run typecheck`     -> exit 2 (TS5097 on packages/runtime
+                                 .ts-extension imports) — documented
+- apps/web `bun run lint`          -> 0 errors (3104 warnings), exit 0
+- apps/web `bun run format:check`  -> exit 1 (no oxfmt config) — documented
+- apps/web `bun run dev`           -> HTTP 200 probe OK
+- apps/web `bun run preview`       -> HTTP 200 probe OK
+- `uv run --frozen --project native python -c "import pypdf; ..."`
+                               -> 6.18.0 on pinned CPython 3.13.15
+
+## Aggregated docs-command execution
+
+- `python3 scripts/check_claims.py --run-commands` -> exit 0; every entry in
+  tests/docs/verified_commands.json exited 0:
+  registry self-check, prepare_examples --check, docs unittest, build,
+  verify, test:fixtures, test:a11y, test:visual, test:native, test:privacy.
+- Side effect note: `bun run test:privacy` regenerates the committed
+  artifacts/tasks/T15/capture/* files; they were restored to HEAD after each
+  verification run so the committed evidence stays the reviewed one.
+
+## Fresh-clone quickstart sequence (branch state 313889a, empty node_modules)
+
+`git clone` to a temporary directory, then, in order:
+- `bun install`  -> 86 packages installed in 3.1s, exit 0 (warm bun cache)
+- `bun run verify`  -> OK, exit 0
+- `bun run build`   -> exit 0
+- `cd apps/web && bun run dev`  -> HTTP 200 probe
+- `cd apps/web && bun run preview` -> HTTP 200 probe
+- `uv run --frozen --project native python -c "import pypdf; ..."` -> 6.18.0
+- `bun run test:native` -> 196 passed in 24.8s, exit 0
+- `python3 scripts/prepare_examples.py --check` -> OK, exit 0
+- `cd apps/web && bun run lint` -> 0 errors, exit 0
+Cold-cache and never-used-machine install behavior were NOT measured; the
+download cache was warm. Recorded as pending release work in limitations.md.
+
+## Documentation checks (final state at 57eaa22)
+
+- `python3 -m unittest discover -s tests/docs -v` -> 17 tests OK, exit 0
+- `python3 scripts/check_claims.py` -> all 8 checks ok, exit 0
