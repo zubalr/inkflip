@@ -1,6 +1,7 @@
 import React from "react";
 import type { Page, Occurrence, Finding } from "../../../../../packages/contracts/src/index.ts";
 import type { RotationDegree } from "./types";
+import { isOrderOnlyFinding } from "../findings/alignment/classify.ts";
 import styles from "./CanvasOverlay.module.css";
 
 export interface CanvasOverlayProps {
@@ -56,10 +57,17 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
   };
 
   const selectedOcc = occurrences.find((o) => o.id === selectedOccurrenceId);
+  // The notice is only honest when the finding's evidence actually lacks
+  // localized geometry — `not_applicable` alignment alone (e.g. an
+  // order-only finding naming polygon'd occurrences) must not claim it.
+  const namedOccs = selectedFinding
+    ? occurrences.filter((o) => selectedFinding.occurrence_ids.includes(o.id))
+    : [];
   const isPageLevelOnly =
     (selectedFinding &&
       (selectedFinding.alignment === "page_level" ||
-        selectedFinding.alignment === "not_applicable")) ||
+        (namedOccs.length > 0 &&
+          namedOccs.every((o) => o.geometry.polygon === null)))) ||
     (selectedOcc &&
       (selectedOcc.geometry.precision === "page_only" ||
         selectedOcc.geometry.precision === "unknown" ||
@@ -118,14 +126,22 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
               const poly = occ.geometry.polygon!;
               const mappedPoints = poly.map((pt) => mapPoint(pt[0], pt[1]));
               const pointsStr = mappedPoints.map((pt) => `${pt[0]},${pt[1]}`).join(" ");
-              // The chosen occurrence is the selection; other occurrences
-              // the finding names stay marked as candidates — picking one
-              // is a navigation choice, and candidates are never rendered
-              // as if the engine had selected them.
+              // The chosen occurrence is the selection. For ambiguous and
+              // order-only findings the other named occurrences are
+              // *candidates* — marked distinctly so a navigation pick never
+              // looks like an engine selection. For settled findings all
+              // named occurrences are co-equal evidence and stay selected.
               const isChosen = occ.id === selectedOccurrenceId;
-              const isCandidate =
-                !isChosen &&
-                (selectedFinding ? selectedFinding.occurrence_ids.includes(occ.id) : false);
+              const isNamed = selectedFinding
+                ? selectedFinding.occurrence_ids.includes(occ.id)
+                : false;
+              const isCandidateSet =
+                selectedFinding !== null &&
+                selectedFinding !== undefined &&
+                (selectedFinding.alignment === "ambiguous" ||
+                  isOrderOnlyFinding(selectedFinding));
+              const isCandidate = !isChosen && isNamed && isCandidateSet;
+              const isCoEvidence = !isChosen && isNamed && !isCandidateSet;
 
               return (
                 <polygon
@@ -138,7 +154,7 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
                     occ.geometry.precision === "exact"
                       ? styles.highlightExact
                       : styles.highlightEstimated
-                  } ${isChosen ? styles.highlightSelected : ""} ${
+                  } ${isChosen || isCoEvidence ? styles.highlightSelected : ""} ${
                     isCandidate ? styles.highlightAmbiguous : ""
                   }`}
                   onClick={() => onSelectOccurrence?.(occ)}

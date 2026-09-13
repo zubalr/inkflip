@@ -53,7 +53,11 @@ export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
       data-testid="alignment-detail"
       data-alignment-class={semantics.classification}
       onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        // Only the card's activation keys need shielding — let global
+        // viewer shortcuts (n/p/f/r/+/-) keep working inside the detail.
+        if (e.key === "Enter" || e.key === " ") e.stopPropagation();
+      }}
     >
       <div className={styles.badgeRow}>
         <span
