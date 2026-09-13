@@ -1,0 +1,37 @@
+# T25 commands.log — explicit offline static/model cache lifecycle
+
+Worktree: worktrees/pdf-t25 (branch work/devin/t25, base c696948)
+Implementation partially delegated (background worker d5851f7a, cancelled
+mid-run); completed + debugged by coordinator.
+
+## Implementation / debugging commands
+
+- bun install                          # worktree deps
+- bun run build                        # clean (vite production build)
+- bun run test:privacy -- tests/privacy/cache.spec.ts
+    # run A: test 1 pass; test 2 fail — sw.js sha256hex() passed a raw
+    #   JSON string to crypto.subtle.digest (not a BufferSource)
+    # fix: encode via TextEncoder before digest in sw.js
+    # run B: test 1 pass; test 2 fail — prepare-result element never
+    #   rendered; prepare() stalled >240s inside the SW fetch loop
+- node /tmp/t25-debug.mjs              # isolated repro: prepare OK in <5s
+- node /tmp/t25-debug2.mjs             # test1-sequence repro: prepare OK in ~3s
+    # => SW logic fine; isolated spec-server bug: pathname "/" resolved
+    #   join(DIST, "/") to the dist DIRECTORY (log mapped "/" -> index.html
+    #   but the file lookup did not) -> readFileSync EISDIR inside the
+    #   request handler -> response never written -> SW fetch hung on the
+    #   first sorted manifest entry -> page-side 240s timeout raced the
+    #   locator timeout -> "element(s) not found"
+    # fix: map "/" -> "/index.html" for the file lookup in the spec's
+    #   static server; also bound each SW prepare fetch with
+    #   AbortSignal.timeout(30s) so a wedged socket fails closed
+    #   (fetch_failed) instead of stalling the generation pass
+- bun run test:privacy -- tests/privacy/cache.spec.ts   # 8/8 PASS
+- bunx oxlint apps/web/src/offline tests/privacy/cache.spec.ts   # 0/0
+- bunx oxfmt apps/web/src/offline/*.{ts,tsx} tests/privacy/cache.spec.ts
+- bun run test:privacy -- tests/privacy/cache.spec.ts   # 8/8 PASS (post-format)
+- git checkout -- artifacts/tasks/T15/ # restore regenerated capture drift
+
+## Registered acceptance command
+
+  bun run test:privacy -- tests/privacy/cache.spec.ts
