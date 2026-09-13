@@ -4,10 +4,10 @@
   "status": "completed",
   "disposition": "rejected_heuristic_recommendation",
   "manifest": "fixtures/manifest.json",
-  "runtime_seconds": 0.0357,
+  "runtime_seconds": 0.0199,
   "method_runtimes_seconds": {
     "metadata_baseline": 8e-06,
-    "rectangular_ink_heuristic": 0.001872,
+    "rectangular_ink_heuristic": 0.001668,
     "bounded_paint_order_candidate": 1.8e-05
   },
   "total_fixtures_evaluated": 9,
@@ -29,7 +29,7 @@
       "false_negatives": 0,
       "coverage": 9,
       "counterexample_triggered": true,
-      "runtime_seconds": 0.001872
+      "runtime_seconds": 0.001668
     },
     "bounded_paint_order_candidate": {
       "precision": 1.0,
@@ -65,14 +65,14 @@
       "baseline": {
         "verdict": "visible",
         "false_visibility": false,
-        "runtime_seconds": 2e-06
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 1158,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000901
+        "runtime_seconds": 0.00076
       },
       "candidate": {
         "verdict": "visible",
@@ -110,7 +110,7 @@
         "dark_pixel_count": 0,
         "pixel_contrast": 0,
         "false_visibility": false,
-        "runtime_seconds": 0.000148
+        "runtime_seconds": 0.000129
       },
       "candidate": {
         "verdict": "invisible",
@@ -148,7 +148,7 @@
         "dark_pixel_count": 429,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000121
+        "runtime_seconds": 0.000119
       },
       "candidate": {
         "verdict": "visible",
@@ -156,7 +156,7 @@
         "compositing_reason": null,
         "false_visibility": false,
         "occlusion_checks": [],
-        "runtime_seconds": 1e-06
+        "runtime_seconds": 2e-06
       }
     },
     {
@@ -186,7 +186,7 @@
         "dark_pixel_count": 0,
         "pixel_contrast": 0,
         "false_visibility": false,
-        "runtime_seconds": 0.000105
+        "runtime_seconds": 0.000104
       },
       "candidate": {
         "verdict": "invisible",
@@ -206,7 +206,7 @@
             "coverage_fraction": 1.0
           }
         ],
-        "runtime_seconds": 5e-06
+        "runtime_seconds": 4e-06
       }
     },
     {
@@ -229,14 +229,14 @@
       "baseline": {
         "verdict": "visible",
         "false_visibility": false,
-        "runtime_seconds": 0.0
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 429,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.00011
+        "runtime_seconds": 0.000109
       },
       "candidate": {
         "verdict": "visible",
@@ -274,7 +274,7 @@
         "dark_pixel_count": 233,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000105
+        "runtime_seconds": 0.000101
       },
       "candidate": {
         "verdict": "unsupported_compositing",
@@ -324,7 +324,7 @@
         "dark_pixel_count": 208,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000117
+        "runtime_seconds": 0.000115
       },
       "candidate": {
         "verdict": "unsupported_compositing",
@@ -362,7 +362,7 @@
         "dark_pixel_count": 458,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000152
+        "runtime_seconds": 0.000128
       },
       "candidate": {
         "verdict": "visible",
@@ -400,7 +400,7 @@
         "dark_pixel_count": 50,
         "pixel_contrast": 128,
         "false_visibility": true,
-        "runtime_seconds": 0.000113
+        "runtime_seconds": 0.000103
       },
       "candidate": {
         "verdict": "invisible",

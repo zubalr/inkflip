@@ -5,9 +5,11 @@ Verifies acceptance criteria:
 - clean neighbor fields not corrupted
 - every accepted transform source-bound
 - failed/modelmissing jobs remain denominator
-- full raw receipt retained.
+- full raw receipt retained
+- real crop coordinate transformation tested
+- empty OCR returns zero recoveries and zero corruptions (no hardcoded variant logic)
+- empty or held-out manifests fail terminal
 """
-
 from __future__ import annotations
 
 import json
@@ -15,6 +17,7 @@ import os
 from pathlib import Path
 import shutil
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,7 +37,7 @@ except (ImportError, ModuleNotFoundError):
         os.execv(uv, [uv, "run", "--project", "native", "python", *sys.argv])
     raise
 
-from experiments.P11.run import resolve_manifest, run_experiment
+from experiments.P11.run import resolve_manifest, run_experiment, pt_to_px
 
 
 class TestP11Experiment(unittest.TestCase):
@@ -99,6 +102,40 @@ class TestP11Experiment(unittest.TestCase):
         # Confirm rejection disposition is backed by evidence
         self.assertEqual(data["disposition"], "rejected_experiment")
         self.assertGreater(len(data["rejection_reasons"]), 0)
+
+    def test_empty_ocr_returns_zero_recoveries_and_corruptions(self) -> None:
+        """Counterexample test: mocked empty OCR must yield 0 recoveries and 0 corruptions."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            res = run_experiment(self.manifest_path, Path(tmpdir), ocr_fn=lambda img: "")
+            self.assertEqual(res["metrics"]["useful_target_recoveries"], 0)
+            self.assertEqual(res["metrics"]["clean_neighbors_corrupted"], 0)
+            self.assertEqual(res["metrics"]["target_recovery_gain_pct"], 0.0)
+            self.assertEqual(res["metrics"]["precision_loss_pp"], 0.0)
+
+    def test_empty_manifest_fails_terminal(self) -> None:
+        """Empty manifest must fail terminal."""
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as f:
+            json.dump({"entries": []}, f)
+            f.flush()
+            with self.assertRaises(ValueError):
+                run_experiment(Path(f.name), self.out_dir)
+
+    def test_held_out_manifest_fails_terminal(self) -> None:
+        """Held-out evaluation manifest must fail terminal."""
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as f:
+            json.dump({"split": "evaluation", "entries": [{"path": "fixtures/development/adjacent-crop-control.pdf"}]}, f)
+            f.flush()
+            with self.assertRaises(ValueError):
+                run_experiment(Path(f.name), self.out_dir)
+
+    def test_pt_to_px_coordinate_transform(self) -> None:
+        """Coordinate transform correctly maps PDF bottom-left points to PIL top-left pixels."""
+        # 320x240 pt page rendered at scale 2.0 -> 640x480 px
+        box_pt = [50.0, 100.0, 100.0, 140.0]
+        # px0 = 50 * 2 = 100, px1 = 100 * 2 = 200
+        # py0 = (240 - 140) * 2 = 200, py1 = (240 - 100) * 2 = 280
+        px_box = pt_to_px(box_pt, 240.0, 2.0, 640, 480)
+        self.assertEqual(px_box, (100, 200, 200, 280))
 
 
 def run_tests() -> int:
