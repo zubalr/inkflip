@@ -332,6 +332,15 @@ def inspect_document(
         ext_res = padapter.extract(source_path, page_indices)
         occurrences.extend(ext_res.get("occurrences", []))
         checks.extend(ext_res.get("checks", []))
+        for p_idx in page_indices:
+            check_id = f"chk_pypdf_p{p_idx}"
+            plan_checks.append({
+                "id": check_id,
+                "page_index": p_idx,
+                "capability": "native_text",
+                "reader_ids": [pdesc["reader"]["id"]],
+                "region_id": None,
+            })
         readers = []
 
     # 1. PDFium

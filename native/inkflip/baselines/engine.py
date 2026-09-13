@@ -77,7 +77,14 @@ def create_baseline(
 
     report_files = sorted(run_dir.glob("*.inkflip.json"))
     if not report_files:
-        # Also check *.json that are valid reports
+        if (run_dir / "reports").is_dir():
+            for f in sorted((run_dir / "reports").glob("*.json")):
+                try:
+                    data = json.loads(f.read_text("utf-8"))
+                    if data.get("kind") == "report":
+                        report_files.append(f)
+                except Exception:
+                    continue
         for f in sorted(run_dir.glob("*.json")):
             if f.name in ("index.json", "rules.json"):
                 continue
@@ -141,16 +148,20 @@ def create_baseline(
 def _load_reports_from_dir(path: Path) -> dict[str, dict[str, Any]]:
     """Load all valid reports from a run directory, keyed by file stem or document key."""
     reports = {}
-    for f in sorted(path.glob("*.json")):
-        if f.name in ("index.json", "rules.json"):
-            continue
-        try:
-            data = json.loads(f.read_text(encoding="utf-8"))
-            if data.get("kind") == "report":
-                key = f.name.replace(".inkflip.json", "").replace(".json", "")
-                reports[key] = data
-        except Exception:
-            continue
+    search_dirs = [path]
+    if (path / "reports").is_dir():
+        search_dirs.append(path / "reports")
+    for sdir in search_dirs:
+        for f in sorted(sdir.glob("*.json")):
+            if f.name in ("index.json", "rules.json"):
+                continue
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+                if data.get("kind") == "report":
+                    key = f.stem.replace(".inkflip", "")
+                    reports[key] = data
+            except Exception:
+                continue
     return reports
 
 

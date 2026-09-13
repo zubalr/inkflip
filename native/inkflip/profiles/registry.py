@@ -77,11 +77,19 @@ def load_profile(name_or_path: str | Path, base_dir: Path | None = None) -> Read
         p = Path(name_or_path)
         if ".." in p.parts:
             raise UntrustedProfileError(f"Directory traversal forbidden in profile path: '{name_or_path}'")
-        resolved = (root / p).resolve() if not p.is_absolute() else p.resolve()
-        try:
-            resolved.relative_to(root)
-        except ValueError:
-            raise UntrustedProfileError(f"Profile path escapes profiles root: '{name_or_path}'")
+        if p.is_absolute():
+            resolved = p.resolve()
+            if base_dir is not None:
+                try:
+                    resolved.relative_to(root)
+                except ValueError:
+                    raise UntrustedProfileError(f"Profile path escapes profiles root: '{name_or_path}'")
+        else:
+            resolved = (root / p).resolve()
+            try:
+                resolved.relative_to(root)
+            except ValueError:
+                raise UntrustedProfileError(f"Profile path escapes profiles root: '{name_or_path}'")
         if not resolved.is_file():
             raise ProfileNotFoundError(f"Profile file not found: {resolved}")
         profile_path = resolved

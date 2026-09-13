@@ -13,6 +13,10 @@
     [
       "pnpm ",
       "bun run "
+    ],
+    [
+      "python -m unittest discover -s tests/examples -v",
+      "uv run --project native python -m unittest discover -s tests/examples -v"
     ]
   ],
   "scope_additions": {

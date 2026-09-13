@@ -32,17 +32,38 @@ def describe_reader() -> dict:
             "method": "native_text",
             "environment": "native",
             "settings": {
-                "normalization": "scalar-whitespace-v1"
+                "normalization": "scalar-whitespace-v1",
+                "language": None,
+                "psm": None,
+                "render_reader_id": None,
+                "raster_dpi": None,
+                "annotation_mode": "not_applicable",
             },
-            "capabilities": ["native_text"],
-            "limits": {
-                "max_bytes": 268435456,
-                "max_pages": 1000
-            }
+            "capabilities": [
+                {
+                    "name": "native_text",
+                    "support": "supported",
+                    "limits": [
+                        "page-level text only; no per-word geometry is claimed or derived from visitor matrices",
+                        "text from this reader is never combined with PDFium boxes by string matching",
+                    ],
+                },
+                {
+                    "name": "crop_metadata",
+                    "support": "approximate",
+                    "limits": [
+                        "declared page dictionaries (media/crop box, /UserUnit, /Rotate) are parsed for other adapters' compensation; metadata is separate from extraction",
+                    ],
+                },
+            ],
+            "model_hashes": [],
+            "limitations": [
+                "version-isolated worker; executed in separate virtual environment",
+            ],
         },
         "interpreter": sys.executable,
         "python_version": sys.version,
-        "pypdf_version": version_str
+        "pypdf_version": version_str,
     }
 
 
@@ -81,30 +102,38 @@ def extract_pdf(source_path: Path, pages: list[int]) -> dict:
         except Exception as e:
             raw_text = ""
 
-        check_id = f"chk_pypdf_p{p_idx}"
-        checks.append({
-            "id": check_id,
-            "page_index": p_idx,
-            "capability": "native_text",
-            "reader_ids": ["pypdf-native"],
-            "status": "completed",
-            "region_id": None
-        })
-
+        occ_ids = []
         if raw_text:
+            occ_id = f"occ_pypdf_p{p_idx}_0"
+            occ_ids.append(occ_id)
             occurrences.append({
-                "id": f"occ_pypdf_p{p_idx}_0",
+                "id": occ_id,
                 "page_index": p_idx,
                 "ordinal": 0,
                 "raw_text": raw_text,
                 "normalized_text": raw_text,
                 "geometry": {
+                    "precision": "page_only",
+                    "space": "canonical_page",
                     "polygon": None,
-                    "page_only": True
+                    "transform_ids": [],
+                    "basis": "pypdf extract_text page-level output; no per-word geometry claimed",
                 },
-                "transform_ids": [],
-                "reader_id": "pypdf-native"
+                "reader_id": "pypdf-native",
+                "engine_score": None,
+                "source_asset_id": None,
+                "raw_source_locator": f"pypdf:page[{p_idx}]:extract_text",
+                "limitations": ["page-only extraction; anchors unavailable by design"],
             })
+
+        check_id = f"chk_pypdf_p{p_idx}"
+        checks.append({
+            "id": check_id,
+            "status": "completed",
+            "reason": None,
+            "produced_occurrence_count": len(occ_ids),
+            "retained_occurrence_ids": occ_ids,
+        })
 
     desc = describe_reader()
     return {
