@@ -1,6 +1,6 @@
 {
   "kind": "inkflip-performance-browser",
-  "schema_version": "2.0.0",
+  "schema_version": "2.1.0",
   "host": {
     "profile_requested": "local-mac",
     "browserName": "chromium",
@@ -9,79 +9,217 @@
     "is_physical_mobile": false,
     "note": "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference."
   },
-  "setup_ms": 331,
+  "build": {
+    "production": true,
+    "vite_dev_server": false,
+    "inkflip_test_hooks": true,
+    "out_dir": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-performance-completion/artifacts/performance/pc-web-zZkqFZ",
+    "index_head": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-w",
+    "note": "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1). Not a shipped unlabeled artifact."
+  },
+  "setup_ms": 103,
   "stages": {
     "preview": {
       "n": 30,
       "failures": 0,
       "measured": true,
       "unit": "ms",
-      "p50": 497,
-      "p95": 535.5,
-      "max": 2010,
-      "distribution_claim": "n>=30"
+      "samples_ms": [
+        251,
+        201,
+        200,
+        201,
+        200,
+        200,
+        97,
+        100,
+        100,
+        202,
+        199,
+        202,
+        97,
+        201,
+        202,
+        96,
+        202,
+        201,
+        200,
+        202,
+        198,
+        200,
+        98,
+        100,
+        100,
+        202,
+        98,
+        100,
+        202,
+        200
+      ],
+      "p50": 200,
+      "p95": 202,
+      "max": 251,
+      "distribution_claim": "n>=30",
+      "proof": "first_rendered_page"
+    },
+    "render": {
+      "n": 30,
+      "failures": 0,
+      "measured": true,
+      "unit": "ms",
+      "samples_ms": [
+        251,
+        201,
+        200,
+        201,
+        200,
+        200,
+        97,
+        100,
+        100,
+        202,
+        199,
+        202,
+        97,
+        201,
+        202,
+        96,
+        202,
+        201,
+        200,
+        202,
+        198,
+        200,
+        98,
+        100,
+        100,
+        202,
+        98,
+        100,
+        202,
+        200
+      ],
+      "p50": 200,
+      "p95": 202,
+      "max": 251,
+      "distribution_claim": "n>=30",
+      "proof": "first_rendered_page"
     },
     "extraction": {
       "n": 30,
       "failures": 0,
       "measured": true,
       "unit": "ms",
-      "p50": 0.4000000059604645,
-      "p95": 0.655000007152557,
-      "max": 2.0999999940395355,
+      "samples_ms": [
+        4.0999999940395355,
+        1,
+        0.9000000059604645,
+        0.7999999821186066,
+        0.6000000238418579,
+        0.699999988079071,
+        0.800000011920929,
+        0.699999988079071,
+        0.699999988079071,
+        0.5,
+        0.5,
+        0.6000000238418579,
+        0.5,
+        0.3999999761581421,
+        0.6000000238418579,
+        0.5,
+        0.5,
+        0.3999999761581421,
+        0.4000000059604645,
+        0.4000000059604645,
+        0.5,
+        0.5,
+        0.4000000059604645,
+        0.4000000059604645,
+        0.5,
+        0.5,
+        0.5,
+        0.3999999761581421,
+        0.4000000059604645,
+        0.4000000059604645
+      ],
+      "p50": 0.5,
+      "p95": 0.9550000026822087,
+      "max": 4.0999999940395355,
       "distribution_claim": "n>=30"
     },
-    "render": {
-      "n": 0,
-      "failures": 0,
-      "measured": false,
-      "distribution_claim": "missing",
-      "unit": "ms"
-    },
     "raster": {
-      "n": 0,
+      "n": 1,
       "measured": true,
       "distribution_claim": "not_a_latency_distribution",
       "oversize_open_rejected": true,
-      "note": "20 MiB desktop byte cap rejected on the live workspace before allocation"
+      "pixel_budget_enforced": true,
+      "edge_budget_enforced": true,
+      "profile_max_raster_pixels": 4000000,
+      "live_buffers": 2,
+      "live_buffer_cap_enforced": true,
+      "ocr_workers": 1,
+      "ocr_worker_cap_enforced": true,
+      "canvas_width": 720,
+      "canvas_height": 554,
+      "note": "20 MiB byte cap is a separate rejection from live preview raster. Preview canvas is the fixture page after PREVIEW_EDGE_PX=720 fit; profile.maxRasterPixels=4000000. Synthetic 4000x4000 and 20000x20000 MediaBox PDFs are parser_error in this reader."
     },
     "ocr": {
       "n": 0,
       "failures": 0,
       "measured": false,
       "distribution_claim": "missing",
-      "unit": "ms"
+      "unit": "ms",
+      "samples_ms": []
     },
     "alignment": {
       "n": 0,
       "failures": 0,
       "measured": false,
       "distribution_claim": "missing",
-      "unit": "ms"
+      "unit": "ms",
+      "samples_ms": []
     },
     "export": {
-      "n": 0,
+      "n": 1,
       "failures": 0,
-      "measured": false,
-      "distribution_claim": "missing",
-      "unit": "ms"
+      "measured": true,
+      "unit": "ms",
+      "samples_ms": [
+        281
+      ],
+      "p50": 281,
+      "p95": 281,
+      "max": 281,
+      "distribution_claim": "insufficient_samples"
     }
   },
   "replace_clear_cycles": {
     "n": 10,
     "js_heap_used_bytes": [
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000,
-      386000000
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000,
+      26000000
     ],
-    "note": "Chromium performance.memory when exposed; not parent-Python ru_maxrss across CLI children"
+    "process_rss_bytes": [
+      499138560,
+      507461632,
+      515866624,
+      501825536,
+      510296064,
+      502611968,
+      512507904,
+      520814592,
+      503267328,
+      513327104
+    ],
+    "note": "JS heap from performance.memory; process RSS from ps(1) on the Chromium PID. Distinct metrics."
   },
   "cancel_next_file": {
     "cancelled_visible": true,
@@ -93,39 +231,10 @@
     "viewport_emulation": "320x568",
     "note": "Viewport emulation is not a physical 4 GiB mobile device"
   },
-  "missing_model": {
-    "note": "OCR stage recorded missing; offline model prepare is T25, not claimed as T39 p95"
-  },
-  "session": {
-    "fileState": "selecting",
-    "generation": 0,
-    "doc": {
-      "label": "mobile.pdf",
-      "byteLength": 586,
-      "sha256": "48e075e755aba3fed026d501532b847186c5186b7e356a1e085a62b434b99265",
-      "pageCount": 1,
-      "pages": [
-        {
-          "index": 0,
-          "widthPt": 612,
-          "heightPt": 792,
-          "rotation": 0,
-          "canonicalTransformId": "t_p0_canonical"
-        }
-      ]
-    },
-    "report": null,
-    "reportSource": null,
-    "error": null,
-    "notice": null,
-    "run": null,
-    "occurrences": [],
-    "importedView": null,
-    "importedReplay": null,
-    "sourceAttached": false
-  },
   "memory": {
-    "js_heap_used_bytes": 386000000,
+    "js_heap_used_bytes": 26000000,
+    "process_rss_bytes": 513327104,
+    "process_rss_unavailable": false,
     "limits": {
       "tracked_allocation_target_bytes": 268435456,
       "measured_peak_rss_target_bytes": 536870912

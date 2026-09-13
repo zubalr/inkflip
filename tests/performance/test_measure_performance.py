@@ -93,6 +93,85 @@ class TestMeasureDriver(unittest.TestCase):
             self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
             self.assertIn("ACCEPT-FAIL", proc.stderr)
 
+    def test_review_n1_failures29_label_is_rejected(self) -> None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("measure_performance", SCRIPT)
+        assert spec and spec.loader
+        mp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mp)
+        stage = {
+            "n": 1,
+            "failures": 29,
+            "measured": True,
+            "distribution_claim": "n>=30",
+            "samples_ms": [1.0],
+            "p50": 1.0,
+            "p95": 1.0,
+            "max": 1.0,
+        }
+        body = {
+            "kind": "inkflip-performance",
+            "schema_version": "2.1.0",
+            "host": {"is_specified_reference_desktop": False, "is_physical_mobile": False},
+            "source_binding": {"fixture_sha256": "a" * 64, "git_head": "deadbeef"},
+            "measurement": {
+                "stages": {
+                    "file_sha256": stage,
+                    "inspect_cli": stage,
+                    "report_html": stage,
+                    "alignment_cli": stage,
+                    "ocr_cli": stage,
+                }
+            },
+        }
+        problems = mp.acceptance_problems(body, mode="accept", profile="local-mac")
+        joined = " ".join(problems)
+        self.assertTrue(problems)
+        self.assertIn("n>=30", joined)
+        self.assertTrue(any("browser" in item.lower() for item in problems))
+
+    def test_stale_schema_20_is_rejected(self) -> None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("measure_performance", SCRIPT)
+        assert spec and spec.loader
+        mp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mp)
+        problems = mp.acceptance_problems(
+            {
+                "kind": "inkflip-performance",
+                "schema_version": "2.0.0",
+                "measurement": {"stages": {}},
+            },
+            mode="accept",
+            profile="local-mac",
+        )
+        self.assertTrue(any("stale" in item for item in problems))
+
+    def test_local_mac_accept_without_browser_fails(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="inkflip-t39-nobrowser-") as raw:
+            out = Path(raw)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--profile",
+                    "local-mac",
+                    "--samples",
+                    "1",
+                    "--mode",
+                    "accept",
+                    "--out",
+                    str(out),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+            self.assertIn("ACCEPT-FAIL", proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

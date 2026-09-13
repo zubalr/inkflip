@@ -295,7 +295,11 @@ def problems_for(root: Path) -> list[str]:
             missing.append(f"unreadable notices index: {index_path}")
         else:
             ids = {entry.get("id") for entry in index.get("entries") or [] if isinstance(entry, dict)}
-            for required in ("inkflip-mit", "pdfium-binary-appendix", "node-license"):
+            required_ids = ("inkflip-mit", "pdfium-binary-appendix", "node-license")
+            tess_stamp_path = root / "release" / "tesseract" / "tesseract.stamp.json"
+            if tess_stamp_path.is_file():
+                required_ids = (*required_ids, "tesseract-apache")
+            for required in required_ids:
                 if required not in ids:
                     missing.append(f"image notices missing required {required}")
             pdfium = dist_notices / "pypdfium2-binary" / "BUILD_LICENSES" / "pdfium.txt"
@@ -307,6 +311,34 @@ def problems_for(root: Path) -> list[str]:
                 missing.append(f"Node bundled LICENSE missing: {node_license}")
             if not app_mit.is_file() or app_mit.stat().st_size == 0:
                 missing.append(f"application MIT notice missing: {app_mit}")
+
+    tess_stamp_path = root / "release" / "tesseract" / "tesseract.stamp.json"
+    tess_stamp = _load_json(tess_stamp_path)
+    if tess_stamp_path.is_file() and tess_stamp is None:
+        missing.append(f"unreadable tesseract stamp: {tess_stamp_path}")
+    elif tess_stamp is not None:
+        packages = tess_stamp.get("packages") or []
+        if not packages:
+            missing.append(f"{tess_stamp_path} lists no hashed debs")
+        dest_debs = dist / "tesseract" / "debs"
+        for entry in packages:
+            if not isinstance(entry, dict) or not entry.get("filename") or not entry.get("sha256"):
+                missing.append(f"{tess_stamp_path} has a malformed package entry")
+                continue
+            deb = dest_debs / str(entry["filename"])
+            if not deb.is_file() or deb.stat().st_size == 0:
+                missing.append(
+                    f"tesseract deb missing from assembled context: {deb} "
+                    "(stamp-only is not a runnable OCR executable)"
+                )
+            elif sha256_file(deb) != entry["sha256"]:
+                missing.append(
+                    f"incorrect tesseract deb hash {entry['filename']}: "
+                    f"stamp {entry['sha256']} != file {sha256_file(deb)}"
+                )
+        tess_notice = dist_notices / "tesseract" / "copyright"
+        if not tess_notice.is_file() or tess_notice.stat().st_size == 0:
+            missing.append(f"tesseract copyright notice missing: {tess_notice}")
 
     release_node = root / "release" / "node"
     release_models = root / "release" / "models"

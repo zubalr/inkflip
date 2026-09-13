@@ -1,12 +1,12 @@
 {
   "kind": "inkflip-performance",
-  "schema_version": "2.0.0",
+  "schema_version": "2.1.0",
   "host": {
     "profile_requested": "local-mac",
     "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
     "machine": "arm64",
     "processor": "arm",
-    "python": "3.14.7",
+    "python": "3.13.15",
     "cpus_logical": 14,
     "physical_memory_bytes": 25769803776,
     "reference_desktop": {
@@ -19,9 +19,17 @@
     "note": "This host is not the specified 4-core/8 GiB reference desktop merely because a viewport can be emulated. Local numbers are labeled as this machine."
   },
   "samples_requested": 30,
-  "mode": "accept",
-  "accepting": true,
+  "mode": "inventory",
+  "accepting": false,
   "contention": "caller must keep competing OCR/container jobs idle; this process does not inspect other PIDs",
+  "source_binding": {
+    "root": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-performance-completion",
+    "fixture_path": "fixtures/public/mapping-control.pdf",
+    "fixture_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+    "fixture_bytes": 1429,
+    "settings_sha256": "7f2e77d2ab1c46cfbe566f9d08c982aab052061a8bf015b801ff02232ca7f1a7",
+    "git_head": "b50c9d22de4c0ad4f9c08b008c3ab9574ec7fa31"
+  },
   "measurement": {
     "source": {
       "path": "fixtures/public/mapping-control.pdf",
@@ -37,52 +45,226 @@
         "failures": 0,
         "unit": "ms",
         "measured": true,
-        "p50": 0.11295849981252104,
-        "p95": 0.15103316400200126,
-        "max": 0.19420901662670076,
-        "mean": 0.11658610213392724,
-        "distribution_claim": "n>=30"
+        "samples_ms": [
+          0.058250006986781955,
+          0.11487500160001218,
+          0.1428340037818998,
+          0.12483299360610545,
+          0.11933298083022237,
+          0.11716698645614088,
+          0.09824999142438173,
+          0.13562501408159733,
+          0.11604200699366629,
+          0.11012499453499913,
+          0.10570901213213801,
+          0.10212499182671309,
+          0.11812499724328518,
+          0.12258399510756135,
+          0.11420898954384029,
+          0.1069169957190752,
+          0.1112080062739551,
+          0.11662501492537558,
+          0.10166599531657994,
+          0.13787500211037695,
+          0.10762500460259616,
+          0.14633301179856062,
+          0.10800000745803118,
+          0.113667018013075,
+          0.11274998541921377,
+          0.1176249934360385,
+          0.10058400221168995,
+          0.11158399865962565,
+          0.09987500379793346,
+          0.10087501141242683
+        ],
+        "distribution_claim": "n>=30",
+        "p50": 0.11320850171614438,
+        "p95": 0.14060245302971452,
+        "max": 0.14633301179856062,
+        "mean": 0.11310983391012996
       },
       "inspect_cli": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
         "measured": true,
-        "p50": 158.60947899636813,
-        "p95": 189.8032356097246,
-        "max": 205.17608302179724,
-        "mean": 162.62520693514185,
-        "distribution_claim": "n>=30"
+        "samples_ms": [
+          184.21958398539573,
+          139.1409579955507,
+          150.85354199982248,
+          151.96358298999257,
+          153.98754199850373,
+          147.7955410082359,
+          151.38458300498314,
+          143.2614169898443,
+          140.55287500377744,
+          142.96749999630265,
+          149.27345898468047,
+          149.74995798547752,
+          142.57604200975038,
+          144.55029199598357,
+          140.08250000188127,
+          139.96400000178255,
+          142.23812500131316,
+          141.6362919844687,
+          139.99958298518322,
+          143.51075000013225,
+          142.4422909913119,
+          143.173292017309,
+          143.20187500561588,
+          140.39495898759924,
+          146.0572499781847,
+          139.74433299154043,
+          145.43279199278913,
+          196.6222079936415,
+          152.61795901460573,
+          182.37812499864958
+        ],
+        "distribution_claim": "n>=30",
+        "p50": 143.38608349498827,
+        "p95": 183.39092744135996,
+        "max": 196.6222079936415,
+        "mean": 149.05910699647697
       },
       "report_html": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
         "measured": true,
-        "p50": 149.31610399798956,
-        "p95": 169.16421510541113,
-        "max": 189.21637500170618,
-        "mean": 152.75572089885827,
-        "distribution_claim": "n>=30"
+        "samples_ms": [
+          134.4298749754671,
+          136.8663340108469,
+          140.84949999232776,
+          138.39591600117274,
+          143.31679200404324,
+          139.32304197805934,
+          137.32754098600708,
+          133.70341699919663,
+          133.51191699621268,
+          143.98987501044758,
+          139.5378329907544,
+          139.346125011798,
+          143.47662500222214,
+          137.18254200648516,
+          133.22524999966845,
+          135.5730420036707,
+          135.43495800695382,
+          134.90416700369678,
+          144.5337499899324,
+          134.88100000540726,
+          137.34562500030734,
+          135.6074160139542,
+          135.0332080037333,
+          135.89025000692345,
+          139.59416700527072,
+          132.5313340057619,
+          140.32570799463429,
+          143.55266600614414,
+          139.68704201397486,
+          138.84720799978822
+        ],
+        "distribution_claim": "n>=30",
+        "p50": 137.3365829931572,
+        "p95": 143.79313095851103,
+        "max": 144.5337499899324,
+        "mean": 137.94080416749543
       },
       "alignment_cli": {
         "n": 30,
         "failures": 0,
         "unit": "ms",
         "measured": true,
-        "p50": 2490.2151040005265,
-        "p95": 7894.164543614894,
-        "max": 8982.025707984576,
-        "mean": 3231.415872268068,
+        "samples_ms": [
+          2568.782290996751,
+          4220.919415995013,
+          2904.1161249915604,
+          2873.988459003158,
+          2364.383292006096,
+          2595.5256249872036,
+          2314.8376660246868,
+          2326.2572499806993,
+          2297.0949159935117,
+          2299.789167009294,
+          2376.87237499631,
+          2536.1829999892507,
+          2314.234083984047,
+          2284.81883299537,
+          2274.8594580043573,
+          2259.288375003962,
+          2327.275042014662,
+          2272.3286250256933,
+          2348.906833998626,
+          2316.659542004345,
+          2314.940750016831,
+          2285.768041998381,
+          2357.6014999998733,
+          2327.168999996502,
+          2317.7248330030125,
+          2300.1034170156345,
+          2358.2705829758197,
+          2402.7091660245787,
+          2354.1287499829195,
+          2371.938666998176
+        ],
         "distribution_claim": "n>=30",
+        "p50": 2327.222021005582,
+        "p95": 2890.5586752967793,
+        "max": 4220.919415995013,
+        "mean": 2448.9158361005443,
         "note": "shared Node alignment bridge via inkflip.baselines.engine._align_pages; not JS-heap",
         "last_compare": null
+      },
+      "ocr_cli": {
+        "n": 30,
+        "failures": 0,
+        "unit": "ms",
+        "measured": true,
+        "samples_ms": [
+          362.1744590054732,
+          268.0788330035284,
+          270.08449999266304,
+          270.7614579994697,
+          271.18062498630024,
+          274.3591660109814,
+          269.25912499427795,
+          266.3014169957023,
+          269.27129199611954,
+          272.03666599234566,
+          272.39183301571757,
+          276.7124169913586,
+          268.47845801967196,
+          259.4142079760786,
+          263.45854098326527,
+          263.73562499065883,
+          260.19587498740293,
+          255.62266699853353,
+          265.95170798827894,
+          265.6153340067249,
+          259.2761249979958,
+          262.9052920092363,
+          257.52566699520685,
+          258.24087497312576,
+          261.75766601227224,
+          257.2779580077622,
+          262.2605829965323,
+          257.4050410185009,
+          266.85916699352674,
+          271.2394169939216
+        ],
+        "distribution_claim": "n>=30",
+        "p50": 266.1265624919906,
+        "p95": 275.6534540501889,
+        "max": 362.1744590054732,
+        "mean": 268.6610665977544,
+        "note": "macOS host tesseract + pinned eng.traineddata; not a Linux image claim",
+        "executable": "/opt/homebrew/bin/tesseract"
       },
       "preview": {
         "n": 0,
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       },
@@ -91,6 +273,7 @@
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       },
@@ -99,6 +282,7 @@
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       },
@@ -107,6 +291,7 @@
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       },
@@ -115,6 +300,7 @@
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       },
@@ -123,6 +309,7 @@
         "failures": 0,
         "unit": "ms",
         "measured": false,
+        "samples_ms": [],
         "distribution_claim": "missing",
         "note": "stage was not executed"
       }
@@ -183,139 +370,6 @@
     },
     "note": "CLI stages are new-process invocations. They are not persistent-browser workspace retention, product JS-heap, or replace/clear evidence. Browser behavior lives in tests/performance/budgets.spec.ts."
   },
-  "browser": {
-    "kind": "inkflip-performance-browser",
-    "schema_version": "2.0.0",
-    "host": {
-      "profile_requested": "local-mac",
-      "browserName": "chromium",
-      "project": "",
-      "is_specified_reference_desktop": false,
-      "is_physical_mobile": false,
-      "note": "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference."
-    },
-    "setup_ms": 331,
-    "stages": {
-      "preview": {
-        "n": 30,
-        "failures": 0,
-        "measured": true,
-        "unit": "ms",
-        "p50": 497,
-        "p95": 535.5,
-        "max": 2010,
-        "distribution_claim": "n>=30"
-      },
-      "extraction": {
-        "n": 30,
-        "failures": 0,
-        "measured": true,
-        "unit": "ms",
-        "p50": 0.4000000059604645,
-        "p95": 0.655000007152557,
-        "max": 2.0999999940395355,
-        "distribution_claim": "n>=30"
-      },
-      "render": {
-        "n": 0,
-        "failures": 0,
-        "measured": false,
-        "distribution_claim": "missing",
-        "unit": "ms"
-      },
-      "raster": {
-        "n": 0,
-        "measured": true,
-        "distribution_claim": "not_a_latency_distribution",
-        "oversize_open_rejected": true,
-        "note": "20 MiB desktop byte cap rejected on the live workspace before allocation"
-      },
-      "ocr": {
-        "n": 0,
-        "failures": 0,
-        "measured": false,
-        "distribution_claim": "missing",
-        "unit": "ms"
-      },
-      "alignment": {
-        "n": 0,
-        "failures": 0,
-        "measured": false,
-        "distribution_claim": "missing",
-        "unit": "ms"
-      },
-      "export": {
-        "n": 0,
-        "failures": 0,
-        "measured": false,
-        "distribution_claim": "missing",
-        "unit": "ms"
-      }
-    },
-    "replace_clear_cycles": {
-      "n": 10,
-      "js_heap_used_bytes": [
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000,
-        386000000
-      ],
-      "note": "Chromium performance.memory when exposed; not parent-Python ru_maxrss across CLI children"
-    },
-    "cancel_next_file": {
-      "cancelled_visible": true,
-      "next_file_pages_summary": true
-    },
-    "mobile": {
-      "ocr_consent_visible": true,
-      "physical_device": false,
-      "viewport_emulation": "320x568",
-      "note": "Viewport emulation is not a physical 4 GiB mobile device"
-    },
-    "missing_model": {
-      "note": "OCR stage recorded missing; offline model prepare is T25, not claimed as T39 p95"
-    },
-    "session": {
-      "fileState": "selecting",
-      "generation": 0,
-      "doc": {
-        "label": "mobile.pdf",
-        "byteLength": 586,
-        "sha256": "48e075e755aba3fed026d501532b847186c5186b7e356a1e085a62b434b99265",
-        "pageCount": 1,
-        "pages": [
-          {
-            "index": 0,
-            "widthPt": 612,
-            "heightPt": 792,
-            "rotation": 0,
-            "canonicalTransformId": "t_p0_canonical"
-          }
-        ]
-      },
-      "report": null,
-      "reportSource": null,
-      "error": null,
-      "notice": null,
-      "run": null,
-      "occurrences": [],
-      "importedView": null,
-      "importedReplay": null,
-      "sourceAttached": false
-    },
-    "memory": {
-      "js_heap_used_bytes": 386000000,
-      "limits": {
-        "tracked_allocation_target_bytes": 268435456,
-        "measured_peak_rss_target_bytes": 536870912
-      }
-    }
-  },
+  "browser": null,
   "problems": []
 }

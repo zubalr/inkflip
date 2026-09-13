@@ -52,6 +52,15 @@ _COMPATIBILITY = (
     {"id": "safari", "aliases": frozenset({"safari", "safari-macos", "safari-ios", "safari-current"})},
     {"id": "linux-amd64-native", "aliases": frozenset({"linux-amd64-native", "linux-x86_64", "linux-amd64"})},
 )
+# 2026-09-13 owner macOS-only release profile. Historical frozen required
+# set above is unchanged. linux-amd64 / Windows / previous-stable / ESR are
+# deferred, not certified. Safari inability is Mac-local, not a Linux gate.
+_MACOS_COMPATIBILITY = (
+    {"id": "chromium", "aliases": frozenset({"chromium", "chromium-family", "chrome", "google-chrome", "chromium-current"})},
+    {"id": "firefox", "aliases": frozenset({"firefox", "firefox-stable"})},
+)
+_FORGED_SAFARI = ("webkit", "playwright webkit", "webkit-safari")
+_FORGED_LINUX_NATIVE = ("qemu", "orbstack", "emulat", "rosetta")
 _ACCESSIBILITY = (
     {"id": "keyboard", "aliases": frozenset({"keyboard", "a01"})},
     {"id": "amount-alternatives", "aliases": frozenset({"amount-alternatives", "amount-alternative"})},
@@ -62,12 +71,20 @@ _ACCESSIBILITY = (
 )
 
 
-def required_profiles(kind: str) -> list[dict[str, Any]]:
+def required_profiles(kind: str, release_profile: str = "historical") -> list[dict[str, Any]]:
     if kind == "compatibility":
+        if release_profile == "macos":
+            return [dict(item) for item in _MACOS_COMPATIBILITY]
         return [dict(item) for item in _COMPATIBILITY]
     if kind == "accessibility":
         return [dict(item) for item in _ACCESSIBILITY]
     if kind == "release":
+        if release_profile == "macos":
+            return [dict(item) for item in _MACOS_COMPATIBILITY] + [
+                item
+                for item in _ACCESSIBILITY
+                if item["id"] != "screen-reader-nvda-firefox"
+            ]
         return [dict(item) for item in _COMPATIBILITY] + [dict(item) for item in _ACCESSIBILITY]
     raise KeyError(kind)
 
@@ -113,10 +130,40 @@ def _evidence_error(root: Path, evidence: Any) -> str | None:
     return None
 
 
+def _identity_blob(row: dict[str, Any]) -> str:
+    identity = row.get("identity")
+    if not isinstance(identity, dict):
+        return ""
+    return json.dumps(identity, ensure_ascii=True).lower()
+
+
+def _forged_or_stale(row: dict[str, Any]) -> str | None:
+    row_id = str(row.get("id") or "")
+    blob = _identity_blob(row)
+    if row.get("status") == "executed" and row_id in {"safari", "safari-macos", "safari-current"}:
+        if any(token in blob for token in _FORGED_SAFARI):
+            return "forged platform flag: Playwright WebKit is not Safari"
+    if row.get("status") == "executed" and row_id in {"linux-amd64-native", "linux-x86_64", "linux-amd64"}:
+        if any(token in blob for token in _FORGED_LINUX_NATIVE):
+            return "forged platform flag: emulated/qemu linux is not native amd64"
+    if row.get("status") == "executed":
+        identity = row.get("identity")
+        if isinstance(identity, dict):
+            digest = identity.get("source_sha256") or identity.get("git_head")
+            if isinstance(digest, str) and digest.strip() in {"", "0" * 64, "stale"}:
+                return "stale source identity"
+            if row_id in {"chromium", "firefox"} and not str(identity.get("browser") or "").strip():
+                return "stale source identity: executed browser missing browser version"
+    return None
+
+
 def _row_satisfies(row: dict[str, Any], profile: dict[str, Any], root: Path) -> str | None:
     """Return None if this executed row covers the profile, else a reason."""
     if row.get("id") not in profile["aliases"]:
         return "id does not match required profile"
+    forged = _forged_or_stale(row)
+    if forged:
+        return forged
     status = row.get("status")
     if status != "executed":
         return f"status is {status!r}, not executed"
@@ -128,10 +175,15 @@ def _row_satisfies(row: dict[str, Any], profile: dict[str, Any], root: Path) -> 
     return None
 
 
-def _coverage(kind: str, platforms: list[Any], root: Path) -> list[tuple[str, str | None]]:
+def _coverage(
+    kind: str,
+    platforms: list[Any],
+    root: Path,
+    release_profile: str = "historical",
+) -> list[tuple[str, str | None]]:
     rows = [row for row in platforms if isinstance(row, dict)]
     results: list[tuple[str, str | None]] = []
-    for profile in required_profiles(kind):
+    for profile in required_profiles(kind, release_profile):
         reasons: list[str] = []
         matched = False
         for row in rows:
@@ -151,7 +203,12 @@ def _coverage(kind: str, platforms: list[Any], root: Path) -> list[tuple[str, st
     return results
 
 
-def check_kind(kind: str, root: Path | None = None, mode: str = "acceptance") -> tuple[int, str]:
+def check_kind(
+    kind: str,
+    root: Path | None = None,
+    mode: str = "acceptance",
+    release_profile: str = "historical",
+) -> tuple[int, str]:
     if kind not in KIND_RELATIVE:
         return 2, f"unknown receipt kind: {kind}"
     if mode not in {"acceptance", "inventory"}:
@@ -190,7 +247,11 @@ def check_kind(kind: str, root: Path | None = None, mode: str = "acceptance") ->
         if row.get("status") not in PLATFORM_STATUSES:
             return 1, f"{kind}: invalid platform status {row}"
 
-    if mode == "acceptance" and data.get("status") not in ACCEPTANCE_OVERALL:
+    if (
+        mode == "acceptance"
+        and release_profile == "historical"
+        and data.get("status") not in ACCEPTANCE_OVERALL
+    ):
         return 1, (
             f"{kind}: overall status {data.get('status')!r} is incomplete; "
             "acceptance requires status 'complete' and every required profile executed"
@@ -211,8 +272,11 @@ def check_kind(kind: str, root: Path | None = None, mode: str = "acceptance") ->
                 structural.append(f"{kind}: {evidence_error} ({row.get('id')})")
             if not _is_nonempty_identity(row.get("identity")):
                 structural.append(f"{kind}: executed platform missing identity: {row.get('id')}")
+            forged = _forged_or_stale(row)
+            if forged:
+                structural.append(f"{kind}: {forged} ({row.get('id')})")
 
-    coverage = _coverage(kind, platforms, base)
+    coverage = _coverage(kind, platforms, base, release_profile)
     incomplete = [(name, reason) for name, reason in coverage if reason]
     inventory_lines = [
         f"{kind} inventory: {len(coverage) - len(incomplete)}/{len(coverage)} required profiles complete"
@@ -231,7 +295,7 @@ def check_kind(kind: str, root: Path | None = None, mode: str = "acceptance") ->
 
     if structural:
         return 1, "\n".join(structural)
-    if data.get("status") not in ACCEPTANCE_OVERALL:
+    if release_profile == "historical" and data.get("status") not in ACCEPTANCE_OVERALL:
         return 1, (
             f"{kind}: overall status {data.get('status')!r} is incomplete; "
             "acceptance requires status 'complete'"
@@ -252,6 +316,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="list incomplete required profiles without certifying acceptance",
     )
+    parser.add_argument(
+        "--release-profile",
+        choices=("historical", "macos"),
+        default="historical",
+        help="historical keeps frozen Windows/Linux/Safari requirements; macos evaluates the 2026-09-13 Mac-only release",
+    )
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -259,7 +329,9 @@ def main(argv: list[str] | None = None) -> int:
         return 2 if code is None else int(code)
 
     mode = "inventory" if args.inventory else "acceptance"
-    code, message = check_kind(args.kind, root=ROOT, mode=mode)
+    code, message = check_kind(
+        args.kind, root=ROOT, mode=mode, release_profile=args.release_profile
+    )
     if args.inventory:
         print(message)
         return code

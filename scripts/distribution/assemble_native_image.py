@@ -9,7 +9,8 @@ plus ``release/`` stamps) and adds the Inkflip application wheel. Writes
   requirements.lock         complete hashed lock the Dockerfile installs
   node/node-v*-linux-x64.tar.xz
   models/tessdata/eng.traineddata
-  notices/                  license texts
+  tesseract/debs/*.deb      hashed Debian tesseract-ocr 5.5.0 amd64 closure
+  notices/                  license texts including tesseract Apache-2.0
   BUILD-CONTEXT.json        identities (platform/ABI, hashes, stamps)
 
 Does not download. Does not modify ZCode's committed third-party
@@ -195,19 +196,76 @@ def install_image_notices(
         raise RuntimeError(f"image notices missing required entries: {missing}")
     (notices_dest / "INDEX.json").write_text(json.dumps(index, indent=2, sort_keys=True) + "\n")
     return index
-    out_dir.mkdir(parents=True, exist_ok=True)
-    proc = subprocess.run(
-        ["uv", "build", "--project", str(NATIVE), "--wheel", "--out-dir", str(out_dir)],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(f"uv build failed:\n{proc.stdout}\n{proc.stderr}")
-    wheels = sorted(out_dir.glob("inkflip-*.whl"))
-    if len(wheels) != 1:
-        raise RuntimeError(f"expected one inkflip wheel, found {wheels}")
-    return wheels[0]
+
+
+def _extract_deb_copyright(deb: Path, dest: Path) -> bool:
+    import io
+    import tarfile
+
+    data = deb.read_bytes()
+    if not data.startswith(b"!<arch>\n"):
+        return False
+    pos = 8
+    while pos + 60 <= len(data):
+        header = data[pos : pos + 60]
+        name = header[0:16].decode("ascii", "replace").strip()
+        size = int(header[48:58].decode("ascii").strip())
+        pos += 60
+        payload = data[pos : pos + size]
+        pos += size + (size % 2)
+        if not name.startswith("data.tar"):
+            continue
+        tf = tarfile.open(fileobj=io.BytesIO(payload), mode="r:*")
+        for member in tf.getmembers():
+            if member.isfile() and member.name.endswith("/copyright"):
+                extracted = tf.extractfile(member)
+                if extracted is None:
+                    continue
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(extracted.read())
+                return True
+    return False
+
+
+def assemble_tesseract(dist: Path, notices_dest: Path) -> dict:
+    stamp_path = RELEASE / "tesseract" / "tesseract.stamp.json"
+    cache = ROOT / ".private" / "tesseract" / "debs"
+    stamp = json.loads(stamp_path.read_text(encoding="utf-8"))
+    dest = dist / "tesseract" / "debs"
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True)
+    copied = []
+    for entry in stamp.get("packages") or []:
+        src = cache / entry["filename"]
+        if not src.is_file():
+            raise RuntimeError(
+                f"tesseract deb missing: {src} (download into .private/tesseract/debs; "
+                "setup network only, never in the production image)"
+            )
+        actual = sha256_file(src)
+        if actual != entry["sha256"]:
+            raise RuntimeError(f"tesseract deb hash mismatch {entry['filename']}: stamp {entry['sha256']} != {actual}")
+        target = dest / entry["filename"]
+        shutil.copy2(src, target)
+        copied.append({"filename": entry["filename"], "sha256": actual, "bytes": target.stat().st_size})
+    shutil.copy2(stamp_path, dist / "tesseract" / "tesseract.stamp.json")
+    ocr_deb = next(dest.glob("tesseract-ocr_5.5.0*.deb"), None)
+    copyright_dest = notices_dest / "tesseract" / "copyright"
+    if ocr_deb is None or not _extract_deb_copyright(ocr_deb, copyright_dest):
+        raise RuntimeError("tesseract-ocr deb has no copyright notice")
+    notice = {
+        "id": "tesseract-apache",
+        "path": str(copyright_dest.relative_to(dist)),
+        "sha256": sha256_file(copyright_dest),
+        "bytes": copyright_dest.stat().st_size,
+    }
+    return {
+        "version": stamp.get("version"),
+        "packages": copied,
+        "platform": stamp.get("platform"),
+        "notice": notice,
+    }
 
 
 def main() -> int:
@@ -340,6 +398,18 @@ def main() -> int:
         app_name=app_name,
         app_sha=app_sha,
     )
+    try:
+        tesseract = assemble_tesseract(DIST, notices_dest)
+    except RuntimeError as exc:
+        return fail(str(exc))
+    notice_index.setdefault("entries", []).append(tesseract["notice"])
+    required = list(notice_index.get("required") or [])
+    if "tesseract-apache" not in required:
+        required.append("tesseract-apache")
+    notice_index["required"] = required
+    (notices_dest / "INDEX.json").write_text(
+        json.dumps(notice_index, indent=2, sort_keys=True) + "\n"
+    )
 
     identity = {
         "kind": "inkflip-native-image-context",
@@ -351,11 +421,22 @@ def main() -> int:
             "path": "models/tessdata/eng.traineddata",
             "sha256": model_stamp["sha256"],
         },
+        "tesseract": {
+            "version": tesseract.get("version"),
+            "platform": tesseract.get("platform"),
+            "packages": len(tesseract.get("packages") or []),
+            "stamp": "tesseract/tesseract.stamp.json",
+            "install": "offline dpkg -i of hashed Debian trixie amd64 debs; no apt-get in the image",
+        },
         "wheels": copied,
         "requirements_lock": "native/dist/requirements.lock",
         "notices": notice_index,
         "dockerfile": "build/native/Dockerfile",
         "docker_platform": "linux/amd64",
+        "emulation_note": (
+            "linux/amd64 on Apple Silicon is qemu/OrbStack emulation; "
+            "this is not native x86_64 hardware certification"
+        ),
         "note": "linux/arm64 checkout images are not this production hashed image",
     }
     (DIST / "BUILD-CONTEXT.json").write_text(

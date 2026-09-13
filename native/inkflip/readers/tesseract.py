@@ -731,7 +731,11 @@ def extract(
             language,
             "--tessdata-dir",
             str(tessdata_dir),
-            "tsv",
+            # The official `tsv` config lives under the engine tessdata tree.
+            # --tessdata-dir points at the pinned model directory (eng only),
+            # so name-based config lookup fails and tesseract emits plaintext.
+            "-c",
+            "tessedit_create_tsv=1",
         ]
         try:
             completed = subprocess.run(

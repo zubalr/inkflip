@@ -207,6 +207,96 @@ class TestNativeImageInputs(unittest.TestCase):
         self.assertIn("incorrect Node stamp version", combined)
         self.assertIn("incorrect model hash", combined)
 
+    def test_tesseract_stamp_requires_hashed_debs(self) -> None:
+        dist = self.root / "native/dist"
+        wheels_dir = dist / "wheels"
+        ink_bytes = make_wheel(wheels_dir, name="inkflip", version="0.0.0", plat="any")
+        pillow_bytes = make_wheel(
+            wheels_dir,
+            name="pillow",
+            version="12.3.0",
+            plat="manylinux_2_28_x86_64",
+        )
+        ink_sha = sha256(ink_bytes)
+        pillow_sha = sha256(pillow_bytes)
+        tarball = b"node-runtime-bytes"
+        model = b"traineddata-bytes"
+        write(
+            self.root,
+            "native/dist/requirements.lock",
+            (
+                f"pillow==12.3.0 --hash=sha256:{pillow_sha}\n"
+                f"inkflip==0.0.0 --hash=sha256:{ink_sha}\n"
+            ).encode(),
+        )
+        write(self.root, "native/dist/node/node-v22.23.2-linux-x64.tar.xz", tarball)
+        write(self.root, "native/dist/models/tessdata/eng.traineddata", model)
+        write(self.root, "native/dist/notices/inkflip-MIT.txt", b"MIT License\n")
+        write(self.root, "native/dist/notices/node/LICENSE", b"Node MIT\n")
+        write(self.root, "native/dist/notices/pypdfium2-binary/BUILD_LICENSES/pdfium.txt", b"PDFium\n")
+        write(
+            self.root,
+            "native/dist/notices/INDEX.json",
+            json.dumps(
+                {
+                    "kind": "inkflip-native-image-notices",
+                    "entries": [
+                        {"id": "inkflip-mit"},
+                        {"id": "pdfium-binary-appendix"},
+                        {"id": "node-license"},
+                    ],
+                }
+            ).encode(),
+        )
+        write(
+            self.root,
+            "release/native-wheels.manifest.json",
+            json.dumps(
+                {
+                    "wheels": [
+                        {
+                            "name": "pillow",
+                            "sha256": pillow_sha,
+                            "filename": "pillow-12.3.0-cp313-cp313-manylinux_2_28_x86_64.whl",
+                        }
+                    ]
+                }
+            ).encode(),
+        )
+        write(
+            self.root,
+            "release/node/node.stamp.json",
+            json.dumps(
+                {
+                    "version": "22.23.2",
+                    "sha256": sha256(tarball),
+                    "filename": "node-v22.23.2-linux-x64.tar.xz",
+                    "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+                }
+            ).encode(),
+        )
+        write(
+            self.root,
+            "release/models/model.stamp.json",
+            json.dumps({"name": "tessdata", "sha256": sha256(model)}).encode(),
+        )
+        write(
+            self.root,
+            "release/tesseract/tesseract.stamp.json",
+            json.dumps(
+                {
+                    "packages": [
+                        {"filename": "tesseract-ocr_5.5.0-1+b1_amd64.deb", "sha256": "e" * 64}
+                    ]
+                }
+            ).encode(),
+        )
+        proc = run_checker(self.root)
+        self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+        combined = proc.stdout + proc.stderr
+        self.assertIn("tesseract deb missing", combined)
+        self.assertIn("tesseract-apache", combined)
+
     def test_inventory_lists_gaps_without_certifying(self) -> None:
         (self.root / "native/dist").mkdir(parents=True)
         proc = run_checker(self.root, "--inventory")

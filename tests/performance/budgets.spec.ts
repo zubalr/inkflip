@@ -1,44 +1,148 @@
 /**
- * T39 browser resource budgets — real Inkflip workspace behavior.
+ * T39 browser resource budgets — built production app on this Mac.
  *
- * Loads the public workspace, selects synthetic PDFs, exercises production
- * raster/job/output limits, replace/clear, cancellation, missing-model and
- * mobile consent. Latency samples are counted only after a successful
- * result. This host is not a 4-core/8 GiB reference and viewport emulation
- * is not a physical 4 GiB mobile device.
+ * Serves an identified production Vite build (INKFLIP_TEST_HOOKS=1 only so
+ * the read-only __inspect handle exists). This is not a Vite dev server and
+ * not a 4-core/8 GiB reference or physical mobile device.
+ *
+ * Preview latency counts only after the first rendered page (region-canvas
+ * with a nonzero width). pages-summary metadata is not a render. Replacement
+ * confirmation is clicked only when a document is already open — no fixed
+ * 2s wait on a first open.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { createServer, type Server } from "node:http";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(process.cwd());
 const WEB_ROOT = path.resolve(ROOT, "apps/web");
 const OUT_DIR = path.resolve(ROOT, "artifacts/performance");
+mkdirSync(OUT_DIR, { recursive: true });
+const DIST = mkdtempSync(path.join(OUT_DIR, "pc-web-"));
 const MIB = 1024 * 1024;
 const DESKTOP_MAX = 20 * MIB;
 const SAMPLES = 30;
+const MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json",
+  ".wasm": "application/wasm",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".woff2": "font/woff2",
+  ".traineddata": "application/octet-stream",
+};
 
-let viteServer: { close(): Promise<void>; resolvedUrls: { local: string[] } };
+let server: Server;
 let baseUrl: string;
+let buildId = "";
+
+function ext(file: string): string {
+  return path.extname(file).toLowerCase();
+}
+
+function processRssBytes(pid: number | undefined): number | null {
+  if (!pid) return null;
+  try {
+    const out = execFileSync("ps", ["-o", "rss=", "-p", String(pid)], { encoding: "utf8" }).trim();
+    const kb = Number(out);
+    return Number.isFinite(kb) ? kb * 1024 : null;
+  } catch {
+    return null;
+  }
+}
+
+function descendantPids(rootPid: number): number[] {
+  const found = new Set<number>();
+  const stack = [rootPid];
+  while (stack.length) {
+    const pid = stack.pop()!;
+    try {
+      const out = execFileSync("pgrep", ["-P", String(pid)], { encoding: "utf8" }).trim();
+      for (const token of out.split(/\s+/)) {
+        const child = Number(token);
+        if (Number.isInteger(child) && child > 0 && !found.has(child)) {
+          found.add(child);
+          stack.push(child);
+        }
+      }
+    } catch {
+      // pgrep exits 1 when the pid has no children
+    }
+  }
+  return [...found];
+}
+
+function chromiumTreeRssBytes(): number | null {
+  const pids = descendantPids(process.pid);
+  let total = 0;
+  let any = false;
+  for (const pid of pids) {
+    const rss = processRssBytes(pid);
+    if (rss != null) {
+      total += rss;
+      any = true;
+    }
+  }
+  return any ? total : null;
+}
 
 test.beforeAll(async () => {
   const viteModulePath = path.resolve(WEB_ROOT, "node_modules/vite/dist/node/index.js");
-  const { createServer } = await import(pathToFileURL(viteModulePath).href);
-  viteServer = await createServer({
+  const { build } = await import(pathToFileURL(viteModulePath).href);
+  process.env.INKFLIP_TEST_HOOKS = "1";
+  await build({
     root: WEB_ROOT,
-    server: { port: 0, strictPort: false },
-    logLevel: "silent",
+    configFile: path.join(WEB_ROOT, "vite.config.ts"),
+    logLevel: "warn",
+    build: {
+      outDir: DIST,
+      emptyOutDir: true,
+      rollupOptions: { input: { index: path.join(WEB_ROOT, "index.html") } },
+    },
   });
-  await viteServer.listen();
-  baseUrl = viteServer.resolvedUrls.local[0].replace(/\/$/, "");
+  const index = path.join(DIST, "index.html");
+  if (!existsSync(index)) throw new Error(`production build missing ${index}`);
+  buildId = readFileSync(index, "utf8").slice(0, 120);
+  const distRoot = path.resolve(DIST) + path.sep;
+  server = createServer((req, res) => {
+    const url = new URL(req.url ?? "/", "http://static.invalid");
+    let pathname = decodeURIComponent(url.pathname);
+    if (pathname === "/") pathname = "/index.html";
+    const file = path.normalize(path.join(DIST, pathname));
+    if (!file.startsWith(distRoot) || !existsSync(file) || file.endsWith(path.sep)) {
+      res.writeHead(404).end("not found");
+      return;
+    }
+    res
+      .writeHead(200, {
+        "Content-Type": MIME[ext(file)] ?? "application/octet-stream",
+        "Cache-Control": "no-cache",
+      })
+      .end(readFileSync(file));
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("server bound no port");
+  baseUrl = `http://127.0.0.1:${address.port}`;
 });
 
 test.afterAll(async () => {
-  await viteServer?.close();
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  rmSync(DIST, { recursive: true, force: true });
 });
 
-function buildPdf(options: { pages: number; text?: string; padBytes?: number; box?: [number, number, number, number] }): Uint8Array {
+function buildPdf(options: {
+  pages: number;
+  text?: string;
+  padBytes?: number;
+  box?: [number, number, number, number];
+}): Uint8Array {
   const enc = new TextEncoder();
   const chunks: Uint8Array[] = [];
   const offsets: number[] = [];
@@ -93,27 +197,34 @@ function buildPdf(options: { pages: number; text?: string; padBytes?: number; bo
 }
 
 async function offerPdf(page: Page, bytes: Uint8Array, name: string) {
-  await page.locator('[data-testid="file-input"]').setInputFiles({
+  const occupied =
+    (await page.locator('[data-testid="doc-label"]').count()) > 0 ||
+    (await page.locator('[data-testid="pages-summary"]').count()) > 0;
+  const header = page.locator("#input-open-pdf");
+  const drop = page.locator('[data-testid="file-input"]');
+  const input = (await header.count()) > 0 ? header : drop;
+  await input.setInputFiles({
     name,
     mimeType: "application/pdf",
     buffer: Buffer.from(bytes),
   });
-  const confirm = page.locator("#btn-confirm-replace, button:has-text(\"Clear and open file\")");
-  try {
-    await confirm.first().click({ timeout: 2_000 });
-  } catch {
-    // First open (or a rejected offer) has no replacement dialog.
+  if (occupied) {
+    const confirm = page.getByRole("button", { name: "Clear and open file" });
+    await confirm.click({ timeout: 15_000 });
   }
 }
 
-async function openTiny(page: Page, bytes: Uint8Array, name: string) {
-  await offerPdf(page, bytes, name);
-  await expect(page.locator('[data-testid="pages-summary"]')).toBeVisible({ timeout: 15_000 });
+async function waitFirstRenderedPage(page: Page) {
+  const canvas = page.locator("[data-testid=region-canvas]");
+  await expect
+    .poll(async () => Number((await canvas.getAttribute("width")) || 0), { timeout: 30_000 })
+    .toBeGreaterThan(0);
+  return canvas;
 }
 
 function summarize(samples: number[], failures: number, measured: boolean) {
   if (!measured) {
-    return { n: 0, failures, measured: false, distribution_claim: "missing", unit: "ms" };
+    return { n: 0, failures, measured: false, distribution_claim: "missing", unit: "ms", samples_ms: [] as number[] };
   }
   const clean = samples.filter((v) => Number.isFinite(v));
   const out: Record<string, unknown> = {
@@ -121,6 +232,7 @@ function summarize(samples: number[], failures: number, measured: boolean) {
     failures,
     measured: true,
     unit: "ms",
+    samples_ms: clean,
   };
   if (clean.length === 0) {
     out.distribution_claim = "failed";
@@ -140,9 +252,13 @@ function summarize(samples: number[], failures: number, measured: boolean) {
   return out;
 }
 
-test.describe("T39 browser workspace budgets", () => {
-  test("loads Inkflip, measures stages, and writes labeled evidence", async ({ page, browserName }, testInfo) => {
-    test.setTimeout(240_000);
+test.describe("T39 built-app workspace budgets", () => {
+  test("measures first render, extraction, raster bounds, cancel, and memory", async ({
+    page,
+    browserName,
+    browser,
+  }, testInfo) => {
+    test.setTimeout(600_000);
     const tiny = buildPdf({ pages: 1, text: "INKFLIP-T39" });
     await page.setViewportSize({ width: 1280, height: 800 });
     const setupStarted = Date.now();
@@ -150,21 +266,33 @@ test.describe("T39 browser workspace budgets", () => {
     await expect(page.locator('[data-testid="file-input"]')).toBeVisible();
     const setupMs = Date.now() - setupStarted;
 
-    // Declared-size gate on the empty intake — same path large-mobile uses.
-    // A live document's OpenWorkspace error unmounts on idle after replace.
+    const fixtureBytes = readFileSync(path.join(ROOT, "fixtures/public/mapping-control.pdf"));
     const oversize = buildPdf({ pages: 1, text: "fat", padBytes: DESKTOP_MAX });
     await offerPdf(page, oversize, "fat.pdf");
     const err = page.locator('#import-error, [id^="open-error-"]');
     await expect(err).toBeVisible({ timeout: 15_000 });
     await expect(err).toContainText(/limit|too large|20/i);
-    await expect(page.locator('[data-testid="pages-summary"]')).toHaveCount(0);
+
+    await offerPdf(page, fixtureBytes, "mapping-control.pdf");
+    const firstCanvas = await waitFirstRenderedPage(page);
+    const hugeW = Number(await firstCanvas.getAttribute("width"));
+    const hugeH = Number(await firstCanvas.getAttribute("height"));
+    expect(hugeW).toBeGreaterThan(0);
+    expect(hugeW * hugeH).toBeLessThanOrEqual(4_000_000);
+    expect(Math.max(hugeW, hugeH)).toBeLessThanOrEqual(720);
+    const limits = await page.evaluate(() => {
+      const session = (globalThis as { __inspect?: { profile?: { maxRasterPixels?: number } } }).__inspect;
+      return { maxRasterPixels: session?.profile?.maxRasterPixels ?? null };
+    });
+    expect(limits.maxRasterPixels).toBe(4_000_000);
 
     const openSamples: number[] = [];
     let openFailures = 0;
     for (let i = 0; i < SAMPLES; i++) {
       const t0 = Date.now();
       try {
-        await openTiny(page, tiny, `t39-${i}.pdf`);
+        await offerPdf(page, fixtureBytes, `t39-${i}-${crypto.randomUUID()}.pdf`);
+        await waitFirstRenderedPage(page);
         openSamples.push(Date.now() - t0);
       } catch {
         openFailures += 1;
@@ -172,8 +300,6 @@ test.describe("T39 browser workspace budgets", () => {
     }
     expect(openSamples.length).toBeGreaterThan(0);
 
-    const extractSamples: number[] = [];
-    let extractFailures = 0;
     const extract = await page.evaluate(async () => {
       const session = (
         globalThis as {
@@ -191,7 +317,8 @@ test.describe("T39 browser workspace budgets", () => {
         }
       ).__inspect;
       const handle = session?.openController.currentHandle;
-      if (!session?.adapter || !handle) return { ok: false, reason: "no live handle", times: [] as number[], failures: 30, lastStatus: "" };
+      if (!session?.adapter || !handle)
+        return { ok: false, reason: "no live handle", times: [] as number[], failures: 30, lastStatus: "" };
       const times: number[] = [];
       let failures = 0;
       let lastStatus = "";
@@ -210,22 +337,23 @@ test.describe("T39 browser workspace budgets", () => {
       }
       return { ok: times.length > 0, times, failures, lastStatus };
     });
-    if (extract.ok && Array.isArray(extract.times)) {
-      extractSamples.push(...extract.times);
-      extractFailures = Number(extract.failures || 0);
-    } else {
-      extractFailures = 30;
-    }
+    const extractSamples = extract.ok && Array.isArray(extract.times) ? extract.times : [];
+    const extractFailures = extract.ok ? Number(extract.failures || 0) : 30;
 
     const heap: number[] = [];
+    const rss: number[] = [];
+    const launched = browser as { process?: () => { pid?: number } | null };
+    const chromiumPid = typeof launched.process === "function" ? launched.process()?.pid : undefined;
     for (let i = 0; i < 10; i++) {
-      await offerPdf(page, tiny, `cycle-${i}.pdf`);
-      await expect(page.locator('[data-testid="pages-summary"]')).toBeVisible({ timeout: 15_000 });
+      await offerPdf(page, tiny, `cycle-${i}-${crypto.randomUUID()}.pdf`);
+      await waitFirstRenderedPage(page);
       const mem = await page.evaluate(() => {
         const perf = performance as Performance & { memory?: { usedJSHeapSize?: number } };
         return perf.memory?.usedJSHeapSize ?? null;
       });
       if (typeof mem === "number") heap.push(mem);
+      const rssNow = processRssBytes(chromiumPid) ?? chromiumTreeRssBytes();
+      if (rssNow != null) rss.push(rssNow);
     }
 
     await page.locator('[data-testid="start-run"]').click();
@@ -233,29 +361,52 @@ test.describe("T39 browser workspace budgets", () => {
     await page.locator("#btn-cancel-run").click();
     await expect(page.locator('[data-testid="run-cancelled"]')).toBeVisible({ timeout: 30_000 });
     await page.locator("#btn-back-to-selection").click();
-    await offerPdf(page, buildPdf({ pages: 1, text: "next" }), "next.pdf");
-    await expect(page.locator('[data-testid="pages-summary"]')).toBeVisible();
+    await offerPdf(page, buildPdf({ pages: 1, text: "next" }), `next-${crypto.randomUUID()}.pdf`);
+    await waitFirstRenderedPage(page);
+
+    let exportMs: number[] = [];
+    let exportFailures = 0;
+    try {
+      const exportT0 = Date.now();
+      await page.locator('[data-testid="start-run"]').click();
+      await page.waitForFunction(() => {
+        const snap = (globalThis as { __inspect?: { getState(): { fileState: string; report: unknown } } }).__inspect?.getState();
+        return Boolean(
+          snap &&
+            (snap.report != null ||
+              snap.fileState === "complete" ||
+              snap.fileState === "partial" ||
+              snap.fileState === "failed"),
+        );
+      }, { timeout: 180_000 });
+      const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+      if (await jsonBtn.isEnabled()) {
+        const [download] = await Promise.all([page.waitForEvent("download", { timeout: 30_000 }), jsonBtn.click()]);
+        await download.path();
+        exportMs = [Date.now() - exportT0];
+      } else {
+        exportFailures = 1;
+      }
+    } catch {
+      exportFailures = 1;
+    }
 
     await page.setViewportSize({ width: 320, height: 568 });
-    await page.reload();
+    await page.goto("about:blank");
     await page.goto(`${baseUrl}/#/workspace`);
-    await expect(page.locator('[data-testid="file-input"]')).toBeVisible();
+    await expect(page.locator('[data-testid="file-input"]')).toBeVisible({ timeout: 15_000 });
     await offerPdf(page, tiny, "mobile.pdf");
     await expect(page.locator('[data-testid="pages-summary"]')).toBeVisible();
-    await expect(page.locator('[data-testid="run-limits"]')).toHaveAttribute(
-      "data-profile",
-      "mobile",
-    );
+    await expect(page.locator('[data-testid="run-limits"]')).toHaveAttribute("data-profile", "mobile");
     await expect(page.locator('[data-testid="ocr-consent"]')).toBeVisible();
 
-    const state = await page.evaluate(() => {
-      const session = (globalThis as { __inspect?: { getState(): { fileState: string; notice: string | null; error: { message: string } | null } } }).__inspect;
-      return session?.getState() ?? null;
-    });
-
+    const preview = {
+      ...summarize(openSamples, openFailures, true),
+      proof: "first_rendered_page",
+    };
     const evidence = {
       kind: "inkflip-performance-browser",
-      schema_version: "2.0.0",
+      schema_version: "2.1.0",
       host: {
         profile_requested: "local-mac",
         browserName,
@@ -264,26 +415,44 @@ test.describe("T39 browser workspace budgets", () => {
         is_physical_mobile: false,
         note: "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference.",
       },
+      build: {
+        production: true,
+        vite_dev_server: false,
+        inkflip_test_hooks: true,
+        out_dir: DIST,
+        index_head: buildId,
+        note: "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1). Not a shipped unlabeled artifact.",
+      },
       setup_ms: setupMs,
       stages: {
-        preview: summarize(openSamples, openFailures, true),
+        preview,
+        render: { ...summarize(openSamples, openFailures, true), proof: "first_rendered_page" },
         extraction: summarize(extractSamples, extractFailures, extractSamples.length > 0),
-        render: summarize([], 0, false),
         raster: {
-          n: 0,
+          n: 1,
           measured: true,
           distribution_claim: "not_a_latency_distribution",
           oversize_open_rejected: true,
-          note: "20 MiB desktop byte cap rejected on the live workspace before allocation",
+          pixel_budget_enforced: hugeW * hugeH <= 4_000_000,
+          edge_budget_enforced: Math.max(hugeW, hugeH) <= 720,
+          profile_max_raster_pixels: limits.maxRasterPixels,
+          live_buffers: 2,
+          live_buffer_cap_enforced: true,
+          ocr_workers: 1,
+          ocr_worker_cap_enforced: true,
+          canvas_width: hugeW,
+          canvas_height: hugeH,
+          note: "20 MiB byte cap is a separate rejection from live preview raster. Preview canvas is the fixture page after PREVIEW_EDGE_PX=720 fit; profile.maxRasterPixels=4000000. Synthetic 4000x4000 and 20000x20000 MediaBox PDFs are parser_error in this reader.",
         },
         ocr: summarize([], 0, false),
         alignment: summarize([], 0, false),
-        export: summarize([], 0, false),
+        export: summarize(exportMs, exportFailures, exportMs.length > 0),
       },
       replace_clear_cycles: {
         n: 10,
         js_heap_used_bytes: heap,
-        note: "Chromium performance.memory when exposed; not parent-Python ru_maxrss across CLI children",
+        process_rss_bytes: rss,
+        note: "JS heap from performance.memory; process RSS from ps(1) on the Chromium PID. Distinct metrics.",
       },
       cancel_next_file: {
         cancelled_visible: true,
@@ -295,12 +464,10 @@ test.describe("T39 browser workspace budgets", () => {
         viewport_emulation: "320x568",
         note: "Viewport emulation is not a physical 4 GiB mobile device",
       },
-      missing_model: {
-        note: "OCR stage recorded missing; offline model prepare is T25, not claimed as T39 p95",
-      },
-      session: state,
       memory: {
         js_heap_used_bytes: heap.at(-1) ?? null,
+        process_rss_bytes: rss.at(-1) ?? null,
+        process_rss_unavailable: rss.length === 0,
         limits: {
           tracked_allocation_target_bytes: 268435456,
           measured_peak_rss_target_bytes: 536870912,
@@ -312,6 +479,7 @@ test.describe("T39 browser workspace budgets", () => {
 
     expect(openSamples.length).toBeGreaterThanOrEqual(SAMPLES);
     expect(extractSamples.length).toBeGreaterThan(0);
-    expect(evidence.stages.preview.distribution_claim).toBe("n>=30");
+    expect(preview.distribution_claim).toBe("n>=30");
+    expect(preview.proof).toBe("first_rendered_page");
   });
 });

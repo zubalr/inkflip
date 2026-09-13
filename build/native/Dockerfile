@@ -7,11 +7,13 @@
 #   requirements.lock       complete hashed lock (inkflip pin included)
 #   node/*.tar.xz           official linux-x64 Node runtime
 #   models/tessdata/        digest-pinned OCR model
-#   notices/                license texts
+#   tesseract/debs/         hashed Debian tesseract-ocr 5.5.0 amd64 closure
+#   notices/                license texts including tesseract Apache-2.0
 #
 # Assemble with: python3 scripts/distribution/assemble_native_image.py
 # Build for the recorded ABI: docker build --platform linux/amd64 ...
 # An arm64 checkout image (Dockerfile.checkout) is not a substitute.
+# Apple Silicon builds are qemu; that is not native x86_64 certification.
 ARG BASE_IMAGE=python:3.13.15-slim-trixie@sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285
 FROM ${BASE_IMAGE}
 WORKDIR /app
@@ -21,6 +23,7 @@ RUN python -m pip install --no-index --find-links=/wheels --require-hashes -r /l
 COPY native/dist/node/ /tmp/node-src/
 COPY native/dist/models/ /app/models/
 COPY native/dist/notices/ /app/notices/
+COPY native/dist/tesseract/ /tmp/tesseract-src/
 RUN python - <<'PY'
 import hashlib, json, tarfile, shutil
 from pathlib import Path
@@ -48,6 +51,39 @@ node = dest / "bin" / "node"
 if not node.is_file():
     raise SystemExit(f"node binary missing after unpack: {node}")
 node.chmod(0o755)
+tess_src = Path("/tmp/tesseract-src")
+tess_stamp = json.loads((tess_src / "tesseract.stamp.json").read_text())
+debs = tess_src / "debs"
+if not debs.is_dir():
+    raise SystemExit("tesseract debs missing from assembled context")
+expected = tess_stamp.get("packages") or []
+if not expected:
+    raise SystemExit("tesseract stamp lists no packages")
+deb_paths = []
+for entry in expected:
+    path = debs / entry["filename"]
+    if not path.is_file():
+        raise SystemExit(f"tesseract deb missing: {path.name}")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != entry["sha256"]:
+        raise SystemExit(f"tesseract deb hash mismatch {path.name}: stamp {entry['sha256']} != {digest}")
+    deb_paths.append(path)
+import subprocess
+install = subprocess.run(
+    ["dpkg", "-i", *[str(p) for p in sorted(deb_paths)]],
+    capture_output=True,
+    text=True,
+)
+if install.returncode != 0:
+    raise SystemExit(
+        "dpkg -i tesseract closure failed:\\n"
+        + (install.stdout or "")[-2000:]
+        + (install.stderr or "")[-2000:]
+    )
+shutil.rmtree(tess_src)
+tess = Path("/usr/bin/tesseract")
+if not tess.is_file():
+    raise SystemExit("tesseract executable missing after offline dpkg")
 PY
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

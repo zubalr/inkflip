@@ -21,10 +21,24 @@ Not forced equal:
 - raster pixels / engine renders
 
 `python scripts/check_manual_receipts.py compatibility` is the registered
-acceptance command. It derives required profiles from
-`planning/quality/PERFORMANCE_AND_COMPATIBILITY.md` (Chromium, Firefox,
-physical Safari, Linux x86_64 native) and fails closed while coverage is
-incomplete. `--inventory` lists missing profiles without certifying them.
+historical acceptance command. It still derives the frozen required set
+(Chromium, Firefox, physical Safari, Linux x86_64 native) and fails closed
+while that coverage is incomplete. That is not a 2026-09-13 Mac-only pass.
+
+The owner dated Mac-only release profile is:
+
+```sh
+python scripts/check_manual_receipts.py compatibility --release-profile macos
+python scripts/check_manual_receipts.py compatibility --inventory
+```
+
+`--release-profile macos` requires executed Chromium and Firefox on this Mac.
+Safari inability stays a Mac-local report (`safaridriver --enable`). Native
+Linux x86_64 hardware, Windows, previous-stable Chromium, Firefox ESR, and
+physical mobile are deferred, not certified. A local linux/amd64 production
+image on this Mac is qemu/OrbStack emulation — not that hardware
+certification. Playwright WebKit is not Safari. `--inventory`
+lists missing historical profiles without certifying them.
 
 ## Platforms
 

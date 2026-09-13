@@ -350,6 +350,79 @@ class CheckerContractTests(unittest.TestCase):
         code, err = self.check("accessibility")
         self.assertEqual(code, 0, err)
 
+    def test_macos_release_profile_does_not_require_linux(self):
+        required = [item["id"] for item in self.mod.required_profiles("compatibility", "macos")]
+        self.assertEqual(required, ["chromium", "firefox"])
+        payload = {
+            "schema_version": "1.0.0",
+            "kind": "compatibility",
+            "status": "partial",
+            "host": {"os": "Darwin arm64", "cpu": "arm64"},
+            "platforms": [
+                {
+                    "id": "chromium",
+                    "status": "executed",
+                    "evidence": [self.write_evidence("artifacts/P15/chromium.json")],
+                    "identity": {"browser": "Chromium 143.0.7499.4"},
+                },
+                {
+                    "id": "firefox",
+                    "status": "executed",
+                    "evidence": [self.write_evidence("artifacts/P15/firefox.json")],
+                    "identity": {"browser": "Firefox 144.0.2"},
+                },
+                {
+                    "id": "safari",
+                    "status": "unavailable",
+                    "evidence": [self.write_evidence("artifacts/P15/safari-blocker.txt")],
+                    "note": "safaridriver not enabled",
+                },
+                {
+                    "id": "linux-amd64-native",
+                    "status": "unavailable",
+                    "evidence": [self.write_evidence("artifacts/P15/linux-blocker.txt")],
+                    "note": "deferred 2026-09-13 macOS-only release",
+                },
+            ],
+        }
+        self.write_kind("compatibility", payload)
+        code, err = self.mod.check_kind(
+            "compatibility", root=self.root, mode="acceptance", release_profile="macos"
+        )
+        self.assertEqual(code, 0, err)
+
+    def test_webkit_labelled_safari_is_forged(self):
+        platforms = self.complete_compatibility_platforms()
+        for row in platforms:
+            if row["id"] == "safari":
+                row["identity"] = {"browser": "Playwright WebKit 26.0", "automation": "webkit-safari"}
+        payload = {
+            "schema_version": "1.0.0",
+            "kind": "compatibility",
+            "status": "complete",
+            "host": {"os": "Darwin arm64", "cpu": "arm64"},
+            "platforms": platforms,
+        }
+        self.write_kind("compatibility", payload)
+        code, err = self.check("compatibility")
+        self.assertEqual(code, 1)
+        self.assertIn("forged", err.lower())
+
+    def test_stale_source_identity_fails(self):
+        platforms = self.complete_compatibility_platforms()
+        platforms[0]["identity"] = {"browser": "Chromium", "source_sha256": "stale"}
+        payload = {
+            "schema_version": "1.0.0",
+            "kind": "compatibility",
+            "status": "complete",
+            "host": {"os": "Darwin arm64", "cpu": "arm64"},
+            "platforms": platforms,
+        }
+        self.write_kind("compatibility", payload)
+        code, err = self.check("compatibility")
+        self.assertEqual(code, 1)
+        self.assertIn("stale", err.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

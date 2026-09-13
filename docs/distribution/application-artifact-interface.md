@@ -13,8 +13,10 @@ Cursor editing those active files.
 | `native/dist/app.wheel.json` | filename, sha256, bytes, lock line for `inkflip==0.0.0` |
 | `native/dist/wheels/inkflip-*-py3-none-any.whl` | the wheel bytes (rebuilds change the hash) |
 | `native/dist/requirements.lock` | third-party pins plus `inkflip==0.0.0 --hash=sha256:…` |
-| `native/dist/notices/INDEX.json` | required notice ids: `inkflip-mit`, `pdfium-binary-appendix`, `node-license` |
-| `native/dist/BUILD-CONTEXT.json` | platform/ABI, wheel list, notice index |
+| `native/dist/notices/INDEX.json` | required notice ids: `inkflip-mit`, `pdfium-binary-appendix`, `node-license`, `tesseract-apache` |
+| `native/dist/tesseract/tesseract.stamp.json` | hashed Debian tesseract-ocr 5.5.0 amd64 closure |
+| `native/dist/tesseract/debs/*.deb` | offline-installable OCR executable + libraries |
+| `native/dist/BUILD-CONTEXT.json` | platform/ABI, wheel list, tesseract stamp, notice index |
 
 ## Proposed shared manifest field (ZCode edit)
 

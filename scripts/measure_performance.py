@@ -17,7 +17,7 @@ import hashlib
 import json
 import os
 import platform
-import statistics
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -25,60 +25,25 @@ import time
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = Path(__file__).resolve().parent
+ROOT = SCRIPTS.parent
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+import performance_receipt as receipt
+
 SETTINGS = json.loads((ROOT / "planning" / "config" / "settings.json").read_text())
 FIXTURE = ROOT / "fixtures" / "public" / "mapping-control.pdf"
 NATIVE_PYTHON = ROOT / "native" / ".venv" / "bin" / "python"
 PINNED_NODE = ROOT / ".private" / "toolchains" / "node-v22.23.2-darwin-arm64" / "bin" / "node"
-SCHEMA_VERSION = "2.0.0"
-REQUIRED_CLI_STAGES = ("file_sha256", "inspect_cli", "report_html", "alignment_cli")
-REFERENCE_CPUS = 4
-REFERENCE_RAM = 8 * 1024**3
-
-
-def percentile(values: list[float], p: float) -> float:
-    if not values:
-        return float("nan")
-    ordered = sorted(values)
-    if len(ordered) == 1:
-        return ordered[0]
-    idx = (p / 100.0) * (len(ordered) - 1)
-    lo = int(idx)
-    hi = min(lo + 1, len(ordered) - 1)
-    frac = idx - lo
-    return ordered[lo] * (1 - frac) + ordered[hi] * frac
-
-
-def summarize(samples: list[float], failures: int, *, measured: bool = True) -> dict[str, Any]:
-    clean = [v for v in samples if v == v]
-    out: dict[str, Any] = {
-        "n": len(clean),
-        "failures": failures,
-        "unit": "ms",
-        "measured": measured,
-    }
-    if not measured:
-        out["distribution_claim"] = "missing"
-        out["note"] = "stage was not executed"
-        return out
-    if clean:
-        out.update(
-            {
-                "p50": percentile(clean, 50),
-                "p95": percentile(clean, 95),
-                "max": max(clean),
-                "mean": statistics.fmean(clean),
-            }
-        )
-        if len(clean) < 30:
-            out["distribution_claim"] = "insufficient_samples"
-            out["note"] = "p50/p95 recorded but not a claimed latency distribution (<30 successful samples)"
-        else:
-            out["distribution_claim"] = "n>=30"
-    else:
-        out["distribution_claim"] = "failed"
-        out["note"] = "no successful samples; latency is not claimed"
-    return out
+PINNED_TESSDATA = ROOT / "apps" / "web" / "public" / "models" / "tessdata-fast-eng" / "7d4322bd"
+BUNDLE_TESSDATA = ROOT / ".private" / "distribution" / "native-bundle" / "models" / "tessdata"
+SCHEMA_VERSION = receipt.SCHEMA_VERSION
+REQUIRED_CLI_STAGES = receipt.REQUIRED_CLI_STAGES
+REFERENCE_CPUS = receipt.REFERENCE_CPUS
+REFERENCE_RAM = receipt.REFERENCE_RAM
+percentile = receipt.percentile
+summarize = receipt.summarize
 
 
 def host_identity(profile: str) -> dict[str, Any]:
@@ -136,11 +101,23 @@ def inkflip_python() -> str:
     return sys.executable
 
 
+def tessdata_prefix() -> Path | None:
+    if (PINNED_TESSDATA / "eng.traineddata").is_file():
+        return PINNED_TESSDATA
+    if (BUNDLE_TESSDATA / "eng.traineddata").is_file():
+        return BUNDLE_TESSDATA
+    return None
+
+
 def run_cli(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT / "native")
     if PINNED_NODE.is_file():
         env.setdefault("INKFLIP_NODE", str(PINNED_NODE))
+    tessdata = tessdata_prefix()
+    if tessdata is not None:
+        env.setdefault("TESSDATA_PREFIX", str(tessdata))
+        env.setdefault("INKFLIP_MODELS", str(tessdata.parent if tessdata.name == "tessdata" else tessdata))
     return subprocess.run(
         [inkflip_python(), "-m", "inkflip.cli", *argv],
         cwd=cwd,
@@ -283,6 +260,41 @@ def measure_cli_stages(samples: int, out_dir: Path) -> dict[str, Any]:
                     compare_failures = samples
                     last_compare = {"error": "align_parse", "detail": str(error)}
 
+        ocr_times: list[float] = []
+        ocr_failures = 0
+        ocr_note = "macOS host tesseract + pinned eng.traineddata; not a Linux image claim"
+        if shutil.which("tesseract") is None:
+            ocr_failures = samples
+            ocr_note = "tesseract executable not on PATH (macOS packaging: brew install tesseract)"
+            ocr_stage = summarize([], ocr_failures, measured=False)
+            ocr_stage["note"] = ocr_note
+        else:
+            for index in range(samples):
+                ocr_out = work / f"ocr-{index}.json"
+                elapsed, proc = time_ms(
+                    lambda out=ocr_out: run_cli(
+                        [
+                            "inspect",
+                            str(pdf),
+                            "--reader",
+                            "tesseract",
+                            "--ocr-pages",
+                            "1",
+                            "--out",
+                            str(out),
+                            "--replace-output",
+                        ],
+                        work,
+                    )
+                )
+                if proc.returncode != 0 or not ocr_out.is_file():
+                    ocr_failures += 1
+                    continue
+                ocr_times.append(elapsed)
+            ocr_stage = summarize(ocr_times, ocr_failures)
+            ocr_stage["note"] = ocr_note
+            ocr_stage["executable"] = shutil.which("tesseract")
+
     return {
         "source": {
             "path": str(pdf.relative_to(ROOT)),
@@ -303,6 +315,7 @@ def measure_cli_stages(samples: int, out_dir: Path) -> dict[str, Any]:
                 "note": "shared Node alignment bridge via inkflip.baselines.engine._align_pages; not JS-heap",
                 "last_compare": last_compare,
             },
+            "ocr_cli": ocr_stage,
             "preview": summarize([], 0, measured=False),
             "render": summarize([], 0, measured=False),
             "extraction": summarize([], 0, measured=False),
@@ -329,35 +342,14 @@ def measure_cli_stages(samples: int, out_dir: Path) -> dict[str, Any]:
 
 
 def acceptance_problems(body: dict[str, Any], *, mode: str, profile: str) -> list[str]:
-    problems: list[str] = []
-    if body.get("kind") != "inkflip-performance" or body.get("schema_version") != SCHEMA_VERSION:
-        problems.append("malformed or stale performance evidence (kind/schema_version)")
-        return problems
-    host = body.get("host") or {}
-    if profile == "reference-desktop" and not host.get("is_specified_reference_desktop"):
-        problems.append("required reference-desktop profile is unavailable on this host")
-    if profile == "mobile-physical":
-        problems.append("physical mobile profile is unavailable")
-    measurement = body.get("measurement") or {}
-    stages = measurement.get("stages") or {}
-    required = REQUIRED_CLI_STAGES if profile in {"local-mac", "reference-desktop"} else ()
-    if mode == "inventory":
-        return problems
-    for name in required:
-        stage = stages.get(name) or {}
-        if not stage.get("measured", True):
-            problems.append(f"required stage {name} was not executed")
-            continue
-        if stage.get("n", 0) <= 0 or stage.get("distribution_claim") == "failed":
-            problems.append(f"required stage {name} has no successful samples")
-        if stage.get("failures", 0) and stage.get("n", 0) == 0:
-            problems.append(f"required stage {name} failed")
-    rss_target = SETTINGS["browser"]["measured_peak_rss_target_bytes"]
-    browser = body.get("browser") or {}
-    peak = (browser.get("memory") or {}).get("js_heap_used_bytes")
-    if isinstance(peak, (int, float)) and peak > rss_target:
-        problems.append(f"recorded JS heap {peak} exceeds measured_peak_rss_target_bytes {rss_target}")
-    return problems
+    """Delegate to the immutable receipt validator. Generation stays in this file."""
+    return receipt.validate_receipt(
+        body,
+        mode=mode,
+        profile=profile,
+        settings=SETTINGS,
+        current_binding=body.get("source_binding") if isinstance(body.get("source_binding"), dict) else receipt.source_binding(ROOT),
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -381,36 +373,43 @@ def main(argv: list[str] | None = None) -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     measurement = measure_cli_stages(max(args.samples, 1), args.out)
     browser_evidence = None
-    if args.browser_evidence and args.browser_evidence.is_file():
-        try:
-            browser_evidence = json.loads(args.browser_evidence.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            browser_evidence = {"malformed": True, "path": str(args.browser_evidence)}
+    if args.browser_evidence:
+        loaded, error = receipt.load_json_object(args.browser_evidence)
+        if error or loaded is None:
+            print(f"ACCEPT-FAIL {error}", file=sys.stderr)
+            return 1
+        browser_evidence = loaded
     body = {
-        "kind": "inkflip-performance",
+        "kind": receipt.KIND,
         "schema_version": SCHEMA_VERSION,
         "host": identity,
         "samples_requested": args.samples,
         "mode": args.mode,
         "accepting": False,
         "contention": "caller must keep competing OCR/container jobs idle; this process does not inspect other PIDs",
+        "source_binding": receipt.source_binding(ROOT),
         "measurement": measurement,
         "browser": browser_evidence,
     }
     problems = acceptance_problems(body, mode=args.mode, profile=args.profile)
     body["problems"] = problems
-    body["accepting"] = args.mode == "accept" and not problems
+    body["accepting"] = False
     out_path = args.out / f"{args.profile}.json"
     out_path.write_text(json.dumps(body, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {out_path}")
     if identity.get("gap"):
         print(identity["gap"], file=sys.stderr)
-    if args.mode == "accept" and problems:
+    if args.mode == "inventory":
+        for line in receipt.inventory_lines(problems, profile=args.profile, mode="inventory"):
+            print(line, file=sys.stderr)
+        print("inventory/report mode: not an acceptance claim", file=sys.stderr)
+        return 0
+    if problems:
         for item in problems:
             print(f"ACCEPT-FAIL {item}", file=sys.stderr)
         return 1
-    if args.mode == "inventory":
-        print("inventory/report mode: not an acceptance claim", file=sys.stderr)
+    body["accepting"] = True
+    out_path.write_text(json.dumps(body, indent=2) + "\n", encoding="utf-8")
     return 0
 
 

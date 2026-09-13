@@ -26,7 +26,7 @@ SCRIPT = ROOT / "scripts" / "run_native_container.sh"
 EVIDENCE = ROOT / "artifacts" / "containment"
 FIXTURE = ROOT / "fixtures" / "public" / "mapping-control.pdf"
 FIXTURE_AMOUNT = ROOT / "fixtures" / "public" / "mapping-amount.pdf"
-IMAGE = os.environ.get("INKFLIP_NATIVE_IMAGE", "inkflip-native:rrr-prod")
+IMAGE = os.environ.get("INKFLIP_NATIVE_IMAGE", "inkflip-native:pc-prod")
 PLATFORM = "linux/amd64"
 NATIVE_MAX_FILE_BYTES = 104_857_600
 NATIVE_MAX_OUTPUT_BYTES = 67_108_864
@@ -114,6 +114,7 @@ def restricted(
     timeout: int = 60,
     name: str | None = None,
     memory: str = "512m",
+    env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess:
     cmd = ["docker", "run", "--rm", "--platform", PLATFORM]
     if name:
@@ -151,6 +152,8 @@ def restricted(
             "/output",
         ]
     )
+    for key, value in (env or {}).items():
+        cmd.extend(["-e", f"{key}={value}"])
     if entrypoint:
         cmd.extend(["--entrypoint", entrypoint[0]])
         cmd.append(IMAGE)
@@ -197,8 +200,8 @@ def main(argv: list[str] | None = None) -> int:
     EVIDENCE.mkdir(parents=True, exist_ok=True)
 
     global IMAGE
-    if not rebuild and not image_exists(IMAGE) and image_exists("inkflip-native:nrf-prod"):
-        IMAGE = "inkflip-native:nrf-prod"
+    if not rebuild and not image_exists(IMAGE) and image_exists("inkflip-native:pc-prod"):
+        IMAGE = "inkflip-native:pc-prod"
 
     if rebuild or not image_exists(IMAGE):
         built, log = build_image()
@@ -376,13 +379,19 @@ def main(argv: list[str] | None = None) -> int:
                 (
                     "from pathlib import Path\n"
                     "root=Path('/app/notices')\n"
-                    "need=['inkflip-MIT.txt','node/LICENSE','pypdfium2-binary/BUILD_LICENSES/pdfium.txt','INDEX.json']\n"
+                    "need=['inkflip-MIT.txt','node/LICENSE','pypdfium2-binary/BUILD_LICENSES/pdfium.txt','tesseract/copyright','INDEX.json']\n"
                     "print({n: (root/n).is_file() and (root/n).stat().st_size>0 for n in need})\n"
                 ),
             ],
         )
         notice_ok = notices.returncode == 0 and all(
-            token in notices.stdout for token in ("inkflip-MIT.txt': True", "pdfium.txt': True", "LICENSE': True")
+            token in notices.stdout
+            for token in (
+                "inkflip-MIT.txt': True",
+                "pdfium.txt': True",
+                "LICENSE': True",
+                "tesseract/copyright': True",
+            )
         )
         cases.append(record("production-image-notices", notice_ok, (notices.stdout + notices.stderr)[-500:]))
 
@@ -445,6 +454,39 @@ def main(argv: list[str] | None = None) -> int:
                 (uid.stdout + uid.stderr)[:200],
             )
         )
+
+        tess_bin = restricted(
+            [],
+            source=source,
+            out=out,
+            entrypoint=["tesseract", "--version"],
+        )
+        cases.append(
+            record(
+                "production-tesseract-binary",
+                tess_bin.returncode == 0 and "tesseract" in combined(tess_bin).lower(),
+                combined(tess_bin)[-400:],
+            )
+        )
+
+        try:
+            oom = restricted(
+                [],
+                source=source,
+                out=out,
+                entrypoint=["python", "-c", "bytearray(400 * 1024 * 1024)"],
+                memory="64m",
+                timeout=20,
+            )
+            cases.append(
+                record(
+                    "production-memory-limit",
+                    oom.returncode != 0,
+                    f"exit {oom.returncode} {combined(oom)[-200:]}",
+                )
+            )
+        except subprocess.TimeoutExpired:
+            cases.append(record("production-memory-limit", True, "killed under 64m memory limit"))
 
         try:
             net = restricted(
@@ -610,13 +652,19 @@ def main(argv: list[str] | None = None) -> int:
                     blocked=True,
                 )
             )
-        elif tess.returncode == 0 and tess_report.is_file() and "completed" in json.dumps(ocr_payload.get("checks")):
+        elif (
+            tess.returncode == 0
+            and tess_report.is_file()
+            and "completed" in json.dumps(ocr_payload.get("checks"))
+            and "missing_binary" not in tess_reason
+            and "missing_model" not in tess_reason
+        ):
             occs = ocr_payload.get("occurrences") or []
             cases.append(
                 record(
                     "production-tesseract-inference",
-                    len(occs) >= 0,
-                    f"exit 0 occurrences={len(occs)}",
+                    True,
+                    f"exit 0 occurrences={len(occs)} checks={tess_reason[:200]}",
                 )
             )
             cases.append(record("production-tesseract-missing-binary-typed", True, "binary present; inference ran"))
@@ -636,6 +684,54 @@ def main(argv: list[str] | None = None) -> int:
                     blocked=True,
                 )
             )
+
+        missing_model = restricted(
+            [
+                "inspect",
+                "/input/mapping-control.pdf",
+                "--reader",
+                "tesseract",
+                "--ocr-pages",
+                "1",
+                "--out",
+                "/output/ocr-missing-model.json",
+            ],
+            source=source,
+            out=out,
+            timeout=90,
+            env={"TESSDATA_PREFIX": "/scratch/no-such-tessdata", "INKFLIP_MODELS": "/scratch/no-such-models"},
+        )
+        missing_text = combined(missing_model)
+        missing_reason = ""
+        if (out / "ocr-missing-model.json").is_file():
+            try:
+                missing_payload = json.loads((out / "ocr-missing-model.json").read_text())
+                missing_reason = " ".join(
+                    str(check.get("reason") or "") for check in missing_payload.get("checks") or []
+                )
+            except json.JSONDecodeError:
+                missing_reason = ""
+        cases.append(
+            record(
+                "production-ocr-missing-model",
+                "missing_model" in missing_reason or "missing_model" in missing_text,
+                f"exit {missing_model.returncode} reason={missing_reason[:300]} {missing_text[-200:]}",
+            )
+        )
+
+        recover = restricted(
+            ["inspect", "/input/mapping-control.pdf", "--out", "/output/recover.json"],
+            source=source,
+            out=out,
+            timeout=60,
+        )
+        cases.append(
+            record(
+                "production-failure-recovery",
+                recover.returncode == 0 and (out / "recover.json").is_file(),
+                combined(recover)[-300:],
+            )
+        )
 
         html = restricted(
             ["report", "/output/report.json", "--format", "html", "--out", "/output/report.html", "--replace-output"],

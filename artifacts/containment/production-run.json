@@ -1,10 +1,10 @@
 {
   "counts": {
-    "collected": 28,
-    "passed": 27,
+    "collected": 32,
+    "passed": 32,
     "failed": 0,
-    "blocked": 1,
-    "image": "inkflip-native:rrr-prod",
+    "blocked": 0,
+    "image": "inkflip-native:pc-prod",
     "architecture": {
       "host_machine": "arm64",
       "docker_architecture_line": "aarch64 linux",
@@ -21,25 +21,25 @@
       "name": "production-image-build",
       "ok": true,
       "blocked": false,
-      "detail": "reused inkflip-native:rrr-prod"
+      "detail": "reused inkflip-native:pc-prod"
     },
     {
       "name": "production-image-linux-amd64",
       "ok": true,
       "blocked": false,
-      "detail": "sha256:d3ac1579545933854fa4c2d3df350d1b78311c01591908daeaa0136c03f8e5ce linux/amd64 166647121"
+      "detail": "sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33 linux/amd64 241717979"
     },
     {
       "name": "production-host-wheel-hash",
       "ok": true,
       "blocked": false,
-      "detail": "app.wheel.json 4fc4fa1b265813ae34bedcb948ab157e3f024914d59f01765ac64b7f6825d510 file 4fc4fa1b265813ae34bedcb948ab157e3f024914d59f01765ac64b7f6825d510 path=inkflip-0.0.0-py3-none-any.whl"
+      "detail": "app.wheel.json c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291 file c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291 path=inkflip-0.0.0-py3-none-any.whl"
     },
     {
       "name": "production-inspect",
       "ok": true,
       "blocked": false,
-      "detail": "exit 0 kind=report Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:d3ac1579545933854fa4c2d3df350d1b78311c01591908daeaa0136c03f8e5ce lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-runtime-review-repairs/build/native/image.lock.json platform=linux/amd64\n"
+      "detail": "exit 0 kind=report Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33 lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-performance-completion/build/native/image.lock.json platform=linux/amd64\n"
     },
     {
       "name": "production-output-bounds",
@@ -63,7 +63,7 @@
       "name": "production-image-notices",
       "ok": true,
       "blocked": false,
-      "detail": "{'inkflip-MIT.txt': True, 'node/LICENSE': True, 'pypdfium2-binary/BUILD_LICENSES/pdfium.txt': True, 'INDEX.json': True}\n"
+      "detail": "{'inkflip-MIT.txt': True, 'node/LICENSE': True, 'pypdfium2-binary/BUILD_LICENSES/pdfium.txt': True, 'tesseract/copyright': True, 'INDEX.json': True}\n"
     },
     {
       "name": "production-installed-wheel-resources",
@@ -82,6 +82,18 @@
       "ok": true,
       "blocked": false,
       "detail": "65532\n"
+    },
+    {
+      "name": "production-tesseract-binary",
+      "ok": true,
+      "blocked": false,
+      "detail": "turbo 2.1.5) : libpng 1.6.48 : libtiff 4.7.0 : zlib 1.3.1 : libwebp 1.5.0 : libopenjp2 2.5.3\n Found FMA\n Found SSE4.1\n Found OpenMP 201511\n Found libarchive 3.7.4 zlib/1.3.1 liblzma/5.8.1 bz2lib/1.0.8 liblz4/1.10.0 libzstd/1.5.7\n Found libcurl/8.14.1 OpenSSL/3.5.7 zlib/1.3.1 brotli/1.1.0 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.2 libssh2/1.11.1 nghttp2/1.64.0 nghttp3/1.8.0 librtmp/2.3 OpenLDAP/2.6.10\n"
+    },
+    {
+      "name": "production-memory-limit",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 137 "
     },
     {
       "name": "production-no-egress",
@@ -138,16 +150,28 @@
       "detail": "exit 2 (want [2]) Error: Contract validation failed: JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)\n"
     },
     {
+      "name": "production-tesseract-inference",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 0 occurrences=16 checks="
+    },
+    {
       "name": "production-tesseract-missing-binary-typed",
       "ok": true,
       "blocked": false,
-      "detail": "exit 3 reason=missing_binary: tesseract executable not found"
+      "detail": "binary present; inference ran"
     },
     {
-      "name": "production-tesseract-inference",
-      "ok": false,
-      "blocked": true,
-      "detail": "blocked: production image has no pinned tesseract executable; eng.traineddata is present but inference cannot run"
+      "name": "production-ocr-missing-model",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 4 reason=missing_model: eng.traineddata is unavailable Report written to /output/ocr-missing-model.json\n"
+    },
+    {
+      "name": "production-failure-recovery",
+      "ok": true,
+      "blocked": false,
+      "detail": "Report written to /output/recover.json\n"
     },
     {
       "name": "production-report-html",
@@ -183,7 +207,7 @@
       "name": "production-source-bytes-unchanged",
       "ok": true,
       "blocked": false,
-      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-d3fvxjro/source with spaces"
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-267smgma/source with spaces"
     }
   ]
 }
