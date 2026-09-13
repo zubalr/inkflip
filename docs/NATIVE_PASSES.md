@@ -14,6 +14,15 @@ run the frozen planning package's bootstrap helper.
 
 ## Startup and state
 
+After a delivered user message, desktop restart or cancellation, reconcile every
+unfinished native child against its actual provider status. Queued UI message
+delivery can cancel descendants as well as the coordinator turn. Resume stopped
+children on their saved grants and checkouts; when resume is unavailable,
+preserve their findings and admit exactly one replacement writer. Verify fresh
+tool activity or a checkpoint before reporting recovery. Use Beads notes for
+feedback while useful children run; avoid queued UI messages until they finish.
+
+
 The active setup is Devin Local SWE-2 coordinating on the Mac, Antigravity on
 the Mac, and ZCode Goal mode on Homebase. Devin alone assigns work, writes Beads, publishes
 GitHub state, integrates candidates and accepts product tasks. Both worker apps
