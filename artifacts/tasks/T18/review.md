@@ -62,3 +62,34 @@ composition commits (findings F1–F7 and round-2 stale-writer fix) are recorded
 in the pdf-3g8 session and this task's gate receipt.
 - **Fresh run:** Run evidence: the G1 gate receipt (`artifacts/gates/G1/receipt.json`) records the 3-leg journey result.
 - **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.
+
+
+### Composition independent review (pdf-3g8) — two rounds
+
+The implementation under test is the pdf-3g8 composition (`48fed92` + fix
+commits, merged at `e9b8c4a`). An independent read-only review subagent
+(`devin-review-3g8`, did not write the code) reviewed the full diff twice.
+
+**Round 1 findings — all fixed before merge:**
+
+- F1: coordinator outbox intents from internal transitions (deadlines,
+  dependency cascades, clear) were not drained → drain added on
+  `onCoordinatorChange` and post-message.
+- F2: `cancelPending` could leak across replacement/stale generations → reset
+  at run start, close/clear/import; applied only to the still-current
+  generation.
+- F3: stale-generation jobs could write rasters/transforms/readers into a new
+  run → all writes moved behind generation checks; raster cache entries tagged
+  with generation and rejected on mismatch.
+- F4: imported reports exposed no OCR reader descriptors → deterministic
+  descriptors for both supported configs returned via `installedReaders`.
+- F5: verified attached source bytes were not retained for source-inclusion
+  export → retained in session state, passed to `ExportPanel`.
+- F6/F7: `window.__inspect` gated to test/dev (`VITE_INSPECT_HANDLE`); session
+  closes on Workspace unmount.
+
+**Round 2:** verified all fixes; found one residual stale-writer in the
+OCR-prep failure path (notice could flash on a new document) — stale-guarded —
+plus a dead-variable cleanup. Re-verified.
+
+**Verdict:** approved; the gate run above is the acceptance evidence.
