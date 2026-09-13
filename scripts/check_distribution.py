@@ -461,6 +461,48 @@ def check_native_bundle(root: Path, nb: dict, scope_notes: list | None = None) -
                 "a third-party bundle alone is not a complete shipped application image"
             )
 
+    # Assembled-context stamp audit (Cursor's interface, read-only): when the
+    # packaging lane has assembled native/dist, verify the app-wheel stamp
+    # against the actual wheel bytes and the build-context identity fields.
+    stamp_rel = nb.get("application_wheel_stamp")
+    if stamp_rel:
+        spath = root / stamp_rel
+        if not spath.is_file():
+            scope_notes.append(f"application wheel stamp not present yet: {stamp_rel} (arrives with assembled native/dist)")
+        else:
+            try:
+                stamp = json.loads(spath.read_text())
+            except json.JSONDecodeError as exc:
+                failures.append(f"native bundle: application wheel stamp unreadable: {exc}")
+                stamp = {}
+            for field in ("filename", "sha256", "bytes", "assembled_path", "wheel_tag"):
+                if not stamp.get(field):
+                    failures.append(f"native bundle: application wheel stamp lacks {field!r}")
+            assembled = stamp.get("assembled_path")
+            if assembled and stamp.get("sha256"):
+                ap = root / assembled
+                if not ap.is_file():
+                    failures.append(f"native bundle: stamped application wheel missing: {assembled}")
+                elif sha256_file(ap) != stamp["sha256"]:
+                    failures.append(f"native bundle: application wheel digest mismatch: {assembled}")
+            tag = stamp.get("wheel_tag", "")
+            if tag and not re.fullmatch(r"[a-z0-9]+-[^-]+-[^-]+", tag):
+                failures.append(f"native bundle: implausible wheel tag in stamp: {tag!r}")
+    build_context_rel = nb.get("build_context_identity")
+    if build_context_rel:
+        bcpath = root / build_context_rel
+        if not bcpath.is_file():
+            scope_notes.append(f"build-context identity record not present yet: {build_context_rel}")
+        else:
+            try:
+                bc = json.loads(bcpath.read_text())
+            except json.JSONDecodeError as exc:
+                failures.append(f"native bundle: build-context identity unreadable: {exc}")
+                bc = {}
+            for field in ("kind", "docker_platform", "dockerfile"):
+                if not bc.get(field):
+                    failures.append(f"native bundle: build-context identity lacks {field!r}")
+
     for stamp_field, required in (("node_stamp", ("version", "sha256", "url", "shasums256_source")),
                                   ("model_stamp", ("name", "sha256", "license", "source"))):
         stamp_rel = nb.get(stamp_field)
@@ -582,6 +624,8 @@ def main() -> int:
             if args.dist_manifest:
                 scopes.append("built static dist")
             print(f"distribution check PASSED for: {', '.join(scopes)}")
+            for note in scope_notes:
+                print(f"  note: {note}")
             for note in scope_report(root, manifest, args.dist_manifest):
                 print(f"  note: {note}")
             print(f"  groups: {len(manifest.get('groups', []))}, shipped roots: {len(manifest['distribution'].get('shipped_roots', []))}")

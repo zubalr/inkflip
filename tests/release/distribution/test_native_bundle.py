@@ -420,3 +420,103 @@ class ApplicationWheelImageTests(unittest.TestCase):
         proc = self.run_checker()
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("without expected_image_digest", proc.stdout)
+
+
+class ApplicationWheelStampTests(unittest.TestCase):
+    """Stamp-interface audit (Cursor's app.wheel.json / BUILD-CONTEXT.json):
+    read-only verification of the assembled-context identity when present."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.write("NOTICE", b"NOTICE\n")
+        self.write("release/native-requirements.lock", b"# generated\n")
+        self.write("release/native-wheels.manifest.json", json.dumps({"wheels": []}).encode())
+        self.write("release/node/node.stamp.json", json.dumps(
+            {"version": "22.23.2", "sha256": "a" * 64, "url": "u", "shasums256_source": "s"}).encode())
+        self.write("release/models/model.stamp.json", json.dumps(
+            {"name": "m", "sha256": "b" * 64, "license": "Apache-2.0", "source": "s"}).encode())
+        self.write(".private/distribution/native-bundle/.prepared", b"")
+        wheel = b"PY_LENGTH_ZERO_WHEN_EMPTY"
+        self.write("native/dist/wheels/inkflip-0.0.0-py3-none-any.whl", wheel)
+        self.write("native/dist/app.wheel.json", json.dumps({
+            "assembled_path": "native/dist/wheels/inkflip-0.0.0-py3-none-any.whl",
+            "filename": "inkflip-0.0.0-py3-none-any.whl",
+            "sha256": hashlib.sha256(wheel).hexdigest(),
+            "bytes": len(wheel),
+            "wheel_tag": "py3-none-any",
+        }).encode())
+        self.write("native/dist/BUILD-CONTEXT.json", json.dumps({
+            "kind": "inkflip-native-image-context",
+            "docker_platform": "linux/amd64",
+            "dockerfile": "build/native/Dockerfile",
+        }).encode())
+        manifest = {
+            "distribution": {"shipped_roots": []},
+            "groups": [],
+            "notice": "NOTICE",
+            "native_bundle": {
+                "requirements_lock": "release/native-requirements.lock",
+                "wheels_manifest": "release/native-wheels.manifest.json",
+                "expected_runtime_packages": [],
+                "context_dir": ".private/distribution/native-bundle",
+                "node_stamp": "release/node/node.stamp.json",
+                "model_stamp": "release/models/model.stamp.json",
+                "notices_dir": "release/notices/",
+                "application_wheel": {"declared": False, "path": None, "sha256": None},
+                "application_image": {"declared": False, "image_lock": None,
+                                      "expected_image_digest": None},
+                "application_wheel_stamp": "native/dist/app.wheel.json",
+                "build_context_identity": "native/dist/BUILD-CONTEXT.json",
+            },
+        }
+        self.write("distribution.json", json.dumps(manifest).encode())
+
+    def write(self, rel, content):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+
+    def run_checker(self):
+        return subprocess.run(
+            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+             "--root", str(self.root)],
+            capture_output=True, text=True, timeout=60,
+        )
+
+    def test_consistent_stamp_passes(self):
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+
+    def test_tampered_wheel_fails_against_stamp(self):
+        self.write("native/dist/wheels/inkflip-0.0.0-py3-none-any.whl", b"tampered")
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("application wheel digest mismatch", proc.stdout)
+
+    def test_stamp_missing_field_fails(self):
+        stamp = json.loads((self.root / "native/dist/app.wheel.json").read_text())
+        del stamp["wheel_tag"]
+        self.write("native/dist/app.wheel.json", json.dumps(stamp).encode())
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("lacks 'wheel_tag'", proc.stdout)
+
+    def test_stamped_wheel_missing_fails(self):
+        (self.root / "native/dist/wheels/inkflip-0.0.0-py3-none-any.whl").unlink()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("stamped application wheel missing", proc.stdout)
+
+    def test_absent_stamp_is_scope_note_not_failure(self):
+        (self.root / "native/dist/app.wheel.json").unlink()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("application wheel stamp not present yet", proc.stdout)
+
+    def test_build_context_missing_fields_fail(self):
+        self.write("native/dist/BUILD-CONTEXT.json", json.dumps({"kind": "x"}).encode())
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("build-context identity lacks", proc.stdout)

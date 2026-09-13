@@ -557,6 +557,8 @@
       "image_lock": "build/native/image.lock.json",
       "expected_image_digest": null,
       "note": "Complete-image audit interface: when the packaging lane produces the final image, declare expected_image_digest (and the lock reference is verified for base-image pins). Absence keeps native release explicitly incomplete."
-    }
+    },
+    "application_wheel_stamp": "native/dist/app.wheel.json",
+    "build_context_identity": "native/dist/BUILD-CONTEXT.json"
   }
 }

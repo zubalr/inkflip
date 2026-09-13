@@ -81,6 +81,58 @@ runs over identical content are byte-identical. Working output goes to the
 local ignored tree (`.private/distribution/`); a compact public digest of
 the current surface lives in [SURFACE.md](SURFACE.md).
 
+## The native CLI in Docker (macOS + Docker)
+
+Two container profiles exist for the native CLI. Both run as UID 65532 with
+`--network none` during processing; image *setup* may use the network.
+
+**Checkout image (functional verification).** Built directly from a source
+checkout; it is explicitly *not* the digest-pinned release profile.
+
+```sh
+git checkout <candidate>
+docker build -f build/native/Dockerfile.checkout -t inkflip-native:checkout .
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/fixtures/public:/data/in:ro" -v "$PWD/out:/data/out" \
+  inkflip-native:checkout inspect /data/in/mapping-amount.pdf --out /data/out/report.json
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/out:/data/out:ro" inkflip-native:checkout validate /data/out/report.json
+```
+
+**Production profile (digest-pinned, linux/amd64).** Assembled from the
+third-party bundle plus the built application wheel:
+
+```sh
+python3 scripts/distribution/prepare_native_bundle.py   # third-party inputs (explicit network step)
+python3 scripts/distribution/assemble_native_image.py   # adds the Inkflip wheel + notices + identities
+docker build --platform linux/amd64 -f build/native/Dockerfile -t inkflip-native:prod .
+```
+
+Verified on 2026-09-13 on this Mac's local Docker (linux/aarch64): the
+checkout image built from a clean clone of candidate `b50c9d2` (image ID
+`9012f41fb6b9`, manifest digest `sha256:9012f41fb6b9…d6d52a`) and completed
+the offline sequence above — inspect (exit 0), validate (`VALID`, 98
+occurrences), script-free HTML report, and the remote-source refusal (exit 2,
+"Remote URL sources are not permitted"). The production assembly chain also
+completed on this Mac: third-party bundle → application wheel
+(`inkflip-0.0.0-py3-none-any.whl`, sha256 `4fc4fa1b265813ae…`, built from
+this source by `assemble_native_image.py`) → notices index →
+`native/dist/BUILD-CONTEXT.json`.
+
+Honest boundaries:
+
+- The production Dockerfile's wheel lock pins the recorded contract platform
+  (**linux/amd64**). On this Mac's aarch64 Docker the build fails at pip
+  exactly as it should for a platform-pinned lock ("no matching distribution"
+  for the compiled wheels); building the recorded amd64 profile requires
+  emulation, which is out of scope for this release. The arm64 checkout run
+  above is a functional check — **not** the recorded release profile and
+  **not** native Linux hardware certification.
+- The assembled wheel's provenance is this checkout's source built by
+  `assemble_native_image.py`; reproducibility of the wheel bytes across
+  machines is expected (pure-Python wheel) but cross-host reproduction has
+  not been independently verified yet.
+
 ## Advisory evidence
 
 Dated advisory scans against the exact selected versions are recorded with
