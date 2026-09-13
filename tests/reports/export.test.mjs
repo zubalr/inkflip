@@ -529,19 +529,73 @@ test("canonical serialization is byte-stable under member reordering", () => {
   const source = loadExample("native-evidence.inkflip.json");
   const { report } = projectReport(source, {});
   const j1 = serializeReportJson(report);
-  // Reorder every object member and re-validate: output must not change.
-  const scramble = (v) => {
-    if (Array.isArray(v)) return v.map(scramble);
+
+  // Permutation 1: Reversing keys of every nested object.
+  const reverseKeys = (v) => {
+    if (Array.isArray(v)) return v.map(reverseKeys);
     if (v && typeof v === "object") {
       const out = {};
-      for (const k of Object.keys(v).sort(() => 0.5)) out[k] = scramble(v[k]);
+      const keys = Object.keys(v).reverse();
+      for (const k of keys) out[k] = reverseKeys(v[k]);
       return out;
     }
     return v;
   };
-  const scrambled = scramble(structuredClone(report));
-  const j2 = serializeReportJson(scrambled);
-  assert.equal(j1, j2);
+
+  // Permutation 2: Interleaving keys (odd-indexed keys, then even-indexed keys).
+  const interleaveKeys = (v) => {
+    if (Array.isArray(v)) return v.map(interleaveKeys);
+    if (v && typeof v === "object") {
+      const keys = Object.keys(v);
+      const evens = keys.filter((_, i) => i % 2 === 0);
+      const odds = keys.filter((_, i) => i % 2 === 1);
+      const out = {};
+      for (const k of [...odds, ...evens]) out[k] = interleaveKeys(v[k]);
+      return out;
+    }
+    return v;
+  };
+
+  // Permutation 3: Alphabetical sort of keys.
+  const sortKeys = (v) => {
+    if (Array.isArray(v)) return v.map(sortKeys);
+    if (v && typeof v === "object") {
+      const out = {};
+      for (const k of Object.keys(v).sort()) out[k] = sortKeys(v[k]);
+      return out;
+    }
+    return v;
+  };
+
+  // Permutation 4: Cyclic shift of keys by 1.
+  const rotateKeys = (v) => {
+    if (Array.isArray(v)) return v.map(rotateKeys);
+    if (v && typeof v === "object") {
+      const keys = Object.keys(v);
+      const rotated = keys.length > 1 ? [...keys.slice(1), keys[0]] : keys;
+      const out = {};
+      for (const k of rotated) out[k] = rotateKeys(v[k]);
+      return out;
+    }
+    return v;
+  };
+
+  const reversed = reverseKeys(structuredClone(report));
+  const interleaved = interleaveKeys(structuredClone(report));
+  const sorted = sortKeys(structuredClone(report));
+  const rotated = rotateKeys(structuredClone(report));
+
+  // Assert that permutations genuinely reordered object keys (not vacuous).
+  const rawJson = JSON.stringify(report);
+  assert.notEqual(JSON.stringify(reversed), rawJson, "reverseKeys changed object insertion order");
+  assert.notEqual(JSON.stringify(interleaved), rawJson, "interleaveKeys changed object insertion order");
+  assert.notEqual(JSON.stringify(rotated), rawJson, "rotateKeys changed object insertion order");
+
+  // Every deterministic permutation must serialize to byte-identical canonical JSON.
+  assert.equal(serializeReportJson(reversed), j1, "reverseKeys byte-stable");
+  assert.equal(serializeReportJson(interleaved), j1, "interleaveKeys byte-stable");
+  assert.equal(serializeReportJson(sorted), j1, "sortKeys byte-stable");
+  assert.equal(serializeReportJson(rotated), j1, "rotateKeys byte-stable");
 });
 
 // ---------------------------------------------------------------------------
@@ -642,4 +696,111 @@ test("selection refusing an unknown id fails closed", () => {
     code(() => projectReport(source, { crops: ["a_nope"] })),
     "SELECTION",
   );
+});
+
+test("omissions disclose excluded crops and explicitly deselected findings (F2)", () => {
+  const source = loadExample("native-evidence.inkflip.json");
+
+  // When crops='none' and occurrences='none', the crop is dropped and disclosed in omissions.
+  const { report: noCrops, notices: n1 } = projectReport(source, {
+    crops: "none",
+    occurrences: "none",
+  });
+  assert.equal(noCrops.assets.filter((a) => a.purpose === "crop").length, 0);
+  assert.ok(
+    noCrops.export.omissions.includes("Crops excluded."),
+    "omissions must include 'Crops excluded.' line",
+  );
+  validate(noCrops);
+
+  // When findings are explicitly deselected (e.g. findings=[]), disclose accurately.
+  const { report: noFindings, notices: n2 } = projectReport(source, {
+    findings: [],
+  });
+  assert.equal(noFindings.findings.length, 0);
+  assert.deepEqual(n2.deselectedFindingIds, ["f_amount"]);
+  assert.ok(
+    noFindings.export.omissions.some((o) => o.includes("1 finding(s) excluded by selection.")),
+    "omissions must include deselected finding line",
+  );
+  validate(noFindings);
+});
+
+test("preview limit reporting honestly enforces PNG pixel, edge, and asset limits (F4)", () => {
+  const source = loadExample("native-evidence.inkflip.json");
+  const { report } = projectReport(source, {});
+
+  // Normal preview is within limits
+  const pOk = buildExportPreview(report);
+  assert.equal(pOk.withinLimits, true);
+
+  // Modify asset pixel_size to exceed maxPngPixels (4,000,000)
+  const overPixels = structuredClone(report);
+  overPixels.assets[0].pixel_size = [2500, 2000]; // 5,000,000 pixels > 4,000,000
+  const pPixels = buildExportPreview(overPixels);
+  assert.equal(pPixels.withinLimits, false);
+  assert.ok(
+    pPixels.warnings.some((w) => w.includes("exceeds PNG pixel limit")),
+    "preview must warn about exceeded PNG pixel cap",
+  );
+
+  // Modify asset pixel_size to exceed maxPngEdge (8192)
+  const overEdge = structuredClone(report);
+  overEdge.assets[0].pixel_size = [8500, 100];
+  const pEdge = buildExportPreview(overEdge);
+  assert.equal(pEdge.withinLimits, false);
+  assert.ok(
+    pEdge.warnings.some((w) => w.includes("exceeds PNG dimension edge limit")),
+    "preview must warn about exceeded PNG edge cap",
+  );
+});
+
+test("source requested but unavailable is distinguished from source not requested (F8)", () => {
+  const source = loadExample("native-evidence.inkflip.json");
+
+  // Not requested: sourcePdf is null (default)
+  const { report: notReq, notices: nNotReq } = projectReport(source, { sourcePdf: null });
+  assert.equal(nNotReq.requestedSourceMissing, false);
+  assert.ok(notReq.export.omissions.includes("Original PDF excluded."));
+  assert.ok(
+    !notReq.export.omissions.includes("Requested original bytes unavailable — evidence only."),
+  );
+
+  // Requested but unavailable: sourcePdf is 'carry' but report has no source_pdf asset
+  const { report: reqMissing, notices: nReqMissing } = projectReport(source, { sourcePdf: "carry" });
+  assert.equal(nReqMissing.requestedSourceMissing, true);
+  assert.ok(reqMissing.export.omissions.includes("Original PDF excluded."));
+  assert.ok(
+    reqMissing.export.omissions.includes("Requested original bytes unavailable — evidence only."),
+  );
+  assert.equal(reqMissing.export.mode, "evidence");
+});
+
+test("oversized source inclusion fails with understandable explanation and evidence-only advice (F9)", () => {
+  const source = loadExample("native-evidence.inkflip.json");
+  const oversizedLength = 20 * 1024 * 1024 + 1; // 20 MiB + 1 byte
+  const fakeBytes = new Uint8Array(oversizedLength);
+  const fakeSha = createHash("sha256").update(fakeBytes).digest("hex");
+
+  const oversizedDoc = structuredClone(source);
+  oversizedDoc.document.byte_length = oversizedLength;
+  oversizedDoc.document.sha256 = fakeSha;
+  seal(oversizedDoc);
+
+  let caughtErr = null;
+  try {
+    projectReport(oversizedDoc, { sourcePdf: fakeBytes });
+  } catch (err) {
+    caughtErr = err;
+  }
+  assert.ok(caughtErr instanceof ContractError);
+  assert.equal(caughtErr.code, "SIZE");
+  assert.match(caughtErr.message, /exceeds the 20971520 byte embed limit/);
+  assert.match(caughtErr.message, /evidence-only/);
+
+  // Deselecting sourcePdf (sourcePdf: null) allows export of evidence-only bundle
+  const { report: evidenceOnly } = projectReport(oversizedDoc, { sourcePdf: null });
+  assert.equal(evidenceOnly.document.source_asset_id, null);
+  assert.equal(evidenceOnly.export.mode, "evidence");
+  validate(evidenceOnly);
 });

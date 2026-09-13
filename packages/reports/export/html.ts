@@ -26,9 +26,11 @@ import { encodeBase64 } from "./serialize.ts";
 import { ContractError } from "../../contracts/src/index.ts";
 
 /**
- * Fixed application-owned stylesheet. Any edit changes the CSP hash — the
- * two are derived together at render time so they can never drift.
- * Palette follows the product tokens (paper/ink, teal/rust accents).
+ * Fixed application-owned stylesheet.
+ * Adapted from the reference stylesheet in `planning/tools/export_html.py` with
+ * additional rules for h3, .warn, and ul styling.
+ * Any edit changes the CSP hash — the two are derived together at render time
+ * so they can never drift. Palette follows the product tokens (paper/ink, teal/rust accents).
  */
 export const EXPORT_CSS =
   "body{margin:0;background:#f5f3ee;color:#192327;font:16px/1.6 system-ui,sans-serif}" +
