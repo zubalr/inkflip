@@ -178,16 +178,27 @@ def build_inventory() -> dict:
             )
     shipped_assets.sort(key=lambda a: a["path"])
 
-    # Unaccounted files under the staged roots are unknowns, never silently dropped.
-    staged_root = assets_cfg["staging_root"].rstrip("/")
+    # Unaccounted files under the staged root (all of apps/web/public) are
+    # unknowns, never silently dropped — except files this inventory itself
+    # accounts for elsewhere (the prepared example directory).
+    staged_root_prefix = assets_cfg["staging_root"].rstrip("/") + "/"
+    prepared_example_paths = set()
+    examples_dir = ROOT / "apps" / "web" / "public" / "examples"
+    if examples_dir.is_dir():
+        for path in sorted(examples_dir.rglob("*")):
+            if path.is_file() and not path.is_symlink():
+                prepared_example_paths.add(path.relative_to(ROOT).as_posix())
     unknown_assets = []
     public_dir = ROOT / "apps" / "web" / "public"
     for path in sorted(public_dir.rglob("*")):
         if not path.is_file() or path.is_symlink():
             continue
-        rel = path.relative_to(public_dir).as_posix()
-        if rel.startswith(staged_root) and rel not in staged_paths:
-            unknown_assets.append({"path": f"apps/web/public/{rel}", "bytes": path.stat().st_size})
+        rel_full = path.relative_to(ROOT).as_posix()
+        rel_staged = path.relative_to(public_dir).as_posix()
+        if rel_full in prepared_example_paths:
+            continue
+        if rel_staged not in staged_paths:
+            unknown_assets.append({"path": rel_full, "bytes": path.stat().st_size})
 
     prepared_example = []
     examples_dir = ROOT / "apps" / "web" / "public" / "examples"

@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "inkflip-distribution-manifest",
+  "recorded_by": "T47 preparation (ZCode distribution-completion batch)",
+  "recorded_at": "2026-09-13",
+  "distribution": {
+    "name": "inkflip-static-snapshot",
+    "description": "The static browser distribution surface this snapshot serves: staged same-origin reader/OCR assets and model data, plus the prepared public example. Source of truth for what ships as browser bytes.",
+    "shipped_roots": [
+      "apps/web/public/assets",
+      "apps/web/public/models",
+      "apps/web/public/examples"
+    ]
+  },
+  "groups": [
+    {
+      "id": "pdfjs-cmaps",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/pdfjs-dist-6.3.289/LICENSE.txt",
+      "notice_name": "pdfjs-dist 6.3.289",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "pdfjs-cmaps",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "pdfjs-standard-fonts",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/pdfjs-dist-6.3.289/LICENSE.txt",
+      "notice_name": "pdfjs-dist 6.3.289",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "pdfjs-standard-fonts",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "pdfjs-wasm",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/pdfjs-dist-6.3.289/LICENSE.txt",
+      "notice_name": "pdfjs-dist 6.3.289",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "pdfjs-wasm",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "pdfjs-iccs",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/pdfjs-dist-6.3.289/LICENSE.txt",
+      "notice_name": "pdfjs-dist 6.3.289",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "pdfjs-iccs",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "pdfjs-license",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/pdfjs-dist-6.3.289/LICENSE.txt",
+      "notice_name": "pdfjs-dist 6.3.289",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "pdfjs-license",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "tesseract-worker",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/tesseract.js-7.0.0/LICENSE.txt",
+      "notice_name": "tesseract.js 7.0.0",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "tesseract-worker",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "tesseract-core",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/tesseract.js-7.0.0/LICENSE.txt",
+      "notice_name": "tesseract.js-core 7.0.0",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "tesseract-core",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "tessdata-fast-eng",
+      "third_party": true,
+      "license": "Apache-2.0",
+      "license_evidence": "licenses/tessdata-fast-eng/NOTICE.txt",
+      "notice_name": "tessdata_fast (eng.traineddata)",
+      "digest_source": {
+        "path": "config/resolved-assets.json",
+        "group": "tessdata-fast-eng",
+        "file_list": "assets[].files[]",
+        "path_field": "staged_path",
+        "path_prefix": "apps/web/public/",
+        "digest_field": "sha256",
+        "bytes_field": "bytes"
+      }
+    },
+    {
+      "id": "inkflip-amount-example",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "apps/web/public/examples/amount/manifest.json",
+      "notice_name": null,
+      "digest_source": {
+        "path": "apps/web/public/examples/amount/manifest.json",
+        "file_list": "files(source,control,covered_source,covered_control)",
+        "path_field": "filename",
+        "path_prefix": "apps/web/public/examples/amount/",
+        "digest_field": "sha256",
+        "bytes_field": "byte_length"
+      },
+      "explicit_files": [
+        { "path": "apps/web/public/examples/amount/amount.css", "sha256": "765f3eac6cc3688e1fa8fedea8b5d1c09973f33c180d6ddefd18b8191406781d", "bytes": 6805 },
+        { "path": "apps/web/public/examples/amount/amount.js", "sha256": "8af07179f5f0e0c6e20d5c4f1b184a6f69acc5b7c3bd9098659e72d5afac5d61", "bytes": 7902 },
+        { "path": "apps/web/public/examples/amount/index.html", "sha256": "dd5214547e3fc79133153fec418997e451f3daf98e5f0080f1ea6aca4e82e4df", "bytes": 6402 },
+        { "path": "apps/web/public/examples/amount/report.json", "sha256": "42dc8ae3b8c619a52205c289db4037d859b121e91d7f441bc3706ce6f993a9ac", "bytes": 9944 },
+        { "path": "apps/web/public/examples/amount/manifest.json", "sha256": "567c20e0dc3104b568504dd45eb4468d1e26eca4d88e8e52855055e385518f8c", "bytes": 2945 }
+      ]
+    }
+  ],
+  "notice": "NOTICE",
+  "private_content_patterns": [
+    "\\.private",
+    "canary",
+    "test-results",
+    "__pycache__",
+    "\\.log$",
+    "\\.env",
+    "id_rsa|\\.pem$",
+    "artifacts/tasks/",
+    "fixtures/development/"
+  ],
+  "symlink_policy": "reject"
+}

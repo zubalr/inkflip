@@ -566,14 +566,14 @@
     "properties": [
       {
         "name": "inkflip:evaluated-commit",
-        "value": "aed954933e2f14536ea8aa6bf8ac866a4905ea5e"
+        "value": "b3b74a9529c1075d77b7a59bd7f33c9129869743"
       },
       {
         "name": "inkflip:status",
         "value": "preparation (not the completed T47 gate)"
       }
     ],
-    "timestamp": "2026-09-13T13:06:00Z",
+    "timestamp": "2026-09-13T13:12:37Z",
     "tools": {
       "components": [
         {
@@ -584,7 +584,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:512c2d91-0000-4000-8000-7d9c76999b75",
+  "serialNumber": "urn:uuid:3eb12681-0000-4000-8000-96b5cc4ae8de",
   "specVersion": "1.5",
   "version": 1
 }
