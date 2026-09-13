@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "example_id": "geometry",
+  "family": "origins-rotation",
+  "fixture_id": "F07",
+  "card_title": "The same ink at four rotations",
+  "mechanism": "Identical page content under 0/90/180/270 rotation; readers must reconcile geometry through the recorded transforms",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "provenance": "prepared",
+  "timing": {
+    "duration_ms": 272,
+    "method": "browser_measured",
+    "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
+  },
+  "files": {
+    "source": {
+      "filename": "geometry-90.pdf",
+      "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+      "byte_length": 1436,
+      "download_url": "/examples/geometry/geometry-90.pdf",
+      "role": "Source document (90°)",
+      "report_file": "report.json"
+    },
+    "rot0": {
+      "filename": "geometry-0.pdf",
+      "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+      "byte_length": 1435,
+      "download_url": "/examples/geometry/geometry-0.pdf",
+      "role": "0° sibling",
+      "report_file": "report.geometry-0.json"
+    },
+    "rot180": {
+      "filename": "geometry-180.pdf",
+      "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+      "byte_length": 1437,
+      "download_url": "/examples/geometry/geometry-180.pdf",
+      "role": "180° sibling",
+      "report_file": "report.geometry-180.json"
+    },
+    "rot270": {
+      "filename": "geometry-270.pdf",
+      "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+      "byte_length": 1437,
+      "download_url": "/examples/geometry/geometry-270.pdf",
+      "role": "270° sibling",
+      "report_file": "report.geometry-270.json"
+    },
+    "control": {
+      "filename": "geometry-control.pdf",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "byte_length": 1429,
+      "download_url": "/examples/geometry/geometry-control.pdf",
+      "role": "Clean control",
+      "report_file": "report.control.json"
+    }
+  },
+  "readers": {
+    "pdf_js_text": {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "native_text"
+    },
+    "pdf_js_render": {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "render"
+    },
+    "tesseract_js": {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "ocr",
+      "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    }
+  },
+  "findings": [
+    {
+      "id": "f_3b9b34d179df717d",
+      "title": "This amount reads differently",
+      "category": "reading_difference",
+      "page_index": 0
+    }
+  ],
+  "report_file": "report.json",
+  "report_id": "ad6f52a5e9e29952a64560d9611769bdddc24e154948dd741395fc7f113425ae",
+  "run_key": "f5d77d6fdcaac4675efffa895e0b96b68d0bcd6032b610d3777904e4a8558e90"
+}

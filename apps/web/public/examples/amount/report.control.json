@@ -1,0 +1,1817 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "84a6567d6b1924c0e850d052c1287b0d9c890c60832f88fa435f653db8714423",
+  "document": {
+    "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+    "byte_length": 1429,
+    "page_count": 1,
+    "display_name": "mapping-control.pdf",
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "build": "pdfjs-dist-legacy",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "render",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+            "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+            "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+            "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+            "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order"
+          ]
+        },
+        {
+          "name": "ocr",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "object_render_mode",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "crop_metadata",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "paint_overlap",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "reading_order",
+          "support": "approximate",
+          "limits": [
+            "raw emitted getTextContent order only; derived geometric/logical ordering belongs to the alignment layer"
+          ]
+        },
+        {
+          "name": "alignment",
+          "support": "unavailable",
+          "limits": []
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+        "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+        "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+        "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+        "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order",
+        "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+        "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+      ]
+    },
+    {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "build": "pdfjs-dist-legacy",
+      "adapter_version": "1.0.0",
+      "method": "render",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "static_appearance"
+      },
+      "capabilities": [
+        {
+          "name": "render",
+          "support": "supported",
+          "limits": [
+            "static annotation appearance streams only (AnnotationMode.ENABLE); no actions, links, forms, XFA or attachments are activated",
+            "canvas is bounded by the configured pixel/edge caps and released after pixels are extracted"
+          ]
+        },
+        {
+          "name": "native_text",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "ocr",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "object_render_mode",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "crop_metadata",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "paint_overlap",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "reading_order",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "alignment",
+          "support": "unavailable",
+          "limits": []
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "static annotation appearance streams only (AnnotationMode.ENABLE); no actions, links, forms, XFA or attachments are activated",
+        "canvas is bounded by the configured pixel/edge caps and released after pixels are extracted",
+        "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+        "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+      ]
+    },
+    {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "build": "tesseract.js-core feature-detected single-threaded lstm",
+      "adapter_version": "1.0.0",
+      "method": "ocr",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": "eng",
+        "psm": 6,
+        "render_reader_id": "pdfjs-6_3_289-render",
+        "raster_dpi": 144,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "ocr",
+          "support": "supported",
+          "limits": [
+            "raster input supplied by the named render reader",
+            "psm 6 fixed for this configured reading"
+          ]
+        }
+      ],
+      "model_hashes": [
+        "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      ],
+      "limitations": []
+    }
+  ],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [],
+    "checks": [
+      {
+        "id": "chk_p0_native_text",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-text"
+        ],
+        "capability": "native_text",
+        "region_id": null
+      },
+      {
+        "id": "chk_p0_render",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-render"
+        ],
+        "capability": "render",
+        "region_id": null
+      },
+      {
+        "id": "ocr_0_0",
+        "page_index": 0,
+        "reader_ids": [
+          "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
+        ],
+        "capability": "ocr",
+        "region_id": null
+      },
+      {
+        "id": "chk_p0_alignment",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-text",
+          "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
+        ],
+        "capability": "alignment",
+        "region_id": null
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "desktop",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 1
+    }
+  },
+  "checks": [
+    {
+      "id": "chk_p0_native_text",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 7,
+      "retained_occurrence_ids": [
+        "o_1ef7b2fe25aa7cae89d4c3cf26ba0124",
+        "o_58c37f444ffdeffe039a3e7825b8aaa2",
+        "o_241f35b6f21d16fb4c163433206ecaad",
+        "o_3b8f5ee9f80523aeeeaaf415a1569fba",
+        "o_0a09ca14066391ebc0f0164f375b3845",
+        "o_a965b2671acd12f6822e42d1672f8b1a",
+        "o_9c7b3b574a8abbd4a623c39e0fceb944"
+      ]
+    },
+    {
+      "id": "chk_p0_render",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    },
+    {
+      "id": "ocr_0_0",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 15,
+      "retained_occurrence_ids": [
+        "o_e4d7f97f39184d08fe792c5a60609159",
+        "o_6b2adccfaa92a5b8d4af094b47d20337",
+        "o_7cabdee537fc2872aa2a1ecd5bb3a900",
+        "o_da4914e7c558cadd5930ffc48e63b40a",
+        "o_ad962420644990fddff44414c5573446",
+        "o_e71b9582c5196b94dbe5fd036e508912",
+        "o_1118130429ef677ee6409af65101b56d",
+        "o_f9758f2c7d7e3aa30fe09ba47490fb4e",
+        "o_0c54db88472ac9eee398fd80c76a0190",
+        "o_e27b8e6f6edf4d090770529768c12fb1",
+        "o_86452f1123f58f1e8617d2dae1e8a223",
+        "o_0c46704424abc8eece0f496ce1c9a145",
+        "o_ee98ffa0850f9f0c062399c0d57f9a2e",
+        "o_858c76d5ee8fb4170b1bad7112f9830a",
+        "o_7ed465ee7e4143b17dfcbab444676bb9"
+      ]
+    },
+    {
+      "id": "chk_p0_alignment",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "o_1ef7b2fe25aa7cae89d4c3cf26ba0124",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "SYNTHETIC EXAMPLE",
+      "normalized_text": "SYNTHETIC EXAMPLE",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 9,
+          "normalized_start": 0,
+          "normalized_end": 9,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 9,
+          "raw_end": 10,
+          "normalized_start": 9,
+          "normalized_end": 10,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 10,
+          "raw_end": 17,
+          "normalized_start": 10,
+          "normalized_end": 17,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            51.390625
+          ],
+          [
+            218.704,
+            51.390625
+          ],
+          [
+            218.704,
+            33.515625
+          ],
+          [
+            48,
+            33.515625
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text0",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_58c37f444ffdeffe039a3e7825b8aaa2",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 1,
+      "raw_text": "",
+      "normalized_text": "",
+      "normalization_map": [],
+      "geometry": {
+        "precision": "page_only",
+        "space": "canonical_page",
+        "polygon": null,
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent item anchor present but extent degenerate or absent; no area polygon claimed"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text1",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "degenerate TextItem extent (zero advance or thickness); position retained at item anchor only"
+      ]
+    },
+    {
+      "id": "o_241f35b6f21d16fb4c163433206ecaad",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 2,
+      "raw_text": "No real transaction. Reader behavior only.",
+      "normalized_text": "No real transaction. Reader behavior only.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 2,
+          "raw_end": 3,
+          "normalized_start": 2,
+          "normalized_end": 3,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 3,
+          "raw_end": 7,
+          "normalized_start": 3,
+          "normalized_end": 7,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 7,
+          "raw_end": 8,
+          "normalized_start": 7,
+          "normalized_end": 8,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 8,
+          "raw_end": 20,
+          "normalized_start": 8,
+          "normalized_end": 20,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 20,
+          "raw_end": 21,
+          "normalized_start": 20,
+          "normalized_end": 21,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 21,
+          "raw_end": 27,
+          "normalized_start": 21,
+          "normalized_end": 27,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 27,
+          "raw_end": 28,
+          "normalized_start": 27,
+          "normalized_end": 28,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 28,
+          "raw_end": 36,
+          "normalized_start": 28,
+          "normalized_end": 36,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 36,
+          "raw_end": 37,
+          "normalized_start": 36,
+          "normalized_end": 37,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 37,
+          "raw_end": 42,
+          "normalized_start": 37,
+          "normalized_end": 42,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            82.542969
+          ],
+          [
+            272.76,
+            82.542969
+          ],
+          [
+            272.76,
+            69.136719
+          ],
+          [
+            48,
+            69.136719
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text2",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_3b8f5ee9f80523aeeeaaf415a1569fba",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 3,
+      "raw_text": "",
+      "normalized_text": "",
+      "normalization_map": [],
+      "geometry": {
+        "precision": "page_only",
+        "space": "canonical_page",
+        "polygon": null,
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent item anchor present but extent degenerate or absent; no area polygon claimed"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text3",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "degenerate TextItem extent (zero advance or thickness); position retained at item anchor only"
+      ]
+    },
+    {
+      "id": "o_0a09ca14066391ebc0f0164f375b3845",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 4,
+      "raw_text": "$100",
+      "normalized_text": "$100",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            190.171875
+          ],
+          [
+            154.752,
+            190.171875
+          ],
+          [
+            154.752,
+            136.546875
+          ],
+          [
+            48,
+            136.546875
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text4",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_a965b2671acd12f6822e42d1672f8b1a",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 5,
+      "raw_text": "",
+      "normalized_text": "",
+      "normalization_map": [],
+      "geometry": {
+        "precision": "page_only",
+        "space": "canonical_page",
+        "polygon": null,
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent item anchor present but extent degenerate or absent; no area polygon claimed"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text5",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "degenerate TextItem extent (zero advance or thickness); position retained at item anchor only"
+      ]
+    },
+    {
+      "id": "o_9c7b3b574a8abbd4a623c39e0fceb944",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 6,
+      "raw_text": "Rendered marks and extracted text are separate.",
+      "normalized_text": "Rendered marks and extracted text are separate.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 8,
+          "normalized_start": 0,
+          "normalized_end": 8,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 8,
+          "raw_end": 9,
+          "normalized_start": 8,
+          "normalized_end": 9,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 9,
+          "raw_end": 14,
+          "normalized_start": 9,
+          "normalized_end": 14,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 14,
+          "raw_end": 15,
+          "normalized_start": 14,
+          "normalized_end": 15,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 15,
+          "raw_end": 18,
+          "normalized_start": 15,
+          "normalized_end": 18,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 18,
+          "raw_end": 19,
+          "normalized_start": 18,
+          "normalized_end": 19,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 19,
+          "raw_end": 28,
+          "normalized_start": 19,
+          "normalized_end": 28,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 28,
+          "raw_end": 29,
+          "normalized_start": 28,
+          "normalized_end": 29,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 29,
+          "raw_end": 33,
+          "normalized_start": 29,
+          "normalized_end": 33,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 33,
+          "raw_end": 34,
+          "normalized_start": 33,
+          "normalized_end": 34,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 34,
+          "raw_end": 37,
+          "normalized_start": 34,
+          "normalized_end": 37,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 37,
+          "raw_end": 38,
+          "normalized_start": 37,
+          "normalized_end": 38,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 38,
+          "raw_end": 47,
+          "normalized_start": 38,
+          "normalized_end": 47,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            272.542969
+          ],
+          [
+            309.456,
+            272.542969
+          ],
+          [
+            309.456,
+            259.136719
+          ],
+          [
+            48,
+            259.136719
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text6",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_e4d7f97f39184d08fe792c5a60609159",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "SYNTHETIC",
+      "normalized_text": "SYNTHETIC",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 9,
+          "normalized_start": 0,
+          "normalized_end": 9,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48.5,
+            36.5
+          ],
+          [
+            138,
+            36.5
+          ],
+          [
+            138,
+            48
+          ],
+          [
+            48.5,
+            48
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[0].words[0]",
+      "limitations": []
+    },
+    {
+      "id": "o_6b2adccfaa92a5b8d4af094b47d20337",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 1,
+      "raw_text": "EXAMPLE",
+      "normalized_text": "EXAMPLE",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 7,
+          "normalized_start": 0,
+          "normalized_end": 7,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            144.5,
+            37
+          ],
+          [
+            218,
+            37
+          ],
+          [
+            218,
+            48
+          ],
+          [
+            144.5,
+            48
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[0].words[1]",
+      "limitations": []
+    },
+    {
+      "id": "o_7cabdee537fc2872aa2a1ecd5bb3a900",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 2,
+      "raw_text": "No",
+      "normalized_text": "No",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 2,
+          "normalized_start": 0,
+          "normalized_end": 2,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            49,
+            71.5
+          ],
+          [
+            63,
+            71.5
+          ],
+          [
+            63,
+            80
+          ],
+          [
+            49,
+            80
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[0]",
+      "limitations": []
+    },
+    {
+      "id": "o_da4914e7c558cadd5930ffc48e63b40a",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 3,
+      "raw_text": "real",
+      "normalized_text": "real",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            67.5,
+            71
+          ],
+          [
+            86,
+            71
+          ],
+          [
+            86,
+            80
+          ],
+          [
+            67.5,
+            80
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[1]",
+      "limitations": []
+    },
+    {
+      "id": "o_ad962420644990fddff44414c5573446",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 4,
+      "raw_text": "transaction.",
+      "normalized_text": "transaction.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 12,
+          "normalized_start": 0,
+          "normalized_end": 12,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            90,
+            71
+          ],
+          [
+            151,
+            71
+          ],
+          [
+            151,
+            80
+          ],
+          [
+            90,
+            80
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 95,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[2]",
+      "limitations": []
+    },
+    {
+      "id": "o_e71b9582c5196b94dbe5fd036e508912",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 5,
+      "raw_text": "Reader",
+      "normalized_text": "Reader",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 6,
+          "normalized_start": 0,
+          "normalized_end": 6,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            156.5,
+            71
+          ],
+          [
+            194.5,
+            71
+          ],
+          [
+            194.5,
+            80
+          ],
+          [
+            156.5,
+            80
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[3]",
+      "limitations": []
+    },
+    {
+      "id": "o_1118130429ef677ee6409af65101b56d",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 6,
+      "raw_text": "behavior",
+      "normalized_text": "behavior",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 8,
+          "normalized_start": 0,
+          "normalized_end": 8,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            198.5,
+            71
+          ],
+          [
+            244,
+            71
+          ],
+          [
+            244,
+            80
+          ],
+          [
+            198.5,
+            80
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[4]",
+      "limitations": []
+    },
+    {
+      "id": "o_f9758f2c7d7e3aa30fe09ba47490fb4e",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 7,
+      "raw_text": "only.",
+      "normalized_text": "only.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 5,
+          "normalized_start": 0,
+          "normalized_end": 5,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            248,
+            71
+          ],
+          [
+            271.5,
+            71
+          ],
+          [
+            271.5,
+            82.5
+          ],
+          [
+            248,
+            82.5
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[1].words[5]",
+      "limitations": []
+    },
+    {
+      "id": "o_0c54db88472ac9eee398fd80c76a0190",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 8,
+      "raw_text": "Rendered",
+      "normalized_text": "Rendered",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 8,
+          "normalized_start": 0,
+          "normalized_end": 8,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            49,
+            261
+          ],
+          [
+            100,
+            261
+          ],
+          [
+            100,
+            270
+          ],
+          [
+            49,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[0]",
+      "limitations": []
+    },
+    {
+      "id": "o_e27b8e6f6edf4d090770529768c12fb1",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 9,
+      "raw_text": "marks",
+      "normalized_text": "marks",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 5,
+          "normalized_start": 0,
+          "normalized_end": 5,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            105,
+            261
+          ],
+          [
+            136.5,
+            261
+          ],
+          [
+            136.5,
+            270
+          ],
+          [
+            105,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[1]",
+      "limitations": []
+    },
+    {
+      "id": "o_86452f1123f58f1e8617d2dae1e8a223",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 10,
+      "raw_text": "and",
+      "normalized_text": "and",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 3,
+          "normalized_start": 0,
+          "normalized_end": 3,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            140.5,
+            261
+          ],
+          [
+            159.5,
+            261
+          ],
+          [
+            159.5,
+            270
+          ],
+          [
+            140.5,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[2]",
+      "limitations": []
+    },
+    {
+      "id": "o_0c46704424abc8eece0f496ce1c9a145",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 11,
+      "raw_text": "extracted",
+      "normalized_text": "extracted",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 9,
+          "normalized_start": 0,
+          "normalized_end": 9,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            164,
+            261
+          ],
+          [
+            212,
+            261
+          ],
+          [
+            212,
+            270
+          ],
+          [
+            164,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[3]",
+      "limitations": []
+    },
+    {
+      "id": "o_ee98ffa0850f9f0c062399c0d57f9a2e",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 12,
+      "raw_text": "text",
+      "normalized_text": "text",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            216.5,
+            262
+          ],
+          [
+            235.5,
+            262
+          ],
+          [
+            235.5,
+            270
+          ],
+          [
+            216.5,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 97,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[4]",
+      "limitations": []
+    },
+    {
+      "id": "o_858c76d5ee8fb4170b1bad7112f9830a",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 13,
+      "raw_text": "are",
+      "normalized_text": "are",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 3,
+          "normalized_start": 0,
+          "normalized_end": 3,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            239,
+            263.5
+          ],
+          [
+            255.5,
+            263.5
+          ],
+          [
+            255.5,
+            270
+          ],
+          [
+            239,
+            270
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 97,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[5]",
+      "limitations": []
+    },
+    {
+      "id": "o_7ed465ee7e4143b17dfcbab444676bb9",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 14,
+      "raw_text": "separate.",
+      "normalized_text": "separate.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 9,
+          "normalized_start": 0,
+          "normalized_end": 9,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            259.5,
+            262
+          ],
+          [
+            308.5,
+            262
+          ],
+          [
+            308.5,
+            272.5
+          ],
+          [
+            259.5,
+            272.5
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[2].words[6]",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_p0_canonical",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API"
+    },
+    {
+      "id": "t_p0_display",
+      "page_index": 0,
+      "from_space": "canonical:p0",
+      "to_space": "display:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "display_rotation",
+      "precision": "exact",
+      "source": "Document /Rotate 0 quarter-turn in top-left canonical space"
+    },
+    {
+      "id": "t_p0_raster_r_p0_0",
+      "page_index": 0,
+      "from_space": "display:p0",
+      "to_space": "raster:r_p0_0",
+      "matrix": [
+        2,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "inverse": [
+        0.5,
+        0,
+        0,
+        0.5,
+        0,
+        0
+      ],
+      "operation": "raster_scale",
+      "precision": "exact",
+      "source": "Render scale 2 px/pt for raster:r_p0_0"
+    },
+    {
+      "id": "t_p0_crop_ocr_ocr_0_0",
+      "page_index": 0,
+      "from_space": "raster:r_p0_0",
+      "to_space": "ocr:ocr_ocr_0_0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "crop_translation",
+      "precision": "exact",
+      "source": "OCR crop origin (0,0) raster pixels for ocr:ocr_ocr_0_0"
+    },
+    {
+      "id": "t_p0_ocrresize_ocr_ocr_0_0",
+      "page_index": 0,
+      "from_space": "ocr:ocr_ocr_0_0",
+      "to_space": "ocr:ocr_ocr_0_0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "ocr_resize",
+      "precision": "exact",
+      "source": "OCR resize (1,1) for ocr:ocr_ocr_0_0"
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": null,
+      "crop_box": null,
+      "effective_view_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "box_source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API",
+      "user_unit": 1,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "raw_to_canonical_transform_id": "t_p0_canonical",
+      "limitations": [
+        "media_box and crop_box are null: the selected pdf.js API exposes only the effective view"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "f_d8afe66705a9c078",
+      "kind": "reading_difference",
+      "title": "Several locations could match this reading",
+      "explanation": "We could not select one location reliably. Compare the candidates without a precise-match claim.",
+      "page_index": 0,
+      "occurrence_ids": [
+        "o_241f35b6f21d16fb4c163433206ecaad",
+        "o_ad962420644990fddff44414c5573446",
+        "o_e71b9582c5196b94dbe5fd036e508912",
+        "o_1118130429ef677ee6409af65101b56d",
+        "o_f9758f2c7d7e3aa30fe09ba47490fb4e",
+        "o_da4914e7c558cadd5930ffc48e63b40a",
+        "o_7cabdee537fc2872aa2a1ecd5bb3a900"
+      ],
+      "check_ids": [
+        "chk_p0_native_text",
+        "ocr_0_0"
+      ],
+      "alignment": "ambiguous",
+      "region_id": null,
+      "priority": "ordinary",
+      "basis": "region-match-v1 bounded matching over retained reader occurrences; ambiguity reason tie.",
+      "limitations": [
+        "A difference does not establish which reading is correct."
+      ]
+    },
+    {
+      "id": "f_15fcf2a0532b038d",
+      "kind": "reading_difference",
+      "title": "Several locations could match this reading",
+      "explanation": "We could not select one location reliably. Compare the candidates without a precise-match claim.",
+      "page_index": 0,
+      "occurrence_ids": [
+        "o_9c7b3b574a8abbd4a623c39e0fceb944",
+        "o_0c54db88472ac9eee398fd80c76a0190",
+        "o_e27b8e6f6edf4d090770529768c12fb1",
+        "o_86452f1123f58f1e8617d2dae1e8a223",
+        "o_0c46704424abc8eece0f496ce1c9a145",
+        "o_ee98ffa0850f9f0c062399c0d57f9a2e",
+        "o_858c76d5ee8fb4170b1bad7112f9830a",
+        "o_7ed465ee7e4143b17dfcbab444676bb9"
+      ],
+      "check_ids": [
+        "chk_p0_native_text",
+        "ocr_0_0"
+      ],
+      "alignment": "ambiguous",
+      "region_id": null,
+      "priority": "ordinary",
+      "basis": "region-match-v1 bounded matching over retained reader occurrences; ambiguity reason tie.",
+      "limitations": [
+        "A difference does not establish which reading is correct."
+      ]
+    },
+    {
+      "id": "f_23c5a687de81c230",
+      "kind": "observed_structure",
+      "title": "No matching reading found here",
+      "explanation": "This may be a reader omission or an alignment limitation. It does not prove the document has missing text.",
+      "page_index": 0,
+      "occurrence_ids": [
+        "o_0a09ca14066391ebc0f0164f375b3845"
+      ],
+      "check_ids": [
+        "chk_p0_native_text"
+      ],
+      "alignment": "unmatched",
+      "region_id": null,
+      "priority": "informational",
+      "basis": "region-match-v1 retained this occurrence without a counterpart.",
+      "limitations": [
+        "An unmatched reading is not proof of missing content."
+      ]
+    }
+  ],
+  "annotations": [],
+  "assets": [],
+  "execution": {
+    "execution_id": "a998e3ca-5f3d-461e-aaa4-2565844373d7",
+    "run_key": "4b88a62b9b2e0b41009ca74cc2058da3bb6cceff99a89660950dc31b457fefc5",
+    "started_at": "2026-09-13T12:25:02.159Z",
+    "duration_ms": 217,
+    "status": "complete",
+    "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+    "result_origin": "live",
+    "errors": []
+  },
+  "limitations": [
+    "Findings are reader differences, not document verdicts."
+  ],
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "document_hash",
+      "filename",
+      "settings",
+      "coverage"
+    ],
+    "omissions": [
+      "Original PDF excluded (explicit opt-in only).",
+      "Page renders and OCR crops excluded.",
+      "Annotations excluded.",
+      "Pages outside the selection are not covered."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  }
+}

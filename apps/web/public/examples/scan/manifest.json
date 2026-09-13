@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "example_id": "scan",
+  "family": "searchable-scan",
+  "fixture_id": "F03",
+  "card_title": "A normal scan — and its invisible-layer siblings",
+  "mechanism": "A searchable scan carries an invisible text layer over the raster; raster-only and shifted siblings show when readings still agree",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "provenance": "prepared",
+  "timing": {
+    "duration_ms": 270,
+    "method": "browser_measured",
+    "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
+  },
+  "files": {
+    "source": {
+      "filename": "scan-correct.pdf",
+      "sha256": "86a17f4a2ee4c4e75bd2eb406266b20ed3f960f644631841c5fad8b0e7ff4f5f",
+      "byte_length": 18686,
+      "download_url": "/examples/scan/scan-correct.pdf",
+      "role": "Searchable scan (correct layer)",
+      "report_file": "report.json"
+    },
+    "raster_only": {
+      "filename": "scan-raster-only.pdf",
+      "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+      "byte_length": 18236,
+      "download_url": "/examples/scan/scan-raster-only.pdf",
+      "role": "Raster-only sibling",
+      "report_file": "report.scan-raster-only.json"
+    },
+    "shifted": {
+      "filename": "scan-shifted.pdf",
+      "sha256": "2b855c7ee27d22c71696d3be9f63758f61b8449e51e03cdfa80272afc4d62158",
+      "byte_length": 18691,
+      "download_url": "/examples/scan/scan-shifted.pdf",
+      "role": "Shifted-layer sibling",
+      "report_file": "report.scan-shifted.json"
+    }
+  },
+  "readers": {
+    "pdf_js_text": {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "native_text"
+    },
+    "pdf_js_render": {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "render"
+    },
+    "tesseract_js": {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "ocr",
+      "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    }
+  },
+  "findings": [
+    {
+      "id": "f_3b9b34d179df717d",
+      "title": "This amount reads differently",
+      "category": "reading_difference",
+      "page_index": 0
+    },
+    {
+      "id": "f_5bf4992056c14477",
+      "title": "These readings differ here",
+      "category": "reading_difference",
+      "page_index": 0
+    },
+    {
+      "id": "f_d8afe66705a9c078",
+      "title": "Several locations could match this reading",
+      "category": "reading_difference",
+      "page_index": 0
+    },
+    {
+      "id": "f_15fcf2a0532b038d",
+      "title": "Several locations could match this reading",
+      "category": "reading_difference",
+      "page_index": 0
+    },
+    {
+      "id": "f_f517d48d7b45fcd0",
+      "title": "Several locations could match this reading",
+      "category": "reading_difference",
+      "page_index": 0
+    }
+  ],
+  "report_file": "report.json",
+  "report_id": "936dbc75dd346413656fc901923abde8c38cad0f9b0dde978607709a739d1b76",
+  "run_key": "2339eb4e576cb02988e235b463deb620abcdac25ee4b20a74f2bc98df76af782"
+}

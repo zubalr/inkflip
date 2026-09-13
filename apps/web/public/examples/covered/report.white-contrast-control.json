@@ -1,0 +1,572 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "6d2845cc6a1f8118c0ef7124fc9fd9e65588aaba4597e19be0b55abf797ccca9",
+  "document": {
+    "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+    "byte_length": 657,
+    "page_count": 1,
+    "display_name": "white-contrast-control.pdf",
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "build": "pdfjs-dist-legacy",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "render",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+            "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+            "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+            "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+            "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order"
+          ]
+        },
+        {
+          "name": "ocr",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "object_render_mode",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "crop_metadata",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "paint_overlap",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "reading_order",
+          "support": "approximate",
+          "limits": [
+            "raw emitted getTextContent order only; derived geometric/logical ordering belongs to the alignment layer"
+          ]
+        },
+        {
+          "name": "alignment",
+          "support": "unavailable",
+          "limits": []
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+        "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+        "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+        "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+        "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order",
+        "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+        "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+      ]
+    },
+    {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "build": "pdfjs-dist-legacy",
+      "adapter_version": "1.0.0",
+      "method": "render",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "static_appearance"
+      },
+      "capabilities": [
+        {
+          "name": "render",
+          "support": "supported",
+          "limits": [
+            "static annotation appearance streams only (AnnotationMode.ENABLE); no actions, links, forms, XFA or attachments are activated",
+            "canvas is bounded by the configured pixel/edge caps and released after pixels are extracted"
+          ]
+        },
+        {
+          "name": "native_text",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "ocr",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "object_render_mode",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "crop_metadata",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "paint_overlap",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "reading_order",
+          "support": "unavailable",
+          "limits": []
+        },
+        {
+          "name": "alignment",
+          "support": "unavailable",
+          "limits": []
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "static annotation appearance streams only (AnnotationMode.ENABLE); no actions, links, forms, XFA or attachments are activated",
+        "canvas is bounded by the configured pixel/edge caps and released after pixels are extracted",
+        "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+        "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+      ]
+    },
+    {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "build": "tesseract.js-core feature-detected single-threaded lstm",
+      "adapter_version": "1.0.0",
+      "method": "ocr",
+      "environment": "browser",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": "eng",
+        "psm": 6,
+        "render_reader_id": "pdfjs-6_3_289-render",
+        "raster_dpi": 144,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "ocr",
+          "support": "supported",
+          "limits": [
+            "raster input supplied by the named render reader",
+            "psm 6 fixed for this configured reading"
+          ]
+        }
+      ],
+      "model_hashes": [
+        "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      ],
+      "limitations": []
+    }
+  ],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [],
+    "checks": [
+      {
+        "id": "chk_p0_native_text",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-text"
+        ],
+        "capability": "native_text",
+        "region_id": null
+      },
+      {
+        "id": "chk_p0_render",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-render"
+        ],
+        "capability": "render",
+        "region_id": null
+      },
+      {
+        "id": "ocr_0_0",
+        "page_index": 0,
+        "reader_ids": [
+          "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
+        ],
+        "capability": "ocr",
+        "region_id": null
+      },
+      {
+        "id": "chk_p0_alignment",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-text",
+          "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
+        ],
+        "capability": "alignment",
+        "region_id": null
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "desktop",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 1
+    }
+  },
+  "checks": [
+    {
+      "id": "chk_p0_native_text",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "o_b95299eb67dc0bdd23414df14fe81fce"
+      ]
+    },
+    {
+      "id": "chk_p0_render",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    },
+    {
+      "id": "ocr_0_0",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "o_e94d98954c7f5c0d33c86ce2892815ae"
+      ]
+    },
+    {
+      "id": "chk_p0_alignment",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "o_b95299eb67dc0bdd23414df14fe81fce",
+      "reader_id": "pdfjs-6_3_289-text",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "$100",
+      "normalized_text": "$100",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            125.085938
+          ],
+          [
+            101.376,
+            125.085938
+          ],
+          [
+            101.376,
+            98.273438
+          ],
+          [
+            48,
+            98.273438
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_canonical"
+        ],
+        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfjs:getTextContent:p0:text0",
+      "limitations": [
+        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
+        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
+      ]
+    },
+    {
+      "id": "o_e94d98954c7f5c0d33c86ce2892815ae",
+      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "$100",
+      "normalized_text": "$100",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 4,
+          "normalized_start": 0,
+          "normalized_end": 4,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "estimated",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48,
+            102
+          ],
+          [
+            100.5,
+            102
+          ],
+          [
+            100.5,
+            121.5
+          ],
+          [
+            48,
+            121.5
+          ]
+        ],
+        "transform_ids": [
+          "t_p0_raster_r_p0_0",
+          "t_p0_crop_ocr_ocr_0_0",
+          "t_p0_ocrresize_ocr_ocr_0_0"
+        ],
+        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
+      },
+      "engine_score": {
+        "value": 96,
+        "scale_min": 0,
+        "scale_max": 100,
+        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
+      },
+      "source_asset_id": null,
+      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[0].words[0]",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_p0_canonical",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        240
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        240
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API"
+    },
+    {
+      "id": "t_p0_display",
+      "page_index": 0,
+      "from_space": "canonical:p0",
+      "to_space": "display:p0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "display_rotation",
+      "precision": "exact",
+      "source": "Document /Rotate 0 quarter-turn in top-left canonical space"
+    },
+    {
+      "id": "t_p0_raster_r_p0_0",
+      "page_index": 0,
+      "from_space": "display:p0",
+      "to_space": "raster:r_p0_0",
+      "matrix": [
+        2,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "inverse": [
+        0.5,
+        0,
+        0,
+        0.5,
+        0,
+        0
+      ],
+      "operation": "raster_scale",
+      "precision": "exact",
+      "source": "Render scale 2 px/pt for raster:r_p0_0"
+    },
+    {
+      "id": "t_p0_crop_ocr_ocr_0_0",
+      "page_index": 0,
+      "from_space": "raster:r_p0_0",
+      "to_space": "ocr:ocr_ocr_0_0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "crop_translation",
+      "precision": "exact",
+      "source": "OCR crop origin (0,0) raster pixels for ocr:ocr_ocr_0_0"
+    },
+    {
+      "id": "t_p0_ocrresize_ocr_ocr_0_0",
+      "page_index": 0,
+      "from_space": "ocr:ocr_ocr_0_0",
+      "to_space": "ocr:ocr_ocr_0_0",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "inverse": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "operation": "ocr_resize",
+      "precision": "exact",
+      "source": "OCR resize (1,1) for ocr:ocr_ocr_0_0"
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": null,
+      "crop_box": null,
+      "effective_view_box": [
+        0,
+        0,
+        320,
+        240
+      ],
+      "box_source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API",
+      "user_unit": 1,
+      "rotation": 0,
+      "canonical_size_pt": [
+        320,
+        240
+      ],
+      "raw_to_canonical_transform_id": "t_p0_canonical",
+      "limitations": [
+        "media_box and crop_box are null: the selected pdf.js API exposes only the effective view"
+      ]
+    }
+  ],
+  "findings": [],
+  "annotations": [],
+  "assets": [],
+  "execution": {
+    "execution_id": "28787536-1fc6-4c3e-a874-96f25e85bf6c",
+    "run_key": "9f860416d8c5f07b0e86138d09b561029f8fbaeded64640aef530eeeb81bea72",
+    "started_at": "2026-09-13T12:25:05.901Z",
+    "duration_ms": 146,
+    "status": "complete",
+    "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+    "result_origin": "live",
+    "errors": []
+  },
+  "limitations": [
+    "Findings are reader differences, not document verdicts."
+  ],
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "document_hash",
+      "filename",
+      "settings",
+      "coverage"
+    ],
+    "omissions": [
+      "Original PDF excluded (explicit opt-in only).",
+      "Page renders and OCR crops excluded.",
+      "Annotations excluded.",
+      "Pages outside the selection are not covered."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  }
+}
