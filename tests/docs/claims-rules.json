@@ -13,7 +13,8 @@
     "docs/distribution/README.md",
     "docs/distribution/SURFACE.md",
     "docs/case-study.md",
-    "docs/launch/CLAIMS-INDEX.md"
+    "docs/launch/CLAIMS-INDEX.md",
+    "docs/distribution/EXECUTED-EXAMPLES.md"
   ],
   "checked_docs": [
     "README.md",
@@ -28,7 +29,8 @@
     "docs/distribution/README.md",
     "docs/distribution/SURFACE.md",
     "docs/case-study.md",
-    "docs/launch/CLAIMS-INDEX.md"
+    "docs/launch/CLAIMS-INDEX.md",
+    "docs/distribution/EXECUTED-EXAMPLES.md"
   ],
   "forbidden_phrases": [
     "what AI sees",
