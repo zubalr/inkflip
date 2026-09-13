@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "_purpose": "Dated, source-bound facts that the public documentation states. Each fact ties doc content to a dated evidence file. These are NOT permanent rules: when a fact legitimately changes, a reviewer updates the evidence file (new dated entry), this file (new as_of / patterns), and the docs in the same reviewed change. tests/docs/test_checker_negative.py proves both directions: a mismatched state fails, a legitimately transitioned state passes. Evidence files must be tracked repository files so the facts stay verifiable on a fresh clone.",
+  "facts": [
+    {
+      "id": "license-applied-mit",
+      "as_of": "2026-09-13",
+      "claim": "the owner's recorded 2026-09-13 decision applies the MIT license with the copyright line 'Copyright (c) 2026 zubair'; the repository LICENSE file is authoritative",
+      "evidence": "LICENSE",
+      "evidence_marker": "Copyright \\(c\\) 2026 zubair",
+      "per_doc": {
+        "NOTICE": {
+          "must_contain": [
+            "MIT License",
+            "Copyright \\(c\\) 2026 zubair"
+          ],
+          "must_not_contain": [
+            "NOT finalized",
+            "not finalized",
+            "no copyright-holder decision"
+          ]
+        }
+      }
+    },
+    {
+      "id": "uv-cold-host-minimum",
+      "as_of": "2026-09-13",
+      "claim": "uv >= 0.12.13 is the recorded minimum for cold-host resolution of the pinned interpreter; older uv is unsupported on cold hosts regardless of any single host observation",
+      "evidence": "config/test-toolchain.json",
+      "evidence_marker": "0\\.12\\.13",
+      "per_doc": {
+        "docs/quickstart.md": {
+          "must_contain": [
+            "0\\.12\\.13"
+          ],
+          "must_not_contain": []
+        }
+      }
+    },
+    {
+      "id": "no-corpus-cli-privacy-claim",
+      "as_of": "2026-09-13",
+      "claim": "the network-disabled corpus/CLI execution is specified for the planned inkflip CLI, not implemented; docs must not present it as working",
+      "evidence": "planning/architecture/CLI_AND_REGRESSION.md",
+      "evidence_marker": "All commands below are required implementation contracts, not a claim that this planning package installs a finished CLI",
+      "per_doc": {
+        "docs/limitations.md": {
+          "must_contain": [
+            "not implemented|not built|being integrated"
+          ],
+          "must_not_contain": [
+            "network-disabled corpus"
+          ]
+        }
+      }
+    }
+  ]
+}

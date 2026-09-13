@@ -77,3 +77,16 @@ See [validation](docs/ACCEPTANCE.md) for the release evidence requirements.
 
 Source provenance and third-party notices are retained in
 [ORIGIN](docs/ORIGIN.md) and [ATTRIBUTION](docs/ATTRIBUTION.md).
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/quickstart.md](docs/quickstart.md) | Prerequisites, install, run, build and check |
+| [docs/user-guide.md](docs/user-guide.md) | The investigation workflow: open, read, compare, annotate, export, reopen |
+| [docs/architecture.md](docs/architecture.md) | Components, data flow, contracts, reader adapters, privacy design |
+| [docs/limitations.md](docs/limitations.md) | Implemented vs incomplete vs not built, method limits, known defects |
+| [docs/developer-guide.md](docs/developer-guide.md) | Workspace layout, command harness, suites, evidence rules |
+| [docs/development-history.md](docs/development-history.md) | How this was built, from Git history and validation records |
+| [docs/distribution/README.md](docs/distribution/README.md) | What ships, license/notice evidence, the distribution gate |
+| [SECURITY.md](SECURITY.md) | Security expectations and reporting status |

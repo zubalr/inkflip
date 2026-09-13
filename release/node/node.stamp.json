@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327",
+  "filename": "node-v22.23.2-linux-x64.tar.xz",
+  "license": "MIT (Node.js; bundled third-party components per official NOTICE \u2014 fetched with the runtime at build time)",
+  "name": "node",
+  "platform": "linux-x64",
+  "purpose": "comparison-bridge runtime for the native bundle",
+  "sha256": "d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307",
+  "shasums256_source": "https://nodejs.org/dist/v22.23.2/SHASUMS256.txt",
+  "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+  "version": "22.23.2"
+}

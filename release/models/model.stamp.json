@@ -1,0 +1,10 @@
+{
+  "bytes": 4113088,
+  "license": "Apache-2.0",
+  "name": "tessdata_fast (eng.traineddata)",
+  "path_in_context": "models/tessdata/",
+  "rights": "tessdata_fast eng.traineddata from the official tesseract-ocr/tessdata_fast repository at the pinned commit; Apache-2.0 per repository LICENSE.",
+  "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+  "source": "config/resolved-assets.json (staged same-origin asset)",
+  "version": "pinned commit 7d4322bd"
+}
