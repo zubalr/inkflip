@@ -56,3 +56,6 @@ htmlcov/
 /artifacts/followups/
 /artifacts/integration/
 /artifacts/gates/
+
+# Provider local dev output (wrangler dev temp state; T48 preflight).
+/.wrangler/
