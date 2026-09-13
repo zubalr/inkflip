@@ -228,10 +228,18 @@ export function deriveFindings(input: FindingsInput): Finding[] {
     // accessibility verdict. Surfaced as observed_structure so it is
     // visible without being counted as changed content.
     for (const [i, diff] of result.order_differences.entries()) {
-      const occIds = [...diff.left_occurrence_ids, ...diff.right_occurrence_ids].filter((id) =>
-        occById.has(id),
-      );
-      if (occIds.length === 0) continue;
+      const left = diff.left_occurrence_ids
+        .map((id) => occById.get(id))
+        .filter((o): o is Occurrence => o !== undefined);
+      const right = diff.right_occurrence_ids
+        .map((id) => occById.get(id))
+        .filter((o): o is Occurrence => o !== undefined);
+      if (left.length === 0 && right.length === 0) continue;
+      // "Order-only" is only honest when the paired readings are the
+      // same; a differing-text inversion is already surfaced as a
+      // reading_difference and must not be re-labeled as same-readings.
+      if (groupText(left) !== groupText(right)) continue;
+      const occIds = [...left, ...right].map((o) => o.id);
       findings.push({
         id: findingId({ order: alignCheck.id, entry: i }),
         kind: "observed_structure",
@@ -251,6 +259,17 @@ export function deriveFindings(input: FindingsInput): Finding[] {
 
     // -- ambiguous units: abstention, never first-match-wins ------------
     for (const [i, entry] of result.ambiguous.entries()) {
+      // Name every evaluated candidate — rival pairings can touch
+      // occurrences outside the contested unit's own left/right spans,
+      // and dropping them would hide evaluated evidence.
+      const candidateIds = new Set<string>([
+        ...entry.left_occurrence_ids,
+        ...entry.right_occurrence_ids,
+      ]);
+      for (const cand of entry.candidates) {
+        for (const id of cand.left_occurrence_ids) candidateIds.add(id);
+        for (const id of cand.right_occurrence_ids) candidateIds.add(id);
+      }
       findings.push({
         id: findingId({ ambiguous: alignCheck.id, entry: i }),
         kind: "reading_difference",
@@ -258,10 +277,7 @@ export function deriveFindings(input: FindingsInput): Finding[] {
         explanation:
           "We could not select one location reliably. Compare the candidates without a precise-match claim.",
         page_index: page,
-        occurrence_ids: [
-          ...entry.left_occurrence_ids,
-          ...entry.right_occurrence_ids,
-        ],
+        occurrence_ids: [...candidateIds].filter((id) => occById.has(id)),
         check_ids: checkIds,
         alignment: "ambiguous",
         region_id: regionId,

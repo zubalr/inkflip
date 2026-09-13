@@ -176,6 +176,19 @@ test("ambiguous finding exposes every candidate and pre-picks none", async ({ pa
     "identical text",
   );
   await expect(page.locator('[data-candidate-id][aria-pressed="true"]')).toHaveCount(0);
+
+  // Pointer selection: clicking a candidate inside the card must stick —
+  // the card's own click handler must not wipe the chosen occurrence.
+  const dup2 = page.locator('[data-testid="occ-candidate-occ-p0-dup2"]');
+  await dup2.click();
+  await expect(dup2).toHaveAttribute("aria-pressed", "true");
+  // The chosen occurrence is the selection; the other named candidates
+  // stay marked as candidates, not as if the engine had picked them.
+  await expect(page.locator("#highlight-occ-p0-dup2")).toHaveClass(/highlightSelected/);
+  await expect(page.locator("#highlight-occ-p0-dup1")).not.toHaveClass(/highlightSelected/);
+  // Clicking elsewhere in the expanded detail does not discard the pick.
+  await page.locator('[data-testid="alignment-body"]').click();
+  await expect(dup2).toHaveAttribute("aria-pressed", "true");
 });
 
 test("order-only differences remain order-only", async ({ page }) => {
@@ -196,6 +209,8 @@ test("order-only differences remain order-only", async ({ page }) => {
   await expect(detail.locator('[data-testid="alignment-body"]')).toContainText(
     "not a text difference",
   );
+  // Order-only candidates are listed but none is pre-picked either.
+  await expect(detail.locator('[data-candidate-id][aria-pressed="true"]')).toHaveCount(0);
 
   // No content-difference finding claims the same readings differ.
   const page_text = await page.locator("#viewer-stage").textContent();

@@ -118,8 +118,13 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
               const poly = occ.geometry.polygon!;
               const mappedPoints = poly.map((pt) => mapPoint(pt[0], pt[1]));
               const pointsStr = mappedPoints.map((pt) => `${pt[0]},${pt[1]}`).join(" ");
-              const isSelected =
-                occ.id === selectedOccurrenceId ||
+              // The chosen occurrence is the selection; other occurrences
+              // the finding names stay marked as candidates — picking one
+              // is a navigation choice, and candidates are never rendered
+              // as if the engine had selected them.
+              const isChosen = occ.id === selectedOccurrenceId;
+              const isCandidate =
+                !isChosen &&
                 (selectedFinding ? selectedFinding.occurrence_ids.includes(occ.id) : false);
 
               return (
@@ -133,7 +138,9 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
                     occ.geometry.precision === "exact"
                       ? styles.highlightExact
                       : styles.highlightEstimated
-                  } ${isSelected ? styles.highlightSelected : ""}`}
+                  } ${isChosen ? styles.highlightSelected : ""} ${
+                    isCandidate ? styles.highlightAmbiguous : ""
+                  }`}
                   onClick={() => onSelectOccurrence?.(occ)}
                   aria-label={`Reading occurrence ${occ.ordinal}: ${occ.raw_text}`}
                 />

@@ -71,22 +71,18 @@ export function isOrderOnlyFinding(finding: Finding): boolean {
 function classify(finding: Finding): AlignmentClass {
   if (finding.kind === "incomplete_check") return "incomplete";
   if (isOrderOnlyFinding(finding)) return "order_only";
-  switch (finding.alignment) {
-    case "ambiguous":
-      return "ambiguous";
-    case "unmatched":
-      return "unmatched";
-    case "page_level":
-      return "page_level";
-    default:
-      break;
-  }
+  if (finding.alignment === "ambiguous") return "ambiguous";
+  if (finding.alignment === "unmatched") return "unmatched";
+  // One-sided readings never ran a comparison — their `page_level`/
+  // `unique` alignment only describes localization, so the kind check
+  // must come before the page_level label (which claims a comparison).
   if (
     finding.kind === "ocr_interpretation" ||
-    (finding.kind === "observed_structure" && finding.alignment !== "ambiguous")
+    finding.kind === "observed_structure"
   ) {
     return "one_sided";
   }
+  if (finding.alignment === "page_level") return "page_level";
   return "difference";
 }
 
@@ -131,7 +127,8 @@ export function classifyFinding(
     else unresolved.push(id);
   }
   // Identical-text sibling bookkeeping: candidates sharing normalized
-  // text are ranked in id order — stable, and never text-addressed.
+  // text are ranked in the finding's named order — stable, and never
+  // text-addressed.
   const byText = new Map<string, Occurrence[]>();
   for (const occ of resolved) {
     const list = byText.get(occ.normalized_text) ?? [];

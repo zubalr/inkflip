@@ -4,8 +4,9 @@
  * Every occurrence a finding names stays individually addressable by id —
  * identical strings at distinct positions are never collapsed and never
  * resolved by text matching. Keyboard selection (Enter/Space) moves the
- * highlight *and* returns focus to the originating finding card; Escape
- * returns focus without changing the selection.
+ * highlight *and* returns focus to the originating finding card; pointer
+ * selection stays inside the card without re-triggering finding
+ * selection. Escape returns focus without changing the selection.
  */
 import React, { useCallback } from "react";
 import type {
@@ -107,9 +108,14 @@ export const OccurrenceCandidates: React.FC<OccurrenceCandidatesProps> = ({
                 className={`${styles.candidate} ${isSelected ? styles.candidateSelected : ""}`}
                 data-testid={`occ-candidate-${occ.id}`}
                 data-candidate-id={occ.id}
-                aria-current={isSelected ? "true" : undefined}
                 aria-pressed={isSelected}
-                onClick={() => onSelectOccurrence(occ)}
+                onClick={(e) => {
+                  // The candidate lives inside the finding card, whose own
+                  // click handler would re-run finding selection and wipe the
+                  // chosen occurrence — keep the pick local.
+                  e.stopPropagation();
+                  onSelectOccurrence(occ);
+                }}
                 onKeyDown={(e) => onCandidateKeyDown(e, candidate)}
               >
                 <span className={styles.candidateText}>{occ.raw_text}</span>

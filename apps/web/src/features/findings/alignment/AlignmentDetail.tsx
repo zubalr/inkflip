@@ -52,6 +52,8 @@ export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
       className={styles.detail}
       data-testid="alignment-detail"
       data-alignment-class={semantics.classification}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
     >
       <div className={styles.badgeRow}>
         <span
