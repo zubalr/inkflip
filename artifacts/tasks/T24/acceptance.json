@@ -3,8 +3,8 @@
   "task_id": "T24",
   "beads_id": "pdf-t24",
   "disposition": "accepted",
-  "evaluated_commit": "34d5dd7d7e1ce810bf731a295c958436e61dc94a",
-  "evaluated_at": "2026-09-12T19:40:49.940403+00:00",
+  "evaluated_commit": "32133af05e9b6c674b9666d156182250b09db25e",
+  "evaluated_at": "2026-09-13T04:23:36.843620+00:00",
   "contract_digest": "5e64b2bbaac6979c2c389062ed2a17ca25e32afcd94202622e5e39e57bbabe6a",
   "worker": "devin-subagent-t24",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-9mwuwx5f/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-4r7wjj8a/results",
         "--test",
         "tests/security/import/followup-3oz.test.mjs",
         "tests/security/import/html-browser.test.mjs",
@@ -34,7 +34,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-d",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     },
     {
@@ -57,15 +57,15 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-d",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T24/commands.log": "b088b4a9e6039f8da9f7b23158143d459ce3700a87b977eef5e63506c85c8098",
-    "artifacts/tasks/T24/coordinator-commands.log": "3621e9e5ca9235b5cd99a7c7556dce548a94a15296cf25d4e64995c5deae65f0",
-    "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl": "c11b14ddb8a6eaeadec6f2df6489abe7344f177d1690e7fed906986c46f7d0bc",
-    "artifacts/tasks/T24/fuzz/fuzz-receipt.json": "88624a2d73ef3752de9f711b8227daaa8b0492659ffa9a0cb15a0d28e9177384",
+    "artifacts/tasks/T24/coordinator-commands.log": "68aa8ab562bdd982830640c498c1940fe71203345dbfd6ed9a71713e1b4d0c83",
+    "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl": "7f45fdbdd9883667695ed334063582960aed68cbc6a8b5c7c5075d6e5fe8fa7b",
+    "artifacts/tasks/T24/fuzz/fuzz-receipt.json": "a6e5db23edcb799ac35ba5f77e331c6323337f1fc05f0257b17f9340667d00c8",
     "artifacts/tasks/T24/receipt.json": "b956b007f9db9eb8c5cb97ef07d383e2ab959f124c81fba7ff8f0a95779cba4e",
     "artifacts/tasks/T24/refresh-20260912/commands.log": "ebc970d3aabcdb68391e1faa780bee4908f59514534d6e2f8c6681c563a42448",
     "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl": "291a86cad32c1453e622933906b6f72b8a7e58bb9e725e2f8a4340965c706867",
@@ -73,8 +73,8 @@
     "artifacts/tasks/T24/refresh-20260912/prior-review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
     "artifacts/tasks/T24/refresh-20260912/review-inputs.json": "224ea89d93143a13d88d81b81cd868834c909bc2cfd12e7d50fa1a233292f8f7",
     "artifacts/tasks/T24/refresh-20260912/run.json": "22134c1496d983e37bf72d0814d0b7e73c479123564e9d2a25eb4aba495b8699",
-    "artifacts/tasks/T24/review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
-    "artifacts/tasks/T24/run.json": "1950244d51519e61823095b86b8d2d7b5ba266124900bb7d661895a920d8375b"
+    "artifacts/tasks/T24/review.md": "d2a0933e05620d4fefde1e08f736ebb1b59a7387cf2cf688663987fee7c87e04",
+    "artifacts/tasks/T24/run.json": "95b2b7cfa1a17ef4506bcfdc240d82f37116f667bd8def580682147676fffbe3"
   },
   "criteria": {
     "Controlled oversized/truncated/HTML/SVG/polyglot/prototype/path inputs fail before dangerous allocation or resource use": [
@@ -124,7 +124,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "devin-review-t24"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T24/review.md"
   }
