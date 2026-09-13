@@ -1,111 +1,93 @@
 {
   "experiment_id": "P13",
   "task_id": "T44",
-  "status": "completed",
+  "status": "blocked",
   "disposition": "blocked_missing_dependency_and_weights",
   "hypothesis": "Native RapidOCR complement value",
   "baseline": "Tesseract native reader",
   "candidate": "RapidOCR v3.8.1 (PP-OCRv5 mobile English)",
-  "manifest": "evaluation/manifests/development.corpus.json",
+  "manifest": "fixtures/manifest.json",
   "fixture_ids": [
     "F14",
     "F15",
     "F16"
   ],
-  "clean_controls": "Same renders, clean text and missing-region negatives",
+  "clean_controls": "Same rasters, clean text and ambiguity fixtures evaluated",
   "environment_audit": {
-    "candidate_name": "RapidOCR v3.8.1 (PP-OCRv5/v4 mobile English)",
+    "candidate_name": "RapidOCR v3.8.1 (PP-OCRv5 mobile English)",
     "source_id": "S47",
+    "required_package": "rapidocr==3.8.1",
     "package_installed": false,
+    "package_version": null,
+    "version_valid": false,
     "weights_present": false,
+    "weights_corrupt": false,
+    "detector_model": null,
+    "recognizer_model": null,
+    "status": "blocked",
+    "disposition": "blocked_missing_dependency_and_weights",
     "runtime_network_allowed": false,
-    "status": "blocked_missing_dependency_and_weights",
-    "reasons": [
-      "rapidocr package not installed in native environment",
-      "Official ONNX model weights not pre-bundled in repository checkout",
-      "Runtime model download prohibited under offline security containment policy"
-    ]
+    "attempted_preparation": {
+      "package_command": "uv pip install --project native rapidocr==3.8.1",
+      "weights_source": "https://github.com/RapidAI/RapidOCR/releases/download/v3.8.1/models/",
+      "error": "Offline containment policy forbids external network fetch during test execution (Invariant I13)",
+      "exit_code": 7
+    },
+    "actionable_remediation": "Install rapidocr==3.8.1 into native environment and stage verified PP-OCRv5 mobile English ONNX weights (en_PP-OCRv5_mobile_det.onnx, en_PP-OCRv5_mobile_rec.onnx) into models/rapidocr/ via approved external intake workflow."
   },
   "resource_costs": {
     "total_pixels_evaluated": 1596800,
     "total_megapixels": 1.5968,
-    "total_runtime_seconds": 0.5513,
-    "native_memory_cap": "1GiB child cap"
+    "total_runtime_seconds": 0.5161,
+    "measured_peak_rss_bytes": 62013440,
+    "measured_peak_rss_mb": 59.14,
+    "memory_budget_bytes": 1073741824,
+    "memory_budget_satisfied": true,
+    "host_containment": {
+      "platform": "darwin",
+      "enforcement": "process_rusage_audit",
+      "rlimit_as_supported": false,
+      "note": "macOS kernel does not enforce RLIMIT_AS address-space limits; actual process memory is audited via resource.getrusage peak RSS measurement."
+    },
+    "runtime_network_isolation": {
+      "enforced": true,
+      "network_calls_attempted": 0,
+      "offline_policy": "Invariant I13 / I14: runtime network access prohibited"
+    }
   },
   "metrics": {
     "total_fixtures_evaluated": 8,
     "baseline_completed_count": 8,
+    "baseline_failed_count": 0,
     "candidate_completed_count": 0,
-    "candidate_blocked_count": 8
+    "candidate_blocked_count": 8,
+    "failure_rate_in_denominator": 0.0
   },
   "fixtures": [
     {
-      "path": "fixtures/development/ocr-material-control.pdf",
-      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "path": "fixtures/development/native-unicode-native.pdf",
+      "sha256": "5ae99c803de6701b334c3328dedde576e9ee425d4c0aa040d5b5c8da7349b159",
       "page_size_pt": [
         320.0,
         240.0
       ],
+      "raster_path": "artifacts/P13/rasters/native-unicode-native_p0.png",
       "raster_dimensions": [
         640,
         480
       ],
       "pixels": 307200,
       "baseline_tesseract": {
-        "text": "SEAMOUNT -+188.",
-        "runtime_seconds": 0.0684,
-        "status": "completed"
+        "status": "completed",
+        "text": "$\n1\n0\n0",
+        "exit_code": 0,
+        "runtime_seconds": 0.0597,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
-      }
-    },
-    {
-      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
-      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "baseline_tesseract": {
-        "text": "SAMOUMT -+108.",
-        "runtime_seconds": 0.0682,
-        "status": "completed"
-      },
-      "candidate_rapidocr": {
-        "status": "unavailable_missing_dependency",
-        "text": null,
-        "error": "rapidocr package and weights unavailable"
-      }
-    },
-    {
-      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
-      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "baseline_tesseract": {
-        "text": "SeMounT File.",
-        "runtime_seconds": 0.0706,
-        "status": "completed"
-      },
-      "candidate_rapidocr": {
-        "status": "unavailable_missing_dependency",
-        "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     },
     {
@@ -115,43 +97,101 @@
         320.0,
         240.0
       ],
+      "raster_path": "artifacts/P13/rasters/native-unicode-control_p0.png",
       "raster_dimensions": [
         640,
         480
       ],
       "pixels": 307200,
       "baseline_tesseract": {
+        "status": "completed",
         "text": "LATIN-$100",
-        "runtime_seconds": 0.0601,
-        "status": "completed"
+        "exit_code": 0,
+        "runtime_seconds": 0.0605,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     },
     {
-      "path": "fixtures/development/native-unicode-native.pdf",
-      "sha256": "5ae99c803de6701b334c3328dedde576e9ee425d4c0aa040d5b5c8da7349b159",
+      "path": "fixtures/development/ocr-material-control.pdf",
+      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
       "page_size_pt": [
         320.0,
         240.0
       ],
+      "raster_path": "artifacts/P13/rasters/ocr-material-control_p0.png",
       "raster_dimensions": [
         640,
         480
       ],
       "pixels": 307200,
       "baseline_tesseract": {
-        "text": "$\n1\n0\n0",
-        "runtime_seconds": 0.0588,
-        "status": "completed"
+        "status": "completed",
+        "text": "SEAMOUNT -+188.",
+        "exit_code": 0,
+        "runtime_seconds": 0.0661,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
+      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_path": "artifacts/P13/rasters/ocr-material-sign-ambiguity_p0.png",
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline_tesseract": {
+        "status": "completed",
+        "text": "SeMounT File.",
+        "exit_code": 0,
+        "runtime_seconds": 0.0667,
+        "error": null
+      },
+      "candidate_rapidocr": {
+        "status": "unavailable_missing_dependency",
+        "text": null,
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
+      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_path": "artifacts/P13/rasters/ocr-material-digit-ambiguity_p0.png",
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline_tesseract": {
+        "status": "completed",
+        "text": "SAMOUMT -+108.",
+        "exit_code": 0,
+        "runtime_seconds": 0.065,
+        "error": null
+      },
+      "candidate_rapidocr": {
+        "status": "unavailable_missing_dependency",
+        "text": null,
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     },
     {
@@ -161,20 +201,23 @@
         210.0,
         40.0
       ],
+      "raster_path": "artifacts/P13/rasters/adjacent-crop-control_p0.png",
       "raster_dimensions": [
         420,
         80
       ],
       "pixels": 33600,
       "baseline_tesseract": {
+        "status": "completed",
         "text": "$100 $200",
-        "runtime_seconds": 0.0573,
-        "status": "completed"
+        "exit_code": 0,
+        "runtime_seconds": 0.0546,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     },
     {
@@ -184,20 +227,23 @@
         120.0,
         40.0
       ],
+      "raster_path": "artifacts/P13/rasters/adjacent-crop-adjacent_p0.png",
       "raster_dimensions": [
         240,
         80
       ],
       "pixels": 19200,
       "baseline_tesseract": {
+        "status": "completed",
         "text": "$100 \u00a7$",
-        "runtime_seconds": 0.0552,
-        "status": "completed"
+        "exit_code": 0,
+        "runtime_seconds": 0.0524,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     },
     {
@@ -207,23 +253,27 @@
         50.0,
         40.0
       ],
+      "raster_path": "artifacts/P13/rasters/adjacent-crop-clipped_p0.png",
       "raster_dimensions": [
         100,
         80
       ],
       "pixels": 8000,
       "baseline_tesseract": {
+        "status": "completed",
         "text": "100",
-        "runtime_seconds": 0.0534,
-        "status": "completed"
+        "exit_code": 0,
+        "runtime_seconds": 0.0501,
+        "error": null
       },
       "candidate_rapidocr": {
         "status": "unavailable_missing_dependency",
         "text": null,
-        "error": "rapidocr package and weights unavailable"
+        "error": "RapidOCR package and PP-OCRv5 model weights unavailable under offline containment"
       }
     }
   ],
   "integration_decision": "default_not_installed",
-  "note": "Native Tesseract baseline evaluated across all manifest fixtures with exact per-fixture timings and rasters. RapidOCR candidate is blocked due to missing package and absent ONNX weights; candidate remains unavailable."
+  "acceptance": "Complementary useful failures at fixed precision and memory budget or reject; missing models/dependencies recorded as blocked; default not installed.",
+  "note": "Native Tesseract baseline evaluated across all manifest fixtures with exact per-fixture timings and persisted rasters. RapidOCR candidate is blocked due to missing package and absent PP-OCRv5 ONNX weights under offline containment; candidate remains default-unavailable."
 }
