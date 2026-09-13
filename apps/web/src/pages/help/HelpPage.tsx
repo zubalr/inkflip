@@ -69,19 +69,19 @@ export const HelpPage: React.FC<HelpPageProps> = ({
           </div>
           <div>
             <h4>macOS Companion CLI</h4>
-            <p>Inspect a local PDF using native engine profiles directly on macOS (requires <code>--out</code> for the output report JSON):</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli inspect &lt;pdf-file&gt; --out report.json</code></pre>
+            <p>Inspect a local PDF using native engine profiles directly on macOS (requires <code>--out</code> for the output report JSON). Run it from the repository root with <code>native/.venv/bin</code> on <code>PATH</code>, as <code>docs/CLI.md</code> documents:</p>
+            <pre className={styles.guideCodeBlock}><code>PYTHONPATH=native python -m inkflip.cli inspect &lt;pdf-file&gt; --out report.json</code></pre>
             <p>Optional flags: <code>--profile native-default</code>, <code>--reader pdfium</code>, <code>--pages 1</code>, <code>--embed-source</code>.</p>
           </div>
           <div>
             <h4>Report Generation (HTML Export)</h4>
             <p>Export a self-contained HTML inspection report from an existing validated report JSON:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli report &lt;report.json&gt; --format html --out report.html</code></pre>
+            <pre className={styles.guideCodeBlock}><code>PYTHONPATH=native python -m inkflip.cli report &lt;report.json&gt; --format html --out report.html</code></pre>
           </div>
           <div>
             <h4>Evidence Replay</h4>
             <p>Replay recorded findings from a previously generated report file. When source bytes are not embedded, provide the original source PDF:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli replay &lt;report.json&gt; --source &lt;pdf-file&gt; --profile native-default --out replay.json</code></pre>
+            <pre className={styles.guideCodeBlock}><code>PYTHONPATH=native python -m inkflip.cli replay &lt;report.json&gt; --source &lt;pdf-file&gt; --profile native-default --out replay.json</code></pre>
           </div>
           <div>
             <h4>Reproducible Docker CLI Workflow</h4>
