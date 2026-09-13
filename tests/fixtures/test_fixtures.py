@@ -471,7 +471,8 @@ class TestRegistryRegistration(unittest.TestCase):
         self.assertEqual(entry["collection"], "harness-unittest")
         self.assertEqual(
             entry["argv"],
-            ["python3", "-m", "unittest", "discover", "-s", "tests/fixtures", "-v"],
+            ["uv", "run", "--frozen", "--project", "native", "python",
+             "-m", "unittest", "discover", "-s", "tests/fixtures", "-v"],
         )
 
 
