@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "task_id": "T40",
+  "beads_id": "pdf-t40",
+  "worker": {
+    "app": "cursor",
+    "branch": "work/cursor/native-assurance",
+    "base": "78750769d1a29d58b7b79f91c1c8ffd749dc4eac",
+    "implementation_commit": "efa11d4b97ec94b732216524aea4f405b629821f"
+  },
+  "criteria": [
+    {"criterion": "Source bytes unchanged", "status": "executed", "evidence": ["native/tests/security/test_containment.py", "artifacts/tasks/T40/commands.log"]},
+    {"criterion": "output cannot escape root", "status": "executed", "evidence": ["native/tests/security/test_containment.py", "artifacts/containment/containment-run.json"]},
+    {"criterion": "child/descendants terminated", "status": "executed", "evidence": ["native/tests/security/test_containment.py"]},
+    {"criterion": "successful unrelated files remain valid", "status": "executed", "evidence": ["native/tests/security/test_containment.py"]},
+    {"criterion": "unsupported OS limits reported", "status": "executed", "evidence": ["native/tests/security/test_containment.py"]},
+    {"criterion": "actual container no-network test uses owned synthetic files and records image digest.", "status": "blocked", "evidence": ["artifacts/containment/missing-runtime.md", "artifacts/containment/host.json"]}
+  ],
+  "acceptance_criteria_evidence": {
+    "Source bytes unchanged": {"status": "executed", "evidence": ["artifacts/tasks/T40/commands.log"]},
+    "output cannot escape root": {"status": "executed", "evidence": ["artifacts/containment/containment-run.json"]},
+    "child/descendants terminated": {"status": "executed", "evidence": ["artifacts/tasks/T40/commands.log"]},
+    "successful unrelated files remain valid": {"status": "executed", "evidence": ["artifacts/tasks/T40/commands.log"]},
+    "unsupported OS limits reported": {"status": "executed", "evidence": ["artifacts/tasks/T40/commands.log"]},
+    "actual container no-network test uses owned synthetic files and records image digest.": {"status": "blocked", "evidence": ["artifacts/containment/missing-runtime.md"]}
+  },
+  "review": {"status": "pending", "path": "artifacts/tasks/T40/review.md"},
+  "limitations": [
+    "Docker daemon not running; OrbStack was not started (prompt forbids starting an idle VM).",
+    "T47 hashed wheels are absent; production Dockerfile cannot be built yet.",
+    "Independent review pending."
+  ]
+}

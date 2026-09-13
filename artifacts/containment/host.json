@@ -1,0 +1,6 @@
+{
+  "platform": "darwin",
+  "docker_cli": "/usr/local/bin/docker",
+  "docker_daemon": false,
+  "container_criterion": "blocked"
+}

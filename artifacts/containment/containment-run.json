@@ -1,0 +1,38 @@
+{
+  "collected": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "invocation-flags",
+      "ok": true,
+      "detail": "missing=[]"
+    },
+    {
+      "name": "digest-pinned-dockerfile",
+      "ok": true,
+      "detail": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285"
+    },
+    {
+      "name": "nonroot-user",
+      "ok": true,
+      "detail": "65532"
+    },
+    {
+      "name": "no-processing-network-in-script",
+      "ok": true,
+      "detail": "network none"
+    },
+    {
+      "name": "script-fails-closed-without-daemon",
+      "ok": true,
+      "detail": "exit 4"
+    },
+    {
+      "name": "refuses-home-root-mount",
+      "ok": true,
+      "detail": "exit 2"
+    }
+  ]
+}

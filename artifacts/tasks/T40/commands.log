@@ -1,0 +1,17 @@
+# T40 commands
+date: 2026-09-13T13:20Z
+base: 78750769d1a29d58b7b79f91c1c8ffd749dc4eac
+implementation: efa11d4b97ec94b732216524aea4f405b629821f
+
+$ uv run --project native python -m pytest native/tests/security -q
+9 passed in 1.85s
+exit 0
+
+$ python3 tests/containment/run.py
+collected 6 passed 6 failed 0 skipped 0
+container: blocked
+docker CLI present; daemon unix:///Users/zubair/.orbstack/run/docker.sock not running
+exit 0
+
+$ sh scripts/run_native_container.sh --source-root <spaced> --out <spaced> -- inspect ...
+exit 4  docker daemon unavailable
