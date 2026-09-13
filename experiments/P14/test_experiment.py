@@ -149,6 +149,15 @@ class TestP14Experiment(unittest.TestCase):
         self.assertEqual(data["integration_decision"], "rejected_from_production")
         self.assertGreater(len(data["rejection_reasons"]), 0)
 
+    def test_resolve_manifest_explicit_missing_fails(self) -> None:
+        """Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests."""
+        with self.assertRaises(FileNotFoundError):
+            resolve_manifest("/tmp/nonexistent_p14_dir/development.json")
+        with self.assertRaises(FileNotFoundError):
+            resolve_manifest("nonexistent_p14.json")
+        self.assertTrue(resolve_manifest(None).is_file())
+        self.assertTrue(resolve_manifest("evaluation/manifests/development.json").is_file())
+
 
 def run_tests() -> int:
     suite = unittest.TestLoader().loadTestsFromTestCase(TestP14Experiment)

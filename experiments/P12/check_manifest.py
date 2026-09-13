@@ -90,20 +90,6 @@ def audit_candidate_archive(archive_path: Path) -> dict[str, Any]:
                 wasm_p = Path(tmpdir) / wasm_files[0]
                 if wasm_p.is_file():
                     wasm_audit = verify_wasm_binary(wasm_p.read_bytes())
-
-            return {
-                "present": True,
-                "path": str(archive_path.relative_to(ROOT)),
-                "size_bytes": actual_size,
-                "sha256": actual_sha,
-                "size_valid": True,
-                "sha256_valid": True,
-                "archive_members": members[:10],
-                "wasm_files": wasm_files,
-                "wasm_audit": wasm_audit,
-                "status": "candidate_verified" if (wasm_audit and wasm_audit.get("valid")) else "candidate_unverified_wasm",
-                "message": "Archive integrity and WASM binary structure verified.",
-            }
         except Exception as e:
             return {
                 "present": True,
@@ -116,6 +102,26 @@ def audit_candidate_archive(archive_path: Path) -> dict[str, Any]:
                 "message": f"Archive decompression/extraction error: {e}",
             }
 
+    vendor_dist = ROOT / "experiments" / "P12" / "vendor" / "pdfium"
+    if not (vendor_dist / "dist" / "pdfium.wasm").is_file():
+        vendor_dist.mkdir(parents=True, exist_ok=True)
+        with tarfile.open(archive_path, "r:gz") as tar:
+            tar.extractall(path=vendor_dist)
+
+    return {
+        "present": True,
+        "path": str(archive_path.relative_to(ROOT)),
+        "size_bytes": actual_size,
+        "sha256": actual_sha,
+        "size_valid": True,
+        "sha256_valid": True,
+        "archive_members": members[:10],
+        "wasm_files": wasm_files,
+        "wasm_audit": wasm_audit,
+        "status": "candidate_verified" if (wasm_audit and wasm_audit.get("valid")) else "candidate_unverified_wasm",
+        "message": "Archive integrity and WASM binary structure verified.",
+    }
+
 
 def check_candidate_asset(search_paths: list[Path]) -> dict[str, Any]:
     found_path: Path | None = None
@@ -126,7 +132,6 @@ def check_candidate_asset(search_paths: list[Path]) -> dict[str, Any]:
             break
 
     if not found_path:
-        # Candidate not present in repository: record attempted preparation under offline containment
         return {
             "present": False,
             "path": None,
@@ -135,11 +140,11 @@ def check_candidate_asset(search_paths: list[Path]) -> dict[str, Any]:
             "size_valid": False,
             "sha256_valid": False,
             "status": "blocked_missing_candidate_archive",
-            "message": f"Candidate archive {CANDIDATE_ARCHIVE} not present in offline repository.",
-            "attempted_preparation": {
-                "command": PREPARATION_COMMAND,
-                "error": "Offline containment policy forbids external network fetch during test execution (Invariant I13)",
-                "exit_code": 7,
+            "message": f"Candidate archive {CANDIDATE_ARCHIVE} not present in search paths.",
+            "preparation_record": {
+                "proposed_command": PREPARATION_COMMAND,
+                "release_url": f"https://github.com/embedpdf/embed-pdf-viewer/releases/tag/{CANDIDATE_RELEASE}",
+                "status": "candidate_archive_not_staged",
             },
             "actionable_remediation": (
                 f"Stage verified {CANDIDATE_ARCHIVE} (SHA-256: {CANDIDATE_SHA256}, {CANDIDATE_SIZE_BYTES} bytes) "

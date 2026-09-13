@@ -137,6 +137,15 @@ class TestP11Experiment(unittest.TestCase):
         px_box = pt_to_px(box_pt, 240.0, 2.0, 640, 480)
         self.assertEqual(px_box, (100, 200, 200, 280))
 
+    def test_resolve_manifest_explicit_missing_fails(self) -> None:
+        """Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests."""
+        with self.assertRaises(FileNotFoundError):
+            resolve_manifest("/tmp/nonexistent_p11_dir/development.json")
+        with self.assertRaises(FileNotFoundError):
+            resolve_manifest("nonexistent_p11.json")
+        self.assertTrue(resolve_manifest(None).is_file())
+        self.assertTrue(resolve_manifest("evaluation/manifests/development.json").is_file())
+
 
 def run_tests() -> int:
     suite = unittest.TestLoader().loadTestsFromTestCase(TestP11Experiment)

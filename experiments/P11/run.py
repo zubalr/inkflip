@@ -39,10 +39,28 @@ except (ImportError, ModuleNotFoundError):
 TARGET_FAMILIES = {"adjacent-crop", "ocr-material", "native-unicode"}
 
 
+DEFAULT_MANIFEST = "evaluation/manifests/development.json"
+
+
 def resolve_manifest(manifest_arg: str | None) -> Path:
-    """Resolve manifest argument to an existing manifest path."""
-    if not manifest_arg:
-        manifest_arg = "evaluation/manifests/development.json"
+    """Resolve manifest argument to an existing manifest path.
+
+    Distinguishes documented default from explicit override:
+    - None, '', or the documented default ('evaluation/manifests/development.json')
+      will check evaluation/manifests/development.json, falling back to fixtures/manifest.json.
+    - Any other explicitly supplied path (e.g. /tmp/.../development.json or custom paths)
+      must exist on disk; if missing, raises FileNotFoundError without fallback.
+    """
+    if manifest_arg is None or manifest_arg == "" or manifest_arg == DEFAULT_MANIFEST:
+        cand_default = ROOT / DEFAULT_MANIFEST
+        if cand_default.is_file():
+            return cand_default
+        cand_fixtures = ROOT / "fixtures" / "manifest.json"
+        if cand_fixtures.is_file():
+            return cand_fixtures
+        raise FileNotFoundError(
+            f"Documented default manifests not found: checked {cand_default} and {cand_fixtures}"
+        )
 
     p = Path(manifest_arg)
     if not p.is_absolute():
@@ -50,18 +68,6 @@ def resolve_manifest(manifest_arg: str | None) -> Path:
 
     if p.is_file():
         return p
-
-    if p.name == "development.json":
-        cand = ROOT / "fixtures" / "manifest.json"
-        if cand.is_file():
-            return cand
-        alt = p.with_name("development.corpus.json")
-        if alt.is_file():
-            return alt
-
-    stem_corpus = p.with_name(p.stem + ".corpus.json")
-    if stem_corpus.is_file():
-        return stem_corpus
 
     raise FileNotFoundError(f"Corpus manifest not found: {manifest_arg}")
 

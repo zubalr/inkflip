@@ -117,6 +117,16 @@ class TestPaintOrderExperiment(unittest.TestCase):
         disjoint_rect = [0.0, 0.0, 20.0, 20.0]
         self.assertEqual(p09_runner.compute_rect_intersection(text_box, disjoint_rect), 0.0)
 
+    def test_resolve_manifest_explicit_missing_fails(self):
+        """Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests."""
+        with self.assertRaises(FileNotFoundError):
+            p09_runner.resolve_manifest("/tmp/nonexistent_p09_dir/development.json")
+        with self.assertRaises(FileNotFoundError):
+            p09_runner.resolve_manifest("nonexistent_p09.json")
+        # Documented defaults resolve
+        self.assertTrue(p09_runner.resolve_manifest(None).is_file())
+        self.assertTrue(p09_runner.resolve_manifest("evaluation/manifests/development.json").is_file())
+
 
 def run_tests() -> int:
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPaintOrderExperiment)
