@@ -59,11 +59,11 @@ PSM6 page raw_text: QUARTERLY’ SUMMARY INVOICE 2a26-8417 AMOUNT CUE $168. 6 IS
 [1A[2Ktests/readers/tesseract.spec.ts:2732:3 › independent real zombie-job probe (real engine) › zombie recognize on the reused worker cannot deliver its result to a newer job
 ZOMBIE_JOB_CROSSTALK {"recogCalls":[{"jobId":"j_2_ocr_0_0_0","bytes":47962},{"jobId":"j_3_ocr_0_0_0","bytes":44030},{"jobId":"j_4_ocr_0_0_0","bytes":44030}],"r1":{"ok":true,"status":"cancelled","reason":"user_cancel"},"r2":{"ok":true,"status":"completed","reason":"unreadable_pixels","text":"","rasterId":"synthetic_blank_0","occurrences":0},"r3":{"status":"completed","reason":"unreadable_pixels","text":"","attempt":0},"progress":[{"status":"loading tesseract core","progress":0},{"status":"loading tesseract core","progress":1},{"status":"initializing tesseract","progress":0},{"status":"initializing tesseract","progress":1},{"status":"loading language traineddata","progress":0},{"status":"loading language traineddata","progress":0.5},{"status":"loading language traineddata","progress":1},{"status":"initializing api","progress":0},{"status":"initializing api","progress":1}],"errors":[]} pageerrors: []
 
-[1A[2K  45 passed (12.0s)
+[1A[2K  45 passed (11.0s)
 $ python3 scripts/task_acceptance.py run test:browser tests/readers/tesseract.spec.ts
-(node:99730) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:86553) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:99735) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:86561) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0

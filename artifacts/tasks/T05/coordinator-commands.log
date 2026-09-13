@@ -1,9 +1,9 @@
 python3 scripts/make_fixtures.py --check
-check ok: 91 files in /Users/zubair/Code/Projects/pdf project/worktrees/refresh-a/fixtures match deterministic regeneration
+check ok: 161 files in /Users/zubair/Code/Projects/pdf project/worktrees/integrate/fixtures match deterministic regeneration
 
 Exit: 0
 
-python3 -m unittest discover -s tests/fixtures -v
+uv run --frozen --project native python -m unittest discover -s tests/fixtures -v
 test_completed_failure_crash_stale_preserve_first_result (test_catalog_followup.TestFaultDoubles.test_completed_failure_crash_stale_preserve_first_result) ... ok
 test_hang_and_cancel_are_reaped_with_prior_result (test_catalog_followup.TestFaultDoubles.test_hang_and_cancel_are_reaped_with_prior_result) ... ok
 test_canary_channels_bind_actual_source (test_catalog_followup.TestPriorityCatalog.test_canary_channels_bind_actual_source) ... ok
@@ -54,9 +54,29 @@ test_word_anchor_boxes_contain_matching_raster_ink (test_fixtures.TestSearchable
 test_all_units_declared_with_fiducial_square (test_fixtures.TestUserUnitFamily.test_all_units_declared_with_fiducial_square) ... ok
 test_family_shares_identical_fiducial_content (test_fixtures.TestUserUnitFamily.test_family_shares_identical_fiducial_content) ... ok
 test_unit_one_is_the_manifest_control (test_fixtures.TestUserUnitFamily.test_unit_one_is_the_manifest_control) ... ok
+test_expansion_extracts_fi_control_extracts_painted_char (test_g78_semantic.TestF13F14Extraction.test_expansion_extracts_fi_control_extracts_painted_char) ... ok
+test_latin_identity_h_extracts_declared_strings (test_g78_semantic.TestF13F14Extraction.test_latin_identity_h_extracts_declared_strings) ... ok
+test_control_is_canonical_schema_valid (test_g78_semantic.TestF22ImportStages.test_control_is_canonical_schema_valid) ... ok
+test_digest_mismatch_passes_schema_fails_binding (test_g78_semantic.TestF22ImportStages.test_digest_mismatch_passes_schema_fails_binding) ... ok
+test_png_oversized_exceeds_any_pixel_budget (test_g78_semantic.TestF22ImportStages.test_png_oversized_exceeds_any_pixel_budget) ... ok
+test_png_truncated_is_undecodable (test_g78_semantic.TestF22ImportStages.test_png_truncated_is_undecodable) ... ok
+test_script_string_is_schema_valid_and_inert (test_g78_semantic.TestF22ImportStages.test_script_string_is_schema_valid_and_inert) ... ok
+test_unknown_key_is_rejected_at_the_schema_stage (test_g78_semantic.TestF22ImportStages.test_unknown_key_is_rejected_at_the_schema_stage) ... ok
+test_control_passes_every_rule (test_g78_semantic.TestF23BaselineRules.test_control_passes_every_rule) ... ok
+test_coverage_loss_fires_the_missing_check (test_g78_semantic.TestF23BaselineRules.test_coverage_loss_fires_the_missing_check) ... ok
+test_every_subdocument_is_canonical_schema_valid (test_g78_semantic.TestF23BaselineRules.test_every_subdocument_is_canonical_schema_valid) ... ok
+test_mismatched_doc_fails_the_binding_stage (test_g78_semantic.TestF23BaselineRules.test_mismatched_doc_fails_the_binding_stage) ... ok
+test_silent_refresh_fires_the_count_rule (test_g78_semantic.TestF23BaselineRules.test_silent_refresh_fires_the_count_rule) ... ok
+test_border_ink_inside_invisible_text_bounds_and_modes_differ (test_g78_semantic.TestF24OverlapInk.test_border_ink_inside_invisible_text_bounds_and_modes_differ) ... ok
+test_control_cache_verifies (test_g78_semantic.TestF26CacheVerification.test_control_cache_verifies) ... ok
+test_corrupt_model_fails_digest_verification (test_g78_semantic.TestF26CacheVerification.test_corrupt_model_fails_digest_verification) ... ok
+test_offline_cold_reports_missing_files (test_g78_semantic.TestF26CacheVerification.test_offline_cold_reports_missing_files) ... ok
+test_offline_warm_verifies (test_g78_semantic.TestF26CacheVerification.test_offline_warm_verifies) ... ok
+test_stale_core_fails_digest_verification (test_g78_semantic.TestF26CacheVerification.test_stale_core_fails_digest_verification) ... ok
+test_stale_worker_fails_digest_verification (test_g78_semantic.TestF26CacheVerification.test_stale_worker_fails_digest_verification) ... ok
 
 ----------------------------------------------------------------------
-Ran 50 tests in 0.776s
+Ran 70 tests in 1.391s
 
 OK
 

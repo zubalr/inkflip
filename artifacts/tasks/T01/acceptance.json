@@ -3,8 +3,8 @@
   "task_id": "T01",
   "beads_id": "pdf-t01",
   "disposition": "accepted",
-  "evaluated_commit": "f25d3ee3ddfdc1dc6bd20f1e21b6b7bf17cd7419",
-  "evaluated_at": "2026-09-12T19:40:19.536480+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:17:26.340812+00:00",
   "contract_digest": "fd3e59901cb14dbd1927d2d071c8a90af74d90c8fa8294ff2643e0dd4f3fc727",
   "worker": "codex-orchestrator",
   "commands": [
@@ -21,7 +21,7 @@
       ],
       "executed_argv": [
         "python3",
-        "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a/scripts/test_results.py",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/integrate/scripts/test_results.py",
         "--unittest",
         "discover",
         "-s",
@@ -31,18 +31,18 @@
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 49,
-        "passed": 49,
+        "collected": 56,
+        "passed": 56,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T01/commands.log": "dfb215d768e97e0180fcb21a7c82e8b706696e994514c6667d97b2120f177d10",
-    "artifacts/tasks/T01/coordinator-commands.log": "075f85a6660d982af407caa29290b6431b21c1d3bcd813914e3497204464d19a",
+    "artifacts/tasks/T01/coordinator-commands.log": "f0e506b5d5f7e4900c31d0f5b0e1254c5d985295674bc70f2730ea4dc7eeb1ca",
     "artifacts/tasks/T01/origin-revalidation.json": "733a97ae3ae31f90f718bb1f4e3456ae378a968546899091c5f876e0aa45baa3",
     "artifacts/tasks/T01/peer-review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
     "artifacts/tasks/T01/receipt.json": "5e6990cc87037f3eacee3ae4bbea4dd2fc4a2be3b1a4e7f088364772f6039e69",
@@ -51,8 +51,8 @@
     "artifacts/tasks/T01/refresh-20260912/prior-review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
     "artifacts/tasks/T01/refresh-20260912/review-inputs.json": "d6ab5525ae5ebd87edcf1dafd8e5827845fccad59810e71f241c91e62435769c",
     "artifacts/tasks/T01/refresh-20260912/run.json": "fe60a180fda62340bfee9755d0a7ac8e69886b3e946c81b819789551ff697500",
-    "artifacts/tasks/T01/review.md": "2350f297c73aaafe6c18cee622ca9fd1448fbc102ae12967e68bd9268aeef14d",
-    "artifacts/tasks/T01/run.json": "01c4c376065b2a70b321ce0a2783a07199d1d7c852b6f960e6b887469164503d"
+    "artifacts/tasks/T01/review.md": "689f7c928b35628dbf548885d3f5dab773c262007e10f67e3d227b1429134f22",
+    "artifacts/tasks/T01/run.json": "75b436a6def9dc85d5620dd134d6bcd32d40fc84b90f938bcaa9a5b785577ee8"
   },
   "criteria": {
     "A clean checkout exposes documented commands": [
@@ -93,7 +93,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "codex-local-review"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T01/review.md"
   }

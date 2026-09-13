@@ -3,8 +3,8 @@
   "task_id": "T09",
   "beads_id": "pdf-t09",
   "disposition": "accepted",
-  "evaluated_commit": "e804f4269441a711203903f466a2b3f7f958d141",
-  "evaluated_at": "2026-09-12T19:42:47.347350+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:17:56.323991+00:00",
   "contract_digest": "2d8d58b1f7cf2fed2f1fc113210f482702e7e9b1705e464c1b5f7c0a75996843",
   "worker": "devin-t09",
   "commands": [
@@ -32,20 +32,20 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-b",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T09/commands.log": "7ebb9a52ceae94db79c3db37325e0d3ad6b2921283f8ceb76fef2c68e3f70985",
-    "artifacts/tasks/T09/coordinator-commands.log": "7fd12b2ff8b30d59172a0d1bc88f7a51487057678643a49ea40cda63bc1655a3",
+    "artifacts/tasks/T09/coordinator-commands.log": "ae2ef4fc5dd24d0f5b30fd06b42059dffd192dabde9b0e488f6b1fb808b3e680",
     "artifacts/tasks/T09/receipt.json": "d997fd5677de35127f2bc038d8d4cf572658999a5a0774ad0ec0dcac3eafdead",
     "artifacts/tasks/T09/refresh-20260912/commands.log": "e1a60bdd7d68fcff0275dc367b4a37f64ab262e25a0ce0d16b8842f811a7caf9",
     "artifacts/tasks/T09/refresh-20260912/prior-review.md": "5f6f952d69d1af8fc965e34922bb07d1c7e3bcd25bdfa15ff500c4b5f672fe6d",
     "artifacts/tasks/T09/refresh-20260912/review-inputs.json": "90970b609a8cbec2dd92b687c980e5061f4cb23a04bb41809e74a8c159d8d8bd",
     "artifacts/tasks/T09/refresh-20260912/run.json": "afc9ed643fcb38ed49fd49b3c658ed56373f7868d3950133896a26956b7938c3",
-    "artifacts/tasks/T09/review.md": "8cc9c6ae3bd1b045b9996c81d770c5f264c6e30c8b8c3fb757204ebf893fd2e6",
-    "artifacts/tasks/T09/run.json": "2ac8bae4528f577f72c32203e7e0970634c9c14d7c47e91dda17d8ff6fa259e4"
+    "artifacts/tasks/T09/review.md": "589ec3148748636be106da7aa66905ff4363c811170041b4b1f99c63ad3c6d6c",
+    "artifacts/tasks/T09/run.json": "2e64c7e579fcbb698404aed2b348316458ce5ebd145d442b49e2985a503b33c8"
   },
   "criteria": {
     "Real mapping and clean PDFs processed through bytes": [
@@ -100,7 +100,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "devin-cloud-review-t09"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T09/review.md"
   }

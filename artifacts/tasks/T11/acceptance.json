@@ -3,8 +3,8 @@
   "task_id": "T11",
   "beads_id": "pdf-t11",
   "disposition": "accepted",
-  "evaluated_commit": "f25d3ee3ddfdc1dc6bd20f1e21b6b7bf17cd7419",
-  "evaluated_at": "2026-09-12T19:40:11.510599+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:18:08.147257+00:00",
   "contract_digest": "93ce32bd4465ff9d033d963a18b5314dd41bc757408cf8571093fac2e9a8e8f5",
   "worker": "devin-subagent-t11",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-c0nppby5/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-zrjywb2o/results",
         "--test",
         "tests/runtime/runtime.test.mjs"
       ],
@@ -30,7 +30,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
@@ -42,8 +42,8 @@
     "artifacts/tasks/T11/refresh-20260912/prior-review.md": "fecb566befaecb2b73ad3c86c210044fc11a07436ee04dece5382ebe2b3e2995",
     "artifacts/tasks/T11/refresh-20260912/review-inputs.json": "805be37a4d831959ad09b2239c25de3568bb2cba8b3d794ea248a63ec02b0892",
     "artifacts/tasks/T11/refresh-20260912/run.json": "935cefdd7c180210f6eb5f403154a748da90d776210d30eb3af0bb0fa9c23b72",
-    "artifacts/tasks/T11/review.md": "fecb566befaecb2b73ad3c86c210044fc11a07436ee04dece5382ebe2b3e2995",
-    "artifacts/tasks/T11/run.json": "b6b0ea88430e920989a5a8283e650150096427bb1d35aca50667f1b253262dc0"
+    "artifacts/tasks/T11/review.md": "2683c7ba16bbfcd966f1a14d429435715dda367fc0ba015233397f4c726a2b48",
+    "artifacts/tasks/T11/run.json": "6e9ddc23c000fea2d67f1e21362bef583845050489eef9db58a70cae633311f6"
   },
   "criteria": {
     "Stale results after replace/cancel cannot render": [
@@ -90,7 +90,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "devin-review-t11"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T11/review.md"
   }

@@ -3,8 +3,8 @@
   "task_id": "T03",
   "beads_id": "pdf-t03",
   "disposition": "accepted",
-  "evaluated_commit": "5cfa64e64242d464eee4dc15b4f8408f49e7971d",
-  "evaluated_at": "2026-09-12T22:03:39.698666+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:17:34.852358+00:00",
   "contract_digest": "d7c3858af936814d640a4f0fb48aca218722a43b93834cca57378eb85fd128f4",
   "worker": "devin-subagent-t03",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-4u5c6z9d/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-8hiu_5am/results",
         "--test",
         "tests/contracts/contracts.test.mjs"
       ],
@@ -30,7 +30,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     },
     {
@@ -56,7 +56,7 @@
         "pytest",
         "native/tests/contracts",
         "-q",
-        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-d3a7kcss/results"
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-xabjz527/results"
       ],
       "cwd": ".",
       "exit": 0,
@@ -66,7 +66,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
@@ -78,8 +78,8 @@
     "artifacts/tasks/T03/refresh-20260912/prior-review.md": "aa4a869e3f24028b360449ed334cb121e6dbbe71805551927d7720e142d342d4",
     "artifacts/tasks/T03/refresh-20260912/review-inputs.json": "50c856ba658c1d1631c848480cab33d26e187b309fcf0925e98e75721ddf4ac2",
     "artifacts/tasks/T03/refresh-20260912/run.json": "623844be26d637e585e4e98d40b37b08c7612b603c6b455db21433d48f8e94b3",
-    "artifacts/tasks/T03/review.md": "aa4a869e3f24028b360449ed334cb121e6dbbe71805551927d7720e142d342d4",
-    "artifacts/tasks/T03/run.json": "43651e0245f5a9e3f88e0721320dd78234c80f70eb4e1951b256727380a9f6d1"
+    "artifacts/tasks/T03/review.md": "5dbe7fe20cb9953889cc75298766cb342e5fb45551cec3a806d7c5d5d1a932b4",
+    "artifacts/tasks/T03/run.json": "2d2885b8d43548ccb90045e489b697360faa57d08fdedd0dfef4b4cb45baeac1"
   },
   "criteria": {
     "All valid/invalid fixtures and expected failure codes pass in TS/Python": [
@@ -121,7 +121,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "devin-review-t03"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T03/review.md"
   }

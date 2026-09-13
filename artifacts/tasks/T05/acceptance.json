@@ -3,9 +3,9 @@
   "task_id": "T05",
   "beads_id": "pdf-t05",
   "disposition": "accepted",
-  "evaluated_commit": "25d6c43c901c43b5306cbcad52413727d706966c",
-  "evaluated_at": "2026-09-12T22:04:11.794711+00:00",
-  "contract_digest": "0b0c8c3743653b268e2b571586905b81dad38a4d4163557118ff15e48a72d67f",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:14:09.248920+00:00",
+  "contract_digest": "4d0b1d1ddb52b42093b5c49c121bb6910b999b51d14993bceff91b65c71fb07d",
   "worker": "zcode-t05",
   "commands": [
     {
@@ -22,13 +22,18 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     },
     {
-      "segment": "python -m unittest discover -s tests/fixtures -v",
+      "segment": "uv run --frozen --project native python -m unittest discover -s tests/fixtures -v",
       "argv": [
-        "python3",
+        "uv",
+        "run",
+        "--frozen",
+        "--project",
+        "native",
+        "python",
         "-m",
         "unittest",
         "discover",
@@ -37,8 +42,13 @@
         "-v"
       ],
       "executed_argv": [
-        "python3",
-        "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a/scripts/test_results.py",
+        "uv",
+        "run",
+        "--frozen",
+        "--project",
+        "native",
+        "python",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/integrate/scripts/test_results.py",
         "--unittest",
         "discover",
         "-s",
@@ -48,18 +58,18 @@
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 50,
-        "passed": 50,
+        "collected": 70,
+        "passed": 70,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T05/commands.log": "e117b8815bd14498ddf6af27ab9b33cb4c96237566f0081237f119043efd557b",
-    "artifacts/tasks/T05/coordinator-commands.log": "c1f5a5ed364cbcf502a0648ddac59f84713eb8df360c22efc5b96f69b910cf5e",
+    "artifacts/tasks/T05/coordinator-commands.log": "671589382cdbae7335c453124f3142e88f04974447e6776e0eaedadaf83d7229",
     "artifacts/tasks/T05/criteria-evidence.md": "0d09793717e986b633133ffeda4a639320d151ae2a08698dd98696a047607860",
     "artifacts/tasks/T05/receipt.json": "30c102c8299ac38552c0c187a4b87df0af89f54983d823154ea1803e84031ace",
     "artifacts/tasks/T05/refresh-20260912/commands.log": "0f79e70e4a216f38121b292a5b94e2afbe758fb2e6017f99defaffeb43c8a33e",
@@ -70,8 +80,8 @@
     "artifacts/tasks/T05/render-evidence/mapping-control.pdf.png": "edebb8f6e60554b80b778cbd14fb1123a790a440f86073c3ee412b382c97f7bf",
     "artifacts/tasks/T05/render-evidence/scan-correct.pdf.png": "193edbe52c97af2a25de82db7e647e44f1a82cfdbacf641309caeaea1537e9d8",
     "artifacts/tasks/T05/render-evidence/scan-raster-only.pdf.png": "193edbe52c97af2a25de82db7e647e44f1a82cfdbacf641309caeaea1537e9d8",
-    "artifacts/tasks/T05/review.md": "5d7e45367277f6c35f01c14deb7c287698c180c539bd2980fd0029bae6ba3d7c",
-    "artifacts/tasks/T05/run.json": "9e6c0db1b5a03bc8db4b044ca746fce4f2c87cac3b5cc85dbb9f6f1213fb13a0"
+    "artifacts/tasks/T05/review.md": "652003809fed36d482ca8b20388cb7fab8848238afbe4e28d16bd452d59e25e2",
+    "artifacts/tasks/T05/run.json": "d5e3c40ef5bf0b8458feddf0d2438e0f25b57a26c469b24bbd25d499a6fd50d0"
   },
   "criteria": {
     "Repeated generation is byte-identical or declared pinned asset-dependent": [
@@ -122,7 +132,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "antigravity-peer-reviewer"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T05/review.md"
   }

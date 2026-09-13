@@ -11,16 +11,16 @@ Running 13 tests using 1 worker
 [1A[2K[6/13] tests/browser/open.spec.ts:457:1 › 1000-page boundary: real generated PDF opens; 1001 is a distinct error
 [1A[2K[7/13] tests/browser/open.spec.ts:507:1 › new file revokes the old generation before teardown; stale messages rejected
 [1A[2K[8/13] tests/browser/open.spec.ts:631:1 › 25 pages: select-all caps visibly; the plan enumerates exactly the selection
-[1A[2K[9/13] tests/browser/open.spec.ts:696:1 › region drag and numeric entry stay inside page bounds; padding explicit
-[1A[2K[10/13] tests/browser/open.spec.ts:771:1 › rotated page: drag converts to canonical bounds inside page extent
-[1A[2K[11/13] tests/browser/open.spec.ts:809:1 › huge page opens; region validation quotes its real bounds
-[1A[2K[12/13] tests/browser/open.spec.ts:833:1 › no document data reaches the URL, storage or any network request
-[1A[2K[13/13] tests/browser/open.spec.ts:929:1 › clear releases the document and returns the drop zone to idle
-[1A[2K  13 passed (12.1s)
+[1A[2K[9/13] tests/browser/open.spec.ts:704:1 › region drag and numeric entry stay inside page bounds; padding explicit
+[1A[2K[10/13] tests/browser/open.spec.ts:779:1 › rotated page: drag converts to canonical bounds inside page extent
+[1A[2K[11/13] tests/browser/open.spec.ts:817:1 › huge page opens; region validation quotes its real bounds
+[1A[2K[12/13] tests/browser/open.spec.ts:841:1 › no document data reaches the URL, storage or any network request
+[1A[2K[13/13] tests/browser/open.spec.ts:937:1 › clear releases the document and returns the drop zone to idle
+[1A[2K  13 passed (11.6s)
 $ python3 scripts/task_acceptance.py run test:browser tests/browser/open.spec.ts
-(node:99726) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:86400) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:99734) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:86420) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0

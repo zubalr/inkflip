@@ -16,11 +16,11 @@ Running 13 tests using 1 worker
 [1A[2K[11/13] tests/reports/import.spec.ts:1018:1 › a superseded source read that fails emits nothing under the new report
 [1A[2K[12/13] tests/reports/import.spec.ts:1151:1 › declared-size gate rejects before any byte is read
 [1A[2K[13/13] tests/reports/import.spec.ts:1188:1 › installed readers plus attached source make replay readiness explicit
-[1A[2K  13 passed (5.6s)
+[1A[2K  13 passed (4.1s)
 $ python3 scripts/task_acceptance.py run test:browser tests/reports/import.spec.ts
-(node:96131) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:86957) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:96162) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:86959) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0

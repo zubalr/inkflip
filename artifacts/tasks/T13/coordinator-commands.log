@@ -12,13 +12,13 @@ Running 11 tests using 1 worker
 [1A[2K[7/11] tests/browser/viewer.spec.ts:292:3 › T13: Integrated Viewer & Evidence Navigation › home landing view does not overflow at 360px viewport (P2-F2)
 [1A[2K[8/11] tests/browser/viewer.spec.ts:309:3 › T13: Integrated Viewer & Evidence Navigation › report import rejects degenerate/invalid JSON without white-screen crash (P2)
 [1A[2K[9/11] tests/browser/viewer.spec.ts:340:3 › T13: Integrated Viewer & Evidence Navigation › PDF open candidate validation rejects non-PDF and does not fabricate findings (P1)
-[1A[2K[10/11] tests/browser/viewer.spec.ts:376:3 › T13: Integrated Viewer & Evidence Navigation › canonical report import accepts page-level occurrences with polygon: null (P1)
-[1A[2K[11/11] tests/browser/viewer.spec.ts:434:3 › T13: Integrated Viewer & Evidence Navigation › FileDrop drag-and-drop handles PDF candidate validation (P3)
-[1A[2K  11 passed (6.2s)
+[1A[2K[10/11] tests/browser/viewer.spec.ts:375:3 › T13: Integrated Viewer & Evidence Navigation › canonical sealed report import mounts the viewer (P1)
+[1A[2K[11/11] tests/browser/viewer.spec.ts:401:3 › T13: Integrated Viewer & Evidence Navigation › FileDrop drag-and-drop handles PDF candidate validation (P3)
+[1A[2K  11 passed (5.1s)
 $ python3 scripts/task_acceptance.py run test:browser tests/browser/viewer.spec.ts
-(node:99653) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:81592) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:99682) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:81595) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0

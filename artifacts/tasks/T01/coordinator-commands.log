@@ -33,6 +33,10 @@ test_package_boundaries_exist_and_match_root_references (test_bootstrap.Workspac
 test_root_manifest_declares_workspaces_without_install_side_effects (test_bootstrap.WorkspaceBoundaryTests.test_root_manifest_declares_workspaces_without_install_side_effects) ... ok
 test_styles_contract_uses_central_tokens (test_bootstrap.WorkspaceBoundaryTests.test_styles_contract_uses_central_tokens) ... ok
 test_web_entry_is_local_strict_port_and_egress_free (test_bootstrap.WorkspaceBoundaryTests.test_web_entry_is_local_strict_port_and_egress_free) ... ok
+test_blockers_prevent_scenarios_and_late_success_receipt (test_gate_blockers.GateBlockerTests.test_blockers_prevent_scenarios_and_late_success_receipt) ... ok
+test_closed_or_absent_dependencies_allow_run (test_gate_blockers.GateBlockerTests.test_closed_or_absent_dependencies_allow_run) ... ok
+test_open_followup_blocks_gate_owner (test_gate_blockers.GateBlockerTests.test_open_followup_blocks_gate_owner) ... ok
+test_unavailable_or_malformed_state_fails_closed (test_gate_blockers.GateBlockerTests.test_unavailable_or_malformed_state_fails_closed) ... ok
 test_a_matching_label_cannot_hide_a_different_executed_command (test_receipts.ReceiptTests.test_a_matching_label_cannot_hide_a_different_executed_command) ... ok
 test_changed_evidence_invalidates_a_receipt (test_receipts.ReceiptTests.test_changed_evidence_invalidates_a_receipt) ... ok
 test_code_changes_invalidate_an_old_green_receipt (test_receipts.ReceiptTests.test_code_changes_invalidate_an_old_green_receipt) ... ok
@@ -40,6 +44,9 @@ test_committed_review_and_real_results_pass (test_receipts.ReceiptTests.test_com
 test_each_required_suite_needs_its_own_counts (test_receipts.ReceiptTests.test_each_required_suite_needs_its_own_counts) ... ok
 test_empty_or_malformed_receipt_cannot_pass (test_receipts.ReceiptTests.test_empty_or_malformed_receipt_cannot_pass) ... ok
 test_missing_manual_evidence_or_independent_review_cannot_pass (test_receipts.ReceiptTests.test_missing_manual_evidence_or_independent_review_cannot_pass) ... ok
+test_native_admission_accepts_fresh_independently_reviewed_receipt (test_receipts.ReceiptTests.test_native_admission_accepts_fresh_independently_reviewed_receipt) ... ok
+test_native_admission_rejects_committed_empty_prerequisite_receipt (test_receipts.ReceiptTests.test_native_admission_rejects_committed_empty_prerequisite_receipt) ... ok
+test_native_admission_rejects_stale_predecessor_code (test_receipts.ReceiptTests.test_native_admission_rejects_stale_predecessor_code) ... ok
 test_record_builder_binds_extra_manual_evidence_and_detects_later_changes (test_receipts.ReceiptTests.test_record_builder_binds_extra_manual_evidence_and_detects_later_changes) ... ok
 test_record_builder_produces_a_valid_bound_receipt_from_a_reviewed_run (test_receipts.ReceiptTests.test_record_builder_produces_a_valid_bound_receipt_from_a_reviewed_run) ... ok
 test_record_builder_rejects_an_unexecuted_criterion (test_receipts.ReceiptTests.test_record_builder_rejects_an_unexecuted_criterion) ... ok
@@ -56,7 +63,7 @@ test_node_unmatched_pattern_cannot_fall_back_to_all_tests (test_result_reports.R
 test_pre_release_checks_accepted_prior_gate_owners (test_result_reports.ResultReportTests.test_pre_release_checks_accepted_prior_gate_owners) ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 7.845s
+Ran 56 tests in 6.046s
 
 OK
 

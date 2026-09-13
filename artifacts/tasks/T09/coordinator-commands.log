@@ -18,11 +18,11 @@ pinned pdf.mjs sha256=91e29f812c593904e8d48d022db5ddf93e3443575d4765ac9bfbb42494
 [1A[2K[8/10] tests/readers/pdfjs.spec.ts:803:1 › unavailable capabilities terminate unsupported with named reasons
 [1A[2K[9/10] tests/readers/pdfjs.spec.ts:855:1 › open verifies digest; closing one generation spares the next
 [1A[2K[10/10] tests/readers/pdfjs.spec.ts:929:1 › F10/F11 real bytes preserve mapping outputs and four duplicate positions
-[1A[2K  10 passed (4.4s)
+[1A[2K  10 passed (3.3s)
 $ python3 scripts/task_acceptance.py run test:browser tests/readers/pdfjs.spec.ts
-(node:3152) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:86485) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:3156) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:86489) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
 Exit: 0

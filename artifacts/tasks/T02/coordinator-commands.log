@@ -85,7 +85,7 @@ test_real_browser_worker_lifecycle (test_tesseract_worker.TesseractWorkerTests.t
 test_registered_cases_ignore_negative_control_override (test_tesseract_worker.TesseractWorkerTests.test_registered_cases_ignore_negative_control_override) ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 7.073s
+Ran 49 tests in 7.220s
 
 OK
 

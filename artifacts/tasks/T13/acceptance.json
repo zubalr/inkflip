@@ -3,8 +3,8 @@
   "task_id": "T13",
   "beads_id": "pdf-t13",
   "disposition": "accepted",
-  "evaluated_commit": "291e36292f013c462ddb96af2a5657a1a0328e74",
-  "evaluated_at": "2026-09-12T19:41:42.034802+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:14:22.618245+00:00",
   "contract_digest": "c1ca30ee7646e1d5157913f0b41cbaafff40073280a29251414c60e5b692d1f8",
   "worker": "antigravity-t13",
   "commands": [
@@ -32,21 +32,21 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T13/commands.log": "a59409941222b257212f3e740fcce897379aa4a142b1c3dc4c3a01a5bc7a81be",
-    "artifacts/tasks/T13/coordinator-commands.log": "6ddc519766c420843e42740b8e42cc2b3567a6f111008ad52afd3e0565c4fa82",
+    "artifacts/tasks/T13/coordinator-commands.log": "da6f91f5ebdfc2f5443811091fea99ce7ca4db7e41c513b1dc6bd9a8a72f3f77",
     "artifacts/tasks/T13/receipt.json": "affd40c0e6a7bdbaced49b62406758ca9131e6e1b0fd40714d3c870662407a3a",
-    "artifacts/tasks/T13/review.md": "914339fbeca2d6e4996c538a23be7495f60ebf8fdf04fe1bee01f01f1c5e9176",
-    "artifacts/tasks/T13/run.json": "9988cefcc3c550fa123b66826647e174712814f9e2ba5a6cf4ec527824c8b2f8",
-    "artifacts/tasks/T13/screenshots/accessible-text-layer.png": "5fda1976ecb295c5d1d14b46484cb399c6c9d05c1e60f75ffeee978910c2f2a9",
-    "artifacts/tasks/T13/screenshots/compare-sync-scroll.png": "e612aee57728e06b59de9eb513120c3ad0eaf08c9bd796fa0fce461fcc55d1a3",
-    "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png": "00083522ebfe1be91c25349395d724deb656ae201bbd052e77beaf4fa06a95d3",
-    "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png": "e98a3f08f14a9397eebabe63dfa7ed0a856857593f09e82c1847459711ea9104",
-    "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png": "1e4389c3bf5a83968f467bd2e1a853f8bfbc5ac76e1e1eb7fed09cfb09f5af4a"
+    "artifacts/tasks/T13/review.md": "394d111eca53199d524cc8ea8f63bd8715d6bd828982c3d782fe10e548e25409",
+    "artifacts/tasks/T13/run.json": "69b669449eeeafbeeefacd079871577dfb80f4a3b7611f34b33cd495533ebc4e",
+    "artifacts/tasks/T13/screenshots/accessible-text-layer.png": "aba1f89e5f9c7ac867118f66e8c108aea506945042b056e757aca4d6a8cc3dfc",
+    "artifacts/tasks/T13/screenshots/compare-sync-scroll.png": "948aaf27d30334b88a542a89656950d2d8252dadabc6386fe79d9052b9673dfd",
+    "artifacts/tasks/T13/screenshots/narrow-stacked-compare.png": "c9a2fd9ededf4e7135a3d823c07126883b2320a3fc8772763e89b29d89feaa79",
+    "artifacts/tasks/T13/screenshots/unknown-geometry-pagelevel.png": "e10662499b3d4f56193c1f21b1c273664796501d10e04aa4ec3185d8a980c634",
+    "artifacts/tasks/T13/screenshots/zoom-rotate-duplicate-selection.png": "7e6e451803a8065ad4142f35c1152aaf3f6b15b029f4dea530f07185199462d3"
   },
   "criteria": {
     "Click/keyboard finding selects correct duplicate/page after zoom/rotation": [
@@ -78,7 +78,7 @@
   "review": {
     "disposition": "approved",
     "reviewers": [
-      "review/devin/t13"
+      "devin-coordinator-delta"
     ],
     "path": "artifacts/tasks/T13/review.md"
   }
