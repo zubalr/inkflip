@@ -1,6 +1,14 @@
 {
   "platform": "darwin",
   "docker_cli": "/usr/local/bin/docker",
-  "docker_daemon": false,
-  "container_criterion": "blocked"
+  "docker_daemon": true,
+  "container_criterion": "executed",
+  "image": "inkflip-native:t40",
+  "architecture": {
+    "host_machine": "arm64",
+    "docker_architecture_line": "aarch64 linux",
+    "emulated": false,
+    "note": "linux/arm64 is native on Apple Silicon OrbStack; linux/amd64 would be emulated"
+  },
+  "daemon_detail": "docker info ok"
 }

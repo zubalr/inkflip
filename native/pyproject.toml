@@ -1,3 +1,12 @@
+[build-system]
+# Hatchling is a build-only pin. It is not a runtime dependency and must not
+# replace the T02 frozen interpreter or the runtime packages below.
+# Pin: hatchling==1.32.0 (PyPI, requires-python >=3.10; used here on 3.13.15).
+# Purpose: emit a PEP 517 wheel plus the `inkflip` console_scripts entry point
+# required by build/native/Dockerfile ENTRYPOINT ["inkflip"].
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
+
 [project]
 name = "inkflip"
 version = "0.0.0"
@@ -17,6 +26,9 @@ dependencies = [
     "jsonschema==4.26.0",
 ]
 
+[project.scripts]
+inkflip = "inkflip.cli.main:main"
+
 [dependency-groups]
 # Test-only dependencies (resolved and frozen by T02 in native/uv.lock):
 # - pytest: native test runner for `uv run --project native python -m pytest`;
@@ -25,6 +37,12 @@ dependencies = [
 dev = [
     "pytest==9.1.1",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["inkflip"]
+
+[tool.hatch.build.targets.sdist]
+include = ["inkflip", "pyproject.toml"]
 
 [tool.pytest.ini_options]
 # When pytest is invoked with native/ as rootdir it must only collect the
@@ -35,8 +53,3 @@ dev = [
 # test:native command's collection scoping is owned by the native test
 # task that lands the suite (see docs/proposals/T02.md).
 testpaths = ["tests"]
-
-[tool.uv]
-# Not packaged yet: uv sync installs dependencies only, keeping native/
-# importable via explicit sys.path in tests until a build backend is chosen.
-package = false

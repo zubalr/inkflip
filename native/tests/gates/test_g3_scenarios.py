@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
+import stat
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -278,3 +281,130 @@ class TestG3Scenarios(unittest.TestCase):
         self.assertIn("native/.venv/bin", text)
         self.assertIn("5.9.0", text)
         self.assertIn("6.18.0", text)
+
+
+def _g3_ordinary_env() -> dict[str, str]:
+    path_parts = [
+        "/usr/bin",
+        "/bin",
+        "/usr/sbin",
+        "/sbin",
+        "/usr/local/bin",
+        str(Path.home() / ".local" / "bin"),
+        "/opt/homebrew/bin",
+    ]
+    env = {
+        "HOME": os.environ.get("HOME", ""),
+        "USER": os.environ.get("USER", ""),
+        "LOGNAME": os.environ.get("LOGNAME", ""),
+        "TMPDIR": os.environ.get("TMPDIR", "/tmp"),
+        "LANG": os.environ.get("LANG", "C.UTF-8"),
+        "LC_ALL": os.environ.get("LC_ALL", "en_US.UTF-8"),
+        "PATH": os.pathsep.join(path_parts),
+        "CDPATH": "",
+    }
+    for key in ("UV_CACHE_DIR", "XDG_CACHE_HOME", "SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    return env
+
+
+class TestG3DocumentedReaderUpgradeShell(unittest.TestCase):
+    """Exercise examples/reader-upgrade/run.sh, not merely assert the file exists."""
+
+    @classmethod
+    def setUpClass(cls):
+        parent = Path(tempfile.mkdtemp(prefix="inkflip-g3-shell-"))
+        sandbox = parent / "checkout with spaces"
+        sandbox.mkdir()
+        for name in ("scripts", "native", "planning", "packages"):
+            os.symlink(ROOT / name, sandbox / name)
+        dest = sandbox / "examples" / "reader-upgrade"
+        dest.parent.mkdir()
+        shutil.copytree(ROOT / "examples" / "reader-upgrade", dest, symlinks=True)
+        (dest / "bin" / "inkflip").chmod((dest / "bin" / "inkflip").stat().st_mode | stat.S_IXUSR)
+        (dest / "run.sh").chmod((dest / "run.sh").stat().st_mode | stat.S_IXUSR)
+        cls.parent = parent
+        cls.sandbox = sandbox
+        cls.proc = subprocess.run(
+            ["/bin/sh", str(dest / "run.sh")],
+            cwd=sandbox,
+            env=_g3_ordinary_env(),
+            capture_output=True,
+            text=True,
+        )
+        cls.setup_error = None
+        if cls.proc.returncode not in (0, 5):
+            cls.setup_error = (
+                f"run.sh exit {cls.proc.returncode}\n{cls.proc.stdout}\n{cls.proc.stderr}"
+            )
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.parent, ignore_errors=True)
+
+    def setUp(self):
+        if getattr(self, "setup_error", None):
+            self.fail(self.setup_error)
+
+    def test_named_isolated_interpreters_and_html_reopen(self):
+        before = json.loads((self.sandbox / "runs" / "before" / "reports" / "mapping-control.json").read_text())
+        after = json.loads((self.sandbox / "runs" / "after" / "reports" / "mapping-control.json").read_text())
+        core.validate(before)
+        core.validate(after)
+        self.assertEqual(before["readers"][0]["version"], "5.9.0")
+        self.assertEqual(after["readers"][0]["version"], "6.18.0")
+        self.assertNotEqual(before["execution"]["environment"], after["execution"]["environment"])
+        html = (self.sandbox / "runs" / "after" / "mapping-control.html").read_text()
+        self.assertIn("<!doctype html>", html.lower())
+        self.assertIn("Content-Security-Policy", html)
+        self.assertNotIn("<script", html.lower())
+        self.assertIn(after["document"]["sha256"], html)
+
+    def test_intentional_regression_keeps_baseline_and_failed_outputs(self):
+        self.assertIn(self.proc.returncode, (0, 5), self.proc.stdout + self.proc.stderr)
+        baseline = self.sandbox / "baselines" / "before.json"
+        before_bytes = baseline.read_bytes()
+        before_digest = hashlib.sha256(before_bytes).hexdigest()
+        mutated = self.sandbox / "runs" / "after-mutated"
+        shutil.copytree(self.sandbox / "runs" / "after", mutated)
+        report_path = mutated / "reports" / "mapping-control.json"
+        report = json.loads(report_path.read_text())
+        for occ in report.get("occurrences", []):
+            occ["raw_text"] = occ.get("raw_text", "").replace("$100", "$999")
+            occ["normalized_text"], occ["normalization_map"] = core.normalize(occ["raw_text"])
+        report = core.seal(report)
+        report_path.write_text(json.dumps(report, indent=2) + "\n")
+        out = self.sandbox / "comparisons" / "mutated"
+        env = _g3_ordinary_env()
+        env["PATH"] = os.pathsep.join(
+            [
+                str(ROOT / "native" / ".venv" / "bin"),
+                str(self.sandbox / "examples" / "reader-upgrade" / "bin"),
+                env["PATH"],
+            ]
+        )
+        env["PYTHONPATH"] = str(ROOT / "native")
+        env["INKFLIP_PROFILES_DIR"] = str(ROOT / "profiles")
+        proc = subprocess.run(
+            [
+                "inkflip",
+                "compare",
+                "baselines/before.json",
+                "runs/after-mutated",
+                "--rules",
+                "examples/reader-upgrade/upgrade-rules.json",
+                "--out",
+                str(out),
+            ],
+            cwd=self.sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, EXIT_POLICY_FAILURE, proc.stdout + proc.stderr)
+        self.assertEqual(hashlib.sha256(baseline.read_bytes()).hexdigest(), before_digest)
+        self.assertEqual(baseline.read_bytes(), before_bytes)
+        self.assertTrue((self.sandbox / "runs" / "before" / "index.json").is_file())
+        self.assertTrue((self.sandbox / "runs" / "after" / "mapping-control.html").is_file())
+        self.assertTrue((out / "comparison.json").is_file() or (out / "comparison.html").is_file())

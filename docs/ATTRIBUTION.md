@@ -124,6 +124,7 @@ worker, WASM and model bytes and existing license notices are unchanged.
 ## T40 — native containment recipe (2026-09-13)
 
 - `build/native/Dockerfile` follows `planning/deployment/examples/Dockerfile.native` and pins the T02-recorded `python:3.13.15-slim-trixie` index digest. No third-party Dockerfile was copied beyond that planning recipe.
+- Native packaging uses hatchling 1.32.0 as a **build-only** PEP 517 pin to emit the `inkflip` console script. Hatchling is not a runtime dependency and is not added to the T02 frozen runtime lock.
 
 ## T46 — compatibility receipt checker (2026-09-13)
 
