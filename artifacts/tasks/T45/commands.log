@@ -1,5 +1,5 @@
 $ python3 experiments/P14/run.py --manifest evaluation/manifests/development.json --out artifacts/P14
-P14 complete: 14 fixtures evaluated (['F06', 'F07', 'F09', 'F15']), clean_corrupted=4, lost_registration=True, disposition=rejected_experiment, runtime=4.539s
+P14 complete: 14 fixtures evaluated (['F06', 'F07', 'F09', 'F15']), clean_corrupted=4, lost_registration=True, disposition=rejected_experiment, runtime=4.7018s
 Exit: 0
 
 $ python3 experiments/P14/test_experiment.py
@@ -23,7 +23,8 @@ test_source_bytes_preservation (__main__.TestP14Experiment.test_source_bytes_pre
 Verify source PDF fixtures remain byte-identical before and after execution (I01, I04). ... ok
 
 ----------------------------------------------------------------------
-Ran 9 tests in 9.011s
+Ran 9 tests in 9.311s
 
 OK
 Exit: 0
+

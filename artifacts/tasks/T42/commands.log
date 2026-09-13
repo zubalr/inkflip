@@ -1,5 +1,5 @@
 $ python3 experiments/P11/run.py --manifest evaluation/manifests/development.json --out artifacts/P11
-P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=1.15s, megapixels=5.5296MP
+P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=1.0845s, megapixels=5.5296MP
 Exit: 0
 
 $ python3 experiments/P11/test_experiment.py
@@ -19,7 +19,8 @@ Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests
 test_resource_budgets (__main__.TestP11Experiment.test_resource_budgets) ... ok
 
 ----------------------------------------------------------------------
-Ran 9 tests in 1.021s
+Ran 9 tests in 1.081s
 
 OK
 Exit: 0
+

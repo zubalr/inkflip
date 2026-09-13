@@ -1,8 +1,8 @@
 {
   "task": "T43",
   "beads_id": "pdf-t43",
-  "evaluated_commit": "eb2392a2618347876db003c685d3f7333de62d7f",
-  "evaluated_at": "2026-09-13T13:05:43.286606+00:00",
+  "evaluated_commit": "12e521e98fbd4f3c97f0db6c906e5377e9c8ac6b",
+  "evaluated_at": "2026-09-13T13:27:54.495903+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -48,8 +48,8 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "\nRunning 7 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/7] experiments/P12/browser.spec.ts:181:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a exercises default PDF.js reader rendering and text extraction in real browser\n\u001b[1A\u001b[2K[2/7] experiments/P12/browser.spec.ts:207:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a proves candidate EmbedPDF PDFium API, text extraction, and character bounding boxes in browser\n\u001b[1A\u001b[2K[3/7] experiments/P12/browser.spec.ts:232:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a evaluates candidate on target fixtures (F01, F07, F10, F11) with clean-mapping and same-reader controls\n\u001b[1A\u001b[2K[4/7] experiments/P12/browser.spec.ts:301:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a candidate asset budget satisfies < 24 MiB limit\n\u001b[1A\u001b[2K[5/7] experiments/P12/browser.spec.ts:314:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a enforces runtime network isolation with zero external network egress\n\u001b[1A\u001b[2K[6/7] experiments/P12/browser.spec.ts:332:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a production web application does not bundle or import EmbedPDF\n\u001b[1A\u001b[2K[7/7] experiments/P12/browser.spec.ts:347:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a manifest and asset check records verified candidate and default-unavailable integration decision\n\u001b[1A\u001b[2K  7 passed (1.8s)\n",
-      "stderr": "$ python3 scripts/task_acceptance.py run test:browser \"experiments/P12/browser.spec.ts\"\n(node:51190) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:51191) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "stdout": "\nRunning 7 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/7] experiments/P12/browser.spec.ts:182:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a exercises default PDF.js reader rendering and text extraction in real browser\n\u001b[1A\u001b[2K[2/7] experiments/P12/browser.spec.ts:208:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a proves candidate EmbedPDF PDFium API, text extraction, and character bounding boxes in browser\n\u001b[1A\u001b[2K[3/7] experiments/P12/browser.spec.ts:233:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a evaluates candidate on target fixtures (F01, F07, F10, F11) with clean-mapping and same-reader controls\n\u001b[1A\u001b[2K[4/7] experiments/P12/browser.spec.ts:303:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a candidate asset and runtime memory budgets satisfy limits (< 24 MiB asset, < 64 MiB WASM memory)\n\u001b[1A\u001b[2K[5/7] experiments/P12/browser.spec.ts:336:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a enforces runtime network isolation with zero external network egress\n\u001b[1A\u001b[2K[6/7] experiments/P12/browser.spec.ts:354:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a production web application does not bundle or import EmbedPDF\n\u001b[1A\u001b[2K[7/7] experiments/P12/browser.spec.ts:369:3 \u203a P12 / T43: Secondary browser PDFium reader evaluation \u203a manifest and asset check records verified candidate and default-unavailable integration decision\n\u001b[1A\u001b[2K  7 passed (1.9s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser \"experiments/P12/browser.spec.ts\"\n(node:33030) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:33033) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
       "tests": {
         "collected": 7,
         "passed": 7,
@@ -67,7 +67,7 @@
         "artifacts/tasks/T43/commands.log",
         "artifacts/tasks/T43/run.json"
       ],
-      "detail": "EmbedPDF PDFium v2.15.0 was executed in headless Chromium Playwright harness across target fixtures F01, F07, F10, F11. Evaluated against PDF.js baseline at fixed precision: candidate provides 0% complementary gain on standard vector text while adding ~2.66 MB WASM binary weight and memory footprint. Formally rejected from production web app."
+      "detail": "EmbedPDF PDFium v2.15.0 was executed in headless Chromium Playwright harness across target fixtures F01, F07, F10, F11. Evaluated against PDF.js baseline at fixed precision: candidate provides 0% complementary gain on standard vector text while adding ~2.66 MB WASM binary weight and runtime memory footprint (~17.75 MiB WASM heap, verified < 64 MiB cap). Formally rejected from production web app."
     },
     "API/geometry proven": {
       "status": "executed",
