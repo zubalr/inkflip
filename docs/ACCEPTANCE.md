@@ -90,3 +90,8 @@ manual evidence is sound: the independent reviewer and coordinator must do so.
 Commit generated evidence, then run `python3 scripts/acceptance_receipts.py
 verify Txx --commit FULL_RECEIPT_COMMIT`. Push code before setting acceptance
 metadata/closure in Beads, and then publish Beads with native Dolt sync.
+
+Gate runs also check the owner task's live Beads blocking dependencies before
+scenarios and again before recording success. Newly discovered follow-up blockers
+remain authoritative even when absent from the frozen prerequisite list. Resolve
+them through reviewed work and coordinator disposition before rerunning the gate.
