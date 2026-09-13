@@ -359,6 +359,9 @@ def strip_comments(text: str, suffix: str) -> str:
         n = len(text)
         state = "NORMAL"
         last_token = ""
+        control_paren_depth = 0
+        in_control_stmt = False
+
         while i < n:
             c = text[i]
             c2 = text[i:i + 2]
@@ -388,13 +391,36 @@ def strip_comments(text: str, suffix: str) -> str:
                     out.append(c)
                     i += 1
                     continue
+                elif c == "(":
+                    if last_token in ("if", "while", "for", "with", "switch"):
+                        in_control_stmt = True
+                        control_paren_depth = 1
+                    elif in_control_stmt:
+                        control_paren_depth += 1
+                    out.append(c)
+                    last_token = "("
+                    i += 1
+                    continue
+                elif c == ")":
+                    if in_control_stmt:
+                        control_paren_depth -= 1
+                        if control_paren_depth == 0:
+                            in_control_stmt = False
+                            last_token = ")_ctrl"
+                            out.append(c)
+                            i += 1
+                            continue
+                    out.append(c)
+                    last_token = ")"
+                    i += 1
+                    continue
                 elif c == "/":
                     can_be_regex = (
                         (not last_token)
                         or (last_token in "=(:[{;,!&|?+-*^%~<>/")
                         or (last_token in (
                             "return", "case", "throw", "yield", "await",
-                            "typeof", "delete", "void", "in", "of"
+                            "typeof", "delete", "void", "in", "of", ")_ctrl"
                         ))
                     )
                     if can_be_regex and c2 not in ("//", "/*"):
@@ -420,7 +446,7 @@ def strip_comments(text: str, suffix: str) -> str:
                 if c == "\n":
                     out.append("\n")
                     state = "NORMAL"
-                    last_token = "\n"
+                    # Preserve preceding token across comments
                 else:
                     out.append(" ")
                 i += 1
@@ -429,50 +455,46 @@ def strip_comments(text: str, suffix: str) -> str:
                     out.append("  ")
                     i += 2
                     state = "NORMAL"
-                    last_token = " "
+                    # Preserve preceding token across comments
                 else:
                     out.append("\n" if c == "\n" else " ")
-                    i += 1
+                i += 1
             elif state == "STRING_SINGLE":
                 out.append(c)
-                if c == "\\":
-                    if i + 1 < n:
-                        out.append(text[i + 1])
-                        i += 2
-                        continue
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
                 elif c == "'":
                     state = "NORMAL"
                     last_token = "'"
                 i += 1
             elif state == "STRING_DOUBLE":
                 out.append(c)
-                if c == "\\":
-                    if i + 1 < n:
-                        out.append(text[i + 1])
-                        i += 2
-                        continue
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
                 elif c == '"':
                     state = "NORMAL"
                     last_token = '"'
                 i += 1
             elif state == "TEMPLATE":
                 out.append(c)
-                if c == "\\":
-                    if i + 1 < n:
-                        out.append(text[i + 1])
-                        i += 2
-                        continue
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
                 elif c == "`":
                     state = "NORMAL"
                     last_token = "`"
                 i += 1
             elif state == "REGEX":
                 out.append(c)
-                if c == "\\":
-                    if i + 1 < n:
-                        out.append(text[i + 1])
-                        i += 2
-                        continue
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
                 elif c == "[":
                     out.append(c)
                     i += 1
@@ -505,9 +527,35 @@ def strip_comments(text: str, suffix: str) -> str:
                     state = "COMMENT"
                     out.append("  ")
                     i += 2
+                elif c == "'":
+                    state = "STRING_SINGLE"
+                    out.append(c)
+                    i += 1
+                elif c == '"':
+                    state = "STRING_DOUBLE"
+                    out.append(c)
+                    i += 1
                 else:
                     out.append(c)
                     i += 1
+            elif state == "STRING_SINGLE":
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
+                elif c == "'":
+                    state = "NORMAL"
+                i += 1
+            elif state == "STRING_DOUBLE":
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
+                elif c == '"':
+                    state = "NORMAL"
+                i += 1
             elif state == "COMMENT":
                 if c2 == "*/":
                     out.append("  ")
@@ -531,9 +579,47 @@ def strip_comments(text: str, suffix: str) -> str:
                     state = "COMMENT"
                     out.append("    ")
                     i += 4
+                elif c == "<":
+                    state = "TAG"
+                    out.append(c)
+                    i += 1
                 else:
                     out.append(c)
                     i += 1
+            elif state == "TAG":
+                if c == ">":
+                    state = "NORMAL"
+                    out.append(c)
+                    i += 1
+                elif c == "'":
+                    state = "TAG_STRING_SINGLE"
+                    out.append(c)
+                    i += 1
+                elif c == '"':
+                    state = "TAG_STRING_DOUBLE"
+                    out.append(c)
+                    i += 1
+                else:
+                    out.append(c)
+                    i += 1
+            elif state == "TAG_STRING_SINGLE":
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
+                elif c == "'":
+                    state = "TAG"
+                i += 1
+            elif state == "TAG_STRING_DOUBLE":
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
+                elif c == '"':
+                    state = "TAG"
+                i += 1
             elif state == "COMMENT":
                 if c3 == "-->":
                     out.append("   ")
@@ -552,10 +638,13 @@ EXECUTABLE_REMOTE_LOADER_RE = re.compile(
     r"new\s+(?:Shared)?Worker\s*\(\s*[\"']https?://|"
     r"fetch\s*\(\s*[\"']https?://|"
     r"import\s*\(\s*[\"']https?://|"
-    r"import\s+.*?\s+from\s*[\"']https?://|"
+    r"import\s+[\"']https?://|"
+    r"import\s+[\s\S]*?\s+from\s*[\"']https?://|"
     r"navigator\.sendBeacon\s*\(\s*[\"']https?://|"
     r"\.open\s*\(\s*[\"'](?:GET|POST|HEAD)[\"']\s*,\s*[\"']https?://|"
-    r"@import\s+(?:url\s*\(\s*)?[\"']?https?://"
+    r"@import\s+(?:url\s*\(\s*)?[\"']?https?://|"
+    r"\burl\s*\(\s*[\"']?https?://",
+    re.IGNORECASE
 )
 
 CDN_DOMAIN_RE = re.compile(
