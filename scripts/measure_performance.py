@@ -388,6 +388,10 @@ def main(argv: list[str] | None = None) -> int:
         "accepting": False,
         "contention": "caller must keep competing OCR/container jobs idle; this process does not inspect other PIDs",
         "source_binding": receipt.source_binding(ROOT),
+        "evidence_location": (
+            "artifacts/performance is local/untracked evidence; do not treat a "
+            "committed receipt as the implementation identity"
+        ),
         "measurement": measurement,
         "browser": browser_evidence,
     }

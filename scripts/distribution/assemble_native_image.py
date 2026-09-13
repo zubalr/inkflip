@@ -32,7 +32,10 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PRIVATE = ROOT / ".private" / "distribution" / "native-bundle"
+PRIVATE = ROOT / ".private" / "cache" / "native-bundle"
+PRIVATE_LEGACY = ROOT / ".private" / "distribution" / "native-bundle"
+TESSERACT_CACHE = ROOT / ".private" / "cache" / "tesseract" / "debs"
+TESSERACT_CACHE_LEGACY = ROOT / ".private" / "tesseract" / "debs"
 DIST = ROOT / "native" / "dist"
 RELEASE = ROOT / "release"
 NATIVE = ROOT / "native"
@@ -55,6 +58,27 @@ def sha256_file(path: Path) -> str:
 def fail(message: str, code: int = 1) -> int:
     print(f"assemble_native_image: {message}", file=sys.stderr)
     return code
+
+
+def reject_external_symlink(path: Path, root: Path, label: str) -> Path:
+    root_resolved = root.resolve()
+    if path.exists() or path.is_symlink():
+        target = path.resolve()
+        try:
+            target.relative_to(root_resolved)
+        except ValueError as error:
+            raise RuntimeError(
+                f"{label} at {path} resolves to {target}; "
+                "the recipe must not depend on writable symlinks into other worktrees"
+            ) from error
+    return path
+
+
+def existing_cache(*candidates: Path, label: str) -> Path:
+    for path in candidates:
+        if path.is_dir():
+            return reject_external_symlink(path, ROOT, label)
+    return candidates[0]
 
 
 def _extract_zip_licenses(wheel: Path, dest: Path) -> list[dict]:
@@ -229,7 +253,7 @@ def _extract_deb_copyright(deb: Path, dest: Path) -> bool:
 
 def assemble_tesseract(dist: Path, notices_dest: Path) -> dict:
     stamp_path = RELEASE / "tesseract" / "tesseract.stamp.json"
-    cache = ROOT / ".private" / "tesseract" / "debs"
+    cache = existing_cache(TESSERACT_CACHE, TESSERACT_CACHE_LEGACY, label="tesseract deb cache")
     stamp = json.loads(stamp_path.read_text(encoding="utf-8"))
     dest = dist / "tesseract" / "debs"
     if dest.exists():
@@ -240,8 +264,8 @@ def assemble_tesseract(dist: Path, notices_dest: Path) -> dict:
         src = cache / entry["filename"]
         if not src.is_file():
             raise RuntimeError(
-                f"tesseract deb missing: {src} (download into .private/tesseract/debs; "
-                "setup network only, never in the production image)"
+                f"tesseract deb missing: {src} (run python3 scripts/distribution/prepare_tesseract_debs.py "
+                "into .private/cache/tesseract/debs; setup network only, never apt-get in the production image)"
             )
         actual = sha256_file(src)
         if actual != entry["sha256"]:
@@ -278,6 +302,13 @@ def main() -> int:
     )
     args = parser.parse_args()
     bundle = args.bundle
+    if bundle == PRIVATE and not bundle.is_dir() and PRIVATE_LEGACY.is_dir():
+        bundle = PRIVATE_LEGACY
+    try:
+        if bundle.is_dir():
+            reject_external_symlink(bundle, ROOT, "native-bundle cache")
+    except RuntimeError as exc:
+        return fail(str(exc))
     manifest_path = RELEASE / "native-wheels.manifest.json"
     third_party_lock = RELEASE / "native-requirements.lock"
     node_stamp_path = RELEASE / "node" / "node.stamp.json"

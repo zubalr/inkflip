@@ -12,8 +12,18 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { createServer, type Server } from "node:http";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -41,6 +51,42 @@ const MIME: Record<string, string> = {
 let server: Server;
 let baseUrl: string;
 let buildId = "";
+let buildIdentity: {
+  production: boolean;
+  vite_dev_server: boolean;
+  inkflip_test_hooks: boolean;
+  tree_sha256: string;
+  file_count: number;
+  files: { path: string; sha256: string; bytes: number }[];
+  out_dir: string;
+  note: string;
+};
+
+function hashBuild(dist: string) {
+  const files: { path: string; sha256: string; bytes: number }[] = [];
+  const walk = (dir: string, prefix = "") => {
+    for (const name of readdirSync(dir).sort()) {
+      const abs = path.join(dir, name);
+      const rel = prefix ? `${prefix}/${name}` : name;
+      if (statSync(abs).isDirectory()) walk(abs, rel);
+      else {
+        const buf = readFileSync(abs);
+        files.push({
+          path: rel,
+          sha256: createHash("sha256").update(buf).digest("hex"),
+          bytes: buf.length,
+        });
+      }
+    }
+  };
+  walk(dist);
+  const canonical = files.map((item) => `${item.path} ${item.sha256}\n`).join("");
+  return {
+    tree_sha256: createHash("sha256").update(canonical).digest("hex"),
+    file_count: files.length,
+    files,
+  };
+}
 
 function ext(file: string): string {
   return path.extname(file).toLowerCase();
@@ -109,6 +155,17 @@ test.beforeAll(async () => {
   const index = path.join(DIST, "index.html");
   if (!existsSync(index)) throw new Error(`production build missing ${index}`);
   buildId = readFileSync(index, "utf8").slice(0, 120);
+  const hashed = hashBuild(DIST);
+  buildIdentity = {
+    production: true,
+    vite_dev_server: false,
+    inkflip_test_hooks: true,
+    tree_sha256: hashed.tree_sha256,
+    file_count: hashed.file_count,
+    files: hashed.files,
+    out_dir: DIST,
+    note: "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1), bound to hashed built bytes. Not a shipped unlabeled artifact.",
+  };
   const distRoot = path.resolve(DIST) + path.sep;
   server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://static.invalid");
@@ -286,6 +343,60 @@ test.describe("T39 built-app workspace budgets", () => {
     });
     expect(limits.maxRasterPixels).toBe(4_000_000);
 
+    const rasterProbe = await page.evaluate(async () => {
+      const session = (
+        globalThis as {
+          __inspect?: {
+            probeRasterBounds: (
+              handle: unknown,
+              scale?: number,
+            ) => Promise<{
+              widthPx: number;
+              heightPx: number;
+              requestedScalePxPerPt: number;
+              usedScalePxPerPt: number;
+              limitations: string[];
+              status: string;
+              reason: string | null;
+            }>;
+            probeLiveRasterCap: () => {
+              first: string;
+              second: string;
+              third: string;
+              liveAfterTwo: number;
+              liveAfterRelease: number;
+              recovered: string;
+              cap: number;
+            };
+            observeResources: () => {
+              liveRasters: number;
+              liveRasterCap: number;
+              activeOcr: number;
+              ocrWorkerCap: number;
+              activeRenders: number;
+              renderCap: number;
+            };
+            openController: { currentHandle: unknown | null };
+          };
+        }
+      ).__inspect;
+      const handle = session?.openController.currentHandle;
+      if (!session || !handle) return { ok: false as const, reason: "no live handle" };
+      const bounds = await session.probeRasterBounds(handle, 20);
+      const live = session.probeLiveRasterCap();
+      const resources = session.observeResources();
+      return { ok: true as const, bounds, live, resources };
+    });
+    expect(rasterProbe.ok).toBe(true);
+    if (!rasterProbe.ok) throw new Error("raster probe missing");
+    expect(rasterProbe.bounds.status).not.toBe("failed");
+    expect(rasterProbe.bounds.reason ?? "").not.toMatch(/parser_error/);
+    expect(rasterProbe.bounds.widthPx * rasterProbe.bounds.heightPx).toBeLessThanOrEqual(4_000_000);
+    expect(Math.max(rasterProbe.bounds.widthPx, rasterProbe.bounds.heightPx)).toBeLessThanOrEqual(8192);
+    expect(rasterProbe.bounds.requestedScalePxPerPt).toBeGreaterThan(rasterProbe.bounds.usedScalePxPerPt);
+    expect(rasterProbe.live.third).toBe("raster_cap");
+    expect(rasterProbe.live.liveAfterTwo).toBe(2);
+
     const openSamples: number[] = [];
     let openFailures = 0;
     for (let i = 0; i < SAMPLES; i++) {
@@ -342,6 +453,7 @@ test.describe("T39 built-app workspace budgets", () => {
 
     const heap: number[] = [];
     const rss: number[] = [];
+    let resourcePeakOcr = 0;
     const launched = browser as { process?: () => { pid?: number } | null };
     const chromiumPid = typeof launched.process === "function" ? launched.process()?.pid : undefined;
     for (let i = 0; i < 10; i++) {
@@ -354,10 +466,29 @@ test.describe("T39 built-app workspace budgets", () => {
       if (typeof mem === "number") heap.push(mem);
       const rssNow = processRssBytes(chromiumPid) ?? chromiumTreeRssBytes();
       if (rssNow != null) rss.push(rssNow);
+      const live = await page.evaluate(() => {
+        const session = (globalThis as { __inspect?: { observeResources(): { activeOcr: number } } }).__inspect;
+        return session?.observeResources().activeOcr ?? 0;
+      });
+      resourcePeakOcr = Math.max(resourcePeakOcr, live);
     }
 
     await page.locator('[data-testid="start-run"]').click();
-    await expect(page.locator("#btn-cancel-run")).toBeVisible({ timeout: 30_000 });
+    await page.waitForFunction(() => {
+      const session = (
+        globalThis as {
+          __inspect?: { observeResources(): { activeOcr: number; activeRenders: number } };
+          __inkflipPeaks?: { ocr: number; render: number };
+        }
+      );
+      const obs = session.__inspect?.observeResources();
+      session.__inkflipPeaks ??= { ocr: 0, render: 0 };
+      if (obs) {
+        session.__inkflipPeaks.ocr = Math.max(session.__inkflipPeaks.ocr, obs.activeOcr);
+        session.__inkflipPeaks.render = Math.max(session.__inkflipPeaks.render, obs.activeRenders);
+      }
+      return Boolean(document.querySelector("#btn-cancel-run"));
+    }, { timeout: 30_000 });
     await page.locator("#btn-cancel-run").click();
     await expect(page.locator('[data-testid="run-cancelled"]')).toBeVisible({ timeout: 30_000 });
     await page.locator("#btn-back-to-selection").click();
@@ -370,7 +501,22 @@ test.describe("T39 built-app workspace budgets", () => {
       const exportT0 = Date.now();
       await page.locator('[data-testid="start-run"]').click();
       await page.waitForFunction(() => {
-        const snap = (globalThis as { __inspect?: { getState(): { fileState: string; report: unknown } } }).__inspect?.getState();
+        const session = (
+          globalThis as {
+            __inspect?: {
+              getState(): { fileState: string; report: unknown };
+              observeResources(): { activeOcr: number; activeRenders: number };
+            };
+            __inkflipPeaks?: { ocr: number; render: number };
+          }
+        );
+        const obs = session.__inspect?.observeResources();
+        session.__inkflipPeaks ??= { ocr: 0, render: 0 };
+        if (obs) {
+          session.__inkflipPeaks.ocr = Math.max(session.__inkflipPeaks.ocr, obs.activeOcr);
+          session.__inkflipPeaks.render = Math.max(session.__inkflipPeaks.render, obs.activeRenders);
+        }
+        const snap = session.__inspect?.getState();
         return Boolean(
           snap &&
             (snap.report != null ||
@@ -391,6 +537,12 @@ test.describe("T39 built-app workspace budgets", () => {
       exportFailures = 1;
     }
 
+    const runPeaks = await page.evaluate(() => {
+      const peak = (globalThis as { __inkflipPeaks?: { ocr: number; render: number } }).__inkflipPeaks;
+      return { ocr: peak?.ocr ?? 0, render: peak?.render ?? 0 };
+    });
+    resourcePeakOcr = Math.max(resourcePeakOcr, runPeaks.ocr);
+
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("about:blank");
     await page.goto(`${baseUrl}/#/workspace`);
@@ -404,9 +556,12 @@ test.describe("T39 built-app workspace budgets", () => {
       ...summarize(openSamples, openFailures, true),
       proof: "first_rendered_page",
     };
+    const peakRss = rss.length ? Math.max(...rss) : null;
+    const lastRss = rss.at(-1) ?? null;
+    const lastHeap = heap.at(-1) ?? null;
     const evidence = {
       kind: "inkflip-performance-browser",
-      schema_version: "2.1.0",
+      schema_version: "2.2.0",
       host: {
         profile_requested: "local-mac",
         browserName,
@@ -416,12 +571,8 @@ test.describe("T39 built-app workspace budgets", () => {
         note: "Playwright viewport is not a 4 GiB physical mobile device; this Mac is not the 4-core/8 GiB reference.",
       },
       build: {
-        production: true,
-        vite_dev_server: false,
-        inkflip_test_hooks: true,
-        out_dir: DIST,
+        ...buildIdentity,
         index_head: buildId,
-        note: "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1). Not a shipped unlabeled artifact.",
       },
       setup_ms: setupMs,
       stages: {
@@ -433,16 +584,40 @@ test.describe("T39 built-app workspace budgets", () => {
           measured: true,
           distribution_claim: "not_a_latency_distribution",
           oversize_open_rejected: true,
-          pixel_budget_enforced: hugeW * hugeH <= 4_000_000,
-          edge_budget_enforced: Math.max(hugeW, hugeH) <= 720,
+          preview_canvas_width: hugeW,
+          preview_canvas_height: hugeH,
           profile_max_raster_pixels: limits.maxRasterPixels,
-          live_buffers: 2,
-          live_buffer_cap_enforced: true,
-          ocr_workers: 1,
-          ocr_worker_cap_enforced: true,
-          canvas_width: hugeW,
-          canvas_height: hugeH,
-          note: "20 MiB byte cap is a separate rejection from live preview raster. Preview canvas is the fixture page after PREVIEW_EDGE_PX=720 fit; profile.maxRasterPixels=4000000. Synthetic 4000x4000 and 20000x20000 MediaBox PDFs are parser_error in this reader.",
+          observed: {
+            width_px: rasterProbe.bounds.widthPx,
+            height_px: rasterProbe.bounds.heightPx,
+            requested_scale_px_per_pt: rasterProbe.bounds.requestedScalePxPerPt,
+            used_scale_px_per_pt: rasterProbe.bounds.usedScalePxPerPt,
+            pixel_cap: 4_000_000,
+            edge_cap: 8192,
+            pixel_budget_hit:
+              rasterProbe.bounds.requestedScalePxPerPt > rasterProbe.bounds.usedScalePxPerPt,
+            edge_budget_hit:
+              rasterProbe.bounds.requestedScalePxPerPt > rasterProbe.bounds.usedScalePxPerPt,
+            limitations: rasterProbe.bounds.limitations,
+            fixture: "fixtures/public/mapping-control.pdf",
+            open_status: rasterProbe.bounds.status,
+            reason: rasterProbe.bounds.reason,
+          },
+          live_buffer_probe: {
+            first_claim: rasterProbe.live.first,
+            second_claim: rasterProbe.live.second,
+            third_claim: rasterProbe.live.third,
+            live_after_two: rasterProbe.live.liveAfterTwo,
+            live_after_release: rasterProbe.live.liveAfterRelease,
+            recovered: rasterProbe.live.recovered,
+            cap: rasterProbe.live.cap,
+          },
+          ocr_worker_probe: {
+            cap: rasterProbe.resources.ocrWorkerCap,
+            observed_active_peak: Math.max(resourcePeakOcr, rasterProbe.resources.activeOcr),
+            render_cap: rasterProbe.resources.renderCap,
+          },
+          note: "Pixel/edge clamp observed by requesting 20 px/pt on the committed mapping-control.pdf. live_buffer_probe calls the bundled TransferLedger; the configured 2 is not restated as proof. Preview canvas is a separate 720px fit.",
         },
         ocr: summarize([], 0, false),
         alignment: summarize([], 0, false),
@@ -452,7 +627,13 @@ test.describe("T39 built-app workspace budgets", () => {
         n: 10,
         js_heap_used_bytes: heap,
         process_rss_bytes: rss,
-        note: "JS heap from performance.memory; process RSS from ps(1) on the Chromium PID. Distinct metrics.",
+        baseline: {
+          first_js_heap_used_bytes: heap[0] ?? null,
+          last_js_heap_used_bytes: lastHeap,
+          first_process_rss_bytes: rss[0] ?? null,
+          last_process_rss_bytes: lastRss,
+        },
+        note: "JS heap from performance.memory; process RSS from ps(1) on the Chromium tree. Distinct from peak RSS.",
       },
       cancel_next_file: {
         cancelled_visible: true,
@@ -465,8 +646,9 @@ test.describe("T39 built-app workspace budgets", () => {
         note: "Viewport emulation is not a physical 4 GiB mobile device",
       },
       memory: {
-        js_heap_used_bytes: heap.at(-1) ?? null,
-        process_rss_bytes: rss.at(-1) ?? null,
+        js_heap_used_bytes: lastHeap,
+        process_rss_bytes: lastRss,
+        measured_peak_rss_bytes: peakRss,
         process_rss_unavailable: rss.length === 0,
         limits: {
           tracked_allocation_target_bytes: 268435456,

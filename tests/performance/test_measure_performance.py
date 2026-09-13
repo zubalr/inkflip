@@ -112,7 +112,7 @@ class TestMeasureDriver(unittest.TestCase):
         }
         body = {
             "kind": "inkflip-performance",
-            "schema_version": "2.1.0",
+            "schema_version": "2.2.0",
             "host": {"is_specified_reference_desktop": False, "is_physical_mobile": False},
             "source_binding": {"fixture_sha256": "a" * 64, "git_head": "deadbeef"},
             "measurement": {

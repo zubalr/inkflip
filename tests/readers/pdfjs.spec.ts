@@ -616,6 +616,7 @@ test('F08 UserUnit values: no double scaling, fiducial square lands exactly', as
     // scale; the adapter sizes its canvas with Math.ceil of the viewport.
     expect(r.dims[0], name).toBe(Math.ceil(520 * u * r.scale - 1e-9));
     expect(r.dims[1], name).toBe(Math.ceil(400 * u * r.scale - 1e-9));
+    expect(r.dims[0] * r.dims[1], `${name} must stay within 4 MP after integer canvas sizing`).toBeLessThanOrEqual(4_000_000);
     // Fiducial square right edge: 372+100=472 user units -> 472u display pt.
     // If UserUnit were applied twice the mark would sit at ~472u^2*scale'.
     const expectedX = 472 * u * r.scale;

@@ -1,6 +1,6 @@
 {
   "kind": "inkflip-native-tesseract-debs",
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "source": "Debian trixie main amd64 (deb.debian.org) downloaded 2026-09-13 inside python:3.13.15-slim-trixie@sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
   "package": "tesseract-ocr",
   "version": "5.5.0-1+b1",
@@ -13,352 +13,499 @@
     {
       "filename": "fontconfig-config_2.15.0-2.3_amd64.deb",
       "sha256": "0475c00d02660c07a15085051818625331bb502e053242106aaaa1f2ddb41225",
-      "bytes": 318308
+      "bytes": 318308,
+      "sha1": "42632289af95f004453b2deaf183de21282d7ca3",
+      "snapshot_url": "https://snapshot.debian.org/file/42632289af95f004453b2deaf183de21282d7ca3"
     },
     {
       "filename": "fontconfig_2.15.0-2.3_amd64.deb",
       "sha256": "09794b188e042c90b4a89fcb5afeb276bc231b74ddf8a3efbbc7dfb6f0eac4cb",
-      "bytes": 463312
+      "bytes": 463312,
+      "sha1": "5ab99fde8b6c1bb93fe4df598eec4eedde72b6da",
+      "snapshot_url": "https://snapshot.debian.org/file/5ab99fde8b6c1bb93fe4df598eec4eedde72b6da"
     },
     {
       "filename": "fonts-dejavu-core_2.37-8_all.deb",
       "sha256": "86635b3d25b3655fc11cb3ecc3af59f0bf19643b02b94f2de48bd10253cdba12",
-      "bytes": 840460
+      "bytes": 840460,
+      "sha1": "475722decc50725f650e326d52dfdd0c66853a6b",
+      "snapshot_url": "https://snapshot.debian.org/file/475722decc50725f650e326d52dfdd0c66853a6b"
     },
     {
       "filename": "fonts-dejavu-mono_2.37-8_all.deb",
       "sha256": "3003e98a5debfdeadc7040a7f715fe9fe6fb67f68deacf6049b54e30f07fc014",
-      "bytes": 488808
+      "bytes": 488808,
+      "sha1": "aa243c859895c91f0fb48f4974a9d7b6b67065da",
+      "snapshot_url": "https://snapshot.debian.org/file/aa243c859895c91f0fb48f4974a9d7b6b67065da"
     },
     {
       "filename": "libarchive13t64_3.7.4-4+deb13u1_amd64.deb",
       "sha256": "12e06195a899e8db371803ed70111fc7302573d3ed84e967d3d48ef2d543ace8",
-      "bytes": 350192
+      "bytes": 350192,
+      "sha1": "48241cf426371a2a003fb094c450f954586287c1",
+      "snapshot_url": "https://snapshot.debian.org/file/48241cf426371a2a003fb094c450f954586287c1"
     },
     {
       "filename": "libatomic1_14.2.0-19_amd64.deb",
       "sha256": "212b399aae2f7299203d261a57e49372e09565a9a5ea971905f94a3960366c05",
-      "bytes": 9308
+      "bytes": 9308,
+      "sha1": "a478fbcba038f4a18db43b9771ee01a7da5ab23c",
+      "snapshot_url": "https://snapshot.debian.org/file/a478fbcba038f4a18db43b9771ee01a7da5ab23c"
     },
     {
       "filename": "libbrotli1_1.1.0-2+b7_amd64.deb",
       "sha256": "0fb79f88db210afbd69282ab9649e525f393ec6950ca34da1a6b359250b8d7db",
-      "bytes": 306624
+      "bytes": 306624,
+      "sha1": "e5e9327d88edff7e03a5d9f9ab0c46c1d8c06536",
+      "snapshot_url": "https://snapshot.debian.org/file/e5e9327d88edff7e03a5d9f9ab0c46c1d8c06536"
     },
     {
       "filename": "libcairo2_1.18.4-1+b1_amd64.deb",
       "sha256": "01390b049661e4cc8bd39cef78b41c2587d4035619d3b00d6c7846f43d80bbba",
-      "bytes": 537556
+      "bytes": 537556,
+      "sha1": "51d0abf121d9fb10e9d8a9ce6b78c93b84152297",
+      "snapshot_url": "https://snapshot.debian.org/file/51d0abf121d9fb10e9d8a9ce6b78c93b84152297"
     },
     {
       "filename": "libcom-err2_1.47.2-3+b12_amd64.deb",
       "sha256": "bd43e020b8fed399db3eebf098111f10fba4c436fff99ccad72cc7e27c9764ec",
-      "bytes": 25036
+      "bytes": 25036,
+      "sha1": "0a08c25cbaba3fbe4faa800fdec8cdd0f05b4155",
+      "snapshot_url": "https://snapshot.debian.org/file/0a08c25cbaba3fbe4faa800fdec8cdd0f05b4155"
     },
     {
       "filename": "libcurl4t64_8.14.1-2+deb13u5_amd64.deb",
       "sha256": "0dedddfe614fc4a4335c9167b73c64a50136edd76b7991aa851408d0795163eb",
-      "bytes": 391492
+      "bytes": 391492,
+      "sha1": "df4648d677695dc4fab8714dc297bce2b8bb53d0",
+      "snapshot_url": "https://snapshot.debian.org/file/df4648d677695dc4fab8714dc297bce2b8bb53d0"
     },
     {
       "filename": "libdatrie1_0.2.13-3+b1_amd64.deb",
       "sha256": "339eb88f23d72b8f0b7b1aebcefbab6de600d97b88bc6222dd8aad11d2ca9051",
-      "bytes": 38132
+      "bytes": 38132,
+      "sha1": "9e7858159e8efd9307100982fa4b277b27924cd7",
+      "snapshot_url": "https://snapshot.debian.org/file/9e7858159e8efd9307100982fa4b277b27924cd7"
     },
     {
       "filename": "libdeflate0_1.23-2_amd64.deb",
       "sha256": "5fe37fb79d53f5c91da6ba3ac4c1a8453e1f2b1ff0e0ea45189c5338bbfdbf82",
-      "bytes": 47344
+      "bytes": 47344,
+      "sha1": "a4de19585b88f367cc983002e28820af8e9f129c",
+      "snapshot_url": "https://snapshot.debian.org/file/a4de19585b88f367cc983002e28820af8e9f129c"
     },
     {
       "filename": "libexpat1_2.8.3-1~deb13u1_amd64.deb",
       "sha256": "38abe0e710a07688e9c149d74536e67cfee0364bdb64dd6d644c32a1cfad389f",
-      "bytes": 122672
+      "bytes": 122672,
+      "sha1": "6fa138e8910182e6ae0451779219e7381feba832",
+      "snapshot_url": "https://snapshot.debian.org/file/6fa138e8910182e6ae0451779219e7381feba832"
     },
     {
       "filename": "libfontconfig1_2.15.0-2.3_amd64.deb",
       "sha256": "7ae91ec59857cc8e375eb2bdd371a4a69daea38f7787d06d474a847867d852b1",
-      "bytes": 391576
+      "bytes": 391576,
+      "sha1": "bcd8cee1738cf4727b6705b4c1609641189591e0",
+      "snapshot_url": "https://snapshot.debian.org/file/bcd8cee1738cf4727b6705b4c1609641189591e0"
     },
     {
       "filename": "libfreetype6_2.13.3+dfsg-1+deb13u1_amd64.deb",
       "sha256": "e4947f3291528f03d574f2b01d5c5fc45c58c47480f32888a5cdf0f231ab584e",
-      "bytes": 452308
+      "bytes": 452308,
+      "sha1": "2602e72ebeb8d5aa36eb1cc60f1cabfbd7558f43",
+      "snapshot_url": "https://snapshot.debian.org/file/2602e72ebeb8d5aa36eb1cc60f1cabfbd7558f43"
     },
     {
       "filename": "libfribidi0_1.0.16-1_amd64.deb",
       "sha256": "f8c35ec8606d0843bd3cf020c6cfa39ddfe717ec58ed826b5855ba9927eb0d55",
-      "bytes": 26484
+      "bytes": 26484,
+      "sha1": "8cd8558083733fbd4797157049a64357c59cadd7",
+      "snapshot_url": "https://snapshot.debian.org/file/8cd8558083733fbd4797157049a64357c59cadd7"
     },
     {
       "filename": "libgif7_5.2.2-1+deb13u1_amd64.deb",
       "sha256": "619328ccf9ad6c621298f9daf5e695ff50e993a6d45dd0d7f6217e1bd2d1c4ce",
-      "bytes": 44052
+      "bytes": 44052,
+      "sha1": "e87b2d8a8eba9f4788c8a874b8506d6d38d49bd2",
+      "snapshot_url": "https://snapshot.debian.org/file/e87b2d8a8eba9f4788c8a874b8506d6d38d49bd2"
     },
     {
       "filename": "libglib2.0-0t64_2.84.4-3~deb13u5_amd64.deb",
       "sha256": "e2baf92c57d1db1753e5781a61450d9a01e7833c7bd2dfe87776a6811c11ecc2",
-      "bytes": 1521120
+      "bytes": 1521120,
+      "sha1": "41b72c2a7108da52740adfd489a1988f1155d807",
+      "snapshot_url": "https://snapshot.debian.org/file/41b72c2a7108da52740adfd489a1988f1155d807"
     },
     {
       "filename": "libgnutls30t64_3.8.9-3+deb13u4_amd64.deb",
       "sha256": "18a8bdfd91c7e3bcb01719d55a2b56849c7160b34f1f52b1c4fdfdd41bf1352b",
-      "bytes": 1469024
+      "bytes": 1469024,
+      "sha1": "72f4c6cf757e4af0acf000271eec501c06f7a97d",
+      "snapshot_url": "https://snapshot.debian.org/file/72f4c6cf757e4af0acf000271eec501c06f7a97d"
     },
     {
       "filename": "libgomp1_14.2.0-19_amd64.deb",
       "sha256": "72b7a1a33c48f3195efeb044111b34ae684b1e640bb6495c832443b798601cd5",
-      "bytes": 137148
+      "bytes": 137148,
+      "sha1": "af0e867223a0b3568ffa77c27fe172fd90ca1487",
+      "snapshot_url": "https://snapshot.debian.org/file/af0e867223a0b3568ffa77c27fe172fd90ca1487"
     },
     {
       "filename": "libgraphite2-3_1.3.14-2+deb13u1_amd64.deb",
       "sha256": "1769ba3ed3c1fc75b7fbe02678e32aa24391205813eceef4e1e3500015d12ee3",
-      "bytes": 75172
+      "bytes": 75172,
+      "sha1": "da1c7c76394d6f24c807d689752490c41b853dfc",
+      "snapshot_url": "https://snapshot.debian.org/file/da1c7c76394d6f24c807d689752490c41b853dfc"
     },
     {
       "filename": "libgssapi-krb5-2_1.21.3-5+deb13u1_amd64.deb",
       "sha256": "30847c1fde4240567d7ed3aeab4f655dd591203758b857e85e824045aae70299",
-      "bytes": 138356
+      "bytes": 138356,
+      "sha1": "ddecd0f8bcc988780e6e7811c9c25e68e776b386",
+      "snapshot_url": "https://snapshot.debian.org/file/ddecd0f8bcc988780e6e7811c9c25e68e776b386"
     },
     {
       "filename": "libharfbuzz0b_10.2.0-1+deb13u1_amd64.deb",
       "sha256": "932165b933e5eb633293afe984a983ebe89cb27c923ce7208626f1da6c0c7941",
-      "bytes": 478952
+      "bytes": 478952,
+      "sha1": "6c3e44c73e446966c6ef55f6bb3fb6fe34632cd3",
+      "snapshot_url": "https://snapshot.debian.org/file/6c3e44c73e446966c6ef55f6bb3fb6fe34632cd3"
     },
     {
       "filename": "libicu76_76.1-4_amd64.deb",
       "sha256": "c1bf762996de9ecba9b9d871e4928a8090f023a3e9e7fa3240b3d90f892a01dc",
-      "bytes": 9722072
+      "bytes": 9722072,
+      "sha1": "64267d4651f634bb7e01190e6cd56da176a792ed",
+      "snapshot_url": "https://snapshot.debian.org/file/64267d4651f634bb7e01190e6cd56da176a792ed"
     },
     {
       "filename": "libidn2-0_2.3.8-2_amd64.deb",
       "sha256": "90b039bcdc4578f8e1c4935adf8dbb525e36a164deefdbbb8c45bac347d48278",
-      "bytes": 109096
+      "bytes": 109096,
+      "sha1": "3c7a11b95bf17674f57763834134ebd4214f87ff",
+      "snapshot_url": "https://snapshot.debian.org/file/3c7a11b95bf17674f57763834134ebd4214f87ff"
     },
     {
       "filename": "libjbig0_2.1-6.1+b2_amd64.deb",
       "sha256": "95cbc44561651e1b3385454df08e8f2efe84498f6963a85259be2cc2fe798709",
-      "bytes": 32116
+      "bytes": 32116,
+      "sha1": "eb369aacf6dd6ae54fefdbed4e4fe9775e07227c",
+      "snapshot_url": "https://snapshot.debian.org/file/eb369aacf6dd6ae54fefdbed4e4fe9775e07227c"
     },
     {
       "filename": "libjpeg62-turbo_1%3a2.1.5-4_amd64.deb",
       "sha256": "5504299ad0e3c0a9ca9f962a68a650a040db52f9f416a109e74df48d55601d3f",
-      "bytes": 168152
+      "bytes": 168152,
+      "sha1": "56bc7cbd9936f62ca59294724011b5bc24bb7540",
+      "snapshot_url": "https://snapshot.debian.org/file/56bc7cbd9936f62ca59294724011b5bc24bb7540"
     },
     {
       "filename": "libk5crypto3_1.21.3-5+deb13u1_amd64.deb",
       "sha256": "7da07ee674b47f1f0be7cc89317c25310086a1f1761217d0f72e6ae2c5a69b84",
-      "bytes": 81152
+      "bytes": 81152,
+      "sha1": "59b80ae0af88c085973d19dd8e321815455e70e6",
+      "snapshot_url": "https://snapshot.debian.org/file/59b80ae0af88c085973d19dd8e321815455e70e6"
     },
     {
       "filename": "libkeyutils1_1.6.3-6_amd64.deb",
       "sha256": "0b11ad17be0300b63ad4eeb4c6450fed24d34b7b740f23e5363dcb29ee6d5eba",
-      "bytes": 9456
+      "bytes": 9456,
+      "sha1": "510fbc305d8dc86f0279c13f77fa06c4c1a6c75f",
+      "snapshot_url": "https://snapshot.debian.org/file/510fbc305d8dc86f0279c13f77fa06c4c1a6c75f"
     },
     {
       "filename": "libkrb5-3_1.21.3-5+deb13u1_amd64.deb",
       "sha256": "47d71d6a7f2e59b9bae5f89602397594805113b95889ad18fa703cd53abafc97",
-      "bytes": 326056
+      "bytes": 326056,
+      "sha1": "53d94056269d541890f7e1bc61b4face03061af6",
+      "snapshot_url": "https://snapshot.debian.org/file/53d94056269d541890f7e1bc61b4face03061af6"
     },
     {
       "filename": "libkrb5support0_1.21.3-5+deb13u1_amd64.deb",
       "sha256": "3a0acd8b37955c0e102c756b52c97df2a31f67b96453c35dab70df218d309117",
-      "bytes": 33124
+      "bytes": 33124,
+      "sha1": "fdcbf424c12036172b67ed2d13d14fa441fb3736",
+      "snapshot_url": "https://snapshot.debian.org/file/fdcbf424c12036172b67ed2d13d14fa441fb3736"
     },
     {
       "filename": "libldap2_2.6.10+dfsg-1_amd64.deb",
       "sha256": "60069e4a550ca890113fa89d3001417781b18e146ec5d637d31e368dec9909bd",
-      "bytes": 193576
+      "bytes": 193576,
+      "sha1": "156554a5a8064d450c2103819c5e1901f2482ef9",
+      "snapshot_url": "https://snapshot.debian.org/file/156554a5a8064d450c2103819c5e1901f2482ef9"
     },
     {
       "filename": "libleptonica6_1.84.1-4_amd64.deb",
       "sha256": "e1f5fbc6fb616f5912b3cd843031ffe8e3a4fc1d0aa021b5858922c5c3655ac9",
-      "bytes": 1065804
+      "bytes": 1065804,
+      "sha1": "095136561e85bc1fde3d00bba3baaa850a89c416",
+      "snapshot_url": "https://snapshot.debian.org/file/095136561e85bc1fde3d00bba3baaa850a89c416"
     },
     {
       "filename": "liblerc4_4.0.0+ds-5_amd64.deb",
       "sha256": "2e0c13c0ddbde12968c2c713c2e0474a5b78e90d5216031256a725e8c76aa31c",
-      "bytes": 182976
+      "bytes": 182976,
+      "sha1": "ea9db04001b6b65ec9d11b4696f6548855902801",
+      "snapshot_url": "https://snapshot.debian.org/file/ea9db04001b6b65ec9d11b4696f6548855902801"
     },
     {
       "filename": "libnghttp2-14_1.64.0-1.1+deb13u1_amd64.deb",
       "sha256": "896cb217537c09251fb909b8541349010ac279d802d871e98c06a62a2c67ce2c",
-      "bytes": 76188
+      "bytes": 76188,
+      "sha1": "5e221d7a3f04f19acb50ae187d26aa7bbcf0d924",
+      "snapshot_url": "https://snapshot.debian.org/file/5e221d7a3f04f19acb50ae187d26aa7bbcf0d924"
     },
     {
       "filename": "libnghttp3-9_1.8.0-1_amd64.deb",
       "sha256": "388e4c33b72829cbf0d098afdc8539fa5ba7458eddb077f5538fdb4d5538716b",
-      "bytes": 67656
+      "bytes": 67656,
+      "sha1": "ec2a18da55b53e48472fc88c9893b0c574d4fc3b",
+      "snapshot_url": "https://snapshot.debian.org/file/ec2a18da55b53e48472fc88c9893b0c574d4fc3b"
     },
     {
       "filename": "libopenjp2-7_2.5.3-2.1~deb13u2_amd64.deb",
       "sha256": "7ddf6360e8845853ba3c9cfaefc2ad6b92b2627eb8564a257f5f2a4c857f8748",
-      "bytes": 204616
+      "bytes": 204616,
+      "sha1": "c8d0d044ab847f9a7e167761ed2a94817d9dd719",
+      "snapshot_url": "https://snapshot.debian.org/file/c8d0d044ab847f9a7e167761ed2a94817d9dd719"
     },
     {
       "filename": "libp11-kit0_0.25.5-3_amd64.deb",
       "sha256": "784bf2063e166c8bc851a32623b74ebd85c499043a9d57c5bbd64fa63447f45a",
-      "bytes": 425240
+      "bytes": 425240,
+      "sha1": "b04bc908531c41504c4197e2e1dc4fca6e820b4e",
+      "snapshot_url": "https://snapshot.debian.org/file/b04bc908531c41504c4197e2e1dc4fca6e820b4e"
     },
     {
       "filename": "libpango-1.0-0_1.56.3-1_amd64.deb",
       "sha256": "4fa38472696d2ddb10bfc9a4692a9446e8478fdb1f48c769a609fc9fec3adfc5",
-      "bytes": 226324
+      "bytes": 226324,
+      "sha1": "6767b0db3a8873143b0db385102415f960318f77",
+      "snapshot_url": "https://snapshot.debian.org/file/6767b0db3a8873143b0db385102415f960318f77"
     },
     {
       "filename": "libpangocairo-1.0-0_1.56.3-1_amd64.deb",
       "sha256": "6994729c5b7a9649661ec078cf039991f22eff44600543aa917894f83c89cd05",
-      "bytes": 35748
+      "bytes": 35748,
+      "sha1": "9acf73287584b4e492c3e57f43dcf191e4ec960c",
+      "snapshot_url": "https://snapshot.debian.org/file/9acf73287584b4e492c3e57f43dcf191e4ec960c"
     },
     {
       "filename": "libpangoft2-1.0-0_1.56.3-1_amd64.deb",
       "sha256": "b506cf66f78ddf542ddb4bb4a68b3d748d41caa6e190e4480430a6630c1e5105",
-      "bytes": 55568
+      "bytes": 55568,
+      "sha1": "5d08aecad44b86d892ea77f39125d4e28706e8df",
+      "snapshot_url": "https://snapshot.debian.org/file/5d08aecad44b86d892ea77f39125d4e28706e8df"
     },
     {
       "filename": "libpixman-1-0_0.44.0-3_amd64.deb",
       "sha256": "3862c87596f6b4b60fc916395fd69aa10af28a875a8e5c081a8cf30ddd120bd6",
-      "bytes": 247888
+      "bytes": 247888,
+      "sha1": "d7440d194dd1142be8833d6167253ed019abd015",
+      "snapshot_url": "https://snapshot.debian.org/file/d7440d194dd1142be8833d6167253ed019abd015"
     },
     {
       "filename": "libpng16-16t64_1.6.48-1+deb13u5_amd64.deb",
       "sha256": "2465b4e9fa85cff54dc10a6da3e64074d8d9292c86e4a8f989b809d6b158e97e",
-      "bytes": 283204
+      "bytes": 283204,
+      "sha1": "565c5c9c0d5279036bff64da652ac5f3e0f38885",
+      "snapshot_url": "https://snapshot.debian.org/file/565c5c9c0d5279036bff64da652ac5f3e0f38885"
     },
     {
       "filename": "libpsl5t64_0.21.2-1.1+b1_amd64.deb",
       "sha256": "59d42bb1f9ebc0d1776fe616efb08a7a8568b05982e00f70b03c63863db768ab",
-      "bytes": 57188
+      "bytes": 57188,
+      "sha1": "721d9692ffd65ded56bf4de880f199ec188aa04f",
+      "snapshot_url": "https://snapshot.debian.org/file/721d9692ffd65ded56bf4de880f199ec188aa04f"
     },
     {
       "filename": "librtmp1_2.4+20151223.gitfa8646d.1-2+b5_amd64.deb",
       "sha256": "93baa2004cbe6c8721b9e81beed078612540aef120970b4751305c51c6697368",
-      "bytes": 58840
+      "bytes": 58840,
+      "sha1": "890c75ffd3bd595233728f775acfa20693e53810",
+      "snapshot_url": "https://snapshot.debian.org/file/890c75ffd3bd595233728f775acfa20693e53810"
     },
     {
       "filename": "libsasl2-2_2.1.28+dfsg1-9_amd64.deb",
       "sha256": "66e49d7ae026811b49a0050f18b0325960a2625ffd1ff60d91b7844a815fa9d2",
-      "bytes": 57512
+      "bytes": 57512,
+      "sha1": "d33dd3ff8f88f8ae9a84bad1df925ea1b2ea0904",
+      "snapshot_url": "https://snapshot.debian.org/file/d33dd3ff8f88f8ae9a84bad1df925ea1b2ea0904"
     },
     {
       "filename": "libsasl2-modules-db_2.1.28+dfsg1-9_amd64.deb",
       "sha256": "a5c38659fbd62c33c6d9bfa2be43e75a572d1818531aad32dd74d0a58cc4bd19",
-      "bytes": 19768
+      "bytes": 19768,
+      "sha1": "8c66ab6412351683261d50959984811c0480087b",
+      "snapshot_url": "https://snapshot.debian.org/file/8c66ab6412351683261d50959984811c0480087b"
     },
     {
       "filename": "libsharpyuv0_1.5.0-0.1_amd64.deb",
       "sha256": "51934833d909588f7761fd84362114e90d8d2d38af57edf5df5c4a705e037547",
-      "bytes": 115612
+      "bytes": 115612,
+      "sha1": "56e21dcef138ba28b011f05a10d04c2589b8fe28",
+      "snapshot_url": "https://snapshot.debian.org/file/56e21dcef138ba28b011f05a10d04c2589b8fe28"
     },
     {
       "filename": "libssh2-1t64_1.11.1-1+deb13u2_amd64.deb",
       "sha256": "dbb1024c192d4d292b7cfa902b96076cfe81b56a5eed4fb28da36e8bf543e49a",
-      "bytes": 245240
+      "bytes": 245240,
+      "sha1": "4bad10a74dc7fc97d2b5a01d0528ea60a22b39de",
+      "snapshot_url": "https://snapshot.debian.org/file/4bad10a74dc7fc97d2b5a01d0528ea60a22b39de"
     },
     {
       "filename": "libtasn1-6_4.20.0-2+deb13u1_amd64.deb",
       "sha256": "23fec6e06583ce2bad9b2c04c9b485e90440e259b1abf8677cd80d3ce60831ad",
-      "bytes": 50112
+      "bytes": 50112,
+      "sha1": "16154349d857a93b3e689959b9cb2e72886edeb4",
+      "snapshot_url": "https://snapshot.debian.org/file/16154349d857a93b3e689959b9cb2e72886edeb4"
     },
     {
       "filename": "libtesseract5_5.5.0-1+b1_amd64.deb",
       "sha256": "3261b2b3e1d6f5207512b93f531ef4b531f4160890b8e5cf4e65b989f6ba3ceb",
-      "bytes": 1416872
+      "bytes": 1416872,
+      "sha1": "3d17798dac8a6a608c9f6717bd933a7ed513de0e",
+      "snapshot_url": "https://snapshot.debian.org/file/3d17798dac8a6a608c9f6717bd933a7ed513de0e"
     },
     {
       "filename": "libthai-data_0.1.29-2_all.deb",
       "sha256": "fd38d40602834d510a29140bd27fd48485105e834f03dccab1c02e2edaa794dd",
-      "bytes": 167504
+      "bytes": 167504,
+      "sha1": "668800d5f7cb8286a36dbcf9610d72ad4091ae5b",
+      "snapshot_url": "https://snapshot.debian.org/file/668800d5f7cb8286a36dbcf9610d72ad4091ae5b"
     },
     {
       "filename": "libthai0_0.1.29-2+b1_amd64.deb",
       "sha256": "e6364c07aeeffe9a95f267061d9df168e48e9dc9126c3b40e19dc829f67702a7",
-      "bytes": 49420
+      "bytes": 49420,
+      "sha1": "e26a84b05448e96717593c0257a9055f82a6ec42",
+      "snapshot_url": "https://snapshot.debian.org/file/e26a84b05448e96717593c0257a9055f82a6ec42"
     },
     {
       "filename": "libtiff6_4.7.0-3+deb13u3_amd64.deb",
       "sha256": "6bb2038f36817ae1ee6d33df03917b21835dcc2e0f3e3e80a71390e83c171173",
-      "bytes": 345492
+      "bytes": 345492,
+      "sha1": "faa5bddd33fff3675e7b76863c6ef140347fb3b2",
+      "snapshot_url": "https://snapshot.debian.org/file/faa5bddd33fff3675e7b76863c6ef140347fb3b2"
     },
     {
       "filename": "libunistring5_1.3-2_amd64.deb",
       "sha256": "6dd3490bef06ea1096f32d10766b7e016cf579bfae8451d1b7df15ce05b8aa46",
-      "bytes": 476768
+      "bytes": 476768,
+      "sha1": "49e3032a7bb85c144d013d237eb8022e499a640c",
+      "snapshot_url": "https://snapshot.debian.org/file/49e3032a7bb85c144d013d237eb8022e499a640c"
     },
     {
       "filename": "libwebp7_1.5.0-0.1_amd64.deb",
       "sha256": "c749744b04abdd1426b0c7718e516362c03a557c5151662092d6d4f2cef6e7c1",
-      "bytes": 317856
+      "bytes": 317856,
+      "sha1": "7be5c58d2594133d0fa1dd5c9f7b8a7d2cd087c8",
+      "snapshot_url": "https://snapshot.debian.org/file/7be5c58d2594133d0fa1dd5c9f7b8a7d2cd087c8"
     },
     {
       "filename": "libwebpmux3_1.5.0-0.1_amd64.deb",
       "sha256": "8bc86d509406ad496b6414c7068b3dadc0f8c502027973cbf1765c7bb54fabdf",
-      "bytes": 126140
+      "bytes": 126140,
+      "sha1": "366bf18b2fc5dbdca483ab8dfabc2384da1fbe36",
+      "snapshot_url": "https://snapshot.debian.org/file/366bf18b2fc5dbdca483ab8dfabc2384da1fbe36"
     },
     {
       "filename": "libx11-6_2%3a1.8.12-1_amd64.deb",
       "sha256": "b5a3fd3bf8c8fd0364bfb9bea00dcba7fc301229bd02dded084632d31f5b0fb3",
-      "bytes": 815292
+      "bytes": 815292,
+      "sha1": "56ae4d0487891c46be6f33fb030c750950259511",
+      "snapshot_url": "https://snapshot.debian.org/file/56ae4d0487891c46be6f33fb030c750950259511"
     },
     {
       "filename": "libx11-data_2%3a1.8.12-1_all.deb",
       "sha256": "c54f87069888f80ba4da586da6147d74c7598ccdd8b90906dbc4271fa414c738",
-      "bytes": 343072
+      "bytes": 343072,
+      "sha1": "7791f7c6ff038c7fad4677f8ce9be34d80f25284",
+      "snapshot_url": "https://snapshot.debian.org/file/7791f7c6ff038c7fad4677f8ce9be34d80f25284"
     },
     {
       "filename": "libxau6_1%3a1.0.11-1_amd64.deb",
       "sha256": "689a9f0e0ba3e2c65431f864871e303ee904de69dd28abfc462663fae030227f",
-      "bytes": 20392
+      "bytes": 20392,
+      "sha1": "3617bde7a7571de051ea98d57a978f3a357631a3",
+      "snapshot_url": "https://snapshot.debian.org/file/3617bde7a7571de051ea98d57a978f3a357631a3"
     },
     {
       "filename": "libxcb-render0_1.17.0-2+b1_amd64.deb",
       "sha256": "7f6e36978e0f70a590fbad4042a692c70b50ca7cbcdc53fa7e9d9ab87933acc6",
-      "bytes": 115100
+      "bytes": 115100,
+      "sha1": "94694566461cb64aaa0dd2bfa8020958a5ec0a9e",
+      "snapshot_url": "https://snapshot.debian.org/file/94694566461cb64aaa0dd2bfa8020958a5ec0a9e"
     },
     {
       "filename": "libxcb-shm0_1.17.0-2+b1_amd64.deb",
       "sha256": "d1777a813f484e89f3dcaadd1d5f2b1a13e9313b6bf70eded16d8ce743208fef",
-      "bytes": 105284
+      "bytes": 105284,
+      "sha1": "4bddb4aed86342c5147f99fd72ce1eb167b8dd68",
+      "snapshot_url": "https://snapshot.debian.org/file/4bddb4aed86342c5147f99fd72ce1eb167b8dd68"
     },
     {
       "filename": "libxcb1_1.17.0-2+b1_amd64.deb",
       "sha256": "5c222a72d11b866447da31693254f738430726e3e065a384e82687b2fd2f978b",
-      "bytes": 144340
+      "bytes": 144340,
+      "sha1": "fc9d1247247dd8d4e0e231b26ff01fe7509a55f1",
+      "snapshot_url": "https://snapshot.debian.org/file/fc9d1247247dd8d4e0e231b26ff01fe7509a55f1"
     },
     {
       "filename": "libxdmcp6_1%3a1.1.5-1_amd64.deb",
       "sha256": "0740dc760916b2008b45417a42a8fd7dd5de370fb57d31373f15034cda8acf0b",
-      "bytes": 27756
+      "bytes": 27756,
+      "sha1": "63f1d1dfe27c54257297c70aad3862682e09d0fd",
+      "snapshot_url": "https://snapshot.debian.org/file/63f1d1dfe27c54257297c70aad3862682e09d0fd"
     },
     {
       "filename": "libxext6_2%3a1.3.4-1+b3_amd64.deb",
       "sha256": "fc618ec40465e5ce48622606299cb47833efc3fb235ba15543b81f850722f443",
-      "bytes": 50448
+      "bytes": 50448,
+      "sha1": "376c8d2c6afc249c30d4e24123bda5504294cb6c",
+      "snapshot_url": "https://snapshot.debian.org/file/376c8d2c6afc249c30d4e24123bda5504294cb6c"
     },
     {
       "filename": "libxml2_2.12.7+dfsg+really2.9.14-2.1+deb13u3_amd64.deb",
       "sha256": "e0c6b63ce4602a036a526f60fe5e6c1586710688058d98fc1001b9b3147b7efd",
-      "bytes": 699724
+      "bytes": 699724,
+      "sha1": "1004cd76d8bbb2b8603eaf4ac38670d6b1b79928",
+      "snapshot_url": "https://snapshot.debian.org/file/1004cd76d8bbb2b8603eaf4ac38670d6b1b79928"
     },
     {
       "filename": "libxrender1_1%3a0.9.12-1_amd64.deb",
       "sha256": "9d042dfd5e613be1e02e6ddd0c5c4adef19c5eb08f6db838c2eba672c496dca4",
-      "bytes": 27896
+      "bytes": 27896,
+      "sha1": "07e9c43d74776b99891fd817fccf4ac8c402b695",
+      "snapshot_url": "https://snapshot.debian.org/file/07e9c43d74776b99891fd817fccf4ac8c402b695"
     },
     {
       "filename": "tesseract-ocr-eng_1%3a4.1.0-2_all.deb",
       "sha256": "9242d054563262398f8cf41fbd96fcc72f9dde70db16de18539882a6cff74f9d",
-      "bytes": 1593640
+      "bytes": 1593640,
+      "sha1": "aaf923ad6564a65b85f33406451374e4a49bf39b",
+      "snapshot_url": "https://snapshot.debian.org/file/aaf923ad6564a65b85f33406451374e4a49bf39b"
     },
     {
       "filename": "tesseract-ocr-osd_1%3a4.1.0-2_all.deb",
       "sha256": "72cc0ba5a04e4d38e5d7901ae2f0319f4941fddaa4a77d1a86110909c036bacb",
-      "bytes": 2992152
+      "bytes": 2992152,
+      "sha1": "2f7d83ddd6ad9f1833ad39c57d0fc091e257bfc8",
+      "snapshot_url": "https://snapshot.debian.org/file/2f7d83ddd6ad9f1833ad39c57d0fc091e257bfc8"
     },
     {
       "filename": "tesseract-ocr_5.5.0-1+b1_amd64.deb",
       "sha256": "9075f944564f5e567f77b218696530125cf2cf70ee64b497df3d5173bf422c7e",
-      "bytes": 438996
+      "bytes": 438996,
+      "sha1": "3353087fa90ff9fa5a531251a8b4c8c85d0bfff6",
+      "snapshot_url": "https://snapshot.debian.org/file/3353087fa90ff9fa5a531251a8b4c8c85d0bfff6"
     }
-  ]
+  ],
+  "retrieval": {
+    "method": "debian-snapshot-file-by-sha1",
+    "url_template": "https://snapshot.debian.org/file/{sha1}",
+    "recorded_download": "2026-09-13",
+    "verify": "sha256 from this stamp after fetch",
+    "note": "snapshot.debian.org's farm is keyed by SHA-1; sha256 is the accept identity. apt-get is not used."
+  }
 }

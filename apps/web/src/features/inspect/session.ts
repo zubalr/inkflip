@@ -27,6 +27,8 @@ import * as tesseract from "tesseract.js";
 import {
   MessageFactory,
   RunCoordinator,
+  RUNTIME_LIMITS,
+  TransferLedger,
   deriveRunKey,
 } from "../../../../../packages/runtime/src/index";
 import type { CoordinatorIntent } from "../../../../../packages/runtime/src/index";
@@ -651,6 +653,83 @@ export class InspectionSession {
       limitations: raster.limitations,
     };
   };
+
+  /**
+   * Instrumented observation: render the live committed document at a
+   * requested scale that exceeds pixel/edge caps and record the clamp.
+   */
+  probeRasterBounds = async (
+    handle: unknown,
+    requestedScalePxPerPt = 20,
+  ): Promise<{
+    widthPx: number;
+    heightPx: number;
+    requestedScalePxPerPt: number;
+    usedScalePxPerPt: number;
+    limitations: readonly string[];
+    status: string;
+    reason: string | null;
+  }> => {
+    const checks = this.adapter.plan(handle as DocumentHandle, {
+      pages: [0],
+      capabilities: ["render"],
+    });
+    const check = checks[0];
+    if (!check) throw new Error("render check was not planned");
+    const outcome = await this.adapter.extract(
+      handle as DocumentHandle,
+      check,
+      () => undefined,
+      {},
+      { renderScalePxPerPt: requestedScalePxPerPt },
+    );
+    const raster = outcome.raster;
+    return {
+      widthPx: raster?.widthPx ?? 0,
+      heightPx: raster?.heightPx ?? 0,
+      requestedScalePxPerPt,
+      usedScalePxPerPt: raster?.scalePxPerPt ?? 0,
+      limitations: raster?.limitations ?? [],
+      status: outcome.result.status,
+      reason: outcome.result.reason,
+    };
+  };
+
+  /**
+   * Instrumented observation of the bundled TransferLedger: two claims
+   * succeed, the third is raster_cap, release recovers a slot.
+   */
+  probeLiveRasterCap(): {
+    first: "ok" | "raster_cap" | "foreign";
+    second: "ok" | "raster_cap" | "foreign";
+    third: "ok" | "raster_cap" | "foreign";
+    liveAfterTwo: number;
+    liveAfterRelease: number;
+    recovered: "ok" | "raster_cap" | "foreign";
+    cap: number;
+  } {
+    const ledger = new TransferLedger();
+    const first = ledger.claim("raster_rgba", "probe_a");
+    const second = ledger.claim("raster_rgba", "probe_b");
+    const third = ledger.claim("raster_rgba", "probe_c");
+    const liveAfterTwo = ledger.liveRasters;
+    ledger.release("probe_a");
+    const liveAfterRelease = ledger.liveRasters;
+    const recovered = ledger.claim("raster_rgba", "probe_c");
+    return {
+      first,
+      second,
+      third,
+      liveAfterTwo,
+      liveAfterRelease,
+      recovered,
+      cap: RUNTIME_LIMITS.maxLiveRasters,
+    };
+  }
+
+  observeResources(): ReturnType<RunCoordinator["resourceObservation"]> {
+    return this.coordinator.resourceObservation();
+  }
 
   cancelRun(): void {
     if (this.coordinator.fileState === "running") {
