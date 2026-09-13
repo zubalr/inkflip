@@ -1,0 +1,8 @@
+# T52 commands
+implementation: 95438c95fc36c5e10052119829b147a24d2c6fad
+
+$ uv run --project native python -m pytest native/tests/gates -q
+6 passed in 3.65s
+
+$ python scripts/gate.py G3
+not executed (would fail Beads prerequisite receipts; left to Devin)

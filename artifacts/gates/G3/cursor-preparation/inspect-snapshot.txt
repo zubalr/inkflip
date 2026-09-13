@@ -1,0 +1,42 @@
+- main
+  - paragraph
+    - StaticText "INKFLIP / PDF READING INSPECTOR"
+  - heading "Two readings. One document." [level=1, ref=e1]
+  - paragraph
+    - StaticText "This is a evidence report. requires_original. A disagreement does not establish which reading is correct, fraud or document safety."
+  - DescriptionList
+    - term "Document SHA-256"
+    - definition
+      - code
+        - StaticText "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed"
+    - term "Report identity"
+    - definition
+      - code
+        - StaticText "32fa2820b0fa8b49c8c495fa64ebec1b0db13d27328efdc696412ad284ac570f"
+    - term "Run"
+    - definition
+      - StaticText "complete · prepared_actual_run"
+    - term "Environment"
+    - definition
+      - code
+        - StaticText "Python 3.13.15; darwin; algorithm=inkflip-inspect-v1; profile_name=native-default"
+  - generic
+    - heading "What was checked" [level=2, ref=e2]
+    - table
+      - rowgroup
+        - row
+          - columnheader "Check" [ref=e7]
+          - columnheader "Status" [ref=e8]
+          - columnheader "Produced" [ref=e9]
+      - row
+        - cell "chk_pypdf_text_p0" [ref=e4]
+        - cell "completed" [ref=e5]
+        - cell "1" [ref=e6]
+  - generic
+    - heading "Included and omitted data" [level=2, ref=e3]
+    - paragraph
+      - StaticText "Included: selected_text, document_hash, settings, coverage, filename"
+    - paragraph
+      - StaticText "Omissions: Other unselected pages excluded."
+  - sectionfooter
+    - StaticText "Generated locally. No scripts, remote fonts or tracking links."

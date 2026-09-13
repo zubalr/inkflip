@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "task_id": "T52",
+  "beads_id": "pdf-t52",
+  "worker": {
+    "app": "cursor",
+    "branch": "work/cursor/native-assurance",
+    "base": "78750769d1a29d58b7b79f91c1c8ffd749dc4eac",
+    "implementation_commit": "95438c95fc36c5e10052119829b147a24d2c6fad"
+  },
+  "criteria": [
+    {"criterion": "Baselines never update automatically.", "status": "executed", "evidence": ["native/tests/gates/test_g3_scenarios.py"]},
+    {"criterion": "Stated rules detect regressions and lost coverage.", "status": "executed", "evidence": ["native/tests/gates/test_g3_scenarios.py"]},
+    {"criterion": "The compared versions actually run in separate, recorded environments.", "status": "executed", "evidence": ["native/tests/gates/test_g3_scenarios.py"]},
+    {"criterion": "One failed file cannot erase successful results from other files.", "status": "executed", "evidence": ["native/tests/gates/test_g3_scenarios.py"]},
+    {"criterion": "Reader, source and configuration identities survive report transfer.", "status": "executed", "evidence": ["native/tests/gates/test_g3_scenarios.py", "artifacts/gates/G3/cursor-preparation/browser-reopen.md"]},
+    {"criterion": "The documented local CI example executes without a hosted account.", "status": "partial", "evidence": ["native/tests/gates/test_g3_scenarios.py", "examples/reader-upgrade/run.sh"]}
+  ],
+  "review": {"status": "pending", "path": "artifacts/tasks/T52/review.md"},
+  "limitations": [
+    "gate.py G3 was not run. Scenario suite is preflight only.",
+    "Reader-upgrade example is asserted present and previously executed on the repair branch; not re-run as a full install in this suite.",
+    "Independent review pending."
+  ]
+}

@@ -1,0 +1,28 @@
+- main
+  - paragraph
+    - StaticText "INKFLIP / PDF READING INSPECTOR"
+  - heading "Comparison regressed" [level=1, ref=e1]
+  - paragraph
+    - StaticText "Mode reader_upgrade. Left cba2acd27b06c131c0857af135df991eb0b7aa8219ed2df2d8a33e96b8890dfd. Right cba2acd27b06c131c0857af135df991eb0b7aa8219ed2df2d8a33e96b8890dfd."
+  - table
+    - rowgroup
+      - row
+        - columnheader "Id" [ref=e12]
+        - columnheader "Kind" [ref=e13]
+        - columnheader "Status" [ref=e14]
+        - columnheader "Rule" [ref=e15]
+        - columnheader "Explanation" [ref=e16]
+    - row
+      - cell "chg_mapping-control-expected-text" [ref=e2]
+      - cell "text" [ref=e3]
+      - cell "regressed" [ref=e4]
+      - cell "mapping-control-expected-text" [ref=e5]
+      - cell "expected_text missing" [ref=e6]
+    - row
+      - cell "chg_mapping-control-coverage" [ref=e7]
+      - cell "coverage" [ref=e8]
+      - cell "regressed" [ref=e9]
+      - cell "mapping-control-coverage" [ref=e10]
+      - cell "required coverage missing" [ref=e11]
+  - sectionfooter
+    - StaticText "Generated locally. No scripts or remote resources."

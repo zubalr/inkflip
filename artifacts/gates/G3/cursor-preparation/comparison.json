@@ -1,0 +1,37 @@
+{
+  "kind": "comparison",
+  "schema_version": "1.0.0",
+  "id": "38c20ec1844855e6c09acf94763ca6c4f3d1ee482726b09b53a42a28702c0edd",
+  "left_report_id": "cba2acd27b06c131c0857af135df991eb0b7aa8219ed2df2d8a33e96b8890dfd",
+  "right_report_id": "cba2acd27b06c131c0857af135df991eb0b7aa8219ed2df2d8a33e96b8890dfd",
+  "left_document_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+  "right_document_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+  "mode": "reader_upgrade",
+  "status": "regressed",
+  "acceptance_rules_sha256": "527d6cfa076170a40c991794c26b4168502c7aa6180c3f03a108583b09e99829",
+  "changes": [
+    {
+      "id": "chg_mapping-control-expected-text",
+      "kind": "text",
+      "page_index": 0,
+      "left_occurrence_ids": [],
+      "right_occurrence_ids": [],
+      "status": "regressed",
+      "rule_id": "mapping-control-expected-text",
+      "explanation": "expected_text missing"
+    },
+    {
+      "id": "chg_mapping-control-coverage",
+      "kind": "coverage",
+      "page_index": 0,
+      "left_occurrence_ids": [],
+      "right_occurrence_ids": [],
+      "status": "regressed",
+      "rule_id": "mapping-control-coverage",
+      "explanation": "required coverage missing"
+    }
+  ],
+  "limitations": [
+    "Comparison uses the shared Node alignment bridge and declared acceptance rules."
+  ]
+}
