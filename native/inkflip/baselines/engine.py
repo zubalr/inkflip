@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -191,13 +192,41 @@ def create_baseline(
     }
     core.validate(record)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    sidecar.mkdir(parents=False)
-    for key, report in reports.items():
-        atomic_write_bytes(
-            sidecar / f"{key}.json",
-            (json.dumps(report, indent=2) + "\n").encode("utf-8"),
+    # Transaction boundary. The bundle is committed in a staging directory and
+    # only becomes visible once every backing report is written; the manifest is
+    # written last, so an interrupted attempt can never leave a manifest pointing
+    # at a partial report set. Re-running after a failure is possible because the
+    # staging directory is removed on every failure path.
+    staging = out_path.with_name(out_path.name + ".staging")
+    if staging.exists():
+        raise BaselineOverwriteError(
+            f"A staging directory already exists at {staging}; another creation for "
+            f"{out_path} is in progress or was interrupted. Resolve it before retrying."
         )
-    atomic_write_bytes(out_path, (json.dumps(record, indent=2) + "\n").encode("utf-8"))
+    try:
+        staging.mkdir(parents=False)
+    except FileExistsError as exc:
+        # Lost a race with a concurrent create for the same destination.
+        raise BaselineOverwriteError(
+            f"Another baseline creation for {out_path} is already in progress"
+        ) from exc
+    committed_sidecar = False
+    try:
+        for key, report in reports.items():
+            atomic_write_bytes(
+                staging / f"{key}.json",
+                (json.dumps(report, indent=2) + "\n").encode("utf-8"),
+            )
+        staging.rename(sidecar)
+        committed_sidecar = True
+        atomic_write_bytes(out_path, (json.dumps(record, indent=2) + "\n").encode("utf-8"))
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        if committed_sidecar:
+            # The manifest write failed after the reports became visible: remove
+            # the sidecar too, so no half-valid immutable bundle survives.
+            shutil.rmtree(sidecar, ignore_errors=True)
+        raise
     return record
 
 
