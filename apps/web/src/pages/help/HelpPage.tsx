@@ -202,7 +202,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
           </div>
           <div>
             <h4>Typography</h4>
-            <p>Space Grotesk, JetBrains Mono, and Silkscreen are distributed under the SIL Open Font License 1.1.</p>
+            <p>Inkflip ships no bundled fonts. It renders with your system's Georgia, system-ui, and ui-monospace stacks.</p>
           </div>
           <div>
             <h4>Privacy &amp; Telemetry Notice</h4>
