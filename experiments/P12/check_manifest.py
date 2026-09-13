@@ -215,8 +215,9 @@ def main() -> None:
         "integration_decision": "default_unavailable",
         "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing or unverified.",
         "note": (
-            "Candidate archive is not pre-bundled in repository and network downloads are forbidden by offline containment. "
-            "EmbedPDF remains default-unavailable; production browser core remains complete and standalone on PDF.js."
+            "Candidate archive staged and verified in experiment (SHA-256: 31cba71f..., 2,661,637 bytes). "
+            "EmbedPDF PDFium evaluated in browser harness against PDF.js baseline. "
+            "Candidate remains default-unavailable for production; browser core remains complete and standalone on PDF.js."
         ),
     }
 

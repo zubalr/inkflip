@@ -18,7 +18,7 @@
   "resource_costs": {
     "total_pixels_evaluated": 6284800,
     "total_megapixels": 6.2848,
-    "runtime_seconds": 4.5745
+    "runtime_seconds": 4.7057
   },
   "metrics": {
     "total_fixtures_evaluated": 14,

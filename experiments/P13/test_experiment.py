@@ -31,10 +31,13 @@ sys.path.insert(0, str(P13_DIR))
 
 # Re-exec via experiment-local virtual environment if available
 P13_VENV_PYTHON = ROOT / "experiments" / "P13" / ".venv" / "bin" / "python"
-if P13_VENV_PYTHON.is_file() and sys.executable != str(P13_VENV_PYTHON):
-    if not os.environ.get("_INKFLIP_P13_TEST_VENV_REEXEC"):
-        os.environ["_INKFLIP_P13_TEST_VENV_REEXEC"] = "1"
-        os.execv(str(P13_VENV_PYTHON), [str(P13_VENV_PYTHON), *sys.argv])
+
+
+def maybe_reexec_venv() -> None:
+    if P13_VENV_PYTHON.is_file() and sys.executable != str(P13_VENV_PYTHON):
+        if "-c" not in sys.argv and not os.environ.get("_INKFLIP_P13_TEST_VENV_REEXEC"):
+            os.environ["_INKFLIP_P13_TEST_VENV_REEXEC"] = "1"
+            os.execv(str(P13_VENV_PYTHON), [str(P13_VENV_PYTHON), *sys.argv])
 
 # Ensure native dependencies are available
 try:
@@ -43,7 +46,7 @@ try:
     from PIL import Image
 except (ImportError, ModuleNotFoundError):
     uv = shutil.which("uv")
-    if uv and not os.environ.get("_INKFLIP_P13_TEST_REEXEC"):
+    if uv and "-c" not in sys.argv and not os.environ.get("_INKFLIP_P13_TEST_REEXEC"):
         os.environ["_INKFLIP_P13_TEST_REEXEC"] = "1"
         os.execv(uv, [uv, "run", "--project", "native", "python", *sys.argv])
     raise
@@ -282,6 +285,61 @@ class TestP13Experiment(unittest.TestCase):
             # Ground truth must not be synthetic consensus of candidate and baseline
             self.assertNotIn("consensus_ground_truth", f)
 
+    def test_runtime_network_isolation_blocks_network(self) -> None:
+        """Verify enforce_network_isolation intercepts and blocks outbound network calls during inference."""
+        from experiments.P13.run import enforce_network_isolation
+        import socket
+
+        with enforce_network_isolation():
+            # Outbound connection attempt must be blocked
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            with self.assertRaises(RuntimeError) as cm:
+                s.connect(("1.1.1.1", 80))
+            self.assertIn("prohibited by Invariant I14", str(cm.exception))
+
+            with self.assertRaises(RuntimeError) as cm:
+                socket.create_connection(("example.com", 80))
+            self.assertIn("prohibited by Invariant I14", str(cm.exception))
+
+            with self.assertRaises(RuntimeError) as cm:
+                socket.getaddrinfo("example.com", 80)
+            self.assertIn("prohibited by Invariant I14", str(cm.exception))
+
+    def test_explicit_missing_model_and_oov_behavior(self) -> None:
+        """Verify explicit missing-model audit triggers blocked status and preserves failure accounting in denominator."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Audit with empty search directory (missing models)
+            audit = audit_rapidocr_environment(custom_search_dirs=[Path(tmpdir)])
+            self.assertEqual(audit["status"], "blocked")
+            self.assertFalse(audit["weights_present"])
+            self.assertEqual(audit["disposition"], "blocked_missing_dependency_and_weights")
+            self.assertIn("attempted_preparation", audit)
+
+            # Evaluate fixture with missing model audit must produce blocked candidate record
+            rasters_dir = Path(tmpdir) / "rasters"
+            rasters_dir.mkdir()
+            dev_dir = ROOT / "fixtures" / "development"
+            fix_path = dev_dir / "ocr-material-control.pdf"
+            from experiments.P13.run import evaluate_fixture
+            res = evaluate_fixture(fix_path, rasters_dir, audit)
+            self.assertEqual(res["baseline_tesseract"]["status"], "completed")
+            self.assertEqual(res["candidate_rapidocr"]["status"], "blocked")
+            self.assertEqual(res["candidate_rapidocr"]["exit_code"], -1)
+            self.assertIn("blocked", res["candidate_rapidocr"]["error"])
+
+            # Verify OOV character handling: RapidOCR inference with unusual/OOV Unicode string
+            audit_real = audit_rapidocr_environment()
+            if audit_real["status"] == "available":
+                from PIL import ImageDraw
+                oov_img = Path(tmpdir) / "oov_test.png"
+                img = Image.new("RGB", (300, 100), color="white")
+                draw = ImageDraw.Draw(img)
+                draw.text((10, 30), "§¶•€¥ 12345", fill="black")
+                img.save(oov_img)
+                res_oov = run_rapidocr(oov_img, Path(audit_real["det_path"]), Path(audit_real["rec_path"]))
+                self.assertIn(res_oov["status"], ("completed", "failed"))
+                self.assertIsInstance(res_oov["boxes"], list)
+
 
 def run_tests() -> int:
     suite = unittest.TestLoader().loadTestsFromTestCase(TestP13Experiment)
@@ -306,4 +364,5 @@ def run_tests() -> int:
 
 
 if __name__ == "__main__":
+    maybe_reexec_venv()
     sys.exit(run_tests())

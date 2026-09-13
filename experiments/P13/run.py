@@ -12,12 +12,14 @@ and failure cases in denominators honestly without simulated counts or fake reje
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
 import resource
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -27,10 +29,74 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Re-exec via experiment-local virtual environment if available
 P13_VENV_PYTHON = ROOT / "experiments" / "P13" / ".venv" / "bin" / "python"
-if P13_VENV_PYTHON.is_file() and sys.executable != str(P13_VENV_PYTHON):
-    if not os.environ.get("_INKFLIP_P13_VENV_REEXEC"):
-        os.environ["_INKFLIP_P13_VENV_REEXEC"] = "1"
-        os.execv(str(P13_VENV_PYTHON), [str(P13_VENV_PYTHON), *sys.argv])
+
+
+def maybe_reexec_venv() -> None:
+    """Re-exec into experiment-local virtual environment when run as CLI script."""
+    if P13_VENV_PYTHON.is_file() and sys.executable != str(P13_VENV_PYTHON):
+        if "-c" not in sys.argv and not os.environ.get("_INKFLIP_P13_VENV_REEXEC"):
+            os.environ["_INKFLIP_P13_VENV_REEXEC"] = "1"
+            os.execv(str(P13_VENV_PYTHON), [str(P13_VENV_PYTHON), *sys.argv])
+
+
+_BLOCKED_NETWORK_CALLS = 0
+
+
+@contextmanager
+def enforce_network_isolation():
+    """Enforce runtime offline isolation (Invariants I13 / I14) during OCR inference.
+
+    Intercepts and blocks outbound socket creation and network address resolution,
+    recording any attempted network egress.
+    """
+    global _BLOCKED_NETWORK_CALLS
+    original_socket = socket.socket
+    original_create_connection = socket.create_connection
+    original_getaddrinfo = socket.getaddrinfo
+
+    class GuardedSocket(original_socket):
+        def connect(self, *args, **kwargs):
+            global _BLOCKED_NETWORK_CALLS
+            _BLOCKED_NETWORK_CALLS += 1
+            raise RuntimeError("Runtime network access prohibited by Invariant I14 during OCR inference")
+
+        def connect_ex(self, *args, **kwargs):
+            global _BLOCKED_NETWORK_CALLS
+            _BLOCKED_NETWORK_CALLS += 1
+            return 111  # ECONNREFUSED
+
+        def send(self, *args, **kwargs):
+            global _BLOCKED_NETWORK_CALLS
+            _BLOCKED_NETWORK_CALLS += 1
+            raise RuntimeError("Runtime network access prohibited by Invariant I14 during OCR inference")
+
+        def sendto(self, *args, **kwargs):
+            global _BLOCKED_NETWORK_CALLS
+            _BLOCKED_NETWORK_CALLS += 1
+            raise RuntimeError("Runtime network access prohibited by Invariant I14 during OCR inference")
+
+    def guarded_create_connection(*args, **kwargs):
+        global _BLOCKED_NETWORK_CALLS
+        _BLOCKED_NETWORK_CALLS += 1
+        raise RuntimeError("Runtime network access prohibited by Invariant I14 during OCR inference")
+
+    def guarded_getaddrinfo(*args, **kwargs):
+        host = args[0] if args else kwargs.get("host")
+        if host in ("localhost", "127.0.0.1", "::1", None):
+            return original_getaddrinfo(*args, **kwargs)
+        global _BLOCKED_NETWORK_CALLS
+        _BLOCKED_NETWORK_CALLS += 1
+        raise RuntimeError(f"Runtime network access to {host} prohibited by Invariant I14")
+
+    socket.socket = GuardedSocket  # type: ignore
+    socket.create_connection = guarded_create_connection  # type: ignore
+    socket.getaddrinfo = guarded_getaddrinfo  # type: ignore
+    try:
+        yield
+    finally:
+        socket.socket = original_socket
+        socket.create_connection = original_create_connection
+        socket.getaddrinfo = original_getaddrinfo
 
 # Ensure required libraries are available
 try:
@@ -39,7 +105,7 @@ try:
     from PIL import Image
 except (ImportError, ModuleNotFoundError):
     uv = shutil.which("uv")
-    if uv and not os.environ.get("_INKFLIP_P13_REEXEC"):
+    if uv and "-c" not in sys.argv and not os.environ.get("_INKFLIP_P13_REEXEC"):
         os.environ["_INKFLIP_P13_REEXEC"] = "1"
         os.execv(uv, [uv, "run", "--project", "native", "python", *sys.argv])
     raise
@@ -546,10 +612,10 @@ def evaluate_fixture(pdf_path: Path, rasters_dir: Path, env_audit: dict[str, Any
     assert sha_before == sha_after, "Invariant violation: source PDF mutated during evaluation!"
 
     return {
-        "path": str(pdf_path.relative_to(ROOT)),
+        "path": str(pdf_path.relative_to(ROOT)) if pdf_path.is_relative_to(ROOT) else str(pdf_path),
         "sha256": sha_before,
         "page_size_pt": [pw, ph],
-        "raster_path": str(raster_path.relative_to(ROOT)),
+        "raster_path": str(raster_path.relative_to(ROOT)) if raster_path.is_relative_to(ROOT) else str(raster_path),
         "raster_dimensions": [pil_image.width, pil_image.height],
         "pixels": pixel_count,
         "baseline_tesseract": tesseract_res,
@@ -570,6 +636,9 @@ def get_peak_rss_bytes() -> int:
 
 
 def run_experiment(manifest_path: Path, out_dir: Path) -> dict[str, Any]:
+    global _BLOCKED_NETWORK_CALLS
+    _BLOCKED_NETWORK_CALLS = 0
+
     out_dir.mkdir(parents=True, exist_ok=True)
     rasters_dir = out_dir / "rasters"
     rasters_dir.mkdir(parents=True, exist_ok=True)
@@ -582,14 +651,15 @@ def run_experiment(manifest_path: Path, out_dir: Path) -> dict[str, Any]:
     # 2. Environment and candidate provenance audit
     env_audit = audit_rapidocr_environment()
 
-    # 3. Evaluate each fixture
+    # 3. Evaluate each fixture under runtime network isolation
     fixture_results: list[dict[str, Any]] = []
     total_pixels = 0
 
-    for fix in fixtures:
-        res = evaluate_fixture(fix["path"], rasters_dir, env_audit)
-        total_pixels += res["pixels"]
-        fixture_results.append(res)
+    with enforce_network_isolation():
+        for fix in fixtures:
+            res = evaluate_fixture(fix["path"], rasters_dir, env_audit)
+            total_pixels += res["pixels"]
+            fixture_results.append(res)
 
     t_elapsed = time.perf_counter() - t0
     peak_rss = get_peak_rss_bytes()
@@ -638,8 +708,8 @@ def run_experiment(manifest_path: Path, out_dir: Path) -> dict[str, Any]:
             },
             "runtime_network_isolation": {
                 "enforced": True,
-                "network_calls_attempted": 0,
-                "offline_policy": "Invariant I13 / I14: runtime network access prohibited during OCR inference",
+                "network_calls_attempted": _BLOCKED_NETWORK_CALLS,
+                "offline_policy": "Invariant I13 / I14: runtime network access prohibited during OCR inference (socket-intercepted)",
             },
         },
         "metrics": {
@@ -671,6 +741,7 @@ def run_experiment(manifest_path: Path, out_dir: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    maybe_reexec_venv()
     parser = argparse.ArgumentParser(description="P13 native RapidOCR complement experiment")
     parser.add_argument(
         "--manifest",

@@ -7,7 +7,8 @@
       "height": 400,
       "charCount": 118,
       "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$1,000\r\nRendered marks and extracted text are separate.",
-      "charsWithBoxes": 118
+      "charsWithBoxes": 118,
+      "wasmMemoryBytes": 18612224
     },
     "baseline": {
       "pageCount": 1,
@@ -25,7 +26,8 @@
       "height": 350,
       "charCount": 116,
       "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
-      "charsWithBoxes": 116
+      "charsWithBoxes": 116,
+      "wasmMemoryBytes": 18612224
     },
     "baseline": {
       "pageCount": 1,
@@ -43,7 +45,8 @@
       "height": 240,
       "charCount": 4,
       "text": "$100",
-      "charsWithBoxes": 4
+      "charsWithBoxes": 4,
+      "wasmMemoryBytes": 18612224
     },
     "baseline": {
       "pageCount": 1,
@@ -61,7 +64,8 @@
       "height": 240,
       "charCount": 4,
       "text": "$100",
-      "charsWithBoxes": 4
+      "charsWithBoxes": 4,
+      "wasmMemoryBytes": 18612224
     },
     "baseline": {
       "pageCount": 1,

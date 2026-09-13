@@ -111,7 +111,8 @@ const PAGE_HTML = `<!doctype html>
     mod.FPDF_CloseDocument(doc);
     mod.pdfium._free(ptr);
 
-    return { pageCount, width, height, charCount, text: fullText, chars };
+    const wasmMemoryBytes = mod.pdfium.HEAPU8.buffer.byteLength;
+    return { pageCount, width, height, charCount, text: fullText, chars, wasmMemoryBytes };
   };
 </script>
 </body>
@@ -282,6 +283,7 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
           charCount: cand1.charCount,
           text: cand1.text,
           charsWithBoxes: cand1.chars.length,
+          wasmMemoryBytes: cand1.wasmMemoryBytes,
         },
         baseline: {
           pageCount: baseline.pageCount,
@@ -306,7 +308,7 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
     );
   });
 
-  test("candidate asset budget satisfies < 24 MiB limit", () => {
+  test("candidate asset and runtime memory budgets satisfy limits (< 24 MiB asset, < 64 MiB WASM memory)", async ({ page }) => {
     const archivePath = path.resolve(ROOT, "artifacts/P12/pdfium-dist.tar.gz");
     expect(fs.existsSync(archivePath)).toBe(true);
     const archiveStat = fs.statSync(archivePath);
@@ -319,6 +321,20 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
     const wasmStat = fs.statSync(wasmPath);
     expect(wasmStat.size).toBe(4_633_788);
     expect(wasmStat.size).toBeLessThan(maxAssetSizeBytes);
+
+    // Verify browser runtime memory bounds
+    await page.goto(`${harness.base}/t12.html`);
+    const mem = await page.evaluate(async () => {
+      // @ts-expect-error test harness global
+      const res = await window.__extractPdfium("/fixtures/development/white-contrast-control.pdf");
+      const jsHeap = (performance as any).memory?.usedJSHeapSize ?? 0;
+      return { wasmMemory: res.wasmMemoryBytes, jsHeap };
+    });
+    expect(mem.wasmMemory).toBeGreaterThan(0);
+    expect(mem.wasmMemory).toBeLessThan(64 * 1024 * 1024); // < 64 MiB WASM heap limit
+    if (mem.jsHeap > 0) {
+      expect(mem.jsHeap).toBeLessThan(128 * 1024 * 1024); // < 128 MiB JS heap limit
+    }
   });
 
   test("enforces runtime network isolation with zero external network egress", async ({ page }) => {

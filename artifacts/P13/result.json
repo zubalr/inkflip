@@ -55,9 +55,9 @@
   "resource_costs": {
     "total_pixels_evaluated": 1596800,
     "total_megapixels": 1.5968,
-    "total_runtime_seconds": 1.1707,
-    "process_max_rss_bytes": 352780288,
-    "process_max_rss_mb": 336.44,
+    "total_runtime_seconds": 1.1888,
+    "process_max_rss_bytes": 340213760,
+    "process_max_rss_mb": 324.45,
     "memory_budget_bytes": 1073741824,
     "memory_budget_satisfied": true,
     "host_containment": {
@@ -68,7 +68,7 @@
     "runtime_network_isolation": {
       "enforced": true,
       "network_calls_attempted": 0,
-      "offline_policy": "Invariant I13 / I14: runtime network access prohibited during OCR inference"
+      "offline_policy": "Invariant I13 / I14: runtime network access prohibited during OCR inference (socket-intercepted)"
     }
   },
   "metrics": {
@@ -98,7 +98,7 @@
         "status": "completed",
         "text": "$\n1\n0\n0",
         "exit_code": 0,
-        "runtime_seconds": 0.058,
+        "runtime_seconds": 0.0622,
         "error": null
       },
       "candidate_rapidocr": {
@@ -186,7 +186,7 @@
         ],
         "count": 4,
         "exit_code": 0,
-        "runtime_seconds": 0.2936,
+        "runtime_seconds": 0.3079,
         "error": null
       }
     },
@@ -207,7 +207,7 @@
         "status": "completed",
         "text": "LATIN-$100",
         "exit_code": 0,
-        "runtime_seconds": 0.0617,
+        "runtime_seconds": 0.0636,
         "error": null
       },
       "candidate_rapidocr": {
@@ -238,7 +238,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0447,
+        "runtime_seconds": 0.0451,
         "error": null
       }
     },
@@ -259,7 +259,7 @@
         "status": "completed",
         "text": "SEAMOUNT -+188.",
         "exit_code": 0,
-        "runtime_seconds": 0.0707,
+        "runtime_seconds": 0.0683,
         "error": null
       },
       "candidate_rapidocr": {
@@ -309,7 +309,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0671,
+        "runtime_seconds": 0.0682,
         "error": null
       }
     },
@@ -330,7 +330,7 @@
         "status": "completed",
         "text": "SeMounT File.",
         "exit_code": 0,
-        "runtime_seconds": 0.0754,
+        "runtime_seconds": 0.072,
         "error": null
       },
       "candidate_rapidocr": {
@@ -380,7 +380,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0687,
+        "runtime_seconds": 0.0638,
         "error": null
       }
     },
@@ -401,7 +401,7 @@
         "status": "completed",
         "text": "SAMOUMT -+108.",
         "exit_code": 0,
-        "runtime_seconds": 0.0708,
+        "runtime_seconds": 0.0695,
         "error": null
       },
       "candidate_rapidocr": {
@@ -451,7 +451,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0651,
+        "runtime_seconds": 0.0632,
         "error": null
       }
     },
@@ -472,7 +472,7 @@
         "status": "completed",
         "text": "$100 $200",
         "exit_code": 0,
-        "runtime_seconds": 0.0603,
+        "runtime_seconds": 0.0601,
         "error": null
       },
       "candidate_rapidocr": {
@@ -522,7 +522,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0286,
+        "runtime_seconds": 0.0284,
         "error": null
       }
     },
@@ -543,7 +543,7 @@
         "status": "completed",
         "text": "$100 \u00a7$",
         "exit_code": 0,
-        "runtime_seconds": 0.0597,
+        "runtime_seconds": 0.0579,
         "error": null
       },
       "candidate_rapidocr": {
@@ -574,7 +574,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0266,
+        "runtime_seconds": 0.0328,
         "error": null
       }
     },
@@ -595,7 +595,7 @@
         "status": "completed",
         "text": "100",
         "exit_code": 0,
-        "runtime_seconds": 0.0559,
+        "runtime_seconds": 0.0597,
         "error": null
       },
       "candidate_rapidocr": {
@@ -626,7 +626,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0102,
+        "runtime_seconds": 0.0101,
         "error": null
       }
     }

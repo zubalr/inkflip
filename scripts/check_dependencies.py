@@ -16,8 +16,10 @@
   5. build/base-image.lock.json — OCI references are digest-pinned and every
      `uses:` action reference in .github/workflows is recorded at a full
      commit SHA.
-  6. No-runtime-download policy — staged serve paths are same-origin and the
-     web entry points contain no remote loader/CDN references.
+  6. No-runtime-download policy — bounded static detector verifying that
+     staged serve paths are same-origin and web entry points contain no
+     executable remote loaders or CDN references (not an exhaustive runtime
+     egress proof).
 
 It does not install or mutate anything; the twice-from-clean-checkout install
 proof runs bun/uv themselves and is recorded in artifacts/tasks/T02/.
@@ -653,6 +655,7 @@ CDN_DOMAIN_RE = re.compile(
 
 
 def check_no_runtime_download() -> None:
+    """Bounded static detector scanning web sources and staged text assets for remote loaders and CDN references."""
     try:
         manifest = prepare_assets.load_manifest()
         for asset in prepare_assets.validate_manifest(manifest):
