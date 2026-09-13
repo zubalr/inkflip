@@ -58,14 +58,22 @@ rediscover them. Each is dated; when one is fixed, this list and
 The following are **not available in this snapshot** and must not be
 presented as working:
 
-- **The `inkflip` native CLI** — the inspect/validate/report/replay,
-  corpus/resume, version-isolated profiles, immutable baseline and
-  reader-upgrade workflow — is delivered on a yielded native branch and its
-  documented examples were executed there on 2026-09-13 (records held with
-  the release preparation); it is **being integrated** and is not part of
-  this snapshot's main-line yet. Until it merges, the browser inspector and
-  the Python reader library are the available capability; the packaging
-  image (container runtime) is still pending and is not claimed anywhere.
+- **The packaged native image is still pending.** The `inkflip` CLI
+  itself (inspect / validate / report / replay / corpus / baselines with
+  version-isolated profiles) is merged on main-line and its documented
+  commands were executed on this branch on 2026-09-13: inspect/validate/
+  report/replay on the F01 fixture, the remote-source refusal (exit 2),
+  and the reader-upgrade corpus/baseline/compare sequence. The container
+  image that packages it is not built and is not claimed anywhere.
+- **The pdfjs Node-profile bridge needs a module path hint in this
+  checkout layout**: the native profiles test `test_real_pdfjs_not_stub`
+  requires `NODE_PATH=apps/web/node_modules` (Bun's isolated linker keeps
+  pdfjs-dist under apps/web). With it the native suite is 249/249; without
+  it, that one test fails on module resolution. Environment requirement of
+  the merged profile code, recorded 2026-09-13.
+- **Accessibility**: automated flows are merged and green (T37 suite); the
+  manual assistive-technology review remains open (tracked separately) —
+  no AT-conformance claim is made.
 - **Offline readiness is per-release and allowlisted**: preparing for
   offline use covers exactly this release's app/reader/model/example files;
   documents never enter the offline cache, and anything unlisted still needs

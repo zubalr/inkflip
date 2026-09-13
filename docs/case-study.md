@@ -56,9 +56,9 @@ general.
 Upgrading a pipeline's PDF library is where regressions hide. The repository's
 reader-upgrade example runs the same corpus through two **version-isolated**
 reader profiles and compares under an explicit, immutable acceptance
-baseline. On 2026-09-13 this exact sequence was executed on the yielded
-native delivery (`work/cursor/native-completion` at `7875076` — merged-state
-acceptance pending):
+baseline. The CLI is merged main-line; on 2026-09-13 this exact sequence was
+executed on this branch (and earlier the same day on the native delivery
+branch it came from):
 
 ```sh
 python scripts/install_reader_profile.py --name before --reader pypdf --version 5.9.0
@@ -83,9 +83,9 @@ reader-upgrade comparison reported **unchanged** across the pypdf 5.9.0 →
 from *regressed*: a change is only a regression when a declared rule in the
 approved baseline forbids it.
 
-This capability is **source-preview on the yielded native branch**, not yet
-merged main-line or accepted release capability, and the container image
-that will carry it is still pending.
+The container image that packages this CLI is still pending — the
+capability above is the merged source and its local execution, not a
+shipped product claim.
 
 ## What this tool cannot tell you
 
