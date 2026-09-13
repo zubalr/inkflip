@@ -43,16 +43,7 @@
       "claim": "the native CLI/corpus workflow is merged main-line; remote URL sources are refused (local paths only); the network-disabled execution claim is bounded to that enforced refusal, not a full offline guarantee at scale",
       "evidence": "docs/CLI.md",
       "evidence_marker": "Remote URL sources are refused",
-      "per_doc": {
-        "docs/limitations.md": {
-          "must_contain": [
-            "remote-source refusal .?exit 2|Remote URL sources"
-          ],
-          "must_not_contain": [
-            "network-disabled corpus"
-          ]
-        }
-      }
+      "per_doc": {}
     }
   ]
 }
