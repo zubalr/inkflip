@@ -33,3 +33,19 @@
 ## Verdict: approved
 
 All acceptance criteria substantiated under independent adversarial probing; every claimed count and the fuzz stream hash reproduced byte-exact; scope/evidence clean.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `32133af0`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker)
+- **Scope delta:** No owned files changed (`packages/reports/validation/`,
+  `tests/security/import/`, `scripts/fuzz_reports.py` untouched since the
+  original acceptance); staleness was shared-input only — AGENTS.md, app
+  composition surface, command registry and docs churn from the pdf-3g8 merge.
+  The strict gate this task hardened is now exercised by the real public import
+  path (verified live: it rejects digest-mismatched reports).
+- **Fresh run:** Re-ran all registered commands at `32133af0`: **104/104 green**,
+  zero failures — including the fuzz suite.
+- **Verdict:** prior review stands; no acceptance-relevant regression.

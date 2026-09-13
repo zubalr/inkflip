@@ -180,7 +180,7 @@
   },
   "driver_stderr_tail": "",
   "egress_attempts": [],
-  "max_case_ms": 25.09,
+  "max_case_ms": 25.21,
   "reject_codes": {
     "ARCHIVE": 94,
     "ASSET": 65,
@@ -205,5 +205,5 @@
   "tool": "scripts/fuzz_reports.py",
   "unexpected": [],
   "verdict": "pass",
-  "wall_s": 3.0
+  "wall_s": 3.01
 }
