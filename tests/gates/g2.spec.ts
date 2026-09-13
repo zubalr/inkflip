@@ -244,21 +244,32 @@ test.beforeAll(async () => {
   // build-time opt-in (the same one G1's gate build uses; shipped
   // production builds omit it).
   process.env.INKFLIP_TEST_HOOKS = "1";
-  await vite.build({
-    root: WEB,
-    configFile: join(WEB, "vite.config.ts"),
-    logLevel: "warn",
-    build: {
-      outDir: DIST,
-      emptyOutDir: true,
-      rollupOptions: {
-        input: {
-          index: join(WEB, "index.html"),
-          offline: join(WEB, "src", "offline", "preview.html"),
+  // Vite derives import.meta.env.DEV from process.env.NODE_ENV at resolve
+  // time; a dev-server spec earlier in this worker process leaves it set
+  // to "development". Pin production so the gate exercises the real
+  // production artifact regardless of worker-process pollution.
+  const savedNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  try {
+    await vite.build({
+      root: WEB,
+      configFile: join(WEB, "vite.config.ts"),
+      logLevel: "warn",
+      build: {
+        outDir: DIST,
+        emptyOutDir: true,
+        rollupOptions: {
+          input: {
+            index: join(WEB, "index.html"),
+            offline: join(WEB, "src", "offline", "preview.html"),
+          },
         },
       },
-    },
-  });
+    });
+  } finally {
+    if (savedNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = savedNodeEnv;
+  }
   await startStaticServer();
 });
 
