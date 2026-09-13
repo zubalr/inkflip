@@ -1,24 +1,15 @@
-P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=0.5400s, megapixels=3.1936MP
-test_acceptance_criteria_and_rejection_rationale (__main__.TestP11Experiment.test_acceptance_criteria_and_rejection_rationale) ... ok
-test_experiment_runs_and_produces_valid_artifact (__main__.TestP11Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok
-test_fixtures_exist_and_intact (__main__.TestP11Experiment.test_fixtures_exist_and_intact) ... ok
-test_resource_budgets (__main__.TestP11Experiment.test_resource_budgets) ... ok
-
-----------------------------------------------------------------------
-Ran 4 tests in 0.475s
-
-OK
+P11 complete: 8 fixtures evaluated, disposition=rejected_experiment, runtime=1.3844s, megapixels=5.5296MP
 {
   "task": "T42",
   "beads_id": "pdf-t42",
-  "evaluated_commit": "9c5fecee63b494632464f36b4abb6d72a454f3c8",
-  "evaluated_at": "2026-09-13T11:12:08.582730+00:00",
+  "evaluated_commit": null,
+  "evaluated_at": "2026-09-13T11:53:18.722088+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 4,
-    "passed": 4,
+    "collected": 8,
+    "passed": 8,
     "failed": 0,
     "skipped": 0
   },
@@ -43,7 +34,7 @@ OK
       ],
       "cwd": ".",
       "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
       "environment": {}
     },
     {
@@ -59,12 +50,12 @@ OK
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 4,
-        "passed": 4,
+        "collected": 8,
+        "passed": 8,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
       "environment": {}
     }
   ]
