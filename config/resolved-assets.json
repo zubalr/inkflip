@@ -1160,7 +1160,7 @@
         "integrity": "sha512-ZHjSVpDa3D6izMq8/04lvkhkATUmL9px6ChPaXc1k6nU2Mrhlg1/7F0bdUqCwUjw3NsPTfPZsMDUU6ZIcRaeQw=="
       },
       "license": "Apache-2.0",
-      "rights": "openjpeg (JPEG 2000), jbig2 and qcms WASM builds with their LICENSE_* notice files staged alongside the binaries.",
+      "rights": "openjpeg (JPEG 2000; BSD-2-Clause), jbig2 (Apache-2.0), qcms (MIT), and quickjs-eval (MIT, QuickJS by Fabrice Bellard and Charlie Gordon) WASM builds with their notices staged alongside the binaries.",
       "serve_prefix": "/assets/pdfjs/6.3.289/wasm/",
       "delivery": "same-origin static; fetched by pdf.js for image decode and ICC handling",
       "files": [

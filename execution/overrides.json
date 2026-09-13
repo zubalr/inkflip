@@ -45,6 +45,9 @@
     "T03": [
       "native/tests/contracts/"
     ],
+    "T31": [
+      "native/tests/bridge/"
+    ],
     "T49": [
       "LICENSE",
       "CONTRIBUTING.md",

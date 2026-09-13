@@ -77,7 +77,7 @@ NPM_ASSET_SETS = [
         "package_dir": "wasm",
         "serve_prefix": "/assets/pdfjs/{version}/wasm/",
         "license": "Apache-2.0",
-        "rights": "openjpeg (JPEG 2000), jbig2 and qcms WASM builds with their LICENSE_* notice files staged alongside the binaries.",
+        "rights": "openjpeg (JPEG 2000; BSD-2-Clause), jbig2 (Apache-2.0), qcms (MIT), and quickjs-eval (MIT, QuickJS by Fabrice Bellard and Charlie Gordon) WASM builds with their notices staged alongside the binaries.",
         "delivery": "same-origin static; fetched by pdf.js for image decode and ICC handling",
     },
     {
