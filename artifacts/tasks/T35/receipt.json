@@ -1,0 +1,58 @@
+{
+  "task": "T35",
+  "beads_id": "pdf-t35",
+  "evaluated_commit": "b7ea21eb8461dba2d0201413fd03c335b61127b1",
+  "evaluated_at": "2026-09-13T02:57:36.556932+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 3,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "uv run --project native python -m unittest discover -s tests/examples -v",
+      "argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/examples",
+        "-v"
+      ],
+      "executed_argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/examples",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "VALID: report_id=267ffefded84feb58ae4bd18cbb796eb9401e9aa65d7d90652998e60d273e099, pages=1, occurrences=1\nHTML report written to /private/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-test-upgrade-kc9bdfbi/runs/after/mapping-control.html\nComparison status: regressed\n",
+      "stderr": "test_end_to_end_reader_upgrade_workflow (test_reader_upgrade.TestReaderUpgradeExample.test_end_to_end_reader_upgrade_workflow)\nCriterion: Example runs end-to-end locally; before/after identities differ; output reopens in web viewer. ... ok\ntest_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline)\nCriterion: known rule-failing mutation exits5 without modifying baseline. ... Violation: Rule 'rule_stable_control' [stable_reading] violated on page 0: candidate reading changed from approved baseline\nok\ntest_readme_commands_copied_verbatim_into_test (test_reader_upgrade.TestReaderUpgradeExample.test_readme_commands_copied_verbatim_into_test)\nCriterion: README commands copied verbatim into test. ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 1.593s\n\nOK\n",
+      "tests": {
+        "collected": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass",
+      "environment": {}
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+$ python3 scripts/task_acceptance.py task T35 --report artifacts/tasks/T35/receipt.json
+test_end_to_end_reader_upgrade_workflow (test_reader_upgrade.TestReaderUpgradeExample.test_end_to_end_reader_upgrade_workflow)
+Criterion: Example runs end-to-end locally; before/after identities differ; output reopens in web viewer. ... ok
+test_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline)
+Criterion: known rule-failing mutation exits5 without modifying baseline. ... Violation: Rule 'rule_stable_control' [stable_reading] violated on page 0: candidate reading changed from approved baseline
+ok
+test_readme_commands_copied_verbatim_into_test (test_reader_upgrade.TestReaderUpgradeExample.test_readme_commands_copied_verbatim_into_test)
+Criterion: README commands copied verbatim into test. ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.593s
+
+OK
+VALID: report_id=267ffefded84feb58ae4bd18cbb796eb9401e9aa65d7d90652998e60d273e099, pages=1, occurrences=1
+HTML report written to runs/after/mapping-control.html
+Comparison status: regressed
