@@ -58,13 +58,17 @@ rediscover them. Each is dated; when one is fixed, this list and
 The following are **not available in this snapshot** and must not be
 presented as working:
 
-- **The packaged native image is still pending.** The `inkflip` CLI
-  itself (inspect / validate / report / replay / corpus / baselines with
-  version-isolated profiles) is merged on main-line and its documented
-  commands were executed on this branch on 2026-09-13: inspect/validate/
-  report/replay on the F01 fixture, the remote-source refusal (exit 2),
-  and the reader-upgrade corpus/baseline/compare sequence. The container
-  image that packages it is not built and is not claimed anywhere.
+- **The packaged native image exists locally and is functionally verified;
+  it is not a certified cross-platform release.** The production image
+  (`linux/amd64`, digest `sha256:1923b04a…`) was built on this Mac with
+  qemu emulation (explicitly labeled — not native x86_64 hardware) and its
+  offline CLI journeys, containment limits and OCR were executed in it
+  (2026-09-13, candidate `84c839c`). The `inkflip` CLI itself (inspect /
+  validate / report / replay / corpus / baselines with version-isolated
+  profiles) is merged on main-line and executed on this branch the same
+  day. Not claimed: bit-identical rebuilds, signing/provenance attestations
+  (never executed), native x86_64 hardware behavior, Windows/macOS-packaged
+  desktop builds.
 - **The pdfjs Node-profile bridge needs a module path hint in this
   checkout layout**: the native profiles test `test_real_pdfjs_not_stub`
   requires `NODE_PATH=apps/web/node_modules` (Bun's isolated linker keeps
@@ -122,10 +126,10 @@ These are product invariants, not missing features:
 
 - **Release platform profile (owner decision, 2026-09-13): macOS and
   Docker.** Supported release targets are this Mac's environment
-  (macOS/arm64, Chromium) and the container profiles verified on this Mac's
-  local Docker (checkout-image functionality; the digest-pinned production
-  profile is recorded for linux/amd64 and needs an amd64 build environment,
-  deferred). Windows, native Linux hardware, NVDA/Windows, physical mobile
+  (macOS/arm64, Chromium) and the Docker container profiles: the
+  production linux/amd64 image was built and exercised locally via
+  qemu emulation (labeled as such — emulation is acceptable for this
+  release and is not native x86_64 hardware certification). Windows, native Linux hardware, NVDA/Windows, physical mobile
   devices and emulated-amd64 certification are deferred and unverified —
   intentionally out of scope for this release, not missing owner inputs.
   Browser behavior outside Chromium is untested (parity is open work).
