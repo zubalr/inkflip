@@ -351,10 +351,216 @@ def check_base_image_lock() -> None:
         ok("base-image.actions", "no workflow `uses:` references present")
 
 
-REMOTE_LOADER_RE = re.compile(
-    r"(?:src|href)\s*=\s*[\"']https?://|importScripts\(\s*[\"']https?://|"
-    r"new\s+Worker\(\s*[\"']https?://|fetch\(\s*[\"']https?://|"
-    r"(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run)")
+def strip_comments(text: str, suffix: str) -> str:
+    """Strip comments while preserving string literals, regex literals, and line numbers."""
+    if suffix in (".ts", ".tsx", ".js", ".mjs"):
+        out: list[str] = []
+        i = 0
+        n = len(text)
+        state = "NORMAL"
+        last_token = ""
+        while i < n:
+            c = text[i]
+            c2 = text[i:i + 2]
+            if state == "NORMAL":
+                if c2 == "//":
+                    state = "LINE_COMMENT"
+                    out.append("  ")
+                    i += 2
+                    continue
+                elif c2 == "/*":
+                    state = "BLOCK_COMMENT"
+                    out.append("  ")
+                    i += 2
+                    continue
+                elif c == "'":
+                    state = "STRING_SINGLE"
+                    out.append(c)
+                    i += 1
+                    continue
+                elif c == '"':
+                    state = "STRING_DOUBLE"
+                    out.append(c)
+                    i += 1
+                    continue
+                elif c == "`":
+                    state = "TEMPLATE"
+                    out.append(c)
+                    i += 1
+                    continue
+                elif c == "/":
+                    can_be_regex = (
+                        (not last_token)
+                        or (last_token in "=(:[{;,!&|?+-*^%~<>/")
+                        or (last_token in (
+                            "return", "case", "throw", "yield", "await",
+                            "typeof", "delete", "void", "in", "of"
+                        ))
+                    )
+                    if can_be_regex and c2 not in ("//", "/*"):
+                        state = "REGEX"
+                        out.append(c)
+                        i += 1
+                    else:
+                        out.append(c)
+                        last_token = c
+                        i += 1
+                else:
+                    out.append(c)
+                    if not c.isspace():
+                        if c.isalnum() or c in "_$":
+                            if last_token and (last_token[-1].isalnum() or last_token[-1] in "_$"):
+                                last_token += c
+                            else:
+                                last_token = c
+                        else:
+                            last_token = c
+                    i += 1
+            elif state == "LINE_COMMENT":
+                if c == "\n":
+                    out.append("\n")
+                    state = "NORMAL"
+                    last_token = "\n"
+                else:
+                    out.append(" ")
+                i += 1
+            elif state == "BLOCK_COMMENT":
+                if c2 == "*/":
+                    out.append("  ")
+                    i += 2
+                    state = "NORMAL"
+                    last_token = " "
+                else:
+                    out.append("\n" if c == "\n" else " ")
+                    i += 1
+            elif state == "STRING_SINGLE":
+                out.append(c)
+                if c == "\\":
+                    if i + 1 < n:
+                        out.append(text[i + 1])
+                        i += 2
+                        continue
+                elif c == "'":
+                    state = "NORMAL"
+                    last_token = "'"
+                i += 1
+            elif state == "STRING_DOUBLE":
+                out.append(c)
+                if c == "\\":
+                    if i + 1 < n:
+                        out.append(text[i + 1])
+                        i += 2
+                        continue
+                elif c == '"':
+                    state = "NORMAL"
+                    last_token = '"'
+                i += 1
+            elif state == "TEMPLATE":
+                out.append(c)
+                if c == "\\":
+                    if i + 1 < n:
+                        out.append(text[i + 1])
+                        i += 2
+                        continue
+                elif c == "`":
+                    state = "NORMAL"
+                    last_token = "`"
+                i += 1
+            elif state == "REGEX":
+                out.append(c)
+                if c == "\\":
+                    if i + 1 < n:
+                        out.append(text[i + 1])
+                        i += 2
+                        continue
+                elif c == "[":
+                    out.append(c)
+                    i += 1
+                    while i < n and text[i] != "]":
+                        if text[i] == "\\" and i + 1 < n:
+                            out.append(text[i:i + 2])
+                            i += 2
+                        else:
+                            out.append(text[i])
+                            i += 1
+                    if i < n:
+                        out.append(text[i])
+                        i += 1
+                    continue
+                elif c == "/":
+                    state = "NORMAL"
+                    last_token = "/"
+                i += 1
+        return "".join(out)
+    elif suffix == ".css":
+        out = []
+        i = 0
+        n = len(text)
+        state = "NORMAL"
+        while i < n:
+            c = text[i]
+            c2 = text[i:i + 2]
+            if state == "NORMAL":
+                if c2 == "/*":
+                    state = "COMMENT"
+                    out.append("  ")
+                    i += 2
+                else:
+                    out.append(c)
+                    i += 1
+            elif state == "COMMENT":
+                if c2 == "*/":
+                    out.append("  ")
+                    i += 2
+                    state = "NORMAL"
+                else:
+                    out.append("\n" if c == "\n" else " ")
+                    i += 1
+        return "".join(out)
+    elif suffix == ".html":
+        out = []
+        i = 0
+        n = len(text)
+        state = "NORMAL"
+        while i < n:
+            c = text[i]
+            c4 = text[i:i + 4]
+            c3 = text[i:i + 3]
+            if state == "NORMAL":
+                if c4 == "<!--":
+                    state = "COMMENT"
+                    out.append("    ")
+                    i += 4
+                else:
+                    out.append(c)
+                    i += 1
+            elif state == "COMMENT":
+                if c3 == "-->":
+                    out.append("   ")
+                    i += 3
+                    state = "NORMAL"
+                else:
+                    out.append("\n" if c == "\n" else " ")
+                    i += 1
+        return "".join(out)
+    return text
+
+
+EXECUTABLE_REMOTE_LOADER_RE = re.compile(
+    r"(?:src|href)\s*=\s*[\"']https?://|"
+    r"importScripts\s*\(\s*[\"']https?://|"
+    r"new\s+(?:Shared)?Worker\s*\(\s*[\"']https?://|"
+    r"fetch\s*\(\s*[\"']https?://|"
+    r"import\s*\(\s*[\"']https?://|"
+    r"import\s+.*?\s+from\s*[\"']https?://|"
+    r"navigator\.sendBeacon\s*\(\s*[\"']https?://|"
+    r"\.open\s*\(\s*[\"'](?:GET|POST|HEAD)[\"']\s*,\s*[\"']https?://|"
+    r"@import\s+(?:url\s*\(\s*)?[\"']?https?://"
+)
+
+CDN_DOMAIN_RE = re.compile(
+    r"(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run)"
+)
 
 
 def check_no_runtime_download() -> None:
@@ -367,19 +573,35 @@ def check_no_runtime_download() -> None:
         fail("no-cdn.serve-paths", str(error))
 
     offenders: list[str] = []
-    scan_roots = [ROOT / "apps/web/src", ROOT / "apps/web/index.html",
-                  ROOT / "apps/web/vite.config.ts"]
-    for item in scan_roots:
+    # 1. Application web sources: no executable remote loaders and no CDN references
+    app_scan_roots = [ROOT / "apps/web/src", ROOT / "apps/web/index.html",
+                      ROOT / "apps/web/vite.config.ts"]
+    for item in app_scan_roots:
         files = [item] if item.is_file() else sorted(item.rglob("*")) if item.is_dir() else []
         for file in files:
             if file.is_file() and file.suffix in (".ts", ".tsx", ".js", ".mjs", ".html", ".css"):
-                text = file.read_text(errors="replace")
-                for match in REMOTE_LOADER_RE.finditer(text):
+                text = strip_comments(file.read_text(errors="replace"), file.suffix)
+                for match in EXECUTABLE_REMOTE_LOADER_RE.finditer(text):
                     line = text[:match.start()].count("\n") + 1
                     offenders.append(f"{file.relative_to(ROOT)}:{line}")
+                for match in CDN_DOMAIN_RE.finditer(text):
+                    line = text[:match.start()].count("\n") + 1
+                    offenders.append(f"{file.relative_to(ROOT)}:{line}")
+
+    # 2. Staged text assets in apps/web/public: no executable remote loaders
+    staged_roots = [ROOT / "apps/web/public"]
+    for item in staged_roots:
+        files = [item] if item.is_file() else sorted(item.rglob("*")) if item.is_dir() else []
+        for file in files:
+            if file.is_file() and file.suffix in (".js", ".mjs", ".html", ".css"):
+                text = strip_comments(file.read_text(errors="replace"), file.suffix)
+                for match in EXECUTABLE_REMOTE_LOADER_RE.finditer(text):
+                    line = text[:match.start()].count("\n") + 1
+                    offenders.append(f"{file.relative_to(ROOT)}:{line}")
+
     require(not offenders, "no-cdn.sources",
-            f"remote loader/CDN references in web sources: {offenders[:6]}",
-            "web sources carry no remote script/worker/fetch or CDN reference")
+            f"remote loader/CDN references in web sources or staged assets: {offenders[:6]}",
+            "web sources and staged assets carry no remote script/worker/fetch or CDN reference")
 
 
 def check_file_digest(path: Path, expected: str, name: str) -> None:

