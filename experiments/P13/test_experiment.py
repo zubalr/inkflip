@@ -201,6 +201,21 @@ class TestP13Experiment(unittest.TestCase):
         self.assertFalse(audit["runtime_network_allowed"])
         self.assertIn("attempted_preparation", audit)
         self.assertIn("rapidocr==3.8.1", audit["attempted_preparation"]["package_command"])
+        from experiments.P13.run import DEFAULT_WEIGHT_SEARCH_DIRS
+
+        for search_dir in DEFAULT_WEIGHT_SEARCH_DIRS:
+            self.assertNotIn("site-packages", str(search_dir))
+
+        # RapidOCR v3.8.1 default_models.yaml: cls_mobile is e47acedf…, not 54379ae5…
+        # (54379ae5… is ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx).
+        self.assertEqual(
+            OFFICIAL_MODEL_DIGESTS["ch_ppocr_mobile_v2.0_cls_mobile.onnx"],
+            "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+        )
+        self.assertEqual(
+            OFFICIAL_MODEL_DIGESTS["ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx"],
+            "54379ae5174d026780215fc748a7f31910dee36818e63d49e17dc598ecc82df7",
+        )
 
         if audit["status"] == "available":
             self.assertEqual(audit["disposition"], "candidate_ready")
@@ -210,6 +225,7 @@ class TestP13Experiment(unittest.TestCase):
             self.assertFalse(audit["weights_corrupt"])
             self.assertIsNotNone(audit["detector_model"])
             self.assertIsNotNone(audit["recognizer_model"])
+            self.assertIsNotNone(audit["classifier_model"])
             self.assertEqual(
                 audit["detector_model"]["sha256"],
                 OFFICIAL_MODEL_DIGESTS["ch_PP-OCRv5_det_mobile.onnx"],
@@ -218,6 +234,32 @@ class TestP13Experiment(unittest.TestCase):
                 audit["recognizer_model"]["sha256"],
                 OFFICIAL_MODEL_DIGESTS["en_PP-OCRv5_rec_mobile.onnx"],
             )
+            self.assertEqual(
+                audit["classifier_model"]["sha256"],
+                OFFICIAL_MODEL_DIGESTS["ch_ppocr_mobile_v2.0_cls_mobile.onnx"],
+            )
+            self.assertNotIn("site-packages", audit["classifier_model"]["path"])
+
+    def test_classifier_digest_mismatch_fails_closed(self) -> None:
+        """A present classifier whose digest does not match its filename pin is corrupt, not official."""
+        models = ROOT / "experiments" / "P13" / "models"
+        det = models / "ch_PP-OCRv5_det_mobile.onnx"
+        rec = models / "en_PP-OCRv5_rec_mobile.onnx"
+        if not (det.is_file() and rec.is_file()):
+            self.skipTest("matching det/rec weights are not staged in this worktree")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            d = Path(tmpdir)
+            shutil.copyfile(det, d / det.name)
+            shutil.copyfile(rec, d / rec.name)
+            (d / "ch_ppocr_mobile_v2.0_cls_mobile.onnx").write_bytes(b"not-official-classifier" * 8)
+            audit = audit_rapidocr_environment(custom_search_dirs=[d])
+            self.assertTrue(audit["weights_corrupt"])
+            self.assertEqual(audit["status"], "blocked")
+            self.assertEqual(audit["disposition"], "candidate_rejected_corrupted_weights")
+            self.assertIsNotNone(audit["classifier_model"])
+            self.assertFalse(audit["classifier_model"]["valid"])
+            self.assertIn("mismatch", audit["classifier_model"]["reason"].lower())
+            self.assertNotEqual(audit["status"], "available")
 
     def test_resolve_manifest_explicit_missing_fails(self) -> None:
         """Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests without fallback."""
@@ -336,7 +378,12 @@ class TestP13Experiment(unittest.TestCase):
                 draw = ImageDraw.Draw(img)
                 draw.text((10, 30), "§¶•€¥ 12345", fill="black")
                 img.save(oov_img)
-                res_oov = run_rapidocr(oov_img, Path(audit_real["det_path"]), Path(audit_real["rec_path"]))
+                res_oov = run_rapidocr(
+                    oov_img,
+                    Path(audit_real["det_path"]),
+                    Path(audit_real["rec_path"]),
+                    Path(audit_real["cls_path"]) if audit_real.get("cls_path") else None,
+                )
                 self.assertIn(res_oov["status"], ("completed", "failed"))
                 self.assertIsInstance(res_oov["boxes"], list)
 

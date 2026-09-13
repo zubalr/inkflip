@@ -155,6 +155,20 @@ def check_candidate_asset(search_paths: list[Path]) -> dict[str, Any]:
     return audit_candidate_archive(found_path)
 
 
+def decide_manifest_status(asset_audit: dict[str, Any]) -> tuple[str, str]:
+    """Archive verification is staging, not experiment completion.
+
+    Complementary API/geometry/gain evidence lives in the browser harness.
+    """
+    if not asset_audit.get("present"):
+        return "blocked", "blocked_missing_candidate_archive"
+    if asset_audit.get("status") == "candidate_corrupt":
+        return "blocked", "candidate_rejected_integrity_mismatch"
+    if asset_audit.get("status") == "candidate_verified":
+        return "staged", "candidate_archive_verified_pending_browser"
+    return "blocked", "candidate_rejected"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="P12 candidate manifest and asset audit")
     parser.add_argument("--out", default="artifacts/P12", help="Output artifact directory")
@@ -173,23 +187,8 @@ def main() -> None:
 
     asset_audit = check_candidate_asset(search_dirs)
 
-    # Acceptance determination:
-    # A present archive is NOT acceptance.
-    # Acceptance requires: verified archive, valid WASM, geometry parity proven, and explicit approval.
-    if not asset_audit["present"]:
-        status = "blocked"
-        disposition = "blocked_missing_candidate_archive"
-    elif asset_audit["status"] == "candidate_corrupt":
-        status = "blocked"
-        disposition = "candidate_rejected_integrity_mismatch"
-    elif asset_audit["status"] == "candidate_verified":
-        # Candidate is verified in isolation, but not accepted for production integration
-        # without full browser parity proof and separate capability review
-        status = "completed"
-        disposition = "candidate_verified_unintegrated"
-    else:
-        status = "blocked"
-        disposition = "candidate_rejected"
+    # Archive presence/digest is NOT experiment completion or complementary gain.
+    status, disposition = decide_manifest_status(asset_audit)
 
     result_data: dict[str, Any] = {
         "experiment_id": "P12",
@@ -215,9 +214,9 @@ def main() -> None:
         "integration_decision": "default_unavailable",
         "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing or unverified.",
         "note": (
-            "Candidate archive staged and verified in experiment (SHA-256: 31cba71f..., 2,661,637 bytes). "
-            "EmbedPDF PDFium evaluated in browser harness against PDF.js baseline. "
-            "Candidate remains default-unavailable for production; browser core remains complete and standalone on PDF.js."
+            "check_manifest.py records archive digest/size/WASM header only. "
+            "Browser API, geometry, complementary gain, and production isolation are recorded by "
+            "experiments/P12/browser.spec.ts. Candidate remains default-unavailable."
         ),
     }
 

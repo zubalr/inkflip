@@ -26,6 +26,25 @@ const ROOT = process.cwd();
 const PDFJS_BUILD = path.resolve(ROOT, "apps/web/node_modules/pdfjs-dist/legacy/build");
 const PDFIUM_DIST = path.resolve(ROOT, "experiments/P12/vendor/pdfium/dist");
 const FIXTURES_DIR = path.resolve(ROOT, "fixtures");
+const CANDIDATE_ARCHIVE = path.resolve(ROOT, "artifacts/P12/pdfium-dist.tar.gz");
+const PDFIUM_WASM = path.join(PDFIUM_DIST, "pdfium.wasm");
+const CANDIDATE_PRESENT = fs.existsSync(CANDIDATE_ARCHIVE) && fs.existsSync(PDFIUM_WASM);
+
+function requireCandidate(): void {
+  if (!CANDIDATE_PRESENT) {
+    throw new Error(
+      "blocked: EmbedPDF PDFium archive/WASM is not staged; candidate tests fail closed",
+    );
+  }
+}
+
+const PDFIUM_BOOT = CANDIDATE_PRESENT
+  ? `import { init } from '/vendor/pdfium/index.browser.js';
+  window.__pdfiumInit = init;`
+  : `window.__pdfiumInit = null;
+  window.__extractPdfium = async function() {
+    throw new Error('blocked: EmbedPDF PDFium vendor/WASM is not staged');
+  };`;
 
 const PAGE_HTML = `<!doctype html>
 <html>
@@ -38,8 +57,7 @@ const PAGE_HTML = `<!doctype html>
   pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.mjs';
   window.__pdfjsLib = pdfjsLib;
 
-  import { init } from '/vendor/pdfium/index.browser.js';
-  window.__pdfiumInit = init;
+  ${PDFIUM_BOOT}
 
   window.__renderPdf = async function(url) {
     const loadingTask = pdfjsLib.getDocument({ url });
@@ -63,7 +81,7 @@ const PAGE_HTML = `<!doctype html>
     return window.__renderResult;
   };
 
-  let _pdfiumModule = null;
+  ${CANDIDATE_PRESENT ? `let _pdfiumModule = null;
   window.__getOrInitPdfium = async function() {
     if (!_pdfiumModule) {
       _pdfiumModule = await init({ locateFile: () => '/vendor/pdfium/pdfium.wasm' });
@@ -113,7 +131,7 @@ const PAGE_HTML = `<!doctype html>
 
     const wasmMemoryBytes = mod.pdfium.HEAPU8.buffer.byteLength;
     return { pageCount, width, height, charCount, text: fullText, chars, wasmMemoryBytes };
-  };
+  };` : ""}
 </script>
 </body>
 </html>`;
@@ -187,6 +205,7 @@ test.afterAll(() => {
 });
 
 test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
+  test.describe.configure({ mode: "serial" });
   test("exercises default PDF.js reader rendering and text extraction in real browser", async ({ page }) => {
     await page.goto(`${harness.base}/t12.html`);
 
@@ -215,6 +234,7 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
   });
 
   test("proves candidate EmbedPDF PDFium API, text extraction, and character bounding boxes in browser", async ({ page }) => {
+    requireCandidate();
     await page.goto(`${harness.base}/t12.html`);
 
     // Evaluate candidate on white-contrast-control.pdf
@@ -240,6 +260,7 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
   });
 
   test("evaluates candidate on target fixtures (F01, F07, F10, F11) with clean-mapping and same-reader controls", async ({ page }) => {
+    requireCandidate();
     await page.goto(`${harness.base}/t12.html`);
 
     const targetFixtures = [
@@ -298,17 +319,45 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
       expect(cand1.pageCount).toBe(baseline.pageCount);
     }
 
+    const fixtureIds = Object.keys(evaluations);
+    const gainFixtures = fixtureIds.filter((id) => {
+      const ev = evaluations[id];
+      const cand = String(ev.candidate.text || "").replace(/\s+/g, " ").trim();
+      const base = String(ev.baseline.text || "").replace(/\s+/g, " ").trim();
+      return cand.length > 0 && !base.includes(cand) && cand !== base;
+    });
+    const complementary = {
+      fixture_count: fixtureIds.length,
+      fixtures_with_candidate_only_text: gainFixtures,
+      complementary_gain_rate: fixtureIds.length ? gainFixtures.length / fixtureIds.length : 0,
+      note: "Gain is extra candidate text not present in the PDF.js baseline on the same original bytes. Zero gain is a complete negative result, not missing evidence.",
+    };
+
     // Persist raw browser evaluation report
     const evalOutDir = path.resolve(ROOT, "artifacts/P12");
     fs.mkdirSync(evalOutDir, { recursive: true });
     fs.writeFileSync(
       path.join(evalOutDir, "browser_evaluation.json"),
-      JSON.stringify(evaluations, null, 2),
+      JSON.stringify({ evaluations, complementary }, null, 2),
       "utf-8"
     );
+
+    const resultPath = path.join(evalOutDir, "result.json");
+    const prior = fs.existsSync(resultPath)
+      ? JSON.parse(fs.readFileSync(resultPath, "utf-8"))
+      : { experiment_id: "P12", task_id: "T43", integration_decision: "default_unavailable" };
+    prior.status = "completed";
+    prior.disposition = "candidate_evaluated_unintegrated";
+    prior.browser_evaluation = {
+      api_geometry_proven: true,
+      complementary,
+    };
+    prior.integration_decision = "default_unavailable";
+    fs.writeFileSync(resultPath, JSON.stringify(prior, null, 2), "utf-8");
   });
 
   test("candidate asset and runtime memory budgets satisfy limits (< 24 MiB asset, < 64 MiB WASM memory)", async ({ page }) => {
+    requireCandidate();
     const archivePath = path.resolve(ROOT, "artifacts/P12/pdfium-dist.tar.gz");
     expect(fs.existsSync(archivePath)).toBe(true);
     const archiveStat = fs.statSync(archivePath);
@@ -338,6 +387,7 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
   });
 
   test("enforces runtime network isolation with zero external network egress", async ({ page }) => {
+    requireCandidate();
     const externalRequests: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
@@ -381,10 +431,17 @@ test.describe("P12 / T43: Secondary browser PDFium reader evaluation", () => {
     expect(result.task_id).toBe("T43");
     expect(result.baseline).toBe("PDF.js plus OCR");
     expect(result.integration_decision).toBe("default_unavailable");
-    expect(result.status).toBe("completed");
-    expect(result.disposition).toBe("candidate_verified_unintegrated");
+    if (!CANDIDATE_PRESENT) {
+      expect(result.status).not.toBe("completed");
+      expect(result.disposition).not.toBe("candidate_verified_unintegrated");
+      return;
+    }
     expect(result.candidate.audit.present).toBe(true);
     expect(result.candidate.audit.sha256_valid).toBe(true);
     expect(result.candidate.audit.size_valid).toBe(true);
+    expect(result.status).toBe("completed");
+    expect(result.disposition).toBe("candidate_evaluated_unintegrated");
+    expect(result.browser_evaluation.api_geometry_proven).toBe(true);
+    expect(result.browser_evaluation.complementary.fixture_count).toBeGreaterThan(0);
   });
 });

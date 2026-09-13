@@ -1,78 +1,86 @@
 {
-  "F01": {
-    "fixture": "/fixtures/public/mapping-amount.pdf",
-    "candidate": {
-      "pageCount": 1,
-      "width": 520,
-      "height": 400,
-      "charCount": 118,
-      "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$1,000\r\nRendered marks and extracted text are separate.",
-      "charsWithBoxes": 118,
-      "wasmMemoryBytes": 18612224
+  "evaluations": {
+    "F01": {
+      "fixture": "/fixtures/public/mapping-amount.pdf",
+      "candidate": {
+        "pageCount": 1,
+        "width": 520,
+        "height": 400,
+        "charCount": 118,
+        "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$1,000\r\nRendered marks and extracted text are separate.",
+        "charsWithBoxes": 118,
+        "wasmMemoryBytes": 18612224
+      },
+      "baseline": {
+        "pageCount": 1,
+        "width": 780,
+        "height": 600,
+        "text": "SYNTHETIC EXAMPLE  No real transaction. Reader behavior only.  $1,000  Rendered marks and extracted text are separate."
+      },
+      "sameReaderControlPassed": true
     },
-    "baseline": {
-      "pageCount": 1,
-      "width": 780,
-      "height": 600,
-      "text": "SYNTHETIC EXAMPLE  No real transaction. Reader behavior only.  $1,000  Rendered marks and extracted text are separate."
+    "F07": {
+      "fixture": "/fixtures/public/geometry-0.pdf",
+      "candidate": {
+        "pageCount": 1,
+        "width": 480,
+        "height": 350,
+        "charCount": 116,
+        "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
+        "charsWithBoxes": 116,
+        "wasmMemoryBytes": 18612224
+      },
+      "baseline": {
+        "pageCount": 1,
+        "width": 1440,
+        "height": 1050,
+        "text": "SYNTHETIC EXAMPLE  No real transaction. Reader behavior only.  $100  Rendered marks and extracted text are separate."
+      },
+      "sameReaderControlPassed": true
     },
-    "sameReaderControlPassed": true
+    "F10": {
+      "fixture": "/fixtures/development/mapping-missing-control.pdf",
+      "candidate": {
+        "pageCount": 1,
+        "width": 320,
+        "height": 240,
+        "charCount": 4,
+        "text": "$100",
+        "charsWithBoxes": 4,
+        "wasmMemoryBytes": 18612224
+      },
+      "baseline": {
+        "pageCount": 1,
+        "width": 480,
+        "height": 360,
+        "text": "$100"
+      },
+      "sameReaderControlPassed": true
+    },
+    "F11": {
+      "fixture": "/fixtures/development/duplicates-control.pdf",
+      "candidate": {
+        "pageCount": 1,
+        "width": 320,
+        "height": 240,
+        "charCount": 4,
+        "text": "$100",
+        "charsWithBoxes": 4,
+        "wasmMemoryBytes": 18612224
+      },
+      "baseline": {
+        "pageCount": 1,
+        "width": 480,
+        "height": 360,
+        "text": "$100"
+      },
+      "sameReaderControlPassed": true
+    }
   },
-  "F07": {
-    "fixture": "/fixtures/public/geometry-0.pdf",
-    "candidate": {
-      "pageCount": 1,
-      "width": 480,
-      "height": 350,
-      "charCount": 116,
-      "text": "SYNTHETIC EXAMPLE\r\nNo real transaction. Reader behavior only.\r\n$100\r\nRendered marks and extracted text are separate.",
-      "charsWithBoxes": 116,
-      "wasmMemoryBytes": 18612224
-    },
-    "baseline": {
-      "pageCount": 1,
-      "width": 1440,
-      "height": 1050,
-      "text": "SYNTHETIC EXAMPLE  No real transaction. Reader behavior only.  $100  Rendered marks and extracted text are separate."
-    },
-    "sameReaderControlPassed": true
-  },
-  "F10": {
-    "fixture": "/fixtures/development/mapping-missing-control.pdf",
-    "candidate": {
-      "pageCount": 1,
-      "width": 320,
-      "height": 240,
-      "charCount": 4,
-      "text": "$100",
-      "charsWithBoxes": 4,
-      "wasmMemoryBytes": 18612224
-    },
-    "baseline": {
-      "pageCount": 1,
-      "width": 480,
-      "height": 360,
-      "text": "$100"
-    },
-    "sameReaderControlPassed": true
-  },
-  "F11": {
-    "fixture": "/fixtures/development/duplicates-control.pdf",
-    "candidate": {
-      "pageCount": 1,
-      "width": 320,
-      "height": 240,
-      "charCount": 4,
-      "text": "$100",
-      "charsWithBoxes": 4,
-      "wasmMemoryBytes": 18612224
-    },
-    "baseline": {
-      "pageCount": 1,
-      "width": 480,
-      "height": 360,
-      "text": "$100"
-    },
-    "sameReaderControlPassed": true
+  "complementary": {
+    "fixture_count": 4,
+    "fixtures_with_candidate_only_text": [],
+    "complementary_gain_rate": 0,
+    "note": "Gain is extra candidate text not present in the PDF.js baseline on the same original bytes. Zero gain is a complete negative result, not missing evidence."
   }
 }

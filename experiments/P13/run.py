@@ -115,13 +115,23 @@ TARGET_FAMILIES = {"native-unicode", "ocr-material", "adjacent-crop"}
 REQUIRED_RAPIDOCR_VERSION = "3.8.1"
 PP_OCRV5_DET_NAMES = ["ch_PP-OCRv5_det_mobile.onnx", "en_PP-OCRv5_mobile_det.onnx", "en_PP-OCRv5_det_infer.onnx"]
 PP_OCRV5_REC_NAMES = ["en_PP-OCRv5_rec_mobile.onnx", "en_PP-OCRv5_mobile_rec.onnx", "en_PP-OCRv5_rec_infer.onnx"]
+PP_OCRV5_CLS_NAMES = ["ch_ppocr_mobile_v2.0_cls_mobile.onnx"]
 
-# Official trusted model digests from RapidAI/RapidOCR v3.8.0/v3.8.1 release configuration
+# Official trusted model digests from RapidAI/RapidOCR v3.8.1 python/rapidocr/default_models.yaml.
+# Filename identity matters: 54379ae5… is the PP-OCRv5 textline-orientation classifier, not cls_mobile.
 OFFICIAL_MODEL_DIGESTS = {
     "ch_PP-OCRv5_det_mobile.onnx": "4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae",
     "en_PP-OCRv5_rec_mobile.onnx": "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8",
-    "ch_ppocr_mobile_v2.0_cls_mobile.onnx": "54379ae5174d026780215fc748a7f31910dee36818e63d49e17dc598ecc82df7",
+    "ch_ppocr_mobile_v2.0_cls_mobile.onnx": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+    "ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx": "54379ae5174d026780215fc748a7f31910dee36818e63d49e17dc598ecc82df7",
 }
+
+DEFAULT_WEIGHT_SEARCH_DIRS = [
+    ROOT / "experiments" / "P13" / "models",
+    ROOT / "models" / "rapidocr",
+    ROOT / "artifacts" / "P13" / "models",
+    ROOT / "vendor" / "rapidocr",
+]
 
 PREPARATION_COMMAND = "uv pip install --python experiments/P13/.venv/bin/python rapidocr==3.8.1 onnx onnxruntime"
 MODEL_DOWNLOAD_BASE = "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.8.0/onnx/PP-OCRv5/"
@@ -340,19 +350,17 @@ def audit_rapidocr_environment(custom_search_dirs: list[Path] | None = None) -> 
 
     version_valid = (package_version == REQUIRED_RAPIDOCR_VERSION) if package_version else False
 
-    # 2. Model weights audit (PP-OCRv5 mobile English)
-    search_dirs = custom_search_dirs or [
-        ROOT / "experiments" / "P13" / "models",
-        ROOT / "models" / "rapidocr",
-        ROOT / "artifacts" / "P13" / "models",
-        ROOT / "vendor" / "rapidocr",
-    ]
+    # 2. Model weights audit (PP-OCRv5 mobile English). Never search site-packages.
+    search_dirs = custom_search_dirs or list(DEFAULT_WEIGHT_SEARCH_DIRS)
 
     found_det: Path | None = None
     found_rec: Path | None = None
+    found_cls: Path | None = None
 
     for d in search_dirs:
         if not d.is_dir():
+            continue
+        if "site-packages" in d.parts:
             continue
         if not found_det:
             for name in PP_OCRV5_DET_NAMES:
@@ -366,11 +374,18 @@ def audit_rapidocr_environment(custom_search_dirs: list[Path] | None = None) -> 
                 if cand.is_file():
                     found_rec = cand
                     break
+        if not found_cls:
+            for name in PP_OCRV5_CLS_NAMES:
+                cand = d / name
+                if cand.is_file():
+                    found_cls = cand
+                    break
 
     det_audit = None
     rec_audit = None
+    cls_audit = None
     weights_corrupt = False
-    weights_present = bool(found_det and found_rec)
+    weights_present = bool(found_det and found_rec and found_cls)
 
     if found_det:
         det_bytes = found_det.read_bytes()
@@ -404,6 +419,29 @@ def audit_rapidocr_environment(custom_search_dirs: list[Path] | None = None) -> 
         if not valid:
             weights_corrupt = True
 
+    if found_cls:
+        cls_bytes = found_cls.read_bytes()
+        expected_sha = OFFICIAL_MODEL_DIGESTS.get(found_cls.name)
+        valid, reason = is_valid_onnx_model(cls_bytes, expected_sha)
+        cls_audit = {
+            "path": str(found_cls.relative_to(ROOT)) if found_cls.is_relative_to(ROOT) else str(found_cls),
+            "filename": found_cls.name,
+            "size_bytes": len(cls_bytes),
+            "sha256": hashlib.sha256(cls_bytes).hexdigest(),
+            "expected_sha256": expected_sha,
+            "valid": valid,
+            "reason": reason,
+        }
+        if not valid:
+            weights_corrupt = True
+    elif found_det and found_rec:
+        cls_audit = {
+            "path": None,
+            "filename": PP_OCRV5_CLS_NAMES[0],
+            "valid": False,
+            "reason": "Classifier weights missing from experiment search dirs (venv site-packages is not official provenance)",
+        }
+
     # 3. Status determination
     if weights_corrupt:
         status = "blocked"
@@ -429,8 +467,10 @@ def audit_rapidocr_environment(custom_search_dirs: list[Path] | None = None) -> 
         "weights_corrupt": weights_corrupt,
         "detector_model": det_audit,
         "recognizer_model": rec_audit,
+        "classifier_model": cls_audit,
         "det_path": str(found_det) if (found_det and not weights_corrupt) else None,
         "rec_path": str(found_rec) if (found_rec and not weights_corrupt) else None,
+        "cls_path": str(found_cls) if (found_cls and not weights_corrupt) else None,
         "status": status,
         "disposition": disposition,
         "runtime_network_allowed": False,
@@ -441,8 +481,8 @@ def audit_rapidocr_environment(custom_search_dirs: list[Path] | None = None) -> 
         },
         "actionable_remediation": (
             f"Install rapidocr=={REQUIRED_RAPIDOCR_VERSION} into experiment environment and stage verified "
-            "PP-OCRv5 mobile English ONNX weights (ch_PP-OCRv5_det_mobile.onnx, en_PP-OCRv5_rec_mobile.onnx) "
-            "into experiments/P13/models/."
+            "PP-OCRv5 mobile English ONNX weights (det, rec, and ch_ppocr_mobile_v2.0_cls_mobile.onnx) "
+            "into experiments/P13/models/. Do not treat RapidOCR site-packages copies as official provenance."
         ),
     }
 
@@ -507,7 +547,11 @@ def run_tesseract_ocr(raster_path: Path, psm: int = 6) -> dict[str, Any]:
 _RAPIDOCR_ENGINE: Any = None
 
 
-def get_rapidocr_engine(det_model_path: Path, rec_model_path: Path) -> Any:
+def get_rapidocr_engine(
+    det_model_path: Path,
+    rec_model_path: Path,
+    cls_model_path: Path | None = None,
+) -> Any:
     """Lazily initialize and reuse a single RapidOCR engine instance."""
     global _RAPIDOCR_ENGINE
     if _RAPIDOCR_ENGINE is None:
@@ -526,11 +570,20 @@ def get_rapidocr_engine(det_model_path: Path, rec_model_path: Path) -> Any:
             "Rec.lang_type": LangRec.EN,
             "Rec.model_path": str(rec_model_path),
         }
+        if cls_model_path is not None:
+            # RapidOCR still opens a classifier file even when use_cls is False.
+            # Point it at the experiment-local digest-matching copy, never site-packages.
+            params["Cls.model_path"] = str(cls_model_path)
         _RAPIDOCR_ENGINE = RapidOCR(params=params)
     return _RAPIDOCR_ENGINE
 
 
-def run_rapidocr(raster_path: Path, det_model_path: Path, rec_model_path: Path) -> dict[str, Any]:
+def run_rapidocr(
+    raster_path: Path,
+    det_model_path: Path,
+    rec_model_path: Path,
+    cls_model_path: Path | None = None,
+) -> dict[str, Any]:
     """Run RapidOCR inference with PP-OCRv5 mobile English models on a raster."""
     t0 = time.perf_counter()
     try:
@@ -539,7 +592,7 @@ def run_rapidocr(raster_path: Path, det_model_path: Path, rec_model_path: Path) 
         img = Image.open(raster_path).convert("RGB")
         img_np = np.array(img)
 
-        engine = get_rapidocr_engine(det_model_path, rec_model_path)
+        engine = get_rapidocr_engine(det_model_path, rec_model_path, cls_model_path)
         res = engine(img_np)
         elapsed = time.perf_counter() - t0
 
@@ -594,8 +647,18 @@ def evaluate_fixture(pdf_path: Path, rasters_dir: Path, env_audit: dict[str, Any
     tesseract_res = run_tesseract_ocr(raster_path, psm=6)
 
     # 2. Run RapidOCR candidate if available
-    if env_audit.get("status") == "available" and env_audit.get("det_path") and env_audit.get("rec_path"):
-        rapidocr_res = run_rapidocr(raster_path, Path(env_audit["det_path"]), Path(env_audit["rec_path"]))
+    if (
+        env_audit.get("status") == "available"
+        and env_audit.get("det_path")
+        and env_audit.get("rec_path")
+        and env_audit.get("cls_path")
+    ):
+        rapidocr_res = run_rapidocr(
+            raster_path,
+            Path(env_audit["det_path"]),
+            Path(env_audit["rec_path"]),
+            Path(env_audit["cls_path"]),
+        )
     else:
         rapidocr_res = {
             "status": "blocked",

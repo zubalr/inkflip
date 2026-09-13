@@ -40,8 +40,18 @@
       "valid": true,
       "reason": "Valid ONNX model binary"
     },
-    "det_path": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/ch_PP-OCRv5_det_mobile.onnx",
-    "rec_path": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/en_PP-OCRv5_rec_mobile.onnx",
+    "classifier_model": {
+      "path": "experiments/P13/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+      "filename": "ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+      "size_bytes": 585532,
+      "sha256": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+      "expected_sha256": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+      "valid": true,
+      "reason": "Valid ONNX model binary"
+    },
+    "det_path": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-experiment-completion/experiments/P13/models/ch_PP-OCRv5_det_mobile.onnx",
+    "rec_path": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-experiment-completion/experiments/P13/models/en_PP-OCRv5_rec_mobile.onnx",
+    "cls_path": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-experiment-completion/experiments/P13/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
     "status": "available",
     "disposition": "candidate_ready",
     "runtime_network_allowed": false,
@@ -50,14 +60,14 @@
       "weights_source": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.8.0/onnx/PP-OCRv5/",
       "status": "candidate_prepared"
     },
-    "actionable_remediation": "Install rapidocr==3.8.1 into experiment environment and stage verified PP-OCRv5 mobile English ONNX weights (ch_PP-OCRv5_det_mobile.onnx, en_PP-OCRv5_rec_mobile.onnx) into experiments/P13/models/."
+    "actionable_remediation": "Install rapidocr==3.8.1 into experiment environment and stage verified PP-OCRv5 mobile English ONNX weights (det, rec, and ch_ppocr_mobile_v2.0_cls_mobile.onnx) into experiments/P13/models/. Do not treat RapidOCR site-packages copies as official provenance."
   },
   "resource_costs": {
     "total_pixels_evaluated": 1596800,
     "total_megapixels": 1.5968,
-    "total_runtime_seconds": 1.1888,
-    "process_max_rss_bytes": 340213760,
-    "process_max_rss_mb": 324.45,
+    "total_runtime_seconds": 1.8489,
+    "process_max_rss_bytes": 370458624,
+    "process_max_rss_mb": 353.3,
     "memory_budget_bytes": 1073741824,
     "memory_budget_satisfied": true,
     "host_containment": {
@@ -98,7 +108,7 @@
         "status": "completed",
         "text": "$\n1\n0\n0",
         "exit_code": 0,
-        "runtime_seconds": 0.0622,
+        "runtime_seconds": 0.1184,
         "error": null
       },
       "candidate_rapidocr": {
@@ -186,7 +196,7 @@
         ],
         "count": 4,
         "exit_code": 0,
-        "runtime_seconds": 0.3079,
+        "runtime_seconds": 0.5331,
         "error": null
       }
     },
@@ -207,7 +217,7 @@
         "status": "completed",
         "text": "LATIN-$100",
         "exit_code": 0,
-        "runtime_seconds": 0.0636,
+        "runtime_seconds": 0.0644,
         "error": null
       },
       "candidate_rapidocr": {
@@ -238,7 +248,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0451,
+        "runtime_seconds": 0.0422,
         "error": null
       }
     },
@@ -259,7 +269,7 @@
         "status": "completed",
         "text": "SEAMOUNT -+188.",
         "exit_code": 0,
-        "runtime_seconds": 0.0683,
+        "runtime_seconds": 0.07,
         "error": null
       },
       "candidate_rapidocr": {
@@ -309,7 +319,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0682,
+        "runtime_seconds": 0.0642,
         "error": null
       }
     },
@@ -330,7 +340,7 @@
         "status": "completed",
         "text": "SeMounT File.",
         "exit_code": 0,
-        "runtime_seconds": 0.072,
+        "runtime_seconds": 0.0718,
         "error": null
       },
       "candidate_rapidocr": {
@@ -380,7 +390,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0638,
+        "runtime_seconds": 0.0617,
         "error": null
       }
     },
@@ -401,7 +411,7 @@
         "status": "completed",
         "text": "SAMOUMT -+108.",
         "exit_code": 0,
-        "runtime_seconds": 0.0695,
+        "runtime_seconds": 0.0698,
         "error": null
       },
       "candidate_rapidocr": {
@@ -451,7 +461,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0632,
+        "runtime_seconds": 0.0613,
         "error": null
       }
     },
@@ -472,7 +482,7 @@
         "status": "completed",
         "text": "$100 $200",
         "exit_code": 0,
-        "runtime_seconds": 0.0601,
+        "runtime_seconds": 0.0575,
         "error": null
       },
       "candidate_rapidocr": {
@@ -522,7 +532,7 @@
         ],
         "count": 2,
         "exit_code": 0,
-        "runtime_seconds": 0.0284,
+        "runtime_seconds": 0.0279,
         "error": null
       }
     },
@@ -543,7 +553,7 @@
         "status": "completed",
         "text": "$100 \u00a7$",
         "exit_code": 0,
-        "runtime_seconds": 0.0579,
+        "runtime_seconds": 0.0562,
         "error": null
       },
       "candidate_rapidocr": {
@@ -574,7 +584,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0328,
+        "runtime_seconds": 0.0251,
         "error": null
       }
     },
@@ -595,7 +605,7 @@
         "status": "completed",
         "text": "100",
         "exit_code": 0,
-        "runtime_seconds": 0.0597,
+        "runtime_seconds": 0.0538,
         "error": null
       },
       "candidate_rapidocr": {
@@ -626,7 +636,7 @@
         ],
         "count": 1,
         "exit_code": 0,
-        "runtime_seconds": 0.0101,
+        "runtime_seconds": 0.0104,
         "error": null
       }
     }

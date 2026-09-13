@@ -2,7 +2,7 @@
   "experiment_id": "P12",
   "task_id": "T43",
   "status": "completed",
-  "disposition": "candidate_verified_unintegrated",
+  "disposition": "candidate_evaluated_unintegrated",
   "hypothesis": "Secondary browser PDFium reader value",
   "baseline": "PDF.js plus OCR",
   "candidate": {
@@ -51,5 +51,14 @@
   },
   "integration_decision": "default_unavailable",
   "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing or unverified.",
-  "note": "Candidate archive staged and verified in experiment (SHA-256: 31cba71f..., 2,661,637 bytes). EmbedPDF PDFium evaluated in browser harness against PDF.js baseline. Candidate remains default-unavailable for production; browser core remains complete and standalone on PDF.js."
+  "note": "check_manifest.py records archive digest/size/WASM header only. Browser API, geometry, complementary gain, and production isolation are recorded by experiments/P12/browser.spec.ts. Candidate remains default-unavailable.",
+  "browser_evaluation": {
+    "api_geometry_proven": true,
+    "complementary": {
+      "fixture_count": 4,
+      "fixtures_with_candidate_only_text": [],
+      "complementary_gain_rate": 0,
+      "note": "Gain is extra candidate text not present in the PDF.js baseline on the same original bytes. Zero gain is a complete negative result, not missing evidence."
+    }
+  }
 }

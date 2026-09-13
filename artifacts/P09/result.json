@@ -4,11 +4,11 @@
   "status": "completed",
   "disposition": "rejected_heuristic_recommendation",
   "manifest": "fixtures/manifest.json",
-  "runtime_seconds": 0.0805,
+  "runtime_seconds": 0.0264,
   "method_runtimes_seconds": {
-    "metadata_baseline": 9e-06,
-    "rectangular_ink_heuristic": 0.001871,
-    "bounded_paint_order_candidate": 2.2e-05
+    "metadata_baseline": 7e-06,
+    "rectangular_ink_heuristic": 0.006426,
+    "bounded_paint_order_candidate": 1.7e-05
   },
   "total_fixtures_evaluated": 9,
   "metrics": {
@@ -19,7 +19,7 @@
       "true_negatives": 1,
       "false_negatives": 0,
       "coverage": 9,
-      "runtime_seconds": 9e-06
+      "runtime_seconds": 7e-06
     },
     "rectangular_ink_heuristic": {
       "precision": 0.8,
@@ -29,7 +29,7 @@
       "false_negatives": 0,
       "coverage": 9,
       "counterexample_triggered": true,
-      "runtime_seconds": 0.001871
+      "runtime_seconds": 0.006426
     },
     "bounded_paint_order_candidate": {
       "precision": 1.0,
@@ -41,7 +41,7 @@
       "decision_coverage": 0.7778,
       "coverage": 9,
       "zero_hard_control_false_visibility": true,
-      "runtime_seconds": 2.2e-05
+      "runtime_seconds": 1.7e-05
     }
   },
   "fixture_evaluations": [
@@ -72,7 +72,7 @@
         "dark_pixel_count": 1158,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000824
+        "runtime_seconds": 0.005352
       },
       "candidate": {
         "verdict": "visible",
@@ -80,7 +80,7 @@
         "compositing_reason": null,
         "false_visibility": false,
         "occlusion_checks": [],
-        "runtime_seconds": 4e-06
+        "runtime_seconds": 5e-06
       }
     },
     {
@@ -103,14 +103,14 @@
       "baseline": {
         "verdict": "visible",
         "false_visibility": true,
-        "runtime_seconds": 2e-06
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "invisible",
         "dark_pixel_count": 0,
         "pixel_contrast": 0,
         "false_visibility": false,
-        "runtime_seconds": 0.000178
+        "runtime_seconds": 0.000147
       },
       "candidate": {
         "verdict": "invisible",
@@ -118,7 +118,7 @@
         "compositing_reason": null,
         "false_visibility": false,
         "occlusion_checks": [],
-        "runtime_seconds": 2e-06
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -148,7 +148,7 @@
         "dark_pixel_count": 429,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000125
+        "runtime_seconds": 0.000105
       },
       "candidate": {
         "verdict": "visible",
@@ -186,7 +186,7 @@
         "dark_pixel_count": 0,
         "pixel_contrast": 0,
         "false_visibility": false,
-        "runtime_seconds": 0.000109
+        "runtime_seconds": 9.2e-05
       },
       "candidate": {
         "verdict": "invisible",
@@ -206,7 +206,7 @@
             "coverage_fraction": 1.0
           }
         ],
-        "runtime_seconds": 5e-06
+        "runtime_seconds": 4e-06
       }
     },
     {
@@ -236,7 +236,7 @@
         "dark_pixel_count": 429,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.00011
+        "runtime_seconds": 9.7e-05
       },
       "candidate": {
         "verdict": "visible",
@@ -274,7 +274,7 @@
         "dark_pixel_count": 233,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000133
+        "runtime_seconds": 9.1e-05
       },
       "candidate": {
         "verdict": "unsupported_compositing",
@@ -294,7 +294,7 @@
             "coverage_fraction": 0.4327
           }
         ],
-        "runtime_seconds": 7e-06
+        "runtime_seconds": 3e-06
       }
     },
     {
@@ -317,14 +317,14 @@
       "baseline": {
         "verdict": "visible",
         "false_visibility": false,
-        "runtime_seconds": 1e-06
+        "runtime_seconds": 0.0
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 208,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000133
+        "runtime_seconds": 0.000325
       },
       "candidate": {
         "verdict": "unsupported_compositing",
@@ -362,7 +362,7 @@
         "dark_pixel_count": 458,
         "pixel_contrast": 255,
         "false_visibility": false,
-        "runtime_seconds": 0.000149
+        "runtime_seconds": 0.000112
       },
       "candidate": {
         "verdict": "visible",
@@ -400,7 +400,7 @@
         "dark_pixel_count": 50,
         "pixel_contrast": 128,
         "false_visibility": true,
-        "runtime_seconds": 0.00011
+        "runtime_seconds": 0.000105
       },
       "candidate": {
         "verdict": "invisible",
