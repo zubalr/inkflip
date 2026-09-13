@@ -120,12 +120,19 @@ These are product invariants, not missing features:
 
 ## Environment and platform limits
 
-- Browser suites are exercised in Chromium. Other browsers are untested here
-  (parity is open work).
+- **Release platform profile (owner decision, 2026-09-13): macOS and
+  Docker.** Supported release targets are this Mac's environment
+  (macOS/arm64, Chromium) and the container profiles verified on this Mac's
+  local Docker (checkout-image functionality; the digest-pinned production
+  profile is recorded for linux/amd64 and needs an amd64 build environment,
+  deferred). Windows, native Linux hardware, NVDA/Windows, physical mobile
+  devices and emulated-amd64 certification are deferred and unverified —
+  intentionally out of scope for this release, not missing owner inputs.
+  Browser behavior outside Chromium is untested (parity is open work).
 - One active document per workspace; the workspace session is in-memory and
   exports are the persistence mechanism.
-- Native tooling targets the pinned Python 3.13.15 on macOS/arm64 (verified
-  here) and Linux (exercised in task evidence); other platforms are untested.
+- Native tooling runs on the pinned Python 3.13.15; the macOS host and the
+  container profiles above are the verified environments.
 - Measured performance envelopes (device budgets, cold/warm timings) are not
   established and are not claimed anywhere in this documentation.
 
