@@ -1,8 +1,8 @@
 {
   "task": "T18",
   "beads_id": "pdf-t18",
-  "evaluated_commit": "0e98f8d7ef72200be69a10e37de6217152058ea0",
-  "evaluated_at": "2026-09-13T04:24:37.007974+00:00",
+  "evaluated_commit": "2a65e5de81ed317859ce6db3a8f82ced03ef8659",
+  "evaluated_at": "2026-09-13T04:25:55.609463+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -27,8 +27,8 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "\nRunning 3 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/3] tests/gates/g1.spec.ts:623:1 \u203a G1 leg 1: public own-file journey \u2014 open/run/report/cancel/replace\n\n\u001b[1A\u001b[2K[2/3] tests/gates/g1.spec.ts:762:1 \u203a G1 leg 2: source geometry + scan text layer through the public app\n\u001b[1A\u001b[2K[3/3] tests/gates/g1.spec.ts:825:1 \u203a G1 leg 3: export \u2192 local reopen \u2192 attach source \u2192 offline OCR\n\u001b[1A\u001b[2K  3 passed (6.3s)\nG1 passed; receipt: artifacts/gates/G1/receipt.json\n",
-      "stderr": "(node:93764) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:93767) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2Ktests/gates/g1.spec.ts:623:1 \u203a G1 leg 1: public own-file journey \u2014 open/run/report/cancel/replace\n\u001b[33m[plugin builtin:vite-reporter] \u001b[33;1m\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001b[0m\u001b[39m\n",
+      "stdout": "\nRunning 3 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/3] tests/gates/g1.spec.ts:623:1 \u203a G1 leg 1: public own-file journey \u2014 open/run/report/cancel/replace\n\n\u001b[1A\u001b[2K[2/3] tests/gates/g1.spec.ts:762:1 \u203a G1 leg 2: source geometry + scan text layer through the public app\n\u001b[1A\u001b[2K[3/3] tests/gates/g1.spec.ts:825:1 \u203a G1 leg 3: export \u2192 local reopen \u2192 attach source \u2192 offline OCR\n\u001b[1A\u001b[2K  3 passed (7.1s)\nG1 passed; receipt: artifacts/gates/G1/receipt.json\n",
+      "stderr": "(node:96130) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:96131) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2Ktests/gates/g1.spec.ts:623:1 \u203a G1 leg 1: public own-file journey \u2014 open/run/report/cancel/replace\n\u001b[33m[plugin builtin:vite-reporter] \u001b[33;1m\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001b[0m\u001b[39m\n",
       "tests": {
         "collected": 3,
         "passed": 3,
