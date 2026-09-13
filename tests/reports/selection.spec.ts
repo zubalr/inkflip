@@ -252,9 +252,60 @@ test.describe("T23 export selection", () => {
 });
 
 test.describe("T23 authored notes", () => {
+  test("finding deselection survives note edits — excluded evidence never leaks back", async ({
+    page,
+  }) => {
+    // Review F1 regression: editing notes rebuilds the export source; the
+    // user's deselection must persist across that rebuild or the next
+    // download would silently contain the excluded finding's text.
+    await page.goto(`${harness.base}/#/workspace`);
+    await page.locator("#input-import-report").setInputFiles(EXAMPLE_REPORT);
+    await expect(page.getByTestId("export-findings")).toBeVisible({ timeout: 30_000 });
+
+    // Deselect the only finding, then author a note on it (the card stays
+    // selectable in the viewer; the note is recorded against it).
+    await page.getByTestId("finding-check-f_amount").uncheck();
+    const card = page.locator("#finding-item-f_amount");
+    await card.click();
+    await page.getByTestId("note-input").fill("Excluded on purpose");
+    await page.getByTestId("note-add").click();
+    await expect(page.getByTestId("finding-notes")).toBeVisible();
+
+    // The rebuild must not resurrect the deselected finding.
+    await expect(page.getByTestId("finding-check-f_amount")).not.toBeChecked();
+    await expect(page.getByTestId("deselected-findings")).toContainText("f_amount");
+
+    await page.getByRole("checkbox", { name: "Include my notes" }).check();
+    // The note rides out with its deselected finding — disclosed, not silent.
+    await expect(page.getByTestId("notes-excluded-with-findings")).toContainText("1 note(s)");
+
+    let dl = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    let text = await (await dl).createReadStream().then(async (s) => {
+      const chunks: Buffer[] = [];
+      for await (const c of s) chunks.push(c as Buffer);
+      return Buffer.concat(chunks).toString("utf8");
+    });
+    let json = JSON.parse(text) as DownloadedJson;
+    expect(json.findings.map((f) => f.id)).not.toContain("f_amount");
+    expect(json.annotations).toEqual([]);
+
+    // Re-selecting restores both the finding and its note.
+    await page.getByTestId("finding-check-f_amount").check();
+    dl = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    text = await (await dl).createReadStream().then(async (s) => {
+      const chunks: Buffer[] = [];
+      for await (const c of s) chunks.push(c as Buffer);
+      return Buffer.concat(chunks).toString("utf8");
+    });
+    json = JSON.parse(text) as DownloadedJson;
+    expect(json.findings.map((f) => f.id)).toContain("f_amount");
+    expect(json.annotations.some((a) => a.text.includes("Excluded on purpose"))).toBe(true);
+  });
+
   test("a note typed in the viewer exports only on opt-in, as human_entered", async ({
     page,
-    context,
   }) => {
     await page.goto(`${harness.base}/#/workspace`);
 
@@ -304,7 +355,5 @@ test.describe("T23 authored notes", () => {
     expect(
       json.occurrences.some((o) => o.raw_text.includes("Glyph shape")),
     ).toBe(false);
-
-    await context.close();
   });
 });

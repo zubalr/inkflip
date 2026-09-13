@@ -58,3 +58,37 @@ Scope notes (disclosed coordinator seams, additive only):
   No machine-evidence fields touched.
 Both are the narrowest seams that wire T23's owned features into the
 composed app; every other change is inside allowed scope.
+
+======================================================================
+Review round 1 (independent reviewer, verdict CHANGES-REQUIRED):
+
+F1 MAJOR — fixed: Workspace built `source` as an inline literal, so note
+edits rebuilt the ExportController and silently reset findings to "all"
+(a deselected finding's text would re-enter the next download). Fix:
+controller carries `sourceReportId`; the panel restores the previous
+request via `restoreRequest` (sanitized to availability/finding ids) when
+the sealed report identity is unchanged, resets on a different report.
+New spec leg covers it.
+
+F2 MINOR — fixed: a note on a deselected finding was pruned with no
+note-level line. Controller now counts `notesExcludedWithFindings` and
+the panel discloses "N note(s) excluded with their deselected findings."
+
+F3 MINOR — run.json predated the committed spec layout; the registered
+command is re-run on the fix commit below, refreshing the record.
+
+F4 NIT — removed redundant `await context.close()` from the spec.
+
+F5 NIT — added "Notes" count row to the preview grid.
+
+F6 NIT/a11y — notes controls nest inside role="option" (pre-existing
+pattern shared with AlignmentDetail); flagged for T37, not expanded here.
+
+$ bunx --no-install playwright test tests/reports/selection.spec.ts
+Running 6 tests using 1 worker — 6 passed (2.8s), including the F1
+regression leg (deselect → note edit → selection persists; note rides
+out with its finding, disclosed).
+
+$ bunx --no-install playwright test tests/browser/export.spec.ts \
+    tests/reports/import.spec.ts tests/browser/viewer.spec.ts
+31 passed (5.1s) — export/import/viewer regressions clean.

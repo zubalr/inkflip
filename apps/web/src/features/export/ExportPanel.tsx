@@ -127,7 +127,17 @@ export function ExportPanel({
 
   if (prevController !== controller) {
     setPrevController(controller);
-    setState(controller.state);
+    // Same sealed report with rebuilt source (notes edited, parent
+    // re-render): keep the user's explicit choices — resetting to "all"
+    // findings here would silently ship evidence they had excluded.
+    if (
+      prevController.sourceReportId !== null &&
+      prevController.sourceReportId === controller.sourceReportId
+    ) {
+      setState(controller.restoreRequest(prevController.state.request));
+    } else {
+      setState(controller.state);
+    }
     setDownloaded(null);
   }
 
@@ -266,6 +276,8 @@ export function ExportPanel({
             <dd>
               {counts?.crops ?? 0} / {counts?.pageRenders ?? 0}
             </dd>
+            <dt>Notes</dt>
+            <dd>{counts?.annotations ?? 0}</dd>
             <dt>JSON size</dt>
             <dd>{formatBytes(preview.bytes.jsonBytes)}</dd>
             <dt>Decoded assets</dt>
@@ -283,6 +295,11 @@ export function ExportPanel({
             <p className={styles.manifest} data-testid="omitted-findings">
               Omitted (their readings are not in the export):{" "}
               {state.notices?.omittedFindingIds?.join(", ")}.
+            </p>
+          )}
+          {state.notesExcludedWithFindings > 0 && (
+            <p className={styles.manifest} data-testid="notes-excluded-with-findings">
+              {state.notesExcludedWithFindings} note(s) excluded with their deselected findings.
             </p>
           )}
           <p className={styles.replay}>
