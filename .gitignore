@@ -21,7 +21,10 @@ dist/
 test-results/
 playwright-report/
 artifacts/scratch/
-runs/
+/runs/
+/profiles/
+/baselines/
+/comparisons/
 
 # Regenerable TypeScript/Vite and Python tool output.
 *.tsbuildinfo
