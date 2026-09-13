@@ -1,0 +1,28 @@
+{
+  "task": "T40",
+  "status": "passed",
+  "dockerfile": {
+    "status": "passed",
+    "digest": "b358c212e79e39299910265bcd9d7712b6b921f580fc774709c74a16acb8f262"
+  },
+  "run_script": {
+    "status": "passed",
+    "digest": "2746b09e1bb45b6c12a100e49beefab0fee32250ae9616172ddc2ea3bb9894e8"
+  },
+  "invocation": {
+    "status": "passed",
+    "command": "docker run --rm   --network none   --read-only   --tmpfs /tmp:rw,noexec,nosuid,size=512m   --cap-drop ALL   --security-opt no-new-privileges   -u 65532:65532   -v \"/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/containment-verify-epbrbbcp/input\":/input:ro   -v \"/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/containment-verify-epbrbbcp/output\":/output:rw   --pids-limit 64   --memory 1g   -e OMP_NUM_THREADS=1   -e OPENBLAS_NUM_THREADS=1   -e MKL_NUM_THREADS=1   -e NUMEXPR_NUM_THREADS=1   -e PYTHONIOENCODING=utf-8   \"inkflip-native:latest\" inspect /input/control.pdf --out /output/report.json",
+    "synthetic_input_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed"
+  },
+  "security_profile": [
+    "network_none",
+    "read_only_root",
+    "capabilities_dropped_all",
+    "no_new_privileges",
+    "nonroot_uid_65532",
+    "pids_limit_64",
+    "memory_limit_1g",
+    "single_thread_clamped",
+    "readonly_input_mount"
+  ]
+}
