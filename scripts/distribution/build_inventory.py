@@ -206,7 +206,7 @@ def build_inventory() -> dict:
                 prepared_example_paths.add(path.relative_to(ROOT).as_posix())
     unknown_assets = []
     public_dir = ROOT / "apps" / "web" / "public"
-    static_runtime_paths = {"apps/web/public/sw.js", "apps/web/public/examples/index.json"}
+    static_runtime_paths = {"apps/web/public/sw.js", "apps/web/public/examples/index.json", "apps/web/public/_headers"}
     for path in sorted(public_dir.rglob("*")):
         if not path.is_file() or path.is_symlink():
             continue

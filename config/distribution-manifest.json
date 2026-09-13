@@ -493,6 +493,20 @@
           "bytes": 7219
         }
       ]
+    },
+    {
+      "id": "inkflip-deployment-headers",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "explicit_files": [
+        {
+          "path": "apps/web/public/_headers",
+          "sha256": "93364c2fb5d808ef21503c80df93179a9597e2f17cd6f0f216b1db535e219399",
+          "bytes": 746
+        }
+      ]
     }
   ],
   "notice": "NOTICE",
