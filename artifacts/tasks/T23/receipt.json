@@ -1,0 +1,51 @@
+{
+ "task_id": "T23",
+ "beads_id": "pdf-t23",
+ "disposition": "implemented_pending_review",
+ "branch": "work/devin/t23",
+ "base_commit": "580ef63",
+ "source_commit": "8bb9823",
+ "implementation_commit": "8bb9823",
+ "merge_commit": "972406b",
+ "actor": "devin-t23",
+ "contract_version": "1.0.0",
+ "recorded_at": "2026-09-13",
+ "acceptance_criteria_evidence": {
+  "Default selected finding does not include unrelated text/name/PDF/notes": {
+   "status": "executed",
+   "detail": "Default request carries scope 'selection', findings 'all', occurrences 'cited', crops/pageRenders enabled, annotations/filename/sourcePdf all off. Spec leg 1 deselects one finding and asserts the downloaded bundle contains neither the deselected finding nor its occurrences nor unrelated text; legs 2-3 assert no source bytes, filename, or notes appear unless explicitly opted in. Review F1 regression leg proves a deselection survives note-driven source rebuilds.",
+   "evidence": [
+    "artifacts/tasks/T23/run.json",
+    "artifacts/tasks/T23/commands.log",
+    "artifacts/tasks/T23/review.md"
+   ]
+  },
+  "full-source warning requires explicit choice": {
+   "status": "executed",
+   "detail": "The 'Include original PDF' checkbox is off by default; checking it surfaces the source-warning disclosure ('The original PDF is included verbatim...'). With no source attached the control is disabled and the state reports requested_source_missing. When enabled the engine verifies actual bytes against the recorded document sha256 and fails closed on mismatch (spec leg 3).",
+   "evidence": [
+    "artifacts/tasks/T23/run.json",
+    "artifacts/tasks/T23/commands.log",
+    "artifacts/tasks/T23/review.md"
+   ]
+  },
+  "crop is described as excerpt not safe redaction": {
+   "status": "executed",
+   "detail": "Crop preview renders the real projected excerpt image plus the mandated disclosure 'excerpt — not a redaction; the full page text remains in the report' (spec leg 4 asserts both the decoded PNG bytes and the disclosure).",
+   "evidence": [
+    "artifacts/tasks/T23/run.json",
+    "artifacts/tasks/T23/commands.log",
+    "artifacts/tasks/T23/review.md"
+   ]
+  },
+  "selected omissions retain honest original produced_count and check coverage.": {
+   "status": "executed",
+   "detail": "Spec leg 1 asserts produced_occurrence_count stays 118 and check coverage stays complete after deselection, with omissions disclosed count-level in the payload and named ids via projection notices ('deselected-findings' manifest line). Review F2 added a note-level line when notes ride out with deselected findings.",
+   "evidence": [
+    "artifacts/tasks/T23/run.json",
+    "artifacts/tasks/T23/commands.log",
+    "artifacts/tasks/T23/review.md"
+   ]
+  }
+ }
+}
