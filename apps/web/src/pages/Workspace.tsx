@@ -15,6 +15,9 @@ export interface WorkspaceProps {
   onNavigateHome: () => void;
   initialWithExample?: boolean;
   initialDoc?: ViewerDoc | null;
+  /** Public-example card id (T21): its captured report is fetched and run
+   *  through the real import gate, never mounted directly. */
+  initialExampleId?: string | null;
 }
 
 const EXAMPLE_DOC: ViewerDoc = {
@@ -324,12 +327,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
   initialWithExample = true,
   initialDoc,
+  initialExampleId = null,
 }) => {
   const profile = useMemo(() => resolveProfile(), []);
   const session = useMemo(() => new InspectionSession(profile), [profile]);
   const [snap, setSnap] = useState(() => session.getState());
   const [exampleDoc, setExampleDoc] = useState<ViewerDoc | null>(
-    initialDoc ?? (initialWithExample ? EXAMPLE_DOC : null),
+    initialDoc ?? (initialWithExample && initialExampleId === null ? EXAMPLE_DOC : null),
   );
 
   // Human notes (T23) live outside the sealed report — they are added to a
@@ -350,6 +354,38 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       delete (globalThis as { __inspect?: InspectionSession }).__inspect;
     };
   }, [session]);
+
+  // T21 gallery handoff: fetch the card's committed captured report and run
+  // it through the real import gate — validation, replay-readiness and the
+  // evidence UI are identical to a user-supplied file.
+  const [exampleError, setExampleError] = useState<string | null>(null);
+  useEffect(() => {
+    if (initialExampleId === null) return;
+    let cancelled = false;
+    setExampleError(null);
+    void fetch(`examples/${initialExampleId}/report.json`, { credentials: "same-origin" })
+      .then((res) => {
+        if (!res.ok) throw new Error(`example report unavailable (${res.status})`);
+        return res.text();
+      })
+      .then((text) => {
+        if (cancelled) return;
+        const file = new File([text], `${initialExampleId}.inkflip.json`, {
+          type: "application/json",
+        });
+        void session.offerFile(file);
+      })
+      .catch((exc) => {
+        if (!cancelled) {
+          setExampleError(
+            `Could not load the prepared example: ${exc instanceof Error ? exc.message : String(exc)}`,
+          );
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, initialExampleId]);
 
   const reportInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -558,6 +594,23 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       </header>
 
       <main className={styles.workspaceMain}>
+        {exampleError !== null && (
+          <div
+            role="alert"
+            data-testid="example-error"
+            style={{
+              marginBottom: "var(--space-3)",
+              padding: "var(--space-2) var(--space-4)",
+              backgroundColor: "var(--color-surface-muted)",
+              border: "1px solid var(--color-line)",
+              borderRadius: "var(--radius-control)",
+              color: "var(--color-ink)",
+              fontSize: "var(--text-caption)",
+            }}
+          >
+            {exampleError}
+          </div>
+        )}
         {snap.error && (
           <div
             id="import-error"

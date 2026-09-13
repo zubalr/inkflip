@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "example_id": "duplicates",
+  "family": "duplicates",
+  "fixture_id": "F11",
+  "card_title": "The same $100, four times",
+  "mechanism": "Four identical amounts at distinct positions stay individually addressable by occurrence — a string match must never collapse them",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "provenance": "prepared",
+  "timing": {
+    "duration_ms": 127,
+    "method": "browser_measured",
+    "description": "Actual measured browser execution time using PDF.js and Tesseract.js (no decorative animation)"
+  },
+  "files": {
+    "source": {
+      "filename": "duplicates-four.pdf",
+      "sha256": "036db55ee2f8c320252c7c9fb220daa38699387800e8a3bbf8c6bb73463feb1f",
+      "byte_length": 754,
+      "download_url": "/examples/duplicates/duplicates-four.pdf",
+      "role": "Source document (four identical amounts)",
+      "report_file": "report.json"
+    },
+    "control": {
+      "filename": "duplicates-control.pdf",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "byte_length": 621,
+      "download_url": "/examples/duplicates/duplicates-control.pdf",
+      "role": "Clean control",
+      "report_file": "report.control.json"
+    },
+    "ocr_ambiguity": {
+      "filename": "ocr-material-sign-ambiguity.pdf",
+      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+      "byte_length": 13961,
+      "download_url": "/examples/duplicates/ocr-material-sign-ambiguity.pdf",
+      "role": "OCR sign-ambiguity companion",
+      "report_file": "report.ocr-material-sign-ambiguity.json"
+    },
+    "ocr_control": {
+      "filename": "ocr-material-control.pdf",
+      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "byte_length": 5171,
+      "download_url": "/examples/duplicates/ocr-material-control.pdf",
+      "role": "OCR clean control",
+      "report_file": "report.ocr-material-control.json"
+    }
+  },
+  "readers": {
+    "pdf_js_text": {
+      "id": "pdfjs-6_3_289-text",
+      "name": "pdf.js text",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "native_text"
+    },
+    "pdf_js_render": {
+      "id": "pdfjs-6_3_289-render",
+      "name": "pdf.js render",
+      "version": "6.3.289",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "render"
+    },
+    "tesseract_js": {
+      "id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "adapter_version": "1.0.0",
+      "environment": "browser",
+      "method": "ocr",
+      "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+    }
+  },
+  "findings": [
+    {
+      "id": "f_b4f8f5609277f817",
+      "title": "No matching reading found here",
+      "category": "observed_structure",
+      "page_index": 0
+    }
+  ],
+  "report_file": "report.json",
+  "report_id": "77bd7c767f26d97830ad6960c566607df3a22a14dea0c470c12ab3ff5654a67b",
+  "run_key": "ed380923eb39e1a227778894f62c686dc1619a51795599ae42d18fec1f2ede2f"
+}

@@ -937,7 +937,10 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
   expect(bootPaths).toContain("/");
   for (const p of bootPaths) {
     expect(
-      p === "/" || p === "/index.html" || p.startsWith("/assets/"),
+      p === "/" ||
+        p === "/index.html" ||
+        p.startsWith("/assets/") ||
+        p.startsWith("/examples/"),
       `cold boot fetched non-asset ${p}`,
     ).toBe(true);
   }
