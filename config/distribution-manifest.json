@@ -559,6 +559,37 @@
       "note": "Complete-image audit interface: when the packaging lane produces the final image, declare expected_image_digest (and the lock reference is verified for base-image pins). Absence keeps native release explicitly incomplete."
     },
     "application_wheel_stamp": "native/dist/app.wheel.json",
-    "build_context_identity": "native/dist/BUILD-CONTEXT.json"
+    "build_context_identity": "native/dist/BUILD-CONTEXT.json",
+    "release_profile": {
+      "name": "macos + docker (linux/amd64 container)",
+      "recorded": "2026-09-13 owner scope: macOS plus reproducible Docker on this Mac; Windows/native Linux hardware/desktop certification deferred",
+      "emulation_note": "Apple Silicon Docker builds linux/amd64 via qemu; explicitly not native x86_64 hardware certification"
+    },
+    "tesseract_stamp": {
+      "path": "release/tesseract/tesseract.stamp.json",
+      "expected_package": "tesseract-ocr",
+      "expected_version": "5.5.0-1+b1",
+      "expected_arch": "amd64",
+      "debs_dir": ".private/tesseract/debs",
+      "license": "Apache-2.0 (Tesseract)"
+    },
+    "production_image": {
+      "declared": true,
+      "image_ref": "inkflip-native:pc-prod",
+      "expected_image_digest": "sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33",
+      "architecture": "amd64",
+      "os": "linux",
+      "expected_wheel_sha256": "c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291",
+      "expected_model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "expected_tesseract_version": "5.5.0",
+      "required_notice_ids": [
+        "inkflip-mit",
+        "pdfium-binary-appendix",
+        "node-license",
+        "tesseract-apache"
+      ],
+      "notice_dir_in_image": "/app/notices",
+      "verification": "docker inspect + read-only container checks (identity, arch, wheel/model digests, tesseract version, notice inventory)"
+    }
   }
 }

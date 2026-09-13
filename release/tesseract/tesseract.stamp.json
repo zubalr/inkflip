@@ -1,0 +1,364 @@
+{
+  "kind": "inkflip-native-tesseract-debs",
+  "schema_version": "1.0.0",
+  "source": "Debian trixie main amd64 (deb.debian.org) downloaded 2026-09-13 inside python:3.13.15-slim-trixie@sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+  "package": "tesseract-ocr",
+  "version": "5.5.0-1+b1",
+  "arch": "amd64",
+  "platform": "linux/amd64",
+  "license": "Apache-2.0 (Tesseract)",
+  "install": "offline dpkg -i of the hashed .deb closure; no apt-get in the production image",
+  "note": "Apple Silicon docker build uses qemu; this is not native x86_64 hardware certification",
+  "packages": [
+    {
+      "filename": "fontconfig-config_2.15.0-2.3_amd64.deb",
+      "sha256": "0475c00d02660c07a15085051818625331bb502e053242106aaaa1f2ddb41225",
+      "bytes": 318308
+    },
+    {
+      "filename": "fontconfig_2.15.0-2.3_amd64.deb",
+      "sha256": "09794b188e042c90b4a89fcb5afeb276bc231b74ddf8a3efbbc7dfb6f0eac4cb",
+      "bytes": 463312
+    },
+    {
+      "filename": "fonts-dejavu-core_2.37-8_all.deb",
+      "sha256": "86635b3d25b3655fc11cb3ecc3af59f0bf19643b02b94f2de48bd10253cdba12",
+      "bytes": 840460
+    },
+    {
+      "filename": "fonts-dejavu-mono_2.37-8_all.deb",
+      "sha256": "3003e98a5debfdeadc7040a7f715fe9fe6fb67f68deacf6049b54e30f07fc014",
+      "bytes": 488808
+    },
+    {
+      "filename": "libarchive13t64_3.7.4-4+deb13u1_amd64.deb",
+      "sha256": "12e06195a899e8db371803ed70111fc7302573d3ed84e967d3d48ef2d543ace8",
+      "bytes": 350192
+    },
+    {
+      "filename": "libatomic1_14.2.0-19_amd64.deb",
+      "sha256": "212b399aae2f7299203d261a57e49372e09565a9a5ea971905f94a3960366c05",
+      "bytes": 9308
+    },
+    {
+      "filename": "libbrotli1_1.1.0-2+b7_amd64.deb",
+      "sha256": "0fb79f88db210afbd69282ab9649e525f393ec6950ca34da1a6b359250b8d7db",
+      "bytes": 306624
+    },
+    {
+      "filename": "libcairo2_1.18.4-1+b1_amd64.deb",
+      "sha256": "01390b049661e4cc8bd39cef78b41c2587d4035619d3b00d6c7846f43d80bbba",
+      "bytes": 537556
+    },
+    {
+      "filename": "libcom-err2_1.47.2-3+b12_amd64.deb",
+      "sha256": "bd43e020b8fed399db3eebf098111f10fba4c436fff99ccad72cc7e27c9764ec",
+      "bytes": 25036
+    },
+    {
+      "filename": "libcurl4t64_8.14.1-2+deb13u5_amd64.deb",
+      "sha256": "0dedddfe614fc4a4335c9167b73c64a50136edd76b7991aa851408d0795163eb",
+      "bytes": 391492
+    },
+    {
+      "filename": "libdatrie1_0.2.13-3+b1_amd64.deb",
+      "sha256": "339eb88f23d72b8f0b7b1aebcefbab6de600d97b88bc6222dd8aad11d2ca9051",
+      "bytes": 38132
+    },
+    {
+      "filename": "libdeflate0_1.23-2_amd64.deb",
+      "sha256": "5fe37fb79d53f5c91da6ba3ac4c1a8453e1f2b1ff0e0ea45189c5338bbfdbf82",
+      "bytes": 47344
+    },
+    {
+      "filename": "libexpat1_2.8.3-1~deb13u1_amd64.deb",
+      "sha256": "38abe0e710a07688e9c149d74536e67cfee0364bdb64dd6d644c32a1cfad389f",
+      "bytes": 122672
+    },
+    {
+      "filename": "libfontconfig1_2.15.0-2.3_amd64.deb",
+      "sha256": "7ae91ec59857cc8e375eb2bdd371a4a69daea38f7787d06d474a847867d852b1",
+      "bytes": 391576
+    },
+    {
+      "filename": "libfreetype6_2.13.3+dfsg-1+deb13u1_amd64.deb",
+      "sha256": "e4947f3291528f03d574f2b01d5c5fc45c58c47480f32888a5cdf0f231ab584e",
+      "bytes": 452308
+    },
+    {
+      "filename": "libfribidi0_1.0.16-1_amd64.deb",
+      "sha256": "f8c35ec8606d0843bd3cf020c6cfa39ddfe717ec58ed826b5855ba9927eb0d55",
+      "bytes": 26484
+    },
+    {
+      "filename": "libgif7_5.2.2-1+deb13u1_amd64.deb",
+      "sha256": "619328ccf9ad6c621298f9daf5e695ff50e993a6d45dd0d7f6217e1bd2d1c4ce",
+      "bytes": 44052
+    },
+    {
+      "filename": "libglib2.0-0t64_2.84.4-3~deb13u5_amd64.deb",
+      "sha256": "e2baf92c57d1db1753e5781a61450d9a01e7833c7bd2dfe87776a6811c11ecc2",
+      "bytes": 1521120
+    },
+    {
+      "filename": "libgnutls30t64_3.8.9-3+deb13u4_amd64.deb",
+      "sha256": "18a8bdfd91c7e3bcb01719d55a2b56849c7160b34f1f52b1c4fdfdd41bf1352b",
+      "bytes": 1469024
+    },
+    {
+      "filename": "libgomp1_14.2.0-19_amd64.deb",
+      "sha256": "72b7a1a33c48f3195efeb044111b34ae684b1e640bb6495c832443b798601cd5",
+      "bytes": 137148
+    },
+    {
+      "filename": "libgraphite2-3_1.3.14-2+deb13u1_amd64.deb",
+      "sha256": "1769ba3ed3c1fc75b7fbe02678e32aa24391205813eceef4e1e3500015d12ee3",
+      "bytes": 75172
+    },
+    {
+      "filename": "libgssapi-krb5-2_1.21.3-5+deb13u1_amd64.deb",
+      "sha256": "30847c1fde4240567d7ed3aeab4f655dd591203758b857e85e824045aae70299",
+      "bytes": 138356
+    },
+    {
+      "filename": "libharfbuzz0b_10.2.0-1+deb13u1_amd64.deb",
+      "sha256": "932165b933e5eb633293afe984a983ebe89cb27c923ce7208626f1da6c0c7941",
+      "bytes": 478952
+    },
+    {
+      "filename": "libicu76_76.1-4_amd64.deb",
+      "sha256": "c1bf762996de9ecba9b9d871e4928a8090f023a3e9e7fa3240b3d90f892a01dc",
+      "bytes": 9722072
+    },
+    {
+      "filename": "libidn2-0_2.3.8-2_amd64.deb",
+      "sha256": "90b039bcdc4578f8e1c4935adf8dbb525e36a164deefdbbb8c45bac347d48278",
+      "bytes": 109096
+    },
+    {
+      "filename": "libjbig0_2.1-6.1+b2_amd64.deb",
+      "sha256": "95cbc44561651e1b3385454df08e8f2efe84498f6963a85259be2cc2fe798709",
+      "bytes": 32116
+    },
+    {
+      "filename": "libjpeg62-turbo_1%3a2.1.5-4_amd64.deb",
+      "sha256": "5504299ad0e3c0a9ca9f962a68a650a040db52f9f416a109e74df48d55601d3f",
+      "bytes": 168152
+    },
+    {
+      "filename": "libk5crypto3_1.21.3-5+deb13u1_amd64.deb",
+      "sha256": "7da07ee674b47f1f0be7cc89317c25310086a1f1761217d0f72e6ae2c5a69b84",
+      "bytes": 81152
+    },
+    {
+      "filename": "libkeyutils1_1.6.3-6_amd64.deb",
+      "sha256": "0b11ad17be0300b63ad4eeb4c6450fed24d34b7b740f23e5363dcb29ee6d5eba",
+      "bytes": 9456
+    },
+    {
+      "filename": "libkrb5-3_1.21.3-5+deb13u1_amd64.deb",
+      "sha256": "47d71d6a7f2e59b9bae5f89602397594805113b95889ad18fa703cd53abafc97",
+      "bytes": 326056
+    },
+    {
+      "filename": "libkrb5support0_1.21.3-5+deb13u1_amd64.deb",
+      "sha256": "3a0acd8b37955c0e102c756b52c97df2a31f67b96453c35dab70df218d309117",
+      "bytes": 33124
+    },
+    {
+      "filename": "libldap2_2.6.10+dfsg-1_amd64.deb",
+      "sha256": "60069e4a550ca890113fa89d3001417781b18e146ec5d637d31e368dec9909bd",
+      "bytes": 193576
+    },
+    {
+      "filename": "libleptonica6_1.84.1-4_amd64.deb",
+      "sha256": "e1f5fbc6fb616f5912b3cd843031ffe8e3a4fc1d0aa021b5858922c5c3655ac9",
+      "bytes": 1065804
+    },
+    {
+      "filename": "liblerc4_4.0.0+ds-5_amd64.deb",
+      "sha256": "2e0c13c0ddbde12968c2c713c2e0474a5b78e90d5216031256a725e8c76aa31c",
+      "bytes": 182976
+    },
+    {
+      "filename": "libnghttp2-14_1.64.0-1.1+deb13u1_amd64.deb",
+      "sha256": "896cb217537c09251fb909b8541349010ac279d802d871e98c06a62a2c67ce2c",
+      "bytes": 76188
+    },
+    {
+      "filename": "libnghttp3-9_1.8.0-1_amd64.deb",
+      "sha256": "388e4c33b72829cbf0d098afdc8539fa5ba7458eddb077f5538fdb4d5538716b",
+      "bytes": 67656
+    },
+    {
+      "filename": "libopenjp2-7_2.5.3-2.1~deb13u2_amd64.deb",
+      "sha256": "7ddf6360e8845853ba3c9cfaefc2ad6b92b2627eb8564a257f5f2a4c857f8748",
+      "bytes": 204616
+    },
+    {
+      "filename": "libp11-kit0_0.25.5-3_amd64.deb",
+      "sha256": "784bf2063e166c8bc851a32623b74ebd85c499043a9d57c5bbd64fa63447f45a",
+      "bytes": 425240
+    },
+    {
+      "filename": "libpango-1.0-0_1.56.3-1_amd64.deb",
+      "sha256": "4fa38472696d2ddb10bfc9a4692a9446e8478fdb1f48c769a609fc9fec3adfc5",
+      "bytes": 226324
+    },
+    {
+      "filename": "libpangocairo-1.0-0_1.56.3-1_amd64.deb",
+      "sha256": "6994729c5b7a9649661ec078cf039991f22eff44600543aa917894f83c89cd05",
+      "bytes": 35748
+    },
+    {
+      "filename": "libpangoft2-1.0-0_1.56.3-1_amd64.deb",
+      "sha256": "b506cf66f78ddf542ddb4bb4a68b3d748d41caa6e190e4480430a6630c1e5105",
+      "bytes": 55568
+    },
+    {
+      "filename": "libpixman-1-0_0.44.0-3_amd64.deb",
+      "sha256": "3862c87596f6b4b60fc916395fd69aa10af28a875a8e5c081a8cf30ddd120bd6",
+      "bytes": 247888
+    },
+    {
+      "filename": "libpng16-16t64_1.6.48-1+deb13u5_amd64.deb",
+      "sha256": "2465b4e9fa85cff54dc10a6da3e64074d8d9292c86e4a8f989b809d6b158e97e",
+      "bytes": 283204
+    },
+    {
+      "filename": "libpsl5t64_0.21.2-1.1+b1_amd64.deb",
+      "sha256": "59d42bb1f9ebc0d1776fe616efb08a7a8568b05982e00f70b03c63863db768ab",
+      "bytes": 57188
+    },
+    {
+      "filename": "librtmp1_2.4+20151223.gitfa8646d.1-2+b5_amd64.deb",
+      "sha256": "93baa2004cbe6c8721b9e81beed078612540aef120970b4751305c51c6697368",
+      "bytes": 58840
+    },
+    {
+      "filename": "libsasl2-2_2.1.28+dfsg1-9_amd64.deb",
+      "sha256": "66e49d7ae026811b49a0050f18b0325960a2625ffd1ff60d91b7844a815fa9d2",
+      "bytes": 57512
+    },
+    {
+      "filename": "libsasl2-modules-db_2.1.28+dfsg1-9_amd64.deb",
+      "sha256": "a5c38659fbd62c33c6d9bfa2be43e75a572d1818531aad32dd74d0a58cc4bd19",
+      "bytes": 19768
+    },
+    {
+      "filename": "libsharpyuv0_1.5.0-0.1_amd64.deb",
+      "sha256": "51934833d909588f7761fd84362114e90d8d2d38af57edf5df5c4a705e037547",
+      "bytes": 115612
+    },
+    {
+      "filename": "libssh2-1t64_1.11.1-1+deb13u2_amd64.deb",
+      "sha256": "dbb1024c192d4d292b7cfa902b96076cfe81b56a5eed4fb28da36e8bf543e49a",
+      "bytes": 245240
+    },
+    {
+      "filename": "libtasn1-6_4.20.0-2+deb13u1_amd64.deb",
+      "sha256": "23fec6e06583ce2bad9b2c04c9b485e90440e259b1abf8677cd80d3ce60831ad",
+      "bytes": 50112
+    },
+    {
+      "filename": "libtesseract5_5.5.0-1+b1_amd64.deb",
+      "sha256": "3261b2b3e1d6f5207512b93f531ef4b531f4160890b8e5cf4e65b989f6ba3ceb",
+      "bytes": 1416872
+    },
+    {
+      "filename": "libthai-data_0.1.29-2_all.deb",
+      "sha256": "fd38d40602834d510a29140bd27fd48485105e834f03dccab1c02e2edaa794dd",
+      "bytes": 167504
+    },
+    {
+      "filename": "libthai0_0.1.29-2+b1_amd64.deb",
+      "sha256": "e6364c07aeeffe9a95f267061d9df168e48e9dc9126c3b40e19dc829f67702a7",
+      "bytes": 49420
+    },
+    {
+      "filename": "libtiff6_4.7.0-3+deb13u3_amd64.deb",
+      "sha256": "6bb2038f36817ae1ee6d33df03917b21835dcc2e0f3e3e80a71390e83c171173",
+      "bytes": 345492
+    },
+    {
+      "filename": "libunistring5_1.3-2_amd64.deb",
+      "sha256": "6dd3490bef06ea1096f32d10766b7e016cf579bfae8451d1b7df15ce05b8aa46",
+      "bytes": 476768
+    },
+    {
+      "filename": "libwebp7_1.5.0-0.1_amd64.deb",
+      "sha256": "c749744b04abdd1426b0c7718e516362c03a557c5151662092d6d4f2cef6e7c1",
+      "bytes": 317856
+    },
+    {
+      "filename": "libwebpmux3_1.5.0-0.1_amd64.deb",
+      "sha256": "8bc86d509406ad496b6414c7068b3dadc0f8c502027973cbf1765c7bb54fabdf",
+      "bytes": 126140
+    },
+    {
+      "filename": "libx11-6_2%3a1.8.12-1_amd64.deb",
+      "sha256": "b5a3fd3bf8c8fd0364bfb9bea00dcba7fc301229bd02dded084632d31f5b0fb3",
+      "bytes": 815292
+    },
+    {
+      "filename": "libx11-data_2%3a1.8.12-1_all.deb",
+      "sha256": "c54f87069888f80ba4da586da6147d74c7598ccdd8b90906dbc4271fa414c738",
+      "bytes": 343072
+    },
+    {
+      "filename": "libxau6_1%3a1.0.11-1_amd64.deb",
+      "sha256": "689a9f0e0ba3e2c65431f864871e303ee904de69dd28abfc462663fae030227f",
+      "bytes": 20392
+    },
+    {
+      "filename": "libxcb-render0_1.17.0-2+b1_amd64.deb",
+      "sha256": "7f6e36978e0f70a590fbad4042a692c70b50ca7cbcdc53fa7e9d9ab87933acc6",
+      "bytes": 115100
+    },
+    {
+      "filename": "libxcb-shm0_1.17.0-2+b1_amd64.deb",
+      "sha256": "d1777a813f484e89f3dcaadd1d5f2b1a13e9313b6bf70eded16d8ce743208fef",
+      "bytes": 105284
+    },
+    {
+      "filename": "libxcb1_1.17.0-2+b1_amd64.deb",
+      "sha256": "5c222a72d11b866447da31693254f738430726e3e065a384e82687b2fd2f978b",
+      "bytes": 144340
+    },
+    {
+      "filename": "libxdmcp6_1%3a1.1.5-1_amd64.deb",
+      "sha256": "0740dc760916b2008b45417a42a8fd7dd5de370fb57d31373f15034cda8acf0b",
+      "bytes": 27756
+    },
+    {
+      "filename": "libxext6_2%3a1.3.4-1+b3_amd64.deb",
+      "sha256": "fc618ec40465e5ce48622606299cb47833efc3fb235ba15543b81f850722f443",
+      "bytes": 50448
+    },
+    {
+      "filename": "libxml2_2.12.7+dfsg+really2.9.14-2.1+deb13u3_amd64.deb",
+      "sha256": "e0c6b63ce4602a036a526f60fe5e6c1586710688058d98fc1001b9b3147b7efd",
+      "bytes": 699724
+    },
+    {
+      "filename": "libxrender1_1%3a0.9.12-1_amd64.deb",
+      "sha256": "9d042dfd5e613be1e02e6ddd0c5c4adef19c5eb08f6db838c2eba672c496dca4",
+      "bytes": 27896
+    },
+    {
+      "filename": "tesseract-ocr-eng_1%3a4.1.0-2_all.deb",
+      "sha256": "9242d054563262398f8cf41fbd96fcc72f9dde70db16de18539882a6cff74f9d",
+      "bytes": 1593640
+    },
+    {
+      "filename": "tesseract-ocr-osd_1%3a4.1.0-2_all.deb",
+      "sha256": "72cc0ba5a04e4d38e5d7901ae2f0319f4941fddaa4a77d1a86110909c036bacb",
+      "bytes": 2992152
+    },
+    {
+      "filename": "tesseract-ocr_5.5.0-1+b1_amd64.deb",
+      "sha256": "9075f944564f5e567f77b218696530125cf2cf70ee64b497df3d5173bf422c7e",
+      "bytes": 438996
+    }
+  ]
+}

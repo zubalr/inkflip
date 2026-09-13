@@ -421,6 +421,54 @@ def check_native_bundle(root: Path, nb: dict, scope_notes: list | None = None) -
             elif e.get("sha256") and sha256_file(artifact) != e["sha256"]:
                 failures.append(f"native bundle: prepared wheel hash mismatch: {e['path_in_context']}")
 
+    # Tesseract Debian closure stamp (production OCR dependency, linux/amd64)
+    ts = nb.get("tesseract_stamp") or {}
+    stamp_rel = ts.get("path")
+    if stamp_rel:
+        if not contained(root, stamp_rel):
+            errors.append(f"native bundle: tesseract stamp path escapes root: {stamp_rel}")
+        else:
+            tpath = root / stamp_rel
+            if not tpath.is_file():
+                failures.append(f"native bundle: tesseract stamp missing: {stamp_rel}")
+            else:
+                try:
+                    tsd = json.loads(tpath.read_text())
+                except json.JSONDecodeError as exc:
+                    failures.append(f"native bundle: tesseract stamp unreadable: {exc}")
+                    tsd = {}
+                if tsd:
+                    if tsd.get("kind") != "inkflip-native-tesseract-debs":
+                        failures.append("native bundle: tesseract stamp has wrong kind")
+                    for field, expected in (("package", ts.get("expected_package")),
+                                            ("version", ts.get("expected_version")),
+                                            ("arch", ts.get("expected_arch"))):
+                        if expected and tsd.get(field) != expected:
+                            failures.append(
+                                f"native bundle: tesseract stamp {field} is {tsd.get(field)!r}, expected {expected!r}"
+                            )
+                    if not tsd.get("license"):
+                        failures.append("native bundle: tesseract stamp lacks license")
+                    pkgs = tsd.get("packages") or []
+                    if not pkgs:
+                        failures.append("native bundle: tesseract stamp records no packages")
+                    for pkg in pkgs:
+                        if not isinstance(pkg, dict) or not pkg.get("filename"):
+                            failures.append("native bundle: tesseract stamp has a malformed package entry")
+                            continue
+                        if not pkg.get("sha256") or pkg.get("bytes") is None:
+                            failures.append(f"native bundle: deb entry lacks hash/bytes: {pkg.get('filename')}")
+                    debs_dir = ts.get("debs_dir")
+                    if debs_dir:
+                        debs_path = root / debs_dir
+                        if debs_path.is_dir():
+                            actual = {p.name for p in debs_path.glob("*.deb")}
+                            expected_names = {p["filename"] for p in pkgs if isinstance(p, dict)}
+                            for name in sorted(expected_names - actual):
+                                failures.append(f"native bundle: deb closure missing prepared file: {name}")
+                            for name in sorted(actual - expected_names):
+                                failures.append(f"native bundle: undeclared deb in prepared closure: {name}")
+
     # application wheel / complete-image audit interface
     wheel = nb.get("application_wheel") or {}
     if wheel.get("declared"):
@@ -583,6 +631,95 @@ def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
     return failures
 
 
+# ------------------------------------------------- production image (Docker)
+
+def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[str]:
+    """Read-only verification of the declared production image via Docker:
+    identity/architecture by `docker inspect`; wheel/model digests, the
+    tesseract binary and the notice inventory by a read-only container run.
+    The image ref alone is not proof — actual bytes are checked."""
+    import subprocess
+    failures: list[str] = []
+    ref = image.get("image_ref")
+    expected_digest = image.get("expected_image_digest")
+    if not ref or not expected_digest:
+        return ["production image: image_ref and expected_image_digest are required for --docker verification"]
+
+    def docker(*args: str) -> tuple[int, str]:
+        proc = subprocess.run([docker_cmd, *args], capture_output=True, text=True, timeout=300)
+        return proc.returncode, (proc.stdout or proc.stderr)
+
+    rc, out = docker("inspect", "--format", "{{.Id}}\n{{.Architecture}}\n{{.Os}}", ref)
+    if rc != 0:
+        return [f"production image: docker inspect failed for {ref}: {out.strip()[:200]}"]
+    lines = out.strip().splitlines()
+    image_id, arch, os_name = (lines + ["", "", ""])[:3]
+    if image_id != expected_digest:
+        failures.append(f"production image: identity mismatch (inspect {image_id}, declared {expected_digest})")
+    if arch != image.get("architecture"):
+        failures.append(f"production image: architecture is {arch!r}, declared {image.get('architecture')!r}")
+    if os_name != image.get("os", "linux"):
+        failures.append(f"production image: os is {os_name!r}, declared {image.get('os', 'linux')!r}")
+
+    rc, out = docker("run", "--rm", "--network", "none", "--user", "0",
+                     "--entrypoint", "sh", ref,
+                     "-c",
+                     "sha256sum /app/wheels/inkflip-*.whl /wheels/inkflip-*.whl 2>/dev/null; "
+                     "sha256sum /app/models/tessdata/eng.traineddata 2>/dev/null; "
+                     "/usr/bin/tesseract --version 2>&1 | head -1")
+    if rc != 0:
+        return failures + [f"production image: read-only container check failed: {out.strip()[:200]}"]
+    hashes = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) == 2 and re.fullmatch(r"[0-9a-f]{64}", parts[0]):
+            hashes[parts[1].rsplit("/", 1)[-1]] = parts[0]
+
+    wheel_sha = image.get("expected_wheel_sha256")
+    wheel_found = [v for k, v in hashes.items() if k.endswith(".whl")]
+    if wheel_sha and wheel_sha not in wheel_found:
+        failures.append(
+            f"production image: application wheel digest mismatch (expected {wheel_sha[:12]}…, found {wheel_found or 'none'})"
+        )
+    model_sha = image.get("expected_model_sha256")
+    if model_sha and hashes.get("eng.traineddata") != model_sha:
+        failures.append("production image: model digest mismatch")
+    tver = image.get("expected_tesseract_version")
+    if tver and f"tesseract {tver}" not in out:
+        failures.append(f"production image: tesseract version line missing/mismatched (expected {tver!r})")
+    # notice inventory: parse INDEX.json (id -> path/sha256) and hash-check
+    # each required entry's actual bytes inside the image — labels are not proof.
+    index_entries: dict[str, dict] = {}
+    rc_idx, index_json = docker("run", "--rm", "--network", "none", "--user", "0",
+                                "--entrypoint", "cat", ref, "/app/notices/INDEX.json")
+    if rc_idx != 0 or not index_json.strip():
+        failures.append("production image: notice INDEX.json absent from image notice directory")
+    else:
+        try:
+            parsed = json.loads(index_json)
+            for e in parsed.get("entries", []):
+                if isinstance(e, dict) and e.get("id"):
+                    index_entries[e["id"]] = e
+        except json.JSONDecodeError:
+            failures.append("production image: notice INDEX.json is not valid JSON")
+    for notice_id in image.get("required_notice_ids", []):
+        entry = index_entries.get(notice_id)
+        if entry is None:
+            failures.append(f"production image: required notice id absent from image notice inventory: {notice_id}")
+            continue
+        entry_path, entry_sha = entry.get("path"), entry.get("sha256")
+        if entry_path and entry_sha:
+            rc2, hash_out = docker("run", "--rm", "--network", "none", "--user", "0",
+                                   "--entrypoint", "sh", ref,
+                                   "-c", f"sha256sum /app/{entry_path} 2>/dev/null")
+            actual = hash_out.split()[0] if rc2 == 0 and hash_out.split() else None
+            if actual != entry_sha:
+                failures.append(
+                    f"production image: notice {notice_id!r} bytes do not match INDEX (expected {entry_sha[:12]}…, got {str(actual)[:12]}…)"
+                )
+    return failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
@@ -596,6 +733,7 @@ def main() -> int:
     parser.add_argument("--manifest", default="config/distribution-manifest.json")
     parser.add_argument("--root", default=".", help="repository root (default: cwd)")
     parser.add_argument("--dist-manifest", default=None, help="verify apps/web/dist against this recorded dist manifest (see scripts/distribution/record_dist.py)")
+    parser.add_argument("--docker", metavar="IMAGE", default=None, help="read-only production-image verification via docker (inspect + container checks)")
     parser.add_argument("--json", action="store_true", help="machine-readable report")
     args = parser.parse_args()
 
@@ -612,6 +750,20 @@ def main() -> int:
         return 2
 
     problems, gate_scope_notes, code = run_checks(root, manifest, args.dist_manifest)
+    if args.docker and not problems:
+        nb = manifest.get("native_bundle") or {}
+        image = nb.get("production_image") or {}
+        if image.get("declared"):
+            import shutil as _shutil
+            docker_cmd = _shutil.which("docker")
+            if not docker_cmd:
+                problems.append("production image: docker CLI not found; --docker verification could not run")
+            else:
+                image = dict(image)
+                image["image_ref"] = args.docker
+                problems.extend(verify_production_image(root, image, docker_cmd))
+                gate_scope_notes.append(f"production image verified via docker: {args.docker}")
+                code = (2 if any(e in problems for e in []) else 1) if problems else 0
     scope_notes = gate_scope_notes + scope_report(root, manifest, args.dist_manifest)
     if args.json:
         print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems,
