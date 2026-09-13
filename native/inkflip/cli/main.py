@@ -58,6 +58,18 @@ def _guard_output_file(source: Path, destination: Path, replace: bool) -> None:
         )
 
 
+def _write_output(path: Path, write) -> None:
+    """Run an output write, translating I/O faults into the CLI contract.
+
+    An unwritable destination is a runtime failure (exit 4) reported as an
+    actionable error, never an untranslated traceback.
+    """
+    try:
+        write()
+    except OSError as exc:
+        raise CliError(f"Cannot write output {path}: {exc}", EXIT_READ_FAILURE) from exc
+
+
 def _load_validated(path: Path) -> dict:
     if not path.is_file():
         raise CliError(f"File not found: {path}", EXIT_READ_FAILURE)
@@ -104,7 +116,7 @@ def cmd_inspect(args: argparse.Namespace) -> int:
         )
     except InspectError as exc:
         raise CliError(exc.message, exc.exit_code) from exc
-    write_report(out_path, report)
+    _write_output(out_path, lambda: write_report(out_path, report))
     print(f"Report written to {out_path}")
     return code
 
@@ -128,7 +140,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         raise ArgumentError(f"Unsupported report export format {args.format!r}; only 'html' is supported")
     data = _load_validated(report_path)
     html_content = render_html_report(data)
-    atomic_write_bytes(out_path, html_content.encode("utf-8"))
+    _write_output(out_path, lambda: atomic_write_bytes(out_path, html_content.encode("utf-8")))
     print(f"HTML report written to {out_path}")
     return EXIT_OK
 
@@ -240,7 +252,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
             )
         except InspectError as exc:
             raise CliError(exc.message, exc.exit_code) from exc
-        write_report(out_path, report)
+        _write_output(out_path, lambda: write_report(out_path, report))
         print(f"Replay report written to {out_path}")
         return code
     finally:
@@ -272,7 +284,7 @@ def cmd_compare_readers(args: argparse.Namespace) -> int:
             )
     if out_dir.exists() and any(out_dir.iterdir()) and not args.replace_output:
         raise ArgumentError(f"Refusing to write into non-empty directory {out_dir}")
-    out_dir.mkdir(parents=True, exist_ok=True)
+    _write_output(out_dir, lambda: out_dir.mkdir(parents=True, exist_ok=True))
     reports = []
     exit_code = EXIT_OK
     for reader in readers:
@@ -288,7 +300,7 @@ def cmd_compare_readers(args: argparse.Namespace) -> int:
         except InspectError as exc:
             raise CliError(exc.message, exc.exit_code) from exc
         path = out_dir / f"report_{reader}.inkflip.json"
-        write_report(path, report)
+        _write_output(path, lambda p=path, r=report: write_report(p, r))
         reports.append(report)
         if code != EXIT_OK:
             exit_code = code
@@ -380,6 +392,8 @@ def cmd_compare(args: argparse.Namespace) -> int:
         fail_on_changed=bool(getattr(args, "fail_on", None) == "changed"),
         mode=args.mode or "reader_upgrade",
     )
+    for violation in result.violations[:5]:
+        sys.stderr.write(f"Error: {violation}\n")
     print(f"Comparison status: {result.status}")
     return result.exit_code
 
