@@ -196,13 +196,14 @@ function scanInto(
   channel: string,
   where: string,
   body: string | undefined | null,
+  sink: Capture["violations"] = cap.violations,
 ): void {
   if (!body) return;
   for (const m of MARKERS) {
     for (const s of spellings(m)) {
       let at = body.indexOf(s);
       while (at >= 0) {
-        cap.violations.push({
+        sink.push({
           marker: m.value,
           channel,
           where: `${where}@${at}`,
@@ -436,18 +437,21 @@ async function endCapture(
   }
   scanInto(cap, "server_access_log", "line", cap.serverLog.join("\n"));
   mkdirSync(CAPTURES, { recursive: true });
+  // Committed evidence is the stabilized projection; snippets and offsets are
+  // re-derived from it so they always match the file's own bytes.
+  const stableRecords = cap.records.map(stabilizeRecord);
+  const stableViolations: Capture["violations"] = [];
+  for (const rec of stableRecords) {
+    scanInto(cap, rec.channel, "url", rec.url, stableViolations);
+    scanInto(cap, rec.channel, "data", rec.data, stableViolations);
+    for (const [k, v] of Object.entries(rec.headers ?? {})) {
+      scanInto(cap, rec.channel, `header:${k}`, v, stableViolations);
+    }
+  }
   writeFileSync(
     join(CAPTURES, `${String(captureSeq++).padStart(2, "0")}-${cap.label}.json`),
     JSON.stringify(
-      {
-        ...cap,
-        records: cap.records.map(stabilizeRecord),
-        violations: cap.violations.map((v) => ({
-          ...v,
-          where: stabilizeText(v.where),
-          snippet: stabilizeText(v.snippet),
-        })),
-      },
+      { ...cap, records: stableRecords, violations: stableViolations },
       null,
       2,
     ),
