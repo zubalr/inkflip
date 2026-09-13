@@ -343,14 +343,13 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
           </div>
 
           {/* List of findings */}
-          <div id="findings-nav-list" role="listbox" aria-label="Discovered findings">
+          <div id="findings-nav-list" role="list" aria-label="Discovered findings">
             {doc.findings.map((f) => {
               const isSelected = f.id === selectedFindingId;
               return (
                 <div
                   key={f.id}
-                  id={`finding-item-${f.id}`}
-                  role="option"
+                  role="listitem"
                   className={`${styles.findingCard} ${isSelected ? styles.findingCardSelected : ""}`}
                   style={{
                     marginBottom: "var(--space-3)",
@@ -358,24 +357,24 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                     backgroundColor: isSelected ? "var(--color-paper-pure)" : undefined,
                   }}
                   onClick={() => handleSelectFinding(f)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleSelectFinding(f);
-                    }
-                  }}
-                  tabIndex={0}
-                  aria-selected={isSelected}
                 >
-                  <h3 className={styles.findingTitle}>{f.title}</h3>
-                  <div className={styles.findingMeta}>
-                    <span>Page {f.page_index + 1}</span> · <span>{f.priority}</span>
-                    {f.alignment === "ambiguous" && <span> · Ambiguous</span>}
-                    {f.alignment === "page_level" && <span> · Page-level</span>}
-                  </div>
-                  <p style={{ fontSize: "var(--text-caption)", color: "var(--color-ink)" }}>
-                    {f.explanation}
-                  </p>
+                  <h3 className={styles.findingTitle} style={{ marginBottom: 0 }}>
+                    <button
+                      type="button"
+                      id={`finding-item-${f.id}`}
+                      className={styles.findingToggle}
+                      aria-expanded={isSelected}
+                      aria-current={isSelected}
+                    >
+                      <span className={styles.findingToggleTitle}>{f.title}</span>
+                      <span className={styles.findingMeta}>
+                        <span>Page {f.page_index + 1}</span> · <span>{f.priority}</span>
+                        {f.alignment === "ambiguous" && <span> · Ambiguous</span>}
+                        {f.alignment === "page_level" && <span> · Page-level</span>}
+                      </span>
+                      <span className={styles.findingExplanation}>{f.explanation}</span>
+                    </button>
+                  </h3>
 
                   {isSelected && (
                     <AlignmentDetail
@@ -406,14 +405,6 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         onKeepEvidence(f);
-                      }}
-                      onKeyDown={(e) => {
-                        // Keep Enter/Space activating this button: the
-                        // card's keydown would preventDefault the native
-                        // activation and re-run finding selection.
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.stopPropagation();
-                        }
                       }}
                     >
                       Keep this evidence
