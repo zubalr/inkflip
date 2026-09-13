@@ -299,3 +299,124 @@ class DistCheckerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ApplicationWheelImageTests(unittest.TestCase):
+    """The application-wheel / complete-image audit interface: absence,
+    mismatch and image-without-wheel cases (recovery review item)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.write("NOTICE", b"NOTICE\n")
+
+    def write(self, rel: str, content: bytes):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        return path
+
+    def base_manifest(self, wheel=None, image=None):
+        self.write(".private/distribution/native-bundle/.prepared", b"")  # context prepared
+        self.write(
+            "release/native-requirements.lock", b"# generated\n"
+        )
+        self.write(
+            "release/native-wheels.manifest.json",
+            json.dumps({"wheels": []}).encode(),
+        )
+        self.write(
+            "release/node/node.stamp.json",
+            json.dumps({"version": "22.23.2", "sha256": "a" * 64, "url": "u",
+                        "shasums256_source": "s"}).encode(),
+        )
+        self.write(
+            "release/models/model.stamp.json",
+            json.dumps({"name": "m", "sha256": "b" * 64, "license": "Apache-2.0",
+                        "source": "s"}).encode(),
+        )
+        manifest = {
+            "distribution": {"shipped_roots": []},
+            "groups": [],
+            "notice": "NOTICE",
+            "native_bundle": {
+                "requirements_lock": "release/native-requirements.lock",
+                "wheels_manifest": "release/native-wheels.manifest.json",
+                "expected_runtime_packages": [],
+                "context_dir": ".private/distribution/native-bundle",
+                "node_stamp": "release/node/node.stamp.json",
+                "model_stamp": "release/models/model.stamp.json",
+                "notices_dir": "release/notices/",
+                "application_wheel": wheel,
+                "application_image": image,
+            },
+        }
+        self.write("distribution.json", json.dumps(manifest).encode())
+
+    def run_checker(self) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+             "--root", str(self.root)],
+            capture_output=True, text=True, timeout=60,
+        )
+
+    def test_undeclared_wheel_stays_explicitly_incomplete(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("no application wheel is declared", proc.stdout)
+
+    def test_declared_wheel_missing_fails(self):
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": "c" * 64},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("declared application wheel missing", proc.stdout)
+
+    def test_declared_wheel_digest_mismatch_fails(self):
+        self.write("native/dist/inkflip-1.0-py3-none-any.whl", b"actual wheel bytes")
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": "c" * 64},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("application wheel digest mismatch", proc.stdout)
+
+    def test_declared_wheel_with_matching_digest_passes(self):
+        wheel_bytes = b"real wheel bytes"
+        digest = hashlib.sha256(wheel_bytes).hexdigest()
+        self.write("native/dist/inkflip-1.0-py3-none-any.whl", wheel_bytes)
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": digest},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+
+    def test_image_declared_without_wheel_fails(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": True, "image_lock": None, "expected_image_digest": "sha256:d" * 1},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("not a complete shipped application image", proc.stdout)
+
+    def test_image_declared_without_digest_fails(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": True, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("without expected_image_digest", proc.stdout)

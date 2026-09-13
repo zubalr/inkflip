@@ -503,8 +503,8 @@
       "explicit_files": [
         {
           "path": "apps/web/public/_headers",
-          "sha256": "93364c2fb5d808ef21503c80df93179a9597e2f17cd6f0f216b1db535e219399",
-          "bytes": 746
+          "sha256": "75f5544adf941a21a069e9949907c8a7365eb1ef1e62c4be38a81feb1621f048",
+          "bytes": 780
         }
       ]
     }
@@ -545,7 +545,18 @@
       "excluded": "musllinux, non-x86_64, non-Linux",
       "reference": "planning/quality/PERFORMANCE_AND_COMPATIBILITY.md: native Linux x86_64 is the initial executed reference"
     },
-    "application_wheel": null,
-    "application_wheel_note": "The Inkflip application wheel and CLI entry point are the packaging lane's delivery; until declared here, the native bundle is third-party dependency inputs only."
+    "application_wheel": {
+      "declared": false,
+      "path": null,
+      "sha256": null,
+      "note": "The Inkflip application wheel and CLI entry point are the packaging lane's delivery. When it exists, declare path+sha256 here; the gate then verifies presence and digest. Until declared, the native bundle remains third-party dependency inputs only."
+    },
+    "application_wheel_note": "The Inkflip application wheel and CLI entry point are the packaging lane's delivery; until declared here, the native bundle is third-party dependency inputs only.",
+    "application_image": {
+      "declared": false,
+      "image_lock": "build/native/image.lock.json",
+      "expected_image_digest": null,
+      "note": "Complete-image audit interface: when the packaging lane produces the final image, declare expected_image_digest (and the lock reference is verified for base-image pins). Absence keeps native release explicitly incomplete."
+    }
   }
 }

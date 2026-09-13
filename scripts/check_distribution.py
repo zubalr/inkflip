@@ -125,15 +125,16 @@ def resolve_file_list(doc: dict, source: dict) -> tuple[list[dict], str | None]:
     return [], f"unsupported file_list spec {file_list!r}"
 
 
-def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None) -> tuple[list[str], int]:
+def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None) -> tuple[list[str], list[str], int]:
     failures: list[str] = []
     errors: list[str] = []
+    scope_notes: list[str] = []
 
     for field in ("groups", "distribution", "notice"):
         if field not in manifest:
             errors.append(f"manifest missing required field {field!r}")
     if errors:
-        return errors + failures, 2
+        return errors + failures, [], 2
 
     shipped_roots = manifest["distribution"].get("shipped_roots", [])
     has_surface = bool(shipped_roots) or bool(manifest.get("native_bundle")) or bool(dist_manifest_rel)
@@ -154,7 +155,7 @@ def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None)
             errors.append(f"declared path escapes repository root: {f['path']}")
 
     if errors:
-        return errors + failures, 2
+        return errors + failures, [], 2
 
     # 2. declared files must match actual bytes
     declared_set = {f["path"] for f in declared_files}
@@ -229,15 +230,15 @@ def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None)
     # 6. native bundle surface (declared third-party dependency inputs)
     nb = manifest.get("native_bundle")
     if nb:
-        failures.extend(check_native_bundle(root, nb))
+        failures.extend(check_native_bundle(root, nb, scope_notes))
 
     # 7. generated static dist surface (optional --dist-manifest)
     if dist_manifest_rel:
         failures.extend(check_dist(root, dist_manifest_rel))
 
     if errors:
-        return errors + failures, 2
-    return sorted(failures), (0 if not failures else 1)
+        return errors + failures, [], 2
+    return sorted(failures), scope_notes, (0 if not failures else 1)
 
 
 def scope_report(root: Path, manifest: dict, dist_manifest_rel: str | None) -> list[str]:
@@ -246,15 +247,18 @@ def scope_report(root: Path, manifest: dict, dist_manifest_rel: str | None) -> l
     lines = []
     nb = manifest.get("native_bundle")
     if nb:
-        app_wheel = nb.get("application_wheel")
-        if app_wheel and not (root / app_wheel).exists():
+        wheel = nb.get("application_wheel") or {}
+        declared = wheel.get("declared") if isinstance(wheel, dict) else bool(wheel)
+        if declared:
+            wpath = wheel.get("path") if isinstance(wheel, dict) else None
+            if wpath and not (root / wpath).exists():
+                lines.append(
+                    f"scope note: the declared application wheel ({wpath}) is absent — "
+                    "native release remains incomplete"
+                )
+        else:
             lines.append(
-                f"scope note: the application wheel ({app_wheel}) is absent — the native "
-                "bundle is third-party inputs only, not a complete shipped application image"
-            )
-        elif not app_wheel:
-            lines.append(
-                "scope note: no application wheel is declared — native bundle covers "
+                "scope note: no application wheel is declared — the native bundle covers "
                 "third-party dependency inputs only, not a complete shipped application image"
             )
     if not dist_manifest_rel:
@@ -269,10 +273,11 @@ WHEEL_TAG_RE = re.compile(
 )
 
 
-def check_native_bundle(root: Path, nb: dict) -> list[str]:
+def check_native_bundle(root: Path, nb: dict, scope_notes: list | None = None) -> list[str]:
     """Verify the declared native third-party bundle against its manifest and
     (when prepared locally) its actual artifacts."""
     failures: list[str] = []
+    scope_notes = scope_notes if scope_notes is not None else []
     for field in ("requirements_lock", "wheels_manifest", "expected_runtime_packages", "context_dir"):
         if field not in nb:
             return [f"native_bundle: missing required field {field!r}"]
@@ -331,6 +336,46 @@ def check_native_bundle(root: Path, nb: dict) -> list[str]:
                 failures.append(f"native bundle: prepared wheel missing from context: {e['path_in_context']}")
             elif e.get("sha256") and sha256_file(artifact) != e["sha256"]:
                 failures.append(f"native bundle: prepared wheel hash mismatch: {e['path_in_context']}")
+
+    # application wheel / complete-image audit interface
+    wheel = nb.get("application_wheel") or {}
+    if wheel.get("declared"):
+        wpath, wsha = wheel.get("path"), wheel.get("sha256")
+        if not wpath or not wsha:
+            failures.append("native bundle: application_wheel declared without path+sha256")
+        else:
+            wp = root / wpath
+            if not wp.is_file():
+                failures.append(f"native bundle: declared application wheel missing: {wpath}")
+            elif sha256_file(wp) != wsha:
+                failures.append(f"native bundle: application wheel digest mismatch: {wpath}")
+    image = nb.get("application_image") or {}
+    lock_rel = image.get("image_lock")
+    if lock_rel:
+        lock_path = root / lock_rel
+        if not lock_path.is_file() and not image.get("declared"):
+            # The lock ships with the packaging lane's merge; until then it is a
+            # visible scope note, not a gate failure (the image itself is absent too).
+            scope_notes.append(f"image lock not present yet in this tree: {lock_rel} (arrives with the packaging merge)")
+            lock_path = None
+        if lock_path is not None and lock_path.is_file():
+            try:
+                lock = json.loads(lock_path.read_text())
+            except json.JSONDecodeError as exc:
+                failures.append(f"native bundle: image lock unreadable: {exc}")
+                lock = {}
+            if not (lock.get("base_image") or {}).get("index_digest"):
+                failures.append("native bundle: image lock lacks base_image.index_digest pin")
+    if image.get("declared"):
+        digest = image.get("expected_image_digest")
+        if not digest:
+            failures.append("native bundle: application_image declared without expected_image_digest")
+        # the wheel must be declared for any complete-image claim
+        if not wheel.get("declared"):
+            failures.append(
+                "native bundle: application_image declared but application_wheel is not — "
+                "a third-party bundle alone is not a complete shipped application image"
+            )
 
     for stamp_field, required in (("node_stamp", ("version", "sha256", "url", "shasums256_source")),
                                   ("model_stamp", ("name", "sha256", "license", "source"))):
@@ -440,8 +485,8 @@ def main() -> int:
         print(f"config error: cannot read manifest {args.manifest}: {exc}", file=sys.stderr)
         return 2
 
-    problems, code = run_checks(root, manifest, args.dist_manifest)
-    scope_notes = scope_report(root, manifest, args.dist_manifest)
+    problems, gate_scope_notes, code = run_checks(root, manifest, args.dist_manifest)
+    scope_notes = gate_scope_notes + scope_report(root, manifest, args.dist_manifest)
     if args.json:
         print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems,
                           "scope_notes": scope_notes}, indent=2))

@@ -41,13 +41,23 @@ repository LICENSE file).
   `.npmignore`; the upstream repository (`github.com/Sebmaster/tr46.js`,
   moved to `github.com/jsdom/tr46`) at tag `0.0.3` likewise has no license
   file.
-- **Shipped-bytes evidence (2026-09-13): tr46 is NOT part of the shipped
-  browser distribution.** A content search of the entire built `apps/web/dist/`
-  (all JS/CSS/WASM/worker assets, including the staged Tesseract worker and
-  pdf.js worker bundles) finds no tr46, mappingTable or whatwg-url markers.
-  tr46 reaches the production npm closure only through tesseract.js's
-  Node.js-path dependencies (node-fetch → whatwg-url → tr46), which the
-  browser build does not bundle.
+- **Shipped-bytes evidence (2026-09-13, strengthened after review): tr46 is
+  NOT part of the shipped browser distribution.** Established from the actual
+  bundler graph, not string absence:
+  (a) `node-fetch` (whose dependency tree carries whatwg-url → tr46) is
+  imported only by tesseract.js's Node worker path
+  (`src/worker-script/node/index.js`, `src/worker/node/loadImage.js`);
+  (b) tesseract.js's package.json `browser` field maps
+  `./src/worker/node/index.js` → `./src/worker/browser/index.js`, so browser
+  bundlers substitute the Node path;
+  (c) the emitted source map of the production build enumerates the complete
+  module graph — 124 modules, including 27 tesseract.js modules, with ZERO
+  tr46/whatwg-url/node-fetch modules (source-map identity
+  d11fefd517e600f7…, built 2026-09-13).
+  The staged upstream `worker.min.js` is tesseract.js's own browser-worker
+  distribution artifact, integrity-pinned in config/resolved-assets.json;
+  the Node worker script that imports node-fetch is not the file staged for
+  the browser.
 - Classification: npm-lock metadata only — not shipped content. No notice
   is required in shipped bytes; the declaration-only license record above
   is retained for supply-chain completeness. This is not a release blocker.
