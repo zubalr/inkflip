@@ -29,8 +29,9 @@ chooser is a native OS surface, not page UI).
   the view-mode tab, zoom/fit/rotate controls, the shortcuts toggle, all 25
   text-equivalent `Select` buttons, prev/next finding, and reaches the finding
   cards. Focus never falls back to `document.body`.
-- `Enter` on a `role="option"` finding card selects it (`aria-selected`), the
-  alignment detail expands, and the findings counter updates.
+- `Enter` on a finding card's activator button selects it (`aria-current`,
+  `aria-expanded`), the alignment detail expands, and the findings counter
+  updates.
 - `Enter` on a candidate button picks the occurrence (`aria-pressed`,
   `highlightSelected`) and **returns focus to the originating card**; `Escape`
   returns focus without picking.
@@ -59,8 +60,8 @@ within it, `Escape` and the "Keep this file" cancel path both restore focus to
   `finding-ambig-amounts`): each candidate button's accessible name carries its
   alternative — `$1,000.00` (occurrences #1/#2, identical text labelled "k of n
   at distinct positions") and `$10,000.00` (pypdf). After keyboard selection,
-  focus lands on the finding `option`, whose expanded accessible name contains
-  the `Ambiguous — candidates kept` badge and both amounts.
+  focus returns to the finding card's activator button, whose accessible name
+  carries the finding title and the `Ambiguous` state marker.
 - **Page-level state**: selecting `finding-page1-unknown` renders
   `#page-level-geometry-notice`, a `role="status" aria-live="polite"` region
   announcing "applies to Page 2 as a whole. No localized bounding coordinates
@@ -94,21 +95,23 @@ and the Button-component export buttons.
 
 - `loaded workspace states`: intake surface, `?example=true` listed,
   `?example=scan` listed — all zero serious/critical.
-- `with a finding expanded`: **fails honestly** — see finding T37-F1. Full
-  node detail is written to `artifacts/a11y/axe-expanded-finding.json` on each
-  run.
+- `with a finding expanded`: passes since the T37-F1 repair — zero
+  serious/critical. Full node detail is written to
+  `artifacts/a11y/axe-expanded-finding.json` on each run.
 
 ## Product findings
 
-Severity is about the accessibility contract, not code quality. None of these
-were patched — T37 scope is tests/docs/artifacts only.
+Severity is about the accessibility contract, not code quality. T37 scope was
+tests/docs/artifacts only; all four findings were repaired afterwards in the
+coordinator's a11y product pass (`work/devin/a11y-f1`, merged `48cd0c3` +
+`9d65ac8`).
 
-### T37-F1 — `nested-interactive` (axe, serious): finding `option` hosts focusable controls
+### T37-F1 — `nested-interactive` (axe, serious): finding `option` hosts focusable controls — FIXED
 
-`apps/web/src/features/viewer/ViewerStage.tsx` (~lines 347-424): each finding
-card is `role="option"` + `tabindex="0"` and, once expanded, renders candidate
+`apps/web/src/features/viewer/ViewerStage.tsx`: each finding card was
+`role="option"` + `tabindex="0"` and, once expanded, rendered candidate
 buttons (`OccurrenceCandidates`), the notes `textarea` and note buttons
-(`FindingNotes`) inside the option element. axe-core reports
+(`FindingNotes`) inside the option element. axe-core reported
 `nested-interactive` (serious) on the expanded card:
 
 ```
@@ -116,42 +119,51 @@ serious | nested-interactive | #finding-item-f_3b9b34d179df717d
   "Element has focusable descendants"
 ```
 
-ARIA 1.2 marks `option` as children-presentational, so per-spec an assistive
-technology may strip the nested controls' semantics (Chromium keeps
-`role=button`; WebKit/Safari+VoiceOver is the risky combination and is a
-manual-receipt item). Suggested direction for the owning task: make the card a
-non-widget container (e.g. group/article with an inner selectable control) or
-move interactive content out of the `option`.
+**Repair (840b791):** the findings list is now `role="list"` of
+`role="listitem"` cards. The keyboard/mouse activator is a real `button`
+inside the card's `h3` carrying the same `finding-item-*` id,
+`aria-expanded` and `aria-current`; interactive expanded content lives in
+the listitem outside the activator. Selection, focus-return
+(`returnFocusId`), click and keyboard paths are unchanged. ARIA 1.2 marks
+`option` as children-presentational, so the restructure removes the
+semantics-stripping hazard rather than suppressing the rule.
 
-### T37-F2 — page-level notice overclaims when occurrences carry estimated geometry
+### T37-F2 — page-level notice overclaims when occurrences carry estimated geometry — FIXED
 
-`apps/web/src/features/viewer/CanvasOverlay.tsx:66-74` shows
+`apps/web/src/features/viewer/CanvasOverlay.tsx` showed
 `#page-level-geometry-notice` ("…No localized bounding coordinates exist for
 this reader.") whenever the selected finding's `alignment === "page_level"`,
 even though the finding's named occurrences may carry `estimated` polygons —
 and the highlight boxes are drawn. Observed on `?example=scan`
-(`f_3b9b34d179df717d`): the live region announces "no bounding coordinates"
-while 25 estimated-polygon highlights render. The copy should distinguish
-"page-level claim" from "no coordinates exist", or key on actual geometry.
+(`f_3b9b34d179df717d`): the live region announced "no bounding coordinates"
+while 25 estimated-polygon highlights rendered.
 
-### T37-F3 — view-mode tablist is not keyboard-navigable
+**Repair (1a15d9b):** the notice now keys on actual geometry. When the
+finding's named occurrences carry polygons it announces "Highlighted
+positions are estimated placements, not localized evidence" instead; the
+no-coordinates copy is kept only when geometry is truly absent.
 
-`apps/web/src/features/viewer/ViewerStage.tsx:186-207`: `role="tablist"` tabs
-use roving `tabIndex` but implement no `ArrowLeft`/`ArrowRight`/`Home`/`End`
-handling, so the two unselected tabs (`tabindex="-1"`) can never receive
-keyboard focus — the tablist's own contract is broken. The mode function
-itself stays keyboard-operable via the `f` stage shortcut (verified in the
-core-flow leg), so this is a defect in the widget's expected interaction, not
-a blocked flow.
+### T37-F3 — view-mode tablist is not keyboard-navigable — FIXED
 
-### T37-F4 — dead transition tokens on finding cards
+`apps/web/src/features/viewer/ViewerStage.tsx`: `role="tablist"` tabs used
+roving `tabIndex` but implemented no `ArrowLeft`/`ArrowRight`/`Home`/`End`
+handling, so the two unselected tabs (`tabindex="-1"`) could never receive
+keyboard focus — the tablist's own contract was broken. The mode function
+stayed keyboard-operable via the `f` stage shortcut.
 
-`apps/web/src/features/viewer/ViewerStage.module.css:143` and
-`apps/web/src/features/findings/FindingCard.module.css:209` reference
-`--duration-fast`/`--ease-standard`, which are never defined (tokens define
-`--motion-state`/`--motion-panel`). The declarations are invalid and the
-transitions never apply — harmless for motion-sensitive users, but the
-intended card feedback is silently absent.
+**Repair (1a15d9b):** arrow-key navigation with automatic activation added;
+Home/End jump to the ends.
+
+### T37-F4 — dead transition tokens on finding cards — FIXED
+
+`apps/web/src/features/viewer/ViewerStage.module.css` and
+`apps/web/src/features/findings/FindingCard.module.css` referenced
+`--duration-fast`/`--ease-standard`, which were never defined (tokens define
+`--motion-state`/`--motion-panel`). The declarations were invalid and the
+transitions never applied.
+
+**Repair (1a15d9b):** replaced with `var(--motion-state) ease-out`, which
+also makes the feedback reduced-motion aware.
 
 ### Observations (not violations)
 
@@ -163,8 +175,8 @@ intended card feedback is silently absent.
   `?example=true` does not re-seed the example. Tests use `page.reload()` to
   get a clean state (`gotoFresh`).
 - `#page-level-geometry-notice` is the only `role="status"` that fires on
-  finding selection; selection state itself is conveyed by `aria-selected` on
-  the focused option (correct listbox semantics).
+  finding selection; selection state is conveyed by `aria-current` +
+  `aria-expanded` on the focused card activator button.
 
 ## Manual checklist (second acceptance leg)
 
@@ -186,7 +198,7 @@ items below are what a manual AT pass must still record (from
 | A07     | Grayscale: reader identity, ambiguity, coverage, priority survive without color                                        | Yes — manual/visual                                                                |
 | A08     | Reduced motion on real OS setting (not only emulation)                                                                 | Covered partially; OS-level confirmation manual                                    |
 | A09     | Slow OCR / failed model / cancellation announcements — polite, no chatter                                              | Yes — needs a real run with slow/cancelled checks                                  |
-| A10     | NVDA+Firefox on Windows, VoiceOver+Safari on macOS/iOS through open → findings → export                                | **Yes — highest value; T37-F1's real AT impact is decided here**                   |
+| A10     | NVDA+Firefox on Windows, VoiceOver+Safari on macOS/iOS through open → findings → export                                | **Yes — highest value; confirms the T37-F1 repair's real AT behavior**             |
 | A11     | Many-occurrence navigation, page/filter change focus retention                                                         | Yes                                                                                |
 | A12     | RTL/CJK reading display, direction isolation (`<bdi>` used in card readings)                                           | Yes — needs RTL fixture                                                            |
 | A13     | Typing in notes/region inputs never triggers single-key shortcuts; shortcuts toggle works                              | Automated covers the note case; region input manual                                |

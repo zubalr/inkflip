@@ -173,7 +173,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     await firstCard.focus();
     await expect(firstCard).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(firstCard).toHaveAttribute("aria-selected", "true");
+    await expect(firstCard).toHaveAttribute("aria-current", "true");
     await expect(page.locator('[data-testid="alignment-detail"]')).toBeVisible();
     await expect(page.locator("#findings-counter")).toContainText("1 of");
 
@@ -338,7 +338,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     const card = page.locator("#finding-item-finding-ambig-amounts");
     await card.focus();
     await page.keyboard.press("Enter");
-    await expect(card).toHaveAttribute("aria-selected", "true");
+    await expect(card).toHaveAttribute("aria-current", "true");
 
     const detail = page.locator('[data-testid="alignment-detail"]');
     await expect(detail).toHaveAttribute("data-alignment-class", "ambiguous");
@@ -357,15 +357,18 @@ test.describe("T37: accessibility flows on the real workspace", () => {
       /\$10,000\.00/,
     );
 
-    // Keyboard selection leaves focus on the finding option; its expanded
-    // accessible name carries the ambiguous state and the alternatives.
+    // Keyboard selection returns focus to the finding card's activator
+    // button; its accessible name carries the finding identity and the
+    // ambiguous state (the alternatives themselves are announced by the
+    // candidate buttons' names, asserted above).
     const dup2 = page.locator('[data-testid="occ-candidate-occ-p0-dup2"]');
     await dup2.focus();
     await page.keyboard.press("Enter");
     await expect(page.locator(":focus")).toHaveId("finding-item-finding-ambig-amounts");
     await expect(page.locator(":focus")).toHaveAccessibleName(/Ambiguous/);
-    await expect(page.locator(":focus")).toHaveAccessibleName(/\$1,000\.00/);
-    await expect(page.locator(":focus")).toHaveAccessibleName(/\$10,000\.00/);
+    await expect(page.locator(":focus")).toHaveAccessibleName(
+      /Several locations could match this reading/,
+    );
 
     // -- Partial coverage on the example document: the page's recorded
     //    limit is published inside the labelled text-equivalent region.
@@ -379,7 +382,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     const pageLevel = page.locator("#finding-item-finding-page1-unknown");
     await pageLevel.focus();
     await page.keyboard.press("Enter");
-    await expect(pageLevel).toHaveAttribute("aria-selected", "true");
+    await expect(pageLevel).toHaveAttribute("aria-current", "true");
     const notice = page.locator("#page-level-geometry-notice");
     await expect(notice).toBeVisible();
     await expect(notice).toHaveAttribute("role", "status");
@@ -442,7 +445,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     const card = page.locator("#finding-item-finding-dup1");
     await card.focus();
     await page.keyboard.press("Enter");
-    await expect(card).toHaveAttribute("aria-selected", "true");
+    await expect(card).toHaveAttribute("aria-current", "true");
     await expect(page.locator('[data-testid="alignment-detail"]')).toBeVisible();
 
     // The viewer's own zoom reaches 400% through the '+' shortcut; the
@@ -590,11 +593,9 @@ test.describe("T37: accessibility flows on the real workspace", () => {
       ),
     );
 
-    // Known product gap T37-F1 (docs/accessibility/flows.md): an expanded
-    // finding card is a role="option" that hosts focusable descendants
-    // (candidate buttons, notes field) — axe reports nested-interactive.
-    // The assertion is left honest: this must be [] when the card stops
-    // nesting interactive controls inside the option.
+    // T37-F1 regression coverage: finding cards were role="option" hosting
+    // focusable descendants (nested-interactive, serious). The card is now
+    // listitem + a button activator; this assertion guards the fix.
     expect(
       serious.map((v) => `${v.id} (${v.impact}): ${v.nodes.map((n) => n.target.join(" "))}`),
     ).toEqual([]);

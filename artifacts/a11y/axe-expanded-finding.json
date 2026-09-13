@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:56680/#/workspace?example=scan",
+  "url": "http://localhost:60170/#/workspace?example=scan",
   "tags": [
     "wcag2a",
     "wcag2aa",
@@ -7,21 +7,7 @@
     "wcag21aa",
     "wcag22aa"
   ],
-  "scannedAt": "2026-09-13T14:57:27.981Z",
-  "violationCount": 1,
-  "seriousOrCritical": [
-    {
-      "id": "nested-interactive",
-      "impact": "serious",
-      "help": "Interactive controls must not be nested",
-      "nodes": [
-        {
-          "target": [
-            "#finding-item-f_3b9b34d179df717d"
-          ],
-          "html": "<div id=\"finding-item-f_3b9b34d179df717d\" role=\"option\" class=\"_findingCard_1anou_138 _findingCardSelected_1anou_150\" tabindex=\"0\" aria-selected=\"true\" style=\"margin-bottom: var(--space-3); cursor: pointer; background-color: var(--color-paper-pure);\">"
-        }
-      ]
-    }
-  ]
+  "scannedAt": "2026-09-13T15:18:37.107Z",
+  "violationCount": 0,
+  "seriousOrCritical": []
 }
