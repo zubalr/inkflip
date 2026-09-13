@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F23",
     "intent": {
-      "expected": "comparison refused; not silently re-based",
-      "scenario": "baseline belongs to a different document digest"
+      "canonical_schema": "report stays schema-valid; the binding stage fires",
+      "expected": "comparison refused; never silently re-based",
+      "scenario": "report bound to a different document digest than the baseline"
     },
     "variant": "mismatched-doc",
     "version": "g78.1"

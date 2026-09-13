@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F22",
     "intent": {
-      "expected": "accepted",
-      "variant": "valid report"
+      "canonical_schema": "inkflip.schema.json $defs/Report",
+      "expected": "accepted; validation stage: full pass",
+      "variant": "valid canonical report"
     },
     "variant": "control",
     "version": "g78.1"

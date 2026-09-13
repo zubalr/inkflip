@@ -8,12 +8,12 @@
   "mechanism": {
     "group_id": "F13",
     "intent": {
-      "extraction_intent": "fi",
-      "map": "identity; literal f+i control",
+      "extraction_intent": "\u00a1",
+      "map": "identity; same painted glyph extracts as itself",
       "painted_codes": [
-        "66",
-        "69"
+        "A1"
       ],
+      "painted_glyph_constant": true,
       "raw_output": "record reader API verbatim"
     },
     "variant": "control",

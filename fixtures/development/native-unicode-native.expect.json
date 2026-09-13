@@ -8,16 +8,16 @@
   "mechanism": {
     "group_id": "F14",
     "intent": {
-      "encoding": "Identity-H hex strings; ToUnicode carries the Unicode",
-      "font": "no font program embedded; glyph appearance not asserted",
-      "geometry": "conservative; complex-script alignment not claimed",
+      "encoding": "Identity-H hex strings; ToUnicode carries the Unicode per code",
+      "font": "no font program embedded (BaseFont names only); glyph appearance not asserted",
       "logical_strings": [
-        "\u0627\u0644",
-        "\u4e2d\u6587",
-        "\ud83d\ude00",
-        "$100"
+        "$",
+        "1",
+        "0",
+        "0"
       ],
-      "observed_extraction": "PDFium 149.0.7825.0 returns no characters for the non-embedded complex-script runs (Latin ToUnicode line extracts); extraction completeness is reader-dependent and never asserted \u2014 consumers preserve whatever the reader returns verbatim, including empty (I11), and never normalize toward the declared logical strings"
+      "mechanism_scope": "Latin single-scalar mechanism only: native-script rendering/extraction needs a rights-pinned embedded font, which the fixture font-program gate forbids \u2014 asset/gate change reported to the coordinator, not simulated with unembedded glyphs",
+      "observed_extraction": "PDFium 149.0.7825.0 extracts the declared logical strings for this Latin mechanism; non-embedded complex-script runs extract as empty on this build (reader-dependent, I11) \u2014 consumers preserve reader output verbatim and never normalize toward the declared logical strings"
     },
     "variant": "native",
     "version": "g78.1"

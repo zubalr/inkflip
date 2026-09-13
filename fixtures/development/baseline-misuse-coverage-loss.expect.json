@@ -8,6 +8,7 @@
   "mechanism": {
     "group_id": "F23",
     "intent": {
+      "canonical_schema": "report stays schema-valid; the rule stage fires",
       "expected": "regression comparison cannot improve by losing checks",
       "scenario": "baseline lost the check-ocr entry"
     },

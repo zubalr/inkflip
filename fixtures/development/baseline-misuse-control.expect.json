@@ -8,6 +8,7 @@
   "mechanism": {
     "group_id": "F23",
     "intent": {
+      "canonical_schema": "report/baseline/acceptance_rules all schema-valid",
       "expected": "accepted unchanged",
       "scenario": "identical stored run"
     },

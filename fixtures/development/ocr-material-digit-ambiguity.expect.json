@@ -9,9 +9,10 @@
     "group_id": "F15",
     "intent": {
       "material_difference": "digit-ambiguity",
-      "noise": "fixed-seed speckle; deterministic",
+      "noise": "fixed-seed speckle; deterministic; control is noise-free",
       "printed_line": "AMOUNT -$1O0.00",
-      "raw_output": "OCR reading recorded verbatim; never normalized toward intent"
+      "raw_output": "OCR reading recorded verbatim; never normalized toward intent",
+      "speckle": true
     },
     "variant": "digit-ambiguity",
     "version": "g78.1"

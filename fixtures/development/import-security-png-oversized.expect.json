@@ -9,7 +9,7 @@
     "group_id": "F22",
     "intent": {
       "control": "development/import-security-control.json",
-      "expected": "rejected by pixel budget",
+      "expected": "rejected at the image-decode stage by the pixel budget",
       "variant": "PNG header declares 2147483647 px"
     },
     "variant": "png-oversized",

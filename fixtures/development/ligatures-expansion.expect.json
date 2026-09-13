@@ -13,9 +13,10 @@
       "painted_codes": [
         "A1"
       ],
+      "painted_glyph_constant": true,
       "raw_output": "expansion and map relation preserved verbatim"
     },
-    "variant": "ligature",
+    "variant": "expansion",
     "version": "g78.1"
   },
   "observation": "raw values/maps preserved",

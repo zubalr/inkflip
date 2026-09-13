@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F23",
     "intent": {
-      "expected": "silent baseline refresh forbidden; declared rule fires",
-      "scenario": "baseline occurrence count edited to match new output"
+      "canonical_schema": "report stays schema-valid; the rule stage fires",
+      "expected": "silent baseline refresh forbidden; the declared rule fires",
+      "scenario": "ocr occurrence count edited from 2 to 9"
     },
     "variant": "silent-refresh",
     "version": "g78.1"

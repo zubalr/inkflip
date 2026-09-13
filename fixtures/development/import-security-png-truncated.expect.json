@@ -9,7 +9,7 @@
     "group_id": "F22",
     "intent": {
       "control": "development/import-security-control.json",
-      "expected": "rejected: undecodable",
+      "expected": "rejected at the image-decode stage: undecodable",
       "variant": "PNG header truncated mid-IHDR"
     },
     "variant": "png-truncated",

@@ -8,11 +8,9 @@
   "mechanism": {
     "group_id": "F26",
     "intent": {
-      "cache_state": "model bytes hash mismatch",
-      "expected": "typed unavailable; no silent fallback",
-      "fallback": "forbidden",
-      "kind": "asset cache fault scenario",
-      "network": "none; offline always"
+      "expected": "model content digest != declared digest: typed unavailable; no silent fallback",
+      "kind": "executable asset cache fault input",
+      "verify": "materialize files, recompute sha256, compare with manifest.required digests"
     },
     "variant": "corrupt-model",
     "version": "g78.1"

@@ -8,11 +8,9 @@
   "mechanism": {
     "group_id": "F26",
     "intent": {
-      "cache_state": "complete cache present",
-      "expected": "proceed offline",
-      "fallback": "forbidden",
-      "kind": "asset cache fault scenario",
-      "network": "none; offline always"
+      "expected": "complete cache present: proceed offline",
+      "kind": "executable asset cache fault input",
+      "verify": "materialize files, recompute sha256, compare with manifest.required digests"
     },
     "variant": "offline-warm",
     "version": "g78.1"

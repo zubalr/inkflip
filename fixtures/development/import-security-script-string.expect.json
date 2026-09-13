@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F22",
     "intent": {
-      "expected": "escaped inert text; never executed",
-      "variant": "script text in a string field"
+      "canonical_schema": "inkflip.schema.json $defs/Report",
+      "expected": "schema-valid; rendered/used as inert escaped text, never executed at any stage",
+      "variant": "script text in the allowed limitations field"
     },
     "variant": "script-string",
     "version": "g78.1"

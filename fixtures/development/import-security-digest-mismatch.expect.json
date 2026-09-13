@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F22",
     "intent": {
-      "expected": "rejected before use",
-      "variant": "document digest does not match source"
+      "canonical_schema": "inkflip.schema.json $defs/Report",
+      "expected": "rejected at the source-binding stage after the schema",
+      "variant": "valid report bound to a different source digest"
     },
     "variant": "digest-mismatch",
     "version": "g78.1"

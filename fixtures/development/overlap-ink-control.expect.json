@@ -9,13 +9,13 @@
     "group_id": "F24",
     "intent": {
       "border_rect": [
-        40,
-        100,
-        160,
-        40
+        70,
+        90,
+        180,
+        150
       ],
       "no_verdict": "ink-in-box does not prove glyph visibility",
-      "overlap": "text box intersects the stroked border",
+      "overlap": "the border's left edge (x=70) crosses the text occurrence box [50,110,97,128], so visible border ink lies inside the invisible text's bounds",
       "render_mode": 0,
       "text_box": [
         50,

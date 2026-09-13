@@ -1,14 +1,212 @@
 {
+  "annotations": [],
+  "assets": [],
   "checks": [
     {
       "id": "check-native-text",
       "produced_occurrence_count": 1,
+      "reason": null,
+      "retained_occurrence_ids": [
+        "pdfium-native-aa00-p0-text-0"
+      ],
       "status": "completed"
     }
   ],
   "document": {
-    "pages": 1,
-    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    "byte_length": 1437,
+    "display_name": "mapping-amount.pdf",
+    "page_count": 1,
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_asset_id": null
   },
-  "schema_version": "1.0.0"
+  "execution": {
+    "duration_ms": 12,
+    "environment": "audit fixture environment",
+    "errors": [],
+    "execution_id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "result_origin": "contract_example",
+    "run_key": "9999999999999999999999999999999999999999999999999999999999999999",
+    "started_at": "2026-09-13T00:00:00Z",
+    "status": "complete"
+  },
+  "export": {
+    "included": [],
+    "mode": "evidence",
+    "omissions": [],
+    "origin_report_id": null,
+    "replay": "not_replayable",
+    "scope": "run"
+  },
+  "findings": [],
+  "kind": "report",
+  "limitations": [
+    "audit fixture report; generated, never app output"
+  ],
+  "occurrences": [
+    {
+      "engine_score": null,
+      "geometry": {
+        "basis": "pdfium get_charbox(loose=True) index 0-3; C over pypdf crop/UserUnit",
+        "polygon": [
+          [
+            48.0,
+            220.0
+          ],
+          [
+            152.9,
+            220.0
+          ],
+          [
+            152.9,
+            257.2
+          ],
+          [
+            48.0,
+            257.2
+          ]
+        ],
+        "precision": "exact",
+        "space": "canonical_page",
+        "transform_ids": [
+          "pdfium-user-to-canonical-c"
+        ]
+      },
+      "id": "pdfium-native-aa00-p0-text-0",
+      "limitations": [],
+      "normalization_map": [
+        {
+          "normalized_end": 4,
+          "normalized_start": 0,
+          "operation": "identity",
+          "raw_end": 4,
+          "raw_start": 0
+        }
+      ],
+      "normalized_text": "$100",
+      "ordinal": 0,
+      "page_index": 0,
+      "raw_source_locator": "pdfium:char[0:4]:loose",
+      "raw_text": "$100",
+      "reader_id": "pdfium-native",
+      "source_asset_id": null
+    }
+  ],
+  "pages": [
+    {
+      "box_source": "pypdf page dictionary",
+      "canonical_size_pt": [
+        520,
+        400
+      ],
+      "crop_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "effective_view_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "index": 0,
+      "limitations": [],
+      "media_box": [
+        0,
+        0,
+        520,
+        400
+      ],
+      "raw_to_canonical_transform_id": "pdfium-user-to-canonical-c",
+      "rotation": 0,
+      "user_unit": 1
+    }
+  ],
+  "plan": {
+    "alignment_version": "region-match-v1",
+    "budget": {
+      "max_raster_pixels": 40000000,
+      "max_retries": 1,
+      "max_run_ocr_pixels": 10000000,
+      "timeout_ms": 1000
+    },
+    "checks": [
+      {
+        "capability": "native_text",
+        "id": "check-native-text",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfium-native"
+        ],
+        "region_id": null
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "profile": "native",
+    "regions": [],
+    "selected_pages": [
+      0
+    ],
+    "version": "1.0.0"
+  },
+  "readers": [
+    {
+      "adapter_version": "1.0.0",
+      "build": "pypdfium2 5.8.0",
+      "capabilities": [
+        {
+          "limits": [],
+          "name": "native_text",
+          "support": "supported"
+        }
+      ],
+      "environment": "native",
+      "id": "pdfium-native",
+      "limitations": [
+        "audit fixture manifest"
+      ],
+      "method": "native_text",
+      "model_hashes": [],
+      "name": "PDFium",
+      "settings": {
+        "annotation_mode": "not_applicable",
+        "language": null,
+        "normalization": "scalar-whitespace-v1",
+        "psm": null,
+        "raster_dpi": null,
+        "render_reader_id": "pdfium-native"
+      },
+      "version": "149.0.7825.0"
+    }
+  ],
+  "report_id": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "schema_version": "1.0.0",
+  "transforms": [
+    {
+      "from_space": "pdf_user:p0",
+      "id": "pdfium-user-to-canonical-c",
+      "inverse": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        -1,
+        0,
+        400
+      ],
+      "operation": "page_box_to_canonical",
+      "page_index": 0,
+      "precision": "exact",
+      "source": "pypdf crop box and /UserUnit metadata",
+      "to_space": "canonical:p0"
+    }
+  ]
 }

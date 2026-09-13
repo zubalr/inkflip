@@ -1,7 +1,30 @@
 {
-  "cache_state": "verified_complete",
-  "expected": "cache verified; proceed",
-  "fallback": "forbidden",
-  "kind": "asset cache fault scenario",
-  "network": "none; offline always"
+  "files": {
+    "core.bin": {
+      "content_base64": "696e6b666c69702d636f72652d706c616365686f6c6465722d76310a",
+      "sha256": "3fa85ad95f7de513706b2b5af97819c1feb4119b778b0d79a179e88afdfc5637"
+    },
+    "model.bin": {
+      "content_base64": "696e6b666c69702d6d6f64656c2d62797465732d76310a",
+      "sha256": "a754cd51d987bd260f1cbea9c9754defa6b92e8df082a29fb999a992fa39c63b"
+    },
+    "worker.bin": {
+      "content_base64": "696e6b666c69702d776f726b65722d706c616365686f6c6465722d76310a",
+      "sha256": "42c76c1f598ab1045140c4ed357923778ba665a05ce7269e7d984eab24c38668"
+    }
+  },
+  "kind": "asset_cache_fixture",
+  "manifest": {
+    "kind": "asset_cache_manifest",
+    "policy": {
+      "fallback": "forbidden",
+      "network": "none",
+      "refresh": "explicit only"
+    },
+    "required": {
+      "core.sha256": "3fa85ad95f7de513706b2b5af97819c1feb4119b778b0d79a179e88afdfc5637",
+      "model.sha256": "a754cd51d987bd260f1cbea9c9754defa6b92e8df082a29fb999a992fa39c63b",
+      "worker.sha256": "42c76c1f598ab1045140c4ed357923778ba665a05ce7269e7d984eab24c38668"
+    }
+  }
 }

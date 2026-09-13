@@ -8,8 +8,9 @@
   "mechanism": {
     "group_id": "F22",
     "intent": {
-      "expected": "rejected: closed schema",
-      "variant": "unknown top-level key"
+      "canonical_schema": "inkflip.schema.json $defs/Report",
+      "expected": "rejected at the schema stage (closed schema)",
+      "variant": "unknown top-level key on a valid report"
     },
     "variant": "unknown-key",
     "version": "g78.1"

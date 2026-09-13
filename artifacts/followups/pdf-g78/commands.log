@@ -41,3 +41,36 @@ FAMILY NOTES
 - Pre-existing 90 fixture files: byte-identical before/after (frozen originals
   and g78.1 families untouched); only manifest.json regenerated + 70 new files.
 ================================================================================
+
+================================================================================
+REVIEW REVISION ROUND (Arendt independent semantic review; 2026-09-13)
+Revision: all 7 findings addressed; semantic consumer tests added.
+1. P1 F24: stroked border [70,90,180,150] now CROSSES the text occurrence box
+   [50,110,97,128] (left edge x=70); rendered-ink test proves nonwhite pixels
+   inside the invisible text's bounds in both variants; render modes 3/0.
+2. P1 F22: rebuilt on a canonical-schema-valid Report (validated against the
+   full inkflip.schema.json $defs/Report in tests). Stage separation proven:
+   unknown-key fails the schema; script-string in the allowed limitations
+   field passes the schema (inert); digest-mismatch passes schema, fails
+   source binding; PNG header cases fail decode/budget.
+3. P2 F23: rebuilt on the same canonical report + AcceptanceRules/Baseline
+   context; rule interpreter (in test) proves control passes, coverage-loss /
+   doc-mismatch / silent-refresh each fire their declared stage.
+4. P2 F14: rewritten within the frozen rights/gate boundary — Latin
+   single-scalar Identity-H mechanism extracting '$100' exactly (the $10
+   truncation fixed by per-scalar CIDs); native-script rendering requires a
+   rights-pinned embedded font which the fixture font-program gate forbids:
+   precise asset/gate change REPORTED to Devin (not simulated).
+5. P2 F13: constant painted glyph (code A1 on both siblings) with map-driven
+   extraction — identity control extracts the painted char, expansion map
+   extracts 'fi'; both verified. Font-backed real ligature glyphs need the
+   same reported rights-pinned font change; combining-sequence sibling noted.
+6. P2 F26: executable cache-tree inputs (manifest + inline model/worker/core
+   files with digests); semantic test materializes the tree, recomputes
+   sha256 and asserts control/offline-warm pass while corrupt-model,
+   stale-worker, stale-core fail and offline-cold reports missing files.
+7. P2 F15: control raster is now noise-free; speckle applies only to the two
+   degraded variants (deterministic function, no PRNG).
+Checks: tests/fixtures 69 passed (50 integrity + 19 semantic); native/tests
+196 + 170 subtests; test:native exit 0; verify exit 0; determinism OK.
+================================================================================

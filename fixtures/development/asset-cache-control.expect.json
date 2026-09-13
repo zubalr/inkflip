@@ -8,11 +8,9 @@
   "mechanism": {
     "group_id": "F26",
     "intent": {
-      "cache_state": "verified_complete",
-      "expected": "cache verified; proceed",
-      "fallback": "forbidden",
-      "kind": "asset cache fault scenario",
-      "network": "none; offline always"
+      "expected": "verified cache; digests match; proceed",
+      "kind": "executable asset cache fault input",
+      "verify": "materialize files, recompute sha256, compare with manifest.required digests"
     },
     "variant": "control",
     "version": "g78.1"
