@@ -70,7 +70,20 @@ function readRequest() {
 }
 
 function resolvePdfJs() {
-  const pkgJson = require.resolve("pdfjs-dist/package.json");
+  const candidates = [];
+  try {
+    candidates.push(require.resolve("pdfjs-dist/package.json"));
+  } catch {
+    // bun keeps the pinned pdfjs-dist under apps/web/node_modules.
+  }
+  const workspacePinned = path.resolve(HERE, "../../../apps/web/node_modules/pdfjs-dist/package.json");
+  if (fs.existsSync(workspacePinned)) {
+    candidates.push(workspacePinned);
+  }
+  const pkgJson = candidates[0];
+  if (!pkgJson) {
+    throw new Error("Cannot find module 'pdfjs-dist/package.json'");
+  }
   const pkgDir = path.dirname(pkgJson);
   const pkg = JSON.parse(fs.readFileSync(pkgJson, "utf8"));
   const buildDir = path.join(pkgDir, "legacy", "build");

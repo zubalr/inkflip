@@ -1,0 +1,43 @@
+{
+  "host": {
+    "os": "Darwin arm64",
+    "python": [
+      "3.13.15",
+      "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+    ],
+    "node": "v22.23.2",
+    "cpu": "arm64",
+    "model": null
+  },
+  "platforms": [
+    {
+      "id": "native-macos-arm64",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/native-repeat.json"
+      ],
+      "identity": {
+        "os": "Darwin arm64",
+        "python": [
+          "3.13.15",
+          "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+        ],
+        "node": "v22.23.2",
+        "cpu": "arm64",
+        "model": null
+      }
+    },
+    {
+      "id": "pdfjs-node-wrapper",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/pdfjs-node.json"
+      ],
+      "identity": {
+        "runtime": "node",
+        "entry": "packages/readers-pdfjs/node/bridge.mjs"
+      }
+    }
+  ],
+  "note": "Browser engines are recorded by tests/parity/browser.test.mjs; Node is not a browser substitute"
+}

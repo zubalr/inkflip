@@ -386,7 +386,7 @@ export class RunCoordinator {
     return true;
   }
 
-  private dispatchRunnable(): void {
+    private dispatchRunnable(): void {
     const run = this.run;
     if (run === null || this.state !== 'running') return;
     for (const record of runnableChecks(run.checks, run.deps)) {
@@ -394,6 +394,29 @@ export class RunCoordinator {
       this.dispatchCheck(run, record);
     }
     this.notify();
+  }
+
+  /**
+   * Observed resource counts from the live run ledger — not restated caps.
+   * `liveRasters` is TransferLedger.liveRasters; worker counts are currently
+   * running checks of that capability.
+   */
+  resourceObservation(): {
+    liveRasters: number;
+    liveRasterCap: number;
+    activeOcr: number;
+    ocrWorkerCap: number;
+    activeRenders: number;
+    renderCap: number;
+  } {
+    return {
+      liveRasters: this.run?.transfers.liveRasters ?? 0,
+      liveRasterCap: this.limits.maxLiveRasters,
+      activeOcr: this.activeByCapability('ocr'),
+      ocrWorkerCap: this.limits.maxOcrWorkers,
+      activeRenders: this.activeByCapability('render'),
+      renderCap: this.limits.maxActiveRenders,
+    };
   }
 
   /**

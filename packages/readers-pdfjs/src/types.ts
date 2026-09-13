@@ -66,6 +66,20 @@ export interface PdfJsPage {
     includeMarkedContent?: boolean;
     disableNormalization?: boolean;
   }): Promise<PdfJsTextContent>;
+  streamTextContent?(params: {
+    includeMarkedContent?: boolean;
+    disableNormalization?: boolean;
+  }):
+    | ReadableStream<{
+        items?: PdfJsContentItem[];
+        styles?: Record<string, PdfJsTextStyle>;
+        lang?: string | null;
+      }>
+    | AsyncIterable<{
+        items?: PdfJsContentItem[];
+        styles?: Record<string, PdfJsTextStyle>;
+        lang?: string | null;
+      }>;
   render(params: Record<string, unknown>): PdfJsRenderTask;
   cleanup?(resetStats?: boolean): boolean;
 }
@@ -118,7 +132,7 @@ export interface PdfJsTextContent {
 }
 
 /** Whether a content item is a real text item (not a marked-content record). */
-export function isPdfJsTextItem(item: PdfJsContentItem): item is PdfJsTextItem {
+export function isPdfJsTextItem(item: unknown): item is PdfJsTextItem {
   return (
     typeof item === 'object' &&
     item !== null &&

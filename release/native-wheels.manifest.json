@@ -1,0 +1,117 @@
+{
+  "generated_from": {
+    "lock": "native/uv.lock",
+    "lock_sha256": "dd128c84665e7e4b6b4ec6530ceb960f44cbce242e1e7d592fcfa2351a38ee73"
+  },
+  "kind": "inkflip-native-wheels-manifest",
+  "missing_app_wheel": "Inkflip's own application wheel and CLI entry point are prepared by the packaging lane and are NOT part of this third-party bundle",
+  "platform": {
+    "abi_tag": "cp313",
+    "arch": "x86_64",
+    "excluded": "musllinux, non-x86_64, iOS/Android/macOS/Windows wheels",
+    "platform": "linux x86_64 (glibc manylinux) \u2014 recorded contract reference",
+    "python_tag": "cp313"
+  },
+  "policy": "runtime closure from root dependencies only; one wheel per package; widest manylinux chosen when several match",
+  "python": "3.13.15 (pinned; requires-python ==3.13.15)",
+  "recorded_at": "2026-09-13",
+  "schema_version": "1.0.0",
+  "wheels": [
+    {
+      "bytes": 67548,
+      "filename": "attrs-26.1.0-py3-none-any.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/attrs-26.1.0",
+      "name": "attrs",
+      "path_in_context": "wheels/attrs-26.1.0-py3-none-any.whl",
+      "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "url": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl",
+      "verified_sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "version": "26.1.0"
+    },
+    {
+      "bytes": 90630,
+      "filename": "jsonschema-4.26.0-py3-none-any.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/jsonschema-4.26.0",
+      "name": "jsonschema",
+      "path_in_context": "wheels/jsonschema-4.26.0-py3-none-any.whl",
+      "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "url": "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl",
+      "verified_sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "version": "4.26.0"
+    },
+    {
+      "bytes": 18437,
+      "filename": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/jsonschema-specifications-2025.9.1",
+      "name": "jsonschema-specifications",
+      "path_in_context": "wheels/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "url": "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "verified_sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "version": "2025.9.1"
+    },
+    {
+      "bytes": 6937129,
+      "filename": "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/pillow-12.3.0",
+      "name": "pillow",
+      "path_in_context": "wheels/pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+      "url": "https://files.pythonhosted.org/packages/f7/62/de5bdd77d935331f4f802edc11e4d82950f642caad6cb2f949837b8560e2/pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "verified_sha256": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+      "version": "12.3.0"
+    },
+    {
+      "bytes": 393848,
+      "filename": "pypdf-6.18.0-py3-none-any.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/pypdf-6.18.0",
+      "name": "pypdf",
+      "path_in_context": "wheels/pypdf-6.18.0-py3-none-any.whl",
+      "sha256": "05b762b77bcb9dcb4a7c91fcf5dded585b25bee7269ab3d3001d7c55fa1b324b",
+      "url": "https://files.pythonhosted.org/packages/c7/a5/d5922a078c9a612327681d4793404f82998f4d66213add6fdc0659245856/pypdf-6.18.0-py3-none-any.whl",
+      "verified_sha256": "05b762b77bcb9dcb4a7c91fcf5dded585b25bee7269ab3d3001d7c55fa1b324b",
+      "version": "6.18.0"
+    },
+    {
+      "bytes": 3665152,
+      "filename": "pypdfium2-5.8.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/pypdfium2-5.8.0",
+      "name": "pypdfium2",
+      "path_in_context": "wheels/pypdfium2-5.8.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "26c1089cdbbdc7fe1248f6d17fe3f30214be4f287dd0196b31aaee18a1564240",
+      "url": "https://files.pythonhosted.org/packages/b4/15/fa7031010d5cf6853dadb4864680a0bfb7782c5bb6a1a401e0c25c4fca87/pypdfium2-5.8.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "verified_sha256": "26c1089cdbbdc7fe1248f6d17fe3f30214be4f287dd0196b31aaee18a1564240",
+      "version": "5.8.0"
+    },
+    {
+      "bytes": 26766,
+      "filename": "referencing-0.37.0-py3-none-any.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/referencing-0.37.0",
+      "name": "referencing",
+      "path_in_context": "wheels/referencing-0.37.0-py3-none-any.whl",
+      "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "url": "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl",
+      "verified_sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "version": "0.37.0"
+    },
+    {
+      "bytes": 365678,
+      "filename": "rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "hash_source": "native/uv.lock (trusted lock hash)",
+      "license_evidence": "release/notices/rpds-py-2026.6.3",
+      "name": "rpds-py",
+      "path_in_context": "wheels/rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "acac386b453c2516111b50985d60ce46e7fadb5ea71ae7b25f4c946935bf27cf",
+      "url": "https://files.pythonhosted.org/packages/57/d7/fe978efc2ae50abe48eb7464668ea99f53c010c60aeebb7b35ad27f23661/rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "verified_sha256": "acac386b453c2516111b50985d60ce46e7fadb5ea71ae7b25f4c946935bf27cf",
+      "version": "2026.6.3"
+    }
+  ]
+}

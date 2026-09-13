@@ -1,0 +1,151 @@
+{
+  "engine": "chromium",
+  "receipt_id": "chromium",
+  "playwright": "1.57.0",
+  "browser_version": "143.0.7499.4",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
+  "pdfjs_version": "6.3.289",
+  "reader": {
+    "id": "pdfjs-6_3_289-text",
+    "name": "pdf.js text",
+    "version": "6.3.289",
+    "build": "pdfjs-dist-legacy",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "browser",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "render",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+          "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+          "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+          "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+          "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order"
+        ]
+      },
+      {
+        "name": "ocr",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "object_render_mode",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "crop_metadata",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "paint_overlap",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "reading_order",
+        "support": "approximate",
+        "limits": [
+          "raw emitted getTextContent order only; derived geometric/logical ordering belongs to the alignment layer"
+        ]
+      },
+      {
+        "name": "alignment",
+        "support": "unavailable",
+        "limits": []
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+      "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+      "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+      "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+      "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order",
+      "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+      "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+    ]
+  },
+  "source_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+  "page_count": 1,
+  "text": {
+    "checkId": "chk_p0_native_text",
+    "capability": "native_text",
+    "page_index": 0,
+    "region_id": null,
+    "status": "completed",
+    "reason": null,
+    "emitted": 7,
+    "raw_texts": [
+      "SYNTHETIC EXAMPLE",
+      "",
+      "No real transaction. Reader behavior only.",
+      "",
+      "$100",
+      "",
+      "Rendered marks and extracted text are separate."
+    ],
+    "ms": 17.700000017881393,
+    "extractError": null,
+    "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
+  },
+  "ocr": {
+    "checkId": "chk_p0_ocr",
+    "capability": "ocr",
+    "page_index": 0,
+    "region_id": null,
+    "status": "unsupported",
+    "reason": "unsupported:capability ocr is unavailable on the pinned pdf.js API boundary",
+    "emitted": 0,
+    "raw_texts": [],
+    "ms": 0,
+    "extractError": null,
+    "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
+  },
+  "warm": {
+    "status": "completed",
+    "emitted": 7,
+    "ms": 1.2999999821186066
+  },
+  "render": {
+    "status": "completed",
+    "reason": null,
+    "widthPx": 520,
+    "heightPx": 400,
+    "hasPngLike": true,
+    "fontFace": true,
+    "moduleWorker": true
+  },
+  "workerIdentity": {
+    "url": "/vendor/pdfjs/pdf.worker.mjs",
+    "bytes": 2395522,
+    "mentionsMainVersion": true,
+    "hasAsyncIterator": true
+  },
+  "directText": {
+    "ok": true,
+    "items": 7,
+    "typeofGetText": "function",
+    "hasStreamTextContent": true,
+    "nativeAsyncIterator": true
+  },
+  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-chromium-MfidZ4",
+  "harness": "http://127.0.0.1:61520",
+  "note": null
+}

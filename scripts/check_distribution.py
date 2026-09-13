@@ -1,0 +1,406 @@
+#!/usr/bin/env python3
+"""Verify that what Inkflip declares to distribute matches what is actually
+there (T47 distribution gate, preparation implementation).
+
+Reads config/distribution-manifest.json (or --manifest PATH) and checks:
+
+  1. manifest sanity: schema fields present, all paths contained in the
+     repository root (no `..`, no absolute paths, no symlinked manifest
+     entries) — violations are config errors (exit 2);
+  2. every declared shipped file exists with the declared byte count and
+     SHA-256 digest;
+  3. every file under the declared shipped roots is declared (unlisted
+     shipped assets fail), no symlinks inside shipped roots (symlink_policy),
+     and no private/development content patterns appear in shipped paths;
+  4. every group's license declaration is non-empty and its license evidence
+     file exists and is non-empty;
+  5. NOTICE exists, is non-empty, and names every third-party group
+     (notice_name), so license summaries agree with the bundled notices.
+
+Unknowns are preserved visibly: an unaccounted file is a named failure, never
+silently excluded, and a filename is never treated as provenance — rights
+come only from the declared license evidence.
+
+Output: a deterministic, sorted, itemized report on stdout. Exit codes:
+  0  all checks pass
+  1  one or more verification failures (hash mismatch, missing file,
+     undeclared asset, missing license evidence, notice inconsistency,
+     private content, symlink)
+  2  manifest/config or usage error (unreadable, malformed, path escape)
+
+Usage:
+  python3 scripts/check_distribution.py --release
+  python3 scripts/check_distribution.py --release --manifest PATH --root DIR
+  python3 scripts/check_distribution.py --json ...
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def contained(root: Path, rel: str) -> bool:
+    """True if rel resolves to a location strictly inside root."""
+    if rel.startswith(("/", "\\")) or drive_prefix(rel):
+        return False
+    resolved = (root / rel).resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def drive_prefix(rel: str) -> bool:
+    return len(rel) > 1 and rel[1] == ":"
+
+
+def expand_groups(root: Path, manifest: dict) -> tuple[list[dict], list[str]]:
+    """Expand groups into declared files. Returns (files, config_errors)."""
+    declared: dict[str, dict] = {}
+    errors: list[str] = []
+    for group in manifest.get("groups", []):
+        gid = group.get("id", "<unnamed-group>")
+        for f in group.get("explicit_files", []):
+            rel = f["path"]
+            if rel in declared:
+                errors.append(f"{gid}: duplicate declared path {rel}")
+            declared[rel] = {
+                "path": rel,
+                "sha256": f.get("sha256"),
+                "bytes": f.get("bytes"),
+                "group": gid,
+            }
+        source = group.get("digest_source")
+        if source:
+            doc_path = root / source["path"]
+            try:
+                doc = json.loads(doc_path.read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"{gid}: unreadable digest source {source['path']}: {exc}")
+                continue
+            entries, err = resolve_file_list(doc, source)
+            if err:
+                errors.append(f"{gid}: {err}")
+                continue
+            prefix = source.get("path_prefix", "")
+            for entry in entries:
+                rel = prefix + entry[source["path_field"]]
+                if rel in declared:
+                    errors.append(f"{gid}: duplicate declared path {rel}")
+                declared[rel] = {
+                    "path": rel,
+                    "sha256": entry.get(source["digest_field"]),
+                    "bytes": entry.get(source["bytes_field"]),
+                    "group": gid,
+                }
+    return list(declared.values()), errors
+
+
+def resolve_file_list(doc: dict, source: dict) -> tuple[list[dict], str | None]:
+    file_list = source.get("file_list", "")
+    if file_list == "assets[].files[]":
+        for group in doc.get("assets", []):
+            if group.get("id") == source.get("group"):
+                return group.get("files", []), None
+        return [], f"digest source has no asset group {source.get('group')!r}"
+    m = re.fullmatch(r"files\(([^)]*)\)", file_list)
+    if m:
+        files_map = doc.get("files", {})
+        keys = [k.strip() for k in m.group(1).split(",") if k.strip()]
+        keys = keys if keys else list(files_map)
+        return [files_map[k] for k in keys if k in files_map], None
+    return [], f"unsupported file_list spec {file_list!r}"
+
+
+def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None) -> tuple[list[str], int]:
+    failures: list[str] = []
+    errors: list[str] = []
+
+    for field in ("groups", "distribution", "notice"):
+        if field not in manifest:
+            errors.append(f"manifest missing required field {field!r}")
+    if errors:
+        return errors + failures, 2
+
+    shipped_roots = manifest["distribution"].get("shipped_roots", [])
+    has_surface = bool(shipped_roots) or bool(manifest.get("native_bundle")) or bool(dist_manifest_rel)
+    if not has_surface:
+        errors.append("manifest declares no verification surface (shipped_roots/native_bundle/dist_manifest)")
+
+    for rel in shipped_roots:
+        if not contained(root, rel):
+            errors.append(f"shipped root escapes repository root: {rel}")
+        elif not (root / rel).is_dir():
+            errors.append(f"shipped root does not exist: {rel}")
+
+    declared_files, expand_errors = expand_groups(root, manifest)
+    errors.extend(expand_errors)
+
+    for f in declared_files:
+        if not contained(root, f["path"]):
+            errors.append(f"declared path escapes repository root: {f['path']}")
+
+    if errors:
+        return errors + failures, 2
+
+    # 2. declared files must match actual bytes
+    declared_set = {f["path"] for f in declared_files}
+    for f in sorted(declared_files, key=lambda x: x["path"]):
+        path = root / f["path"]
+        if not path.is_file():
+            failures.append(f"missing declared file: {f['path']} (group {f['group']})")
+            continue
+        if f["bytes"] is not None and path.stat().st_size != f["bytes"]:
+            failures.append(
+                f"size mismatch: {f['path']} (declared {f['bytes']}, actual {path.stat().st_size})"
+            )
+        if f["sha256"]:
+            actual = sha256_file(path)
+            if actual != f["sha256"]:
+                failures.append(
+                    f"hash mismatch: {f['path']} (declared {f['sha256'][:12]}…, actual {actual[:12]}…)"
+                )
+
+    # 3. walk shipped roots: undeclared files, symlinks, private content
+    patterns = [re.compile(p) for p in manifest.get("private_content_patterns", [])]
+    for shipped_root in sorted(shipped_roots):
+        base = root / shipped_root
+        for path in sorted(base.rglob("*")):
+            rel = path.relative_to(root).as_posix()
+            if path.is_symlink():
+                failures.append(f"symlink inside shipped root (policy {manifest.get('symlink_policy', 'reject')}): {rel}")
+                continue
+            if not path.is_file():
+                continue
+            if rel not in declared_set:
+                failures.append(f"undeclared shipped asset: {rel}")
+            for pat in patterns:
+                if pat.search(rel):
+                    failures.append(f"private/development content in shipped root: {rel} (pattern {pat.pattern!r})")
+                    break
+
+    # 4. license evidence per group
+    for group in sorted(manifest["groups"], key=lambda g: g.get("id", "")):
+        gid = group.get("id", "<unnamed>")
+        license_decl = group.get("license")
+        if not license_decl:
+            failures.append(f"group {gid}: no license declared (a filename is not provenance)")
+        evidence = group.get("license_evidence")
+        if not evidence:
+            failures.append(f"group {gid}: no license evidence recorded")
+            continue
+        if not contained(root, evidence):
+            errors.append(f"group {gid}: license evidence path escapes repository root: {evidence}")
+            continue
+        ev_path = root / evidence
+        if not ev_path.is_file() or ev_path.stat().st_size == 0:
+            failures.append(f"group {gid}: license evidence missing or empty: {evidence}")
+
+    # 5. NOTICE consistency
+    notice_rel = manifest.get("notice")
+    if not notice_rel or not contained(root, notice_rel):
+        errors.append(f"manifest notice path invalid: {notice_rel!r}")
+    else:
+        notice_path = root / notice_rel
+        if not notice_path.is_file() or notice_path.stat().st_size == 0:
+            failures.append(f"NOTICE missing or empty: {notice_rel}")
+        else:
+            notice_text = notice_path.read_text()
+            for group in manifest["groups"]:
+                name = group.get("notice_name")
+                if group.get("third_party") and name and name not in notice_text:
+                    failures.append(
+                        f"notice inconsistency: NOTICE does not name third-party group {group.get('id')!r} ({name!r})"
+                    )
+
+    # 6. native bundle surface (declared third-party dependency inputs)
+    nb = manifest.get("native_bundle")
+    if nb:
+        failures.extend(check_native_bundle(root, nb))
+
+    # 7. generated static dist surface (optional --dist-manifest)
+    if dist_manifest_rel:
+        failures.extend(check_dist(root, dist_manifest_rel))
+
+    if errors:
+        return errors + failures, 2
+    return sorted(failures), (0 if not failures else 1)
+
+
+WHEEL_TAG_RE = re.compile(
+    r"^(?P<dist>[A-Za-z0-9_.]+)-(?P<version>[^-]+)-"
+    r"(?P<py>cp313|py3)-(?P<abi>cp313|abi3|none)-"
+    r"(?P<plat>any|manylinux(?:_\d+_\d+|2014|1)_x86_64\.manylinux\d*_x86_64|manylinux(?:_\d+_\d+|2014|1)_x86_64)"
+)
+
+
+def check_native_bundle(root: Path, nb: dict) -> list[str]:
+    """Verify the declared native third-party bundle against its manifest and
+    (when prepared locally) its actual artifacts."""
+    failures: list[str] = []
+    for field in ("requirements_lock", "wheels_manifest", "expected_runtime_packages", "context_dir"):
+        if field not in nb:
+            return [f"native_bundle: missing required field {field!r}"]
+
+    lock_path = root / nb["requirements_lock"]
+    manifest_path = root / nb["wheels_manifest"]
+    for label, path in (("requirements lock", lock_path), ("wheels manifest", manifest_path)):
+        if not path.is_file() or path.stat().st_size == 0:
+            failures.append(f"native bundle: {label} missing or empty: {nb['requirements_lock'] if label.startswith('requirements') else nb['wheels_manifest']}")
+    if not lock_path.is_file() or not manifest_path.is_file():
+        return failures
+    try:
+        wm = json.loads(manifest_path.read_text())
+    except json.JSONDecodeError as exc:
+        return failures + [f"native bundle: wheels manifest unreadable: {exc}"]
+
+    entries = wm.get("wheels", [])
+    by_name: dict[str, list[dict]] = {}
+    for e in entries:
+        by_name.setdefault(e.get("name", ""), []).append(e)
+    for name in nb["expected_runtime_packages"]:
+        count = len(by_name.get(name, []))
+        if count == 0:
+            failures.append(f"native bundle: required component absent: {name}")
+        elif count > 1:
+            failures.append(f"native bundle: duplicate entries for {name}: {count}")
+    for name in by_name:
+        if name not in nb["expected_runtime_packages"]:
+            failures.append(f"native bundle: unexpected package in wheels manifest: {name}")
+
+    context = root / nb["context_dir"]
+    context_ready = context.is_dir()
+    if not context_ready:
+        failures.append(
+            "native bundle: build context not prepared locally "
+            f"({nb['context_dir']}; run scripts/distribution/prepare_native_bundle.py)"
+        )
+    for e in entries:
+        filename = e.get("filename", "")
+        if not filename or not WHEEL_TAG_RE.match(filename):
+            failures.append(f"native bundle: wheel filename fails platform/ABI tag check: {filename}")
+        if not e.get("sha256") or not e.get("url"):
+            failures.append(f"native bundle: wheel entry lacks hash or source URL: {filename}")
+        if not e.get("license_evidence"):
+            failures.append(f"native bundle: wheel entry lacks license evidence: {filename}")
+        else:
+            ev = root / e["license_evidence"]
+            has_content = (ev.is_file() and ev.stat().st_size > 0) or (
+                ev.is_dir() and any(f.stat().st_size > 0 for f in ev.rglob("*") if f.is_file())
+            )
+            if not has_content:
+                failures.append(f"native bundle: license evidence missing or empty: {e['license_evidence']}")
+        if context_ready and e.get("path_in_context"):
+            artifact = root / nb["context_dir"] / e["path_in_context"]
+            if not artifact.is_file():
+                failures.append(f"native bundle: prepared wheel missing from context: {e['path_in_context']}")
+            elif e.get("sha256") and sha256_file(artifact) != e["sha256"]:
+                failures.append(f"native bundle: prepared wheel hash mismatch: {e['path_in_context']}")
+
+    for stamp_field, required in (("node_stamp", ("version", "sha256", "url", "shasums256_source")),
+                                  ("model_stamp", ("name", "sha256", "license", "source"))):
+        stamp_rel = nb.get(stamp_field)
+        if not stamp_rel:
+            failures.append(f"native bundle: {stamp_field} not declared")
+            continue
+        stamp_path = root / stamp_rel
+        if not stamp_path.is_file():
+            failures.append(f"native bundle: {stamp_field} missing: {stamp_rel}")
+            continue
+        try:
+            stamp = json.loads(stamp_path.read_text())
+        except json.JSONDecodeError as exc:
+            failures.append(f"native bundle: {stamp_field} unreadable: {exc}")
+            continue
+        for field in required:
+            if not stamp.get(field):
+                failures.append(f"native bundle: {stamp_field} lacks {field!r}")
+    return failures
+
+
+def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
+    """Verify the generated static dist against a recorded dist manifest."""
+    failures: list[str] = []
+    path = root / dist_manifest_rel
+    if not path.is_file():
+        return [f"dist manifest missing: {dist_manifest_rel} (record it after building, see scripts/distribution/record_dist.py)"]
+    try:
+        dm = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        return [f"dist manifest unreadable: {exc}"]
+    dist_root = root / dm.get("dist_root", "apps/web/dist")
+    if not dist_root.is_dir():
+        return [f"dist root missing: {dm.get('dist_root', 'apps/web/dist')} (build first)"]
+    declared = {f["path"]: f for f in dm.get("files", [])}
+    for rel, f in sorted(declared.items()):
+        actual = root / rel
+        if not actual.is_file():
+            failures.append(f"dist: missing declared file: {rel}")
+            continue
+        if f.get("sha256") and sha256_file(actual) != f["sha256"]:
+            failures.append(f"dist: hash mismatch: {rel}")
+    for actual in sorted(dist_root.rglob("*")):
+        if actual.is_file() and not actual.is_symlink():
+            rel = actual.relative_to(root).as_posix()
+            if rel not in declared:
+                failures.append(f"dist: undeclared file: {rel}")
+    return failures
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__.splitlines()[0],
+        epilog="Exit codes: 0 pass, 1 verification failures, 2 config/usage error.",
+    )
+    parser.add_argument(
+        "--release",
+        action="store_true",
+        help="run the full release gate checks (required; without it only usage is shown)",
+    )
+    parser.add_argument("--manifest", default="config/distribution-manifest.json")
+    parser.add_argument("--root", default=".", help="repository root (default: cwd)")
+    parser.add_argument("--dist-manifest", default=None, help="verify apps/web/dist against this recorded dist manifest (see scripts/distribution/record_dist.py)")
+    parser.add_argument("--json", action="store_true", help="machine-readable report")
+    args = parser.parse_args()
+
+    if not args.release:
+        parser.print_help()
+        return 2
+
+    root = Path(args.root).resolve()
+    manifest_path = root / args.manifest if not Path(args.manifest).is_absolute() else Path(args.manifest)
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"config error: cannot read manifest {args.manifest}: {exc}", file=sys.stderr)
+        return 2
+
+    problems, code = run_checks(root, manifest, args.dist_manifest)
+    if args.json:
+        print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems}, indent=2))
+    else:
+        if not problems:
+            print("distribution manifest: all checks passed")
+            print(f"  groups: {len(manifest.get('groups', []))}, shipped roots: {len(manifest['distribution']['shipped_roots'])}")
+        else:
+            print(f"distribution manifest: {len(problems)} problem(s)")
+            for p in problems:
+                print(f"  - {p}")
+    return code
+
+
+if __name__ == "__main__":
+    sys.exit(main())

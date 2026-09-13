@@ -255,7 +255,18 @@ def _tessdata_candidates(binary: Path) -> list[Path]:
     if env:
         return [Path(env)]
     resolved = binary.resolve()
-    candidates = [
+    extra: list[Path] = []
+    models_env = os.environ.get("INKFLIP_MODELS")
+    if models_env:
+        extra.append(Path(models_env))
+        extra.append(Path(models_env) / "tessdata")
+    extra.extend(
+        [
+            Path("/app/models/tessdata"),
+            Path("/app/models"),
+        ]
+    )
+    candidates = extra + [
         resolved.parent.parent / "share" / "tessdata",
         resolved.parent / "tessdata",
         binary.parent.parent / "share" / "tessdata",
@@ -309,10 +320,17 @@ def _version(binary: Path) -> str:
 
 def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> dict:
     """Complete reader manifest (schema $defs/Reader + ReaderManifest)."""
-    binary = _binary_path(binary)
-    digest, trained = model_digest(binary, language)
-    version_line = _version(binary)
-    version = version_line.split()[-1] if version_line else ""
+    try:
+        resolved = _binary_path(binary)
+        digest, trained = model_digest(resolved, language)
+        version_line = _version(resolved)
+        version = version_line.split()[-1] if version_line else ""
+        binary_error = None
+    except AdapterError as error:
+        digest, trained = None, None
+        version_line = error.detail[:256]
+        version = ""
+        binary_error = error
     return {
         "kind": "reader_manifest",
         "schema_version": "1.0.0",
@@ -335,8 +353,11 @@ def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> di
             "capabilities": [
                 {
                     "name": "ocr",
-                    "support": "supported" if digest else "unavailable",
-                    "limits": [
+                    "support": "unavailable" if binary_error or not digest else "supported",
+                    "limits": (
+                        [f"missing_binary: {binary_error.detail}"]
+                        if binary_error
+                        else [
                         "printed English only; other scripts are preserved by "
                         "native text readers, not claimed from this OCR path",
                         "word confidence is an engine diagnostic, not a quality verdict",
@@ -356,6 +377,7 @@ def describe(binary: Path | None = None, language: str = DEFAULT_LANGUAGE) -> di
                         ]
                         if trained
                         else []
+                    )
                     ),
                 }
             ],
@@ -709,7 +731,11 @@ def extract(
             language,
             "--tessdata-dir",
             str(tessdata_dir),
-            "tsv",
+            # The official `tsv` config lives under the engine tessdata tree.
+            # --tessdata-dir points at the pinned model directory (eng only),
+            # so name-based config lookup fails and tesseract emits plaintext.
+            "-c",
+            "tessedit_create_tsv=1",
         ]
         try:
             completed = subprocess.run(

@@ -114,9 +114,9 @@ def cmd_inspect(args: argparse.Namespace) -> int:
             profile_id=args.profile or "native-default",
             embed_source=bool(getattr(args, "embed_source", False)),
         )
+        _write_output(out_path, lambda: write_report(out_path, report))
     except InspectError as exc:
         raise CliError(exc.message, exc.exit_code) from exc
-    _write_output(out_path, lambda: write_report(out_path, report))
     print(f"Report written to {out_path}")
     return code
 
@@ -252,7 +252,10 @@ def cmd_replay(args: argparse.Namespace) -> int:
             )
         except InspectError as exc:
             raise CliError(exc.message, exc.exit_code) from exc
-        _write_output(out_path, lambda: write_report(out_path, report))
+        try:
+            _write_output(out_path, lambda: write_report(out_path, report))
+        except InspectError as exc:
+            raise CliError(exc.message, exc.exit_code) from exc
         print(f"Replay report written to {out_path}")
         return code
     finally:
@@ -300,7 +303,10 @@ def cmd_compare_readers(args: argparse.Namespace) -> int:
         except InspectError as exc:
             raise CliError(exc.message, exc.exit_code) from exc
         path = out_dir / f"report_{reader}.inkflip.json"
-        _write_output(path, lambda p=path, r=report: write_report(p, r))
+        try:
+            _write_output(path, lambda p=path, r=report: write_report(p, r))
+        except InspectError as exc:
+            raise CliError(exc.message, exc.exit_code) from exc
         reports.append(report)
         if code != EXIT_OK:
             exit_code = code

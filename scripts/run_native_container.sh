@@ -89,15 +89,35 @@ if [ -z "$IMAGE" ]; then
   fi
 fi
 
+PLATFORM="${INKFLIP_NATIVE_PLATFORM:-}"
+# linux/amd64 production images on Apple Silicon must be requested explicitly
+# so qemu is an honest labeled path, not an implicit platform warning.
+if [ -z "$PLATFORM" ]; then
+  IMG_ARCH="$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$IMAGE" 2>/dev/null || true)"
+  case "$IMG_ARCH" in
+    linux/amd64|linux/x86_64)
+      PLATFORM="linux/amd64"
+      ;;
+  esac
+fi
+
 IMAGE_ID="$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE" 2>/dev/null || true)"
 if [ -z "$IMAGE_ID" ]; then
   IMAGE_ID="$IMAGE"
 fi
 
-echo "inkflip-container image=$IMAGE_ID lock=$LOCK" >&2
+echo "inkflip-container image=$IMAGE_ID lock=$LOCK platform=${PLATFORM:-host-default}" >&2
+
+run_restricted() {
+  if [ -n "$PLATFORM" ]; then
+    exec docker run --rm --platform "$PLATFORM" "$@"
+  else
+    exec docker run --rm "$@"
+  fi
+}
 
 if [ -n "$SCRATCH_DIR" ]; then
-  exec docker run --rm \
+  run_restricted \
     --network none \
     --read-only \
     --user 65532:65532 \
@@ -117,7 +137,7 @@ if [ -n "$SCRATCH_DIR" ]; then
     "$@"
 fi
 
-exec docker run --rm \
+run_restricted \
   --network none \
   --read-only \
   --user 65532:65532 \

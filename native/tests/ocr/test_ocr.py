@@ -360,7 +360,7 @@ class TestOptionInjectionDefense(unittest.TestCase):
             subprocess.run = original
             handle.close()
         argv = [str(a) for a in recorded["argv"]]
-        self.assertEqual(len(argv), 10)
+        self.assertEqual(len(argv), 11)
         self.assertEqual(argv[0].split("/")[-1], "tesseract")
         self.assertTrue(argv[1].startswith("/var/folders/") or "inkflip-ocr-" in argv[1])
         self.assertTrue(argv[1].endswith("input.png"))
@@ -371,7 +371,7 @@ class TestOptionInjectionDefense(unittest.TestCase):
         tessdata = Path(argv[8])
         self.assertTrue(tessdata.is_dir(), argv[8])
         self.assertTrue((tessdata / "eng.traineddata").is_file(), argv[8])
-        self.assertEqual(argv[9], "tsv")
+        self.assertEqual(argv[9:11], ["-c", "tessedit_create_tsv=1"])
         self.assertNotIn(";", " ".join(argv))
 
 

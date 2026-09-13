@@ -1,0 +1,20 @@
+Physical Safari T46 blocker — 2026-09-13
+
+Host: macOS 26.5.2 arm64
+safaridriver: /System/Cryptexes/App/usr/bin/safaridriver
+version: Included with Safari 26.5.2 (21624.2.5.11.8)
+
+Attempted: safaridriver --enable
+Result: interactive macOS admin password prompt. Non-interactive session
+cannot supply the owner password. The prompt was aborted.
+
+One-time owner requirement (either):
+  1. Run `safaridriver --enable` in a Terminal the owner controls and enter
+     the macOS admin password.
+  2. Safari → Develop → Allow Remote Automation.
+
+After that, a later session can drive physical Safari separately from
+Playwright WebKit. WebKit automation must not be recorded as the `safari`
+required profile.
+
+Did not replace or modify the user's Safari profile.

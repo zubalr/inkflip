@@ -1,0 +1,37 @@
+{
+  "reader": {
+    "id": "pdfjs-6_3_289-text",
+    "name": "pdf.js",
+    "version": "6.3.289",
+    "build": "pdfjs-dist 6.3.289 (node profile; actual runtime 6.3.289)",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "node",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "raw_text is the unmodified getTextContent API string",
+          "geometry is page_only in this Node wrapper; precise overlays stay in the browser adapter"
+        ]
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "fixed Node wrapper over the workspace-locked pdfjs-dist; no network, no scripting"
+    ]
+  },
+  "pdfjs_version": "6.3.289",
+  "node": "v22.23.2",
+  "page_status": "completed",
+  "raw_text_len": 116
+}

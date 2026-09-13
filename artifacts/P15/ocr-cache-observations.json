@@ -1,0 +1,35 @@
+{
+  "kind": "t25-ocr-cache-observations",
+  "task": "T46",
+  "source": "tests/privacy/cache.spec.ts (merged T25 behavior on bd05b4c)",
+  "playwright": "1.57.0",
+  "command": "bun x --no-install playwright test tests/privacy/cache.spec.ts",
+  "result": "4 passed (3.1s) on 2026-09-13",
+  "observations": [
+    {
+      "id": "cold-missing-offline-model",
+      "test": "cold offline: nothing caches silently; unprepared profile reports unavailable",
+      "status": "executed",
+      "maps_to": "cold model / missing offline model: unprepared profile reports unregistered/not_prepared; prepare fails closed offline; Tesseract path ends unavailable_offline"
+    },
+    {
+      "id": "warm-complete-offline-cache",
+      "test": "prepared offline: shell reload + own-file run completes with zero requests",
+      "status": "executed",
+      "maps_to": "warm/complete offline cache: after explicit prepare, reload while offline, native text + render + OCR via worker-served model with zero server requests"
+    },
+    {
+      "id": "wrong-or-corrupt-model-not-reused",
+      "test": "model update cannot reuse a wrong hash — store-time and serve-time",
+      "status": "executed",
+      "maps_to": "integrity_mismatch at store time; corrupted stored entry refused at serve time; previous good generation intact"
+    },
+    {
+      "id": "clear-does-not-promise-forensic-erasure",
+      "test": "clear tears down workers/URLs; remove deletes owned caches without a forensic promise",
+      "status": "executed",
+      "maps_to": "clear terminates workers/revokes URLs/removes requested caches"
+    }
+  ],
+  "not_this_file": "artifacts/P15/cold-warm.json is pdf.js native_text cold/warm on the T46 harness, not OCR"
+}

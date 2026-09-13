@@ -1,0 +1,19 @@
+{
+  "kind": "inkflip-stream-lifecycle-repro",
+  "review": "handoffs/recovery-review-20260913/REVIEW.md Cursor finding 2",
+  "reproduced_before_repair": {
+    "early_return_cancelled": false,
+    "error_stream_still_locked": true,
+    "command": "bun /tmp/inkflip-stream-repro.mjs",
+    "note": "Pre-repair iterator released the lock on return() without cancel, and left the stream locked when read() rejected."
+  },
+  "after_adapter_repair": {
+    "native_iterator_unmodified": true,
+    "exhaustion_releases_without_cancel": true,
+    "read_rejection_releases_lock": true,
+    "early_break_cancels_unless_preventCancel": true,
+    "repeated_next_return_stay_done": true,
+    "tests": "tests/readers/readable-stream-iterator.test.mjs",
+    "counts": "6/6 bun test"
+  }
+}

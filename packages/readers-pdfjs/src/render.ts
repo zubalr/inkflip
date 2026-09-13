@@ -132,6 +132,22 @@ export async function renderPage(
   let scale = requestedScale;
   if (scale > maxScale) {
     scale = maxScale;
+  }
+  // maxScale is computed from float page size; ceil(viewport) can still
+  // exceed the integer pixel/edge caps by a few pixels. Shrink scale until
+  // the canvas that will actually be allocated stays in-cap.
+  for (let step = 0; step < 16; step += 1) {
+    const trial = page.proxy.getViewport({ scale });
+    const widthPx = Math.max(1, Math.ceil(trial.width));
+    const heightPx = Math.max(1, Math.ceil(trial.height));
+    const inPixel = widthPx * heightPx <= limits.maxRasterPixels;
+    const inEdge = widthPx <= limits.maxRasterEdge && heightPx <= limits.maxRasterEdge;
+    if (inPixel && inEdge) break;
+    const pixelK = Math.sqrt(limits.maxRasterPixels / (widthPx * heightPx));
+    const edgeK = Math.min(limits.maxRasterEdge / widthPx, limits.maxRasterEdge / heightPx);
+    scale *= Math.min(pixelK, edgeK, 0.999);
+  }
+  if (requestedScale > scale) {
     limitations.push(
       `render downsampled to ${scale} px/pt by raster caps (requested ${requestedScale}); actual scale recorded`,
     );

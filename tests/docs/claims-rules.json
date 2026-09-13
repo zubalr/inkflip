@@ -1,0 +1,102 @@
+{
+  "_purpose": "Data rules for scripts/check_claims.py. Edit here to tighten or relax a rule; the checker has no policy of its own. 'checked_docs' entries are interpreted relative to the repository root; relative link targets inside each doc are resolved against the doc's own directory.",
+  "required_docs": [
+    "README.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "docs/quickstart.md",
+    "docs/user-guide.md",
+    "docs/developer-guide.md",
+    "docs/architecture.md",
+    "docs/limitations.md",
+    "docs/development-history.md",
+    "docs/distribution/README.md",
+    "docs/distribution/SURFACE.md"
+  ],
+  "checked_docs": [
+    "README.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "docs/quickstart.md",
+    "docs/user-guide.md",
+    "docs/developer-guide.md",
+    "docs/architecture.md",
+    "docs/limitations.md",
+    "docs/development-history.md",
+    "docs/distribution/README.md",
+    "docs/distribution/SURFACE.md"
+  ],
+  "forbidden_phrases": [
+    "what AI sees",
+    "AI sees",
+    "fully autonomous",
+    "unhackable",
+    "100% accurate",
+    "completely safe",
+    "guaranteed safe",
+    "risk score",
+    "trust score",
+    "safety score",
+    "fraud detection feature",
+    "fraud-free",
+    "cannot be tampered with"
+  ],
+  "version_pins": [
+    {
+      "name": "pdfjs-dist",
+      "doc_pattern": "PDF\\.js\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "apps/web/package.json",
+      "pin_json_path": "dependencies.pdfjs-dist"
+    },
+    {
+      "name": "tesseract.js",
+      "doc_pattern": "Tesseract\\.js\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "apps/web/package.json",
+      "pin_regex": "\"tesseract\\.js\":\\s*\"([0-9.]+)\""
+    },
+    {
+      "name": "react",
+      "doc_pattern": "React\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "apps/web/package.json",
+      "pin_json_path": "dependencies.react"
+    },
+    {
+      "name": "vite",
+      "doc_pattern": "Vite\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "apps/web/package.json",
+      "pin_json_path": "devDependencies.vite"
+    },
+    {
+      "name": "bun",
+      "doc_pattern": "Bun\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "package.json",
+      "pin_json_path": "packageManager",
+      "pin_regex": "bun@([0-9.]+)"
+    },
+    {
+      "name": "python-pin",
+      "doc_pattern": "Python\\s+(3\\.13\\.[0-9]+)",
+      "pin_file": ".python-version",
+      "pin_regex": "^([0-9.]+)\\s*$"
+    },
+    {
+      "name": "pypdf",
+      "doc_pattern": "pypdf\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "native/pyproject.toml",
+      "pin_regex": "pypdf==([0-9.]+)"
+    },
+    {
+      "name": "pypdfium2",
+      "doc_pattern": "pypdfium2\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "pin_file": "native/pyproject.toml",
+      "pin_regex": "pypdfium2==([0-9.]+)"
+    }
+  ],
+  "snapshot_facts_file": "tests/docs/snapshot-facts.json",
+  "required_phrases": {
+    "_purpose": "Permanent claims-hygiene requirements (independent of snapshot state): the claims ledger requires synthetic-example claims to stay scoped to the tested file and named readers.",
+    "docs/user-guide.md": [
+      "not\\s+a\\s+claim\\s+about\\s+PDFs\\s+in\\s+general"
+    ]
+  }
+}

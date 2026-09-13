@@ -1,0 +1,56 @@
+{
+  "host": {
+    "os": "Darwin arm64",
+    "python": [
+      "3.13.15",
+      "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+    ],
+    "node": "v22.23.2",
+    "cpu": "arm64",
+    "model": null
+  },
+  "platforms": [
+    {
+      "id": "chromium",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/chromium.json"
+      ],
+      "identity": {
+        "browser": "chromium 143.0.7499.4",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36"
+      },
+      "note": null
+    },
+    {
+      "id": "firefox",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/firefox.json"
+      ],
+      "identity": {
+        "browser": "firefox 144.0.2",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0"
+      },
+      "note": null
+    },
+    {
+      "id": "webkit-safari",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/webkit-safari.json"
+      ],
+      "identity": {
+        "browser": "webkit 26.0",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
+      },
+      "note": "Playwright WebKit automation with paired pdf.js worker; not a physical Safari device observation"
+    }
+  ]
+}
