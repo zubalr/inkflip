@@ -1,5 +1,5 @@
 GET /index.html
-GET /assets/index-CQo9cAFB.js
+GET /assets/index-DwBZFsse.js
 GET /assets/index-BOovg_cS.css
 GET /assets/pdf.worker-DTrjDNvb.mjs
 GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf
@@ -7,7 +7,7 @@ GET /models/tessdata-fast-eng/7d4322bd/eng.traineddata
 GET /assets/tesseract/7.0.0/worker.min.js
 GET /assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js
 GET /index.html
-GET /assets/index-CQo9cAFB.js
+GET /assets/index-DwBZFsse.js
 GET /assets/index-BOovg_cS.css
 GET /assets/pdf.worker-DTrjDNvb.mjs
 GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf
@@ -15,7 +15,7 @@ GET /models/tessdata-fast-eng/7d4322bd/eng.traineddata
 GET /assets/tesseract/7.0.0/worker.min.js
 GET /assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js
 GET /index.html
-GET /assets/index-CQo9cAFB.js
+GET /assets/index-DwBZFsse.js
 GET /assets/index-BOovg_cS.css
 GET /assets/pdf.worker-DTrjDNvb.mjs
 GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf

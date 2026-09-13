@@ -281,9 +281,12 @@ export class InspectionSession {
     }
     // The controller hash-verified the candidate against the report's
     // recorded document — retain it so the export source opt-in can
-    // include the file the user just attached.
+    // include the file the user just attached. The sourceAttached flag
+    // (set by the controller's source_attached event) binds this write
+    // to the import that verified it.
     try {
-      this.sourceBytes = new Uint8Array(await candidate.arrayBuffer());
+      const bytes = new Uint8Array(await candidate.arrayBuffer());
+      if (this.sourceAttached) this.sourceBytes = bytes;
     } catch {
       this.sourceBytes = null;
     }
@@ -314,6 +317,8 @@ export class InspectionSession {
     this.ocrReader = null;
     this.ocrHandle = null;
     this.cancelPending = false;
+    this.notice = null;
+    this.ocrNote = null;
     this.assembledForGeneration = -1;
 
     // OCR eligibility: user-drawn region pages first, then the rest of
@@ -514,9 +519,11 @@ export class InspectionSession {
     } catch (error) {
       // Model/worker preparation failed: OCR checks still dispatch and
       // report `failed`/`model_missing` honestly — never a silent stall.
-      this.ocrReader = null;
-      this.ocrHandle = null;
+      // Guarded by generation: a stale prep must never clobber the
+      // reader a superseding run may have just assigned.
       if (!stale()) {
+        this.ocrReader = null;
+        this.ocrHandle = null;
         this.notice = `OCR model could not be prepared: ${error instanceof Error ? error.message.slice(0, 140) : "unavailable"}. OCR checks are recorded as failed.`;
       }
     }
@@ -863,7 +870,7 @@ export class InspectionSession {
     try {
       let result: CheckResult;
       if (check.capability === "ocr") {
-        result = await this.runOcrCheck(check, mf, feedChunks, ac.signal, stale);
+        result = await this.runOcrCheck(check, feedChunks, ac.signal, stale);
       } else if (check.capability === "alignment") {
         result = this.runAlignmentCheck(check, ac, stale);
       } else {
@@ -950,7 +957,6 @@ export class InspectionSession {
 
   private async runOcrCheck(
     check: CheckPlan,
-    mf: MessageFactory,
     feedChunks: (occs: readonly Occurrence[]) => void,
     signal: AbortSignal,
     stale: () => boolean,
