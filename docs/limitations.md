@@ -58,16 +58,18 @@ rediscover them. Each is dated; when one is fixed, this list and
 The following are **not available in this snapshot** and must not be
 presented as working:
 
-- **The `inkflip` native CLI.** The command contract
-  ([planning/architecture/CLI_AND_REGRESSION.md](../planning/architecture/CLI_AND_REGRESSION.md))
-  specifies `inspect`, `compare-readers`, `models prepare`, `corpus run`,
-  `baseline create`, `compare`, `report`, `replay`, `validate` — the full
-  CLI and corpus workflow is still being integrated. Only the Python reader
-  library underneath it exists.
-- **Corpus runs, version-isolated reader profiles, immutable regression
-  baselines, and the local reader-upgrade CI example.**
-- **The complete public gallery** — one synthetic example is prepared and
-  verified; the full six-example set with prepared manifests is in progress.
+- **The `inkflip` native CLI** — the inspect/validate/report/replay,
+  corpus/resume, version-isolated profiles, immutable baseline and
+  reader-upgrade workflow — is delivered on a yielded native branch and its
+  documented examples were executed there on 2026-09-13 (records held with
+  the release preparation); it is **being integrated** and is not part of
+  this snapshot's main-line yet. Until it merges, the browser inspector and
+  the Python reader library are the available capability; the packaging
+  image (container runtime) is still pending and is not claimed anywhere.
+- **Offline readiness is per-release and allowlisted**: preparing for
+  offline use covers exactly this release's app/reader/model/example files;
+  documents never enter the offline cache, and anything unlisted still needs
+  the network.
 - **Measured performance budgets, native containment/failure-recovery
   hardening, and browser/native parity verification** — open work.
 - **Deployment preflight and any public deployment** — the static-dist
@@ -134,7 +136,8 @@ These are product invariants, not missing features:
 ## What this documentation still needs for final release
 
 Re-verification of every command against the release tag, the
-never-used-host install proof, screenshots re-tied to the tagged build (the
-prepared gallery may change them), the finished capability matrix once the
-gallery and deployment preflight land, and links checked together with the
-other documentation owners.
+never-used-host install proof, finished promotional captures and visual
+approval (pending visual-polish work — current-build captures used here are
+clearly dated and expected to be refreshed), the native CLI and image
+actually merged and accepted, deployment of the static site (an owner
+action), and links checked together with the other documentation owners.
