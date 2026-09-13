@@ -54,7 +54,25 @@ class DocumentedCommandTests(unittest.TestCase):
         result = run_tool(HARNESS, "list")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("verify", result.stdout)
-        self.assertIn("unavailable", result.stdout)  # declared suites show as not yet runnable
+
+    def test_list_marks_missing_prerequisites_unavailable(self):
+        # A real command's prerequisites are lifecycle-bound (the tree can
+        # reach a state where every registered command is runnable), so pin
+        # the "unavailable" marker to a synthetic declared entry.
+        with tempfile.TemporaryDirectory() as tmp:
+            reg = Path(tmp) / "reg.json"
+            reg.write_text(json.dumps({"commands": {
+                "verify": {"kind": "test", "status": "active",
+                           "collection": "structured-report",
+                           "argv": [sys.executable, "-V"]},
+                "test:needs-runner": {"kind": "test", "status": "declared",
+                    "argv": None,
+                    "requires": [str(Path(tmp) / "absent-runner")]},
+            }}))
+            result = run_tool(HARNESS, "--registry", str(reg), "list")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("test:needs-runner", result.stdout)
+        self.assertIn("unavailable", result.stdout)
 
     def test_self_check_passes_on_a_clean_checkout(self):
         result = run_tool(HARNESS, "self-check")

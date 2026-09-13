@@ -320,39 +320,50 @@ test.beforeAll(async () => {
   const vite = (await import(viteEntry)) as {
     build: (opts: Record<string, unknown>) => Promise<unknown>;
   };
-  // Pass 1 — the real app build (apps/web root): shipped index plus the
-  // real T08 open and T22 import feature mounts.
-  await vite.build({
-    root: WEB,
-    configFile: join(WEB, "vite.config.ts"),
-    logLevel: "warn",
-    build: {
-      outDir: DIST,
-      emptyOutDir: true,
-      rollupOptions: {
-        input: {
-          index: join(WEB, "index.html"),
-          open: join(WEB, "src", "features", "open", "preview.html"),
-          import_: join(WEB, "src", "features", "import", "preview.html"),
+  // Vite derives import.meta.env.DEV from process.env.NODE_ENV at resolve
+  // time; a dev-server spec earlier in this worker process leaves it set
+  // to "development". Pin production so the privacy artifacts are real
+  // production builds regardless of worker-process pollution.
+  const savedNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  try {
+    // Pass 1 — the real app build (apps/web root): shipped index plus the
+    // real T08 open and T22 import feature mounts.
+    await vite.build({
+      root: WEB,
+      configFile: join(WEB, "vite.config.ts"),
+      logLevel: "warn",
+      build: {
+        outDir: DIST,
+        emptyOutDir: true,
+        rollupOptions: {
+          input: {
+            index: join(WEB, "index.html"),
+            open: join(WEB, "src", "features", "open", "preview.html"),
+            import_: join(WEB, "src", "features", "import", "preview.html"),
+          },
         },
       },
-    },
-  });
-  // Pass 2 — the test-owned privacy harness page (tests/privacy/harness),
-  // bundling the same production packages through the same build pipeline.
-  await vite.build({
-    root: HARNESS,
-    configFile: join(WEB, "vite.config.ts"),
-    logLevel: "warn",
-    publicDir: false,
-    build: {
-      outDir: DIST,
-      emptyOutDir: false,
-      rollupOptions: {
-        input: { privacy: join(HARNESS, "privacy.html") },
+    });
+    // Pass 2 — the test-owned privacy harness page (tests/privacy/harness),
+    // bundling the same production packages through the same build pipeline.
+    await vite.build({
+      root: HARNESS,
+      configFile: join(WEB, "vite.config.ts"),
+      logLevel: "warn",
+      publicDir: false,
+      build: {
+        outDir: DIST,
+        emptyOutDir: false,
+        rollupOptions: {
+          input: { privacy: join(HARNESS, "privacy.html") },
+        },
       },
-    },
-  });
+    });
+  } finally {
+    if (savedNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = savedNodeEnv;
+  }
   harness = await startStaticServer();
 });
 

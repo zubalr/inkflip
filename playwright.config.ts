@@ -12,5 +12,17 @@ import { defineConfig } from "@playwright/test";
  * their own specs. No other option is set; defaults are unchanged.
  */
 export default defineConfig({
-  testDir: "./tests",
+  projects: [
+    {
+      name: "tests",
+      testDir: "./tests",
+    },
+    {
+      // Experiments register acceptance commands that pass spec paths like
+      // experiments/P12/browser.spec.ts; they need discovery outside tests/.
+      name: "experiments",
+      testDir: "./experiments",
+      testMatch: "**/*.spec.ts",
+    },
+  ],
 });
