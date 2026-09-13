@@ -48,11 +48,6 @@ rediscover them. Each is dated; when one is fixed, this list and
   offline processing, which ran behind a dead proxy). What remains unproven
   is a host where the tools themselves (Bun, uv, compilers, browsers) have
   never been installed — that step is outside this repository's control.
-- **`bun run test:fixtures` has one erroring test on a fresh checkout**
-  (found 2026-09-13): `tests/fixtures/test_catalog_followup.py` reads a
-  baseline-hashes file from the working records directory, which the
-  local-only migration removed from tracking — the test needs its baseline
-  re-homed into tracked files. The other 69 fixture tests pass.
 - **`bun run test:regression` and `bun run check:static-dist` fail closed**
   with their owning tasks named: the regression suite and the
   static-dist/deployment preflight do not exist yet. This is the registry

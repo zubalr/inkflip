@@ -15,10 +15,24 @@ def source(name):
 
 class TestPriorityCatalog(unittest.TestCase):
     def test_original_pdfs_and_expectations_are_unchanged(self):
-        baseline = json.loads((ROOT / 'artifacts/tasks/T05/followup-g78/baseline-hashes.json').read_text())
+        # Baseline restored verbatim from the original committed evidence
+        # (580ef63:artifacts/tasks/T05/followup-g78/baseline-hashes.json);
+        # tracked test data so the check runs on a fresh clone.
+        baseline = json.loads((ROOT / 'tests/fixtures/data/baseline-hashes.json').read_text())
         self.assertEqual(len(baseline), 32)
         for name, digest in baseline.items():
             self.assertEqual(hashlib.sha256((FIXTURES / name).read_bytes()).hexdigest(), digest, name)
+
+    def test_baseline_data_file_is_tracked_and_complete(self):
+        # Focused availability check: the baseline itself must be a tracked
+        # file with exactly the original 32 entries (no regeneration).
+        import subprocess
+        tracked = subprocess.run(['git', 'ls-files', 'tests/fixtures/data/baseline-hashes.json'],
+                                 cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(tracked.stdout.strip(), 'tests/fixtures/data/baseline-hashes.json')
+        baseline = json.loads((ROOT / 'tests/fixtures/data/baseline-hashes.json').read_text())
+        self.assertEqual(len(baseline), 32)
+        self.assertTrue(all(name.startswith(('development/', 'public/')) for name in baseline))
 
     def test_contrast_control_has_white_text_and_dark_background(self):
         control = content_of(source('white-contrast-control.pdf'))
