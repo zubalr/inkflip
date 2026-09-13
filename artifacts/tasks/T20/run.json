@@ -1,0 +1,46 @@
+{
+  "task": "T20",
+  "beads_id": "pdf-t20",
+  "evaluated_commit": "102b79ea02d67a656f98ea173f8d8d5dec12ac72",
+  "evaluated_at": "2026-09-13T11:26:36.686596+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:browser -- tests/browser/ambiguity.spec.ts",
+      "argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/ambiguity.spec.ts"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:browser",
+        "--",
+        "tests/browser/ambiguity.spec.ts"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "\nRunning 5 tests using 1 worker\n\n\n\u001b[1A\u001b[2K[1/5] tests/browser/ambiguity.spec.ts:145:1 \u203a repeated identical amounts stay individually addressable \u2014 never first string match\n\u001b[1A\u001b[2K[2/5] tests/browser/ambiguity.spec.ts:177:1 \u203a ambiguous finding exposes every candidate and pre-picks none\n\u001b[1A\u001b[2K[3/5] tests/browser/ambiguity.spec.ts:202:1 \u203a order-only differences remain order-only\n\u001b[1A\u001b[2K[4/5] tests/browser/ambiguity.spec.ts:228:1 \u203a unmatched readings are never claimed as missing visible text\n\u001b[1A\u001b[2K[5/5] tests/browser/ambiguity.spec.ts:255:1 \u203a keyboard selection returns focus to the originating finding\n\u001b[1A\u001b[2K  5 passed (4.5s)\n",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:browser tests/browser/ambiguity.spec.ts\n(node:22037) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\u001b[1A\u001b[2K(node:22045) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "tests": {
+        "collected": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t20",
+      "environment": {}
+    }
+  ]
+}
