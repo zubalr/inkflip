@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "task": "T40",
+  "purpose": "Digest pin for the recommended native containment image. Digests come from build/base-image.lock.json (T02). They are revision records, not a claim that this host built or ran the image.",
+  "base_image": {
+    "ref": "python:3.13.15-slim-trixie",
+    "index_digest": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+    "platform_digests": {
+      "linux/amd64": "sha256:cc9dffa47c8294ba9bb795a8dfaeb7b76f2b30acade2c52a461a2999d127eb00",
+      "linux/arm64": "sha256:c89921a0c7b42f27338ed8c279fb370e69e941c92460f91895d08304e844b0b4"
+    },
+    "source": "T02 build/base-image.lock.json"
+  },
+  "hardened_invocation": {
+    "script": "scripts/run_native_container.sh",
+    "network": "none",
+    "user": "65532:65532",
+    "read_only_root": true,
+    "cap_drop": "ALL",
+    "no_new_privileges": true
+  },
+  "notes": [
+    "The production Dockerfile copies native/dist wheels produced by T47. Those paths are not in this checkout yet.",
+    "Dockerfile.checkout is a weaker source install for local debugging only."
+  ]
+}

@@ -120,3 +120,8 @@ worker, WASM and model bytes and existing license notices are unchanged.
 ## T30 — native HTML report conversion (2026-09-13)
 
 - `native/inkflip/cli/html.py`: Script-free portable HTML for validated reports and comparisons adapts the same `planning/tools/export_html.py` stylesheet tokens (colors, type scale, section cards) with a CSP `style-src` hash and no script tags.
+
+## T40 — native containment recipe (2026-09-13)
+
+- `build/native/Dockerfile` follows `planning/deployment/examples/Dockerfile.native` and pins the T02-recorded `python:3.13.15-slim-trixie` index digest. No third-party Dockerfile was copied beyond that planning recipe.
+
