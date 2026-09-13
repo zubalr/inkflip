@@ -1,0 +1,34 @@
+{
+  "experiment_id": "P12",
+  "task_id": "T43",
+  "status": "blocked",
+  "disposition": "blocked_missing_candidate_archive",
+  "hypothesis": "Secondary browser PDFium reader value",
+  "baseline": "PDF.js plus OCR",
+  "candidate": {
+    "name": "EmbedPDF PDFium",
+    "release": "v2.15.0",
+    "archive": "pdfium-dist.tar.gz",
+    "source_id": "S48",
+    "pinned_sha256": "31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42",
+    "pinned_size_bytes": 2661637,
+    "max_asset_size_bytes": 25165824,
+    "audit": {
+      "present": false,
+      "path": null,
+      "size_bytes": null,
+      "sha256": null,
+      "size_valid": false,
+      "sha256_valid": false,
+      "status": "blocked_missing_candidate_archive",
+      "message": "Candidate archive pdfium-dist.tar.gz not present in offline repository."
+    }
+  },
+  "controls": {
+    "clean_mapping_twin": "required",
+    "same_reader_control": "required"
+  },
+  "integration_decision": "default_unavailable",
+  "acceptance": "Asset < 24 MiB, verified digest, clean controls preserved; default unavailable if missing.",
+  "note": "Candidate archive is not pre-bundled in repo and network downloads are forbidden by offline containment. EmbedPDF remains default-unavailable; browser core remains complete on PDF.js."
+}
