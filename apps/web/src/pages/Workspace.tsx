@@ -448,9 +448,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         (report.document as { display_name?: string | null }).display_name ??
         snap.doc?.label ??
         "Inspection report")
-    : exampleDoc !== null
-      ? "Invoice-Example.pdf"
-      : "Workspace";
+    : snap.doc !== null
+      ? (snap.doc.label ?? "PDF Document")
+      : exampleDoc !== null
+        ? "Invoice-Example.pdf"
+        : "Workspace";
 
   const addNote = useCallback(
     (annotation: Annotation) => setUserNotes((prev) => [...prev, annotation]),

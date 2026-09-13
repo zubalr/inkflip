@@ -50,7 +50,12 @@ export function ModalDialog({
         }
       }, 20);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (previousActiveElement.current && typeof previousActiveElement.current.focus === "function") {
+          previousActiveElement.current.focus();
+        }
+      };
     } else {
       // Focus restoration
       if (previousActiveElement.current && typeof previousActiveElement.current.focus === "function") {
@@ -58,6 +63,20 @@ export function ModalDialog({
       }
     }
   }, [isOpen, triggerRef]);
+
+  // Global Escape key handling for bulletproof modal dismissal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isOpen, onClose]);
 
   // Trap focus & Escape handling
   const handleKeyDown = useCallback(
