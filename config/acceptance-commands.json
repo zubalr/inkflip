@@ -222,10 +222,25 @@
     },
     "test:regression": {
       "kind": "test",
-      "status": "declared",
-      "argv": null,
+      "status": "active",
+      "collection": "harness-unittest",
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/regression",
+        "-v"
+      ],
       "requires": [
-        "tests/regression/"
+        "tests/regression/",
+        "native/uv.lock"
       ],
       "owner_task": "T34",
       "description": "Baseline immutability, coverage loss, invalid comparison and rule exit behavior."

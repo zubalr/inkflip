@@ -871,6 +871,45 @@ def cmd_corpus_run(args: argparse.Namespace) -> int:
         return EXIT_INVALID_ARGS
 
 
+def cmd_baseline_create(args: argparse.Namespace) -> int:
+    from inkflip.baselines.engine import create_baseline
+    from inkflip.baselines.models import BaselineError, BaselineOverwriteError
+
+    try:
+        create_baseline(
+            run_dir=Path(args.run),
+            rules_path=Path(args.rules) if args.rules else None,
+            out_path=Path(args.out),
+            approved_by=args.approved_by,
+            rationale=args.rationale,
+            overwrite=args.replace_output,
+        )
+        print(f"Baseline successfully created at: {args.out}")
+        return EXIT_OK
+    except BaselineOverwriteError as e:
+        sys.stderr.write(f"Baseline error: {e}\n")
+        return EXIT_INVALID_ARGS
+    except BaselineError as e:
+        sys.stderr.write(f"Baseline error: {e}\n")
+        return EXIT_INVALID_ARGS
+
+
+def cmd_compare(args: argparse.Namespace) -> int:
+    from inkflip.baselines.engine import compare
+
+    res = compare(
+        left_path=Path(args.left),
+        right_path=Path(args.right),
+        rules_path=Path(args.rules) if args.rules else None,
+        out_dir=Path(args.out) if args.out else None,
+    )
+    if res.violations:
+        for v in res.violations:
+            sys.stderr.write(f"Violation: {v}\n")
+    print(f"Comparison status: {res.status}")
+    return res.exit_code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="inkflip",
@@ -941,6 +980,24 @@ def build_parser() -> argparse.ArgumentParser:
     p_crun.add_argument("--jobs", type=int, default=1, help="Concurrent workers (default 1)")
     p_crun.add_argument("--resume", action="store_true", help="Resume previous run preserving completed reports")
 
+    # baseline create
+    p_baseline = subparsers.add_parser("baseline")
+    baseline_sub = p_baseline.add_subparsers(dest="subcommand", required=True)
+    p_bcreate = baseline_sub.add_parser("create")
+    p_bcreate.add_argument("--run", required=True, help="Run directory containing reports and index.json")
+    p_bcreate.add_argument("--rules", help="Optional path to acceptance-rules JSON")
+    p_bcreate.add_argument("--out", required=True, help="Output destination for baseline JSON")
+    p_bcreate.add_argument("--approved-by", required=True, help="Reviewer label explicitly approving baseline")
+    p_bcreate.add_argument("--rationale", required=True, help="Reviewer rationale for baseline approval")
+    p_bcreate.add_argument("--replace-output", action="store_true", help="Explicitly allow overwriting destination")
+
+    # compare
+    p_compare = subparsers.add_parser("compare")
+    p_compare.add_argument("left", help="Baseline JSON or run directory")
+    p_compare.add_argument("right", help="Run directory or report to compare")
+    p_compare.add_argument("--rules", help="Acceptance rules JSON file")
+    p_compare.add_argument("--out", help="Output directory for comparison results")
+
     return parser
 
 
@@ -974,6 +1031,11 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "corpus":
             if args.subcommand == "run":
                 return cmd_corpus_run(args)
+        elif args.command == "baseline":
+            if args.subcommand == "create":
+                return cmd_baseline_create(args)
+        elif args.command == "compare":
+            return cmd_compare(args)
 
         raise ArgumentError(f"Unknown command: {args.command}")
 
