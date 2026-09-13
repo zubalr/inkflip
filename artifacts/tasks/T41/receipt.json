@@ -1,0 +1,71 @@
+{
+  "task": "T41",
+  "beads_id": "pdf-t41",
+  "evaluated_commit": "d48409128dfc51229bd46633114a14de11ffab27",
+  "evaluated_at": "2026-09-13T11:05:58.685019+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09",
+      "argv": [
+        "python3",
+        "experiments/P09/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P09"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P09/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P09"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P09 Experiment completed in 0.0810s: 9 fixtures evaluated.\nCandidate hard-control false visibility: 0\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2/artifacts/P09/result.json\n",
+      "stderr": "",
+      "tests": {
+        "collected": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    },
+    {
+      "segment": "python experiments/P09/test_experiment.py",
+      "argv": [
+        "python3",
+        "experiments/P09/test_experiment.py"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P09/test_experiment.py"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P09 Experiment completed in 0.0201s: 9 fixtures evaluated.\nCandidate hard-control false visibility: 0\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2/artifacts/P09/result.json\n",
+      "stderr": "test_ink_counterexample_triggered (__main__.TestPaintOrderExperiment.test_ink_counterexample_triggered)\nCriterion: negative result / counterexample complete. ... ok\ntest_no_held_out_leakage (__main__.TestPaintOrderExperiment.test_no_held_out_leakage)\nCriterion: candidate gain measured without held-out leakage. ... ok\ntest_precision_coverage_runtime_recorded (__main__.TestPaintOrderExperiment.test_precision_coverage_runtime_recorded)\nCriterion: precision/coverage/runtime recorded. ... ok\ntest_source_bytes_immutable (__main__.TestPaintOrderExperiment.test_source_bytes_immutable)\nInvariant I01: source fixture bytes remain immutable. ... ok\ntest_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_zero_hard_control_false_visibility)\nCriterion: Zero hard-control false visibility. ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.021s\n\nOK\n",
+      "tests": {
+        "collected": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+P09 Experiment completed in 0.0810s: 9 fixtures evaluated.
+Candidate hard-control false visibility: 0
+Result written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2/artifacts/P09/result.json
+P09 Experiment completed in 0.0201s: 9 fixtures evaluated.
+Candidate hard-control false visibility: 0
+Result written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2/artifacts/P09/result.json
+{
+  "task": "T41",
+  "beads_id": "pdf-t41",
+  "evaluated_commit": "d48409128dfc51229bd46633114a14de11ffab27",
+  "evaluated_at": "2026-09-13T11:05:58.685019+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09",
+      "argv": [
+        "python3",
+        "experiments/P09/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P09"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P09/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P09"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    },
+    {
+      "segment": "python experiments/P09/test_experiment.py",
+      "argv": [
+        "python3",
+        "experiments/P09/test_experiment.py"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P09/test_experiment.py"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "tests": {
+        "collected": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    }
+  ]
+}
