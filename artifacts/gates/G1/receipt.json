@@ -1,8 +1,8 @@
 {
   "gate": "G1",
   "title": "Real browser own-file evidence loop",
-  "evaluated_commit": "a5d901d953be809acbfe6dd60ccb4ba2170e4052",
-  "evaluated_at": "2026-09-13T04:35:12.776202+00:00",
+  "evaluated_commit": "eafbf109e7ab0be248dcfa6e88cc48a59c17e21b",
+  "evaluated_at": "2026-09-13T04:36:41.452940+00:00",
   "target": null,
   "tests": {
     "collected": 3,
