@@ -1,0 +1,60 @@
+T23 commands.log — exact commands and verbatim results
+Worktree: /Users/zubair/Code/Projects/pdf project/original/worktrees/pdf-t23
+Branch: work/devin/t23   Worker: devin (coordinator session)
+All commands run from the worktree root unless noted.
+
+======================================================================
+$ python3 scripts/coordination.py task T23
+Effective contract read: purpose "Complete multi-finding selection,
+explicit note inclusion, original-byte opt-in, crop preview and replay-
+level disclosure. Human notes never become machine readings or overwrite
+evidence." Scope: apps/web/src/features/export/, features/annotations/,
+tests/reports/selection.spec.ts. Command: bun run test:browser --
+tests/reports/selection.spec.ts.
+AC:
+ - Default selected finding does not include unrelated text/name/PDF/notes
+ - full-source warning requires explicit choice
+ - crop is described as excerpt not safe redaction
+ - selected omissions retain honest original produced_count and check coverage.
+
+======================================================================
+$ bun install
+86 packages installed — fresh worktree needed node_modules for build/test.
+
+======================================================================
+$ bun run build
+vite v8.3.0 — 156 modules transformed; dist emitted. Exit: 0
+
+======================================================================
+$ bunx --no-install playwright test tests/reports/selection.spec.ts
+Running 5 tests using 1 worker
+  ✓ multi-finding selection excludes unrelated evidence and preserves produced counts
+  ✓ notes enter the export only through explicit opt-in, never as readings
+  ✓ full-source inclusion is explicit and warned; absent by default
+  ✓ crop preview shows the real excerpt and the not-a-redaction disclosure
+  ✓ a note typed in the viewer exports only on opt-in, as human_entered
+5 passed (2.7s)
+
+======================================================================
+$ bunx --no-install playwright test tests/browser tests/reports
+Full browser + reports regression across all suites (open, viewer,
+ambiguity, findings, export, large-mobile, pdf-8hn, import, selection).
+81 passed (21.4s)
+
+======================================================================
+$ bunx --no-install oxlint apps/web/src/features/annotations \
+    apps/web/src/features/export apps/web/src/pages/Workspace.tsx \
+    apps/web/src/features/viewer/ViewerStage.tsx tests/reports/selection.spec.ts
+0 errors. (Two unused-import warnings in the new spec found and removed.)
+
+======================================================================
+Scope notes (disclosed coordinator seams, additive only):
+- apps/web/src/features/viewer/ViewerStage.tsx (+18): optional
+  annotations/onAddAnnotation/onRemoveAnnotation props; renders
+  FindingNotes inside the selected finding card when handlers are present.
+- apps/web/src/pages/Workspace.tsx (+38): userNotes state keyed to the
+  open document/report; passes notes to ViewerStage and merges them into
+  the ExportPanel `source` so the engine's opt-in/pruning semantics apply.
+  No machine-evidence fields touched.
+Both are the narrowest seams that wire T23's owned features into the
+composed app; every other change is inside allowed scope.

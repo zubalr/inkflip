@@ -39,6 +39,22 @@ export interface ExportControllerState {
   readonly error: string | null;
   /** True when the user asked for source PDF but no usable bytes exist. */
   readonly sourceUnavailable: boolean;
+  /** Findings present on the source report, for the selection picker. */
+  readonly findingChoices: readonly FindingChoice[];
+  /** Thumbnails of the crops the current projection will carry (T23). */
+  readonly cropPreviews: readonly CropPreview[];
+}
+
+export interface FindingChoice {
+  readonly id: string;
+  readonly title: string;
+  readonly pageIndex: number;
+}
+
+export interface CropPreview {
+  readonly id: string;
+  readonly pageIndex: number;
+  readonly dataUrl: string;
 }
 
 const DEFAULT_REQUEST: ExportRequestLike = {
@@ -61,6 +77,7 @@ export class ExportController {
   private error: string | null = null;
   private sourceUnavailable = false;
   private readonly availability: ExportAvailability;
+  private readonly findingChoices: readonly FindingChoice[];
 
   constructor(engine: ExportEngine, source: unknown, options: ExportControllerOptions = {}) {
     this.engine = engine;
@@ -68,6 +85,7 @@ export class ExportController {
     this.sourcePdfBytes = options.sourcePdfBytes;
     this.request = { ...DEFAULT_REQUEST, ...options.request };
     this.availability = probeAvailability(source);
+    this.findingChoices = probeFindingChoices(source);
     this.recompute();
   }
 
@@ -84,7 +102,21 @@ export class ExportController {
       notices: this.projection?.notices ?? null,
       error: this.error,
       sourceUnavailable: this.sourceUnavailable,
+      findingChoices: this.findingChoices,
+      cropPreviews: this.cropPreviews(),
     };
+  }
+
+  /**
+   * Restrict the export to an explicit finding subset (T23 multi-finding
+   * selection). `"all"` restores the default full-evidence projection; an
+   * empty array exports zero findings — the projection still discloses the
+   * omitted evidence honestly rather than pretending nothing existed.
+   */
+  setFindingSelection(ids: "all" | readonly string[]): ExportControllerState {
+    this.request = { ...this.request, findings: ids === "all" ? "all" : [...ids] };
+    this.recompute();
+    return this.state;
   }
 
   /** Merge inclusion options and recompute projection + preview. */
@@ -152,6 +184,45 @@ export class ExportController {
       this.error = exc instanceof Error ? exc.message : String(exc);
     }
   }
+
+  /**
+   * Crop thumbnails for the preview pane, decoded from the *projected*
+   * report — what the user sees is exactly what the download contains.
+   */
+  private cropPreviews(): readonly CropPreview[] {
+    if (this.projection === null) return [];
+    const assets = (this.projection.report as { assets?: readonly {
+      id?: string; purpose?: string; media_type?: string; data_base64?: string; page_index?: number;
+    }[] }).assets ?? [];
+    const out: CropPreview[] = [];
+    for (const a of assets) {
+      if (a?.purpose !== "crop" || typeof a.data_base64 !== "string") continue;
+      out.push({
+        id: String(a.id),
+        pageIndex: typeof a.page_index === "number" ? a.page_index : -1,
+        dataUrl: `data:${a.media_type ?? "image/png"};base64,${a.data_base64}`,
+      });
+    }
+    return out;
+  }
+}
+
+/** Findings on the source report, in document order. */
+export function probeFindingChoices(source: unknown): readonly FindingChoice[] {
+  const findings = (source as { findings?: readonly {
+    id?: string; title?: string; page_index?: number;
+  }[] } | null)?.findings;
+  if (!Array.isArray(findings)) return [];
+  const out: FindingChoice[] = [];
+  for (const f of findings) {
+    if (typeof f?.id !== "string") continue;
+    out.push({
+      id: f.id,
+      title: typeof f.title === "string" ? f.title : f.id,
+      pageIndex: typeof f.page_index === "number" ? f.page_index : -1,
+    });
+  }
+  return out;
 }
 
 /** Inspect the recorded run for optional categories the UI can offer. */
