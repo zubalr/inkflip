@@ -279,13 +279,17 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
     // Unsupported exact percentage claims must NOT appear
     expect(pageContent).not.toContain("exact percentage of page text and geometry");
 
-    // Honest product principles must be present
+    // Honest product principles and platform scope must be present
     expect(pageContent).toContain("Non-Certification Principle");
     expect(pageContent).toContain("Explicit Omission Reporting");
     expect(pageContent).toContain("Provenance &amp; Audit Trail");
     expect(pageContent).toContain("Local-First Processing");
     expect(pageContent).toContain("Offline Readiness");
     expect(pageContent).toContain("Inspection Coverage &amp; Status");
+    expect(pageContent).toContain("Platform Scope &amp; Availability");
+    expect(pageContent).toContain("macOS native companion");
+    expect(pageContent).toContain("Docker CLI workflow");
+    expect(pageContent).toContain("Separate Windows and Linux desktop GUI applications remain deferred");
   });
 
   test("10. Escape key on Help page returns to active Workspace", async ({ page }) => {
