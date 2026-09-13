@@ -32,14 +32,14 @@ class PassTests(unittest.TestCase):
         self.assertEqual(self.config["integration_owner"], "devin")
         self.assertEqual(self.config["worker_budgets"], {
             "codex": 0, "devin": None, "antigravity": None, "zcode": None})
-        self.assertIsNone(self.config["max_active_workers"])
+        self.assertEqual(self.config["max_active_workers"], 5)
         self.assertEqual(self.config["apps"]["codex"]["tasks"], [])
-        self.assertLessEqual(set("T03 T04 T11 T15 T23 T24 T25 T29 T30 T32 T33 T34 T40 T46 T48 T51 T52 T55".split()),
+        self.assertLessEqual(set("T03 T04 T11 T15 T24 T25 T29 T30 T32 T33 T34 T35 T40 T46 T47 T48 T51 T52 T55".split()),
                              set(self.config["apps"]["devin"]["tasks"]))
         self.assertEqual(self.config["apps"]["zcode"]["tasks"],
-                         "T05 T21 T26 T27 T28 T35 T41 T42 T44 T45 T47".split())
+                         "T05 T21 T26 T27 T28 T41 T42 T43 T44 T45".split())
         self.assertEqual(self.config["apps"]["antigravity"]["tasks"],
-                         "T06 T07 T13 T14 T17 T19 T20 T37 T38 T49 T50".split())
+                         "T06 T07 T13 T14 T17 T19 T20 T23 T37 T38 T49 T50".split())
 
     def test_no_pass_depends_on_future_work(self):
         seen = set(self.config["completed_bootstrap"])
@@ -79,7 +79,7 @@ class PassTests(unittest.TestCase):
         self.assertIn("Global worker capacity is occupied", p.dispatch_errors(self.config, stage, "T05", issue, [{}] * 3, "zcode"))
 
     def test_adaptive_capacity_has_no_numeric_ceiling_but_preserves_admission(self):
-        # The generic helper supports null; live project policy has no numeric ceiling.
+        # The generic helper supports null; the current owner policy sets five.
         self.config["max_active_workers"] = None
         stage = self.config["passes"][0]
         for app, task in (("antigravity", "T13"), ("devin", "T10"), ("zcode", "T27")):
@@ -94,18 +94,13 @@ class PassTests(unittest.TestCase):
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(
             self.config, stage, "T03", {"status": "open"}, [], "codex"))
 
-    def test_live_project_has_no_numeric_worker_ceiling(self):
-        # Live config sets max_active_workers null: a sixth admission is
-        # decided by scope/review throughput, not a fixed count. Configured
-        # budgets still bound — codex stays zero.
+    def test_live_project_refuses_a_sixth_active_worker(self):
         stage = self.config["passes"][0]
         workers = [{"metadata": {"execution": {"app": "devin"}}}] * 5
-        self.assertEqual(p.dispatch_errors(
-            self.config, stage, "T13", {"status": "open"}, workers, "antigravity"), [])
+        self.assertIn("Global worker capacity is occupied", p.dispatch_errors(
+            self.config, stage, "T13", {"status": "open"}, workers, "antigravity"))
         self.assertIn("App worker capacity is occupied", p.dispatch_errors(
-            self.config, stage, "T13", {"status": "open"}, workers, "codex"))
-        with self.assertRaisesRegex(ValueError, "not owned"):
-            p.assignment(self.config, "T29", "codex", "a" * 40, 1)
+            self.config, stage, "T13", {"status": "open"}, [], "codex"))
 
     def test_finite_global_and_app_limits_work_independently_of_null(self):
         stage = self.config["passes"][0]
@@ -172,9 +167,10 @@ class PassTests(unittest.TestCase):
                 key, value = argv[argv.index("--set-metadata") + 1].split("=", 1)
                 issue["metadata"][key] = value
             issue.update(status="in_progress", assignee=kwargs["actor"])
-        with patch.object(p.c, "run", side_effect=git), patch.object(p.c, "bd", side_effect=bd), \
+        with patch.object(p.c, "canonical_root", return_value=p.c.ROOT), \
+             patch.object(p.c, "run", side_effect=git), patch.object(p.c, "bd", side_effect=bd), \
              patch.object(p.c, "issues_by_id", return_value=issues), patch.object(p.c, "admission_lock"), \
-             patch.object(p.c, "check_predecessors"), patch.object(p, "sync_state"), \
+             patch.object(p.c, "check_predecessors"), patch.object(p, "check_fresh_predecessors"), patch.object(p, "sync_state"), \
              patch.object(p, "publish_state") as publish, redirect_stdout(StringIO()):
             p.dispatch("T02", "devin")
             publish.assert_called_once()

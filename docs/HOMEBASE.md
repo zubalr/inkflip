@@ -25,9 +25,9 @@ refresh stale foundation receipts before granting dependent tasks. T27 already
 has an acceptance receipt; verify its freshness against subsequent shared changes.
 Grant T28 to Homebase ZCode after predecessor validation. Devin owns native
 supervision, CLI, version comparison, security, integration and difficult defects;
-Antigravity owns the browser interface path. Later passes require actual gates.
+Antigravity owns the browser interface path. Dependent tasks require fresh accepted prerequisites; stage numbers do not hold independent work.
 
-Use native descendants without a fixed numeric project ceiling; honor any
+Keep five active execution slots total, including native descendants; honor any
 configured finite budget and lower harness limit. Allocate by disjoint
 scope, memory/load and review throughput. Every writer has a named scope
 and isolated checkout. Keep review capacity available and retire completed
@@ -159,3 +159,5 @@ grants, partial review, stale-receipt findings and follow-up issues are in Beads
 Cloud could not select SWE-2 for managed children through its session API.
 For Local use the documented `subagent_general` profile with SWE-2 Max selected
 on the parent; explore/default custom profiles have different routing.
+
+Independent queue D is defined in `docs/plans/independent-workbenches/D-START.md`. Use canonical `status zcode --workbench D --sync` after fetching current code. Preserve the existing Goal and legacy grant until acknowledged yield; do not create a second Goal.

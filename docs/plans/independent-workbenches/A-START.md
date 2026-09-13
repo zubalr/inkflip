@@ -1,0 +1,22 @@
+# Workbench A: Application and integration
+
+Use Existing Devin Local / SWE-2.
+
+Own the public app connection, offline lifecycle, root wiring and integrated capability gates. Sole Beads writer, publisher and acceptance owner.
+
+Queue priority (choose first eligible, not necessarily first listed): pdf-3g8, T18, T25, T48, T51, T52.
+
+Read README.md beside this packet and your task contracts in roadmap.json. This is a standing lane brief, not proof of an active grant. Live task status/claims remain exclusively in Beads. You are the bootstrap owner: start the one-time adoption section below even when activation is absent. That authority covers the scheduling/configuration setup, not a new product claim. Before subsequent product implementation, verify activation and an exact task branch/base/scoped grant. Do not wait for another session to activate your own plan or claim conflicting product work. Canonical native_pass status supports --workbench A. Read current canonical scripts; older task checkouts may lack this option.
+
+After activation: read your lane's published state and review artifacts at startup, after each checkpoint, and before choosing work. Use the first eligible task in your queue, skipping blocked tasks. Eligibility requires accepted merged dependencies with fresh evidence and an uncontested exact scope; never waive checks because a task is assigned to your lane. Do not wait for agent chat. Work in your own task checkout; preserve other writers and existing checkpoints. Keep original bytes, schemas, frozen planning, licenses and acceptance gates intact. Use the task's actual effective commands and record failures/skips honestly. Hand off an exact committed candidate plus existing task receipt/handoff and command logs. A checkpoint is not acceptance.
+
+A alone changes shared Beads/acceptance and merges main. Publish a recoverable checkpoint, then work on another eligible item or service an independent review; do not start a task that depends on your unaccepted candidate. Review findings arrive as committed review files, not chat messages. Read and fix your own findings when received. Each grant records the actual branch/checkpoint transport; never guess or change the destination. Homebase uses the existing SSH Git/Dolt relay; no new Goal, broker or daemon.
+
+Only A edits root wiring and shared execution/registry files; put proposed shared-file changes in docs/proposals/<task>-*.md with a concrete patch/reproducer. All workers together, including native descendants, remain within five active execution slots and lower provider limits. Pause your own writer before using its slot for an independent child. Keep existing single heavy-run reservation until measured capacity permits an explicit change. Every task gets distinct test ports, outputs and environment directories. Never reboot/suspend/shut down Homebase.
+
+## One-time adoption owned here
+The owner's latest request authorizes fixed cross-provider workbenches again, replacing the previous Devin-only direction. Adopt the plan only at a safe execution checkpoint: inspect actual native children and stop duplicate writers before transferring scopes. Do not cancel productive children by injecting UI messages. Preserve all current branches and source edits; current work has precedence until its writer yields.
+
+Setup issue pdf-enc installs the reviewed dispatcher and routing; inspect its activation evidence before making any duplicate setup edits. Use the installed dependency admission and workbench inbox protocol. Record static lane routes, session identities and standing task lists, then issue ready-task grants mechanically. Accept prerequisites and process candidate reviews at every coordination cycle so workers do not depend on reminder messages. Preserve yourself as sole final acceptance authority. Reconcile metadata and old ZCode return refs explicitly; an old t05 branch cannot push the new pdf-g78 ref through its guard.
+
+Read the current pdf-pass1, pdf-3g8 and pdf-g78 notes, reconcile the live resumed composition writer and any fixture writer, and choose the newest actual candidates. Old conversation summaries and packet source_commit are not a launch base. Do not reopen accepted T05. Roll out B with T30 and D with eligible volume work as soon as readiness checks pass; release C's T19/T20 and D's T21 after T18/G1. Keep reviewing and integrating while lanes execute. Do not wait for all lanes to finish to merge a small reviewed candidate. T54 still requires its separate release decision.

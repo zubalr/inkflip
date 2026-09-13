@@ -25,10 +25,12 @@ once per session, then only the assigned task's inputs.
   and Beads writer. Mac Antigravity and Homebase ZCode consume assignments.
   Codex has yielded coordination and its continuation heartbeat stays paused.
   Only the canonical integration checkout on main dispatches with `native_pass.py dispatch`.
+  Owner-authorized setup issue pdf-enc may install/reconcile this workflow; product
+  acceptance remains Devin-owned. Read docs/plans/independent-workbenches/README.md.
   Do not use the historical local-only `coordination.py start`/`start-review`.
 - Native apps own execution. Use their own delegation and resume facilities.
   Admit useful independent work with disjoint ownership and review capacity;
-  the project has no fixed numeric worker ceiling. Allocate by independent
+  stay within five active execution slots total, including descendants. Allocate by independent
   scope, memory/load, review throughput and actual running descendants, not
   historical cards. Configured finite budgets still bound their app (codex
   stays zero); honor lower harness limits. Record allocations in Beads;
@@ -43,8 +45,9 @@ once per session, then only the assigned task's inputs.
   Cloud is stopped. Only the Devin coordinator
   accepts/closes product tasks after independent review and real merged checks.
   T54 public publication/deployment and messages to people require approval.
-- Continue ready work through the defined passes; do not stop at each ticket.
-  Advance only after the current pass checkpoint and required gates pass.
+- Continue ready granted work across independent workbenches; do not stop at each ticket.
+  Admission uses fresh accepted dependencies, not a global pass barrier.
+  Pass completion still requires its checkpoint and required gates.
   Beads pass checkpoints require listed tasks and actual gate evidence.
 - Worktrees are not an access boundary for held-out evaluation labels.
 
