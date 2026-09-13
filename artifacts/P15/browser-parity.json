@@ -1,0 +1,35 @@
+{
+  "host": {
+    "os": "Darwin arm64",
+    "python": [
+      "3.13.15",
+      "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+    ],
+    "node": "v26.7.0",
+    "cpu": "arm64",
+    "model": null
+  },
+  "playwright": "1.57.0",
+  "engines": [
+    {
+      "engine": "chromium",
+      "version": "143.0.7499.4",
+      "pdfjs": "6.3.289",
+      "source": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed"
+    },
+    {
+      "engine": "firefox",
+      "version": "144.0.2",
+      "pdfjs": "6.3.289",
+      "source": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed"
+    },
+    {
+      "engine": "webkit",
+      "version": "26.0",
+      "pdfjs": "6.3.289",
+      "source": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed"
+    }
+  ],
+  "safari_physical": "unavailable",
+  "linux_amd64_native": "unavailable"
+}

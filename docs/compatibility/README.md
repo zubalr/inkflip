@@ -1,8 +1,11 @@
 # Browser / native compatibility (T46 / P15)
 
-This checkout ran native PDFium inspect and the pinned Node PDF.js wrapper
-(`packages/readers-pdfjs/node/bridge.mjs`) against
-`fixtures/public/mapping-control.pdf`.
+This checkout ran native PDFium inspect, the pinned Node PDF.js wrapper,
+and Playwright Chromium 143.0.7499.4 plus Firefox 144.0.2 against
+`fixtures/public/mapping-control.pdf` through the `@inkflip/readers-pdfjs`
+browser adapter (pdfjs-dist 6.3.289). Playwright WebKit 26.0 launched but
+`getTextContent` failed with a ReadableStream TypeError; that is not a
+physical Safari result.
 
 Promised semantic equivalence here is:
 
@@ -21,11 +24,9 @@ acceptance command. It derives required profiles from
 `planning/quality/PERFORMANCE_AND_COMPATIBILITY.md` (Chromium, Firefox,
 physical Safari, Linux x86_64 native) and fails closed while coverage is
 incomplete. `--inventory` lists missing profiles without certifying them.
-Node PDF.js and Playwright WebKit are not substitutes for those profiles.
 
 ## Platforms
 
-See `docs/compatibility/manual-receipt.json` and `artifacts/P15/platforms.json`.
-Safari device observations and Linux amd64 native binaries remain missing
-and block final acceptance. Browser automation results, when present, are
-recorded per engine and never implied from the Node wrapper.
+See `docs/compatibility/manual-receipt.json` and `artifacts/P15/`.
+Physical Safari and Linux amd64 native remain missing and block final
+acceptance. Node PDF.js is recorded but is not a browser substitute.

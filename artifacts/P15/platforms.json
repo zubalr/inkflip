@@ -11,39 +11,46 @@
   },
   "platforms": [
     {
-      "id": "native-macos-arm64",
-      "status": "executed",
-      "evidence": [
-        "artifacts/P15/native-repeat.json"
-      ]
-    },
-    {
-      "id": "pdfjs-node-wrapper",
-      "status": "executed",
-      "evidence": [
-        "artifacts/P15/pdfjs-node.json"
-      ]
-    },
-    {
       "id": "chromium",
-      "status": "unavailable",
-      "evidence": [],
-      "note": "Playwright/Chromium UI not launched in this allocation; pdf.js entry used via node wrapper"
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/chromium.json"
+      ],
+      "identity": {
+        "browser": "chromium 143.0.7499.4",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36"
+      },
+      "note": null
     },
     {
       "id": "firefox",
-      "status": "unavailable",
-      "evidence": []
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/firefox.json"
+      ],
+      "identity": {
+        "browser": "firefox 144.0.2",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0"
+      },
+      "note": null
     },
     {
       "id": "webkit-safari",
-      "status": "unavailable",
-      "evidence": []
-    },
-    {
-      "id": "linux-amd64-native",
-      "status": "unavailable",
-      "evidence": []
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/webkit-safari.json"
+      ],
+      "identity": {
+        "browser": "webkit 26.0",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
+      },
+      "note": "Playwright WebKit launched; pdf.js getTextContent hits a ReadableStream TypeError. This is not a physical Safari device result."
     }
   ]
 }

@@ -12,7 +12,6 @@ import {
   nativeInspect,
   pdfjsExtract,
   sha256File,
-  which,
   writeJson,
 } from "./harness.mjs";
 
@@ -112,43 +111,25 @@ test("same-version native repeats differ from a deliberate reader change", () =>
   });
 });
 
-test("supported browsers actually available are exercised; others recorded", () => {
+test("native and node wrapper identities are recorded without claiming browser coverage", () => {
   const platforms = [
     {
       id: "native-macos-arm64",
       status: "executed",
       evidence: ["artifacts/P15/native-repeat.json"],
+      identity: hostManifest(),
     },
     {
       id: "pdfjs-node-wrapper",
       status: existsSync(PDFJS_BRIDGE) ? "executed" : "unavailable",
       evidence: existsSync(PDFJS_BRIDGE) ? ["artifacts/P15/pdfjs-node.json"] : [],
-    },
-    {
-      id: "chromium",
-      status: which("chromium") || which("google-chrome") ? "pending" : "unavailable",
-      evidence: [],
-      note: "Playwright/Chromium UI not launched in this allocation; pdf.js entry used via node wrapper",
-    },
-    {
-      id: "firefox",
-      status: "unavailable",
-      evidence: [],
-    },
-    {
-      id: "webkit-safari",
-      status: "unavailable",
-      evidence: [],
-    },
-    {
-      id: "linux-amd64-native",
-      status: "unavailable",
-      evidence: [],
+      identity: existsSync(PDFJS_BRIDGE) ? { runtime: "node", entry: "packages/readers-pdfjs/node/bridge.mjs" } : {},
     },
   ];
-  writeJson(join(ARTIFACTS, "platforms.json"), {
+  writeJson(join(ARTIFACTS, "native-node-platforms.json"), {
     host: hostManifest(),
     platforms,
+    note: "Browser engines are recorded by tests/parity/browser.test.mjs; Node is not a browser substitute",
   });
   const executed = platforms.filter((p) => p.status === "executed");
   assert.ok(executed.length >= 1);

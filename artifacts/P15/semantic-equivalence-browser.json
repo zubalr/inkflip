@@ -1,0 +1,125 @@
+{
+  "source_hash_agreed": true,
+  "native_reader": {
+    "id": "pdfium-native",
+    "name": "PDFium",
+    "version": "5.8.0",
+    "build": "pypdfium2 5.8.0 / PDFium 149.0.7825.0",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "native",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "glyph-box granularity; consecutive characters sharing an exactly-equal reported box are coalesced without width guessing",
+          "UserUnit compensation derives physical geometry from pypdf page metadata; get_size() is not trusted for physical units"
+        ]
+      },
+      {
+        "name": "render",
+        "support": "unavailable",
+        "limits": [
+          "render scale compensation is proven under the OCR/render tasks; not claimed by this reader manifest yet"
+        ]
+      }
+    ],
+    "model_hashes": [
+      "3aed5632c54a689ade84a811b93943ea8afa8c3ccae6b3e7e9e58de87bea42af"
+    ],
+    "limitations": [
+      "single-threaded in-process adapter; supervision belongs to the native parent task",
+      "rotation is display-only and is not applied to stored occurrence coordinates"
+    ]
+  },
+  "browser_reader": {
+    "id": "pdfjs-6_3_289-text",
+    "name": "pdf.js text",
+    "version": "6.3.289",
+    "build": "pdfjs-dist-legacy",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "browser",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "render",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+          "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+          "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+          "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+          "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order"
+        ]
+      },
+      {
+        "name": "ocr",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "object_render_mode",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "crop_metadata",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "paint_overlap",
+        "support": "unavailable",
+        "limits": []
+      },
+      {
+        "name": "reading_order",
+        "support": "approximate",
+        "limits": [
+          "raw emitted getTextContent order only; derived geometric/logical ordering belongs to the alignment layer"
+        ]
+      },
+      {
+        "name": "alignment",
+        "support": "unavailable",
+        "limits": []
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "raw_text is the unmodified getTextContent API string; the parser may still decode character mappings",
+      "occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance",
+      "a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item",
+      "marked-content records are preserved as counts only; they are never emitted as text occurrences",
+      "emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order",
+      "original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null",
+      "no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary"
+    ]
+  },
+  "native_check": "completed",
+  "browser_check": "completed",
+  "raw_text_equal": false,
+  "explanation": "expected engine difference: PDFium vs pdf.js getTextContent; rasters not compared"
+}
