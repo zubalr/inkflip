@@ -1,0 +1,28 @@
+# Weaker local-checkout image for when T47 wheels are not yet published.
+# Not the digest-pinned release profile in Dockerfile. Still uses the T02
+# python index digest and runs as UID 65532. Processing remains offline.
+# The `inkflip` command is a PATH wrapper over PYTHONPATH=/app/native; it is
+# not a hashed-wheel install. Do not advertise this image as the release profile.
+ARG BASE_IMAGE=python:3.13.15-slim-trixie@sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285
+FROM ${BASE_IMAGE}
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY native/ /app/native/
+ENV PYTHONPATH=/app/native \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1
+RUN python -m pip install --no-cache-dir \
+      pypdfium2==5.8.0 pypdf==6.18.0 Pillow==12.3.0 jsonschema==4.26.0 \
+    && printf '%s\n' \
+         '#!/usr/bin/env python' \
+         'import sys' \
+         'from inkflip.cli.main import main' \
+         'raise SystemExit(main())' \
+         > /usr/local/bin/inkflip \
+    && chmod 0755 /usr/local/bin/inkflip
+USER 65532:65532
+ENTRYPOINT ["inkflip"]

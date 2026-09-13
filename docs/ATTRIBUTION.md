@@ -120,3 +120,13 @@ worker, WASM and model bytes and existing license notices are unchanged.
 ## T30 — native HTML report conversion (2026-09-13)
 
 - `native/inkflip/cli/html.py`: Script-free portable HTML for validated reports and comparisons adapts the same `planning/tools/export_html.py` stylesheet tokens (colors, type scale, section cards) with a CSP `style-src` hash and no script tags.
+
+## T40 — native containment recipe (2026-09-13)
+
+- `build/native/Dockerfile` follows `planning/deployment/examples/Dockerfile.native` and pins the T02-recorded `python:3.13.15-slim-trixie` index digest. No third-party Dockerfile was copied beyond that planning recipe.
+- Native packaging uses hatchling 1.32.0 as a **build-only** PEP 517 pin to emit the `inkflip` console script. Hatchling is not a runtime dependency and is not added to the T02 frozen runtime lock.
+
+## T46 — compatibility receipt checker (2026-09-13)
+
+- `scripts/check_manual_receipts.py` is a small shared checker (T37/T46/T53 kinds). T46 lands the `compatibility` kind so the documented command can run. Other kinds fail closed until their owners add receipts. See `docs/proposals/T46.md`.
+

@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "compatibility",
+  "status": "partial",
+  "task": "T46",
+  "host": {
+    "os": "Darwin arm64",
+    "python": "3.13.15",
+    "node": "v26.7.0",
+    "cpu": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "playwright": "1.57.0"
+  },
+  "platforms": [
+    {
+      "id": "native-macos-arm64",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/native-repeat.json",
+        "artifacts/P15/semantic-equivalence.json"
+      ],
+      "identity": {
+        "os": "Darwin arm64",
+        "python": "3.13.15",
+        "reader": "pdfium-native / pypdfium2 5.8.0 / PDFium 149.0.7825.0"
+      }
+    },
+    {
+      "id": "pdfjs-node-wrapper",
+      "status": "executed",
+      "evidence": ["artifacts/P15/pdfjs-node.json"],
+      "identity": {
+        "runtime": "node v26.7.0",
+        "entry": "packages/readers-pdfjs/node/bridge.mjs",
+        "pdfjs": "6.3.289"
+      },
+      "note": "Node wrapper is not a browser profile"
+    },
+    {
+      "id": "chromium",
+      "status": "executed",
+      "evidence": ["artifacts/P15/chromium.json", "artifacts/P15/semantic-equivalence-browser.json"],
+      "identity": {
+        "browser": "chromium 143.0.7499.4",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289"
+      }
+    },
+    {
+      "id": "firefox",
+      "status": "executed",
+      "evidence": ["artifacts/P15/firefox.json"],
+      "identity": {
+        "browser": "firefox 144.0.2",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289"
+      }
+    },
+    {
+      "id": "webkit-safari",
+      "status": "executed",
+      "evidence": ["artifacts/P15/webkit-safari.json"],
+      "identity": {
+        "browser": "webkit 26.0",
+        "playwright": "1.57.0",
+        "pdfjs": "6.3.289"
+      },
+      "note": "Playwright WebKit automation. pdf.js getTextContent raised ReadableStream TypeError. This is not a physical Safari device observation."
+    },
+    {
+      "id": "safari",
+      "status": "unavailable",
+      "evidence": [],
+      "note": "Physical Safari / device observation not executed. WebKit automation does not satisfy this profile."
+    },
+    {
+      "id": "linux-amd64-native",
+      "status": "unavailable",
+      "evidence": [],
+      "note": "Linux x86_64 native binary not executed on this macOS arm64 host."
+    }
+  ],
+  "promised_semantic_equivalence": {
+    "source_hash": "agreed",
+    "check_terminals": "agreed completed",
+    "raw_text": "not forced equal",
+    "rasters": "not forced equal"
+  },
+  "pending_for_final_acceptance": [
+    "Physical Safari current/previous major",
+    "Linux amd64 native binary",
+    "Chromium previous-stable and Firefox ESR",
+    "cold/warm OCR model cache"
+  ]
+}
