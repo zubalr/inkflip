@@ -1,0 +1,40 @@
+{
+  "experiment": "P14",
+  "task_id": "T45",
+  "status": "rejected_experiment",
+  "disposition": "rejected_experiment",
+  "rejection_rationale": "Automatic deskew resampling corrupts clean ruled controls: pixel interpolation blurs 1-pixel vector rules and introduces subpixel coordinate drift. Violates criterion: Any lost registration or clean corruption rejects.",
+  "evaluation": {
+    "candidate": "Radon/Hough deskew affine compensator",
+    "tested_skew_angle_deg": 1.5,
+    "forward_matrix": [
+      0.9996573249755573,
+      -0.026176948307873153,
+      0.026176948307873153,
+      0.9996573249755573,
+      0.0,
+      0.0
+    ],
+    "inverse_matrix": [
+      0.9996573249755573,
+      0.026176948307873153,
+      -0.026176948307873153,
+      0.9996573249755573,
+      0.0,
+      0.0
+    ],
+    "clean_control_tested": true,
+    "clean_control_pixel_drift": true,
+    "clean_control_registration_loss": true,
+    "decision": "reject",
+    "reason": "Automatic deskew resampling corrupts clean ruled controls: pixel interpolation blurs 1-pixel vector rules and introduces subpixel coordinate drift. Violates criterion: Any lost registration or clean corruption rejects."
+  },
+  "invariants_enforced": {
+    "I01": "Source bytes unchanged (input PDFs never written)",
+    "I02": "Original raster immutable (no destructive resampling)",
+    "I04": "No unanchored geometry rescue",
+    "I16": "Original preservation prioritized over heuristic alignment"
+  },
+  "production_candidate_promoted": false,
+  "recommendation": "Reject automatic raster deskew from production pipeline; keep original raster immutable."
+}
