@@ -6,233 +6,261 @@
   "hypothesis": "Original-preserving geometric raster value",
   "baseline": "Unmodified render OCR",
   "candidate": "Single deskew/strip-registration candidate with full transform chain",
-  "manifest": "evaluation/manifests/development.corpus.json",
+  "candidate_theta_degrees": 1.0,
+  "manifest": "fixtures/manifest.json",
   "fixture_ids": [
     "F06",
     "F07",
     "F09",
     "F15"
   ],
-  "clean_controls": "Ordinary ruled forms, already aligned clean pages",
+  "clean_controls": "Ordinary ruled forms, already aligned clean pages across F06, F07, F09, F15",
   "resource_costs": {
-    "total_pixels_evaluated": 3016000,
-    "total_megapixels": 3.016,
-    "runtime_seconds": 0.0752
+    "total_pixels_evaluated": 6284800,
+    "total_megapixels": 6.2848,
+    "runtime_seconds": 4.7092
   },
   "metrics": {
-    "total_fixtures_evaluated": 9,
-    "clean_controls_evaluated": 5,
-    "clean_controls_corrupted_count": 5,
-    "mean_edge_variance_loss_pct": 12.7451,
-    "max_subpixel_drift_px": 0.6244,
+    "total_fixtures_evaluated": 14,
+    "clean_controls_evaluated": 4,
+    "clean_controls_corrupted_count": 4,
     "lost_registration_detected": true,
+    "mean_edge_variance_loss_pct": 13.0058,
+    "max_fiducial_drift_px": 159.6285,
+    "max_subpixel_drift_px": 0.5348,
     "source_bytes_mutated_count": 0
   },
   "rejection_reasons": [
-    "Clean controls corrupted by resampling blur: 5 / 5 clean controls exhibited edge variance loss and anti-aliasing degradation",
-    "Subpixel coordinate drift detected on grid quantization (max drift: 0.6244 px)",
-    "Acceptance rule violation: 'Any lost registration or clean corruption rejects'"
+    "Clean controls corrupted by resampling blur: 4 / 4 clean controls exhibited edge variance loss (> 1.0%) or pixel drift",
+    "Lost registration detected: rendered fiducial anchor drift reached 159.6285px, subpixel coordinate drift reached 0.5348px"
   ],
   "fixtures": [
     {
-      "path": "fixtures/development/ocr-material-control.pdf",
-      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "path": "fixtures/public/geometry-0.pdf",
+      "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
+      "is_clean_control": false,
       "page_size_pt": [
-        320.0,
-        240.0
+        480.0,
+        350.0
       ],
       "raster_dimensions": [
-        640,
-        480
+        960,
+        700
       ],
-      "pixels": 307200,
+      "pixels": 672000,
+      "baseline": {
+        "edge_variance": 1190.876,
+        "fiducial_anchor_px": [
+          228.45,
+          271.63
+        ],
+        "ocr_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\nRendered marks and extracted text are separate."
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1092.3204,
+        "edge_variance_loss_pct": 8.2759,
+        "mean_pixel_drift": 3.0304,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 89.5911,
+        "subpixel_coordinate_drift_px": 0.2894,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\nRendered marks and extracted text are separate.",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/geometry-0_baseline.png",
+        "candidate": "artifacts/P14/rasters/geometry-0_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/geometry-0_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/public/geometry-90.pdf",
+      "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
+      "is_clean_control": false,
+      "page_size_pt": [
+        350.0,
+        480.0
+      ],
+      "raster_dimensions": [
+        700,
+        960
+      ],
+      "pixels": 672000,
+      "baseline": {
+        "edge_variance": 1172.9688,
+        "fiducial_anchor_px": [
+          427.13,
+          228.5
+        ],
+        "ocr_text": "Zz\nPF  :\u00a2\n2 =\no gg Zz\n3 \u2014> = a\na as\n3 2 \u2122\n\u00bb \u00bb ao\nx Qo.0Um\n2 > om\ng \u00a2 \u00a7\n3 $ =\nQ os \u00ab(UW\ng a TF\nz mm\n4 <.\n\u00bb ro}\n3 gs\n8 =\nno]\no\n@\n3\n\u00ae"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1067.0524,
+        "edge_variance_loss_pct": 9.0298,
+        "mean_pixel_drift": 3.0088,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 89.336,
+        "subpixel_coordinate_drift_px": 0.5061,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "Zz WM\ng Hf cs\n3 a \\ = 7\na o\n3 zg\nD o a\n3 CO ja\n\u00bb Pp om\na a &\noO\nES a =\n3 g 5\n3 5 or\na => m\n=> o\noO <.\nx Ss\n2 \u00b0\noO =\na <\n2 :\nmo]\nog\n3\no",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/geometry-90_baseline.png",
+        "candidate": "artifacts/P14/rasters/geometry-90_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/geometry-90_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/public/geometry-180.pdf",
+      "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
+      "is_clean_control": false,
+      "page_size_pt": [
+        480.0,
+        350.0
+      ],
+      "raster_dimensions": [
+        960,
+        700
+      ],
+      "pixels": 672000,
+      "baseline": {
+        "edge_variance": 1187.5876,
+        "fiducial_anchor_px": [
+          730.28,
+          427.08
+        ],
+        "ocr_text": "\u201cayesedas ole }x9} pajoeyxe pue sew porepusy\n\u201cKuo Joeyaq Japeay \u201cuojoesued) jel ON\nAIdWVX3 OILAHLNAS"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1084.5274,
+        "edge_variance_loss_pct": 8.6781,
+        "mean_pixel_drift": 3.03,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 89.2362,
+        "subpixel_coordinate_drift_px": 0.4462,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "-ayesedas aie 1X9} pajoes}xe pue sew pasepusy\n\u201cKuo Joeyaq Japeay \u201cuoNOesue,} [281 ON\nFIdWVX3 OILAHLNAS",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/geometry-180_baseline.png",
+        "candidate": "artifacts/P14/rasters/geometry-180_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/geometry-180_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/public/geometry-270.pdf",
+      "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
+      "is_clean_control": false,
+      "page_size_pt": [
+        350.0,
+        480.0
+      ],
+      "raster_dimensions": [
+        700,
+        960
+      ],
+      "pixels": 672000,
+      "baseline": {
+        "edge_variance": 1172.8581,
+        "fiducial_anchor_px": [
+          271.84,
+          730.53
+        ],
+        "ocr_text": "g\n. \u00a9\n: oO\n: Q\n: oO\nKe} :\n: 2\nws\n: 2\na 3\n2 no}\nF oO\nSg x\n= oO\no & (2) 5\n\u2014 oOo\nF \u00a7\nwi<\u00ab \u00a9 3\nrc &\u00a3 :\nEs vv\nz \u00a7$\noO\n> o :\nNn Zz GH ;\nc\noO\na"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1067.3116,
+        "edge_variance_loss_pct": 8.9991,
+        "mean_pixel_drift": 3.0089,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 89.3594,
+        "subpixel_coordinate_drift_px": 0.494,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "g\n| \u00a9\n. oO\n3 Qa\n2 oO\n5 a\n8 :\n: 5\nwu = :\n= & 3\na. g\nS 8 :\nWig :\nke &\nw 2 \u2018@) :\n<r &\u00a7& :\nE 5 vo :\n3 o\n5s 6A E\nig",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/geometry-270_baseline.png",
+        "candidate": "artifacts/P14/rasters/geometry-270_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/geometry-270_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/public/geometry-control.pdf",
+      "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "fixture_id": "F07",
+      "family": "origins-rotation",
       "is_clean_control": true,
-      "baseline": {
-        "edge_variance": 903.1406
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 870.7027,
-        "edge_variance_loss_pct": 3.5917,
-        "mean_pixel_drift": 2.6658,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": true,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
-      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": false,
-      "baseline": {
-        "edge_variance": 1680.749
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 1017.562,
-        "edge_variance_loss_pct": 39.4578,
-        "mean_pixel_drift": 3.8232,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": false,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
-      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": false,
-      "baseline": {
-        "edge_variance": 1679.6347
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 1016.7344,
-        "edge_variance_loss_pct": 39.4669,
-        "mean_pixel_drift": 3.8227,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": false,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/partial-clip-control.pdf",
-      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": true,
-      "baseline": {
-        "edge_variance": 622.4634
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 608.7571,
-        "edge_variance_loss_pct": 2.2019,
-        "mean_pixel_drift": 2.5078,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": true,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/partial-clip-partial.pdf",
-      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": false,
-      "baseline": {
-        "edge_variance": 555.6285
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 555.4142,
-        "edge_variance_loss_pct": 0.0386,
-        "mean_pixel_drift": 2.454,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": false,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/partial-clip-triangle.pdf",
-      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": false,
-      "baseline": {
-        "edge_variance": 546.1753
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 548.106,
-        "edge_variance_loss_pct": -0.3535,
-        "mean_pixel_drift": 2.4387,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": false,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/huge-page-control.pdf",
-      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
-      "page_size_pt": [
-        320.0,
-        240.0
-      ],
-      "raster_dimensions": [
-        640,
-        480
-      ],
-      "pixels": 307200,
-      "is_clean_control": true,
-      "baseline": {
-        "edge_variance": 622.4634
-      },
-      "candidate": {
-        "transform": "affine_deskew_bilinear_resample",
-        "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 608.7571,
-        "edge_variance_loss_pct": 2.2019,
-        "mean_pixel_drift": 2.5078,
-        "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.2018,
-        "clean_control_corrupted": true,
-        "source_bound": true
-      }
-    },
-    {
-      "path": "fixtures/development/userunit-1.pdf",
-      "sha256": "6f6201cebc34505d6af8ffc3bc555cf16ac94f874e5d674b11c451bb8f0d09cb",
       "page_size_pt": [
         520.0,
         400.0
@@ -242,51 +270,543 @@
         800
       ],
       "pixels": 832000,
-      "is_clean_control": true,
       "baseline": {
-        "edge_variance": 1113.275
+        "edge_variance": 993.2264,
+        "fiducial_anchor_px": [
+          268.45,
+          291.63
+        ],
+        "ocr_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\nRendered marks and extracted text are separate."
       },
       "candidate": {
         "transform": "affine_deskew_bilinear_resample",
         "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 928.1024,
-        "edge_variance_loss_pct": 16.6331,
-        "mean_pixel_drift": 3.0785,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 852.6243,
+        "edge_variance_loss_pct": 14.1561,
+        "mean_pixel_drift": 3.0004,
         "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.6244,
+        "fiducial_anchor_drift_px": 105.7269,
+        "subpixel_coordinate_drift_px": 0.4584,
         "clean_control_corrupted": true,
+        "registration_lost": true,
+        "ocr_text": "TTT \u2014\u2014\u2014\u2014\u2014 lL,\nSYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\nRendered marks and extracted text are separate.\nees",
         "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/geometry-control_baseline.png",
+        "candidate": "artifacts/P14/rasters/geometry-control_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/geometry-control_roundtrip.png"
       }
     },
     {
-      "path": "fixtures/development/adjacent-crop-control.pdf",
-      "sha256": "4722b3e2cf2af24facc0ab5849020aab371547f2dfde5e6e9d984035371033fe",
+      "path": "fixtures/development/partial-clip-control.pdf",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "is_clean_control": true,
       "page_size_pt": [
-        210.0,
-        40.0
+        320.0,
+        240.0
       ],
       "raster_dimensions": [
-        420,
-        80
+        640,
+        480
       ],
-      "pixels": 33600,
-      "is_clean_control": true,
+      "pixels": 307200,
       "baseline": {
-        "edge_variance": 4511.1532
+        "edge_variance": 622.4634,
+        "fiducial_anchor_px": [
+          148.41,
+          222.52
+        ],
+        "ocr_text": "$100"
       },
       "candidate": {
         "transform": "affine_deskew_bilinear_resample",
         "theta_degrees": 1.0,
-        "roundtrip_edge_variance": 3993.82,
-        "edge_variance_loss_pct": 11.4679,
-        "mean_pixel_drift": 8.7849,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 608.7571,
+        "edge_variance_loss_pct": 2.2019,
+        "mean_pixel_drift": 2.5078,
         "max_pixel_drift": 255,
-        "subpixel_coordinate_drift_px": 0.3714,
+        "fiducial_anchor_drift_px": 120.0856,
+        "subpixel_coordinate_drift_px": 0.5348,
         "clean_control_corrupted": true,
+        "registration_lost": true,
+        "ocr_text": "Oo",
         "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/partial-clip-control_baseline.png",
+        "candidate": "artifacts/P14/rasters/partial-clip-control_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/partial-clip-control_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/partial-clip-partial.pdf",
+      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 555.6285,
+        "fiducial_anchor_px": [
+          122.91,
+          222.42
+        ],
+        "ocr_text": "$1"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 555.4142,
+        "edge_variance_loss_pct": 0.0386,
+        "mean_pixel_drift": 2.454,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 159.6285,
+        "subpixel_coordinate_drift_px": 0.2434,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "Oo",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/partial-clip-partial_baseline.png",
+        "candidate": "artifacts/P14/rasters/partial-clip-partial_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/partial-clip-partial_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/partial-clip-triangle.pdf",
+      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
+      "fixture_id": "F06",
+      "family": "partial-clip",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 546.1753,
+        "fiducial_anchor_px": [
+          176.26,
+          225.47
+        ],
+        "ocr_text": ".J0"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 548.106,
+        "edge_variance_loss_pct": -0.3535,
+        "mean_pixel_drift": 2.4387,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 119.4655,
+        "subpixel_coordinate_drift_px": 0.4689,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "Oo",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/partial-clip-triangle_baseline.png",
+        "candidate": "artifacts/P14/rasters/partial-clip-triangle_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/partial-clip-triangle_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/text-transform-control.pdf",
+      "sha256": "d70636d4e402f7e4dd70ecb89a2e14680e42eb19e80493f2ea80e1b68e82708e",
+      "fixture_id": "F09",
+      "family": "text-transform",
+      "is_clean_control": true,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 1001.4169,
+        "fiducial_anchor_px": [
+          319.75,
+          59.75
+        ],
+        "ocr_text": "$100"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 835.3792,
+        "edge_variance_loss_pct": 16.5803,
+        "mean_pixel_drift": 2.759,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 0.3817,
+        "subpixel_coordinate_drift_px": 0.2464,
+        "clean_control_corrupted": true,
+        "registration_lost": true,
+        "ocr_text": "",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/text-transform-control_baseline.png",
+        "candidate": "artifacts/P14/rasters/text-transform-control_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/text-transform-control_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/text-transform-skew.pdf",
+      "sha256": "8e6b6ae59cd4d5e9de239707c67a63945acf75bfc0c378e0202e08a0327b4587",
+      "fixture_id": "F09",
+      "family": "text-transform",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 997.1337,
+        "fiducial_anchor_px": [
+          319.75,
+          59.75
+        ],
+        "ocr_text": "g100"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 838.9053,
+        "edge_variance_loss_pct": 15.8683,
+        "mean_pixel_drift": 2.7949,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 0.3817,
+        "subpixel_coordinate_drift_px": 0.2464,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/text-transform-skew_baseline.png",
+        "candidate": "artifacts/P14/rasters/text-transform-skew_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/text-transform-skew_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/text-transform-rotated.pdf",
+      "sha256": "0e38534ecf6deacbb2009fcec3b44d1b03a816c070da1b59d2e0b6735636cddb",
+      "fixture_id": "F09",
+      "family": "text-transform",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 1004.0689,
+        "fiducial_anchor_px": [
+          319.75,
+          59.75
+        ],
+        "ocr_text": "lo)\n(o)\n\u2014\nA"
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 842.5073,
+        "edge_variance_loss_pct": 16.0907,
+        "mean_pixel_drift": 2.7495,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 0.3817,
+        "subpixel_coordinate_drift_px": 0.2464,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/text-transform-rotated_baseline.png",
+        "candidate": "artifacts/P14/rasters/text-transform-rotated_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/text-transform-rotated_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-control.pdf",
+      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "is_clean_control": true,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 903.1406,
+        "fiducial_anchor_px": [
+          297.74,
+          235.19
+        ],
+        "ocr_text": "SEAMOUNT -+188."
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 870.7027,
+        "edge_variance_loss_pct": 3.5917,
+        "mean_pixel_drift": 2.6658,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 9.5502,
+        "subpixel_coordinate_drift_px": 0.2592,
+        "clean_control_corrupted": true,
+        "registration_lost": true,
+        "ocr_text": "SBeAPOUMT -+1iee.",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/ocr-material-control_baseline.png",
+        "candidate": "artifacts/P14/rasters/ocr-material-control_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/ocr-material-control_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
+      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 1679.6347,
+        "fiducial_anchor_px": [
+          301.68,
+          236.12
+        ],
+        "ocr_text": "SeMounT File."
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1016.7344,
+        "edge_variance_loss_pct": 39.4669,
+        "mean_pixel_drift": 3.8227,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 5.3316,
+        "subpixel_coordinate_drift_px": 0.32,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "eS AePounT Ftiee.",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/ocr-material-sign-ambiguity_baseline.png",
+        "candidate": "artifacts/P14/rasters/ocr-material-sign-ambiguity_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/ocr-material-sign-ambiguity_roundtrip.png"
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
+      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "is_clean_control": false,
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "baseline": {
+        "edge_variance": 1680.749,
+        "fiducial_anchor_px": [
+          300.38,
+          236.12
+        ],
+        "ocr_text": "SAMOUMT -+108."
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "forward_matrix": [
+          0.9998476951563913,
+          -0.01745240643728351,
+          0.01745240643728351,
+          0.9998476951563913
+        ],
+        "inverse_matrix": [
+          0.9998476951563913,
+          0.01745240643728351,
+          -0.01745240643728351,
+          0.9998476951563913
+        ],
+        "roundtrip_edge_variance": 1017.562,
+        "edge_variance_loss_pct": 39.4578,
+        "mean_pixel_drift": 3.8232,
+        "max_pixel_drift": 255,
+        "fiducial_anchor_drift_px": 5.726,
+        "subpixel_coordinate_drift_px": 0.5037,
+        "clean_control_corrupted": false,
+        "registration_lost": true,
+        "ocr_text": "BAPOUMT -+1ioe.",
+        "source_bound": true
+      },
+      "rasters": {
+        "baseline": "artifacts/P14/rasters/ocr-material-digit-ambiguity_baseline.png",
+        "candidate": "artifacts/P14/rasters/ocr-material-digit-ambiguity_candidate.png",
+        "roundtrip": "artifacts/P14/rasters/ocr-material-digit-ambiguity_roundtrip.png"
       }
     }
   ],
   "integration_decision": "rejected_from_production",
-  "note": "Measured real PDFium renderings at 2.0x scale. Resampling deskew transforms introduced measurable edge variance loss (blur) and subpixel coordinate drift on clean ruled controls. Candidate is rejected; never automated repair or sanitization."
+  "acceptance": "Any lost registration or clean corruption rejects; gain must transfer beyond challenge generator; no PDF write path; negative result closes task with deleted production candidate.",
+  "note": "Evaluated real PDFium renderings across manifest fixtures F06, F07, F09, F15. Resampling deskew transforms introduced measurable edge variance loss (blur) and rendered fiducial anchor drift. Decision is dynamically derived: identity transform produces zero blur/drift/loss; candidate deskew rejects."
 }
