@@ -196,9 +196,10 @@ def check_versions(root: Path, rules: dict) -> list[str]:
             path = root / rel
             if not path.is_file():
                 continue
+            allowed = {a.get("version"): a.get("reason", "") for a in rule.get("allowed_other_versions", [])}
             for m in re.finditer(rule["doc_pattern"], path.read_text()):
                 quoted = m.group(1)
-                if quoted != pin:
+                if quoted != pin and quoted not in allowed:
                     problems.append(
                         f"{rel}: quotes {rule['name']} version {quoted} but the frozen pin is {pin}"
                     )
