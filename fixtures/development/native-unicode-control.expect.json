@@ -1,0 +1,26 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "native-unicode",
+  "fixture_id": "F14",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F14",
+    "intent": {
+      "encoding": "Identity-H hex strings; ToUnicode carries the Unicode per code",
+      "font": "no font program embedded (BaseFont names only); glyph appearance not asserted",
+      "logical_strings": [
+        "LATIN-$100"
+      ],
+      "mechanism_scope": "Latin single-scalar mechanism only: native-script rendering/extraction needs a rights-pinned embedded font, which the fixture font-program gate forbids \u2014 asset/gate change reported to the coordinator, not simulated with unembedded glyphs",
+      "note": "Latin control",
+      "observed_extraction": "PDFium 149.0.7825.0 extracts the declared logical strings for this Latin mechanism; non-embedded complex-script runs extract as empty on this build (reader-dependent, I11) \u2014 consumers preserve reader output verbatim and never normalize toward the declared logical strings"
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "preserve logical values, conservative geometry",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

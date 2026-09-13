@@ -1,0 +1,21 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/baseline-misuse-control.json",
+  "family": "baseline-misuse",
+  "fixture_id": "F23",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F23",
+    "intent": {
+      "canonical_schema": "report/baseline/acceptance_rules all schema-valid; the rule stage fires",
+      "expected": "regression comparison cannot improve by losing checks",
+      "scenario": "baseline lost the check-ocr entry"
+    },
+    "variant": "coverage-loss",
+    "version": "g78.1"
+  },
+  "observation": "not improved due to missing checks",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

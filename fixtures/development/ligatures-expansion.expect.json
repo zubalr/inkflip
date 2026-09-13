@@ -1,0 +1,25 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/ligatures-control.pdf",
+  "family": "ligatures",
+  "fixture_id": "F13",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F13",
+    "intent": {
+      "extraction_intent": "fi",
+      "map": "single code expands to two Unicode scalars",
+      "painted_codes": [
+        "A1"
+      ],
+      "painted_glyph_constant": true,
+      "raw_output": "expansion and map relation preserved verbatim"
+    },
+    "variant": "expansion",
+    "version": "g78.1"
+  },
+  "observation": "raw values/maps preserved",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

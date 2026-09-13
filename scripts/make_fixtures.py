@@ -656,6 +656,628 @@ def followup_entries() -> list[dict]:
     return structural_entries() + missing_map_entries() + failure_entries() + fault_entries() + canary_entries()
 
 
+# ---------------------------------------------------------------------------
+# g78.2 catalog follow-up: F09, F12-F16, F22-F26 (audit-derived recipes)
+# ---------------------------------------------------------------------------
+
+def transform_entries() -> list[dict]:
+    """F09: skew/rotation text matrices with registration crosshairs; the
+    unskewed page is the control. Consumers must map polygons through the
+    full text matrix — an axis-only bounding box cannot match the anchors."""
+    crosshair = b"0.5 w 30 210 m 290 210 l S 160 30 m 160 230 l S\n"
+    skew = "0.9 0.25 0 1 60 120"
+    rotate = "0 1 -1 0 220 80"
+    definitions = [
+        ("F09", "control", crosshair + fixed_text(matrix="1 0 0 1 60 120"),
+         {"matrices": ["1 0 0 1 60 120"], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+        ("F09", "skew", crosshair + fixed_text(matrix=skew),
+         {"matrices": [skew], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+        ("F09", "rotated", crosshair + fixed_text(matrix=rotate),
+         {"matrices": [rotate], "crosshair": [30, 210, 290, 210, 160, 30, 160, 230],
+          "text": "$100"}),
+    ]
+    return [catalog_entry(fid, variant, pdf(fixed_page(body)), intent)
+            for fid, variant, body, intent in definitions]
+
+
+def reading_order_entries() -> list[dict]:
+    """F12: identical two-column layout; the variant reorders the content
+    stream (right column painted first). Recorded stream order and visual
+    order differ; no accessibility verdict exists anywhere."""
+    left = [fixed_text("LEFT-1", "1 0 0 1 40 180"), fixed_text("LEFT-2", "1 0 0 1 40 120")]
+    right = [fixed_text("RIGHT-1", "1 0 0 1 180 180"), fixed_text("RIGHT-2", "1 0 0 1 180 120")]
+    ordered = b"".join(left + right)
+    reordered = b"".join(right + left)
+    intent = {
+        "visual_columns": {"left": ["LEFT-1", "LEFT-2"], "right": ["RIGHT-1", "RIGHT-2"]},
+        "stream_order": None,
+        "note": "reading order differs; no accessibility verdict",
+    }
+    control = dict(intent, stream_order=["LEFT-1", "LEFT-2", "RIGHT-1", "RIGHT-2"])
+    variant = dict(intent, stream_order=["RIGHT-1", "RIGHT-2", "LEFT-1", "LEFT-2"])
+    return [
+        catalog_entry("F12", "control", pdf(fixed_page(ordered)), control),
+        catalog_entry("F12", "reordered", pdf(fixed_page(reordered)), variant),
+    ]
+
+
+def _cmap_font_page(body: bytes, cmap: bytes, font_obj_index: int = 3) -> list[bytes]:
+    objects = fixed_page(body)
+    objects[font_obj_index] = objects[font_obj_index].replace(
+        b" >>", b" /ToUnicode 6 0 R >>")
+    objects.append(stream(cmap))
+    return objects
+
+
+def ligature_entries() -> list[dict]:
+    """F13 within the frozen rights/gate boundary: a constant painted glyph
+    (code A1 on every page) whose extraction is driven only by the ToUnicode
+    map — identity control extracts the painted character, the expansion map
+    extracts the multi-scalar 'fi' sequence. Raw values and maps are
+    preserved verbatim. A real font-backed ligature/combining glyph requires
+    a rights-pinned embedded font (fixture font-program gate) — reported to
+    the coordinator as the precise needed asset/gate change."""
+    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+            b"/CMapName /Owned def /CMapType 2 def\n"
+            b"1 begincodespacerange <00> <FF> endcodespacerange\n"
+            b"1 beginbfchar <A1> <00660069> endbfchar\n"
+            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
+    ligature = pdf(_cmap_font_page(
+        b"BT /F0 24 Tf 1 0 0 1 48 120 Tm (\241) Tj ET\n", cmap))
+    literal = pdf(fixed_page(b"BT /F0 24 Tf 1 0 0 1 48 120 Tm (\241) Tj ET\n"))
+    return [
+        catalog_entry("F13", "expansion", ligature,
+                      {"painted_codes": ["A1"], "painted_glyph_constant": True,
+                       "extraction_intent": "fi",
+                       "map": "single code expands to two Unicode scalars",
+                       "raw_output": "expansion and map relation preserved verbatim"}),
+        catalog_entry("F13", "control", literal,
+                      {"painted_codes": ["A1"], "painted_glyph_constant": True,
+                       "extraction_intent": "\u00a1",
+                       "map": "identity; same painted glyph extracts as itself",
+                       "raw_output": "record reader API verbatim"}),
+    ]
+
+
+def unicode_entries() -> list[dict]:
+    """F14 within the frozen rights/gate boundary: the Identity-H/ToUnicode
+    mechanism is demonstrated with Latin logical strings (single-scalar
+    codes). Non-Latin native scripts require a rights-pinned embedded font,
+    which the fixture font-program gate forbids — that asset/gate change is
+    reported to the coordinator, not simulated with unembedded glyphs."""
+    type0 = (b"<< /Type /Font /Subtype /Type0 /BaseFont /Helvetica "
+             b"/Encoding /Identity-H /DescendantFonts [6 0 R] /ToUnicode 7 0 R >>")
+    descendant = (b"<< /Type /Font /Subtype /CIDFontType0 /BaseFont /Helvetica "
+                  b"/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> "
+                  b"/DW 1000 >>")
+    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
+            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
+            b"/CMapName /Owned def /CMapType 2 def\n"
+            b"1 begincodespacerange <0000> <FFFF> endcodespacerange\n"
+            b"4 beginbfchar\n<0001> <0024>\n<0002> <0031>\n"
+            b"<0003> <0030>\n<0004> <0030>\nendbfchar\n"
+            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
+    content = (b"BT /F0 24 Tf 1 0 0 1 40 180 Tm <0001> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 140 Tm <0002> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 100 Tm <0003> Tj ET\n"
+               b"BT /F0 24 Tf 1 0 0 1 40 60 Tm <0004> Tj ET\n")
+    objects = fixed_page(content)
+    objects[3] = type0
+    objects.append(descendant)
+    objects.append(stream(cmap))
+    unicode_page = pdf(objects)
+    latin = pdf(fixed_page(b"BT /F0 24 Tf 1 0 0 1 40 60 Tm (LATIN-$100) Tj ET\n"))
+    intent = {
+        "logical_strings": ["$", "1", "0", "0"],
+        "encoding": "Identity-H hex strings; ToUnicode carries the Unicode per code",
+        "font": "no font program embedded (BaseFont names only); glyph "
+        "appearance not asserted",
+        "mechanism_scope": "Latin single-scalar mechanism only: native-script "
+        "rendering/extraction needs a rights-pinned embedded font, which the "
+        "fixture font-program gate forbids — asset/gate change reported to the "
+        "coordinator, not simulated with unembedded glyphs",
+        "observed_extraction": "PDFium 149.0.7825.0 extracts the declared "
+        "logical strings for this Latin mechanism; non-embedded complex-script "
+        "runs extract as empty on this build (reader-dependent, I11) — "
+        "consumers preserve reader output verbatim and never normalize toward "
+        "the declared logical strings",
+    }
+    return [
+        catalog_entry("F14", "native", unicode_page, intent),
+        catalog_entry("F14", "control", latin, {**intent, "logical_strings": ["LATIN-$100"],
+                                                "note": "Latin control"}),
+    ]
+
+
+def ocr_material_entries() -> list[dict]:
+    """F15: fixed-seed raster ambiguity pairs around the owned bitmap amount
+    print. Material differences (sign, digit shape) must survive OCR without
+    normalization; every pixel is deterministic. The control is noise-free so
+    degraded variants compare against clean input."""
+    result = []
+
+    def material_raster(line: str, speckle: bool) -> bytes:
+        buf = bytearray(b"\xff" * (SCAN_WIDTH // 2 * SCAN_HEIGHT // 2))
+        width = SCAN_WIDTH // 2
+        margin, top = 40, 200
+        cursor = margin
+        for ch in line:
+            glyph = BITMAP_FONT[ch]
+            for r in range(7):
+                bits = glyph[r]
+                for col in range(5):
+                    if bits & (0x10 >> col):
+                        x0 = cursor + col * 4
+                        y0 = top + r * 4
+                        for dy in range(4):
+                            for dx in range(4):
+                                offset = (y0 + dy) * width + x0 + dx
+                                if 0 <= offset < len(buf):
+                                    buf[offset] = 0
+            cursor += 6 * 4
+        # Fixed-seed speckle: deterministic function of pixel index + variant
+        # phase. Applied ONLY to degraded variants so the noise-free control
+        # gives degraded variants a clean comparison baseline.
+        if speckle:
+            for i in range(len(buf)):
+                if buf[i] == 255 and ((i * 31 + 17 + i // 97 * 7) % 53) == 0:
+                    buf[i] = 96
+        return bytes(buf)
+
+    for variant, line, speckle in (
+        ("control", "AMOUNT -$100.00", False),
+        ("sign-ambiguity", "AMOUNT  $100.00", True),   # minus lost to print defect
+        ("digit-ambiguity", "AMOUNT -$1O0.00", True),  # letter O in place of zero
+    ):
+        pixels = material_raster(line, speckle)
+        page = raster_page(pixels, SCAN_WIDTH // 2, SCAN_HEIGHT // 2)
+        result.append(catalog_entry(
+            "F15", variant, page,
+            {"printed_line": line, "material_difference": variant,
+             "speckle": speckle,
+             "noise": "fixed-seed speckle; deterministic; control is noise-free",
+             "raw_output": "OCR reading recorded verbatim; never normalized toward intent"}))
+    return result
+
+
+def adjacent_entries() -> list[dict]:
+    """F16: neighboring amounts and a crop-clipped glyph; the control scopes
+    the crop correctly. Wrong-neighbor selection must be rejectable from the
+    recorded boxes alone."""
+    two_amounts = (fixed_text("$100", "1 0 0 1 40 120")
+                   + fixed_text("$200", "1 0 0 1 135 120"))
+
+    def with_crop(data_objects: list[bytes], box: str) -> bytes:
+        data_objects[2] = data_objects[2].replace(
+            b"/MediaBox [0 0 320 240]", f"/MediaBox [0 0 320 240] /CropBox [{box}]".encode())
+        return pdf(data_objects)
+
+    control = with_crop(fixed_page(two_amounts), "30 100 240 140")
+    adjacent = with_crop(fixed_page(two_amounts), "30 100 150 140")
+    clipped = with_crop(fixed_page(two_amounts), "50 100 100 140")
+    return [
+        catalog_entry("F16", "control", control,
+                      {"crop": [30, 100, 240, 140], "in_crop": ["$100", "$200"],
+                       "selection": "both amounts fully inside; unambiguous"}),
+        catalog_entry("F16", "adjacent", adjacent,
+                      {"crop": [30, 100, 150, 140], "in_crop": ["$100"],
+                       "neighbor": "$200 begins at x=135, inside the crop edge",
+                       "selection": "wrong-neighbor selection must be rejectable"}),
+        catalog_entry("F16", "clipped", clipped,
+                      {"crop": [50, 100, 100, 140], "in_crop": [],
+                       "clipped_glyph": "$100 cut by the left crop edge at x=50 "
+                                        "(text spans ~40-93pt; x=100 is the right edge)",
+                       "selection": "partial glyph must not be read as a full amount"}),
+    ]
+
+
+def canonical_report(document_sha: str, checks: list[dict]) -> dict:
+    """A minimal canonical Report (inkflip.schema.json $defs/Report):
+    validated against the full shared schema by tests/fixtures/test_g78_
+    semantic.py before any mutation is applied."""
+    occurrence = {
+        "id": "pdfium-native-aa00-p0-text-0",
+        "reader_id": "pdfium-native",
+        "page_index": 0,
+        "ordinal": 0,
+        "raw_text": "$100",
+        "normalized_text": "$100",
+        "normalization_map": [{"raw_start": 0, "raw_end": 4,
+                               "normalized_start": 0, "normalized_end": 4,
+                               "operation": "identity"}],
+        "geometry": {"precision": "exact", "space": "canonical_page",
+                     "polygon": [[48.0, 220.0], [152.9, 220.0],
+                                 [152.9, 257.2], [48.0, 257.2]],
+                     "transform_ids": ["pdfium-user-to-canonical-c"],
+                     "basis": "pdfium get_charbox(loose=True) index 0-3; C over "
+                              "pypdf crop/UserUnit"},
+        "engine_score": None,
+        "source_asset_id": None,
+        "raw_source_locator": "pdfium:char[0:4]:loose",
+        "limitations": [],
+    }
+    return {
+        "kind": "report",
+        "schema_version": "1.0.0",
+        "report_id": "f" * 64,
+        "document": {"sha256": document_sha, "byte_length": 1437,
+                     "page_count": 1, "display_name": "mapping-amount.pdf",
+                     "source_asset_id": None},
+        "readers": [{
+            "id": "pdfium-native", "name": "PDFium",
+            "version": "149.0.7825.0", "build": "pypdfium2 5.8.0",
+            "adapter_version": "1.0.0", "method": "native_text",
+            "environment": "native",
+            "settings": {"normalization": "scalar-whitespace-v1",
+                         "language": None, "psm": None,
+                         "render_reader_id": "pdfium-native",
+                         "raster_dpi": None,
+                         "annotation_mode": "not_applicable"},
+            "capabilities": [{"name": "native_text",
+                              "support": "supported", "limits": []}],
+            "model_hashes": [],
+            "limitations": ["audit fixture manifest"]}],
+        "pages": [{"index": 0, "media_box": [0, 0, 520, 400],
+                   "crop_box": [0, 0, 520, 400], "effective_view_box": [0, 0, 520, 400],
+                   "box_source": "pypdf page dictionary",
+                   "user_unit": 1, "rotation": 0,
+                   "canonical_size_pt": [520, 400],
+                   "raw_to_canonical_transform_id": "pdfium-user-to-canonical-c",
+                   "limitations": []}],
+        "transforms": [{"id": "pdfium-user-to-canonical-c", "page_index": 0,
+                        "from_space": "pdf_user:p0", "to_space": "canonical:p0",
+                        "matrix": [1, 0, 0, -1, 0, 400],
+                        "inverse": [1, 0, 0, -1, 0, 400],
+                        "operation": "page_box_to_canonical", "precision": "exact",
+                        "source": "pypdf crop box and /UserUnit metadata"}],
+        "occurrences": [occurrence],
+        "findings": [],
+        "annotations": [],
+        "plan": {"version": "1.0.0", "selected_pages": [0], "regions": [],
+                 "checks": [{"id": "check-native-text", "page_index": 0,
+                             "reader_ids": ["pdfium-native"],
+                             "capability": "native_text", "region_id": None}],
+                 "normalization_version": "scalar-whitespace-v1",
+                 "alignment_version": "region-match-v1",
+                 "profile": "native", "budget": {"max_raster_pixels": 40000000, "max_run_ocr_pixels": 10000000, "timeout_ms": 1000, "max_retries": 1}},
+        "checks": checks,
+        "execution": {"execution_id": "e" * 64,
+                      "run_key": "9" * 64, "status": "complete",
+                      "started_at": "2026-09-13T00:00:00Z", "duration_ms": 12,
+                      "environment": "audit fixture environment",
+                      "result_origin": "contract_example", "errors": []},
+        "export": {"mode": "evidence", "scope": "run", "included": [],
+                   "omissions": [], "replay": "not_replayable",
+                   "origin_report_id": None},
+        "assets": [],
+        "limitations": ["audit fixture report; generated, never app output"],
+    }
+
+
+def import_security_entries() -> list[dict]:
+    """F22: mutations of a canonical-schema-valid report. The control and the
+    script-string variant both pass the closed schema (script text is inert
+    field content), the digest variant fails at the source-binding stage, the
+    unknown-key variant fails the schema itself, and the PNG header cases are
+    rejected by the image budget/decoder before interpretation."""
+    report = canonical_report("a" * 64, [
+        {"id": "check-native-text", "status": "completed", "reason": None,
+         "produced_occurrence_count": 1,
+         "retained_occurrence_ids": ["pdfium-native-aa00-p0-text-0"]}])
+    with_unknown_key = dict(report)
+    with_unknown_key["unknown_top_level"] = {"evil": True}
+    with_script = json.loads(json.dumps(report))
+    with_script["limitations"] = ["<script>alert(1)</script> recorded verbatim as inert text"]
+    with_bad_digest = json.loads(json.dumps(report))
+    with_bad_digest["document"] = dict(report["document"], sha256="b" * 64)
+
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\x0dIHDR" + b"\x7f\xff\xff\xff" + b"\x08\x00\x00\x00" + b"\x00" * 8
+    truncated_png = png[:12]
+    entries = [
+        catalog_entry("F22", "control", json_payload(report),
+                      {"variant": "valid canonical report",
+                       "expected": "accepted; validation stage: full pass",
+                       "canonical_schema": "inkflip.schema.json $defs/Report"},
+                      "json"),
+        catalog_entry("F22", "unknown-key", json_payload(with_unknown_key),
+                      {"variant": "unknown top-level key on a valid report",
+                       "expected": "rejected at the schema stage (closed schema)",
+                       "canonical_schema": "inkflip.schema.json $defs/Report"},
+                      "json"),
+        catalog_entry("F22", "script-string", json_payload(with_script),
+                      {"variant": "script text in the allowed limitations field",
+                       "expected": "schema-valid; rendered/used as inert escaped "
+                                   "text, never executed at any stage",
+                       "canonical_schema": "inkflip.schema.json $defs/Report"},
+                      "json"),
+        catalog_entry("F22", "digest-mismatch", json_payload(with_bad_digest),
+                      {"variant": "valid report bound to a different source digest",
+                       "expected": "rejected at the source-binding stage after the schema",
+                       "canonical_schema": "inkflip.schema.json $defs/Report"},
+                      "json"),
+        catalog_entry("F22", "png-oversized", png,
+                      {"variant": "PNG header declares 2147483647 px",
+                       "expected": "rejected at the image-decode stage by the pixel budget",
+                       "control": "development/import-security-control.json"},
+                      "png"),
+        catalog_entry("F22", "png-truncated", truncated_png,
+                      {"variant": "PNG header truncated mid-IHDR",
+                       "expected": "rejected at the image-decode stage: undecodable",
+                       "control": "development/import-security-control.json"},
+                      "png"),
+    ]
+    # The hostile PNG variants share the valid-report control (a JSON report):
+    # catalog_entry's same-extension default would point at a nonexistent file.
+    for entry in entries:
+        if entry["name"].endswith(".png"):
+            entry["control"] = "development/import-security-control.json"
+    return entries
+
+
+def baseline_entries() -> list[dict]:
+    """F23: mutations of a canonical-schema-valid report against an
+    AcceptanceRules baseline context; unchanged stays accepted while
+    coverage loss, document mismatch and silent refresh each fire their
+    declared rule. All three sub-documents validate against the canonical
+    schema ($defs/Report, $defs/Baseline, $defs/AcceptanceRules) — the
+    semantic test asserts this so the claim cannot silently regress."""
+    report = canonical_report("a" * 64, [
+        {"id": "check-native-text", "status": "completed", "reason": None,
+         "produced_occurrence_count": 1,
+         "retained_occurrence_ids": ["pdfium-native-aa00-p0-text-0"]},
+        {"id": "check-ocr", "status": "completed", "reason": None,
+         "produced_occurrence_count": 2,
+         "retained_occurrence_ids": ["tesseract-native-aa00-p0-text-0",
+                                     "tesseract-native-aa00-p0-text-1"]},
+    ])
+    # The retained_occurrence_ids above name real occurrences: declare the
+    # OCR reader, its planned check and the two occurrences it produced.
+    ocr_reader = json.loads(json.dumps(report["readers"][0]))
+    ocr_reader.update({"id": "tesseract-native", "name": "Tesseract",
+                       "version": "5.5.0", "build": "tesseract 5.5.0",
+                       "method": "ocr",
+                       "capabilities": [{"name": "ocr", "support": "supported",
+                                         "limits": []}]})
+    ocr_reader["settings"].update({"language": "eng", "psm": 6,
+                                   "raster_dpi": 300})
+    report["readers"].append(ocr_reader)
+    report["plan"]["checks"].append(
+        {"id": "check-ocr", "page_index": 0,
+         "reader_ids": ["tesseract-native"], "capability": "ocr",
+         "region_id": None})
+    for ordinal in range(2):
+        occurrence = json.loads(json.dumps(report["occurrences"][0]))
+        occurrence.update(
+            {"id": f"tesseract-native-aa00-p0-text-{ordinal}",
+             "reader_id": "tesseract-native", "ordinal": ordinal,
+             "raw_source_locator": f"tesseract:word[{ordinal}]:line0"})
+        report["occurrences"].append(occurrence)
+    baseline = {
+        "kind": "baseline",
+        "schema_version": "1.0.0",
+        "id": "b" * 64,
+        "corpus_manifest_sha256": "d" * 64,
+        "profile_sha256": "e" * 64,
+        "report_ids": ["f" * 64],
+        "rules_sha256": "f" * 64,
+        "approved_by": "audit fixture lane",
+        "rationale": "deterministic approved baseline for rule exercises",
+    }
+    rules = {
+        "kind": "acceptance_rules",
+        "schema_version": "1.0.0",
+        "rules": [{"id": "rule-native-text",
+                   "type": "expected_occurrence_count",
+                   "document_sha256": "a" * 64, "page_index": 0,
+                   "reader_id": "pdfium-native", "region_id": None,
+                   "expected_text": None, "expected_count": 1,
+                   "max_delta_pt": 0.0, "capability": "native_text",
+                   "explanation": "native amount must stay findable"},
+                  {"id": "rule-ocr", "type": "expected_occurrence_count",
+                   "document_sha256": "a" * 64, "page_index": 0,
+                   "reader_id": "tesseract-native", "region_id": None,
+                   "expected_text": None, "expected_count": 2,
+                   "max_delta_pt": 0.0, "capability": "ocr",
+                   "explanation": "ocr occurrences must not drop"}],
+        "policy": {"fail_on_coverage_loss": True, "fail_on_error": True,
+                   "unruled_change": "changed"},
+    }
+    coverage_loss = json.loads(json.dumps(report))
+    coverage_loss["checks"] = report["checks"][:1]
+    mismatched = json.loads(json.dumps(report))
+    mismatched["document"] = dict(report["document"], sha256="c" * 64)
+    silent_refresh = json.loads(json.dumps(report))
+    silent_refresh["checks"] = [
+        report["checks"][0],
+        {"id": "check-ocr", "status": "completed", "reason": None,
+         "produced_occurrence_count": 9,
+         "retained_occurrence_ids": ["tesseract-native-aa00-p0-text-0",
+                                     "tesseract-native-aa00-p0-text-1"]},
+    ]
+    context = {"baseline": baseline, "rules": rules}
+    return [
+        catalog_entry("F23", "control", json_payload({**context, "report": report}),
+                      {"scenario": "identical stored run", "expected": "accepted unchanged",
+                       "canonical_schema": "report/baseline/acceptance_rules all schema-valid"},
+                      "json"),
+        catalog_entry("F23", "coverage-loss", json_payload({**context, "report": coverage_loss}),
+                      {"scenario": "baseline lost the check-ocr entry",
+                       "expected": "regression comparison cannot improve by losing checks",
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the rule stage fires"},
+                      "json"),
+        catalog_entry("F23", "mismatched-doc", json_payload({**context, "report": mismatched}),
+                      {"scenario": "report bound to a different document digest than the baseline",
+                       "expected": "comparison refused; never silently re-based",
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the binding stage fires"},
+                      "json"),
+        catalog_entry("F23", "silent-refresh", json_payload({**context, "report": silent_refresh}),
+                      {"scenario": "ocr occurrence count edited from 2 to 9",
+                       "expected": "silent baseline refresh forbidden; the declared rule fires",
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the rule stage fires"},
+                      "json"),
+    ]
+
+
+def overlap_entries() -> list[dict]:
+    """F24: the stroked border's left edge crosses through the invisible
+    text's occurrence box, so real visible ink lies inside the invisible
+    text's bounds while the glyphs themselves paint nothing; the visible
+    control paints the same text inside the same border. Ink-in-box never
+    proves glyph visibility, and invisibility is never a verdict."""
+    border = b"0.5 w 70 90 180 150 re S\n"
+    invisible = border + b"BT /F0 24 Tf 3 Tr 1 0 0 1 50 110 Tm ($100) Tj ET\n"
+    visible = border + b"BT /F0 24 Tf 0 Tr 1 0 0 1 50 110 Tm ($100) Tj ET\n"
+    intent_base = {
+        "border_rect": [70, 90, 180, 150],
+        "text_box": [50, 110, 97, 128],
+        "overlap": "the border's left edge (x=70) crosses the text occurrence "
+                   "box [50,110,97,128], so visible border ink lies inside the "
+                   "invisible text's bounds",
+        "no_verdict": "ink-in-box does not prove glyph visibility",
+    }
+    return [
+        catalog_entry("F24", "control", pdf(fixed_page(visible)),
+                      {**intent_base, "render_mode": 0}),
+        catalog_entry("F24", "invisible", pdf(fixed_page(invisible)),
+                      {**intent_base, "render_mode": 3}),
+    ]
+
+
+def annotation_entries() -> list[dict]:
+    """F25: a static appearance-stream annotation plus an inert unsupported
+    form widget; the plain page is the control. Static appearance may be
+    recorded; actions/forms stay unsupported and inert."""
+    appearance = stream(b"0 0 0 rg 2 2 36 16 re f\n")
+    objects = fixed_page(b"BT /F0 12 Tf 1 0 0 1 40 180 Tm (ANNOTATED) Tj ET\n")
+    objects[2] = objects[2].replace(b" /Contents", b" /Annots [6 0 R 7 0 R] /Contents")
+    objects.append(
+        b"<< /Type /Annot /Subtype /Square /Rect [30 160 90 190] /F 4 "
+        b"/AP << /N 8 0 R >> >>")
+    objects.append(
+        b"<< /Type /Annot /Subtype /Widget /Rect [30 100 150 130] /FT /Tx "
+        b"/T /InkflipField /F 68 >>")
+    objects.append(appearance)
+    annotated = pdf(objects)
+    plain = pdf(fixed_page(b"BT /F0 12 Tf 1 0 0 1 40 180 Tm (PLAIN) Tj ET\n"))
+    return [
+        catalog_entry("F25", "control", plain,
+                      {"annotations": [], "expected": "plain page; nothing recorded beyond text"}),
+        catalog_entry("F25", "annotated", annotated,
+                      {"annotations": [
+                          {"subtype": "Square", "appearance": "static AP stream; static appearance may be recorded"},
+                          {"subtype": "Widget", "form": "Tx field; form actions and XFA unsupported and inert"},
+                      ],
+                       "expected": "render mode and unsupported behavior recorded, never executed"}),
+    ]
+
+
+def cache_entries() -> list[dict]:
+    """F26: executable cache-tree fault inputs. Each variant ships a real
+    file set (cache manifest + model/worker/core placeholder files) whose
+    bytes and declared digests deliberately realize one fault: corrupt model
+    bytes, stale worker/core digests, missing cold cache, complete warm
+    cache. The semantic consumer test materializes the files, recomputes
+    digests and asserts the declared fault — no prose-only scenarios."""
+    good_model = b"inkflip-model-bytes-v1\n"
+    good_worker = b"inkflip-worker-placeholder-v1\n"
+    good_core = b"inkflip-core-placeholder-v1\n"
+
+    def cache_files(model: bytes, worker: bytes, core: bytes,
+                    declared_model: str | None = None,
+                    declared_worker: str | None = None,
+                    declared_core: str | None = None,
+                    include_files: bool = True) -> dict:
+        """Build manifest + inline files; declared digests default to the
+        real content digests, so a fault is realized by passing a different
+        declared digest or by omitting the files entirely."""
+        def declared(data: bytes, override: str | None) -> str:
+            return override or hashlib.sha256(data).hexdigest()
+
+        manifest = {
+            "kind": "asset_cache_manifest",
+            "required": {
+                "model.sha256": declared(good_model, declared_model),
+                "worker.sha256": declared(good_worker, declared_worker),
+                "core.sha256": declared(good_core, declared_core),
+            },
+            "policy": {"network": "none", "fallback": "forbidden",
+                       "refresh": "explicit only"},
+        }
+        files = None
+        if include_files:
+            files = {
+                "model.bin": {"sha256": hashlib.sha256(model).hexdigest(),
+                              "content_hex": model.hex()},
+                "worker.bin": {"sha256": hashlib.sha256(worker).hexdigest(),
+                               "content_hex": worker.hex()},
+                "core.bin": {"sha256": hashlib.sha256(core).hexdigest(),
+                             "content_hex": core.hex()},
+            }
+        return {"kind": "asset_cache_fixture", "manifest": manifest, "files": files}
+
+    good_model_d = hashlib.sha256(good_model).hexdigest()
+    scenarios = [
+        ("control", cache_files(good_model, good_worker, good_core),
+         "verified cache; digests match; proceed"),
+        ("corrupt-model", cache_files(
+            b"corrupted model bytes\n", good_worker, good_core,
+            declared_model=good_model_d),
+         "model content digest != declared digest: typed unavailable; "
+         "no silent fallback"),
+        ("stale-worker", cache_files(
+            good_model, good_worker, good_core,
+            declared_worker=hashlib.sha256(b"older-worker-v0\n").hexdigest()),
+         "declared worker digest is not the deployed digest: explicit "
+         "refresh required; never silent"),
+        ("stale-core", cache_files(
+            good_model, good_worker, good_core,
+            declared_core=hashlib.sha256(b"older-core-v0\n").hexdigest()),
+         "declared core digest is not the deployed digest: explicit "
+         "refresh required; never silent"),
+        ("offline-cold", cache_files(good_model, good_worker, good_core,
+                                     include_files=False),
+         "no cache files present: explicit unavailable; nothing fetched"),
+        ("offline-warm", cache_files(good_model, good_worker, good_core),
+         "complete cache present: proceed offline"),
+    ]
+    return [
+        catalog_entry("F26", variant, json_payload(payload),
+                      {"kind": "executable asset cache fault input",
+                       "expected": expected,
+                       "verify": "materialize files, recompute sha256, compare "
+                                 "with manifest.required digests"},
+                      "json")
+        for variant, payload, expected in scenarios
+    ]
+
+
+def g78_2_entries() -> list[dict]:
+    return (
+        transform_entries()
+        + reading_order_entries()
+        + ligature_entries()
+        + unicode_entries()
+        + ocr_material_entries()
+        + adjacent_entries()
+        + import_security_entries()
+        + baseline_entries()
+        + overlap_entries()
+        + annotation_entries()
+        + cache_entries()
+    )
+
+
+def followup_entries() -> list[dict]:
+    return (structural_entries() + missing_map_entries() + failure_entries()
+            + fault_entries() + canary_entries() + g78_2_entries())
+
+
 def entry_payload(entry: dict) -> bytes:
     if "payload" in entry:
         return entry["payload"]

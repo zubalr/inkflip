@@ -1,0 +1,29 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/annotation-mode-control.pdf",
+  "family": "annotation-mode",
+  "fixture_id": "F25",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F25",
+    "intent": {
+      "annotations": [
+        {
+          "appearance": "static AP stream; static appearance may be recorded",
+          "subtype": "Square"
+        },
+        {
+          "form": "Tx field; form actions and XFA unsupported and inert",
+          "subtype": "Widget"
+        }
+      ],
+      "expected": "render mode and unsupported behavior recorded, never executed"
+    },
+    "variant": "annotated",
+    "version": "g78.1"
+  },
+  "observation": "render mode/unsupported behavior recorded",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

@@ -1,0 +1,9 @@
+=== pdf-g78 review-revision round (Arendt review; 2026-09-13) ===
+=== generation run 1 (in place) ===
+generated 161 files under /home/wertyp/.local/share/homebase-factory/worktrees/inkflip/g78-audit/fixtures
+=== determinism: two independent temp generations ===
+generated 161 files under /tmp/g78r1
+generated 161 files under /tmp/g78r2
+DETERMINISM OK
+IN-PLACE OK
+check ok: 161 files in /home/wertyp/.local/share/homebase-factory/worktrees/inkflip/g78-audit/fixtures match deterministic regeneration

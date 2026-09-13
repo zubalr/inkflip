@@ -1,0 +1,33 @@
+{
+  "byte_stability": "byte-identical",
+  "control": "development/overlap-ink-control.pdf",
+  "family": "overlap-ink",
+  "fixture_id": "F24",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F24",
+    "intent": {
+      "border_rect": [
+        70,
+        90,
+        180,
+        150
+      ],
+      "no_verdict": "ink-in-box does not prove glyph visibility",
+      "overlap": "the border's left edge (x=70) crosses the text occurrence box [50,110,97,128], so visible border ink lies inside the invisible text's bounds",
+      "render_mode": 3,
+      "text_box": [
+        50,
+        110,
+        97,
+        128
+      ]
+    },
+    "variant": "invisible",
+    "version": "g78.1"
+  },
+  "observation": "ink-in-box does not prove glyph visibility",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "development"
+}

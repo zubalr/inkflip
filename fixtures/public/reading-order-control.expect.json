@@ -1,0 +1,35 @@
+{
+  "byte_stability": "byte-identical",
+  "control": null,
+  "family": "reading-order",
+  "fixture_id": "F12",
+  "generator": "scripts/make_fixtures.py",
+  "generator_version": "1.0.0",
+  "mechanism": {
+    "group_id": "F12",
+    "intent": {
+      "note": "reading order differs; no accessibility verdict",
+      "stream_order": [
+        "LEFT-1",
+        "LEFT-2",
+        "RIGHT-1",
+        "RIGHT-2"
+      ],
+      "visual_columns": {
+        "left": [
+          "LEFT-1",
+          "LEFT-2"
+        ],
+        "right": [
+          "RIGHT-1",
+          "RIGHT-2"
+        ]
+      }
+    },
+    "variant": "control",
+    "version": "g78.1"
+  },
+  "observation": "order differs, no accessibility verdict",
+  "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
+  "split": "public"
+}
