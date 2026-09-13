@@ -3,25 +3,45 @@
   "task_id": "T41",
   "status": "completed",
   "disposition": "rejected_heuristic_recommendation",
-  "runtime_seconds": 0.0192,
+  "manifest": "fixtures/manifest.json",
+  "runtime_seconds": 0.0357,
+  "method_runtimes_seconds": {
+    "metadata_baseline": 8e-06,
+    "rectangular_ink_heuristic": 0.001872,
+    "bounded_paint_order_candidate": 1.8e-05
+  },
   "total_fixtures_evaluated": 9,
   "metrics": {
     "metadata_baseline": {
-      "precision": 0.5,
-      "false_visibility_count": 4,
-      "coverage": 9
+      "precision": 0.6667,
+      "false_visibility_count": 2,
+      "true_positives": 4,
+      "true_negatives": 1,
+      "false_negatives": 0,
+      "coverage": 9,
+      "runtime_seconds": 8e-06
     },
     "rectangular_ink_heuristic": {
-      "precision": 0.5714,
-      "false_visibility_count": 3,
+      "precision": 0.8,
+      "false_visibility_count": 1,
+      "true_positives": 4,
+      "true_negatives": 2,
+      "false_negatives": 0,
       "coverage": 9,
-      "counterexample_triggered": true
+      "counterexample_triggered": true,
+      "runtime_seconds": 0.001872
     },
     "bounded_paint_order_candidate": {
       "precision": 1.0,
       "false_visibility_count": 0,
+      "true_positives": 4,
+      "true_negatives": 3,
+      "false_negatives": 0,
+      "abstentions_count": 2,
+      "decision_coverage": 0.7778,
       "coverage": 9,
-      "zero_hard_control_false_visibility": true
+      "zero_hard_control_false_visibility": true,
+      "runtime_seconds": 1.8e-05
     }
   },
   "fixture_evaluations": [
@@ -31,21 +51,36 @@
       "variant": "control",
       "path": "fixtures/development/white-contrast-control.pdf",
       "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
-      "ground_truth_visible": true,
+      "ground_truth": {
+        "category": "visible",
+        "is_visible": true,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": false
+        "false_visibility": false,
+        "runtime_seconds": 2e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
-        "dark_pixel_count": 3958,
-        "false_visibility": false
+        "dark_pixel_count": 1158,
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.000901
       },
       "candidate": {
-        "verdict": "invisible",
+        "verdict": "visible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 4e-06
       }
     },
     {
@@ -54,21 +89,36 @@
       "variant": "white",
       "path": "fixtures/development/white-contrast-white.pdf",
       "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
-      "ground_truth_visible": false,
+      "ground_truth": {
+        "category": "invisible",
+        "is_visible": false,
+        "is_invisible": true
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": true
+        "false_visibility": true,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "invisible",
         "dark_pixel_count": 0,
-        "false_visibility": false
+        "pixel_contrast": 0,
+        "false_visibility": false,
+        "runtime_seconds": 0.000148
       },
       "candidate": {
         "verdict": "invisible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -77,21 +127,36 @@
       "variant": "control",
       "path": "fixtures/development/paint-order-control.pdf",
       "sha256": "db606229b121784e8e28d0ef33ed01a1f5135dc3b9c6d958b650991ae15ffe84",
-      "ground_truth_visible": true,
+      "ground_truth": {
+        "category": "visible",
+        "is_visible": true,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": false
+        "false_visibility": false,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 429,
-        "false_visibility": false
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.000121
       },
       "candidate": {
         "verdict": "visible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -100,21 +165,48 @@
       "variant": "after",
       "path": "fixtures/development/paint-order-after.pdf",
       "sha256": "3c474638423b2b9b9fa45c79b39abce40105fba5d20566ca9d231ae41fb9955d",
-      "ground_truth_visible": false,
+      "ground_truth": {
+        "category": "invisible",
+        "is_visible": false,
+        "is_invisible": true
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": true
+        "false_visibility": true,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "invisible",
         "dark_pixel_count": 0,
-        "false_visibility": false
+        "pixel_contrast": 0,
+        "false_visibility": false,
+        "runtime_seconds": 0.000105
       },
       "candidate": {
         "verdict": "invisible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [
+          {
+            "fill_index": 1,
+            "fill_rect": [
+              24.0,
+              96.0,
+              200.0,
+              60.0
+            ],
+            "intersection_area": 1089.65,
+            "coverage_fraction": 1.0
+          }
+        ],
+        "runtime_seconds": 5e-06
       }
     },
     {
@@ -123,21 +215,36 @@
       "variant": "control",
       "path": "fixtures/development/partial-clip-control.pdf",
       "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
-      "ground_truth_visible": true,
+      "ground_truth": {
+        "category": "visible",
+        "is_visible": true,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": false
+        "false_visibility": false,
+        "runtime_seconds": 0.0
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 429,
-        "false_visibility": false
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.00011
       },
       "candidate": {
         "verdict": "visible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -146,21 +253,48 @@
       "variant": "partial",
       "path": "fixtures/development/partial-clip-partial.pdf",
       "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
-      "ground_truth_visible": false,
+      "ground_truth": {
+        "category": "partial_cover",
+        "is_visible": false,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": true
+        "false_visibility": false,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 233,
-        "false_visibility": true
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.000105
       },
       "candidate": {
-        "verdict": "invisible",
-        "unsupported_compositing": false,
-        "compositing_reason": null,
-        "false_visibility": false
+        "verdict": "unsupported_compositing",
+        "unsupported_compositing": true,
+        "compositing_reason": "partial_occlusion_unsupported",
+        "false_visibility": false,
+        "occlusion_checks": [
+          {
+            "fill_index": 1,
+            "fill_rect": [
+              78.0,
+              110.0,
+              24.0,
+              36.0
+            ],
+            "intersection_area": 471.5,
+            "coverage_fraction": 0.4327
+          }
+        ],
+        "runtime_seconds": 4e-06
       }
     },
     {
@@ -169,21 +303,36 @@
       "variant": "triangle",
       "path": "fixtures/development/partial-clip-triangle.pdf",
       "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
-      "ground_truth_visible": false,
+      "ground_truth": {
+        "category": "clipped",
+        "is_visible": false,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        48.86,
+        117.55,
+        100.22,
+        138.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": true
+        "false_visibility": false,
+        "runtime_seconds": 0.0
       },
       "ink_heuristic": {
         "verdict": "visible",
         "dark_pixel_count": 208,
-        "false_visibility": true
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.000117
       },
       "candidate": {
         "verdict": "unsupported_compositing",
         "unsupported_compositing": true,
         "compositing_reason": "path_clipping_unsupported",
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -192,21 +341,36 @@
       "variant": "control",
       "path": "fixtures/development/overlap-ink-control.pdf",
       "sha256": "16323f7311b1c179a09ce8d4ba63de0a77d09f911035902adda93e1ea42a2e9e",
-      "ground_truth_visible": true,
+      "ground_truth": {
+        "category": "visible",
+        "is_visible": true,
+        "is_invisible": false
+      },
+      "text_bbox": [
+        50.86,
+        107.55,
+        102.22,
+        128.77
+      ],
       "baseline": {
         "verdict": "visible",
-        "false_visibility": false
+        "false_visibility": false,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
-        "dark_pixel_count": 488,
-        "false_visibility": false
+        "dark_pixel_count": 458,
+        "pixel_contrast": 255,
+        "false_visibility": false,
+        "runtime_seconds": 0.000152
       },
       "candidate": {
         "verdict": "visible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 1e-06
       }
     },
     {
@@ -215,29 +379,44 @@
       "variant": "invisible",
       "path": "fixtures/development/overlap-ink-invisible.pdf",
       "sha256": "449ce1d814e7d20704fb3c8e231edca555d591d3dbb86531921cf6e6535b81b1",
-      "ground_truth_visible": false,
+      "ground_truth": {
+        "category": "invisible",
+        "is_visible": false,
+        "is_invisible": true
+      },
+      "text_bbox": [
+        50.86,
+        107.55,
+        102.22,
+        128.77
+      ],
       "baseline": {
         "verdict": "invisible",
-        "false_visibility": false
+        "false_visibility": false,
+        "runtime_seconds": 1e-06
       },
       "ink_heuristic": {
         "verdict": "visible",
-        "dark_pixel_count": 80,
-        "false_visibility": true
+        "dark_pixel_count": 50,
+        "pixel_contrast": 128,
+        "false_visibility": true,
+        "runtime_seconds": 0.000113
       },
       "candidate": {
         "verdict": "invisible",
         "unsupported_compositing": false,
         "compositing_reason": null,
-        "false_visibility": false
+        "false_visibility": false,
+        "occlusion_checks": [],
+        "runtime_seconds": 0.0
       }
     }
   ],
   "invariants_enforced": {
-    "I04": "Geometry anchors preserved",
-    "I06": "Limits enforced honestly without unanchored rescue",
-    "I16": "Original observations preserved; agreement not treated as truth",
+    "I04": "Geometry anchors preserved with exact PDFium textpage coordinate extraction",
+    "I06": "Limits enforced honestly: complex clipping/partial occlusion abstains without unanchored rescue",
+    "I16": "Original observations preserved; separate baseline/heuristic/candidate outputs",
     "I18": "No unverified visibility heuristic promoted to production"
   },
-  "conclusion": "Rectangular-ink heuristics fail on overlapping non-text ink (e.g. F24 border crossing), causing fatal false visibility verdicts. Bounded paint-order candidate achieves zero hard-control false visibility (precision 1.0). However, general compositing remains complex and renderer-dependent; production continues to require explicit object render modes and distinct reader observations rather than a universal visibility oracle."
+  "conclusion": "Rectangular-ink heuristics fail on overlapping non-text ink (proven counterexample on F24 overlap-ink), triggering false visibility when stroke lines intersect invisible text bounding boxes. Bounded paint-order candidate achieves zero hard-control false visibility (precision 1.0) while honestly abstaining (unsupported_compositing) on partial cover and nonrectangular clipping. Because general compositing requires a full rendering pipeline, heuristic visibility is rejected for production."
 }

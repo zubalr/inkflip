@@ -6,6 +6,9 @@ Verifies acceptance criteria:
 - candidate gain measured without held-out leakage
 - negative result is complete
 - source bytes preserved immutable (I01)
+- empty or held-out manifests fail terminal
+- 2D geometric occlusion distinguishes full vs partial coverage
+- distinct execution runtimes recorded per method
 """
 from __future__ import annotations
 
@@ -14,6 +17,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -55,11 +59,14 @@ class TestPaintOrderExperiment(unittest.TestCase):
         self.assertIn("runtime_seconds", self.result)
         self.assertGreater(self.result["runtime_seconds"], 0.0)
         self.assertIn("metrics", self.result)
+        self.assertIn("method_runtimes_seconds", self.result)
         for key in ("metadata_baseline", "rectangular_ink_heuristic", "bounded_paint_order_candidate"):
             m = self.result["metrics"][key]
             self.assertIn("precision", m)
             self.assertIn("coverage", m)
             self.assertIn("false_visibility_count", m)
+            self.assertIn("runtime_seconds", m)
+            self.assertGreater(m["runtime_seconds"], 0.0)
 
     def test_ink_counterexample_triggered(self):
         """Criterion: negative result / counterexample complete."""
@@ -78,6 +85,37 @@ class TestPaintOrderExperiment(unittest.TestCase):
             p = ROOT / ev["path"]
             actual_sha = hashlib.sha256(p.read_bytes()).hexdigest()
             self.assertEqual(actual_sha, ev["sha256"], f"Source fixture mutated: {ev['path']}")
+
+    def test_empty_manifest_fails_terminal(self):
+        """Review counterexample: empty manifest must fail terminal."""
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as f:
+            json.dump({"entries": []}, f)
+            f.flush()
+            with self.assertRaises(ValueError):
+                p09_runner.run_experiment(Path(f.name), self.out_dir)
+
+    def test_held_out_manifest_fails_terminal(self):
+        """Review counterexample: held-out evaluation manifest must fail terminal."""
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as f:
+            json.dump({"split": "evaluation", "entries": [{"path": "fixtures/development/paint-order-control.pdf"}]}, f)
+            f.flush()
+            with self.assertRaises(ValueError):
+                p09_runner.run_experiment(Path(f.name), self.out_dir)
+
+    def test_occlusion_geometry_computation(self):
+        """Geometric occlusion accurately computes full, partial, and zero intersection."""
+        text_box = [50.0, 100.0, 150.0, 120.0]  # width 100, height 20, area 2000
+        # Fully enclosing rectangle
+        full_rect = [40.0, 90.0, 160.0, 130.0]
+        self.assertEqual(p09_runner.compute_rect_intersection(text_box, full_rect), 2000.0)
+
+        # Half covering rectangle
+        half_rect = [50.0, 100.0, 100.0, 120.0]  # width 50, height 20, area 1000
+        self.assertEqual(p09_runner.compute_rect_intersection(text_box, half_rect), 1000.0)
+
+        # Disjoint rectangle (corner of page)
+        disjoint_rect = [0.0, 0.0, 20.0, 20.0]
+        self.assertEqual(p09_runner.compute_rect_intersection(text_box, disjoint_rect), 0.0)
 
 
 def run_tests() -> int:
