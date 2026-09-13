@@ -108,6 +108,10 @@ function isOwnedCacheName(name) {
 
 async function readIndex() {
   try {
+    // Read-only probes must not create empty owned caches — an absent
+    // index means absent, not a freshly-created empty one that a later
+    // "remove" would appear to have missed.
+    if (!(await caches.has(INDEX_CACHE))) return null;
     const cache = await caches.open(INDEX_CACHE);
     const res = await cache.match(INDEX_KEY);
     if (!res) return null;
@@ -121,6 +125,7 @@ async function readIndex() {
 
 async function readManifestRecord(cacheName) {
   try {
+    if (!(await caches.has(cacheName))) return null;
     const cache = await caches.open(cacheName);
     const res = await cache.match(MANIFEST_KEY);
     if (!res) return null;
@@ -171,7 +176,14 @@ async function reportToClients(payload) {
 async function serveFromActive(request) {
   const url = new URL(request.url);
   const entry = active.entries.get(url.pathname);
-  const cache = await caches.open(generationCacheName(active.generation));
+  const cacheName = generationCacheName(active.generation);
+  if (!(await caches.has(cacheName))) {
+    // The active generation's cache is gone (external eviction) — degrade
+    // to the honest network result rather than recreating an empty shell.
+    active = null;
+    return fetch(request);
+  }
+  const cache = await caches.open(cacheName);
   const cached = await cache.match(request, { ignoreVary: true });
   if (!cached) {
     // Declared by the manifest but absent from the cache — a partial or
@@ -243,10 +255,14 @@ async function prepare(manifest) {
         failed.push({ path: entry.path, error: "reserved_path" });
         continue;
       }
-      const url = new URL(entry.path, self.location.origin).href;
+      const url = new URL(entry.path, self.location.origin);
+      if (url.origin !== self.location.origin) {
+        failed.push({ path: entry.path, error: "cross_origin_path" });
+        continue;
+      }
       let response;
       try {
-        response = await fetch(url, {
+        response = await fetch(url.href, {
           cache: "no-store",
           credentials: "same-origin",
           // A hung socket must not stall the whole prepare pass — fail
@@ -276,6 +292,10 @@ async function prepare(manifest) {
         continue;
       }
       const headers = new Headers(response.headers);
+      // Stored bodies are decoded bytes — transport framing must not
+      // travel with them (stale gzip length/encoding would lie).
+      headers.delete("content-encoding");
+      headers.delete("content-length");
       headers.set(DIGEST_HEADER, digest);
       await cache.put(url, new Response(body, { status: 200, headers }));
       stored.push(entry.path);
@@ -283,7 +303,7 @@ async function prepare(manifest) {
     }
     if (failed.length > 0) {
       await caches.delete(cacheName);
-      return { ok: false, generation, error: "incomplete", failed, stored };
+      return { ok: false, generation, error: "incomplete", failed, stored: stored.length };
     }
     // The manifest record makes the generation self-describing; it is the
     // last entry written before the index flips, so an interrupted prepare
@@ -327,7 +347,7 @@ async function prepare(manifest) {
       generation,
       error: `prepare_failed: ${error?.message ?? error}`,
       failed,
-      stored,
+      stored: stored.length,
     };
   }
 }
@@ -348,7 +368,14 @@ async function removeAll() {
 async function status() {
   if (active === null) await loadActive();
   if (active === null) return { ok: true, ready: false };
-  const cache = await caches.open(generationCacheName(active.generation));
+  const cacheName = generationCacheName(active.generation);
+  if (!(await caches.has(cacheName))) {
+    // Index claims a generation whose cache is gone — that is degraded,
+    // not "create an empty shell and call it ready".
+    active = null;
+    return { ok: true, ready: false };
+  }
+  const cache = await caches.open(cacheName);
   const keys = await cache.keys();
   const paths = keys
     .map((r) => new URL(r.url).pathname)

@@ -201,7 +201,10 @@ export async function registerServiceWorker(options: {
         };
         candidate.addEventListener("statechange", onChange);
         onChange();
-        setTimeout(() => resolve(candidate), 15_000);
+        setTimeout(() => {
+          candidate.removeEventListener("statechange", onChange);
+          resolve(candidate.state === "activated" ? candidate : null);
+        }, 15_000);
       }));
     if (worker === null) {
       return {
