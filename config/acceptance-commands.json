@@ -222,8 +222,13 @@
     },
     "test:regression": {
       "kind": "test",
-      "status": "declared",
-      "argv": null,
+      "status": "active",
+      "collection": "structured-report",
+      "argv": [
+        "node",
+        "--test",
+        "tests/regression/regression.test.mjs"
+      ],
       "requires": [
         "tests/regression/"
       ],

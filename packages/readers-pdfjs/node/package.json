@@ -1,0 +1,10 @@
+{
+  "name": "@inkflip/readers-pdfjs-node",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Node PDF.js profile wrapper. Own lockfile; pinned pdfjs-dist.",
+  "dependencies": {
+    "pdfjs-dist": "6.3.289"
+  }
+}
