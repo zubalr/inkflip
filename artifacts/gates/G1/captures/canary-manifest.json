@@ -77,25 +77,30 @@
       "allowed_channels": []
     },
     {
+      "name": "geometry_doc_sha256",
+      "sha256": "a638349155d786dd1687470d3763ca6d7c27b8086cdf4e153506645022f092a1",
+      "allowed_channels": []
+    },
+    {
       "name": "scan_filename",
       "sha256": "6a4cf335c25024a54ea7e0fc87b6d75dbc790fa6f31d15194976bcb1c728629e",
       "allowed_channels": []
     },
     {
-      "name": "raster_sha256",
-      "sha256": "20a229f300d59e05cc08cb2f2387e9e9b80e125d35646f709d7f92150014eed6",
+      "name": "scan_doc_sha256",
+      "sha256": "f3c1e96db95e1706ae97180a5bde6e7f54da5f38e399fa81ab7b91ee5a3df11b",
       "allowed_channels": []
     },
     {
       "name": "report_id",
-      "sha256": "b663fd7b9ff7078f60ce0c2c922d7429b9624d7de31c2e0596aea3d275d312a4",
+      "sha256": "c4aea021d834f095de665c875cda90af83195fc312a86accd6c626005f3ad089",
       "allowed_channels": [
         "downloads"
       ]
     },
     {
       "name": "run_key",
-      "sha256": "3a6bf2550246095c40dfb973ceed44c8f0eed4b8c761f3fc23058df6a9101631",
+      "sha256": "f7e74c45db5408aef97c2c41799d755d0e13606977784c8226fc7bc31c661db9",
       "allowed_channels": [
         "downloads"
       ]
@@ -103,7 +108,7 @@
   ],
   "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
   "limitations": [
-    "App composition (T13) has not landed a unified own-file page: the gate drives the real built feature mounts (open/import), the test-owned T15 harness page, and the real app shell in sequence — the same production code paths the composed page calls.",
+    "The public app is exercised end-to-end: index.html → Workspace → InspectionSession → OpenController/ImportController → RunCoordinator → pdf.js/Tesseract readers → sealed report → ViewerStage/ExportPanel — no test-owned mounts or in-test composition.",
     "Browser automation cannot see every OS/browser channel; the release profile additionally needs a proxy/firewall capture per planning.",
     "Offline coverage means an already-loaded page with prepared assets; the site ships no service worker, so cold offline navigation is out of scope (asserted as a boundary, not a feature)."
   ]

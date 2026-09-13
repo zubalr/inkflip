@@ -1,18 +1,19 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ViewerStage } from "../features/viewer/ViewerStage";
 import type { ViewerDoc } from "../features/viewer/types";
-import { FileDrop, type OpenPhase } from "../features/open/FileDrop";
-import { validateCandidate, resolveProfile } from "../features/open";
-import type { FileCandidate } from "../features/open/types";
+import { FileDrop } from "../features/open/FileDrop";
+import { OpenWorkspace } from "../features/open/OpenWorkspace";
+import { resolveProfile } from "../features/open";
+import { InspectionSession } from "../features/inspect/session";
+import { ReplaceConfirmDialog } from "../components/Dialogs/ReplaceConfirmDialog";
+import { CoveragePanel } from "../features/coverage/CoveragePanel";
+import { ExportPanel } from "../features/export/ExportPanel";
 import styles from "./Workspace.module.css";
 
 export interface WorkspaceProps {
   onNavigateHome: () => void;
   initialWithExample?: boolean;
   initialDoc?: ViewerDoc | null;
-  onImportReport?: (doc: ViewerDoc) => void;
-  onOpenFile?: (file: File) => void;
-  onCloseDoc?: () => void;
 }
 
 const EXAMPLE_DOC: ViewerDoc = {
@@ -85,7 +86,6 @@ const EXAMPLE_DOC: ViewerDoc = {
     },
   ],
   occurrences: [
-    // Duplicate occurrence 1 on page 0
     {
       id: "occ-p0-dup1",
       reader_id: "reader-pdfium",
@@ -111,7 +111,6 @@ const EXAMPLE_DOC: ViewerDoc = {
       raw_source_locator: "p0:line1",
       limitations: [],
     },
-    // Duplicate occurrence 2 on page 0 (different coordinate!)
     {
       id: "occ-p0-dup2",
       reader_id: "reader-pdfium",
@@ -137,7 +136,6 @@ const EXAMPLE_DOC: ViewerDoc = {
       raw_source_locator: "p0:line5",
       limitations: [],
     },
-    // Pypdf counterpart for occurrence 1
     {
       id: "occ-p0-pypdf1",
       reader_id: "reader-pypdf",
@@ -163,7 +161,6 @@ const EXAMPLE_DOC: ViewerDoc = {
       raw_source_locator: "p0:block1",
       limitations: [],
     },
-    // Page 1 occurrence
     {
       id: "occ-p1-item1",
       reader_id: "reader-pdfium",
@@ -189,7 +186,6 @@ const EXAMPLE_DOC: ViewerDoc = {
       raw_source_locator: "p1:line2",
       limitations: [],
     },
-    // Page-level unknown geometry occurrence on page 1
     {
       id: "occ-p1-pagelevel",
       reader_id: "reader-pypdf",
@@ -284,183 +280,104 @@ class ViewerErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBound
   }
 }
 
+const RUN_STATUS_COPY: Record<string, string> = {
+  running: "Running checks…",
+  preparing_assets: "Preparing the OCR model…",
+};
+
 export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
   initialWithExample = true,
   initialDoc,
-  onImportReport,
-  onOpenFile,
-  onCloseDoc,
 }) => {
-  const [doc, setDoc] = useState<ViewerDoc | null>(
-    initialDoc || (initialWithExample ? EXAMPLE_DOC : null),
+  const profile = useMemo(() => resolveProfile(), []);
+  const session = useMemo(() => new InspectionSession(profile), [profile]);
+  const [snap, setSnap] = useState(() => session.getState());
+  const [exampleDoc, setExampleDoc] = useState<ViewerDoc | null>(
+    initialDoc ?? (initialWithExample ? EXAMPLE_DOC : null),
   );
-  const [docTitle, setDocTitle] = useState<string>(
-    initialDoc
-      ? "Imported Report"
-      : initialWithExample
-        ? "Invoice-Example.pdf"
-        : "Workspace",
-  );
-  const [openPhase, setOpenPhase] = useState<OpenPhase>("idle");
-  const [importError, setImportError] = useState<string | null>(null);
-  const [pdfNotice, setPdfNotice] = useState<string | null>(null);
+
+  useEffect(() => session.subscribe(() => setSnap(session.getState())), [session]);
+  // Unmounting the workspace releases the session's pdf.js handle,
+  // OCR worker and retained bytes.
+  useEffect(() => () => session.close(), [session]);
+  // Read-only test handle — present only in dev/test-hook builds
+  // (vite `__INKFLIP_TEST_HOOKS__` define; shipped builds omit it).
+  useEffect(() => {
+    if (!__INKFLIP_TEST_HOOKS__) return;
+    (globalThis as { __inspect?: InspectionSession }).__inspect = session;
+    return () => {
+      delete (globalThis as { __inspect?: InspectionSession }).__inspect;
+    };
+  }, [session]);
 
   const reportInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
+  const sourceInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImportReportText = useCallback(
-    (text: string, fallbackName: string) => {
-      try {
-        const data = JSON.parse(text);
-        if (!data || typeof data !== "object") {
-          setImportError("Invalid report JSON: Expected JSON object.");
-          setDoc(null);
-          return;
-        }
-        if (!Array.isArray(data.pages) || data.pages.length === 0) {
-          setImportError("Invalid report JSON: report must contain at least one page.");
-          setDoc(null);
-          return;
-        }
-        if (!Array.isArray(data.findings)) {
-          setImportError("Invalid report JSON: missing required findings array.");
-          setDoc(null);
-          return;
-        }
-        for (const p of data.pages) {
-          if (!p || typeof p.index !== "number" || !Array.isArray(p.canonical_size_pt)) {
-            setImportError("Invalid report JSON: malformed page structure in report.");
-            setDoc(null);
-            return;
-          }
-        }
-        if (Array.isArray(data.occurrences)) {
-          for (const occ of data.occurrences) {
-            if (
-              !occ ||
-              typeof occ.page_index !== "number" ||
-              !occ.geometry ||
-              (occ.geometry.polygon !== null && !Array.isArray(occ.geometry.polygon))
-            ) {
-              setImportError(
-                "Invalid report JSON: occurrence missing required geometry or page_index.",
-              );
-              setDoc(null);
-              return;
-            }
-          }
-        }
-        for (const f of data.findings) {
-          if (!f || typeof f.id !== "string" || !Array.isArray(f.occurrence_ids)) {
-            setImportError("Invalid report JSON: malformed finding structure in report.");
-            setDoc(null);
-            return;
-          }
-        }
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
-        const importedDoc: ViewerDoc = {
-          pages: data.pages,
-          readers: Array.isArray(data.readers) ? data.readers : [],
-          occurrences: Array.isArray(data.occurrences) ? data.occurrences : [],
-          findings: data.findings,
-        };
-        setDoc(importedDoc);
-        setDocTitle(data.document?.display_name || fallbackName);
-        setImportError(null);
-        setPdfNotice(null);
-        onImportReport?.(importedDoc);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Invalid JSON";
-        setImportError(`Could not parse report file: ${msg}`);
-        setDoc(null);
-      }
-    },
-    [onImportReport],
-  );
-
-  const handleReportFileChange = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Header-level offers while a document or report is open replace it —
+  // the same confirmed-replacement contract the open workspace enforces.
+  const onFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
-      if (!file) return;
       event.target.value = "";
-      const text = await file.text();
-      handleImportReportText(text, file.name);
-    },
-    [handleImportReportText],
-  );
-
-  const handlePdfCandidate = useCallback(
-    async (file: FileCandidate) => {
-      setOpenPhase("validating");
-      try {
-        const profile = resolveProfile();
-        const err = await validateCandidate(file, profile);
-        if (err) {
-          setImportError(err.message);
-          setDoc(null);
-          setPdfNotice(null);
-          return;
-        }
-        // Valid PDF: do NOT fabricate canned findings!
-        setDoc(null);
-        setImportError(null);
-        setPdfNotice(
-          `PDF received: ${file.name}. In-browser inspection pipeline is unavailable in this viewer build. Open an exported report (.inkflip.json) to inspect findings.`,
-        );
-        if (onOpenFile && file instanceof File) {
-          onOpenFile(file);
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Validation error";
-        setImportError(`Failed to validate PDF: ${msg}`);
-        setDoc(null);
-        setPdfNotice(null);
-      } finally {
-        setOpenPhase("idle");
-      }
-    },
-    [onOpenFile],
-  );
-
-  const handlePdfFileChange = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
       if (!file) return;
-      event.target.value = "";
-      await handlePdfCandidate(file);
-    },
-    [handlePdfCandidate],
-  );
-
-  const handleFileCandidate = useCallback(
-    async (candidate: FileCandidate) => {
-      const isJson =
-        candidate.name.endsWith(".json") ||
-        candidate.name.endsWith(".inkflip.json") ||
-        candidate.type === "application/json";
-
-      if (isJson) {
-        setOpenPhase("validating");
-        try {
-          const buf = await candidate.arrayBuffer();
-          const text = new TextDecoder().decode(buf);
-          handleImportReportText(text, candidate.name);
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : "Read failure";
-          setImportError(`Failed to read report file: ${msg}`);
-          setDoc(null);
-        } finally {
-          setOpenPhase("idle");
-        }
+      const occupied = session.getState().doc !== null || session.getState().report !== null;
+      if (occupied) {
+        setPendingFile(file);
         return;
       }
-
-      // Handle PDF candidate with strict validation
-      await handlePdfCandidate(candidate);
+      void session.offerFile(file);
     },
-    [handleImportReportText, handlePdfCandidate],
+    [session],
   );
+
+  const onSourceChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      await session.attachSource(file);
+    },
+    [session],
+  );
+
+  const report = snap.report;
+  // A real document or report always takes precedence over the example.
+  const viewerDoc: ViewerDoc | null = report
+    ? {
+        pages: report.pages,
+        readers: report.readers,
+        occurrences: report.occurrences,
+        findings: report.findings,
+      }
+    : snap.doc === null
+      ? exampleDoc
+      : null;
+
+  const fileState = snap.fileState;
+  const busy =
+    fileState === "validating_file" || fileState === "loading_metadata";
+  const running = fileState === "running" || fileState === "preparing_assets";
+  const settled =
+    fileState === "complete" || fileState === "partial" || fileState === "failed";
+  const showViewer = viewerDoc !== null && (settled || snap.reportSource === "import" || exampleDoc !== null);
+  const docTitle = report
+    ? ((report.document as { filename?: string | null; display_name?: string | null })
+        .filename ??
+        (report.document as { display_name?: string | null }).display_name ??
+        snap.doc?.label ??
+        "Inspection report")
+    : exampleDoc !== null
+      ? "Invoice-Example.pdf"
+      : "Workspace";
+
+  const closeAll = useCallback(() => {
+    session.close();
+    setExampleDoc(null);
+  }, [session]);
 
   return (
     <div className={styles.workspace}>
@@ -470,7 +387,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         type="file"
         accept="application/json,.json,.inkflip.json"
         style={{ display: "none" }}
-        onChange={handleReportFileChange}
+        onChange={onFileChange}
       />
       <input
         ref={pdfInputRef}
@@ -478,7 +395,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         type="file"
         accept="application/pdf,.pdf"
         style={{ display: "none" }}
-        onChange={handlePdfFileChange}
+        onChange={onFileChange}
+      />
+      <input
+        ref={sourceInputRef}
+        id="input-attach-source"
+        type="file"
+        accept="application/pdf,.pdf"
+        style={{ display: "none" }}
+        onChange={onSourceChange}
       />
 
       <header className={styles.documentBar}>
@@ -497,11 +422,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           >
             ← Home
           </button>
-          <span className={styles.documentTitle}>{doc ? docTitle : "Workspace"}</span>
-          <span className={styles.documentMeta}>
-            {doc
-              ? `${doc.pages.length} pages · ${doc.findings.length} findings`
-              : "No document loaded"}
+          <span className={styles.documentTitle}>
+            {viewerDoc || snap.doc ? docTitle : "Workspace"}
+          </span>
+          <span className={styles.documentMeta} data-testid="doc-stats">
+            {viewerDoc
+              ? `${viewerDoc.pages.length} pages · ${viewerDoc.findings.length} findings`
+              : snap.doc
+                ? `${snap.doc.pageCount} pages · not yet inspected`
+                : "No document loaded"}
           </span>
         </div>
 
@@ -521,7 +450,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           >
             Open saved report
           </button>
-          {doc ? (
+          <button
+            id="btn-header-open-pdf"
+            type="button"
+            style={{
+              padding: "4px 12px",
+              fontSize: "var(--text-caption)",
+              borderRadius: "var(--radius-control)",
+              border: "1px solid var(--color-line)",
+              background: "var(--color-paper-pure)",
+              cursor: "pointer",
+            }}
+            onClick={() => pdfInputRef.current?.click()}
+          >
+            Open PDF
+          </button>
+          {viewerDoc || snap.doc ? (
             <button
               id="btn-close-doc"
               type="button"
@@ -533,13 +477,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 background: "var(--color-paper-pure)",
                 cursor: "pointer",
               }}
-              onClick={() => {
-                setDoc(null);
-                setDocTitle("Workspace");
-                setImportError(null);
-                setPdfNotice(null);
-                onCloseDoc?.();
-              }}
+              onClick={closeAll}
             >
               Close Document
             </button>
@@ -555,12 +493,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 background: "var(--color-paper-pure)",
                 cursor: "pointer",
               }}
-              onClick={() => {
-                setDoc(EXAMPLE_DOC);
-                setDocTitle("Invoice-Example.pdf");
-                setImportError(null);
-                setPdfNotice(null);
-              }}
+              onClick={() => setExampleDoc(EXAMPLE_DOC)}
             >
               Load Example
             </button>
@@ -569,7 +502,113 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       </header>
 
       <main className={styles.workspaceMain}>
-        {doc ? (
+        {snap.error && (
+          <div
+            id="import-error"
+            role="alert"
+            style={{
+              marginBottom: "var(--space-3)",
+              padding: "var(--space-2) var(--space-4)",
+              backgroundColor: "var(--color-surface-muted)",
+              border: "1px solid var(--color-line)",
+              borderRadius: "var(--radius-control)",
+              color: "var(--color-ink)",
+              fontSize: "var(--text-caption)",
+            }}
+          >
+            {snap.error.message}
+            {snap.error.detail ? ` (${snap.error.detail})` : ""}
+          </div>
+        )}
+        {snap.notice && (
+          <div
+            id="pdf-received-notice"
+            role="status"
+            style={{
+              marginBottom: "var(--space-3)",
+              padding: "var(--space-2) var(--space-4)",
+              backgroundColor: "var(--color-surface-subtle)",
+              border: "1px solid var(--color-line)",
+              borderRadius: "var(--radius-control)",
+              color: "var(--color-ink)",
+              fontSize: "var(--text-caption)",
+            }}
+          >
+            {snap.notice}
+          </div>
+        )}
+
+        {running && (
+          <section
+            aria-label="Inspection progress"
+            data-testid="run-progress"
+            style={{
+              padding: "var(--space-4)",
+              border: "1px solid var(--color-line)",
+              borderRadius: "var(--radius-control)",
+            }}
+          >
+            <h2 style={{ marginTop: 0 }}>{RUN_STATUS_COPY[fileState]}</h2>
+            <ul data-testid="run-checks" style={{ listStyle: "none", padding: 0 }}>
+              {(snap.run?.checks ?? []).map((check) => (
+                <li
+                  key={check.id}
+                  data-check-id={check.id}
+                  data-status={check.status ?? check.phase}
+                >
+                  <code>{check.id}</code> — {check.capability} on page{" "}
+                  {check.pageIndex + 1}: {check.status ?? check.phase}
+                </li>
+              ))}
+            </ul>
+            <button
+              id="btn-cancel-run"
+              type="button"
+              style={{
+                padding: "4px 12px",
+                borderRadius: "var(--radius-control)",
+                border: "1px solid var(--color-line)",
+                background: "var(--color-paper-pure)",
+                cursor: "pointer",
+              }}
+              onClick={() => session.cancelRun()}
+            >
+              Cancel run
+            </button>
+          </section>
+        )}
+
+        {fileState === "cancelled" && (
+          <section aria-label="Run cancelled" data-testid="run-cancelled">
+            <p>The inspection run was cancelled.</p>
+            <button
+              id="btn-back-to-selection"
+              type="button"
+              onClick={() => session.newRun()}
+              style={{
+                padding: "4px 12px",
+                borderRadius: "var(--radius-control)",
+                border: "1px solid var(--color-line)",
+                background: "var(--color-paper-pure)",
+                cursor: "pointer",
+              }}
+            >
+              Back to selection
+            </button>
+          </section>
+        )}
+
+        {fileState === "selecting" && snap.doc !== null && snap.reportSource !== "import" && (
+          <OpenWorkspace
+            controller={session.openController}
+            host={session.coordinator}
+            profile={profile}
+            renderPageRaster={session.renderPageRaster}
+            startRun={session.startRun}
+          />
+        )}
+
+        {showViewer && viewerDoc && (
           <ViewerErrorBoundary
             key={docTitle}
             fallback={(error) => (
@@ -589,45 +628,94 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </div>
             )}
           >
-            <ViewerStage doc={doc} />
+            <ViewerStage doc={viewerDoc} />
           </ViewerErrorBoundary>
-        ) : (
+        )}
+
+        {report && (
+          <>
+            {settled && snap.doc !== null && (
+              <button
+                id="btn-rerun"
+                type="button"
+                style={{
+                  marginBottom: "var(--space-3)",
+                  padding: "4px 12px",
+                  borderRadius: "var(--radius-control)",
+                  border: "1px solid var(--color-line)",
+                  background: "var(--color-paper-pure)",
+                  cursor: "pointer",
+                }}
+                onClick={() => session.newRun()}
+              >
+                Re-inspect this document
+              </button>
+            )}
+            <CoveragePanel
+              plan={report.plan}
+              checks={report.checks}
+              pages={report.pages}
+              ocrRun={report.plan.checks.some((c) => c.capability === "ocr")}
+              findingsCount={report.findings.length}
+            />
+            {snap.reportSource === "import" && snap.importedReplay !== null && (
+              <section
+                aria-label="Replay readiness"
+                data-testid="replay-status"
+                style={{
+                  marginTop: "var(--space-3)",
+                  padding: "var(--space-2) var(--space-4)",
+                  border: "1px solid var(--color-line)",
+                  borderRadius: "var(--radius-control)",
+                  fontSize: "var(--text-caption)",
+                }}
+              >
+                {snap.importedReplay.source === "missing" ? (
+                  <>
+                    <p>
+                      The original PDF was not embedded in this report. Attach the
+                      matching file to enable source replay.
+                    </p>
+                    <button
+                      id="btn-attach-source"
+                      type="button"
+                      onClick={() => sourceInputRef.current?.click()}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: "var(--radius-control)",
+                        border: "1px solid var(--color-line)",
+                        background: "var(--color-paper-pure)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Attach original PDF
+                    </button>
+                  </>
+                ) : snap.importedReplay.ready ? (
+                  <p>Original document {snap.importedReplay.source}; replay ready.</p>
+                ) : (
+                  <p>
+                    Original document {snap.importedReplay.source}. Replay is not
+                    ready
+                    {snap.importedReplay.readersMissing.length > 0
+                      ? ` — missing reader${snap.importedReplay.readersMissing.length === 1 ? "" : "s"}: ${snap.importedReplay.readersMissing.join(", ")}`
+                      : ""}
+                    .
+                  </p>
+                )}
+              </section>
+            )}
+            <ExportPanel
+              engine={session.exportEngine}
+              source={report}
+              sourcePdfBytes={session.sourcePdfBytes}
+            />
+          </>
+        )}
+
+        {!busy && !running && fileState === "idle" && viewerDoc === null && (
           <div className={styles.emptyWorkspace}>
-            <FileDrop phase={openPhase} onFile={handleFileCandidate} hasDocument={false} />
-            {importError && (
-              <div
-                id="import-error"
-                role="alert"
-                style={{
-                  marginTop: "var(--space-3)",
-                  padding: "var(--space-2) var(--space-4)",
-                  backgroundColor: "var(--color-surface-muted)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-control)",
-                  color: "var(--color-ink)",
-                  fontSize: "var(--text-caption)",
-                }}
-              >
-                {importError}
-              </div>
-            )}
-            {pdfNotice && (
-              <div
-                id="pdf-received-notice"
-                role="status"
-                style={{
-                  marginTop: "var(--space-3)",
-                  padding: "var(--space-2) var(--space-4)",
-                  backgroundColor: "var(--color-surface-subtle)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-control)",
-                  color: "var(--color-ink)",
-                  fontSize: "var(--text-caption)",
-                }}
-              >
-                {pdfNotice}
-              </div>
-            )}
+            <FileDrop phase="idle" onFile={(file) => void session.offerFile(file)} hasDocument={false} />
             <div
               style={{
                 display: "flex",
@@ -681,18 +769,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   padding: "0 var(--space-4)",
                   backgroundColor: "var(--color-ink)",
                   color: "var(--color-paper-pure)",
-                  border: "1px solid var(--color-ink)",
+                  border: "1px solid var(--color-line)",
                   borderRadius: "var(--radius-control)",
                   fontSize: "var(--text-body)",
                   fontWeight: 500,
                   cursor: "pointer",
                 }}
-                onClick={() => {
-                  setDoc(EXAMPLE_DOC);
-                  setDocTitle("Invoice-Example.pdf");
-                  setImportError(null);
-                  setPdfNotice(null);
-                }}
+                onClick={() => setExampleDoc(EXAMPLE_DOC)}
               >
                 Try the example
               </button>
@@ -700,6 +783,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </div>
         )}
       </main>
+
+      <ReplaceConfirmDialog
+        isOpen={pendingFile !== null}
+        onCancel={() => setPendingFile(null)}
+        onConfirm={() => {
+          const file = pendingFile;
+          setPendingFile(null);
+          if (file) void session.offerFile(file);
+        }}
+      />
     </div>
   );
 };

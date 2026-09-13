@@ -70,7 +70,7 @@ export type TerminalStatusCategory =
   | "skipped";
 
 export interface StatusDetail {
-  checkId?: string;
+  checkId?: string | undefined;
   category: TerminalStatusCategory;
   label: string;
   description: string;
@@ -211,13 +211,17 @@ export function isMaterialTokenDifference(
   }
   if (readings.length < 2) return false;
   // Inspect only the tokens that actually differ between comparative readings
-  const text0 = readings[0].readingText;
+  const first = readings[0];
+  if (first === undefined) return false;
+  const text0 = first.readingText;
   const differing = readings.slice(1).some((r) => r.readingText !== text0);
   if (!differing) return false;
 
   const tokens0 = new Set(text0.split(/\s+/));
   for (let i = 1; i < readings.length; i++) {
-    const tokensI = readings[i].readingText.split(/\s+/);
+    const item = readings[i];
+    if (item === undefined) continue;
+    const tokensI = item.readingText.split(/\s+/);
     for (const t of tokensI) {
       if (!tokens0.has(t) && MATERIAL_TOKEN_RE.test(t)) {
         return true;

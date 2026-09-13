@@ -1,7 +1,7 @@
 {
   "kind": "report",
   "schema_version": "1.0.0",
-  "report_id": "c7e5f65e01295ac00c5e6ca599a4814d964fca4e8cfa39b6a41c14c8c107dcfc",
+  "report_id": "82750d99acf0905680fa44247d38ff2ec890d41121f00617fe8029649119e52b",
   "document": {
     "sha256": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
     "byte_length": 947,
@@ -169,7 +169,7 @@
         "language": "eng",
         "psm": 6,
         "render_reader_id": "pdfjs-6_3_289-render",
-        "raster_dpi": 72,
+        "raster_dpi": 144,
         "annotation_mode": "not_applicable"
       },
       "capabilities": [
@@ -237,254 +237,17 @@
       "operation": "page_box_to_canonical",
       "precision": "exact",
       "source": "pdf.js page.view effective view; original MediaBox/CropBox unavailable via selected API"
-    },
-    {
-      "id": "t_p0_raster_r_p0_0",
-      "page_index": 0,
-      "from_space": "display:p0",
-      "to_space": "raster:r_p0_0",
-      "matrix": [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0
-      ],
-      "inverse": [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0
-      ],
-      "operation": "raster_scale",
-      "precision": "exact",
-      "source": "Render scale 1 px/pt for raster:r_p0_0"
-    },
-    {
-      "id": "t_p0_crop_ocr_ocr_0_0",
-      "page_index": 0,
-      "from_space": "raster:r_p0_0",
-      "to_space": "ocr:ocr_ocr_0_0",
-      "matrix": [
-        1,
-        0,
-        0,
-        1,
-        -40,
-        -101
-      ],
-      "inverse": [
-        1,
-        0,
-        0,
-        1,
-        40,
-        101
-      ],
-      "operation": "crop_translation",
-      "precision": "exact",
-      "source": "OCR crop origin (40,101) raster pixels for ocr:ocr_ocr_0_0"
-    },
-    {
-      "id": "t_p0_ocrresize_ocr_ocr_0_0",
-      "page_index": 0,
-      "from_space": "ocr:ocr_ocr_0_0",
-      "to_space": "ocr:ocr_ocr_0_0",
-      "matrix": [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0
-      ],
-      "inverse": [
-        1,
-        0,
-        0,
-        1,
-        0,
-        0
-      ],
-      "operation": "ocr_resize",
-      "precision": "exact",
-      "source": "OCR resize (1,1) for ocr:ocr_ocr_0_0"
     }
   ],
-  "occurrences": [
-    {
-      "id": "o_024e6354e07efca01a9835ede3a90526",
-      "reader_id": "pdfjs-6_3_289-text",
-      "page_index": 0,
-      "ordinal": 0,
-      "raw_text": "INKFLIP-CANARY-TEXT-7B2",
-      "normalized_text": "INKFLIP-CANARY-TEXT-7B2",
-      "normalization_map": [
-        {
-          "raw_start": 0,
-          "raw_end": 23,
-          "normalized_start": 0,
-          "normalized_end": 23,
-          "operation": "identity"
-        }
-      ],
-      "geometry": {
-        "precision": "estimated",
-        "space": "canonical_page",
-        "polygon": [
-          [
-            48,
-            122.542969
-          ],
-          [
-            207.36,
-            122.542969
-          ],
-          [
-            207.36,
-            109.136719
-          ],
-          [
-            48,
-            109.136719
-          ]
-        ],
-        "transform_ids": [
-          "t_p0_canonical"
-        ],
-        "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
-      },
-      "engine_score": null,
-      "source_asset_id": null,
-      "raw_source_locator": "pdfjs:getTextContent:p0:text0",
-      "limitations": [
-        "extent estimated from pdf.js TextItem transform, width/height and font ascent/descent; not a glyph-paint or per-character provenance",
-        "multi-character TextItem: no per-character advance boxes; the whole measured item is the extent"
-      ]
-    },
-    {
-      "id": "o_49f70173a714e189be84dde0b2656e61",
-      "reader_id": "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render",
-      "page_index": 0,
-      "ordinal": 0,
-      "raw_text": "INKFLIP-CANARY-TEXT-7B2",
-      "normalized_text": "INKFLIP-CANARY-TEXT-7B2",
-      "normalization_map": [
-        {
-          "raw_start": 0,
-          "raw_end": 23,
-          "normalized_start": 0,
-          "normalized_end": 23,
-          "operation": "identity"
-        }
-      ],
-      "geometry": {
-        "precision": "estimated",
-        "space": "canonical_page",
-        "polygon": [
-          [
-            49,
-            111
-          ],
-          [
-            207,
-            111
-          ],
-          [
-            207,
-            120
-          ],
-          [
-            49,
-            120
-          ]
-        ],
-        "transform_ids": [
-          "t_p0_raster_r_p0_0",
-          "t_p0_crop_ocr_ocr_0_0",
-          "t_p0_ocrresize_ocr_ocr_0_0"
-        ],
-        "basis": "tesseract.js word bbox in ocr:ocr_ocr_0_0 pixels; mapped ocr->canonical through transforms t_p0_raster_r_p0_0,t_p0_crop_ocr_ocr_0_0,t_p0_ocrresize_ocr_ocr_0_0"
-      },
-      "engine_score": {
-        "value": 58,
-        "scale_min": 0,
-        "scale_max": 100,
-        "meaning": "tesseract word confidence (0-100); recognizer estimate for diagnostics — never asserted as ground truth"
-      },
-      "source_asset_id": null,
-      "raw_source_locator": "tesseract.js/blocks[0].paragraphs[0].lines[0].words[0]",
-      "limitations": [
-        "low_engine_score"
-      ]
-    }
-  ],
-  "findings": [
-    {
-      "id": "f_canary",
-      "kind": "reading_difference",
-      "title": "Text-layer marker present on rendered page",
-      "explanation": "The named text reader and the OCR reader produced different raw strings for the same selected region; neither output alone establishes document truth.",
-      "page_index": 0,
-      "occurrence_ids": [
-        "o_024e6354e07efca01a9835ede3a90526",
-        "o_49f70173a714e189be84dde0b2656e61"
-      ],
-      "check_ids": [
-        "chk_p0_native_text",
-        "ocr_0_0"
-      ],
-      "alignment": "page_level",
-      "region_id": "region_p0_canary",
-      "priority": "selected",
-      "basis": "Actual recorded reader outputs of the generated canary document.",
-      "limitations": [
-        "Synthetic single-line canary text."
-      ]
-    }
-  ],
+  "occurrences": [],
+  "findings": [],
   "annotations": [],
   "plan": {
     "version": "1.0.0",
     "selected_pages": [
       0
     ],
-    "regions": [
-      {
-        "id": "region_p0_canary",
-        "page_index": 0,
-        "geometry": {
-          "precision": "estimated",
-          "space": "canonical_page",
-          "polygon": [
-            [
-              48,
-              122.542969
-            ],
-            [
-              207.36,
-              122.542969
-            ],
-            [
-              207.36,
-              109.136719
-            ],
-            [
-              48,
-              109.136719
-            ]
-          ],
-          "transform_ids": [
-            "t_p0_canonical"
-          ],
-          "basis": "pdf.js getTextContent TextItem transform+width/height with font ascent/descent, mapped through the page raw_to_canonical transform"
-        },
-        "label": "canary"
-      }
-    ],
+    "regions": [],
     "checks": [
       {
         "id": "chk_p0_native_text",
@@ -493,7 +256,7 @@
           "pdfjs-6_3_289-text"
         ],
         "capability": "native_text",
-        "region_id": "region_p0_canary"
+        "region_id": null
       },
       {
         "id": "chk_p0_render",
@@ -511,7 +274,17 @@
           "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
         ],
         "capability": "ocr",
-        "region_id": "region_p0_canary"
+        "region_id": null
+      },
+      {
+        "id": "chk_p0_alignment",
+        "page_index": 0,
+        "reader_ids": [
+          "pdfjs-6_3_289-text",
+          "rdr_tesseract_eng_lstm_psm6_desktop_pdfjs-6_3_289-render"
+        ],
+        "capability": "alignment",
+        "region_id": null
       }
     ],
     "normalization_version": "scalar-whitespace-v1",
@@ -530,9 +303,7 @@
       "status": "completed",
       "reason": null,
       "produced_occurrence_count": 1,
-      "retained_occurrence_ids": [
-        "o_024e6354e07efca01a9835ede3a90526"
-      ]
+      "retained_occurrence_ids": []
     },
     {
       "id": "chk_p0_render",
@@ -546,18 +317,23 @@
       "status": "completed",
       "reason": null,
       "produced_occurrence_count": 1,
-      "retained_occurrence_ids": [
-        "o_49f70173a714e189be84dde0b2656e61"
-      ]
+      "retained_occurrence_ids": []
+    },
+    {
+      "id": "chk_p0_alignment",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 0,
+      "retained_occurrence_ids": []
     }
   ],
   "execution": {
-    "execution_id": "dbdc9cf2-db06-4c67-a3cf-9802a01eda8e",
-    "run_key": "c19a175c877aecd3f62a872f5d53ce15806bcfaa5ff2a9c362ddf10aac31aac6",
+    "execution_id": "33077056-8a25-4cec-a972-2e01aa346fcc",
+    "run_key": "eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c",
     "status": "complete",
-    "started_at": "2026-09-13T00:02:39.540Z",
-    "duration_ms": 1,
-    "environment": "Chromium (Playwright) · g1 gate",
+    "started_at": "2026-09-13T03:53:11.459Z",
+    "duration_ms": 245,
+    "environment": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36",
     "result_origin": "live",
     "errors": []
   },
@@ -565,7 +341,6 @@
     "mode": "evidence",
     "scope": "selection",
     "included": [
-      "selected_text",
       "document_hash",
       "settings",
       "coverage"
@@ -573,14 +348,15 @@
     "omissions": [
       "Original PDF excluded.",
       "Filename excluded.",
-      "Notes excluded.",
+      "Other extracted source occurrences excluded.",
       "Reader runtime binaries and model bytes excluded."
     ],
     "replay": "requires_original",
-    "origin_report_id": "ce171633bb52cca3e676039a8586e2b5dc3e370260e8818410f2a7a2a871aab1"
+    "origin_report_id": "8b1dc4dd1f4ea7fdbb77beffa49cef49a5ac0695fe028e00d57c63ebed86490f"
   },
   "assets": [],
   "limitations": [
-    "G1 gate: report assembled in-page from the actual pdf.js/tesseract readings of the canary document."
+    "Findings are reader differences, not document verdicts.",
+    "Selection projection: 0 of 2 produced occurrences retained; check scope and produced counts are unchanged."
   ]
 }

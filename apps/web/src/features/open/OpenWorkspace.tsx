@@ -90,7 +90,11 @@ export function OpenWorkspace({
   startRun,
 }: OpenWorkspaceProps) {
   const [view, setView] = useState(() => host.snapshot());
-  const [doc, setDoc] = useState<OpenedDocumentInfo | null>(null);
+  // Lazy-init from the controller: this component can mount after the
+  // `metadata` event already fired (the host decides when to mount it).
+  const [doc, setDoc] = useState<OpenedDocumentInfo | null>(
+    () => controller.currentDocument,
+  );
   const [error, setError] = useState<OpenError | null>(null);
   const [pending, setPending] = useState<FileCandidate | null>(null);
   const [selectionRev, setSelectionRev] = useState(0);
@@ -434,13 +438,15 @@ export function OpenWorkspace({
                   </li>
                 ))}
               </ul>
-              <ul className={styles.planList} data-testid="plan-dispatched">
-                {plan.dispatched.map((job) => (
-                  <li key={job.jobId}>
-                    dispatched {job.checkId} on {job.jobId}
-                  </li>
-                ))}
-              </ul>
+              {plan.dispatched.length > 0 && (
+                <ul className={styles.planList} data-testid="plan-dispatched">
+                  {plan.dispatched.map((job) => (
+                    <li key={job.jobId}>
+                      dispatched {job.checkId} on {job.jobId}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
         </section>
