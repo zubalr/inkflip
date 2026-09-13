@@ -1,0 +1,18 @@
+bun run test:browser -- tests/browser/ambiguity.spec.ts
+
+Running 5 tests using 1 worker
+
+
+[1A[2K[1/5] tests/browser/ambiguity.spec.ts:145:1 › repeated identical amounts stay individually addressable — never first string match
+[1A[2K[2/5] tests/browser/ambiguity.spec.ts:177:1 › ambiguous finding exposes every candidate and pre-picks none
+[1A[2K[3/5] tests/browser/ambiguity.spec.ts:215:1 › order-only differences remain order-only
+[1A[2K[4/5] tests/browser/ambiguity.spec.ts:243:1 › unmatched readings are never claimed as missing visible text
+[1A[2K[5/5] tests/browser/ambiguity.spec.ts:270:1 › keyboard selection returns focus to the originating finding
+[1A[2K  5 passed (5.4s)
+$ python3 scripts/task_acceptance.py run test:browser tests/browser/ambiguity.spec.ts
+(node:38489) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[1A[2K(node:38495) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Exit: 0
