@@ -125,3 +125,7 @@ worker, WASM and model bytes and existing license notices are unchanged.
 
 - `build/native/Dockerfile` follows `planning/deployment/examples/Dockerfile.native` and pins the T02-recorded `python:3.13.15-slim-trixie` index digest. No third-party Dockerfile was copied beyond that planning recipe.
 
+## T46 — compatibility receipt checker (2026-09-13)
+
+- `scripts/check_manual_receipts.py` is a small shared checker (T37/T46/T53 kinds). T46 lands the `compatibility` kind so the documented command can run. Other kinds fail closed until their owners add receipts. See `docs/proposals/T46.md`.
+

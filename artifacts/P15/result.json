@@ -1,0 +1,14 @@
+{
+  "experiment": "P15",
+  "task": "T46",
+  "status": "executed_scoped",
+  "accept_reject": "No unexplained difference in promised semantic equivalence on the executed native + pdf.js-node pair. Engine raw text and rasters were not forced equal. Unavailable browsers and Linux amd64 are recorded, not implied.",
+  "artifacts": [
+    "artifacts/P15/hash-vectors.json",
+    "artifacts/P15/native-repeat.json",
+    "artifacts/P15/pdfjs-node.json",
+    "artifacts/P15/semantic-equivalence.json",
+    "artifacts/P15/reader-change.json",
+    "artifacts/P15/platforms.json"
+  ]
+}

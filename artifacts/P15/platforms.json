@@ -1,0 +1,49 @@
+{
+  "host": {
+    "os": "Darwin arm64",
+    "python": [
+      "3.13.15",
+      "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+    ],
+    "node": "v26.7.0",
+    "cpu": "arm64",
+    "model": null
+  },
+  "platforms": [
+    {
+      "id": "native-macos-arm64",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/native-repeat.json"
+      ]
+    },
+    {
+      "id": "pdfjs-node-wrapper",
+      "status": "executed",
+      "evidence": [
+        "artifacts/P15/pdfjs-node.json"
+      ]
+    },
+    {
+      "id": "chromium",
+      "status": "unavailable",
+      "evidence": [],
+      "note": "Playwright/Chromium UI not launched in this allocation; pdf.js entry used via node wrapper"
+    },
+    {
+      "id": "firefox",
+      "status": "unavailable",
+      "evidence": []
+    },
+    {
+      "id": "webkit-safari",
+      "status": "unavailable",
+      "evidence": []
+    },
+    {
+      "id": "linux-amd64-native",
+      "status": "unavailable",
+      "evidence": []
+    }
+  ]
+}

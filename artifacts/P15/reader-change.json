@@ -1,0 +1,83 @@
+{
+  "source_hash": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+  "pdfium": {
+    "id": "pdfium-native",
+    "name": "PDFium",
+    "version": "5.8.0",
+    "build": "pypdfium2 5.8.0 / PDFium 149.0.7825.0",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "native",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "glyph-box granularity; consecutive characters sharing an exactly-equal reported box are coalesced without width guessing",
+          "UserUnit compensation derives physical geometry from pypdf page metadata; get_size() is not trusted for physical units"
+        ]
+      },
+      {
+        "name": "render",
+        "support": "unavailable",
+        "limits": [
+          "render scale compensation is proven under the OCR/render tasks; not claimed by this reader manifest yet"
+        ]
+      }
+    ],
+    "model_hashes": [
+      "3aed5632c54a689ade84a811b93943ea8afa8c3ccae6b3e7e9e58de87bea42af"
+    ],
+    "limitations": [
+      "single-threaded in-process adapter; supervision belongs to the native parent task",
+      "rotation is display-only and is not applied to stored occurrence coordinates"
+    ]
+  },
+  "pypdf": {
+    "id": "pypdf-native",
+    "name": "pypdf",
+    "version": "6.18.0",
+    "build": "pypdf 6.18.0 (pure Python)",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "native",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "page-level text only; no per-word geometry is claimed or derived from visitor matrices",
+          "text from this reader is never combined with PDFium boxes by string matching"
+        ]
+      },
+      {
+        "name": "crop_metadata",
+        "support": "approximate",
+        "limits": [
+          "declared page dictionaries (media/crop box, /UserUnit, /Rotate) are parsed for other adapters' compensation; metadata is separate from extraction"
+        ]
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "in-process adapter; child-process supervision belongs to the native parent task"
+    ]
+  },
+  "environments_differ": false
+}

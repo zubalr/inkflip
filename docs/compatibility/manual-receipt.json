@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "compatibility",
+  "status": "partial",
+  "task": "T46",
+  "host": {
+    "os": "Darwin arm64",
+    "python": "3.13.15",
+    "node": "v26.7.0",
+    "cpu": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  },
+  "platforms": [
+    {
+      "id": "native-macos-arm64",
+      "status": "executed",
+      "evidence": ["artifacts/P15/native-repeat.json", "artifacts/P15/semantic-equivalence.json"]
+    },
+    {
+      "id": "pdfjs-node-wrapper",
+      "status": "executed",
+      "evidence": ["artifacts/P15/pdfjs-node.json"]
+    },
+    {
+      "id": "chromium",
+      "status": "unavailable",
+      "evidence": [],
+      "note": "GUI Chromium not launched; pdf.js entry used via node wrapper"
+    },
+    {
+      "id": "firefox",
+      "status": "unavailable",
+      "evidence": []
+    },
+    {
+      "id": "webkit-safari",
+      "status": "unavailable",
+      "evidence": []
+    },
+    {
+      "id": "linux-amd64-native",
+      "status": "unavailable",
+      "evidence": []
+    }
+  ],
+  "promised_semantic_equivalence": {
+    "source_hash": "agreed",
+    "check_terminals": "agreed completed",
+    "raw_text": "not forced equal",
+    "rasters": "not forced equal"
+  },
+  "pending_for_final_acceptance": [
+    "Chromium/Firefox/WebKit GUI runs",
+    "Linux amd64 native binary",
+    "cold/warm OCR model cache"
+  ]
+}

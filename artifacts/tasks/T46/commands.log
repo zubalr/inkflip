@@ -1,0 +1,8 @@
+# T46 commands
+implementation: f4f31fc0bcaf15cdac5342a378ed4db2dd5edb35
+
+$ node --test tests/parity/*.test.mjs
+8 passed, 0 failed
+
+$ python3 scripts/check_manual_receipts.py compatibility
+compatibility: ok (6 platforms)

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "task_id": "T46",
+  "beads_id": "pdf-t46",
+  "worker": {
+    "app": "cursor",
+    "branch": "work/cursor/native-assurance",
+    "base": "78750769d1a29d58b7b79f91c1c8ffd749dc4eac",
+    "implementation_commit": "f4f31fc0bcaf15cdac5342a378ed4db2dd5edb35"
+  },
+  "criteria": [
+    {"criterion": "No unexplained difference in promised semantic equivalence", "status": "executed", "evidence": ["artifacts/P15/semantic-equivalence.json"]},
+    {"criterion": "required hash vectors same everywhere", "status": "executed", "evidence": ["artifacts/P15/hash-vectors.json"]},
+    {"criterion": "engine renders not forced equal", "status": "executed", "evidence": ["artifacts/P15/semantic-equivalence.json", "docs/compatibility/README.md"]},
+    {"criterion": "exact build/CPU/OS/model manifest and all failed/skipped profiles recorded.", "status": "executed", "evidence": ["artifacts/P15/platforms.json", "docs/compatibility/manual-receipt.json"]}
+  ],
+  "acceptance_criteria_evidence": {
+    "No unexplained difference in promised semantic equivalence": {"status": "executed", "evidence": ["artifacts/P15/semantic-equivalence.json"]},
+    "required hash vectors same everywhere": {"status": "executed", "evidence": ["artifacts/P15/hash-vectors.json"]},
+    "engine renders not forced equal": {"status": "executed", "evidence": ["docs/compatibility/README.md"]},
+    "exact build/CPU/OS/model manifest and all failed/skipped profiles recorded.": {"status": "executed", "evidence": ["docs/compatibility/manual-receipt.json"]}
+  },
+  "review": {"status": "pending", "path": "artifacts/tasks/T46/review.md"},
+  "limitations": [
+    "GUI Chromium/Firefox/WebKit unavailable in this allocation.",
+    "Linux amd64 native binary not executed.",
+    "Independent review pending."
+  ]
+}
