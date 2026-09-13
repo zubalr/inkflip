@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -8,6 +8,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(here, "../..");
 export const WEB_ROOT = join(ROOT, "apps/web");
 export const DIST_DIR = join(WEB_ROOT, "dist");
+/** The shared dist is never written by this harness; see startProdServer. */
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -34,6 +35,38 @@ function ext(name: string): string {
 export interface BuildIdentity {
   indexHtmlSha256: string;
   distDir: string;
+  /** Hash over every emitted build file, so the identity binds the bytes the
+   *  page actually loads (JS/CSS/worker/wasm), not only index.html. */
+  buildSha256: string;
+  fileCount: number;
+  /** True when the build directory is private to this run. */
+  isolated: boolean;
+}
+
+function hashBuildTree(dir: string): { buildSha256: string; fileCount: number } {
+  const files: string[] = [];
+  const walk = (current: string, prefix: string) => {
+    for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    )) {
+      const next = join(current, entry.name);
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        walk(next, rel);
+      } else if (entry.isFile()) {
+        files.push(rel);
+      }
+    }
+  };
+  walk(dir, "");
+  const digest = createHash("sha256");
+  for (const rel of files) {
+    digest.update(rel);
+    digest.update("\0");
+    digest.update(readFileSync(join(dir, rel)));
+    digest.update("\0");
+  }
+  return { buildSha256: digest.digest("hex"), fileCount: files.length };
 }
 
 export interface ProdServerInstance {
@@ -52,6 +85,11 @@ export async function startProdServer(): Promise<ProdServerInstance> {
     build: (opts: Record<string, unknown>) => Promise<unknown>;
   };
 
+  // Each run builds into its own disposable directory. Building into the shared
+  // apps/web/dist with emptyOutDir:false let a stale asset from an earlier build
+  // satisfy a later run, and made two suites share one output tree.
+  const runDistDir = join(WEB_ROOT, `.harness-dist-${process.pid}-${Date.now().toString(36)}`);
+
   const prevEnv = process.env.NODE_ENV;
   process.env.NODE_ENV = "production";
   try {
@@ -60,8 +98,8 @@ export async function startProdServer(): Promise<ProdServerInstance> {
       configFile: join(WEB_ROOT, "vite.config.ts"),
       logLevel: "warn",
       build: {
-        outDir: DIST_DIR,
-        emptyOutDir: false,
+        outDir: runDistDir,
+        emptyOutDir: true,
       },
     });
   } finally {
@@ -72,12 +110,13 @@ export async function startProdServer(): Promise<ProdServerInstance> {
     }
   }
 
-  // Calculate build identity from index.html
-  const indexPath = join(DIST_DIR, "index.html");
+  // Build identity binds the whole emitted tree, not just index.html.
+  const indexPath = join(runDistDir, "index.html");
   const indexBytes = readFileSync(indexPath);
   const indexHtmlSha256 = createHash("sha256").update(indexBytes).digest("hex");
+  const { buildSha256, fileCount } = hashBuildTree(runDistDir);
 
-  const distRoot = resolve(DIST_DIR) + sep;
+  const distRoot = resolve(runDistDir) + sep;
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     let pathname = decodeURIComponent(url.pathname);
@@ -95,11 +134,11 @@ export async function startProdServer(): Promise<ProdServerInstance> {
       return;
     }
 
-    let file = normalize(join(DIST_DIR, pathname));
+    let file = normalize(join(runDistDir, pathname));
     // SPA fallback: if file does not exist and doesn't look like static file with extension, serve index.html
     if (!file.startsWith(distRoot) || !existsSync(file) || file.endsWith(sep)) {
       if (!pathname.slice(1).includes(".")) {
-        file = join(DIST_DIR, "index.html");
+        file = join(runDistDir, "index.html");
       } else {
         res.writeHead(404, headers).end("not found");
         return;
@@ -128,8 +167,18 @@ export async function startProdServer(): Promise<ProdServerInstance> {
     baseUrl,
     buildIdentity: {
       indexHtmlSha256,
-      distDir: DIST_DIR,
+      distDir: runDistDir,
+      buildSha256,
+      fileCount,
+      isolated: true,
     },
-    close: () => new Promise((r) => server.close(() => r())),
+    close: () =>
+      new Promise((r) =>
+        server.close(() => {
+          // Dispose of this run's private build; the shared dist is untouched.
+          rmSync(runDistDir, { recursive: true, force: true });
+          r();
+        }),
+      ),
   };
 }
