@@ -68,7 +68,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     await finding2.click();
 
     // Verify finding 2 is selected
-    await expect(finding2).toHaveAttribute("aria-selected", "true");
+    await expect(finding2).toHaveAttribute("aria-current", "true");
 
     // Verify correct duplicate occurrence highlight is selected
     const occ2Highlight = page.locator("#highlight-occ-p0-dup2");
@@ -85,17 +85,17 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     // Keyboard selection verification (P3-F4): press 'n' to cycle to next finding
     await page.keyboard.press("n");
     const unknownFinding = page.locator("#finding-item-finding-page1-unknown");
-    await expect(unknownFinding).toHaveAttribute("aria-selected", "true");
+    await expect(unknownFinding).toHaveAttribute("aria-current", "true");
 
     // Press 'p' to cycle back to finding-dup2
     await page.keyboard.press("p");
-    await expect(finding2).toHaveAttribute("aria-selected", "true");
+    await expect(finding2).toHaveAttribute("aria-current", "true");
 
     // Verify Enter on focused finding item selects it
     const finding1 = page.locator("#finding-item-finding-dup1");
     await finding1.focus();
     await page.keyboard.press("Enter");
-    await expect(finding1).toHaveAttribute("aria-selected", "true");
+    await expect(finding1).toHaveAttribute("aria-current", "true");
     const occ1HighlightAfter = page.locator("#highlight-occ-p0-dup1");
     await expect(occ1HighlightAfter).toBeVisible();
     const classAttrOcc1 = await occ1HighlightAfter.getAttribute("class");
@@ -377,14 +377,10 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     await expect(page.locator("#viewer-stage")).toHaveCount(0);
     // The parse failure surfaces as an honest open error
     await expect(page.locator("#import-error")).toBeVisible();
-    expect(await page.locator("#import-error").textContent()).toContain(
-      "could not open this PDF",
-    );
+    expect(await page.locator("#import-error").textContent()).toContain("could not open this PDF");
   });
 
-  test("canonical sealed report import mounts the viewer (P1)", async ({
-    page,
-  }) => {
+  test("canonical sealed report import mounts the viewer (P1)", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(`${baseUrl}/#/workspace`);
     await page.waitForSelector('[data-testid="file-drop"]');

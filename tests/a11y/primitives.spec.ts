@@ -41,7 +41,9 @@ test.afterAll(async () => {
 });
 
 test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
-  test("no serious or critical automated accessibility violations (WCAG 2.2 AA)", async ({ page }) => {
+  test("no serious or critical automated accessibility violations (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
     await page.waitForSelector("main");
 
@@ -50,13 +52,15 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
       .analyze();
 
     const seriousOrCritical = accessibilityScanResults.violations.filter(
-      (v) => v.impact === "serious" || v.impact === "critical"
+      (v) => v.impact === "serious" || v.impact === "critical",
     );
 
     expect(seriousOrCritical).toEqual([]);
   });
 
-  test("keyboard can reach and operate all controls (buttons, tabs, disclosures)", async ({ page }) => {
+  test("keyboard can reach and operate all controls (buttons, tabs, disclosures)", async ({
+    page,
+  }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
     await page.waitForSelector("main");
 
@@ -161,7 +165,9 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
     const focusableCount = await page.evaluate(() => {
       const dlg = document.querySelector('[role="dialog"]');
       if (!dlg) return 0;
-      return dlg.querySelectorAll('button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])').length;
+      return dlg.querySelectorAll(
+        'button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])',
+      ).length;
     });
     expect(focusableCount).toBeGreaterThanOrEqual(2); // close btn + footer btn
 
@@ -190,7 +196,9 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
     await expect(dialog).not.toBeVisible();
   });
 
-  test("dynamic progress does not announce every OCR token (polite stage announcements only)", async ({ page }) => {
+  test("dynamic progress does not announce every OCR token (polite stage announcements only)", async ({
+    page,
+  }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
     await page.waitForSelector("#btn-update-token");
 
@@ -207,7 +215,9 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
     await expect(liveRegion).toHaveText("Reading text on page 2…");
   });
 
-  test("interactive controls adhere to 44px minimum touch target size and 3px focus outline", async ({ page }) => {
+  test("interactive controls adhere to 44px minimum touch target size and 3px focus outline", async ({
+    page,
+  }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
     await page.waitForSelector("#btn-primary");
 
@@ -237,7 +247,9 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
     expect(outline.outlineWidth).toBe("3px");
   });
 
-  test("replace confirmation dialog displays canonical copy and restores focus on cancel", async ({ page }) => {
+  test("replace confirmation dialog displays canonical copy and restores focus on cancel", async ({
+    page,
+  }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}`);
     await page.waitForSelector("#btn-open-replace-modal");
 
@@ -249,7 +261,9 @@ test.describe("T07: Accessible Controls, Dialogs, and Navigation", () => {
 
     // Verify copy from copy.json
     await expect(dialog.locator("h2")).toHaveText("Open a different PDF?");
-    await expect(dialog.locator("text=This clears the current file and its unsaved report")).toBeVisible();
+    await expect(
+      dialog.locator("text=This clears the current file and its unsaved report"),
+    ).toBeVisible();
     await expect(dialog.locator("button:has-text('Clear and open file')")).toBeVisible();
     await expect(dialog.locator("button:has-text('Keep this file')")).toBeVisible();
 

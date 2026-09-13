@@ -1,0 +1,63 @@
+{
+  "kind": "acceptance_rules",
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "mapping-control-expected-text",
+      "type": "expected_text",
+      "document_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "page_index": 0,
+      "reader_id": "pypdf-native",
+      "region_id": null,
+      "expected_text": "$100",
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": null,
+      "explanation": "The control fixture's known amount reading is $100."
+    },
+    {
+      "id": "mapping-control-coverage",
+      "type": "required_coverage",
+      "document_sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+      "page_index": 0,
+      "reader_id": "pypdf-native",
+      "region_id": null,
+      "expected_text": null,
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": "native_text",
+      "explanation": "Control page native_text must complete; skip-to-green is forbidden."
+    },
+    {
+      "id": "mapping-amount-stable-reading",
+      "type": "stable_reading",
+      "document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "page_index": 0,
+      "reader_id": "pypdf-native",
+      "region_id": null,
+      "expected_text": null,
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": null,
+      "explanation": "Maintainer-chosen stable reading for the amount fixture under the approved baseline."
+    },
+    {
+      "id": "mapping-amount-coverage",
+      "type": "required_coverage",
+      "document_sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+      "page_index": 0,
+      "reader_id": "pypdf-native",
+      "region_id": null,
+      "expected_text": null,
+      "expected_count": null,
+      "max_delta_pt": null,
+      "capability": "native_text",
+      "explanation": "Amount page native_text must complete."
+    }
+  ],
+  "policy": {
+    "fail_on_coverage_loss": true,
+    "fail_on_error": true,
+    "unruled_change": "changed"
+  }
+}

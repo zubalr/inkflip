@@ -116,3 +116,7 @@ worker, WASM and model bytes and existing license notices are unchanged.
 ## T16 — portable JSON + escaped HTML export foundation (2026-09-13)
 
 - `packages/reports/export/html.ts`: The static HTML report stylesheet (`EXPORT_CSS`) and document layout adapt the reference template in `planning/tools/export_html.py` (an assigned project task input), with additions for `h3`, `.warn`, `ul` and strict static HTML hardening (meta CSP with runtime style SHA-256 derivation, script-free assertions, and sanitized PNG re-encoding).
+
+## T30 — native HTML report conversion (2026-09-13)
+
+- `native/inkflip/cli/html.py`: Script-free portable HTML for validated reports and comparisons adapts the same `planning/tools/export_html.py` stylesheet tokens (colors, type scale, section cards) with a CSP `style-src` hash and no script tags.
