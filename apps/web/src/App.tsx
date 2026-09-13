@@ -33,6 +33,7 @@ export default function App() {
   const [route, setRoute] = useState<Route>(initial.route);
   const [withExample, setWithExample] = useState<boolean>(initial.withExample);
   const [exampleId, setExampleId] = useState<string | null>(initial.exampleId);
+  const [workspaceEpoch, setWorkspaceEpoch] = useState<number>(0);
 
   // Preserve workspace state across temporary Help visits
   const [workspaceEverMounted, setWorkspaceEverMounted] = useState<boolean>(
@@ -91,6 +92,9 @@ export default function App() {
     setWorkspaceEverMounted(true);
     setWithExample(loadExample);
     setExampleId(null);
+    if (loadExample) {
+      setWorkspaceEpoch((e) => e + 1);
+    }
     setRoute("workspace");
     const targetHash = loadExample ? "#/workspace?example=true" : "#/workspace";
     lastWorkspaceHash.current = targetHash;
@@ -101,6 +105,7 @@ export default function App() {
     setWorkspaceEverMounted(true);
     setWithExample(false);
     setExampleId(id);
+    setWorkspaceEpoch((e) => e + 1);
     setRoute("workspace");
     const targetHash = `#/workspace?example=${id}`;
     lastWorkspaceHash.current = targetHash;
@@ -158,7 +163,7 @@ export default function App() {
           inert={route !== "workspace" ? true : undefined}
         >
           <Workspace
-            key={`${withExample}-${exampleId ?? "default"}`}
+            key={`${withExample}-${exampleId ?? "default"}-${workspaceEpoch}`}
             onNavigateHome={navigateToHome}
             onNavigateHelp={navigateToHelp}
             initialWithExample={withExample}

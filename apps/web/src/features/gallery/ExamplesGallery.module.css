@@ -231,3 +231,38 @@
   color: var(--color-warning-text);
   font-size: var(--text-caption);
 }
+
+.mechanismSection {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-paper-subtle, #f7f7f8);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control, 4px);
+}
+
+.mechanismSection h4 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+}
+
+.mechanismText {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-ink);
+  line-height: 1.4;
+}
+
+.evidenceNote {
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  line-height: 1.4;
+  border-top: 1px dashed var(--color-line);
+  padding-top: var(--space-2);
+}

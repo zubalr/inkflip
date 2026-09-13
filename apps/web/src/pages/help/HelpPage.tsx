@@ -69,19 +69,24 @@ export const HelpPage: React.FC<HelpPageProps> = ({
           </div>
           <div>
             <h4>macOS Companion CLI</h4>
-            <p>Inspect a local PDF using native engine profiles (browser engine comparison or native Node runtime) directly on macOS:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip inspect &lt;pdf-file&gt; --profile browser|node</code></pre>
+            <p>Inspect a local PDF using native engine profiles directly on macOS (requires <code>--out</code> for the output report JSON):</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli inspect &lt;pdf-file&gt; --out report.json</code></pre>
+            <p>Optional flags: <code>--profile native-default</code>, <code>--reader pdfium</code>, <code>--pages 1</code>, <code>--embed-source</code>.</p>
+          </div>
+          <div>
+            <h4>Report Generation (HTML Export)</h4>
+            <p>Export a self-contained HTML inspection report from an existing validated report JSON:</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli report &lt;report.json&gt; --format html --out report.html</code></pre>
+          </div>
+          <div>
+            <h4>Evidence Replay</h4>
+            <p>Replay recorded findings from a previously generated report file. When source bytes are not embedded, provide the original source PDF:</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli replay &lt;report.json&gt; --source &lt;pdf-file&gt; --profile native-default --out replay.json</code></pre>
           </div>
           <div>
             <h4>Reproducible Docker CLI Workflow</h4>
-            <p>Run batch inspections in a reproducible, containerized environment with pinned dependencies and zero network access:</p>
-            <pre className={styles.guideCodeBlock}><code>docker run --rm --network none -v "$PWD":/data inkflip inspect /data/&lt;pdf-file&gt;</code></pre>
-          </div>
-          <div>
-            <h4>Report Generation &amp; Evidence Replay</h4>
-            <p>Generate a sealed, portable JSON inspection report or replay recorded findings without re-running engines:</p>
-            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip report &lt;pdf-file&gt; -o report.json
-python3 -m inkflip replay &lt;report.json&gt;</code></pre>
+            <p>Run batch inspections in a reproducible Linux container with pinned dependencies and zero network access. Requires built image <code>inkflip</code>; mount input directories read-only (<code>:ro</code>) and output directories writable (<code>:rw</code>):</p>
+            <pre className={styles.guideCodeBlock}><code>docker run --rm --network none -v "$PWD/input":/data/in:ro -v "$PWD/output":/data/out:rw inkflip inspect /data/in/&lt;pdf-file&gt; --out /data/out/report.json</code></pre>
           </div>
           <div>
             <h4>Fail-Closed Security</h4>

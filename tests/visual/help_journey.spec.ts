@@ -1,9 +1,7 @@
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { test, expect } from "@playwright/test";
 
 const ROOT = path.resolve(process.cwd());
-const WEB_ROOT = path.resolve(ROOT, "apps/web");
 const EXAMPLE_REPORT = path.resolve(
   ROOT,
   "planning/contracts/examples/valid/native-evidence.inkflip.json",
@@ -13,24 +11,19 @@ const REAL_PDF = path.resolve(
   "apps/web/public/examples/amount/mapping-amount.pdf",
 );
 
-let viteServer: any;
+import { startProdServer, type ProdServerInstance } from "./prod_server.ts";
+
+let prodServer: ProdServerInstance;
 let baseUrl: string;
 
 test.beforeAll(async () => {
-  const viteModulePath = path.resolve(WEB_ROOT, "node_modules/vite/dist/node/index.js");
-  const { createServer } = await import(pathToFileURL(viteModulePath).href);
-  viteServer = await createServer({
-    root: WEB_ROOT,
-    server: { port: 0, strictPort: false },
-    logLevel: "silent",
-  });
-  await viteServer.listen();
-  baseUrl = viteServer.resolvedUrls.local[0].replace(/\/$/, "");
+  prodServer = await startProdServer();
+  baseUrl = prodServer.baseUrl;
 });
 
 test.afterAll(async () => {
-  if (viteServer) {
-    await viteServer.close();
+  if (prodServer) {
+    await prodServer.close();
   }
 });
 
@@ -258,6 +251,11 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
       await expect(dialog).toHaveCount(0);
 
       // Focus restored to button
+      await page.waitForFunction(
+        (expectedId) => document.activeElement?.id === expectedId,
+        guide.id,
+        { timeout: 3000 },
+      );
       const activeId = await page.evaluate(() => document.activeElement?.id);
       expect(activeId).toBe(guide.id);
     }

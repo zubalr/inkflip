@@ -58,6 +58,16 @@ function CardDetail({
         <p className={styles.sub}>Loading manifest…</p>
       ) : (
         <>
+          <div className={styles.mechanismSection} data-testid="card-mechanism-section">
+            <h4>Verification Mechanism</h4>
+            <p className={styles.mechanismText}>{card.mechanism}</p>
+            {card.example_id === "duplicates" && (
+              <p className={styles.evidenceNote} data-testid="duplicates-evidence-note">
+                Four distinct &ldquo;$100&rdquo; occurrences appear at separate page coordinates (occurrences #0, #2, #3, and #5). In Reading mode or the accessible text layer, each occurrence is individually addressable and selectable by occurrence ordinal, demonstrating that identical text strings are never collapsed by string matching.
+              </p>
+            )}
+          </div>
+
           <div className={styles.detailGrid}>
             <section aria-label="Source files">
               <h4>Source files</h4>
