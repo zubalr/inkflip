@@ -719,6 +719,7 @@ test('25 pages: select-all caps visibly; the plan enumerates exactly the selecti
     'aria-pressed',
     'true',
   );
+  await expect(page.locator('#ocr-limit-notice')).toBeVisible();
 
   // The frozen plan covers EXACTLY the selected pages — count and set.
   await page.locator('[data-testid=start-run]').click();
@@ -739,11 +740,20 @@ test('25 pages: select-all caps visibly; the plan enumerates exactly the selecti
     if (i !== 0 && i !== 1 && i <= 20) expected.add(i);
   }
   expect(plannedPages).toEqual(expected);
-  // Every selected page carries all three planned capabilities — no page
-  // silently lost a check.
+  // Every selected page carries native_text and render checks; OCR is
+  // capped at max_ocr_pages_per_run (5 on desktop) — no page silently lost
+  // native or render coverage.
+  const ocrPages = new Set(
+    checks.filter((c) => c.capability === 'ocr').map((c) => c.page),
+  );
+  expect(ocrPages.size).toBe(5);
   for (const p of expected) {
     const caps = checks.filter((c) => c.page === p).map((c) => c.capability);
-    expect(caps.sort()).toEqual(['native_text', 'ocr', 'render'].sort());
+    if (ocrPages.has(p)) {
+      expect(caps.sort()).toEqual(['native_text', 'ocr', 'render'].sort());
+    } else {
+      expect(caps.sort()).toEqual(['native_text', 'render'].sort());
+    }
   }
   // The pinned selected-pages total is recorded by the coordinator.
   const pinned = await page.evaluate(

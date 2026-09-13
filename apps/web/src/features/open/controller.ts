@@ -142,9 +142,16 @@ export class OpenController {
    */
   async offer(candidate: FileCandidate): Promise<OpenOutcome> {
     if (this.busy) {
+      const err = makeError("open_failed", OPEN_COPY.malformed, "open:busy");
+      this.emit({
+        type: "rejected",
+        generation: this.host.currentGeneration,
+        kind: err.kind,
+        error: err,
+      });
       return {
         ok: false,
-        error: makeError("open_failed", OPEN_COPY.malformed, "open:busy"),
+        error: err,
       };
     }
     this.busy = true;
@@ -155,9 +162,18 @@ export class OpenController {
       } else if (state === "validating_file") {
         // Already in the sniff phase (e.g. a synchronous re-offer): proceed.
       } else if (state === "clearing") {
+        this.handle = null;
+        this.document = null;
+        const err = makeError("open_failed", OPEN_COPY.malformed, `open:state:${state}`);
+        this.emit({
+          type: "rejected",
+          generation: this.host.currentGeneration,
+          kind: err.kind,
+          error: err,
+        });
         return {
           ok: false,
-          error: makeError("open_failed", OPEN_COPY.malformed, `open:state:${state}`),
+          error: err,
         };
       } else {
         // selecting/running/terminal states: generation-first replacement.
@@ -169,10 +185,14 @@ export class OpenController {
           next: "replace",
         });
         this.host.requestClear("replace");
+        this.handle = null;
+        this.document = null;
       }
       // fileState is now validating_file either way.
       const invalid = await validateCandidate(candidate, this.profile);
       if (invalid !== null) {
+        this.handle = null;
+        this.document = null;
         this.emit({ type: "rejected", generation: this.host.currentGeneration, kind: invalid.kind, error: invalid });
         this.host.requestClear("idle");
         return { ok: false, error: invalid };
@@ -184,20 +204,38 @@ export class OpenController {
       try {
         bytes = new Uint8Array(await candidate.arrayBuffer());
       } catch {
+        this.handle = null;
+        this.document = null;
+        const err = makeError("malformed", OPEN_COPY.malformed, "bytes:unreadable");
+        this.emit({
+          type: "rejected",
+          generation: this.host.currentGeneration,
+          kind: err.kind,
+          error: err,
+        });
         this.host.requestClear("idle");
         return {
           ok: false,
-          error: makeError("malformed", OPEN_COPY.malformed, "bytes:unreadable"),
+          error: err,
         };
       }
       let sha: string;
       try {
         sha = await sha256Hex(bytes);
       } catch {
+        this.handle = null;
+        this.document = null;
+        const err = makeError("open_failed", OPEN_COPY.malformed, "sha256:unavailable");
+        this.emit({
+          type: "rejected",
+          generation: this.host.currentGeneration,
+          kind: err.kind,
+          error: err,
+        });
         this.host.requestClear("idle");
         return {
           ok: false,
-          error: makeError("open_failed", OPEN_COPY.malformed, "sha256:unavailable"),
+          error: err,
         };
       }
 
@@ -209,6 +247,8 @@ export class OpenController {
           generation: this.host.currentGeneration,
         });
       } catch (error) {
+        this.handle = null;
+        this.document = null;
         const classified = classifyOpenFailure(error);
         this.emit({
           type: "rejected",
@@ -249,6 +289,7 @@ export class OpenController {
         });
         this.host.requestClear("idle");
         this.handle = null;
+        this.document = null;
         return { ok: false, error: classified };
       }
       if (meta.count > this.profile.maxDocumentPages) {
@@ -265,6 +306,7 @@ export class OpenController {
         });
         this.host.requestClear("idle");
         this.handle = null;
+        this.document = null;
         return { ok: false, error: err };
       }
 
@@ -291,6 +333,8 @@ export class OpenController {
       });
       return { ok: true, document: this.document };
     } catch (error) {
+      this.handle = null;
+      this.document = null;
       // Lifecycle contract violations (e.g. illegal transitions) surface as
       // open_failed — never as a successful open.
       const failed = makeError(
