@@ -100,8 +100,9 @@ def acceptance_reference(task_id: str, issue: dict) -> tuple[str, str]:
 def check_predecessors(task: dict, issues: dict, *, ref: str) -> None:
     for parent in task["dependencies"]:
         commit, receipt = acceptance_reference(parent, issues.get(bead_id(parent), {}))
-        run(["git", "merge-base", "--is-ancestor", commit, ref])
-        if run(["git", "cat-file", "-t", f"{commit}:{receipt}"]) != "blob":
+        import evidence_store
+        evidence_store.require_ancestry(ROOT, commit, ref, parent)
+        if run(["git", "cat-file", "-t", f"{commit}:{receipt}"], cwd=ROOT) != "blob":
             raise ValueError(f"{parent}: accepted receipt is not a committed file")
 
 

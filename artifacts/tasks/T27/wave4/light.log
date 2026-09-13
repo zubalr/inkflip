@@ -1,4 +1,0 @@
-pytest arguments: ['native/tests/ocr', '-q', '-k', 'not (test_amount_line_is_recognized_with_canonical_geometry or test_raw_punctuation_and_case_are_retained_verbatim or test_f03_scan_ocr_reads_pixels_only_and_ignores_invisible_layer or test_single_line_psm7_reads_amount_through_inverse_transform or test_userunit_two_render_is_twice_the_physical_pixels or test_blank_raster_completes_with_zero_occurrences or test_timeout_is_a_distinct_terminal or test_invocation_uses_only_neutral_generated_names or test_every_occurrence_and_score_validate or test_non_schema_region_key_is_not_a_plan_channel or test_occurrence_id_includes_page_index or test_explicit_prefix_model_is_hashed_and_pinned_in_argv)', '--junitxml=/tmp/inkflip-t27-wave4-logs/light.xml']
-..............................................       [100%]
-46 passed, 12 deselected, 20 subtests passed in 1.99s
-exit_code=0

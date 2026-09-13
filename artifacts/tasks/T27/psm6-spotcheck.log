@@ -1,7 +1,0 @@
-fixture: public/mapping-amount.pdf  scale=3px/pt  raster=1560x1200px
-psm=3: terminal=completed words=16 '$100' present=True
-  words: ['SYNTHETIC', 'EXAMPLE', 'No', 'real', 'transaction.', 'Reader', 'behavior', 'only.', '$100', 'Rendered', 'marks', 'and', 'extracted', 'text', 'are', 'separate.']
-psm=6: terminal=completed words=16 '$100' present=True
-  words: ['SYNTHETIC', 'EXAMPLE', 'No', 'real', 'transaction.', 'Reader', 'behavior', 'only.', '$100', 'Rendered', 'marks', 'and', 'extracted', 'text', 'are', 'separate.']
-psm=11: terminal=completed words=16 '$100' present=True
-  words: ['SYNTHETIC', 'EXAMPLE', 'No', 'real', 'transaction.', 'Reader', 'behavior', 'only.', '$100', 'Rendered', 'marks', 'and', 'extracted', 'text', 'are', 'separate.']

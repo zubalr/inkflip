@@ -127,7 +127,17 @@ export function ExportPanel({
 
   if (prevController !== controller) {
     setPrevController(controller);
-    setState(controller.state);
+    // Same sealed report with rebuilt source (notes edited, parent
+    // re-render): keep the user's explicit choices — resetting to "all"
+    // findings here would silently ship evidence they had excluded.
+    if (
+      prevController.sourceReportId !== null &&
+      prevController.sourceReportId === controller.sourceReportId
+    ) {
+      setState(controller.restoreRequest(prevController.state.request));
+    } else {
+      setState(controller.state);
+    }
     setDownloaded(null);
   }
 
@@ -140,6 +150,28 @@ export function ExportPanel({
   const availability: ExportAvailability = state.availability;
   const preview = state.preview;
   const counts = preview?.counts;
+
+  // Multi-finding selection (T23): `findings === "all"` means every finding
+  // is checked; toggling one computes the explicit ID subset. Re-checking
+  // all of them restores "all" rather than an equivalent array.
+  const selectedFindings =
+    state.request.findings === "all"
+      ? new Set(state.findingChoices.map((f) => f.id))
+      : new Set(state.request.findings ?? []);
+
+  const toggleFinding = (id: string, next: boolean) => {
+    const nextIds = new Set(selectedFindings);
+    if (next) {
+      nextIds.add(id);
+    } else {
+      nextIds.delete(id);
+    }
+    setState(
+      controller.setFindingSelection(
+        nextIds.size === state.findingChoices.length ? "all" : [...nextIds],
+      ),
+    );
+  };
 
   const download = (format: "json" | "html") => {
     const out = format === "json" ? controller.jsonOutput() : controller.htmlOutput();
@@ -191,6 +223,29 @@ export function ExportPanel({
         />
       </fieldset>
 
+      {state.findingChoices.length > 0 && (
+        <fieldset className={styles.options} data-testid="export-findings">
+          <legend className={styles.legend}>Findings to include</legend>
+          {state.findingChoices.map((f) => (
+            <div key={f.id} className={styles.option}>
+              <input
+                id={`${baseId}-finding-${f.id}`}
+                type="checkbox"
+                data-testid={`finding-check-${f.id}`}
+                checked={selectedFindings.has(f.id)}
+                onChange={(e: { target: { checked: boolean } }) =>
+                  toggleFinding(f.id, e.target.checked)
+                }
+              />
+              <label htmlFor={`${baseId}-finding-${f.id}`}>
+                {f.title}
+                {f.pageIndex >= 0 && ` · page ${f.pageIndex + 1}`}
+              </label>
+            </div>
+          ))}
+        </fieldset>
+      )}
+
       {state.error !== null && (
         <Notice type="error" title="Export failed">
           {state.error}
@@ -221,14 +276,32 @@ export function ExportPanel({
             <dd>
               {counts?.crops ?? 0} / {counts?.pageRenders ?? 0}
             </dd>
+            <dt>Notes</dt>
+            <dd>{counts?.annotations ?? 0}</dd>
             <dt>JSON size</dt>
             <dd>{formatBytes(preview.bytes.jsonBytes)}</dd>
             <dt>Decoded assets</dt>
             <dd>{formatBytes(preview.bytes.decodedAssetBytes)}</dd>
           </dl>
-          <p className={styles.manifest}>
+          <p className={styles.manifest} data-testid="export-manifest">
             Included: {preview.included.join(", ")}. Excluded: {preview.omissions.join(" ")}
           </p>
+          {(state.notices?.deselectedFindingIds?.length ?? 0) > 0 && (
+            <p className={styles.manifest} data-testid="deselected-findings">
+              Deselected by you: {state.notices?.deselectedFindingIds?.join(", ")}.
+            </p>
+          )}
+          {(state.notices?.omittedFindingIds?.length ?? 0) > 0 && (
+            <p className={styles.manifest} data-testid="omitted-findings">
+              Omitted (their readings are not in the export):{" "}
+              {state.notices?.omittedFindingIds?.join(", ")}.
+            </p>
+          )}
+          {state.notesExcludedWithFindings > 0 && (
+            <p className={styles.manifest} data-testid="notes-excluded-with-findings">
+              {state.notesExcludedWithFindings} note(s) excluded with their deselected findings.
+            </p>
+          )}
           <p className={styles.replay}>
             {preview.mode === "diagnostic"
               ? COPY.noAssets
@@ -237,7 +310,22 @@ export function ExportPanel({
                 : COPY.replayAbsent}
           </p>
           {preview.sourcePdfIncluded && <p className={styles.warning}>{COPY.sourceWarning}</p>}
-          {(counts?.crops ?? 0) > 0 && <p className={styles.warning}>{COPY.cropWarning}</p>}
+          {state.cropPreviews.length > 0 && (
+            <div className={styles.cropStrip} data-testid="crop-preview">
+              <p className={styles.warning}>{COPY.cropWarning}</p>
+              <div className={styles.cropImages}>
+                {state.cropPreviews.map((c) => (
+                  <img
+                    key={c.id}
+                    src={c.dataUrl}
+                    alt={`Crop ${c.id}${c.pageIndex >= 0 ? `, page ${c.pageIndex + 1}` : ""}`}
+                    className={styles.cropImage}
+                    data-testid={`crop-image-${c.id}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
           {(counts?.pageRenders ?? 0) > 0 && (
             <p className={styles.warning}>{COPY.pageRendersWarning}</p>
           )}

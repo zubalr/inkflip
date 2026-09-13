@@ -1,2 +1,0 @@
-{"accepted": 172, "crashes": 0, "egress": 0, "rejected": 828, "unexpected_accepts": 0, "unexpected_rejects": 0}
-verdict=pass cases=1000 seed=8090 max_case_ms=30.09 wall_s=3.58 out=/Users/zubair/Code/Projects/pdf project/worktrees/pdf-3oz/artifacts/tasks/T24/fuzz

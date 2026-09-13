@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Inkflip — local-first PDF reading inspector (browser app plus local native/corpus tools). Scaffold: unfinished.",
+  "description": "Local-first PDF reading inspector with browser and native tools.",
   "packageManager": "bun@1.4.0",
   "workspaces": [
     "apps/*",
