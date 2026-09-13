@@ -317,6 +317,20 @@ def main() -> int:
     cases.append(record("no-processing-network-in-script", "--network none" in text, "network none"))
     checkout = DOCKERFILE_CHECKOUT.read_text(encoding="utf-8")
     cases.append(record("checkout-entrypoint-inkflip", 'ENTRYPOINT ["inkflip"]' in checkout, "inkflip"))
+    cases.append(
+        record(
+            "production-copies-hashed-wheels",
+            "COPY native/dist/wheels/" in dockerfile and "--require-hashes" in dockerfile,
+            "hashed wheels + lock",
+        )
+    )
+    cases.append(
+        record(
+            "production-not-checkout-pythonpath",
+            "PYTHONPATH=/app/native" not in dockerfile,
+            "production image must install the wheel, not mount checkout",
+        )
+    )
 
     with tempfile.TemporaryDirectory(prefix="t40-contain-") as raw:
         td = Path(raw)

@@ -255,7 +255,18 @@ def _tessdata_candidates(binary: Path) -> list[Path]:
     if env:
         return [Path(env)]
     resolved = binary.resolve()
-    candidates = [
+    extra: list[Path] = []
+    models_env = os.environ.get("INKFLIP_MODELS")
+    if models_env:
+        extra.append(Path(models_env))
+        extra.append(Path(models_env) / "tessdata")
+    extra.extend(
+        [
+            Path("/app/models/tessdata"),
+            Path("/app/models"),
+        ]
+    )
+    candidates = extra + [
         resolved.parent.parent / "share" / "tessdata",
         resolved.parent / "tessdata",
         binary.parent.parent / "share" / "tessdata",

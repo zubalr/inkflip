@@ -63,7 +63,16 @@ BRIDGE_PROTOCOL_VERSION = 1
 BRIDGE_VERSION = "1.0.0"  # this Python adapter's version
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ENTRYPOINT = REPO_ROOT / "packages" / "compare" / "node" / "bridge.mjs"
+_PACKAGED_ENTRYPOINT = (
+    Path(__file__).resolve().parent
+    / "resources"
+    / "packages"
+    / "compare"
+    / "node"
+    / "bridge.mjs"
+)
+_CHECKOUT_ENTRYPOINT = REPO_ROOT / "packages" / "compare" / "node" / "bridge.mjs"
+ENTRYPOINT = _PACKAGED_ENTRYPOINT if _PACKAGED_ENTRYPOINT.is_file() else _CHECKOUT_ENTRYPOINT
 
 _CHUNK = 65536
 _STDERR_SAMPLE_BYTES = 8192
@@ -141,21 +150,35 @@ class BridgeResult:
 
 
 def _resolve_node(node: str | os.PathLike | None) -> str:
-    """Resolve the Node runtime: explicit install path or PATH lookup."""
+    """Resolve the Node runtime: explicit install path, image layout, or PATH."""
     if node is None:
-        found = shutil.which("node")
-        if found is None:
-            raise BridgeCapabilityError(
-                "capability",
-                "node runtime not found on PATH; install Node to enable "
-                "native comparisons (the shared comparator has no "
-                "Python fallback)",
-            )
-        return found
+        env = os.environ.get("INKFLIP_NODE")
+        if env:
+            node = env
+        else:
+            for candidate in (
+                Path("/app/node/bin/node"),
+                Path("/opt/node/bin/node"),
+            ):
+                if candidate.is_file() and os.access(candidate, os.X_OK):
+                    return str(candidate)
+            found = shutil.which("node")
+            if found is None:
+                raise BridgeCapabilityError(
+                    "capability",
+                    "node runtime not found on PATH; install Node to enable "
+                    "native comparisons (the shared comparator has no "
+                    "Python fallback)",
+                )
+            return found
     path = str(node)
     if not os.path.isfile(path):
         raise BridgeCapabilityError(
             "capability", "configured node runtime path does not exist"
+        )
+    if not os.access(path, os.X_OK):
+        raise BridgeCapabilityError(
+            "capability", "configured node runtime path is not executable"
         )
     return path
 
@@ -163,12 +186,17 @@ def _resolve_node(node: str | os.PathLike | None) -> str:
 def _resolve_entrypoint(entrypoint: str | os.PathLike | None) -> str:
     """The fixed installed entrypoint; an override exists for tests and
     explicit installation layouts, never for request/report data."""
-    path = Path(entrypoint) if entrypoint is not None else ENTRYPOINT
+    if entrypoint is not None:
+        path = Path(entrypoint)
+    else:
+        env = os.environ.get("INKFLIP_COMPARE_BRIDGE")
+        path = Path(env) if env else ENTRYPOINT
     if not path.is_file():
         raise BridgeCapabilityError(
             "capability",
             "shared comparison entrypoint is not installed at "
-            "packages/compare/node/bridge.mjs",
+            "packages/compare/node/bridge.mjs (or the packaged "
+            "inkflip/resources/packages/compare/node/bridge.mjs)",
         )
     return str(path)
 

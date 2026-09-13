@@ -1,0 +1,92 @@
+{
+  "counts": {
+    "collected": 15,
+    "passed": 15,
+    "failed": 0,
+    "image": "inkflip-native:nrf-prod",
+    "architecture": {
+      "host_machine": "arm64",
+      "docker_architecture_line": "aarch64 linux",
+      "requested_platform": "linux/amd64",
+      "emulated": true,
+      "note": "linux/amd64 on Apple Silicon OrbStack is qemu; not native x86_64 reference performance"
+    }
+  },
+  "cases": [
+    {
+      "name": "production-image-build",
+      "ok": true,
+      "detail": "reused inkflip-native:nrf-prod"
+    },
+    {
+      "name": "production-image-linux-amd64",
+      "ok": true,
+      "detail": "sha256:4055655e16732189ad6c0a567010282656dc713db71c9ccf561b7a02369ec8d2 linux/amd64 166587587"
+    },
+    {
+      "name": "production-inspect",
+      "ok": true,
+      "detail": "Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:4055655e16732189ad6c0a567010282656dc713db71c9ccf561b7a02369ec8d2 lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-runtime-finish/build/native/image.lock.json\nWARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested\n"
+    },
+    {
+      "name": "production-node-unpacked",
+      "ok": true,
+      "detail": "exit 0 stdout='v22.23.2' stderr=''"
+    },
+    {
+      "name": "production-model-present",
+      "ok": true,
+      "detail": "True 4113088\n"
+    },
+    {
+      "name": "production-no-checkout-tree",
+      "ok": true,
+      "detail": "exit 0 "
+    },
+    {
+      "name": "production-nonroot-uid",
+      "ok": true,
+      "detail": "65532\n"
+    },
+    {
+      "name": "production-no-egress",
+      "ok": true,
+      "detail": "~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/socket.py\", line 868, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.13/socket.py\", line 853, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nOSError: [Errno 101] Network is unreachable\n"
+    },
+    {
+      "name": "production-readonly-input",
+      "ok": true,
+      "detail": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    open('/input/escape.txt','w').write('nope')\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 30] Read-only file system: '/input/escape.txt'\n"
+    },
+    {
+      "name": "production-crash",
+      "ok": true,
+      "detail": "exit 99"
+    },
+    {
+      "name": "production-timeout",
+      "ok": true,
+      "detail": "killed after 5s wall timeout"
+    },
+    {
+      "name": "production-oversize-input-fails-closed",
+      "ok": true,
+      "detail": "exit 4 EOF marker not found\nError: Failed to parse PDF /input/huge.bin: Stream has ended unexpectedly\n"
+    },
+    {
+      "name": "production-neighbor-corpus-preserved",
+      "ok": true,
+      "detail": "exit 0 neighbor=True prior_intact=True"
+    },
+    {
+      "name": "production-tesseract-missing-or-completes",
+      "ok": true,
+      "detail": "exit 2 Error: --reader tesseract requires explicit --ocr-pages; raster source is PDFium\n"
+    },
+    {
+      "name": "production-source-bytes-unchanged",
+      "ok": true,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-v0t703pa/source with spaces"
+    }
+  ]
+}

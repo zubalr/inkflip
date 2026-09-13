@@ -1,0 +1,7 @@
+{
+  "host_machine": "arm64",
+  "docker_architecture_line": "aarch64 linux",
+  "requested_platform": "linux/amd64",
+  "emulated": true,
+  "note": "linux/amd64 on Apple Silicon OrbStack is qemu; not native x86_64 reference performance"
+}
