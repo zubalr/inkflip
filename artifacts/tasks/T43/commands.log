@@ -1,69 +1,15 @@
+[2026-09-13T11:57:11Z] python3 experiments/P12/check_manifest.py
 P12 manifest check complete: candidate_present=False, status=blocked, disposition=blocked_missing_candidate_archive
-$ python3 scripts/task_acceptance.py run test:browser "experiments/P12/browser.spec.ts"
+Exit code: 0
 
+[2026-09-13T11:57:12Z] bun run test:browser -- experiments/P12/browser.spec.ts
 Running 4 tests using 1 worker
+[1/4] experiments/P12/browser.spec.ts:107:3 › P12 / T43: Secondary browser PDFium reader evaluation › exercises default PDF.js reader rendering and text extraction in real browser
+[2/4] experiments/P12/browser.spec.ts:133:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate asset budget satisfies < 24 MiB limit
+[3/4] experiments/P12/browser.spec.ts:138:3 › P12 / T43: Secondary browser PDFium reader evaluation › production web application does not bundle or import EmbedPDF
+[4/4] experiments/P12/browser.spec.ts:153:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate is default-unavailable and blocked without archive in offline repo
+4 passed (1.7s)
+Exit code: 0
 
-[1/4] experiments/P12/browser.spec.ts:17:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate asset budget satisfies < 24 MiB limit
-[2/4] experiments/P12/browser.spec.ts:22:3 › P12 / T43: Secondary browser PDFium reader evaluation › production web application does not bundle or import EmbedPDF
-[3/4] experiments/P12/browser.spec.ts:37:3 › P12 / T43: Secondary browser PDFium reader evaluation › default primary reader is PDF.js and secondary candidate is default-unavailable
-[4/4] experiments/P12/browser.spec.ts:47:3 › P12 / T43: Secondary browser PDFium reader evaluation › clean controls exist in development fixtures
-  4 passed (506ms)
-{
-  "task": "T43",
-  "beads_id": "pdf-t43",
-  "evaluated_commit": "2e991fdaaba4143e785fed290c3bafaf032ec0fe",
-  "evaluated_at": "2026-09-13T11:15:15.272898+00:00",
-  "commands_run": 2,
-  "failures": [],
-  "evidence_errors": [],
-  "tests": {
-    "collected": 4,
-    "passed": 4,
-    "failed": 0,
-    "skipped": 0
-  },
-  "records": [
-    {
-      "segment": "python experiments/P12/check_manifest.py",
-      "argv": [
-        "python3",
-        "experiments/P12/check_manifest.py"
-      ],
-      "executed_argv": [
-        "python3",
-        "experiments/P12/check_manifest.py"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
-      "environment": {}
-    },
-    {
-      "segment": "bun run test:browser -- experiments/P12/browser.spec.ts",
-      "argv": [
-        "bun",
-        "run",
-        "test:browser",
-        "--",
-        "experiments/P12/browser.spec.ts"
-      ],
-      "executed_argv": [
-        "bun",
-        "run",
-        "test:browser",
-        "--",
-        "experiments/P12/browser.spec.ts"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "tests": {
-        "collected": 4,
-        "passed": 4,
-        "failed": 0,
-        "skipped": 0
-      },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
-      "environment": {}
-    }
-  ]
-}
+[2026-09-13T11:57:13Z] python3 scripts/task_acceptance.py task T43
+Exit code: 0 (4 tests passed, 0 failed)
