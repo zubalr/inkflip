@@ -1,11 +1,47 @@
-[2026-09-13T12:02:03Z] python3 experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13
-P13 evaluation complete: 8 fixtures evaluated, baseline=8 completed (0 failed), candidate_status=blocked (blocked_missing_dependency_and_weights), peak_rss=55.88MB, runtime=0.5748s
-Exit code: 0
+$ python3 experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13
+P13 evaluation complete: 8 fixtures evaluated, baseline=8 completed (0 failed), candidate=8 completed (0 blocked), status=completed (candidate_evaluated_unintegrated), max_rss=324.44MB, runtime=1.4021s
+[32m[INFO] 2026-09-13 16:02:39,069 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:39,111 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/ch_PP-OCRv5_det_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:39,142 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:39,144 [RapidOCR] download_file.py:60: File exists and is valid: /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/.venv/lib/python3.13/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:39,144 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/.venv/lib/python3.13/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:39,156 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:39,156 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/en_PP-OCRv5_rec_mobile.onnx[0m
+Exit: 0
 
-[2026-09-13T12:02:04Z] python3 experiments/P13/test_experiment.py
-Ran 8 tests in 0.534s
+$ python3 experiments/P13/test_experiment.py
+test_baseline_real_measurements_and_persisted_rasters (__main__.TestP13Experiment.test_baseline_real_measurements_and_persisted_rasters)
+Verify baseline runs real Tesseract and retains PNG rasters in artifacts/P13/rasters/. ... ok
+test_candidate_rapidocr_execution_when_available (__main__.TestP13Experiment.test_candidate_rapidocr_execution_when_available)
+Verify candidate RapidOCR outputs boxes, texts, scores when environment is available. ... ok
+test_experiment_runs_and_produces_valid_artifact (__main__.TestP13Experiment.test_experiment_runs_and_produces_valid_artifact)
+Verify experiment execution produces compliant result.json. ... [32m[INFO] 2026-09-13 16:02:40,507 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:40,525 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/ch_PP-OCRv5_det_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:40,540 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:40,540 [RapidOCR] download_file.py:60: File exists and is valid: /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/.venv/lib/python3.13/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:40,541 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/.venv/lib/python3.13/site-packages/rapidocr/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-09-13 16:02:40,551 [RapidOCR] base.py:22: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-09-13 16:02:40,551 [RapidOCR] main.py:57: Using /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/experiments/P13/models/en_PP-OCRv5_rec_mobile.onnx[0m
+ok
+test_fixtures_exist_and_intact (__main__.TestP13Experiment.test_fixtures_exist_and_intact)
+Verify all target F14, F15, F16 development fixtures exist. ... ok
+test_junk_onnx_counterexample_rejected_strictly (__main__.TestP13Experiment.test_junk_onnx_counterexample_rejected_strictly)
+Reproduce and verify rejection of junk-ONNX counterexample b'\x08' + b'\x00' * 127. ... ok
+test_manifest_validation_terminal_failures (__main__.TestP13Experiment.test_manifest_validation_terminal_failures)
+Verify manifest loader fails terminally on missing, empty, or held-out manifests. ... ok
+test_no_consensus_as_truth (__main__.TestP13Experiment.test_no_consensus_as_truth)
+Verify that candidate and baseline outputs are kept separate without consensus-as-truth (Invariant I17). ... ok
+test_ocr_failures_counted_in_denominator_not_empty_success (__main__.TestP13Experiment.test_ocr_failures_counted_in_denominator_not_empty_success)
+Counterexample test: verify Tesseract failure/timeout/error is never treated as completed. ... ok
+test_pp_ocrv5_mobile_english_provenance_and_version (__main__.TestP13Experiment.test_pp_ocrv5_mobile_english_provenance_and_version)
+Verify candidate audit targets PP-OCRv5 mobile English, pinned version 3.8.1, and official digests. ... ok
+test_resolve_manifest_explicit_missing_fails (__main__.TestP13Experiment.test_resolve_manifest_explicit_missing_fails)
+Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests without fallback. ... ok
+test_resource_costs_and_rss_measurement (__main__.TestP13Experiment.test_resource_costs_and_rss_measurement)
+Verify peak RSS is measured and strictly within 1 GiB memory budget. ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.255s
+
 OK
-Exit code: 0
-
-[2026-09-13T12:02:05Z] python3 scripts/task_acceptance.py task T44
-Exit code: 0 (8 tests passed, 0 failed)
+Exit: 0

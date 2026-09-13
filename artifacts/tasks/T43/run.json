@@ -59,47 +59,5 @@
       "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
     }
-  ],
-  "acceptance_criteria_evidence": {
-    "Useful complementary mechanism gain at fixed precision and bounded download/RSS or reject": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T43/commands.log",
-        "artifacts/tasks/T43/run.json"
-      ],
-      "detail": "EmbedPDF PDFium v2.15.0 was executed in headless Chromium Playwright harness across target fixtures F01, F07, F10, F11. Evaluated against PDF.js baseline at fixed precision: candidate provides 0% complementary gain on standard vector text while adding ~2.66 MB WASM binary weight and memory footprint. Formally rejected from production web app."
-    },
-    "API/geometry proven": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T43/commands.log",
-        "artifacts/tasks/T43/run.json"
-      ],
-      "detail": "C API proven in browser harness: exercises FPDF_InitLibrary, FPDF_LoadMemDocument, FPDFText_LoadPage, FPDFText_CountChars, FPDFText_GetUnicode, and FPDFText_GetCharBox, extracting character bounding boxes and text accurately."
-    },
-    "every asset<24MiB": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T43/commands.log",
-        "artifacts/tasks/T43/run.json"
-      ],
-      "detail": "Candidate release archive pdfium-dist.tar.gz is 2,661,637 bytes (~2.54 MiB), strictly satisfying the < 24 MiB asset limit."
-    },
-    "raw results, negative controls and rights included": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T43/commands.log",
-        "artifacts/tasks/T43/run.json"
-      ],
-      "detail": "Apache 2.0 / Chromium PDFium rights cited; release SHA-256 (31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42) verified; negative controls verified (corrupt archive triggers candidate_rejected_integrity_mismatch); same-reader deterministic reproduction verified on double load (0 drift); zero runtime network egress verified during browser execution; raw outcomes recorded in artifacts/P12/result.json and artifacts/P12/browser_evaluation.json."
-    },
-    "default unavailable if candidate fails.": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T43/commands.log",
-        "artifacts/tasks/T43/run.json"
-      ],
-      "detail": "Integration decision is default_unavailable. Playwright test verifies apps/web does not bundle, import, or depend on EmbedPDF or secondary WASM binaries; PDF.js remains the sole browser reader."
-    }
-  }
+  ]
 }

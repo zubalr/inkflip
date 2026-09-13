@@ -16,7 +16,7 @@
   "resource_costs": {
     "total_megapixels": 5.5296,
     "max_megapixels_budget": 20.0,
-    "runtime_seconds": 1.1033,
+    "runtime_seconds": 1.0185,
     "max_runtime_seconds_budget": 120.0
   },
   "metrics": {

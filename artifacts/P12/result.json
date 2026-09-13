@@ -1,8 +1,8 @@
 {
   "experiment_id": "P12",
   "task_id": "T43",
-  "status": "blocked",
-  "disposition": "blocked_missing_candidate_archive",
+  "status": "completed",
+  "disposition": "candidate_verified_unintegrated",
   "hypothesis": "Secondary browser PDFium reader value",
   "baseline": "PDF.js plus OCR",
   "candidate": {
@@ -14,20 +14,35 @@
     "pinned_size_bytes": 2661637,
     "max_asset_size_bytes": 25165824,
     "audit": {
-      "present": false,
-      "path": null,
-      "size_bytes": null,
-      "sha256": null,
-      "size_valid": false,
-      "sha256_valid": false,
-      "status": "blocked_missing_candidate_archive",
-      "message": "Candidate archive pdfium-dist.tar.gz not present in offline repository.",
-      "attempted_preparation": {
-        "command": "curl -fL -sS --max-time 15 -o artifacts/P12/pdfium-dist.tar.gz https://github.com/embedpdf/embed-pdf-viewer/releases/download/v2.15.0/pdfium-dist.tar.gz",
-        "error": "Offline containment policy forbids external network fetch during test execution (Invariant I13)",
-        "exit_code": 7
+      "present": true,
+      "path": "artifacts/P12/pdfium-dist.tar.gz",
+      "size_bytes": 2661637,
+      "sha256": "31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42",
+      "size_valid": true,
+      "sha256_valid": true,
+      "archive_members": [
+        "dist",
+        "dist/pdfium.wasm",
+        "dist/index.browser.js.map",
+        "dist/index.cjs.d.ts",
+        "dist/index.js",
+        "dist/index.js.map",
+        "dist/index.d.cts",
+        "dist/index.esm.d.ts",
+        "dist/index.d.ts",
+        "dist/vendor"
+      ],
+      "wasm_files": [
+        "dist/pdfium.wasm"
+      ],
+      "wasm_audit": {
+        "valid": true,
+        "magic": "\u0000asm",
+        "version": 1,
+        "size_bytes": 4633788
       },
-      "actionable_remediation": "Stage verified pdfium-dist.tar.gz (SHA-256: 31cba71f5620bec3ae2aab6606f148e42cba0cd34d56cf5b54998d771e62bd42, 2661637 bytes) into vendor/ or artifacts/P12/ via approved external intake workflow."
+      "status": "candidate_verified",
+      "message": "Archive integrity and WASM binary structure verified."
     }
   },
   "controls": {

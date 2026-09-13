@@ -61,39 +61,5 @@
       "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
     }
-  ],
-  "acceptance_criteria_evidence": {
-    "Any lost registration or clean corruption rejects": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T45/commands.log",
-        "artifacts/tasks/T45/run.json"
-      ],
-      "detail": "Candidate deskew (theta=1.0 deg) corrupted 4/4 clean controls by anti-aliasing sharp 1px ruled lines into multi-pixel bands, and exhibited up to 0.3803 px fiducial anchor drift and lost registration. Triggered mandatory rejection: candidate is rejected_from_production."
-    },
-    "gain must transfer beyond the challenge generator": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T45/commands.log",
-        "artifacts/tasks/T45/run.json"
-      ],
-      "detail": "Deskew resampled rasters degraded high-frequency edge variance across all clean controls (mean loss ~3.5%), causing overall blur rather than generalizable gain."
-    },
-    "no generic reconstruction/search or PDF write path": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T45/commands.log",
-        "artifacts/tasks/T45/run.json"
-      ],
-      "detail": "Original PDF bytes remain byte-identical before and after execution (I01, I04). Canonical rasters remain unmodified (I02); candidate rasters are stored separately in artifacts/P14/rasters/. No PDF mutation or generic search path exists."
-    },
-    "negative result closes task with deleted production candidate.": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T45/commands.log",
-        "artifacts/tasks/T45/run.json"
-      ],
-      "detail": "Dynamic verdict derivation from direct measurements (identity theta=0.0 accepts with zero drift/blur, candidate theta=1.0 rejects). Negative result closes task with candidate deleted from production consideration; production pipeline retains unmodified canonical rasters."
-    }
-  }
+  ]
 }

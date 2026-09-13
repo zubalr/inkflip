@@ -1,15 +1,23 @@
-[2026-09-13T11:57:11Z] python3 experiments/P12/check_manifest.py
-P12 manifest check complete: candidate_present=False, status=blocked, disposition=blocked_missing_candidate_archive
-Exit code: 0
+$ python3 experiments/P12/check_manifest.py
+P12 manifest check complete: candidate_present=True, status=completed, disposition=candidate_verified_unintegrated
+Exit: 0
 
-[2026-09-13T11:57:12Z] bun run test:browser -- experiments/P12/browser.spec.ts
-Running 4 tests using 1 worker
-[1/4] experiments/P12/browser.spec.ts:107:3 › P12 / T43: Secondary browser PDFium reader evaluation › exercises default PDF.js reader rendering and text extraction in real browser
-[2/4] experiments/P12/browser.spec.ts:133:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate asset budget satisfies < 24 MiB limit
-[3/4] experiments/P12/browser.spec.ts:138:3 › P12 / T43: Secondary browser PDFium reader evaluation › production web application does not bundle or import EmbedPDF
-[4/4] experiments/P12/browser.spec.ts:153:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate is default-unavailable and blocked without archive in offline repo
-4 passed (1.7s)
-Exit code: 0
+$ bun run test:browser -- experiments/P12/browser.spec.ts
 
-[2026-09-13T11:57:13Z] python3 scripts/task_acceptance.py task T43
-Exit code: 0 (4 tests passed, 0 failed)
+Running 7 tests using 1 worker
+
+
+[1A[2K[1/7] experiments/P12/browser.spec.ts:181:3 › P12 / T43: Secondary browser PDFium reader evaluation › exercises default PDF.js reader rendering and text extraction in real browser
+[1A[2K[2/7] experiments/P12/browser.spec.ts:207:3 › P12 / T43: Secondary browser PDFium reader evaluation › proves candidate EmbedPDF PDFium API, text extraction, and character bounding boxes in browser
+[1A[2K[3/7] experiments/P12/browser.spec.ts:232:3 › P12 / T43: Secondary browser PDFium reader evaluation › evaluates candidate on target fixtures (F01, F07, F10, F11) with clean-mapping and same-reader controls
+[1A[2K[4/7] experiments/P12/browser.spec.ts:301:3 › P12 / T43: Secondary browser PDFium reader evaluation › candidate asset budget satisfies < 24 MiB limit
+[1A[2K[5/7] experiments/P12/browser.spec.ts:314:3 › P12 / T43: Secondary browser PDFium reader evaluation › enforces runtime network isolation with zero external network egress
+[1A[2K[6/7] experiments/P12/browser.spec.ts:332:3 › P12 / T43: Secondary browser PDFium reader evaluation › production web application does not bundle or import EmbedPDF
+[1A[2K[7/7] experiments/P12/browser.spec.ts:347:3 › P12 / T43: Secondary browser PDFium reader evaluation › manifest and asset check records verified candidate and default-unavailable integration decision
+[1A[2K  7 passed (1.7s)
+$ python3 scripts/task_acceptance.py run test:browser "experiments/P12/browser.spec.ts"
+(node:45160) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[1A[2K(node:45163) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Exit: 0

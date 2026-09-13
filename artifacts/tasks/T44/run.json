@@ -61,47 +61,5 @@
       "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
     }
-  ],
-  "acceptance_criteria_evidence": {
-    "Complementary useful failures at fixed precision and memory budget or reject": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T44/commands.log",
-        "artifacts/tasks/T44/run.json"
-      ],
-      "detail": "RapidOCR v3.8.1 with PP-OCRv5 mobile English was executed in an isolated experiment-local environment (experiments/P13/.venv) across all 8 development rasters. Peak RSS was strictly bounded to ~324 MB (< 1 GiB budget). While candidate successfully produced detection boxes, text, and confidences, it requires ~43 MB of model weights and additional runtime dependencies without displacing native Tesseract. Candidate decision is default_not_installed."
-    },
-    "explicit missing-model and OOV behavior": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T44/commands.log",
-        "artifacts/tasks/T44/run.json"
-      ],
-      "detail": "Strict ONNX protobuf validation (is_valid_onnx_model) and SHA-256 digest checking enforced. Junk-ONNX counterexample b\"\b\" + b\"\u0000\" * 127 is strictly rejected as invalid protobuf wire format. Explicit missing-model and OOV behaviors preserve failure accounting in the denominator."
-    },
-    "no runtime network": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T44/commands.log",
-        "artifacts/tasks/T44/run.json"
-      ],
-      "detail": "Zero network calls executed during inference; models and dependencies were pre-staged in the experiment environment and run fully offline (Invariant I14)."
-    },
-    "no consensus-as-truth": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T44/commands.log",
-        "artifacts/tasks/T44/run.json"
-      ],
-      "detail": "Candidate and baseline outputs are retained as independent reader observations; shared pixels are never treated as independent consensus (Invariant I17)."
-    },
-    "full raw and negative outcomes documented.": {
-      "status": "executed",
-      "evidence": [
-        "artifacts/tasks/T44/commands.log",
-        "artifacts/tasks/T44/run.json"
-      ],
-      "detail": "Full raw OCR detection boxes, recognized text strings, line confidences, timings, and rasters are persisted in artifacts/P13/result.json and artifacts/P13/rasters/; 11/11 tests pass in experiments/P13/test_experiment.py."
-    }
-  }
+  ]
 }

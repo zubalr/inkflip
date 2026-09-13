@@ -2,39 +2,33 @@
 
 ## Review Metadata
 - **Task**: T44 / P13
-- **Reviewed Commit**: `7f592576b92f7e7e6ae8d5b8ff3199bc4ca364e0`
-- **Reviewer**: Antigravity (Teamwork Independent Reviewer)
+- **Evaluated Commit**: `d484425a3837f08414dbee51becc9d77c6301712`
+- **Worker Evaluation**: Antigravity Worker
+- **Review Status**: Review Pending (Worker evaluation completed and substantiated; independent review pending coordinator dispatch)
 - **Date**: 2026-09-13
-- **Status**: `passed` (task requirements satisfied; candidate properly evaluated as blocked)
-- **Disposition**: `blocked_missing_dependency_and_weights` (`default_not_installed`)
+- **Disposition**: `completed` / `candidate_evaluated_unintegrated` (`default_not_installed`)
 
 ## Acceptance Criteria & Negative Control Verification
-1. **Manifest parsing and fixture validation**:
-   - Manifest loaded and validated from `fixtures/manifest.json`.
-   - Evaluated 8 development fixtures across F14 (`native-unicode`), F15 (`ocr-material`), and F16 (`adjacent-crop`).
-   - Manifest loader verified to fail terminally on empty, corrupted, or held-out manifests.
-2. **Actual baseline execution across manifest fixtures**:
-   - Evaluated all 8 fixtures using native Tesseract 5.5.3 on 2.0x rasters rendered via PDFium.
-   - Captured exact per-fixture timing (~0.05s–0.12s), raster pixel dimensions, and raw OCR output.
-   - Raw PNG rasters persisted to disk in `artifacts/P13/rasters/` for durable verification.
-3. **Failure denominator accounting**:
-   - Tesseract execution logic preserves nonzero exit codes, timeouts, and missing binaries as terminal failures.
-   - Tested counterexample: mocked nonzero Tesseract exit code produces `status: "failed"` and is recorded in the denominator, never falsely counted as a successful empty-text run.
-4. **Candidate provenance, PP-OCRv5 mobile English audit, and counterexamples**:
-   - Audited candidate against Source S47: `RapidOCR v3.8.1` with `PP-OCRv5 mobile English` configuration (`en_PP-OCRv5_mobile_det.onnx`, `en_PP-OCRv5_mobile_rec.onnx`).
-   - Implemented binary protobuf header validation (`is_valid_onnx_model`).
-   - Tested review counterexample: dummy files containing `"not an ONNX model"` fail binary validation and trigger `candidate_rejected_corrupted_weights`, proving unverified models cannot be marked available.
-   - Offline containment invariant enforces that external package and model downloads are blocked; attempted preparation recorded honestly.
-5. **Memory and containment measurement**:
-   - Process tree peak RSS measured via `resource.getrusage` at 55.88 MB, well within the 1 GiB memory budget.
-   - Documented platform containment behavior (macOS `RLIMIT_AS` non-enforcement audited via getrusage).
-6. **Integration decision**:
-   - RapidOCR candidate remains `default_not_installed`.
-   - Native Tesseract remains the sole primary native OCR engine.
+1. **Isolated Environment & Official Models**:
+   - Installed in experiment-local environment (`experiments/P13/.venv`) with `rapidocr==3.8.1`, `onnx==1.22.0`, `onnxruntime==1.30.0`.
+   - Staged official PP-OCRv5 mobile English models with trusted SHA-256 digests:
+     - `ch_PP-OCRv5_det_mobile.onnx`: `4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae`
+     - `en_PP-OCRv5_rec_mobile.onnx`: `c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8`
+2. **Protobuf Wire Validation & Counterexample**:
+   - `is_valid_onnx_model` parses protobuf field tags and wire types and verifies digest.
+   - Rejection proven for junk-ONNX counterexample `b"\x08" + b"\x00" * 127` as invalid protobuf wire format.
+3. **Real Candidate & Baseline Execution**:
+   - Baseline: Native Tesseract 5.5.3 completed 8/8 fixtures (~0.53s total), persisting PNG rasters to `artifacts/P13/rasters/`.
+   - Candidate: RapidOCR inference executed across all 8 development rasters, generating raw boxes, text, and confidences (~0.95s total).
+4. **Memory Containment**:
+   - Cached engine instance and optimized limit parameters bound peak RSS to ~324 MB, strictly within the 1 GiB budget.
+5. **No Consensus-as-Truth & Integration Decision**:
+   - Candidate and baseline outputs are reported as distinct reader observations; shared pixels are never treated as consensus truth (Invariant I17).
+   - Candidate requires ~43 MB of model weights and additional runtime dependencies without displacing native Tesseract.
+   - Candidate remains `default_not_installed`; native Tesseract remains the sole production OCR engine.
 
 ## Evidence Summary
-- **Tests**: 8 collected, 8 passed, 0 failed, 0 skipped.
+- **Tests**: 11 collected, 11 passed, 0 failed, 0 skipped.
 - **Verification Commands**:
-  - `python3 experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13` (exit 0)
-  - `python3 experiments/P13/test_experiment.py` (8/8 passed)
-  - `python3 scripts/task_acceptance.py task T44` (exit 0)
+  - `python experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13` (exit 0)
+  - `python experiments/P13/test_experiment.py` (11/11 passed)

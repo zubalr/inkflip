@@ -1,14 +1,14 @@
 {
   "task": "T41",
   "beads_id": "pdf-t41",
-  "evaluated_commit": "89bcffce37c44af88b0dd29f4196710b8f48d4e1",
-  "evaluated_at": "2026-09-13T11:48:33.038993+00:00",
+  "evaluated_commit": "d484425a3837f08414dbee51becc9d77c6301712",
+  "evaluated_at": "2026-09-13T13:02:24.802405+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 9,
-    "passed": 9,
+    "collected": 10,
+    "passed": 10,
     "failed": 0,
     "skipped": 0
   },
@@ -33,13 +33,15 @@
       ],
       "cwd": ".",
       "exit": 0,
+      "stdout": "P09 Experiment completed in 0.0732s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
+      "stderr": "",
       "tests": {
         "collected": 1,
         "passed": 1,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
     },
     {
@@ -54,36 +56,16 @@
       ],
       "cwd": ".",
       "exit": 0,
+      "stdout": "P09 Experiment completed in 0.0227s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.\nCandidate hard-control false visibility: 0 (zero FP: True)\nCandidate abstentions (unsupported compositing): 2\nCounterexample triggered on ink heuristic: True\nResult written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json\n",
+      "stderr": "test_empty_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_empty_manifest_fails_terminal)\nReview counterexample: empty manifest must fail terminal. ... ok\ntest_held_out_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_held_out_manifest_fails_terminal)\nReview counterexample: held-out evaluation manifest must fail terminal. ... ok\ntest_ink_counterexample_triggered (__main__.TestPaintOrderExperiment.test_ink_counterexample_triggered)\nCriterion: negative result / counterexample complete. ... ok\ntest_no_held_out_leakage (__main__.TestPaintOrderExperiment.test_no_held_out_leakage)\nCriterion: candidate gain measured without held-out leakage. ... ok\ntest_occlusion_geometry_computation (__main__.TestPaintOrderExperiment.test_occlusion_geometry_computation)\nGeometric occlusion accurately computes full, partial, and zero intersection. ... ok\ntest_precision_coverage_runtime_recorded (__main__.TestPaintOrderExperiment.test_precision_coverage_runtime_recorded)\nCriterion: precision/coverage/runtime recorded. ... ok\ntest_resolve_manifest_explicit_missing_fails (__main__.TestPaintOrderExperiment.test_resolve_manifest_explicit_missing_fails)\nVerify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok\ntest_source_bytes_immutable (__main__.TestPaintOrderExperiment.test_source_bytes_immutable)\nInvariant I01: source fixture bytes remain immutable. ... ok\ntest_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_zero_hard_control_false_visibility)\nCriterion: Zero hard-control false visibility. ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.024s\n\nOK\n",
       "tests": {
-        "collected": 8,
-        "passed": 8,
+        "collected": 9,
+        "passed": 9,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion",
       "environment": {}
     }
-  ],
-  "acceptance_criteria_evidence": {
-    "Zero hard-control false visibility": {
-      "status": "passed",
-      "evidence": "Candidate achieved 0 false-visibility classifications on hard controls (bounded_paint_order_candidate.false_visibility_count == 0, zero_hard_control_false_visibility == True, precision == 1.0)."
-    },
-    "precision/coverage/runtime recorded": {
-      "status": "passed",
-      "evidence": "Metadata baseline (precision 0.6667, coverage 9, runtime <0.001s), rectangular ink heuristic (precision 0.8000, coverage 9, runtime ~0.005s), candidate (precision 1.0, coverage 9, decision coverage 77.8%, runtime <0.001s) recorded with distinct execution timers."
-    },
-    "candidate gain measured without held-out leakage": {
-      "status": "passed",
-      "evidence": "All evaluated fixtures originate strictly from development split (fixtures/development/*.pdf) via validated manifest. Held-out evaluation manifests fail terminal."
-    },
-    "negative result is complete": {
-      "status": "passed",
-      "evidence": "Fatal counterexample on F24 overlap-ink proven: rectangular-ink heuristic falsely asserts visibility on overlap-ink-invisible.pdf (false_visibility == True). Heuristic rejected."
-    },
-    "proposed merge has separate adapter capability review and full controls.": {
-      "status": "passed",
-      "evidence": "Production recommendation rejects universal heuristic; keeps explicit Tr modes and distinct reader observations. Separate review and full control suite verified."
-    }
-  }
+  ]
 }

@@ -1,77 +1,38 @@
-P09 Experiment completed in 0.0588s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes/fixtures/manifest.json.
+$ python3 experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09
+P09 Experiment completed in 0.0732s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
 Candidate hard-control false visibility: 0 (zero FP: True)
 Candidate abstentions (unsupported compositing): 2
 Counterexample triggered on ink heuristic: True
-Result written to /Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes/artifacts/P09/result.json
-P09 Experiment completed in 0.0199s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes/fixtures/manifest.json.
+Result written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json
+Exit: 0
+
+$ python3 experiments/P09/test_experiment.py
+P09 Experiment completed in 0.0227s: 9 fixtures evaluated from /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/fixtures/manifest.json.
 Candidate hard-control false visibility: 0 (zero FP: True)
 Candidate abstentions (unsupported compositing): 2
 Counterexample triggered on ink heuristic: True
-Result written to /Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes/artifacts/P09/result.json
-{
-  "task": "T41",
-  "beads_id": "pdf-t41",
-  "evaluated_commit": null,
-  "evaluated_at": "2026-09-13T11:48:33.038993+00:00",
-  "commands_run": 2,
-  "failures": [],
-  "evidence_errors": [],
-  "tests": {
-    "collected": 9,
-    "passed": 9,
-    "failed": 0,
-    "skipped": 0
-  },
-  "records": [
-    {
-      "segment": "python experiments/P09/run.py --manifest evaluation/manifests/development.json --out artifacts/P09",
-      "argv": [
-        "python3",
-        "experiments/P09/run.py",
-        "--manifest",
-        "evaluation/manifests/development.json",
-        "--out",
-        "artifacts/P09"
-      ],
-      "executed_argv": [
-        "python3",
-        "experiments/P09/run.py",
-        "--manifest",
-        "evaluation/manifests/development.json",
-        "--out",
-        "artifacts/P09"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "tests": {
-        "collected": 1,
-        "passed": 1,
-        "failed": 0,
-        "skipped": 0
-      },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
-      "environment": {}
-    },
-    {
-      "segment": "python experiments/P09/test_experiment.py",
-      "argv": [
-        "python3",
-        "experiments/P09/test_experiment.py"
-      ],
-      "executed_argv": [
-        "python3",
-        "experiments/P09/test_experiment.py"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "tests": {
-        "collected": 8,
-        "passed": 8,
-        "failed": 0,
-        "skipped": 0
-      },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
-      "environment": {}
-    }
-  ]
-}
+Result written to /Users/zubair/Code/Projects/pdf project/worktrees/agy-candidate-completion/artifacts/P09/result.json
+test_empty_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_empty_manifest_fails_terminal)
+Review counterexample: empty manifest must fail terminal. ... ok
+test_held_out_manifest_fails_terminal (__main__.TestPaintOrderExperiment.test_held_out_manifest_fails_terminal)
+Review counterexample: held-out evaluation manifest must fail terminal. ... ok
+test_ink_counterexample_triggered (__main__.TestPaintOrderExperiment.test_ink_counterexample_triggered)
+Criterion: negative result / counterexample complete. ... ok
+test_no_held_out_leakage (__main__.TestPaintOrderExperiment.test_no_held_out_leakage)
+Criterion: candidate gain measured without held-out leakage. ... ok
+test_occlusion_geometry_computation (__main__.TestPaintOrderExperiment.test_occlusion_geometry_computation)
+Geometric occlusion accurately computes full, partial, and zero intersection. ... ok
+test_precision_coverage_runtime_recorded (__main__.TestPaintOrderExperiment.test_precision_coverage_runtime_recorded)
+Criterion: precision/coverage/runtime recorded. ... ok
+test_resolve_manifest_explicit_missing_fails (__main__.TestPaintOrderExperiment.test_resolve_manifest_explicit_missing_fails)
+Verify resolve_manifest raises FileNotFoundError on explicitly missing manifests. ... ok
+test_source_bytes_immutable (__main__.TestPaintOrderExperiment.test_source_bytes_immutable)
+Invariant I01: source fixture bytes remain immutable. ... ok
+test_zero_hard_control_false_visibility (__main__.TestPaintOrderExperiment.test_zero_hard_control_false_visibility)
+Criterion: Zero hard-control false visibility. ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.024s
+
+OK
+Exit: 0
