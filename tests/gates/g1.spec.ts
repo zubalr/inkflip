@@ -275,7 +275,10 @@ function armEgress(context: BrowserContext): void {
 
 /** Persist a downloaded artifact into the capture for scanning + evidence. */
 async function recordDownload(cap: Capture, download: Download, destName: string): Promise<string> {
-  const dir = join(CAPTURES, "downloads");
+  // Raw export bytes are volatile by design (execution_id/started_at/
+  // duration_ms live inside the sealed artifact), so they stay outside the
+  // committed evidence tree; the capture records a normalized digest below.
+  const dir = join(ROOT, "test-results", "g1-downloads");
   mkdirSync(dir, { recursive: true });
   const dest = join(dir, `${String(captureSeq).padStart(2, "0")}-${destName}`);
   await download.saveAs(dest);
@@ -290,6 +293,42 @@ async function recordDownload(cap: Capture, download: Download, destName: string
     },
   });
   return dest;
+}
+
+const LOCAL_ORIGIN = "http://inkflip.local";
+
+/**
+ * Deterministic copy of a string field for committed evidence: the ephemeral
+ * server origin and per-run execution envelope are transport noise — replace
+ * them with stable tokens so re-runs of an unchanged build produce identical
+ * capture bytes. Runs on the serialized artifact only; the in-memory records
+ * used for the marker scan and assertions stay raw.
+ */
+function stabilizeText<T extends string | undefined>(text: T): T {
+  if (text === undefined) return text;
+  return text
+    .replaceAll(baseURL, LOCAL_ORIGIN)
+    .replace(/"execution_id": ?"[^"]+"/g, '"execution_id": "<run-scoped>"')
+    .replace(/"started_at": ?"[^"]+"/g, '"started_at": "<run-scoped>"')
+    .replace(/"duration_ms": ?\d+/g, '"duration_ms": "<run-scoped>"') as T;
+}
+
+/** Write-time projection of a capture record with volatile fields removed. */
+function stabilizeRecord(rec: Rec): Rec {
+  const out: Rec = {
+    ...rec,
+    url: stabilizeText(rec.url),
+    data: stabilizeText(rec.data?.slice(0, 4000)),
+  };
+  if (rec.headers) {
+    const headers = { ...rec.headers };
+    delete headers.date;
+    if (rec.channel === "downloads" && out.data !== undefined) {
+      headers.sha256 = createHash("sha256").update(out.data).digest("hex");
+    }
+    out.headers = headers;
+  }
+  return out;
 }
 
 async function storageDump(page: Page): Promise<Rec[]> {
@@ -400,7 +439,15 @@ async function endCapture(
   writeFileSync(
     join(CAPTURES, `${String(captureSeq++).padStart(2, "0")}-${cap.label}.json`),
     JSON.stringify(
-      { ...cap, records: cap.records.map((r) => ({ ...r, data: r.data?.slice(0, 4000) })) },
+      {
+        ...cap,
+        records: cap.records.map(stabilizeRecord),
+        violations: cap.violations.map((v) => ({
+          ...v,
+          where: stabilizeText(v.where),
+          snippet: stabilizeText(v.snippet),
+        })),
+      },
       null,
       2,
     ),
