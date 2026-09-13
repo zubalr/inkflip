@@ -4,6 +4,7 @@ import type {
   Occurrence,
   Reader,
   Finding,
+  Annotation,
 } from "../../../../../packages/contracts/src/index.ts";
 import type { ViewerMode, RotationDegree, ViewerDoc } from "./types";
 import { CanvasOverlay } from "./CanvasOverlay";
@@ -11,6 +12,7 @@ import { ComparePanes } from "./ComparePanes";
 import { AccessibleTextLayer } from "./AccessibleTextLayer";
 import { AlignmentDetail } from "../findings/alignment/AlignmentDetail";
 import { isOrderOnlyFinding } from "../findings/alignment/classify.ts";
+import { FindingNotes } from "../annotations/FindingNotes.tsx";
 import styles from "./ViewerStage.module.css";
 
 export interface ViewerStageProps {
@@ -20,6 +22,10 @@ export interface ViewerStageProps {
   initialZoom?: number;
   initialRotation?: RotationDegree;
   onKeepEvidence?: (finding: Finding) => void;
+  /** User-authored notes on the open report (T23); rendered per finding. */
+  annotations?: readonly Annotation[];
+  onAddAnnotation?: (annotation: Annotation) => void;
+  onRemoveAnnotation?: (annotationId: string) => void;
 }
 
 export const ViewerStage: React.FC<ViewerStageProps> = ({
@@ -29,6 +35,9 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
   initialZoom = 100,
   initialRotation = 0,
   onKeepEvidence,
+  annotations,
+  onAddAnnotation,
+  onRemoveAnnotation,
 }) => {
   const [mode, setMode] = useState<ViewerMode>(initialMode);
   const [pageIndex, setPageIndex] = useState<number>(0);
@@ -376,6 +385,15 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                       selectedOccurrenceId={selectedOccurrenceId}
                       onSelectOccurrence={handleSelectOccurrence}
                       returnFocusId={`finding-item-${f.id}`}
+                    />
+                  )}
+
+                  {isSelected && onAddAnnotation && onRemoveAnnotation && (
+                    <FindingNotes
+                      finding={f}
+                      notes={annotations ?? []}
+                      onAdd={onAddAnnotation}
+                      onRemove={onRemoveAnnotation}
                     />
                   )}
 

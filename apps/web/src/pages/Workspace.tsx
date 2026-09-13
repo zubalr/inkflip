@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ViewerStage } from "../features/viewer/ViewerStage";
 import type { ViewerDoc } from "../features/viewer/types";
+import type { Annotation } from "../../../../packages/contracts/src/index.ts";
 import { FileDrop } from "../features/open/FileDrop";
 import { OpenWorkspace } from "../features/open/OpenWorkspace";
 import { resolveProfile } from "../features/open";
@@ -331,6 +332,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     initialDoc ?? (initialWithExample ? EXAMPLE_DOC : null),
   );
 
+  // Human notes (T23) live outside the sealed report — they are added to a
+  // projection at export time only, never mutate machine evidence. Notes
+  // reset when the open document/report identity changes.
+  const [userNotes, setUserNotes] = useState<Annotation[]>([]);
+
   useEffect(() => session.subscribe(() => setSnap(session.getState())), [session]);
   // Unmounting the workspace releases the session's pdf.js handle,
   // OCR worker and retained bytes.
@@ -408,9 +414,25 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       ? "Invoice-Example.pdf"
       : "Workspace";
 
+  const addNote = useCallback(
+    (annotation: Annotation) => setUserNotes((prev) => [...prev, annotation]),
+    [],
+  );
+  const removeNote = useCallback(
+    (id: string) => setUserNotes((prev) => prev.filter((n) => n.id !== id)),
+    [],
+  );
+
+  // Notes belong to the open document/report — a new run, import or close
+  // discards them rather than leaking them onto unrelated findings.
+  useEffect(() => {
+    setUserNotes([]);
+  }, [report, snap.doc, exampleDoc]);
+
   const closeAll = useCallback(() => {
     session.close();
     setExampleDoc(null);
+    setUserNotes([]);
   }, [session]);
 
   return (
@@ -662,7 +684,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </div>
             )}
           >
-            <ViewerStage doc={viewerDoc} />
+            <ViewerStage
+              doc={viewerDoc}
+              annotations={userNotes}
+              onAddAnnotation={addNote}
+              onRemoveAnnotation={removeNote}
+            />
           </ViewerErrorBoundary>
         )}
 
@@ -741,7 +768,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             )}
             <ExportPanel
               engine={session.exportEngine}
-              source={report}
+              source={
+                userNotes.length === 0
+                  ? report
+                  : {
+                      ...report,
+                      annotations: [...(report.annotations ?? []), ...userNotes],
+                    }
+              }
               sourcePdfBytes={session.sourcePdfBytes}
             />
           </>

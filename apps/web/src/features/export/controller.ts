@@ -39,6 +39,28 @@ export interface ExportControllerState {
   readonly error: string | null;
   /** True when the user asked for source PDF but no usable bytes exist. */
   readonly sourceUnavailable: boolean;
+  /** Findings present on the source report, for the selection picker. */
+  readonly findingChoices: readonly FindingChoice[];
+  /** Thumbnails of the crops the current projection will carry (T23). */
+  readonly cropPreviews: readonly CropPreview[];
+  /**
+   * Notes excluded because their finding was deselected (engine prunes
+   * annotations to kept findings — contract-required). Disclosed
+   * separately so a note never disappears silently (review F2).
+   */
+  readonly notesExcludedWithFindings: number;
+}
+
+export interface FindingChoice {
+  readonly id: string;
+  readonly title: string;
+  readonly pageIndex: number;
+}
+
+export interface CropPreview {
+  readonly id: string;
+  readonly pageIndex: number;
+  readonly dataUrl: string;
 }
 
 const DEFAULT_REQUEST: ExportRequestLike = {
@@ -61,6 +83,11 @@ export class ExportController {
   private error: string | null = null;
   private sourceUnavailable = false;
   private readonly availability: ExportAvailability;
+  private readonly findingChoices: readonly FindingChoice[];
+  /** Sealed report identity — lets the panel preserve user choices across
+   *  same-report source rebuilds (e.g. notes edited) while a genuinely
+   *  different report still resets to privacy defaults. */
+  readonly sourceReportId: string | null;
 
   constructor(engine: ExportEngine, source: unknown, options: ExportControllerOptions = {}) {
     this.engine = engine;
@@ -68,7 +95,37 @@ export class ExportController {
     this.sourcePdfBytes = options.sourcePdfBytes;
     this.request = { ...DEFAULT_REQUEST, ...options.request };
     this.availability = probeAvailability(source);
+    this.findingChoices = probeFindingChoices(source);
+    this.sourceReportId = probeReportId(source);
     this.recompute();
+  }
+
+  /**
+   * Re-apply a previous request against this controller's source,
+   * sanitized to what the source actually offers. Used when the panel's
+   * source identity changed but the sealed report did not (notes edited,
+   * parent re-render) — without this the projection silently reverted to
+   * "all findings" and could ship evidence the user had deselected.
+   */
+  restoreRequest(prev: ExportRequestLike): ExportControllerState {
+    const next: Partial<ExportRequestLike> = { ...prev };
+    if (Array.isArray(next.findings)) {
+      const known = new Set(this.findingChoices.map((f) => f.id));
+      const ids = next.findings.filter((id) => known.has(id));
+      next.findings = ids.length === this.findingChoices.length ? "all" : ids;
+    }
+    if (next.annotations === true && !this.availability.hasAnnotations) {
+      next.annotations = false;
+    }
+    if (next.filename === true && !this.availability.hasFilename) {
+      next.filename = false;
+    }
+    if (next.pageRenders === "all" && !this.availability.hasPageRenders) {
+      next.pageRenders = "none";
+    }
+    this.request = { ...this.request, ...next };
+    this.recompute();
+    return this.state;
   }
 
   get state(): ExportControllerState {
@@ -84,7 +141,22 @@ export class ExportController {
       notices: this.projection?.notices ?? null,
       error: this.error,
       sourceUnavailable: this.sourceUnavailable,
+      findingChoices: this.findingChoices,
+      cropPreviews: this.cropPreviews(),
+      notesExcludedWithFindings: this.notesExcludedWithFindings(),
     };
+  }
+
+  /**
+   * Restrict the export to an explicit finding subset (T23 multi-finding
+   * selection). `"all"` restores the default full-evidence projection; an
+   * empty array exports zero findings — the projection still discloses the
+   * omitted evidence honestly rather than pretending nothing existed.
+   */
+  setFindingSelection(ids: "all" | readonly string[]): ExportControllerState {
+    this.request = { ...this.request, findings: ids === "all" ? "all" : [...ids] };
+    this.recompute();
+    return this.state;
   }
 
   /** Merge inclusion options and recompute projection + preview. */
@@ -152,6 +224,69 @@ export class ExportController {
       this.error = exc instanceof Error ? exc.message : String(exc);
     }
   }
+
+  /**
+   * Crop thumbnails for the preview pane, decoded from the *projected*
+   * report — what the user sees is exactly what the download contains.
+   */
+  private cropPreviews(): readonly CropPreview[] {
+    if (this.projection === null) return [];
+    const assets = (this.projection.report as { assets?: readonly {
+      id?: string; purpose?: string; media_type?: string; data_base64?: string; page_index?: number;
+    }[] }).assets ?? [];
+    const out: CropPreview[] = [];
+    for (const a of assets) {
+      if (a?.purpose !== "crop" || typeof a.data_base64 !== "string") continue;
+      out.push({
+        id: String(a.id),
+        pageIndex: typeof a.page_index === "number" ? a.page_index : -1,
+        dataUrl: `data:${a.media_type ?? "image/png"};base64,${a.data_base64}`,
+      });
+    }
+    return out;
+  }
+
+  /**
+   * Source annotations dropped because the finding they annotate was
+   * deselected. Only counted when notes inclusion is on — when notes are
+   * off the wholesale "Notes excluded." line already discloses them.
+   */
+  private notesExcludedWithFindings(): number {
+    if (this.projection === null || this.request.annotations !== true) return 0;
+    const kept = new Set(
+      ((this.projection.report as { findings?: readonly { id?: string }[] }).findings ?? [])
+        .map((f) => f.id),
+    );
+    const sourceAnnotations =
+      (this.source as { annotations?: readonly { finding_id?: string | null }[] }).annotations ?? [];
+    return sourceAnnotations.filter(
+      (a) => typeof a?.finding_id === "string" && !kept.has(a.finding_id),
+    ).length;
+  }
+}
+
+/** Sealed report identity of the source, or null for non-report inputs. */
+export function probeReportId(source: unknown): string | null {
+  const id = (source as { report_id?: unknown } | null)?.report_id;
+  return typeof id === "string" ? id : null;
+}
+
+/** Findings on the source report, in document order. */
+export function probeFindingChoices(source: unknown): readonly FindingChoice[] {
+  const findings = (source as { findings?: readonly {
+    id?: string; title?: string; page_index?: number;
+  }[] } | null)?.findings;
+  if (!Array.isArray(findings)) return [];
+  const out: FindingChoice[] = [];
+  for (const f of findings) {
+    if (typeof f?.id !== "string") continue;
+    out.push({
+      id: f.id,
+      title: typeof f.title === "string" ? f.title : f.id,
+      pageIndex: typeof f.page_index === "number" ? f.page_index : -1,
+    });
+  }
+  return out;
 }
 
 /** Inspect the recorded run for optional categories the UI can offer. */
