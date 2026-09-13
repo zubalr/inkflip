@@ -1,0 +1,71 @@
+{
+  "task": "T45",
+  "beads_id": "pdf-t45",
+  "evaluated_commit": "2bdd86e61f5c3fac580621ad0f28d4889a3f1648",
+  "evaluated_at": "2026-09-13T03:06:17.657382+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python experiments/P14/run.py --manifest evaluation/manifests/development.json --out artifacts/P14",
+      "argv": [
+        "python3",
+        "experiments/P14/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P14"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P14/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P14"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P14 Experiment executed: status=rejected_experiment\nArtifact written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/artifacts/P14/result.json\n",
+      "stderr": "",
+      "tests": {
+        "collected": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass",
+      "environment": {}
+    },
+    {
+      "segment": "python experiments/P14/test_experiment.py",
+      "argv": [
+        "python3",
+        "experiments/P14/test_experiment.py"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P14/test_experiment.py"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P14 Experiment executed: status=rejected_experiment\nArtifact written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/artifacts/P14/result.json\nP14 Experiment executed: status=rejected_experiment\nArtifact written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/artifacts/P14/result.json\n",
+      "stderr": "test_clean_control_corruption_triggers_rejection (__main__.TestRasterGeometryExperiment.test_clean_control_corruption_triggers_rejection)\nCriterion: Any lost registration or clean corruption rejects. ... ok\ntest_inverse_transform_chain_exactness (__main__.TestRasterGeometryExperiment.test_inverse_transform_chain_exactness)\nCriterion: transform chain provides exact mathematical inverse. ... ok\ntest_negative_result_documents_disposition (__main__.TestRasterGeometryExperiment.test_negative_result_documents_disposition)\nCriterion: negative result closes task with deleted production candidate. ... ok\ntest_no_pdf_write_or_reconstruction (__main__.TestRasterGeometryExperiment.test_no_pdf_write_or_reconstruction)\nCriterion: no generic reconstruction/search or PDF write path. ... ok\ntest_original_source_and_raster_immutable (__main__.TestRasterGeometryExperiment.test_original_source_and_raster_immutable)\nCriterion: original PDF and raster immutable (I01, I02). ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.001s\n\nOK\n",
+      "tests": {
+        "collected": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass",
+      "environment": {}
+    }
+  ]
+}
