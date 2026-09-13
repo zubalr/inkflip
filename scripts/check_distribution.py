@@ -240,6 +240,28 @@ def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None)
     return sorted(failures), (0 if not failures else 1)
 
 
+def scope_report(root: Path, manifest: dict, dist_manifest_rel: str | None) -> list[str]:
+    """Named scope summary + explicit incomplete items: a pass on one scope
+    must never read as full release completion."""
+    lines = []
+    nb = manifest.get("native_bundle")
+    if nb:
+        app_wheel = nb.get("application_wheel")
+        if app_wheel and not (root / app_wheel).exists():
+            lines.append(
+                f"scope note: the application wheel ({app_wheel}) is absent — the native "
+                "bundle is third-party inputs only, not a complete shipped application image"
+            )
+        elif not app_wheel:
+            lines.append(
+                "scope note: no application wheel is declared — native bundle covers "
+                "third-party dependency inputs only, not a complete shipped application image"
+            )
+    if not dist_manifest_rel:
+        lines.append("scope note: built static dist was not verified (no --dist-manifest given)")
+    return lines
+
+
 WHEEL_TAG_RE = re.compile(
     r"^(?P<dist>[A-Za-z0-9_.]+)-(?P<version>[^-]+)-"
     r"(?P<py>cp313|py3)-(?P<abi>cp313|abi3|none)-"
@@ -345,6 +367,21 @@ def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
     if not dist_root.is_dir():
         return [f"dist root missing: {dm.get('dist_root', 'apps/web/dist')} (build first)"]
     declared = {f["path"]: f for f in dm.get("files", [])}
+    reject = dm.get("reject_patterns") or dm.get("reject_source_maps") and [r"\.map$"] or []
+    import re as _re
+    patterns = [_re.compile(pat) for pat in reject]
+    for rel in sorted(declared):
+        for pat in patterns:
+            if pat.search(rel):
+                failures.append(f"dist: prohibited development material declared: {rel} (pattern {pat.pattern!r})")
+                break
+    for actual in sorted(dist_root.rglob("*")):
+        if actual.is_file():
+            rel = actual.relative_to(root).as_posix()
+            for pat in patterns:
+                if pat.search(rel):
+                    failures.append(f"dist: prohibited development material present: {rel} (pattern {pat.pattern!r})")
+                    break
     for rel, f in sorted(declared.items()):
         actual = root / rel
         if not actual.is_file():
@@ -389,14 +426,23 @@ def main() -> int:
         return 2
 
     problems, code = run_checks(root, manifest, args.dist_manifest)
+    scope_notes = scope_report(root, manifest, args.dist_manifest)
     if args.json:
-        print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems}, indent=2))
+        print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems,
+                          "scope_notes": scope_notes}, indent=2))
     else:
         if not problems:
-            print("distribution manifest: all checks passed")
-            print(f"  groups: {len(manifest.get('groups', []))}, shipped roots: {len(manifest['distribution']['shipped_roots'])}")
+            scopes = ["browser static surface"]
+            if manifest.get("native_bundle"):
+                scopes.append("native third-party dependency inputs")
+            if args.dist_manifest:
+                scopes.append("built static dist")
+            print(f"distribution check PASSED for: {', '.join(scopes)}")
+            for note in scope_report(root, manifest, args.dist_manifest):
+                print(f"  note: {note}")
+            print(f"  groups: {len(manifest.get('groups', []))}, shipped roots: {len(manifest['distribution'].get('shipped_roots', []))}")
         else:
-            print(f"distribution manifest: {len(problems)} problem(s)")
+            print(f"distribution check: {len(problems)} problem(s)")
             for p in problems:
                 print(f"  - {p}")
     return code

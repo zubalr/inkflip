@@ -241,6 +241,7 @@ class DistCheckerTests(unittest.TestCase):
         self.write("apps/web/dist/assets/app-ABC123.js", asset)
         manifest = {
             "dist_root": "apps/web/dist",
+            "reject_patterns": ["\\.map$", "\.log$"],
             "files": [
                 {"path": "apps/web/dist/index.html", "sha256": hashlib.sha256(index).hexdigest()},
                 {"path": "apps/web/dist/assets/app-ABC123.js", "sha256": hashlib.sha256(asset).hexdigest()},
@@ -279,6 +280,13 @@ class DistCheckerTests(unittest.TestCase):
         proc = self.run_checker("--dist-manifest", ".private/distribution/dist-manifest.json")
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("dist: undeclared file", proc.stdout)
+
+    def test_source_map_in_dist_fails(self):
+        self.record_dist()
+        self.write("apps/web/dist/assets/app-ABC123.js.map", b"{\"sources\":[]}")
+        proc = self.run_checker("--dist-manifest", ".private/distribution/dist-manifest.json")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("prohibited development material present", proc.stdout)
 
     def test_missing_dist_manifest_fails(self):
         self.record_dist()

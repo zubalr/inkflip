@@ -32,20 +32,25 @@ repository LICENSE file).
 | tr46 0.0.3 | MIT | `node_modules/.bun/tr46@0.0.3/node_modules/tr46/package.json` | `(no text shipped — see gaps below)` | `(none — declaration-only record)` |
 | tessdata_fast (eng.traineddata) pinned commit 65727574dfcd264acbb0c3e07860e4e9e9b22185 | Apache-2.0 | `node_modules/.bun/tesseract.js-core@7.0.0/node_modules/tesseract.js-core/LICENSE (canonical Apache-2.0 text; asset provenance in config/resolved-assets.json)` | `cd77eea3b79399cc2c14f2fb20b0871967b84699a974b439cdd60d6e027cbf57` | `licenses/tessdata-fast-eng/NOTICE.txt` |
 
-## Known gaps (visible, unresolved)
+## tr46@0.0.3 — resolved as not shipped (recorded 2026-09-13)
 
-- `tr46@0.0.3` — the MIT license **text** cannot be established for this
-  exact release from authoritative sources. Verified 2026-09-13:
-  the npm-published tarball `https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz`
+- The MIT license **text** cannot be established for this exact release:
+  the npm tarball `https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz`
   (shasum `8184fd347dac9cdc185992f3a6622e14b9d9ab6a`) contains only
   `package.json` (declaring `"license": "MIT"`), `index.js`, `lib/`,
-  `.npmignore` — no LICENSE/COPYING file; and the upstream repository
-  (`github.com/Sebmaster/tr46.js`, moved to `github.com/jsdom/tr46`) at tag
-  `0.0.3` likewise has no license file. The declaration is therefore
-  recorded without a verifiable text body. Resolution (accept
-  declaration-only with rationale, or pin a text-bearing version) is a
-  packaging/licensing policy decision left to the integrator. (Not a
-  distribution-manifest group: tr46 is bundled via tesseract.js's URL shim.)
+  `.npmignore`; the upstream repository (`github.com/Sebmaster/tr46.js`,
+  moved to `github.com/jsdom/tr46`) at tag `0.0.3` likewise has no license
+  file.
+- **Shipped-bytes evidence (2026-09-13): tr46 is NOT part of the shipped
+  browser distribution.** A content search of the entire built `apps/web/dist/`
+  (all JS/CSS/WASM/worker assets, including the staged Tesseract worker and
+  pdf.js worker bundles) finds no tr46, mappingTable or whatwg-url markers.
+  tr46 reaches the production npm closure only through tesseract.js's
+  Node.js-path dependencies (node-fetch → whatwg-url → tr46), which the
+  browser build does not bundle.
+- Classification: npm-lock metadata only — not shipped content. No notice
+  is required in shipped bytes; the declaration-only license record above
+  is retained for supply-chain completeness. This is not a release blocker.
 - The PyPI runtime-tooling packages (native/uv.lock) are distributed as
   source+lock, not bundled; their license declarations come from the T02
   ledger (docs/ATTRIBUTION.md). If a future T47 closure bundles wheels,

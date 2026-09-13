@@ -12,7 +12,9 @@ freeze; re-generate after any dependency or asset change.
 | bundled_npm_packages | 17 |
 | fixture_entries | 80 |
 | native_lock_packages | 14 |
-| prepared_example_files | 9 |
+| offline_manifest_example_entries | 54 |
+| prepared_example_files | 54 |
+| prepared_example_in_offline_manifest | 54 |
 | shipped_asset_files | 212 |
 | unknown | 0 |
 

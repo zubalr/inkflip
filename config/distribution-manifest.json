@@ -142,19 +142,26 @@
       }
     },
     {
-      "id": "inkflip-amount-example",
+      "id": "inkflip-service-worker",
       "third_party": false,
       "license": "MIT (project-original)",
-      "license_evidence": "apps/web/public/examples/amount/manifest.json",
+      "license_evidence": "LICENSE",
       "notice_name": null,
-      "digest_source": {
-        "path": "apps/web/public/examples/amount/manifest.json",
-        "file_list": "files(source,control,covered_source,covered_control)",
-        "path_field": "filename",
-        "path_prefix": "apps/web/public/examples/amount/",
-        "digest_field": "sha256",
-        "bytes_field": "byte_length"
-      },
+      "explicit_files": [
+        {
+          "path": "apps/web/public/sw.js",
+          "sha256": "466de62658b3f453259aaa77e17448feef624738fac4aeafb418245ccb66c957",
+          "bytes": 16797
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-amount",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
       "explicit_files": [
         {
           "path": "apps/web/public/examples/amount/amount.css",
@@ -168,18 +175,322 @@
         },
         {
           "path": "apps/web/public/examples/amount/index.html",
-          "sha256": "dd5214547e3fc79133153fec418997e451f3daf98e5f0080f1ea6aca4e82e4df",
-          "bytes": 6402
-        },
-        {
-          "path": "apps/web/public/examples/amount/report.json",
-          "sha256": "42dc8ae3b8c619a52205c289db4037d859b121e91d7f441bc3706ce6f993a9ac",
-          "bytes": 9944
+          "sha256": "91c42b039238cc95b48e4917afda5acfb590dea682ba7ba9284c8f4d7ea398f5",
+          "bytes": 6345
         },
         {
           "path": "apps/web/public/examples/amount/manifest.json",
-          "sha256": "567c20e0dc3104b568504dd45eb4468d1e26eca4d88e8e52855055e385518f8c",
-          "bytes": 2945
+          "sha256": "21bc314355faf5d0c8df91384c9e15f7717f42caf2a3e2c4568bcc0d35bdf20d",
+          "bytes": 3208
+        },
+        {
+          "path": "apps/web/public/examples/amount/mapping-amount.pdf",
+          "sha256": "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80",
+          "bytes": 1437
+        },
+        {
+          "path": "apps/web/public/examples/amount/mapping-control.pdf",
+          "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+          "bytes": 1429
+        },
+        {
+          "path": "apps/web/public/examples/amount/native-unicode-control.pdf",
+          "sha256": "3456ae2c3cd0bac03c76656f7f0150b9e1be92ad384006d4b158a39feef7b421",
+          "bytes": 626
+        },
+        {
+          "path": "apps/web/public/examples/amount/native-unicode-native.pdf",
+          "sha256": "5ae99c803de6701b334c3328dedde576e9ee425d4c0aa040d5b5c8da7349b159",
+          "bytes": 1409
+        },
+        {
+          "path": "apps/web/public/examples/amount/report.control.json",
+          "sha256": "8e0b2499857ebbe5d944fc85d6e264645d8e1d4f5f195a2190395deb06dea07c",
+          "bytes": 51974
+        },
+        {
+          "path": "apps/web/public/examples/amount/report.json",
+          "sha256": "91dca8c6ac5ef6827df1fde73e909330fafa55136e182e5c168b4cbd7a0d161f",
+          "bytes": 28843
+        },
+        {
+          "path": "apps/web/public/examples/amount/report.native-unicode-control.json",
+          "sha256": "c04a6792d86d690366bbeaa72c42cdd2e53ff5cd5c94a9ebaee0a484bdd7e320",
+          "bytes": 15739
+        },
+        {
+          "path": "apps/web/public/examples/amount/report.native-unicode-native.json",
+          "sha256": "392389da1ff54bec23da05a5e09d2c46495aca9937d4192337c7b3abd5b1fdeb",
+          "bytes": 18906
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-covered",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/covered/covered-amount.pdf",
+          "sha256": "5dfb2dd71cff34e36f6e909e42fdbb67e4b976f8d88a0a521bdc5029c226b888",
+          "bytes": 1504
+        },
+        {
+          "path": "apps/web/public/examples/covered/covered-control.pdf",
+          "sha256": "cf003f5a746ace7ea6efab9c86733b267159cd8f6bc0343f6a09f0233d95d03d",
+          "bytes": 1429
+        },
+        {
+          "path": "apps/web/public/examples/covered/manifest.json",
+          "sha256": "faff8468499457ad7d605a5bdf287918b71551a2bc2397f29ef6da968e6697ae",
+          "bytes": 3224
+        },
+        {
+          "path": "apps/web/public/examples/covered/report.control.json",
+          "sha256": "90fdd863892df3c9f1fee4469eaf05720dbfacde610b3101d94b771a85d4e262",
+          "bytes": 51974
+        },
+        {
+          "path": "apps/web/public/examples/covered/report.json",
+          "sha256": "90ad7e588a94777da2b2df277392e1c5d944d1128c65b81ad1d6f1a6bebccdf4",
+          "bytes": 30394
+        },
+        {
+          "path": "apps/web/public/examples/covered/report.white-contrast-control.json",
+          "sha256": "a092cded143c17a212696c2f228f7f68c0250c0696f01ea3c990ccc11710651a",
+          "bytes": 15709
+        },
+        {
+          "path": "apps/web/public/examples/covered/report.white-contrast-white.json",
+          "sha256": "d2eda25ece3b11f1eb1ac4efcb56766a912874fde3cb2dda6e7b3b2c23a479b2",
+          "bytes": 14855
+        },
+        {
+          "path": "apps/web/public/examples/covered/white-contrast-control.pdf",
+          "sha256": "cdf06d357a1db2771061290669ec2083c39ab75b0a9473f80082028e7fefb804",
+          "bytes": 657
+        },
+        {
+          "path": "apps/web/public/examples/covered/white-contrast-white.pdf",
+          "sha256": "333a621576c9d023751da527760e7f4deb380bac10dd0e0fab22fa116da5ef8c",
+          "bytes": 630
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-duplicates",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/duplicates/duplicates-control.pdf",
+          "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+          "bytes": 621
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/duplicates-four.pdf",
+          "sha256": "036db55ee2f8c320252c7c9fb220daa38699387800e8a3bbf8c6bb73463feb1f",
+          "bytes": 754
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/manifest.json",
+          "sha256": "c21ccd2075fb314809f5ce894c90266359b14f2a115fda199bcb375b7181e899",
+          "bytes": 3280
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/ocr-material-control.pdf",
+          "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+          "bytes": 5171
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/ocr-material-sign-ambiguity.pdf",
+          "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+          "bytes": 13961
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/report.control.json",
+          "sha256": "9146ab0fab97ca03388602a1abbf5e72506028cf302caab22e3170bc593e2efc",
+          "bytes": 15705
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/report.json",
+          "sha256": "19bf826479d651aee0d5a12d8a5cac1f625d8048e07205dd06f3cf1286f9fbd5",
+          "bytes": 24219
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/report.ocr-material-control.json",
+          "sha256": "be9f68170582b413cbe99b952ab3e385edaa050f9360c37ed0279928982349a5",
+          "bytes": 16612
+        },
+        {
+          "path": "apps/web/public/examples/duplicates/report.ocr-material-sign-ambiguity.json",
+          "sha256": "2f5366b4373f66107ec9d9cd14dd29067ad42ea48a319d56377a80957cbaef31",
+          "bytes": 16611
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-geometry",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/geometry/geometry-0.pdf",
+          "sha256": "42b3bdedd0563b259b497bdd81c8631b710f362448b6bd1e59e424b2a34d8531",
+          "bytes": 1435
+        },
+        {
+          "path": "apps/web/public/examples/geometry/geometry-180.pdf",
+          "sha256": "5447a3de234f99e6eae2afcedb711c6e86e6053054027010087a58da54faac23",
+          "bytes": 1437
+        },
+        {
+          "path": "apps/web/public/examples/geometry/geometry-270.pdf",
+          "sha256": "743bb29a07c556bbe2ab3a29ad9d61909e2ce4fe2c52494c139b91b491cffede",
+          "bytes": 1437
+        },
+        {
+          "path": "apps/web/public/examples/geometry/geometry-90.pdf",
+          "sha256": "a9e8b167a9b244459254842daca0daadbf67a07a15706e9ec3dda3d8a990625f",
+          "bytes": 1436
+        },
+        {
+          "path": "apps/web/public/examples/geometry/geometry-control.pdf",
+          "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+          "bytes": 1429
+        },
+        {
+          "path": "apps/web/public/examples/geometry/manifest.json",
+          "sha256": "ecd7fdb7809376fde14d56f58528d24eb2493b824e0d53e85d8ffabfb89d4385",
+          "bytes": 3436
+        },
+        {
+          "path": "apps/web/public/examples/geometry/report.control.json",
+          "sha256": "c6c2dc65dbb45d501b03fcdd3c2910ff083f75e23192cd65bd40a92549697422",
+          "bytes": 39119
+        },
+        {
+          "path": "apps/web/public/examples/geometry/report.geometry-0.json",
+          "sha256": "b34ebb328ed53e50fe3d3406d93eccd0595bf1c1e53285f893b4b142e29b348d",
+          "bytes": 28091
+        },
+        {
+          "path": "apps/web/public/examples/geometry/report.geometry-180.json",
+          "sha256": "049aeb469913360ee6a271abcb188f171fba4f364ded2c4f3316bf63a3d2a846",
+          "bytes": 28888
+        },
+        {
+          "path": "apps/web/public/examples/geometry/report.geometry-270.json",
+          "sha256": "ddb4c9ce761f299762109c4fb3be58101504a036d162c123a753b3ceee1dc014",
+          "bytes": 33815
+        },
+        {
+          "path": "apps/web/public/examples/geometry/report.json",
+          "sha256": "cf7cebf0d51dcb6908cc675af8408ad3c73143dd493e8cbd3d1cf663fbfd69ed",
+          "bytes": 33764
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-reading-order",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/reading-order/manifest.json",
+          "sha256": "7cd17171af2b6abd8b327a25642bb0a06e0f7383302126a708ea2df71a859649",
+          "bytes": 3089
+        },
+        {
+          "path": "apps/web/public/examples/reading-order/reading-order-control.pdf",
+          "sha256": "41a20c6a460fd9e7c91ffc500573a2ae32e97f9bb6ee5410a33d256b23ba9db4",
+          "bytes": 766
+        },
+        {
+          "path": "apps/web/public/examples/reading-order/reading-order-reordered.pdf",
+          "sha256": "cdedafa22cf2a54386998ebea5e7d8c597f541fcd2c702f7909e16d43c2499df",
+          "bytes": 766
+        },
+        {
+          "path": "apps/web/public/examples/reading-order/report.control.json",
+          "sha256": "f119bfd6fb4aff82d5617a52b3f4b5dc4c543d693f92d0efe07f1d44475889e3",
+          "bytes": 26654
+        },
+        {
+          "path": "apps/web/public/examples/reading-order/report.json",
+          "sha256": "48cb7127160db5fe302bdaa080799acc4867738b792c4e1d0fa5c01f5cfd5608",
+          "bytes": 28540
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-scan",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "reconciled": "Digests reconciled 2026-09-13 from each example's own manifest.json (source/control/variant PDFs, digest-verified) plus actual committed bytes for support files (viewer, reports, catalogs); regeneration is byte-stable (scripts/prepare_examples.py --check) and the distribution gate re-verifies declared vs actual bytes.",
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/scan/manifest.json",
+          "sha256": "66f963979bc2a6b12130db45d04a6ff024dfddb918a5b2510c92f7c084a86699",
+          "bytes": 3546
+        },
+        {
+          "path": "apps/web/public/examples/scan/report.json",
+          "sha256": "5b7c473a8e0c1c90a2089e5515a160ab6a48718980d0ded090a23bec5d658526",
+          "bytes": 57365
+        },
+        {
+          "path": "apps/web/public/examples/scan/report.scan-raster-only.json",
+          "sha256": "4785a9ce43fa0db8d9ff514a9fa38791a2d6a25e4789b96a2052d792504d35ce",
+          "bytes": 35901
+        },
+        {
+          "path": "apps/web/public/examples/scan/report.scan-shifted.json",
+          "sha256": "b5ee6726656c64a9d6f473e3e16c76d871fe7dc583ef7e632e91f575aab334e3",
+          "bytes": 56910
+        },
+        {
+          "path": "apps/web/public/examples/scan/scan-correct.pdf",
+          "sha256": "86a17f4a2ee4c4e75bd2eb406266b20ed3f960f644631841c5fad8b0e7ff4f5f",
+          "bytes": 18686
+        },
+        {
+          "path": "apps/web/public/examples/scan/scan-raster-only.pdf",
+          "sha256": "29b36a189b356fd6320f70846a68741399415789f378171f34152d6d0abf7ddf",
+          "bytes": 18236
+        },
+        {
+          "path": "apps/web/public/examples/scan/scan-shifted.pdf",
+          "sha256": "2b855c7ee27d22c71696d3be9f63758f61b8449e51e03cdfa80272afc4d62158",
+          "bytes": 18691
+        }
+      ]
+    },
+    {
+      "id": "inkflip-example-catalog",
+      "third_party": false,
+      "license": "MIT (project-original)",
+      "license_evidence": "LICENSE",
+      "notice_name": null,
+      "explicit_files": [
+        {
+          "path": "apps/web/public/examples/index.json",
+          "sha256": "02403e2317e8ec5bd6d75d562b1366660a2b10480da9befff6522c340d3cfa03",
+          "bytes": 7219
         }
       ]
     }
@@ -219,6 +530,8 @@
       "platform_tags": "glibc manylinux x86_64, or py3-none-any for pure-Python",
       "excluded": "musllinux, non-x86_64, non-Linux",
       "reference": "planning/quality/PERFORMANCE_AND_COMPATIBILITY.md: native Linux x86_64 is the initial executed reference"
-    }
+    },
+    "application_wheel": null,
+    "application_wheel_note": "The Inkflip application wheel and CLI entry point are the packaging lane's delivery; until declared here, the native bundle is third-party dependency inputs only."
   }
 }

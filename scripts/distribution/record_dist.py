@@ -66,6 +66,9 @@ def main() -> int:
         "kind": "inkflip-dist-manifest",
         "dist_root": "apps/web/dist",
         "file_count": len(files),
+        # Release-contract prohibition (this project's distribution policy):
+        # built source maps and other development material are not shipped.
+        "reject_patterns": ["\\.map$", "__pycache__", "\.log$"],
         "files": files,
     }
     out = ROOT / args.out
