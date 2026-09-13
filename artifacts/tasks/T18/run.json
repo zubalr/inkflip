@@ -1,7 +1,7 @@
 {
   "task": "T18",
   "beads_id": "pdf-t18",
-  "evaluated_commit": "a5d901d953be809acbfe6dd60ccb4ba2170e4052",
+  "evaluated_commit": "3f5b09280f30247f9b951a362dae766aade3748d",
   "evaluated_at": "2026-09-13T04:35:12.810562+00:00",
   "commands_run": 1,
   "failures": [],
