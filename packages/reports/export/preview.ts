@@ -6,7 +6,7 @@
  */
 import type { Report } from "../../contracts/src/index.ts";
 import { IMPORT_LIMITS } from "../validation/limits.ts";
-import { decodeBase64 } from "../validation/assets.ts";
+import { decodeBase64, hasPngSignature } from "../validation/assets.ts";
 import { serializeReportJson, reportJsonBytes } from "./serialize.ts";
 import type { ProjectionNotices } from "./selection.ts";
 
@@ -105,14 +105,55 @@ export function buildExportPreview(
   let encodedTotal = 0;
   let crops = 0;
   let pageRenders = 0;
+  let assetBytesExceeded = false;
+  let pngPixelsExceeded = false;
+  let pngEdgeExceeded = false;
+  const assetLimitWarnings: string[] = [];
+
   for (const a of report.assets) {
     // Byte accounting decodes the actual payload the file carries — the
     // preview reflects the decoded contents, not declared metadata.
-    const decoded = decodeBase64(a.data_base64).length;
+    const decodedBytes = decodeBase64(a.data_base64);
+    const decoded = decodedBytes.length;
     decodedTotal += decoded;
     encodedTotal += a.data_base64.length;
     if (a.purpose === "crop") crops++;
     if (a.purpose === "page_render") pageRenders++;
+    if (decoded > IMPORT_LIMITS.maxAssetBytes) {
+      assetBytesExceeded = true;
+      assetLimitWarnings.push(
+        `Asset ${a.id} exceeds per-asset byte limit (${decoded} bytes vs cap ${IMPORT_LIMITS.maxAssetBytes} bytes).`,
+      );
+    }
+    if (a.media_type === "image/png") {
+      let width = a.pixel_size ? a.pixel_size[0] : 0;
+      let height = a.pixel_size ? a.pixel_size[1] : 0;
+      let pixels = width * height;
+      if (decodedBytes.length >= 24 && hasPngSignature(decodedBytes)) {
+        const dv = new DataView(
+          decodedBytes.buffer,
+          decodedBytes.byteOffset,
+          decodedBytes.byteLength,
+        );
+        const payloadW = dv.getUint32(16);
+        const payloadH = dv.getUint32(20);
+        width = Math.max(width, payloadW);
+        height = Math.max(height, payloadH);
+        pixels = Math.max(pixels, payloadW * payloadH);
+      }
+      if (pixels > IMPORT_LIMITS.maxPngPixels) {
+        pngPixelsExceeded = true;
+        assetLimitWarnings.push(
+          `Asset ${a.id} exceeds PNG pixel limit (${pixels} pixels vs cap ${IMPORT_LIMITS.maxPngPixels} pixels).`,
+        );
+      }
+      if (width > IMPORT_LIMITS.maxPngEdge || height > IMPORT_LIMITS.maxPngEdge) {
+        pngEdgeExceeded = true;
+        assetLimitWarnings.push(
+          `Asset ${a.id} exceeds PNG dimension edge limit (${Math.max(width, height)} px vs cap ${IMPORT_LIMITS.maxPngEdge} px).`,
+        );
+      }
+    }
     assets.push({
       id: a.id,
       purpose: a.purpose,
@@ -156,10 +197,29 @@ export function buildExportPreview(
       );
     }
   }
+  warnings.push(...assetLimitWarnings);
+  if (jsonBytes > IMPORT_LIMITS.maxJsonBytes) {
+    warnings.push(
+      `JSON payload exceeds limit (${jsonBytes} bytes vs cap ${IMPORT_LIMITS.maxJsonBytes} bytes).`,
+    );
+  }
+  if (report.assets.length > IMPORT_LIMITS.maxAssets) {
+    warnings.push(
+      `Asset count exceeds limit (${report.assets.length} assets vs cap ${IMPORT_LIMITS.maxAssets}).`,
+    );
+  }
+  if (decodedTotal > IMPORT_LIMITS.maxAssetTotalBytes) {
+    warnings.push(
+      `Total decoded asset size exceeds limit (${decodedTotal} bytes vs cap ${IMPORT_LIMITS.maxAssetTotalBytes} bytes).`,
+    );
+  }
   const withinLimits =
     jsonBytes <= IMPORT_LIMITS.maxJsonBytes &&
     report.assets.length <= IMPORT_LIMITS.maxAssets &&
-    decodedTotal <= IMPORT_LIMITS.maxAssetTotalBytes;
+    decodedTotal <= IMPORT_LIMITS.maxAssetTotalBytes &&
+    !assetBytesExceeded &&
+    !pngPixelsExceeded &&
+    !pngEdgeExceeded;
   return {
     mode: exp.mode,
     scope: exp.scope,

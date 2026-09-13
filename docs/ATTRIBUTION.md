@@ -111,3 +111,7 @@ The Apache-2.0 tesseract.js 7.0.0 source constructor and its types carry the
 Inkflip cancellation patch in `patches/tesseract.js@7.0.0.patch`. Upstream and
 modified hashes are recorded in `config/dependency-patches.json`. The staged
 worker, WASM and model bytes and existing license notices are unchanged.
+
+## T16 — portable JSON + escaped HTML export foundation (2026-09-13)
+
+- `packages/reports/export/html.ts`: The static HTML report stylesheet (`EXPORT_CSS`) and document layout adapt the reference template in `planning/tools/export_html.py` (an assigned project task input), with additions for `h3`, `.warn`, `ul` and strict static HTML hardening (meta CSP with runtime style SHA-256 derivation, script-free assertions, and sanitized PNG re-encoding).

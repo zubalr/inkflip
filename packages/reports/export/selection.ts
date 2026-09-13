@@ -36,6 +36,7 @@ import {
 } from "../../contracts/src/index.ts";
 import type { Asset, CheckResult, Finding, Report } from "../../contracts/src/index.ts";
 import { decodeBase64 } from "../validation/assets.ts";
+import { IMPORT_LIMITS } from "../validation/limits.ts";
 import { encodeBase64 } from "./serialize.ts";
 
 function fail(code: string, message: string): never {
@@ -57,9 +58,10 @@ export type FindingSelection = "all" | readonly string[];
  * Which occurrences to retain. `'all'` keeps every produced occurrence,
  * `'cited'` keeps only occurrences cited by retained findings (plus their
  * required context), `'none'` keeps none (screenshot-only diagnostic
- * profile), and an explicit list retains exactly those ids — in every case
- * occurrences cited by retained findings are unioned in, because a finding
- * may never be exported while silently dropping the reading it asserts.
+ * profile; unsupported findings are omitted and disclosed), and an explicit
+ * list retains those ids (with occurrences cited by retained findings unioned
+ * in, because a finding may never be exported while silently dropping the
+ * reading it asserts).
  */
 export type OccurrenceSelection = "all" | "cited" | "none" | readonly string[];
 /** Asset selection by purpose: `'all'`, `'none'` or explicit asset ids. */
@@ -100,6 +102,8 @@ export interface ProjectionNotices {
   readonly omittedOccurrenceCount: number;
   /** Findings dropped because the selection cannot support them. */
   readonly omittedFindingIds: readonly string[];
+  /** Finding ids dropped by explicit request deselection. */
+  readonly deselectedFindingIds: readonly string[];
   /** Asset ids dropped because their bytes were missing or did not verify. */
   readonly missingAssetIds: readonly string[];
   /**
@@ -226,6 +230,11 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
       // Explicit opt-in cannot be satisfied: the missing bytes mark the
       // export evidence-only rather than blocking unrelated evidence (I11).
       requestedSourceMissing = true;
+    } else if (existing.byte_length > IMPORT_LIMITS.maxAssetBytes) {
+      fail(
+        "SIZE",
+        `Original PDF (${existing.byte_length} bytes) exceeds the ${IMPORT_LIMITS.maxAssetBytes} byte embed limit. Deselect the original PDF to export a valid evidence-only bundle.`,
+      );
     } else {
       sourceAsset = existing;
     }
@@ -235,6 +244,12 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
       fail(
         "SOURCE",
         "Supplied bytes do not match the document hash/length — never attach mismatched originals",
+      );
+    }
+    if (bytes.length > IMPORT_LIMITS.maxAssetBytes) {
+      fail(
+        "SIZE",
+        `Original PDF (${bytes.length} bytes) exceeds the ${IMPORT_LIMITS.maxAssetBytes} byte embed limit. Deselect the original PDF to export a valid evidence-only bundle.`,
       );
     }
     sourceAsset = {
@@ -279,6 +294,9 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
     "finding",
   );
   const keptFindings = src.findings.filter((f) => findingSel.all || findingSel.ids.has(f.id));
+  const deselectedFindingIds = src.findings
+    .filter((f) => !findingSel.all && !findingSel.ids.has(f.id))
+    .map((f) => f.id);
 
   const knownOccurrences = new Map(src.occurrences.map((o) => [o.id, o]));
   const occRequest = request.occurrences ?? (scope === "run" ? "all" : "cited");
@@ -319,6 +337,11 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
   if (omittedFindingIds.length > 0) {
     omissions.push(
       `${omittedFindingIds.length} finding(s) omitted: the selection does not retain the readings they cite.`,
+    );
+  }
+  if (deselectedFindingIds.length > 0) {
+    omissions.push(
+      `${deselectedFindingIds.length} finding(s) excluded by selection.`,
     );
   }
   const omittedOccurrenceCount = src.occurrences.length - keptOccurrences.length;
@@ -389,6 +412,7 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
   const keptAssets: Asset[] = [];
   const requiredContextAssetIds: string[] = [];
   let excludedRenders = 0;
+  let excludedCrops = 0;
   for (const asset of src.assets) {
     if (asset.purpose === "source_pdf") continue; // handled via doc opt-in
     const wanted =
@@ -406,7 +430,12 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
       if (!wanted && required) requiredContextAssetIds.push(asset.id);
     } else if (asset.purpose === "page_render") {
       excludedRenders++;
+    } else if (asset.purpose === "crop") {
+      excludedCrops++;
     }
+  }
+  if (excludedCrops > 0) {
+    omissions.push("Crops excluded.");
   }
   if (excludedRenders > 0) {
     omissions.push("Full-page images excluded.");
@@ -517,6 +546,7 @@ export function projectReport(source: Report, request: ExportRequest = {}): Proj
     notices: {
       omittedOccurrenceCount,
       omittedFindingIds,
+      deselectedFindingIds,
       missingAssetIds,
       requiredContextAssetIds,
       unlinkedOccurrenceIds,
