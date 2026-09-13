@@ -1,0 +1,30 @@
+# T34 executed command transcript
+date: 2026-09-13T12:38Z
+host: macOS arm64 (Darwin 25.5.0)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7; `python` not on PATH)
+worktree: /Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion
+branch: work/cursor/native-completion
+base: c696948a74bde02d19749ed4fc929179a2c94c16
+HEAD under test: 2e36f9bfd3b8056ea08902b453a961014119020e
+
+$ python3 scripts/task_acceptance.py task T34 --report artifacts/tasks/T34/run.json
+evaluated_commit: 2e36f9bfd3b8056ea08902b453a961014119020e
+evaluated_at: 2026-09-13T12:39:13.935766+00:00
+failures: []
+evidence_errors: []
+tests: {"collected": 16, "passed": 16, "failed": 0, "skipped": 0}
+exit: 0
+
+$ bun run test:regression
+--- stderr ---
+$ python3 scripts/task_acceptance.py run test:regression
+exit: 0
+counts: {"collected": 7, "passed": 7, "failed": 0, "skipped": 0}
+
+$ uv run --project native python -m pytest native/tests/baselines -q
+.........                                                                [100%]
+9 passed in 10.90s
+exit: 0
+counts: {"collected": 9, "passed": 9, "failed": 0, "skipped": 0}
+
+# Notes
+test:regression is active (node --test tests/regression/regression.test.mjs). Baseline tests call the native CLI inspect + exclusive create_baseline; overwrite attempts raise BaselineOverwriteError.

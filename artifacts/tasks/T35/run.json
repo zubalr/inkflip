@@ -1,0 +1,50 @@
+{
+  "task": "T35",
+  "beads_id": "pdf-t35",
+  "evaluated_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
+  "evaluated_at": "2026-09-13T12:39:00.731116+00:00",
+  "commands_run": 1,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python -m unittest discover -s tests/examples -v",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/examples",
+        "-v"
+      ],
+      "executed_argv": [
+        "python3",
+        "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion/scripts/test_results.py",
+        "--unittest",
+        "discover",
+        "-s",
+        "tests/examples",
+        "-v"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "test_before_after_identities_differ (test_reader_upgrade.TestReaderUpgradeExample.test_before_after_identities_differ) ... ok\ntest_example_runs_end_to_end_locally (test_reader_upgrade.TestReaderUpgradeExample.test_example_runs_end_to_end_locally) ... ok\ntest_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline) ... ok\ntest_output_reopens_as_script_free_html (test_reader_upgrade.TestReaderUpgradeExample.test_output_reopens_as_script_free_html) ... ok\ntest_readme_contains_each_documented_command (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_readme_contains_each_documented_command) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 3.007s\n\nOK\n",
+      "tests": {
+        "collected": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion",
+      "environment": {}
+    }
+  ]
+}

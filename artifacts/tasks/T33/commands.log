@@ -1,0 +1,24 @@
+# T33 executed command transcript
+date: 2026-09-13T12:38Z
+host: macOS arm64 (Darwin 25.5.0)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7; `python` not on PATH)
+worktree: /Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion
+branch: work/cursor/native-completion
+base: c696948a74bde02d19749ed4fc929179a2c94c16
+HEAD under test: 2e36f9bfd3b8056ea08902b453a961014119020e
+
+$ python3 scripts/task_acceptance.py task T33 --report artifacts/tasks/T33/run.json
+evaluated_commit: 2e36f9bfd3b8056ea08902b453a961014119020e
+evaluated_at: 2026-09-13T12:39:02.635534+00:00
+failures: []
+evidence_errors: []
+tests: {"collected": 8, "passed": 8, "failed": 0, "skipped": 0}
+exit: 0
+
+$ uv run --project native python -m pytest native/tests/profiles -q
+........                                                                 [100%]
+8 passed in 1.32s
+exit: 0
+counts: {"collected": 8, "passed": 8, "failed": 0, "skipped": 0}
+
+# Notes
+Profile installs use uv venv + pinned pypdf 5.9.0 / 6.18.0 into a directory whose path contains spaces. PDF.js tests spawn packages/readers-pdfjs/node/bridge.mjs against pdfjs-dist@6.3.289.

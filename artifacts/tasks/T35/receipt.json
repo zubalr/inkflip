@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "task_id": "T35",
+  "beads_id": "pdf-t35",
+  "worker": {
+    "app": "cursor",
+    "worker_id": "cursor-native-completion",
+    "branch": "work/cursor/native-completion",
+    "base": "c696948a74bde02d19749ed4fc929179a2c94c16",
+    "implementation_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
+    "test_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
+    "head": "2e36f9bfd3b8056ea08902b453a961014119020e",
+    "commit_history": "3d50053 example + tests; 2e36f9b re-exec native/.venv so `python -m unittest` can import inkflip"
+  },
+  "contract_version": "1.0.0",
+  "fixture_ids": ["F01", "F23", "F25"],
+  "test_ids": ["TEST-35"],
+  "criteria": [
+    {
+      "criterion": "Example runs end-to-end locally",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
+      "detail": "README sh commands ran via shell=True in a symlink sandbox. Index, baseline, comparison.json, and mapping-control.html were produced."
+    },
+    {
+      "criterion": "before/after identities differ as intended",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
+      "detail": "before readers[0].version 5.9.0 vs after 6.18.0; execution.environment strings differ and contain those versions."
+    },
+    {
+      "criterion": "known rule-failing mutation exits5 without modifying baseline",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
+      "detail": "Mutated after report compare exits 5; baselines/before.json bytes and sha256 unchanged."
+    },
+    {
+      "criterion": "output reopens in web viewer",
+      "status": "blocked",
+      "evidence": [
+        "artifacts/tasks/T35/browser-reopen.md",
+        "artifacts/tasks/T35/mapping-control.html",
+        "artifacts/tasks/T35/commands.log",
+        "artifacts/tasks/T35/run.json"
+      ],
+      "detail": "Unittest asserts script-free HTML+CSP. HTTP GET http://127.0.0.1:5195/mapping-control.html returned 200 (2390 bytes, sha256 06a40137d13dc4d5834893b607dcb7176c498909f007294421841e838a515460). Cursor browser MCP: no tab available after newTab navigate. Visual reopen in that viewer is blocked; HTML generation and HTTP fetch executed."
+    },
+    {
+      "criterion": "README commands copied verbatim into test.",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
+      "detail": "VERBATIM list is asserted in README text and extracted ```sh``` blocks. Commands run as those strings, not rewritten to absolute python -m paths."
+    }
+  ],
+  "acceptance_criteria_evidence": {
+    "Example runs end-to-end locally": {
+      "status": "executed",
+      "detail": "Install before/after pypdf, two corpus runs, baseline create, compare, HTML report all completed in the sandbox.",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+    },
+    "before/after identities differ as intended": {
+      "status": "executed",
+      "detail": "Reports record pypdf 5.9.0 vs 6.18.0 and distinct environment identity strings.",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+    },
+    "known rule-failing mutation exits5 without modifying baseline": {
+      "status": "executed",
+      "detail": "Intentional $100→$999 mutation exits 5; baseline bytes unchanged.",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+    },
+    "output reopens in web viewer": {
+      "status": "blocked",
+      "detail": "Script-free HTML generated and served with HTTP 200. Cursor-owned browser tab could not be created (No browser tab available). Not claimed as visual reopen success.",
+      "evidence": [
+        "artifacts/tasks/T35/browser-reopen.md",
+        "artifacts/tasks/T35/mapping-control.html",
+        "artifacts/tasks/T35/commands.log",
+        "artifacts/tasks/T35/run.json"
+      ]
+    },
+    "README commands copied verbatim into test.": {
+      "status": "executed",
+      "detail": "Documented shell lines are stored and executed verbatim.",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+    }
+  },
+  "commands": [
+    {
+      "segment": "python -m unittest discover -s tests/examples -v",
+      "exit": 0,
+      "counts": {"collected": 5, "passed": 5, "failed": 0, "skipped": 0},
+      "detail": "Harness mapped python → python3 3.14.7; test module re-exec'd native/.venv CPython 3.13.15"
+    },
+    {
+      "segment": "python3 scripts/task_acceptance.py task T35 --report artifacts/tasks/T35/run.json",
+      "exit": 0,
+      "counts": {"collected": 5, "passed": 5, "failed": 0, "skipped": 0},
+      "detail": "run.json binds evaluated_commit 2e36f9bfd3b8056ea08902b453a961014119020e"
+    }
+  ],
+  "environment": {
+    "host": "macOS arm64 (Darwin 25.5.0)",
+    "python": "CPython 3.13.15 via uv frozen native/.venv; system python3 3.14.7; no `python` on PATH"
+  },
+  "limitations": [
+    "Independent review is pending; this worker did not approve the work.",
+    "Visual Cursor browser reopen is blocked (no tab). HTTP fetch of mapping-control.html succeeded.",
+    "Committed mapping-control.html is a default PDFium inspect of the same fixture, not the named-profile after HTML from the deleted unittest sandbox.",
+    "Owned rules file is examples/reader-upgrade/upgrade-rules.json (docs/proposals/T35.md)."
+  ],
+  "dependency_requests": [],
+  "handoff": "artifacts/tasks/T35/handoff.md",
+  "review": {
+    "status": "pending",
+    "path": "artifacts/tasks/T35/review.md",
+    "note": "Independent review remains reviewer-owned; this worker did not write an approval."
+  }
+}

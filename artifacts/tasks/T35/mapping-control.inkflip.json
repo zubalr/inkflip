@@ -1,0 +1,4974 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "cba2acd27b06c131c0857af135df991eb0b7aa8219ed2df2d8a33e96b8890dfd",
+  "document": {
+    "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+    "byte_length": 1429,
+    "page_count": 1,
+    "display_name": "mapping-control.pdf",
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "pdfium-native",
+      "name": "PDFium",
+      "version": "5.8.0",
+      "build": "pypdfium2 5.8.0 / PDFium 149.0.7825.0",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "glyph-box granularity; consecutive characters sharing an exactly-equal reported box are coalesced without width guessing",
+            "UserUnit compensation derives physical geometry from pypdf page metadata; get_size() is not trusted for physical units"
+          ]
+        },
+        {
+          "name": "render",
+          "support": "unavailable",
+          "limits": [
+            "render scale compensation is proven under the OCR/render tasks; not claimed by this reader manifest yet"
+          ]
+        }
+      ],
+      "model_hashes": [
+        "3aed5632c54a689ade84a811b93943ea8afa8c3ccae6b3e7e9e58de87bea42af"
+      ],
+      "limitations": [
+        "single-threaded in-process adapter; supervision belongs to the native parent task",
+        "rotation is display-only and is not applied to stored occurrence coordinates"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "crop_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "effective_view_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "box_source": "pypdf crop box and /UserUnit metadata; PDFium get_size() is rotated and UserUnit-blind on this build",
+      "user_unit": 1.0,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520.0,
+        400.0
+      ],
+      "raw_to_canonical_transform_id": "t_raw_to_canonical_p0",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_raw_to_canonical_p0",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        -0.0,
+        400.0
+      ],
+      "inverse": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        -0.0,
+        400.0
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "Derived from page crop box and /UserUnit"
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "pdfium-native-19031ea00621-p0-0",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "S",
+      "normalized_text": "S",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48.0,
+            33.519989
+          ],
+          [
+            58.672001,
+            33.519989
+          ],
+          [
+            58.672001,
+            51.376007
+          ],
+          [
+            48.0,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 0-0; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[0:1]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-1",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 1,
+      "raw_text": "Y",
+      "normalized_text": "Y",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            58.672001,
+            33.519989
+          ],
+          [
+            69.344002,
+            33.519989
+          ],
+          [
+            69.344002,
+            51.376007
+          ],
+          [
+            58.672001,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 1-1; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[1:2]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-2",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 2,
+      "raw_text": "N",
+      "normalized_text": "N",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            69.344002,
+            33.519989
+          ],
+          [
+            80.896004,
+            33.519989
+          ],
+          [
+            80.896004,
+            51.376007
+          ],
+          [
+            69.344002,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 2-2; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[2:3]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-3",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 3,
+      "raw_text": "T",
+      "normalized_text": "T",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            80.895996,
+            33.519989
+          ],
+          [
+            90.671997,
+            33.519989
+          ],
+          [
+            90.671997,
+            51.376007
+          ],
+          [
+            80.895996,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 3-3; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[3:4]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-4",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 4,
+      "raw_text": "H",
+      "normalized_text": "H",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            90.671997,
+            33.519989
+          ],
+          [
+            102.223999,
+            33.519989
+          ],
+          [
+            102.223999,
+            51.376007
+          ],
+          [
+            90.671997,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 4-4; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[4:5]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-5",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 5,
+      "raw_text": "E",
+      "normalized_text": "E",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            102.223999,
+            33.519989
+          ],
+          [
+            112.895996,
+            33.519989
+          ],
+          [
+            112.895996,
+            51.376007
+          ],
+          [
+            102.223999,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 5-5; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[5:6]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-6",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 6,
+      "raw_text": "T",
+      "normalized_text": "T",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            112.895996,
+            33.519989
+          ],
+          [
+            122.671997,
+            33.519989
+          ],
+          [
+            122.671997,
+            51.376007
+          ],
+          [
+            112.895996,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 6-6; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[6:7]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-7",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 7,
+      "raw_text": "I",
+      "normalized_text": "I",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            122.671997,
+            33.519989
+          ],
+          [
+            127.119995,
+            33.519989
+          ],
+          [
+            127.119995,
+            51.376007
+          ],
+          [
+            122.671997,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 7-7; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[7:8]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-8",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 8,
+      "raw_text": "C ",
+      "normalized_text": "C ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            127.119995,
+            33.519989
+          ],
+          [
+            138.671997,
+            33.519989
+          ],
+          [
+            138.671997,
+            51.376007
+          ],
+          [
+            127.119995,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 8-9; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[8:10]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-9",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 9,
+      "raw_text": "E",
+      "normalized_text": "E",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            143.119995,
+            33.519989
+          ],
+          [
+            153.791992,
+            33.519989
+          ],
+          [
+            153.791992,
+            51.376007
+          ],
+          [
+            143.119995,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 10-10; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[10:11]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-10",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 10,
+      "raw_text": "X",
+      "normalized_text": "X",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            153.791992,
+            33.519989
+          ],
+          [
+            164.463989,
+            33.519989
+          ],
+          [
+            164.463989,
+            51.376007
+          ],
+          [
+            153.791992,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 11-11; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[11:12]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-11",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 11,
+      "raw_text": "A",
+      "normalized_text": "A",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            164.463989,
+            33.519989
+          ],
+          [
+            175.151993,
+            33.519989
+          ],
+          [
+            175.151993,
+            51.376007
+          ],
+          [
+            164.463989,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 12-12; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[12:13]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-12",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 12,
+      "raw_text": "M",
+      "normalized_text": "M",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            175.135986,
+            33.519989
+          ],
+          [
+            188.463989,
+            33.519989
+          ],
+          [
+            188.463989,
+            51.376007
+          ],
+          [
+            175.135986,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 13-13; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[13:14]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-13",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 13,
+      "raw_text": "P",
+      "normalized_text": "P",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            188.463989,
+            33.519989
+          ],
+          [
+            199.135986,
+            33.519989
+          ],
+          [
+            199.135986,
+            51.376007
+          ],
+          [
+            188.463989,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 14-14; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[14:15]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-14",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 14,
+      "raw_text": "L",
+      "normalized_text": "L",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            199.135986,
+            33.519989
+          ],
+          [
+            208.031982,
+            33.519989
+          ],
+          [
+            208.031982,
+            51.376007
+          ],
+          [
+            199.135986,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 15-15; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[15:16]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-15",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 15,
+      "raw_text": "E",
+      "normalized_text": "E",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            208.031982,
+            33.519989
+          ],
+          [
+            218.703979,
+            33.519989
+          ],
+          [
+            218.703979,
+            51.376007
+          ],
+          [
+            208.031982,
+            51.376007
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 16-16; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[16:17]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-16",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 16,
+      "raw_text": "N",
+      "normalized_text": "N",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48.0,
+            69.140015
+          ],
+          [
+            56.664001,
+            69.140015
+          ],
+          [
+            56.664001,
+            82.532013
+          ],
+          [
+            48.0,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 19-19; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[19:20]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-17",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 17,
+      "raw_text": "o ",
+      "normalized_text": "o ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            56.664001,
+            69.140015
+          ],
+          [
+            63.336002,
+            69.140015
+          ],
+          [
+            63.336002,
+            82.532013
+          ],
+          [
+            56.664001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 20-21; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[20:22]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-18",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 18,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            66.671997,
+            69.140015
+          ],
+          [
+            70.835999,
+            69.140015
+          ],
+          [
+            70.835999,
+            82.532013
+          ],
+          [
+            66.671997,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 22-22; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[22:23]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-19",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 19,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            70.667999,
+            69.140015
+          ],
+          [
+            77.339996,
+            69.140015
+          ],
+          [
+            77.339996,
+            82.532013
+          ],
+          [
+            70.667999,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 23-23; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[23:24]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-20",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 20,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            77.339996,
+            69.140015
+          ],
+          [
+            84.011993,
+            69.140015
+          ],
+          [
+            84.011993,
+            82.532013
+          ],
+          [
+            77.339996,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 24-24; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[24:25]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-21",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 21,
+      "raw_text": "l ",
+      "normalized_text": "l ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            84.012001,
+            69.140015
+          ],
+          [
+            86.676003,
+            69.140015
+          ],
+          [
+            86.676003,
+            82.532013
+          ],
+          [
+            84.012001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 25-26; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[25:27]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-22",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 22,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            90.012001,
+            69.140015
+          ],
+          [
+            93.348,
+            69.140015
+          ],
+          [
+            93.348,
+            82.532013
+          ],
+          [
+            90.012001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 27-27; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[27:28]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-23",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 23,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            93.348,
+            69.140015
+          ],
+          [
+            97.512001,
+            69.140015
+          ],
+          [
+            97.512001,
+            82.532013
+          ],
+          [
+            93.348,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 28-28; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[28:29]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-24",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 24,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            97.343994,
+            69.140015
+          ],
+          [
+            104.015991,
+            69.140015
+          ],
+          [
+            104.015991,
+            82.532013
+          ],
+          [
+            97.343994,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 29-29; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[29:30]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-25",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 25,
+      "raw_text": "n",
+      "normalized_text": "n",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            104.015999,
+            69.140015
+          ],
+          [
+            110.688004,
+            69.140015
+          ],
+          [
+            110.688004,
+            82.532013
+          ],
+          [
+            104.015999,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 30-30; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[30:31]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-26",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 26,
+      "raw_text": "s",
+      "normalized_text": "s",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            110.688004,
+            69.140015
+          ],
+          [
+            116.688004,
+            69.140015
+          ],
+          [
+            116.688004,
+            82.532013
+          ],
+          [
+            110.688004,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 31-31; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[31:32]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-27",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 27,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            116.688004,
+            69.140015
+          ],
+          [
+            123.360001,
+            69.140015
+          ],
+          [
+            123.360001,
+            82.532013
+          ],
+          [
+            116.688004,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 32-32; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[32:33]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-28",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 28,
+      "raw_text": "c",
+      "normalized_text": "c",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            123.360001,
+            69.140015
+          ],
+          [
+            129.360001,
+            69.140015
+          ],
+          [
+            129.360001,
+            82.532013
+          ],
+          [
+            123.360001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 33-33; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[33:34]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-29",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 29,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            129.360001,
+            69.140015
+          ],
+          [
+            132.695999,
+            69.140015
+          ],
+          [
+            132.695999,
+            82.532013
+          ],
+          [
+            129.360001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 34-34; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[34:35]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-30",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 30,
+      "raw_text": "i",
+      "normalized_text": "i",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            132.695999,
+            69.140015
+          ],
+          [
+            135.360001,
+            69.140015
+          ],
+          [
+            135.360001,
+            82.532013
+          ],
+          [
+            132.695999,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 35-35; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[35:36]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-31",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 31,
+      "raw_text": "o",
+      "normalized_text": "o",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            135.360001,
+            69.140015
+          ],
+          [
+            142.031998,
+            69.140015
+          ],
+          [
+            142.031998,
+            82.532013
+          ],
+          [
+            135.360001,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 36-36; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[36:37]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-32",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 32,
+      "raw_text": "n",
+      "normalized_text": "n",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            142.031998,
+            69.140015
+          ],
+          [
+            148.703995,
+            69.140015
+          ],
+          [
+            148.703995,
+            82.532013
+          ],
+          [
+            142.031998,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 37-37; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[37:38]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-33",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 33,
+      "raw_text": ". ",
+      "normalized_text": ". ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            148.703995,
+            69.140015
+          ],
+          [
+            152.039993,
+            69.140015
+          ],
+          [
+            152.039993,
+            82.532013
+          ],
+          [
+            148.703995,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 38-39; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[38:40]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-34",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 34,
+      "raw_text": "R",
+      "normalized_text": "R",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            155.375992,
+            69.140015
+          ],
+          [
+            164.039993,
+            69.140015
+          ],
+          [
+            164.039993,
+            82.532013
+          ],
+          [
+            155.375992,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 40-40; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[40:41]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-35",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 35,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            164.039993,
+            69.140015
+          ],
+          [
+            170.71199,
+            69.140015
+          ],
+          [
+            170.71199,
+            82.532013
+          ],
+          [
+            164.039993,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 41-41; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[41:42]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-36",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 36,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            170.71199,
+            69.140015
+          ],
+          [
+            177.383987,
+            69.140015
+          ],
+          [
+            177.383987,
+            82.532013
+          ],
+          [
+            170.71199,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 42-42; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[42:43]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-37",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 37,
+      "raw_text": "d",
+      "normalized_text": "d",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            177.383987,
+            69.140015
+          ],
+          [
+            184.055984,
+            69.140015
+          ],
+          [
+            184.055984,
+            82.532013
+          ],
+          [
+            177.383987,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 43-43; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[43:44]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-38",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 38,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            184.055984,
+            69.140015
+          ],
+          [
+            190.727982,
+            69.140015
+          ],
+          [
+            190.727982,
+            82.532013
+          ],
+          [
+            184.055984,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 44-44; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[44:45]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-39",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 39,
+      "raw_text": "r ",
+      "normalized_text": "r ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            190.727982,
+            69.140015
+          ],
+          [
+            194.891983,
+            69.140015
+          ],
+          [
+            194.891983,
+            82.532013
+          ],
+          [
+            190.727982,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 45-46; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[45:47]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-40",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 40,
+      "raw_text": "b",
+      "normalized_text": "b",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            198.059982,
+            69.140015
+          ],
+          [
+            204.731979,
+            69.140015
+          ],
+          [
+            204.731979,
+            82.532013
+          ],
+          [
+            198.059982,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 47-47; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[47:48]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-41",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 41,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            204.731979,
+            69.140015
+          ],
+          [
+            211.403976,
+            69.140015
+          ],
+          [
+            211.403976,
+            82.532013
+          ],
+          [
+            204.731979,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 48-48; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[48:49]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-42",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 42,
+      "raw_text": "h",
+      "normalized_text": "h",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            211.403976,
+            69.140015
+          ],
+          [
+            218.075974,
+            69.140015
+          ],
+          [
+            218.075974,
+            82.532013
+          ],
+          [
+            211.403976,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 49-49; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[49:50]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-43",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 43,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            218.075974,
+            69.140015
+          ],
+          [
+            224.747971,
+            69.140015
+          ],
+          [
+            224.747971,
+            82.532013
+          ],
+          [
+            218.075974,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 50-50; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[50:51]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-44",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 44,
+      "raw_text": "v",
+      "normalized_text": "v",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            224.747971,
+            69.140015
+          ],
+          [
+            230.747971,
+            69.140015
+          ],
+          [
+            230.747971,
+            82.532013
+          ],
+          [
+            224.747971,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 51-51; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[51:52]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-45",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 45,
+      "raw_text": "i",
+      "normalized_text": "i",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            230.747971,
+            69.140015
+          ],
+          [
+            233.411972,
+            69.140015
+          ],
+          [
+            233.411972,
+            82.532013
+          ],
+          [
+            230.747971,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 52-52; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[52:53]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-46",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 46,
+      "raw_text": "o",
+      "normalized_text": "o",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            233.411972,
+            69.140015
+          ],
+          [
+            240.083969,
+            69.140015
+          ],
+          [
+            240.083969,
+            82.532013
+          ],
+          [
+            233.411972,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 53-53; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[53:54]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-47",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 47,
+      "raw_text": "r ",
+      "normalized_text": "r ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            240.083969,
+            69.140015
+          ],
+          [
+            244.247971,
+            69.140015
+          ],
+          [
+            244.247971,
+            82.532013
+          ],
+          [
+            240.083969,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 54-55; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[54:56]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-48",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 48,
+      "raw_text": "o",
+      "normalized_text": "o",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            247.41597,
+            69.140015
+          ],
+          [
+            254.087967,
+            69.140015
+          ],
+          [
+            254.087967,
+            82.532013
+          ],
+          [
+            247.41597,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 56-56; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[56:57]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-49",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 49,
+      "raw_text": "n",
+      "normalized_text": "n",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            254.087967,
+            69.140015
+          ],
+          [
+            260.759949,
+            69.140015
+          ],
+          [
+            260.759949,
+            82.532013
+          ],
+          [
+            254.087967,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 57-57; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[57:58]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-50",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 50,
+      "raw_text": "l",
+      "normalized_text": "l",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            260.759949,
+            69.140015
+          ],
+          [
+            263.42395,
+            69.140015
+          ],
+          [
+            263.42395,
+            82.532013
+          ],
+          [
+            260.759949,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 58-58; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[58:59]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-51",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 51,
+      "raw_text": "y",
+      "normalized_text": "y",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            263.42395,
+            69.140015
+          ],
+          [
+            269.42395,
+            69.140015
+          ],
+          [
+            269.42395,
+            82.532013
+          ],
+          [
+            263.42395,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 59-59; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[59:60]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-52",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 52,
+      "raw_text": ".",
+      "normalized_text": ".",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            269.42395,
+            69.140015
+          ],
+          [
+            272.759949,
+            69.140015
+          ],
+          [
+            272.759949,
+            82.532013
+          ],
+          [
+            269.42395,
+            82.532013
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 60-60; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[60:61]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-53",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 53,
+      "raw_text": "$",
+      "normalized_text": "$",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48.0,
+            136.559998
+          ],
+          [
+            74.688004,
+            136.559998
+          ],
+          [
+            74.688004,
+            190.128006
+          ],
+          [
+            48.0,
+            190.128006
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 63-63; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[63:64]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-54",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 54,
+      "raw_text": "1",
+      "normalized_text": "1",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            74.688004,
+            136.559998
+          ],
+          [
+            101.376007,
+            136.559998
+          ],
+          [
+            101.376007,
+            190.128006
+          ],
+          [
+            74.688004,
+            190.128006
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 64-64; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[64:65]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-55",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 55,
+      "raw_text": "0",
+      "normalized_text": "0",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            101.375999,
+            136.559998
+          ],
+          [
+            128.063995,
+            136.559998
+          ],
+          [
+            128.063995,
+            190.128006
+          ],
+          [
+            101.375999,
+            190.128006
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 65-65; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[65:66]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-56",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 56,
+      "raw_text": "0",
+      "normalized_text": "0",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            128.063995,
+            136.559998
+          ],
+          [
+            154.751999,
+            136.559998
+          ],
+          [
+            154.751999,
+            190.128006
+          ],
+          [
+            128.063995,
+            190.128006
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 66-66; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[66:67]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-57",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 57,
+      "raw_text": "R",
+      "normalized_text": "R",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            48.0,
+            259.139999
+          ],
+          [
+            56.664001,
+            259.139999
+          ],
+          [
+            56.664001,
+            272.531998
+          ],
+          [
+            48.0,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 69-69; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[69:70]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-58",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 58,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            56.664001,
+            259.139999
+          ],
+          [
+            63.336002,
+            259.139999
+          ],
+          [
+            63.336002,
+            272.531998
+          ],
+          [
+            56.664001,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 70-70; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[70:71]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-59",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 59,
+      "raw_text": "n",
+      "normalized_text": "n",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            63.335999,
+            259.139999
+          ],
+          [
+            70.007996,
+            259.139999
+          ],
+          [
+            70.007996,
+            272.531998
+          ],
+          [
+            63.335999,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 71-71; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[71:72]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-60",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 60,
+      "raw_text": "d",
+      "normalized_text": "d",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            70.007996,
+            259.139999
+          ],
+          [
+            76.679993,
+            259.139999
+          ],
+          [
+            76.679993,
+            272.531998
+          ],
+          [
+            70.007996,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 72-72; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[72:73]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-61",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 61,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            76.68,
+            259.139999
+          ],
+          [
+            83.352005,
+            259.139999
+          ],
+          [
+            83.352005,
+            272.531998
+          ],
+          [
+            76.68,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 73-73; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[73:74]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-62",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 62,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            83.352005,
+            259.139999
+          ],
+          [
+            87.516006,
+            259.139999
+          ],
+          [
+            87.516006,
+            272.531998
+          ],
+          [
+            83.352005,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 74-74; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[74:75]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-63",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 63,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            87.348,
+            259.139999
+          ],
+          [
+            94.020004,
+            259.139999
+          ],
+          [
+            94.020004,
+            272.531998
+          ],
+          [
+            87.348,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 75-75; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[75:76]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-64",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 64,
+      "raw_text": "d ",
+      "normalized_text": "d ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            94.020004,
+            259.139999
+          ],
+          [
+            100.692001,
+            259.139999
+          ],
+          [
+            100.692001,
+            272.531998
+          ],
+          [
+            94.020004,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 76-77; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[76:78]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-65",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 65,
+      "raw_text": "m",
+      "normalized_text": "m",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            104.028,
+            259.139999
+          ],
+          [
+            114.024002,
+            259.139999
+          ],
+          [
+            114.024002,
+            272.531998
+          ],
+          [
+            104.028,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 78-78; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[78:79]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-66",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 66,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            114.024002,
+            259.139999
+          ],
+          [
+            120.695999,
+            259.139999
+          ],
+          [
+            120.695999,
+            272.531998
+          ],
+          [
+            114.024002,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 79-79; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[79:80]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-67",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 67,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            120.695999,
+            259.139999
+          ],
+          [
+            124.860001,
+            259.139999
+          ],
+          [
+            124.860001,
+            272.531998
+          ],
+          [
+            120.695999,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 80-80; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[80:81]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-68",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 68,
+      "raw_text": "k",
+      "normalized_text": "k",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            124.692001,
+            259.139999
+          ],
+          [
+            130.692001,
+            259.139999
+          ],
+          [
+            130.692001,
+            272.531998
+          ],
+          [
+            124.692001,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 81-81; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[81:82]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-69",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 69,
+      "raw_text": "s ",
+      "normalized_text": "s ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            130.692001,
+            259.139999
+          ],
+          [
+            136.692001,
+            259.139999
+          ],
+          [
+            136.692001,
+            272.531998
+          ],
+          [
+            130.692001,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 82-83; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[82:84]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-70",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 70,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            140.028,
+            259.139999
+          ],
+          [
+            146.699997,
+            259.139999
+          ],
+          [
+            146.699997,
+            272.531998
+          ],
+          [
+            140.028,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 84-84; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[84:85]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-71",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 71,
+      "raw_text": "n",
+      "normalized_text": "n",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            146.699997,
+            259.139999
+          ],
+          [
+            153.371994,
+            259.139999
+          ],
+          [
+            153.371994,
+            272.531998
+          ],
+          [
+            146.699997,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 85-85; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[85:86]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-72",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 72,
+      "raw_text": "d ",
+      "normalized_text": "d ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            153.371994,
+            259.139999
+          ],
+          [
+            160.043991,
+            259.139999
+          ],
+          [
+            160.043991,
+            272.531998
+          ],
+          [
+            153.371994,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 86-87; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[86:88]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-73",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 73,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            163.37999,
+            259.139999
+          ],
+          [
+            170.051987,
+            259.139999
+          ],
+          [
+            170.051987,
+            272.531998
+          ],
+          [
+            163.37999,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 88-88; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[88:89]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-74",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 74,
+      "raw_text": "x",
+      "normalized_text": "x",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            170.051987,
+            259.139999
+          ],
+          [
+            176.051987,
+            259.139999
+          ],
+          [
+            176.051987,
+            272.531998
+          ],
+          [
+            170.051987,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 89-89; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[89:90]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-75",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 75,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            176.051987,
+            259.139999
+          ],
+          [
+            179.387985,
+            259.139999
+          ],
+          [
+            179.387985,
+            272.531998
+          ],
+          [
+            176.051987,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 90-90; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[90:91]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-76",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 76,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            179.387985,
+            259.139999
+          ],
+          [
+            183.551987,
+            259.139999
+          ],
+          [
+            183.551987,
+            272.531998
+          ],
+          [
+            179.387985,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 91-91; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[91:92]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-77",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 77,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            183.383987,
+            259.139999
+          ],
+          [
+            190.055984,
+            259.139999
+          ],
+          [
+            190.055984,
+            272.531998
+          ],
+          [
+            183.383987,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 92-92; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[92:93]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-78",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 78,
+      "raw_text": "c",
+      "normalized_text": "c",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            190.055984,
+            259.139999
+          ],
+          [
+            196.055984,
+            259.139999
+          ],
+          [
+            196.055984,
+            272.531998
+          ],
+          [
+            190.055984,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 93-93; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[93:94]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-79",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 79,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            196.055984,
+            259.139999
+          ],
+          [
+            199.391983,
+            259.139999
+          ],
+          [
+            199.391983,
+            272.531998
+          ],
+          [
+            196.055984,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 94-94; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[94:95]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-80",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 80,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            199.391983,
+            259.139999
+          ],
+          [
+            206.06398,
+            259.139999
+          ],
+          [
+            206.06398,
+            272.531998
+          ],
+          [
+            199.391983,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 95-95; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[95:96]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-81",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 81,
+      "raw_text": "d ",
+      "normalized_text": "d ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            206.06398,
+            259.139999
+          ],
+          [
+            212.735977,
+            259.139999
+          ],
+          [
+            212.735977,
+            272.531998
+          ],
+          [
+            206.06398,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 96-97; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[96:98]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-82",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 82,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            216.071976,
+            259.139999
+          ],
+          [
+            219.407974,
+            259.139999
+          ],
+          [
+            219.407974,
+            272.531998
+          ],
+          [
+            216.071976,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 98-98; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[98:99]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-83",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 83,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            219.407974,
+            259.139999
+          ],
+          [
+            226.079971,
+            259.139999
+          ],
+          [
+            226.079971,
+            272.531998
+          ],
+          [
+            219.407974,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 99-99; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[99:100]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-84",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 84,
+      "raw_text": "x",
+      "normalized_text": "x",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            226.079971,
+            259.139999
+          ],
+          [
+            232.079971,
+            259.139999
+          ],
+          [
+            232.079971,
+            272.531998
+          ],
+          [
+            226.079971,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 100-100; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[100:101]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-85",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 85,
+      "raw_text": "t ",
+      "normalized_text": "t ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            232.079971,
+            259.139999
+          ],
+          [
+            235.41597,
+            259.139999
+          ],
+          [
+            235.41597,
+            272.531998
+          ],
+          [
+            232.079971,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 101-102; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[101:103]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-86",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 86,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            238.751968,
+            259.139999
+          ],
+          [
+            245.423965,
+            259.139999
+          ],
+          [
+            245.423965,
+            272.531998
+          ],
+          [
+            238.751968,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 103-103; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[103:104]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-87",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 87,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            245.423965,
+            259.139999
+          ],
+          [
+            249.587967,
+            259.139999
+          ],
+          [
+            249.587967,
+            272.531998
+          ],
+          [
+            245.423965,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 104-104; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[104:105]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-88",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 88,
+      "raw_text": "e ",
+      "normalized_text": "e ",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 1,
+          "raw_end": 2,
+          "normalized_start": 1,
+          "normalized_end": 2,
+          "operation": "whitespace"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            249.419968,
+            259.139999
+          ],
+          [
+            256.09198,
+            259.139999
+          ],
+          [
+            256.09198,
+            272.531998
+          ],
+          [
+            249.419968,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 105-106; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[105:107]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-89",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 89,
+      "raw_text": "s",
+      "normalized_text": "s",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            259.427979,
+            259.139999
+          ],
+          [
+            265.427979,
+            259.139999
+          ],
+          [
+            265.427979,
+            272.531998
+          ],
+          [
+            259.427979,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 107-107; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[107:108]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-90",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 90,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            265.427979,
+            259.139999
+          ],
+          [
+            272.099976,
+            259.139999
+          ],
+          [
+            272.099976,
+            272.531998
+          ],
+          [
+            265.427979,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 108-108; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[108:109]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-91",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 91,
+      "raw_text": "p",
+      "normalized_text": "p",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            272.099976,
+            259.139999
+          ],
+          [
+            278.771973,
+            259.139999
+          ],
+          [
+            278.771973,
+            272.531998
+          ],
+          [
+            272.099976,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 109-109; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[109:110]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-92",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 92,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            278.771973,
+            259.139999
+          ],
+          [
+            285.44397,
+            259.139999
+          ],
+          [
+            285.44397,
+            272.531998
+          ],
+          [
+            278.771973,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 110-110; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[110:111]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-93",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 93,
+      "raw_text": "r",
+      "normalized_text": "r",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            285.44397,
+            259.139999
+          ],
+          [
+            289.607971,
+            259.139999
+          ],
+          [
+            289.607971,
+            272.531998
+          ],
+          [
+            285.44397,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 111-111; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[111:112]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-94",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 94,
+      "raw_text": "a",
+      "normalized_text": "a",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            289.439941,
+            259.139999
+          ],
+          [
+            296.111938,
+            259.139999
+          ],
+          [
+            296.111938,
+            272.531998
+          ],
+          [
+            289.439941,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 112-112; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[112:113]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-95",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 95,
+      "raw_text": "t",
+      "normalized_text": "t",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            296.111938,
+            259.139999
+          ],
+          [
+            299.447937,
+            259.139999
+          ],
+          [
+            299.447937,
+            272.531998
+          ],
+          [
+            296.111938,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 113-113; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[113:114]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-96",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 96,
+      "raw_text": "e",
+      "normalized_text": "e",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            299.447937,
+            259.139999
+          ],
+          [
+            306.119934,
+            259.139999
+          ],
+          [
+            306.119934,
+            272.531998
+          ],
+          [
+            299.447937,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 114-114; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[114:115]:loose",
+      "limitations": []
+    },
+    {
+      "id": "pdfium-native-19031ea00621-p0-97",
+      "reader_id": "pdfium-native",
+      "page_index": 0,
+      "ordinal": 97,
+      "raw_text": ".",
+      "normalized_text": ".",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 1,
+          "normalized_start": 0,
+          "normalized_end": 1,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "exact",
+        "space": "canonical_page",
+        "polygon": [
+          [
+            306.119965,
+            259.139999
+          ],
+          [
+            309.455963,
+            259.139999
+          ],
+          [
+            309.455963,
+            272.531998
+          ],
+          [
+            306.119965,
+            272.531998
+          ]
+        ],
+        "transform_ids": [
+          "t_raw_to_canonical_p0"
+        ],
+        "basis": "pdfium get_charbox(loose=True) indices 115-115; identical reported glyph box coalesced; C over pypdf crop/UserUnit"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pdfium:char[115:116]:loose",
+      "limitations": []
+    }
+  ],
+  "findings": [],
+  "annotations": [],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [],
+    "checks": [
+      {
+        "id": "chk_pdfium_text_p0",
+        "page_index": 0,
+        "capability": "native_text",
+        "reader_ids": [
+          "pdfium-native"
+        ],
+        "region_id": null
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "native",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "chk_pdfium_text_p0",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 98,
+      "retained_occurrence_ids": [
+        "pdfium-native-19031ea00621-p0-0",
+        "pdfium-native-19031ea00621-p0-1",
+        "pdfium-native-19031ea00621-p0-2",
+        "pdfium-native-19031ea00621-p0-3",
+        "pdfium-native-19031ea00621-p0-4",
+        "pdfium-native-19031ea00621-p0-5",
+        "pdfium-native-19031ea00621-p0-6",
+        "pdfium-native-19031ea00621-p0-7",
+        "pdfium-native-19031ea00621-p0-8",
+        "pdfium-native-19031ea00621-p0-9",
+        "pdfium-native-19031ea00621-p0-10",
+        "pdfium-native-19031ea00621-p0-11",
+        "pdfium-native-19031ea00621-p0-12",
+        "pdfium-native-19031ea00621-p0-13",
+        "pdfium-native-19031ea00621-p0-14",
+        "pdfium-native-19031ea00621-p0-15",
+        "pdfium-native-19031ea00621-p0-16",
+        "pdfium-native-19031ea00621-p0-17",
+        "pdfium-native-19031ea00621-p0-18",
+        "pdfium-native-19031ea00621-p0-19",
+        "pdfium-native-19031ea00621-p0-20",
+        "pdfium-native-19031ea00621-p0-21",
+        "pdfium-native-19031ea00621-p0-22",
+        "pdfium-native-19031ea00621-p0-23",
+        "pdfium-native-19031ea00621-p0-24",
+        "pdfium-native-19031ea00621-p0-25",
+        "pdfium-native-19031ea00621-p0-26",
+        "pdfium-native-19031ea00621-p0-27",
+        "pdfium-native-19031ea00621-p0-28",
+        "pdfium-native-19031ea00621-p0-29",
+        "pdfium-native-19031ea00621-p0-30",
+        "pdfium-native-19031ea00621-p0-31",
+        "pdfium-native-19031ea00621-p0-32",
+        "pdfium-native-19031ea00621-p0-33",
+        "pdfium-native-19031ea00621-p0-34",
+        "pdfium-native-19031ea00621-p0-35",
+        "pdfium-native-19031ea00621-p0-36",
+        "pdfium-native-19031ea00621-p0-37",
+        "pdfium-native-19031ea00621-p0-38",
+        "pdfium-native-19031ea00621-p0-39",
+        "pdfium-native-19031ea00621-p0-40",
+        "pdfium-native-19031ea00621-p0-41",
+        "pdfium-native-19031ea00621-p0-42",
+        "pdfium-native-19031ea00621-p0-43",
+        "pdfium-native-19031ea00621-p0-44",
+        "pdfium-native-19031ea00621-p0-45",
+        "pdfium-native-19031ea00621-p0-46",
+        "pdfium-native-19031ea00621-p0-47",
+        "pdfium-native-19031ea00621-p0-48",
+        "pdfium-native-19031ea00621-p0-49",
+        "pdfium-native-19031ea00621-p0-50",
+        "pdfium-native-19031ea00621-p0-51",
+        "pdfium-native-19031ea00621-p0-52",
+        "pdfium-native-19031ea00621-p0-53",
+        "pdfium-native-19031ea00621-p0-54",
+        "pdfium-native-19031ea00621-p0-55",
+        "pdfium-native-19031ea00621-p0-56",
+        "pdfium-native-19031ea00621-p0-57",
+        "pdfium-native-19031ea00621-p0-58",
+        "pdfium-native-19031ea00621-p0-59",
+        "pdfium-native-19031ea00621-p0-60",
+        "pdfium-native-19031ea00621-p0-61",
+        "pdfium-native-19031ea00621-p0-62",
+        "pdfium-native-19031ea00621-p0-63",
+        "pdfium-native-19031ea00621-p0-64",
+        "pdfium-native-19031ea00621-p0-65",
+        "pdfium-native-19031ea00621-p0-66",
+        "pdfium-native-19031ea00621-p0-67",
+        "pdfium-native-19031ea00621-p0-68",
+        "pdfium-native-19031ea00621-p0-69",
+        "pdfium-native-19031ea00621-p0-70",
+        "pdfium-native-19031ea00621-p0-71",
+        "pdfium-native-19031ea00621-p0-72",
+        "pdfium-native-19031ea00621-p0-73",
+        "pdfium-native-19031ea00621-p0-74",
+        "pdfium-native-19031ea00621-p0-75",
+        "pdfium-native-19031ea00621-p0-76",
+        "pdfium-native-19031ea00621-p0-77",
+        "pdfium-native-19031ea00621-p0-78",
+        "pdfium-native-19031ea00621-p0-79",
+        "pdfium-native-19031ea00621-p0-80",
+        "pdfium-native-19031ea00621-p0-81",
+        "pdfium-native-19031ea00621-p0-82",
+        "pdfium-native-19031ea00621-p0-83",
+        "pdfium-native-19031ea00621-p0-84",
+        "pdfium-native-19031ea00621-p0-85",
+        "pdfium-native-19031ea00621-p0-86",
+        "pdfium-native-19031ea00621-p0-87",
+        "pdfium-native-19031ea00621-p0-88",
+        "pdfium-native-19031ea00621-p0-89",
+        "pdfium-native-19031ea00621-p0-90",
+        "pdfium-native-19031ea00621-p0-91",
+        "pdfium-native-19031ea00621-p0-92",
+        "pdfium-native-19031ea00621-p0-93",
+        "pdfium-native-19031ea00621-p0-94",
+        "pdfium-native-19031ea00621-p0-95",
+        "pdfium-native-19031ea00621-p0-96",
+        "pdfium-native-19031ea00621-p0-97"
+      ]
+    }
+  ],
+  "assets": [],
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "document_hash",
+      "settings",
+      "coverage",
+      "filename"
+    ],
+    "omissions": [
+      "Other unselected pages excluded."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  },
+  "execution": {
+    "execution_id": "92818bb4-6cb2-4839-be7e-f31d194a20f2",
+    "run_key": "3f7fd41f2ecfa767670128308896e44071843333b8dfe7a7e475e6e65ae2a843",
+    "status": "complete",
+    "started_at": "2026-09-13T12:39:39Z",
+    "duration_ms": 1,
+    "environment": "Python 3.13.15; darwin; algorithm=inkflip-inspect-v1; profile_name=native-default",
+    "result_origin": "prepared_actual_run",
+    "errors": []
+  },
+  "limitations": [
+    "Native local document inspection.",
+    "algorithm inkflip-inspect-v1"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "task": "T34",
+  "beads_id": "pdf-t34",
+  "evaluated_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
+  "evaluated_at": "2026-09-13T12:39:13.935766+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "bun run test:regression",
+      "argv": [
+        "bun",
+        "run",
+        "test:regression"
+      ],
+      "executed_argv": [
+        "bun",
+        "run",
+        "test:regression"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "$ python3 scripts/task_acceptance.py run test:regression\n",
+      "tests": {
+        "collected": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion",
+      "environment": {}
+    },
+    {
+      "segment": "uv run --project native python -m pytest native/tests/baselines -q",
+      "argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/baselines",
+        "-q"
+      ],
+      "executed_argv": [
+        "uv",
+        "run",
+        "--project",
+        "native",
+        "python",
+        "-m",
+        "pytest",
+        "native/tests/baselines",
+        "-q",
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-om03vi23/results"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": ".........                                                                [100%]\n9 passed in 10.90s\n",
+      "stderr": "",
+      "tests": {
+        "collected": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion",
+      "environment": {}
+    }
+  ]
+}

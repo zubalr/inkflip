@@ -1,0 +1,33 @@
+# T35 executed command transcript
+date: 2026-09-13T12:38Z
+host: macOS arm64 (Darwin 25.5.0)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7; `python` not on PATH)
+worktree: /Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion
+branch: work/cursor/native-completion
+base: c696948a74bde02d19749ed4fc929179a2c94c16
+HEAD under test: 2e36f9bfd3b8056ea08902b453a961014119020e
+
+$ python3 scripts/task_acceptance.py task T35 --report artifacts/tasks/T35/run.json
+evaluated_commit: 2e36f9bfd3b8056ea08902b453a961014119020e
+evaluated_at: 2026-09-13T12:39:00.731116+00:00
+failures: []
+evidence_errors: []
+tests: {"collected": 5, "passed": 5, "failed": 0, "skipped": 0}
+exit: 0
+
+$ python -m unittest discover -s tests/examples -v
+--- stderr ---
+test_before_after_identities_differ (test_reader_upgrade.TestReaderUpgradeExample.test_before_after_identities_differ) ... ok
+test_example_runs_end_to_end_locally (test_reader_upgrade.TestReaderUpgradeExample.test_example_runs_end_to_end_locally) ... ok
+test_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline) ... ok
+test_output_reopens_as_script_free_html (test_reader_upgrade.TestReaderUpgradeExample.test_output_reopens_as_script_free_html) ... ok
+test_readme_contains_each_documented_command (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_readme_contains_each_documented_command) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.007s
+
+OK
+exit: 0
+counts: {"collected": 5, "passed": 5, "failed": 0, "skipped": 0}
+
+# Notes
+Harness mapped `python` -> python3 (3.14.7). tests/examples/test_reader_upgrade.py re-execs native/.venv Python 3.13.15 before importing inkflip. README ```sh``` lines ran verbatim via shell=True in a symlink sandbox. Cursor browser MCP: no tab available after newTab navigate to http://127.0.0.1:5195/mapping-control.html; curl HTTP 200 (2390 bytes, sha256 06a40137d13dc4d5834893b607dcb7176c498909f007294421841e838a515460).

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "task_id": "T34",
+  "beads_id": "pdf-t34",
+  "worker": {
+    "app": "cursor",
+    "worker_id": "cursor-native-completion",
+    "branch": "work/cursor/native-completion",
+    "base": "c696948a74bde02d19749ed4fc929179a2c94c16",
+    "implementation_commit": "fcb0db85ca3b8112f1587cbad9d6488a4e3a81df",
+    "test_commit": "fcb0db85ca3b8112f1587cbad9d6488a4e3a81df",
+    "head": "2e36f9bfd3b8056ea08902b453a961014119020e",
+    "commit_history": "fcb0db8 T34 baselines, regression evaluator, test:regression activation"
+  },
+  "contract_version": "1.0.0",
+  "fixture_ids": ["F23", "F25", "F26"],
+  "test_ids": ["TEST-34"],
+  "criteria": [
+    {
+      "criterion": "Changed no-rule is informational",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "Node test: no-rule text difference is changed/exit 0. Python test_no_rule_difference_is_informational."
+    },
+    {
+      "criterion": "rule regression exits5",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "evaluateReportPair declared expected_text → status regressed, EXIT_REGRESSION 5. Python test_rule_regression_exits_5 mutates pypdf control text."
+    },
+    {
+      "criterion": "lost coverage cannot count improvement",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "lost coverage cannot be improved; required_coverage + fail_on_coverage_loss exits 5. Missing corpus keys retained."
+    },
+    {
+      "criterion": "incompatiblefiles/readerconfig marked",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "Different documents → incomparable/exit 6. Geometry page_only is not a match. Malformed/tampered backing reports exit 2."
+    },
+    {
+      "criterion": "baseline overwrite/auto-refresh prohibited",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "create_baseline exclusive; second write to the same path raises BaselineOverwriteError."
+    },
+    {
+      "criterion": "new baseline requires explicit approval and new path.",
+      "status": "executed",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"],
+      "detail": "test_overwrite_prohibited_and_new_path_required requires --approved-by/--rationale and a new destination path."
+    }
+  ],
+  "acceptance_criteria_evidence": {
+    "Changed no-rule is informational": {
+      "status": "executed",
+      "detail": "No-rule diffs are informational (changed, exit 0), not regressions.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    },
+    "rule regression exits5": {
+      "status": "executed",
+      "detail": "Declared expected_text failure exits 5.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    },
+    "lost coverage cannot count improvement": {
+      "status": "executed",
+      "detail": "Coverage loss cannot be improved; with fail_on_coverage_loss it is a regression.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    },
+    "incompatiblefiles/readerconfig marked": {
+      "status": "executed",
+      "detail": "Different documents and geometry-incompatible pairs are marked incomparable; malformed inputs exit 2.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    },
+    "baseline overwrite/auto-refresh prohibited": {
+      "status": "executed",
+      "detail": "Exclusive create; no overwrite or auto-refresh of an existing baseline path.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    },
+    "new baseline requires explicit approval and new path.": {
+      "status": "executed",
+      "detail": "Approval fields plus a new path are required for a new baseline.",
+      "evidence": ["artifacts/tasks/T34/commands.log", "artifacts/tasks/T34/run.json"]
+    }
+  },
+  "commands": [
+    {
+      "segment": "bun run test:regression",
+      "exit": 0,
+      "counts": {"collected": 7, "passed": 7, "failed": 0, "skipped": 0}
+    },
+    {
+      "segment": "uv run --project native python -m pytest native/tests/baselines -q",
+      "exit": 0,
+      "counts": {"collected": 9, "passed": 9, "failed": 0, "skipped": 0}
+    },
+    {
+      "segment": "python3 scripts/task_acceptance.py task T34 --report artifacts/tasks/T34/run.json",
+      "exit": 0,
+      "counts": {"collected": 16, "passed": 16, "failed": 0, "skipped": 0},
+      "detail": "run.json binds evaluated_commit 2e36f9bfd3b8056ea08902b453a961014119020e"
+    }
+  ],
+  "environment": {
+    "host": "macOS arm64 (Darwin 25.5.0)",
+    "python": "CPython 3.13.15 via uv frozen native/.venv",
+    "node": "bun run test:regression → node --test tests/regression/regression.test.mjs"
+  },
+  "limitations": [
+    "Independent review is pending; this worker did not approve the work.",
+    "config/acceptance-commands.json activation of test:regression is a root-manifest edit recorded in docs/proposals/T34.md."
+  ],
+  "dependency_requests": [],
+  "handoff": "artifacts/tasks/T34/handoff.md",
+  "review": {
+    "status": "pending",
+    "path": "artifacts/tasks/T34/review.md",
+    "note": "Independent review remains reviewer-owned; this worker did not write an approval."
+  }
+}
