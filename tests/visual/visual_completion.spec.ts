@@ -1,6 +1,9 @@
+import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { test, expect } from "@playwright/test";
+
+const ROOT = path.resolve(process.cwd());
 
 /**
  * T38: Visual Completion & Usability Regression Test Suite
@@ -99,23 +102,33 @@ test.describe("T38: Visual Completion — Responsive Viewport Overflow", () => {
 });
 
 test.describe("T38: Visual Completion — Layout Resilience & Hostile Filenames", () => {
-  test("Hostile long filename truncates cleanly without causing horizontal blowout", async ({ page }) => {
+  test("Real PDF with hostile long filename truncates cleanly without causing horizontal blowout", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector("#btn-header-open-pdf", { timeout: 10000 });
 
-    // Inject a hostile 120-character filename into the title element
-    await page.evaluate(() => {
-      const titleEl = document.getElementById("workspace-doc-title");
-      if (titleEl) {
-        titleEl.textContent =
-          "VERY_LONG_HOSTILE_DOCUMENT_NAME_WITHOUT_SPACES_THAT_WOULD_PREVIOUSLY_BLOW_OUT_THE_HEADER_CONTAINER_TO_OVER_1300PX_WIDTH.pdf";
+    // Create a real temporary PDF with a 110-character hostile unspaced filename
+    const testDir = path.resolve(ROOT, "tests/fixtures/temp_visual");
+    fs.mkdirSync(testDir, { recursive: true });
+    const longFileName =
+      "VERY_LONG_REAL_PDF_FILENAME_WITHOUT_ANY_SPACES_TO_VERIFY_COMPLETE_OVERFLOW_RESILIENCE_ON_MOBILE_VIEWPORTS_AUDIT.pdf";
+    const longPdfPath = path.resolve(testDir, longFileName);
+    const sourcePdf = path.resolve(ROOT, "apps/web/public/examples/amount/mapping-amount.pdf");
+    fs.copyFileSync(sourcePdf, longPdfPath);
+
+    try {
+      await page.locator("#input-open-pdf").setInputFiles(longPdfPath);
+      await page.waitForSelector("#workspace-doc-title", { timeout: 10000 });
+      await expect(page.locator("#workspace-doc-title")).toContainText("VERY_LONG_REAL_PDF_FILENAME");
+
+      const overflow = await checkNoPageHorizontalOverflow(page);
+      expect(overflow.hasOverflow).toBe(false);
+      expect(overflow.scrollWidth).toBeLessThanOrEqual(390);
+    } finally {
+      if (fs.existsSync(longPdfPath)) {
+        fs.unlinkSync(longPdfPath);
       }
-    });
-
-    const overflow = await checkNoPageHorizontalOverflow(page);
-    expect(overflow.hasOverflow).toBe(false);
-    expect(overflow.scrollWidth).toBeLessThanOrEqual(390);
+    }
   });
 
   test("Examples gallery card open detail does not overflow at 320px", async ({ page }) => {
@@ -172,12 +185,15 @@ test.describe("T38: Visual Completion — Touch Targets & Focus Tokens", () => {
 
     const homeBtn = page.locator("#btn-help-back-home");
     const wsBtn = page.locator("#btn-help-back-workspace");
+    const exBtn = page.locator("#btn-help-open-example");
 
     const homeBox = await homeBtn.boundingBox();
     const wsBox = await wsBtn.boundingBox();
+    const exBox = await exBtn.boundingBox();
 
     expect(homeBox?.height).toBeGreaterThanOrEqual(44);
     expect(wsBox?.height).toBeGreaterThanOrEqual(44);
+    expect(exBox?.height).toBeGreaterThanOrEqual(44);
   });
 
   test("Active focus outline styling adheres to 3px focus token", async ({ page }) => {
@@ -222,13 +238,13 @@ test.describe("T38: Visual Completion — Help Surface Navigation", () => {
     await page.waitForSelector('[data-testid="help-page"]', { timeout: 5000 });
     expect(page.url()).toContain("#/help");
 
-    // Verify Invariant notices exist
+    // Verify product principle notices exist (no raw invariant IDs)
     const noticeHeading = page.locator("#limits-heading");
     await expect(noticeHeading).toBeVisible();
-    await expect(page.locator("text=Invariant I06")).toBeVisible();
-    await expect(page.locator("text=Invariant I11")).toBeVisible();
+    await expect(page.locator("text=Non-Certification Principle")).toBeVisible();
+    await expect(page.locator("text=Explicit Omission Reporting")).toBeVisible();
 
-    // Click back to workspace
+    // Click return to workspace
     await page.click("#btn-help-back-workspace");
     await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 5000 });
     expect(page.url()).toContain("#/workspace");
