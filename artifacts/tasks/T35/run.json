@@ -1,14 +1,14 @@
 {
   "task": "T35",
   "beads_id": "pdf-t35",
-  "evaluated_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
-  "evaluated_at": "2026-09-13T12:39:00.731116+00:00",
+  "evaluated_commit": "5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df",
+  "evaluated_at": "2026-09-13T13:09:45.054873+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 5,
-    "passed": 5,
+    "collected": 10,
+    "passed": 10,
     "failed": 0,
     "skipped": 0
   },
@@ -36,10 +36,10 @@
       "cwd": ".",
       "exit": 0,
       "stdout": "",
-      "stderr": "test_before_after_identities_differ (test_reader_upgrade.TestReaderUpgradeExample.test_before_after_identities_differ) ... ok\ntest_example_runs_end_to_end_locally (test_reader_upgrade.TestReaderUpgradeExample.test_example_runs_end_to_end_locally) ... ok\ntest_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline) ... ok\ntest_output_reopens_as_script_free_html (test_reader_upgrade.TestReaderUpgradeExample.test_output_reopens_as_script_free_html) ... ok\ntest_readme_contains_each_documented_command (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_readme_contains_each_documented_command) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 3.007s\n\nOK\n",
+      "stderr": "test_python_command_missing_without_readme_exports (test_reader_upgrade.TestDocumentedRoutesFailClosed.test_python_command_missing_without_readme_exports) ... ok\ntest_run_sh_fails_when_frozen_interpreter_missing (test_reader_upgrade.TestDocumentedRoutesFailClosed.test_run_sh_fails_when_frozen_interpreter_missing) ... ok\ntest_before_after_identities_differ (test_reader_upgrade.TestReaderUpgradeManualSequence.test_before_after_identities_differ) ... ok\ntest_corpus_processing_is_offline_after_install (test_reader_upgrade.TestReaderUpgradeManualSequence.test_corpus_processing_is_offline_after_install) ... ok\ntest_example_runs_end_to_end_locally (test_reader_upgrade.TestReaderUpgradeManualSequence.test_example_runs_end_to_end_locally) ... ok\ntest_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeManualSequence.test_known_rule_failing_mutation_exits_5_without_modifying_baseline) ... ok\ntest_output_reopens_as_script_free_html (test_reader_upgrade.TestReaderUpgradeManualSequence.test_output_reopens_as_script_free_html) ... ok\ntest_run_sh_from_ordinary_shell_with_spaces (test_reader_upgrade.TestReaderUpgradeRunSh.test_run_sh_from_ordinary_shell_with_spaces) ... ok\ntest_ordinary_shell_has_no_python_until_frozen_path (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_ordinary_shell_has_no_python_until_frozen_path) ... ok\ntest_readme_contains_each_documented_command (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_readme_contains_each_documented_command) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 6.657s\n\nOK\n",
       "tests": {
-        "collected": 5,
-        "passed": 5,
+        "collected": 10,
+        "passed": 10,
         "failed": 0,
         "skipped": 0
       },

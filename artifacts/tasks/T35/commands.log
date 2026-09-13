@@ -1,42 +1,41 @@
 # T35 executed command transcript
-date: 2026-09-13T12:38Z
+date: 2026-09-13T13:09Z
 host: macOS arm64 (Darwin 25.5.0)  python: CPython 3.13.15 via frozen uv native/.venv  (system python3: 3.14.7; `python` not on PATH)
 worktree: /Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-completion
 branch: work/cursor/native-completion
 base: c696948a74bde02d19749ed4fc929179a2c94c16
-HEAD under test: 2e36f9bfd3b8056ea08902b453a961014119020e
+source HEAD under test: 5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df
 
 $ python3 scripts/task_acceptance.py task T35 --report artifacts/tasks/T35/run.json
-evaluated_commit: 2e36f9bfd3b8056ea08902b453a961014119020e
-evaluated_at: 2026-09-13T12:39:00.731116+00:00
+evaluated_commit: 5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df
+evaluated_at: 2026-09-13T13:09:45.054873+00:00
 failures: []
 evidence_errors: []
-tests: {"collected": 5, "passed": 5, "failed": 0, "skipped": 0}
+tests: {"collected": 10, "passed": 10, "failed": 0, "skipped": 0}
 exit: 0
 
-$ python -m unittest discover -s tests/examples -v
---- stderr ---
-test_before_after_identities_differ (test_reader_upgrade.TestReaderUpgradeExample.test_before_after_identities_differ) ... ok
-test_example_runs_end_to_end_locally (test_reader_upgrade.TestReaderUpgradeExample.test_example_runs_end_to_end_locally) ... ok
-test_known_rule_failing_mutation_exits_5_without_modifying_baseline (test_reader_upgrade.TestReaderUpgradeExample.test_known_rule_failing_mutation_exits_5_without_modifying_baseline) ... ok
-test_output_reopens_as_script_free_html (test_reader_upgrade.TestReaderUpgradeExample.test_output_reopens_as_script_free_html) ... ok
-test_readme_contains_each_documented_command (test_reader_upgrade.TestReadmeCommandsCopiedVerbatim.test_readme_contains_each_documented_command) ... ok
+$ native/.venv/bin/python -m unittest discover -s tests/examples -v
+10 passed in ~7s (ordinary-shell run.sh + README sequence + failure paths)
 
-----------------------------------------------------------------------
-Ran 5 tests in 3.007s
-
-OK
+# Ordinary-shell named-profile run (disposable root with spaces)
+sandbox: /var/folders/.../inkflip-t35-evidence.l90RF1/checkout with spaces
+ordinary PATH python: MISSING
+$ env -i HOME=... PATH=/usr/bin:/bin:... /bin/sh examples/reader-upgrade/run.sh
 exit: 0
-counts: {"collected": 5, "passed": 5, "failed": 0, "skipped": 0}
+before: pypdf 5.9.0 profile_sha256=5067ae2be9fa06e324118855c62ba846a9398749c525dae8330966e865c290e7
+after:  pypdf 6.18.0 profile_sha256=a2f4a7f6b96aae024217923889f09296b6e8cd9179068d3552b8b81840107166
+source mapping-control.pdf sha256: 19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed
+baseline sha256: df9c52b6df0ca3a7d8c0af41918f9fea87b8dfba11b1893c82c57a95f2a647b7
+after HTML sha256: 7a72da06b05b08549b7cb9097bdd1c0c7cd85ef55915b81d8c8bdcd4011c2909 (2633 bytes)
+comparison HTML sha256: c2d1474895548dbb34768c65c1b5217e3c5730f0d0ccfe67e3db343b9ba099d7 (1761 bytes)
 
-# Notes
-Harness mapped `python` -> python3 (3.14.7). tests/examples/test_reader_upgrade.py re-execs native/.venv Python 3.13.15 before importing inkflip. README ```sh``` lines ran verbatim via shell=True in a symlink sandbox.
+# Browser reopen
+$ python3 -m http.server 5196 --bind 127.0.0.1 --directory artifacts/tasks/T35/named-profile-run
+GET /runs/after/mapping-control.html → 200 length 2633
+GET /comparisons/upgrade/comparison.html → 200 length 1761
+Cursor IDE browser: tab created then "Browser view not found" / "No browser tab available"
+agent-browser Chromium: opened both URLs; scripts=0; after shows profile_name=after reader_version=6.18.0 chk_pypdf_text_p0; comparison heading "Comparison unchanged"
+screenshots: named-profile-run/after-browser.png named-profile-run/comparison-browser.png
 
-# Browser reopen (2026-09-13T12:47Z)
-$ python3 -m http.server 5195 --bind 127.0.0.1 --directory artifacts/tasks/T35
-Cursor IDE browser viewId f7c6ed navigated to http://127.0.0.1:5195/mapping-control.html
-title: Inkflip — evidence report
-CDP Runtime.evaluate: scripts=0, document SHA present, chk_pdfium_text_p0 present, CSP default-src 'none'
-screenshot: artifacts/tasks/T35/mapping-control-browser.png
-status: executed
-
+# Historical
+Previous PDFium inspect reopen (0ae6a99) moved to artifacts/tasks/T35/historical-pdfium-inspect/

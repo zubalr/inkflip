@@ -1,0 +1,424 @@
+{
+  "kind": "report",
+  "schema_version": "1.0.0",
+  "report_id": "40577c109c6935f2f51e07173d80939910904485608ba9f37e9843768eb980f4",
+  "document": {
+    "sha256": "19031ea006214acdd5ae3191ff74a2976736314faf139f44c93d2b3a0bb7c6ed",
+    "byte_length": 1429,
+    "page_count": 1,
+    "display_name": "mapping-control.pdf",
+    "source_asset_id": null
+  },
+  "readers": [
+    {
+      "id": "pypdf-native",
+      "name": "pypdf",
+      "version": "6.18.0",
+      "build": "pypdf 6.18.0 (isolated interpreter: /private/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-t35-evidence.l90RF1/checkout with spaces/profiles/after/venv/bin/python)",
+      "adapter_version": "1.0.0",
+      "method": "native_text",
+      "environment": "native",
+      "settings": {
+        "normalization": "scalar-whitespace-v1",
+        "language": null,
+        "psm": null,
+        "render_reader_id": null,
+        "raster_dpi": null,
+        "annotation_mode": "not_applicable"
+      },
+      "capabilities": [
+        {
+          "name": "native_text",
+          "support": "supported",
+          "limits": [
+            "page-level text only; no per-word geometry is claimed or derived from visitor matrices",
+            "text from this reader is never combined with PDFium boxes by string matching"
+          ]
+        },
+        {
+          "name": "crop_metadata",
+          "support": "approximate",
+          "limits": [
+            "declared page dictionaries (media/crop box, /UserUnit, /Rotate) are parsed for other adapters' compensation; metadata is separate from extraction"
+          ]
+        }
+      ],
+      "model_hashes": [],
+      "limitations": [
+        "version-isolated worker; executed in a separate virtual environment"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "index": 0,
+      "media_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "crop_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "effective_view_box": [
+        0.0,
+        0.0,
+        520.0,
+        400.0
+      ],
+      "box_source": "pypdf crop box and /UserUnit metadata; PDFium get_size() is rotated and UserUnit-blind on this build",
+      "user_unit": 1.0,
+      "rotation": 0,
+      "canonical_size_pt": [
+        520.0,
+        400.0
+      ],
+      "raw_to_canonical_transform_id": "t_raw_to_canonical_p0",
+      "limitations": []
+    }
+  ],
+  "transforms": [
+    {
+      "id": "t_raw_to_canonical_p0",
+      "page_index": 0,
+      "from_space": "pdf_user:p0",
+      "to_space": "canonical:p0",
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        -0.0,
+        400.0
+      ],
+      "inverse": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        -0.0,
+        400.0
+      ],
+      "operation": "page_box_to_canonical",
+      "precision": "exact",
+      "source": "Derived from page crop box and /UserUnit"
+    }
+  ],
+  "occurrences": [
+    {
+      "id": "pypdf-native-19031ea00621-p0-0",
+      "reader_id": "pypdf-native",
+      "page_index": 0,
+      "ordinal": 0,
+      "raw_text": "SYNTHETIC EXAMPLE\nNo real transaction. Reader behavior only.\n$100\nRendered marks and extracted text are separate.",
+      "normalized_text": "SYNTHETIC EXAMPLE No real transaction. Reader behavior only. $100 Rendered marks and extracted text are separate.",
+      "normalization_map": [
+        {
+          "raw_start": 0,
+          "raw_end": 9,
+          "normalized_start": 0,
+          "normalized_end": 9,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 9,
+          "raw_end": 10,
+          "normalized_start": 9,
+          "normalized_end": 10,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 10,
+          "raw_end": 17,
+          "normalized_start": 10,
+          "normalized_end": 17,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 17,
+          "raw_end": 18,
+          "normalized_start": 17,
+          "normalized_end": 18,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 18,
+          "raw_end": 20,
+          "normalized_start": 18,
+          "normalized_end": 20,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 20,
+          "raw_end": 21,
+          "normalized_start": 20,
+          "normalized_end": 21,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 21,
+          "raw_end": 25,
+          "normalized_start": 21,
+          "normalized_end": 25,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 25,
+          "raw_end": 26,
+          "normalized_start": 25,
+          "normalized_end": 26,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 26,
+          "raw_end": 38,
+          "normalized_start": 26,
+          "normalized_end": 38,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 38,
+          "raw_end": 39,
+          "normalized_start": 38,
+          "normalized_end": 39,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 39,
+          "raw_end": 45,
+          "normalized_start": 39,
+          "normalized_end": 45,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 45,
+          "raw_end": 46,
+          "normalized_start": 45,
+          "normalized_end": 46,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 46,
+          "raw_end": 54,
+          "normalized_start": 46,
+          "normalized_end": 54,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 54,
+          "raw_end": 55,
+          "normalized_start": 54,
+          "normalized_end": 55,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 55,
+          "raw_end": 60,
+          "normalized_start": 55,
+          "normalized_end": 60,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 60,
+          "raw_end": 61,
+          "normalized_start": 60,
+          "normalized_end": 61,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 61,
+          "raw_end": 65,
+          "normalized_start": 61,
+          "normalized_end": 65,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 65,
+          "raw_end": 66,
+          "normalized_start": 65,
+          "normalized_end": 66,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 66,
+          "raw_end": 74,
+          "normalized_start": 66,
+          "normalized_end": 74,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 74,
+          "raw_end": 75,
+          "normalized_start": 74,
+          "normalized_end": 75,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 75,
+          "raw_end": 80,
+          "normalized_start": 75,
+          "normalized_end": 80,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 80,
+          "raw_end": 81,
+          "normalized_start": 80,
+          "normalized_end": 81,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 81,
+          "raw_end": 84,
+          "normalized_start": 81,
+          "normalized_end": 84,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 84,
+          "raw_end": 85,
+          "normalized_start": 84,
+          "normalized_end": 85,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 85,
+          "raw_end": 94,
+          "normalized_start": 85,
+          "normalized_end": 94,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 94,
+          "raw_end": 95,
+          "normalized_start": 94,
+          "normalized_end": 95,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 95,
+          "raw_end": 99,
+          "normalized_start": 95,
+          "normalized_end": 99,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 99,
+          "raw_end": 100,
+          "normalized_start": 99,
+          "normalized_end": 100,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 100,
+          "raw_end": 103,
+          "normalized_start": 100,
+          "normalized_end": 103,
+          "operation": "identity"
+        },
+        {
+          "raw_start": 103,
+          "raw_end": 104,
+          "normalized_start": 103,
+          "normalized_end": 104,
+          "operation": "whitespace"
+        },
+        {
+          "raw_start": 104,
+          "raw_end": 113,
+          "normalized_start": 104,
+          "normalized_end": 113,
+          "operation": "identity"
+        }
+      ],
+      "geometry": {
+        "precision": "page_only",
+        "space": "canonical_page",
+        "polygon": null,
+        "transform_ids": [],
+        "basis": "pypdf isolated worker page-level output"
+      },
+      "engine_score": null,
+      "source_asset_id": null,
+      "raw_source_locator": "pypdf:page[0]:extract",
+      "limitations": [
+        "page-only extraction from isolated profile worker"
+      ]
+    }
+  ],
+  "findings": [],
+  "annotations": [],
+  "plan": {
+    "version": "1.0.0",
+    "selected_pages": [
+      0
+    ],
+    "regions": [],
+    "checks": [
+      {
+        "id": "chk_pypdf_text_p0",
+        "page_index": 0,
+        "capability": "native_text",
+        "reader_ids": [
+          "pypdf-native"
+        ],
+        "region_id": null
+      }
+    ],
+    "normalization_version": "scalar-whitespace-v1",
+    "alignment_version": "region-match-v1",
+    "profile": "native",
+    "budget": {
+      "max_raster_pixels": 4000000,
+      "max_run_ocr_pixels": 20000000,
+      "timeout_ms": 120000,
+      "max_retries": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "chk_pypdf_text_p0",
+      "status": "completed",
+      "reason": null,
+      "produced_occurrence_count": 1,
+      "retained_occurrence_ids": [
+        "pypdf-native-19031ea00621-p0-0"
+      ]
+    }
+  ],
+  "assets": [],
+  "export": {
+    "mode": "evidence",
+    "scope": "selection",
+    "included": [
+      "selected_text",
+      "document_hash",
+      "settings",
+      "coverage",
+      "filename"
+    ],
+    "omissions": [
+      "Other unselected pages excluded."
+    ],
+    "replay": "requires_original",
+    "origin_report_id": null
+  },
+  "execution": {
+    "execution_id": "2aaabb91-0580-4a29-8113-565fc9220af1",
+    "run_key": "043f8e80430634807ab4625e4cb006e5b861bbbbb218f275d6bc1d1922d66798",
+    "status": "complete",
+    "started_at": "2026-09-13T13:07:09Z",
+    "duration_ms": 1,
+    "environment": "Python 3.13.15; darwin; algorithm=inkflip-inspect-v1; profile_name=after; profile_sha256=a2f4a7f6b96aae024217923889f09296b6e8cd9179068d3552b8b81840107166; reader_version=6.18.0; interpreter=/private/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-t35-evidence.l90RF1/checkout with spaces/profiles/after/venv/bin/python",
+    "result_origin": "prepared_actual_run",
+    "errors": []
+  },
+  "limitations": [
+    "Native local document inspection.",
+    "algorithm inkflip-inspect-v1"
+  ]
+}

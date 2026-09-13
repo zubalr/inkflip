@@ -7,10 +7,10 @@
     "worker_id": "cursor-native-completion",
     "branch": "work/cursor/native-completion",
     "base": "c696948a74bde02d19749ed4fc929179a2c94c16",
-    "implementation_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
-    "test_commit": "2e36f9bfd3b8056ea08902b453a961014119020e",
-    "head": "2e36f9bfd3b8056ea08902b453a961014119020e",
-    "commit_history": "3d50053 example + tests; 2e36f9b re-exec native/.venv so `python -m unittest` can import inkflip"
+    "implementation_commit": "5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df",
+    "test_commit": "5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df",
+    "head": "5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df",
+    "commit_history": "3d50053 example; 2e36f9b test re-exec; 5c8f52a frozen PATH + run.sh + ordinary-shell tests"
   },
   "contract_version": "1.0.0",
   "fixture_ids": ["F01", "F23", "F25"],
@@ -19,50 +19,50 @@
     {
       "criterion": "Example runs end-to-end locally",
       "status": "executed",
-      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
-      "detail": "README sh commands ran via shell=True in a symlink sandbox. Index, baseline, comparison.json, and mapping-control.html were produced."
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json", "artifacts/tasks/T35/named-profile-run/identities.json"],
+      "detail": "README exports plus verbatim commands, and sh examples/reader-upgrade/run.sh, both ran from an ordinary shell in a disposable root with spaces in the path. Frozen native/.venv/bin supplied python. Install used the network; corpus/compare ran offline."
     },
     {
       "criterion": "before/after identities differ as intended",
       "status": "executed",
-      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
-      "detail": "before readers[0].version 5.9.0 vs after 6.18.0; execution.environment strings differ and contain those versions."
+      "evidence": ["artifacts/tasks/T35/named-profile-run/identities.json", "artifacts/tasks/T35/named-profile-run/runs/after/mapping-control.html", "artifacts/tasks/T35/run.json"],
+      "detail": "before pypdf 5.9.0 vs after pypdf 6.18.0; distinct environment strings include those versions and named profiles before/after."
     },
     {
       "criterion": "known rule-failing mutation exits5 without modifying baseline",
       "status": "executed",
       "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
-      "detail": "Mutated after report compare exits 5; baselines/before.json bytes and sha256 unchanged."
+      "detail": "Mutated after report compare exits 5; baselines/before.json bytes unchanged. Named-profile run baseline sha256 df9c52b6df0ca3a7d8c0af41918f9fea87b8dfba11b1893c82c57a95f2a647b7."
     },
     {
       "criterion": "output reopens in web viewer",
       "status": "executed",
       "evidence": [
         "artifacts/tasks/T35/browser-reopen.md",
-        "artifacts/tasks/T35/mapping-control.html",
-        "artifacts/tasks/T35/mapping-control-browser.png",
-        "artifacts/tasks/T35/commands.log",
-        "artifacts/tasks/T35/run.json"
+        "artifacts/tasks/T35/named-profile-run/runs/after/mapping-control.html",
+        "artifacts/tasks/T35/named-profile-run/comparisons/upgrade/comparison.html",
+        "artifacts/tasks/T35/named-profile-run/after-browser.png",
+        "artifacts/tasks/T35/named-profile-run/comparison-browser.png"
       ],
-      "detail": "Unittest asserts script-free HTML+CSP. HTTP GET http://127.0.0.1:5195/mapping-control.html returned 200. Cursor IDE browser view f7c6ed loaded that URL: title Inkflip — evidence report, scripts=0, document SHA and chk_pdfium_text_p0 present. Screenshot artifacts/tasks/T35/mapping-control-browser.png."
+      "detail": "Opened the named-profile after HTML and comparison HTML over HTTP 5196 in Chromium. Observed profile_name=after, reader_version=6.18.0, chk_pypdf_text_p0, scripts=0. Historical PDFium inspect remains under historical-pdfium-inspect/."
     },
     {
       "criterion": "README commands copied verbatim into test.",
       "status": "executed",
       "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"],
-      "detail": "VERBATIM list is asserted in README text and extracted ```sh``` blocks. Commands run as those strings, not rewritten to absolute python -m paths."
+      "detail": "VERBATIM commands and README setup exports are asserted and executed. run.sh is a separate ordinary-shell route. Tests no longer skip exports or inject INKFLIP_PYTHON."
     }
   ],
   "acceptance_criteria_evidence": {
     "Example runs end-to-end locally": {
       "status": "executed",
-      "detail": "Install before/after pypdf, two corpus runs, baseline create, compare, HTML report all completed in the sandbox.",
-      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+      "detail": "Both documented routes completed in a disposable spaced-path sandbox from an ordinary shell with no python on PATH.",
+      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json", "artifacts/tasks/T35/named-profile-run/identities.json"]
     },
     "before/after identities differ as intended": {
       "status": "executed",
-      "detail": "Reports record pypdf 5.9.0 vs 6.18.0 and distinct environment identity strings.",
-      "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
+      "detail": "Reports and after HTML record pypdf 5.9.0 vs 6.18.0 and named profiles before/after.",
+      "evidence": ["artifacts/tasks/T35/named-profile-run/identities.json", "artifacts/tasks/T35/named-profile-run/runs/after/mapping-control.html", "artifacts/tasks/T35/run.json"]
     },
     "known rule-failing mutation exits5 without modifying baseline": {
       "status": "executed",
@@ -71,18 +71,18 @@
     },
     "output reopens in web viewer": {
       "status": "executed",
-      "detail": "Cursor-owned browser loaded http://127.0.0.1:5195/mapping-control.html. Rendered title, document SHA, chk_pdfium_text_p0, CSP, and zero scripts. Screenshot saved.",
+      "detail": "Chromium loaded the named-profile after HTML and comparison HTML. Cursor IDE browser tab creation failed this session.",
       "evidence": [
         "artifacts/tasks/T35/browser-reopen.md",
-        "artifacts/tasks/T35/mapping-control.html",
-        "artifacts/tasks/T35/mapping-control-browser.png",
-        "artifacts/tasks/T35/commands.log",
-        "artifacts/tasks/T35/run.json"
+        "artifacts/tasks/T35/named-profile-run/runs/after/mapping-control.html",
+        "artifacts/tasks/T35/named-profile-run/comparisons/upgrade/comparison.html",
+        "artifacts/tasks/T35/named-profile-run/after-browser.png",
+        "artifacts/tasks/T35/named-profile-run/comparison-browser.png"
       ]
     },
     "README commands copied verbatim into test.": {
       "status": "executed",
-      "detail": "Documented shell lines are stored and executed verbatim.",
+      "detail": "Documented setup exports and command lines are stored and executed verbatim; run.sh is exercised separately.",
       "evidence": ["artifacts/tasks/T35/commands.log", "artifacts/tasks/T35/run.json"]
     }
   },
@@ -90,14 +90,14 @@
     {
       "segment": "python -m unittest discover -s tests/examples -v",
       "exit": 0,
-      "counts": {"collected": 5, "passed": 5, "failed": 0, "skipped": 0},
-      "detail": "Harness mapped python → python3 3.14.7; test module re-exec'd native/.venv CPython 3.13.15"
+      "counts": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
+      "detail": "Harness mapped python → python3; test module re-exec'd native/.venv for inkflip import. Subprocess routes used ordinary PATH plus README/run.sh frozen setup."
     },
     {
       "segment": "python3 scripts/task_acceptance.py task T35 --report artifacts/tasks/T35/run.json",
       "exit": 0,
-      "counts": {"collected": 5, "passed": 5, "failed": 0, "skipped": 0},
-      "detail": "run.json binds evaluated_commit 2e36f9bfd3b8056ea08902b453a961014119020e"
+      "counts": {"collected": 10, "passed": 10, "failed": 0, "skipped": 0},
+      "detail": "run.json binds evaluated_commit 5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df"
     }
   ],
   "environment": {
@@ -106,7 +106,7 @@
   },
   "limitations": [
     "Independent review is pending; this worker did not approve the work.",
-    "Committed mapping-control.html is a default PDFium inspect of the same fixture, not the named-profile after HTML from the deleted unittest sandbox.",
+    "Cursor IDE browser tab creation failed this session; Chromium via agent-browser opened the named-profile HTML.",
     "Owned rules file is examples/reader-upgrade/upgrade-rules.json (docs/proposals/T35.md)."
   ],
   "dependency_requests": [],

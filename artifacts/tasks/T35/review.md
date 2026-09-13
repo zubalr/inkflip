@@ -3,13 +3,7 @@
 Disposition: **pending**
 
 No independent reviewer has examined revision
-`2e36f9bfd3b8056ea08902b453a961014119020e` (implementation commits
-`3d50053c204df23d08a0b7b5871ee40558e63617` and interpreter-fix
-`2e36f9bfd3b8056ea08902b453a961014119020e`). This file is a worker
-placeholder so the required evidence path exists. It is not approval.
-Devin owns formal acceptance after independent review.
-
-Visual reopen of generated HTML in the Cursor-owned browser tab was
-executed after a later successful navigate to
-`http://127.0.0.1:5195/mapping-control.html`. See `browser-reopen.md`.
-That reopen is worker evidence, not independent review.
+`5c8f52ae74d1a4ee5e10ed961ef0d964c711a9df` (frozen-interpreter repair) or the
+named-profile browser reopen evidence. This file is a worker placeholder so
+the required evidence path exists. It is not approval. Devin owns formal
+acceptance after independent review.
