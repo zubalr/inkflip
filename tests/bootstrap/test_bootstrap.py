@@ -138,7 +138,7 @@ class EmptyRegistrationFailsTests(unittest.TestCase):
             self.assertIn("Ran 1 test", result.stderr)
 
     def test_gate_refuses_unaccepted_prerequisites(self):
-        result = run_tool(GATE, "G1")
+        result = run_tool(GATE, "pre-release")
         self.assertNotEqual(result.returncode, 0)
         self.assertRegex(result.stderr, r"prerequisite unmet|gate blocked")
 
