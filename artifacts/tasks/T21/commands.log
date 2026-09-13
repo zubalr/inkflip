@@ -4,7 +4,7 @@ Worktree: original/worktrees/pdf-t21, base c696948
 Implementation notes
 - Six example cards under apps/web/public/examples/{amount,duplicates,
   geometry,reading-order,covered,scan}/ each with manifest.json,
-  report.json (real captured sealed reports from scripts/capture.mjs
+  report.json (real captured sealed reports from tests/gallery/capture.mjs
   matrix), and the real source PDF bytes.
 - scripts/prepare_examples.py rewritten data-driven: derives each card's
   manifest from its captured report (fixture sha256, produced counts,
@@ -31,8 +31,39 @@ $ bun run test:fixtures
 
 $ bunx --no-install playwright test tests/gallery/smoke.spec.ts
   1 passed — six cards render; example card import mounts viewer with
-  findings; assertions target T21-era selectors (export panel belongs
-  to T23, not present on this base).
+  findings; assertions target selectors present on this base (the T16
+  export panel heading is asserted; the T23 selection controls belong
+  to a later task and are not asserted here).
 
 $ bun run build
   clean
+
+======================================================================
+Review round 1 (independent reviewer, verdict CHANGES-REQUIRED —
+all five criteria passed on substance; required items were process and
+hygiene, no implementation rework):
+
+F1 HIGH — App/Home/Workspace composition edits lacked the explicit
+  composition lease OWNERSHIP.md requires. Resolved by the integrator's
+  scope record at docs/proposals/T21.md (lease granted: additive seams
+  only, verified non-breaking).
+F2 MEDIUM — shipped card set F01/F02/F03/F07/F11/F12 deviates from the
+  planned F01/F03/F04/F07/F12/F14; F04+F14 ride as executed companion
+  variants. Documented and accepted in docs/proposals/T21.md — every
+  planned fixture still ships with executed evidence.
+F3 LOW-MED — stale 142 ms static timing vs sealed 249 ms; dead
+  ../../styles/tokens.css link; orphan covered-*.pdf. Fixed: static
+  timing now mirrors the sealed report (249 ms), dead link removed,
+  orphans deleted. The page's /node_modules pdfjs imports remain a
+  dev-only T17 limitation — disclosed in the scope record.
+F4 MEDIUM — gallery.test.mjs now recomputes report_id/run_key for every
+  committed report (primary + 16 variants) via @inkflip/contracts,
+  schema-validates all variants, and cross-checks index.json fields
+  against manifests.
+F5 — commands.log path/wording corrections (this file).
+F6 — smoke.spec.ts header comment corrected (it is a committed suite).
+F7 — CSS token fixes (shadow token; dead warning-text fallback removed).
+F8 — isLocalExampleUrl now rejects `..` path segments.
+F9 — exampleError cleared when a new example id arrives.
+
+$ node --test tests/gallery/gallery.test.mjs

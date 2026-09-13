@@ -25,6 +25,10 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 import Ajv2020 from "ajv/dist/2020.js";
+import {
+  reportDigest,
+  runKey,
+} from "../../packages/contracts/src/index.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const EXAMPLES = join(ROOT, "apps", "web", "public", "examples");
@@ -130,6 +134,70 @@ test("OCR language claims match the models that actually ran", () => {
           `${card.example_id}: non-OCR readers must not claim a language`);
       }
     }
+  }
+});
+
+test("every committed report's seal recomputes; variants schema-valid", () => {
+  // report_id and run_key are recomputed from content — a report that was
+  // tampered with after sealing fails here, not just at schema level.
+  for (const cardId of readdirSync(EXAMPLES)) {
+    const dir = join(EXAMPLES, cardId);
+    if (!statSync(dir).isDirectory()) continue;
+    const reportFiles = readdirSync(dir).filter(
+      (f) => f.startsWith("report") && f.endsWith(".json"),
+    );
+    assert.ok(reportFiles.includes("report.json"),
+      `${cardId}: primary report.json required`);
+    const manifest = loadJson(join(dir, "manifest.json"));
+    const boundSources = new Set(
+      Object.values(manifest.files).map((f) => f.sha256),
+    );
+    for (const rf of reportFiles) {
+      const report = loadJson(join(dir, rf));
+      const ok = reportValidator(report);
+      assert.ok(ok,
+        `${cardId}/${rf} fails contract schema: ${JSON.stringify(reportValidator.errors?.slice(0, 3))}`);
+      assert.equal(reportDigest(report), report.report_id,
+        `${cardId}/${rf}: report_id must recompute from sealed content`);
+      assert.equal(runKey(report), report.execution.run_key,
+        `${cardId}/${rf}: run_key must recompute from sealed content`);
+      assert.equal(report.execution.result_origin, "live");
+      assert.ok(boundSources.has(report.document.sha256),
+        `${cardId}/${rf}: report document must bind a staged source PDF`);
+      for (const reader of report.readers) {
+        if (reader.method === "ocr") {
+          assert.equal(reader.settings.language, "eng",
+            `${cardId}/${rf}: OCR reader must declare the language it ran`);
+        } else {
+          assert.equal(reader.settings.language, null,
+            `${cardId}/${rf}: non-OCR readers must not claim a language`);
+        }
+      }
+    }
+  }
+});
+
+test("index card fields mirror the manifests they summarize", () => {
+  const index = loadJson(join(EXAMPLES, "index.json"));
+  for (const card of index.cards) {
+    const dir = join(EXAMPLES, card.example_id);
+    const manifest = loadJson(join(dir, "manifest.json"));
+    const report = loadJson(join(dir, "report.json"));
+    assert.equal(card.fixture_id, manifest.fixture_id);
+    assert.equal(card.family, manifest.family);
+    assert.equal(card.source.sha256, manifest.files.source.sha256);
+    assert.equal(card.source.sha256, report.document.sha256);
+    assert.equal(card.finding_count, report.findings.length,
+      `${card.example_id}: finding_count must equal the real report`);
+    const variantCount = readdirSync(dir).filter(
+      (f) => f.startsWith("report.") && f.endsWith(".json") && f !== "report.json",
+    ).length;
+    assert.equal(card.variant_count, variantCount,
+      `${card.example_id}: variant_count must equal committed variant reports`);
+    assert.equal(card.timing_ms, report.execution.duration_ms,
+      `${card.example_id}: timing must mirror the sealed run`);
+    assert.equal(card.readers.length, report.readers.length,
+      `${card.example_id}: reader list must mirror the real run`);
   }
 });
 

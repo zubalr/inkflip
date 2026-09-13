@@ -24,7 +24,7 @@
 .card:hover,
 .card:focus-visible {
   border-color: var(--color-teal, var(--color-line));
-  box-shadow: 0 1px 4px rgb(0 0 0 / 8%);
+  box-shadow: var(--shadow-paper);
 }
 
 .cardTitle {
@@ -180,6 +180,6 @@
 }
 
 .error {
-  color: var(--color-warning-text, #8a4b00);
+  color: var(--color-warning-text);
   font-size: var(--text-caption);
 }

@@ -33,9 +33,11 @@ function isManifest(v: unknown): v is ExampleManifest {
   );
 }
 
-/** True only for site-relative paths under /examples/ — blocks URL exfil. */
+/** True only for site-relative paths under /examples/ — blocks URL exfil
+ *  and path traversal (`..` segments stay inside the mounted prefix). */
 export function isLocalExampleUrl(url: string): boolean {
-  return /^\/examples\/[A-Za-z0-9._/-]+$/.test(url);
+  if (!/^\/examples\/[A-Za-z0-9._/-]+$/.test(url)) return false;
+  return !url.split("/").includes("..");
 }
 
 export async function loadExampleIndex(

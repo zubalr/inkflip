@@ -356,6 +356,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   useEffect(() => {
     if (initialExampleId === null) return;
     let cancelled = false;
+    setExampleError(null);
     void fetch(`examples/${initialExampleId}/report.json`, { credentials: "same-origin" })
       .then((res) => {
         if (!res.ok) throw new Error(`example report unavailable (${res.status})`);

@@ -1,4 +1,5 @@
-/* Temporary T21 smoke check — deleted after verification, not a committed suite. */
+/* T21 gallery smoke — committed suite: six cards render on Home and an
+ * example card imports its real captured report through the app. */
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
