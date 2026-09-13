@@ -67,28 +67,97 @@ def drive_prefix(rel: str) -> bool:
     return len(rel) > 1 and rel[1] == ":"
 
 
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def validate_declared_entry(gid: str, path, sha256, nbytes) -> list[str]:
+    """Strict per-entry integrity validation. Integrity fields are required:
+    a declared file without a byte count and a well-formed SHA-256 digest is
+    a config error (the recovery-review gap: absent fields were accepted)."""
+    errors: list[str] = []
+    label = f"{gid}: entry {path!r}"
+    if not isinstance(path, str) or not path:
+        return [f"{gid}: entry with missing or non-string path"]
+    if sha256 is None:
+        errors.append(f"{label}: missing required sha256 digest (a filename is not integrity)")
+    elif not isinstance(sha256, str):
+        errors.append(f"{label}: sha256 must be a string, got {type(sha256).__name__}")
+    elif not SHA256_RE.match(sha256):
+        errors.append(f"{label}: malformed sha256 digest {sha256!r} (expected 64 lowercase hex chars)")
+    if nbytes is None:
+        errors.append(f"{label}: missing required byte count")
+    elif isinstance(nbytes, bool):
+        errors.append(f"{label}: bytes must be an integer, got boolean")
+    elif not isinstance(nbytes, int):
+        errors.append(f"{label}: bytes must be an integer, got {type(nbytes).__name__}")
+    elif nbytes < 0:
+        errors.append(f"{label}: negative byte count {nbytes}")
+    return [e for e in errors if e]
+
+
 def expand_groups(root: Path, manifest: dict) -> tuple[list[dict], list[str]]:
     """Expand groups into declared files. Returns (files, config_errors)."""
     declared: dict[str, dict] = {}
     errors: list[str] = []
-    for group in manifest.get("groups", []):
-        gid = group.get("id", "<unnamed-group>")
-        for f in group.get("explicit_files", []):
-            rel = f["path"]
-            if rel in declared:
-                errors.append(f"{gid}: duplicate declared path {rel}")
-            declared[rel] = {
+    groups = manifest.get("groups")
+    if not isinstance(groups, list):
+        return [], ["manifest: 'groups' must be a list of group objects"]
+    for idx, group in enumerate(groups):
+        if not isinstance(group, dict):
+            errors.append(f"manifest: groups[{idx}] is not an object")
+            continue
+        gid = group.get("id")
+        if not isinstance(gid, str) or not gid:
+            errors.append(f"manifest: groups[{idx}] missing a non-empty string 'id'")
+            continue
+        if gid in {g.get("id") for g in groups[:idx] if isinstance(g, dict)}:
+            errors.append(f"manifest: duplicate group id {gid!r}")
+        explicit = group.get("explicit_files", [])
+        if not isinstance(explicit, list):
+            errors.append(f"{gid}: explicit_files must be a list")
+            continue
+        for position, f in enumerate(explicit):
+            if not isinstance(f, dict):
+                errors.append(f"{gid}: explicit_files entry is not an object")
+                continue
+            rel = f.get("path")
+            key = rel if isinstance(rel, str) else f"<non-string path at position {position}>"
+            if key in declared:
+                errors.append(f"{gid}: duplicate declared path {key}")
+                continue
+            errors.extend(validate_declared_entry(gid, rel, f.get("sha256"), f.get("bytes")))
+            declared[key] = {
                 "path": rel,
                 "sha256": f.get("sha256"),
                 "bytes": f.get("bytes"),
                 "group": gid,
+                "invalid": bool([e for e in errors if e.startswith(f"{gid}: entry {rel!r}")]),
             }
         source = group.get("digest_source")
-        if source:
+        if source is not None:
+            if not isinstance(source, dict):
+                errors.append(f"{gid}: digest_source must be an object")
+                continue
+            required_source_keys = ("path", "group", "file_list", "path_field", "digest_field", "bytes_field")
+            missing_keys = [k for k in required_source_keys if k not in source]
+            if missing_keys:
+                # An explicitly incomplete selector must not silently shrink
+                # the expected set: it is a config error, not a skip.
+                errors.append(f"{gid}: digest_source missing required key(s): {missing_keys}")
+                continue
             doc_path = root / source["path"]
+            if not contained(root, source["path"]):
+                errors.append(f"{gid}: digest source path escapes the repository root: {source['path']}")
+                continue
+            if not doc_path.is_file():
+                errors.append(f"{gid}: digest source is not a file: {source['path']}")
+                continue
             try:
                 doc = json.loads(doc_path.read_text())
-            except (OSError, json.JSONDecodeError) as exc:
+            except json.JSONDecodeError as exc:
+                errors.append(f"{gid}: malformed JSON in digest source {source['path']}: {exc}")
+                continue
+            except (OSError) as exc:
                 errors.append(f"{gid}: unreadable digest source {source['path']}: {exc}")
                 continue
             entries, err = resolve_file_list(doc, source)
@@ -97,13 +166,24 @@ def expand_groups(root: Path, manifest: dict) -> tuple[list[dict], list[str]]:
                 continue
             prefix = source.get("path_prefix", "")
             for entry in entries:
-                rel = prefix + entry[source["path_field"]]
+                if not isinstance(entry, dict):
+                    errors.append(f"{gid}: digest-source entry is not an object")
+                    continue
+                try:
+                    rel = prefix + entry[source["path_field"]]
+                except (KeyError, TypeError):
+                    errors.append(f"{gid}: digest-source entry missing path field {source['path_field']!r}")
+                    continue
                 if rel in declared:
                     errors.append(f"{gid}: duplicate declared path {rel}")
+                    continue
+                sha = entry.get(source["digest_field"])
+                nbytes = entry.get(source["bytes_field"])
+                errors.extend(validate_declared_entry(gid, rel, sha, nbytes))
                 declared[rel] = {
                     "path": rel,
-                    "sha256": entry.get(source["digest_field"]),
-                    "bytes": entry.get(source["bytes_field"]),
+                    "sha256": sha,
+                    "bytes": nbytes,
                     "group": gid,
                 }
     return list(declared.values()), errors
@@ -151,6 +231,8 @@ def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None)
     errors.extend(expand_errors)
 
     for f in declared_files:
+        if not isinstance(f["path"], str):
+            continue  # already reported via validate_declared_entry
         if not contained(root, f["path"]):
             errors.append(f"declared path escapes repository root: {f['path']}")
 
@@ -160,6 +242,8 @@ def run_checks(root: Path, manifest: dict, dist_manifest_rel: str | None = None)
     # 2. declared files must match actual bytes
     declared_set = {f["path"] for f in declared_files}
     for f in sorted(declared_files, key=lambda x: x["path"]):
+        if f.get("invalid"):
+            continue  # integrity declaration already reported as a config error
         path = root / f["path"]
         if not path.is_file():
             failures.append(f"missing declared file: {f['path']} (group {f['group']})")
