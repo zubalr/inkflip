@@ -213,6 +213,20 @@ test("320px layout: controls stack and stay usable, mobile profile engages", asy
   ).toBeVisible({ timeout: 60_000 });
 });
 
+test("mobile page changes discard the previous preview until requested", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto(`${baseUrl}/#/workspace`);
+  await openPdf(page, buildPdf({ pages: 2, text: "preview" }));
+  const canvas = page.locator('[data-testid="region-canvas"]');
+  await page.locator('[data-testid="render-preview"]').click();
+  await expect.poll(() => canvas.evaluate((node: HTMLCanvasElement) => node.width)).toBeGreaterThan(0);
+  await page.locator('[data-testid="preview-page"]').fill("2");
+  await expect(page.locator('[data-testid="render-preview"]')).toBeVisible();
+  await expect(canvas).toHaveAttribute("width", "0");
+  await page.locator('[data-testid="render-preview"]').click();
+  await expect.poll(() => canvas.evaluate((node: HTMLCanvasElement) => node.width)).toBeGreaterThan(0);
+});
+
 test("oversized edges are rejected before allocation", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(`${baseUrl}/#/workspace`);

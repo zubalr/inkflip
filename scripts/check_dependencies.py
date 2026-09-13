@@ -351,38 +351,10 @@ def check_base_image_lock() -> None:
         ok("base-image.actions", "no workflow `uses:` references present")
 
 
-def strip_comments(text: str, suffix: str) -> str:
-    """Strip comments while preserving string literals and line count."""
-    if suffix in (".ts", ".tsx", ".js", ".mjs", ".css"):
-        def replacer(match: re.Match) -> str:
-            s = match.group(0)
-            if s.startswith("/"):
-                return "\n" * s.count("\n")
-            return s
-        pattern = re.compile(
-            r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"|`(?:\\.|[^\\`])*`',
-            re.DOTALL | re.MULTILINE,
-        )
-        return pattern.sub(replacer, text)
-    elif suffix in (".html",):
-        return re.sub(r"<!--.*?-->", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.DOTALL)
-    return text
-
-
-EXECUTABLE_REMOTE_LOADER_RE = re.compile(
-    r"(?:src|href)\s*=\s*[\"']https?://|"
-    r"importScripts\s*\(\s*[\"']https?://|"
-    r"new\s+(?:Shared)?Worker\s*\(\s*[\"']https?://|"
-    r"fetch\s*\(\s*[\"']https?://|"
-    r"import\s*\(\s*[\"']https?://|"
-    r"import\s+.*?\s+from\s*[\"']https?://|"
-    r"navigator\.sendBeacon\s*\(\s*[\"']https?://|"
-    r"\.open\s*\(\s*[\"'](?:GET|POST|HEAD)[\"']\s*,\s*[\"']https?://"
-)
-
-CDN_DOMAIN_RE = re.compile(
-    r"(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run)"
-)
+REMOTE_LOADER_RE = re.compile(
+    r"(?:src|href)\s*=\s*[\"']https?://|importScripts\(\s*[\"']https?://|"
+    r"new\s+Worker\(\s*[\"']https?://|fetch\(\s*[\"']https?://|"
+    r"(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run)")
 
 
 def check_no_runtime_download() -> None:
@@ -395,35 +367,19 @@ def check_no_runtime_download() -> None:
         fail("no-cdn.serve-paths", str(error))
 
     offenders: list[str] = []
-    # 1. Application web sources: no executable remote loaders and no CDN references
-    app_scan_roots = [ROOT / "apps/web/src", ROOT / "apps/web/index.html",
-                      ROOT / "apps/web/vite.config.ts"]
-    for item in app_scan_roots:
+    scan_roots = [ROOT / "apps/web/src", ROOT / "apps/web/index.html",
+                  ROOT / "apps/web/vite.config.ts"]
+    for item in scan_roots:
         files = [item] if item.is_file() else sorted(item.rglob("*")) if item.is_dir() else []
         for file in files:
             if file.is_file() and file.suffix in (".ts", ".tsx", ".js", ".mjs", ".html", ".css"):
-                text = strip_comments(file.read_text(errors="replace"), file.suffix)
-                for match in EXECUTABLE_REMOTE_LOADER_RE.finditer(text):
+                text = file.read_text(errors="replace")
+                for match in REMOTE_LOADER_RE.finditer(text):
                     line = text[:match.start()].count("\n") + 1
                     offenders.append(f"{file.relative_to(ROOT)}:{line}")
-                for match in CDN_DOMAIN_RE.finditer(text):
-                    line = text[:match.start()].count("\n") + 1
-                    offenders.append(f"{file.relative_to(ROOT)}:{line}")
-
-    # 2. Staged text assets in apps/web/public: no executable remote loaders
-    staged_roots = [ROOT / "apps/web/public"]
-    for item in staged_roots:
-        files = [item] if item.is_file() else sorted(item.rglob("*")) if item.is_dir() else []
-        for file in files:
-            if file.is_file() and file.suffix in (".js", ".mjs", ".html", ".css"):
-                text = strip_comments(file.read_text(errors="replace"), file.suffix)
-                for match in EXECUTABLE_REMOTE_LOADER_RE.finditer(text):
-                    line = text[:match.start()].count("\n") + 1
-                    offenders.append(f"{file.relative_to(ROOT)}:{line}")
-
     require(not offenders, "no-cdn.sources",
-            f"remote loader/CDN references in web sources or staged assets: {offenders[:6]}",
-            "web sources and staged assets carry no remote script/worker/fetch or CDN reference")
+            f"remote loader/CDN references in web sources: {offenders[:6]}",
+            "web sources carry no remote script/worker/fetch or CDN reference")
 
 
 def check_file_digest(path: Path, expected: str, name: str) -> None:

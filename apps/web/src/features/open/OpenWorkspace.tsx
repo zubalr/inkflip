@@ -194,12 +194,14 @@ export function OpenWorkspace({
   // mode it renders only on explicit request — the auto-preview is real
   // work a constrained device may not want.
   useEffect(() => {
+    // A new page must never retain the preceding page's pixels while
+    // waiting for an explicit low-memory preview request.
+    setRaster(null);
+    setRasterError(null);
     if (!doc || !renderPageRaster || !controller.currentHandle) return;
     if (lowMemory && !previewRequested) return;
     if (previewPage < 0 || previewPage >= doc.pageCount) return;
     let cancelled = false;
-    setRaster(null);
-    setRasterError(null);
     renderPageRaster(controller.currentHandle, previewPage)
       .then((next) => {
         if (!cancelled) setRaster(next);
