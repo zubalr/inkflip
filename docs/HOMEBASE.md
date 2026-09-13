@@ -96,6 +96,14 @@ these guards to branch refs, so they permit native snapshot rollover.
    `python3 scripts/homebase_relay.py publish`. Do this after dispatch, a handoff
    note, acceptance, or any change Homebase must see. Failed publication blocks
    dependent execution; retain the existing claim and retry safely.
+   A handoff note also needs `bd dolt commit -m "Publish native app handoff"`
+   and `bd dolt push` before the relay command. The relay does not publish
+   local database edits for you. Its read-only `bd diff origin/main HEAD`
+   guard rejects locally committed issue changes missing from Beads' origin
+   tracking state, including changed grant notes. An unavailable comparison
+   is an error. An unchanged Git transport ref proves neither fresh grant
+   publication nor worker pickup: verify the expected issue update on the
+   Homebase replica after its pull, then require a worker acknowledgment.
 3. Homebase: fetch `origin`, fast-forward canonical main when clean, pull the
    native state replica, then read the ZCode grant and task contract. Create or
    resume its isolated task checkout at the exact saved branch/base. Install its
@@ -123,6 +131,15 @@ Assigned Antigravity or independent SWE reviewers inspect ZCode independently; e
 including Devin edits, receives an independent actual reviewer. Use real session identities in evidence. Homebase reviewers
 must not share a writing checkout with ZCode. Held-out labels require the
 repository's actual access isolation, not another folder or a reviewer persona.
+
+For `kind: followup` grants, use the complete ID in the return branch:
+`git push handoff HEAD:refs/heads/hb/inkflip/pdf-g78`. Devin collects it with
+`python3 scripts/homebase_relay.py collect pdf-g78`; collection without an ID
+includes every active ZCode grant. Keep the exact saved `work/zcode/pdf-g78`
+branch and full base commit. Follow the grant's `instructions`, `mode` and
+`allowed_scope`, and put evidence in `artifacts/followups/pdf-g78/`.
+The product-only `coordination.py task Txx` command does not describe follow-ups.
+See `docs/NATIVE_PASSES.md` for admission and acknowledgement checks.
 
 During an active run, Devin uses bounded waits while native workers execute,
 collects Homebase checkpoints and resumes granted work after ordinary interruptions.

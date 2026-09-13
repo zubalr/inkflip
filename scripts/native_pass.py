@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 import coordination as c
+import native_followups as f
 
 
 def plan() -> dict:
@@ -37,7 +39,7 @@ def assignment(config: dict, task_id: str, app: str, base: str, stage: int) -> d
 
 def dispatch_errors(config: dict, stage: dict | None, task_id: str, issue: dict,
                     workers: list[dict], app: str) -> list[str]:
-    own = [i for i in workers if i.get("metadata", {}).get("execution", {}).get("app") == app]
+    own = [i for i in workers if ((i.get("metadata") or {}).get("execution") or {}).get("app") == app]
     # None removes a numeric ceiling; each grant still requires coordinator admission.
     global_limit = config["max_active_workers"]
     app_limit = config["worker_budgets"][app]
@@ -97,16 +99,65 @@ def status(app: str, sync: bool) -> None:
         issues = c.issues_by_id()
     stage = current_pass(config, issues)
     assignments = []
+    undelivered = []
     # Saved grants outlive changes to the static allocation; never remap their branch/app.
     product_tasks = [task for stage in config["passes"] for task in stage["tasks"]]
-    for task_id in product_tasks:
-        issue = issues.get(c.bead_id(task_id), {})
-        grant = issue.get("metadata", {}).get("execution", {})
+    product_ids = {c.bead_id(task): task for task in product_tasks}
+    for issue_id, issue in sorted(issues.items()):
+        grant = f.execution_grant(issue_id, issue)
+        assignee = issue.get("assignee") or ""
+        if (issue.get("status") in {"open", "in_progress"} and not grant
+                and (assignee == app or assignee.startswith(app + "-"))):
+            undelivered.append({"issue": issue_id, "reason": "Assignee has no execution grant; coordinator dispatch required"})
         if issue.get("status") == "in_progress" and grant.get("app") == app:
-            assignments.append({"task": task_id, "assignee": issue.get("assignee"),
-                                "notes": issue.get("notes", ""), **grant})
+            if issue_id not in product_ids:
+                f.validate_grant(issue_id, grant, config)
+            assignments.append({**grant, "task": product_ids.get(issue_id, issue_id),
+                                "assignee": issue.get("assignee"), "notes": issue.get("notes", "")})
     print(json.dumps({"app": app, "current_pass": stage, "assignments": assignments,
+                      "undelivered": undelivered,
                       "worker_budget": config["worker_budgets"][app]}, indent=2))
+
+
+def dispatch_followup(issue_id: str, app: str, mode: str, scopes: list[str], instructions: str) -> None:
+    """Claim a ready follow-up, never infer authority from prose or reassign a writer."""
+    config = plan()
+    f.validate_id(issue_id)
+    if (c.ROOT.resolve() != c.canonical_root().resolve()
+            or c.run(["git", "config", "--get", "inkflip.role"]) != "integrator"):
+        raise ValueError("Only the canonical integrator may dispatch follow-ups")
+    c.run(["git", "fetch", "origin", "main"])
+    base = c.run(["git", "rev-parse", "HEAD"])
+    if (c.run(["git", "branch", "--show-current"]) != "main"
+            or base != c.run(["git", "rev-parse", "origin/main"])
+            or c.run(["git", "status", "--porcelain"])):
+        raise ValueError("Follow-up dispatch requires clean, published canonical main")
+    with c.admission_lock():
+        sync_state()
+        issues = c.issues_by_id()
+        issue = issues.get(issue_id, {})
+        stage = current_pass(config, issues)
+        workers = c.active_workers(issues)
+        # Reuse capacity and unclaimed-state rules without treating a follow-up as a product task.
+        admission_stage = {**stage, "tasks": [issue_id]} if stage else None
+        errors = dispatch_errors(config, admission_stage, issue_id, issue, workers, app)
+        if errors:
+            raise ValueError("; ".join(errors))
+        grant = {"kind": "followup", "app": app, "branch": config["apps"][app]["branch_prefix"] + issue_id,
+                 "base": base, "pass": stage["id"], "mode": mode,
+                 "allowed_scope": scopes, "instructions": instructions}
+        f.validate_grant(issue_id, grant, config)
+        ready = {i["id"] for i in c.bd(["list", "--ready", "--limit", "0"])}
+        if issue_id not in ready:
+            raise ValueError("Beads dependencies are not ready")
+        tasks, overrides = c.load_contracts()
+        c.check_scope_ownership({"allowed_scope": scopes}, workers, tasks, overrides)
+        metadata = dict(issue.get("metadata") or {})
+        metadata["execution"] = grant
+        c.bd(["update", issue_id, "--claim", "--add-label", "execution:worker", "--metadata",
+              json.dumps(metadata)], write=True, actor=f"{app}-{issue_id}")
+        publish_state()
+        print(json.dumps({**grant, "task": issue_id}, indent=2))
 
 
 def main() -> None:
@@ -118,9 +169,17 @@ def main() -> None:
     admit = commands.add_parser("dispatch")
     admit.add_argument("task")
     admit.add_argument("--app", required=True, choices=plan()["apps"])
+    followup = commands.add_parser("dispatch-followup")
+    followup.add_argument("issue")
+    followup.add_argument("--app", required=True, choices=plan()["apps"])
+    followup.add_argument("--mode", required=True, choices=("audit", "implementation"))
+    followup.add_argument("--scope", action="append", required=True)
+    followup.add_argument("--instructions-file", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "dispatch":
         dispatch(args.task, args.app)
+    elif args.command == "dispatch-followup":
+        dispatch_followup(args.issue, args.app, args.mode, args.scope, args.instructions_file.read_text())
     else:
         status(args.app, args.sync)
 

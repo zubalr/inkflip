@@ -3,8 +3,8 @@
   "task_id": "T24",
   "beads_id": "pdf-t24",
   "disposition": "accepted",
-  "evaluated_commit": "7a9c6032e08057ab6c6f80ec911f035b498e345e",
-  "evaluated_at": "2026-09-12T00:49:09.104123+00:00",
+  "evaluated_commit": "34d5dd7d7e1ce810bf731a295c958436e61dc94a",
+  "evaluated_at": "2026-09-12T19:40:49.940403+00:00",
   "contract_digest": "5e64b2bbaac6979c2c389062ed2a17ca25e32afcd94202622e5e39e57bbabe6a",
   "worker": "devin-subagent-t24",
   "commands": [
@@ -18,8 +18,10 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-2uzxgpsm/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-9mwuwx5f/results",
         "--test",
+        "tests/security/import/followup-3oz.test.mjs",
+        "tests/security/import/html-browser.test.mjs",
         "tests/security/import/html.test.mjs",
         "tests/security/import/import.test.mjs",
         "tests/security/import/png.test.mjs"
@@ -27,12 +29,12 @@
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 79,
-        "passed": 79,
+        "collected": 104,
+        "passed": 104,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-d",
       "environment": {}
     },
     {
@@ -55,39 +57,68 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-d",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T24/commands.log": "b088b4a9e6039f8da9f7b23158143d459ce3700a87b977eef5e63506c85c8098",
-    "artifacts/tasks/T24/coordinator-commands.log": "4adb83dfd6e18ebcb274de5b0ed69b5077c5d631a922eb1472471800bf8a9ad3",
-    "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl": "344e6c3c1ee35679fd8c3aa783275e14ba1d25de4f96d794f9fa134c31e6a56c",
-    "artifacts/tasks/T24/fuzz/fuzz-receipt.json": "1eca36325a7a24721015db3f09aed54e0a50541d27be5d128bdfecf96c90aae0",
-    "artifacts/tasks/T24/peer-review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
-    "artifacts/tasks/T24/receipt.json": "f5584a47d80dc5a181e9445be08b14cecdba181625d382c6cb9f1711dc0b1559",
+    "artifacts/tasks/T24/coordinator-commands.log": "3621e9e5ca9235b5cd99a7c7556dce548a94a15296cf25d4e64995c5deae65f0",
+    "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl": "c11b14ddb8a6eaeadec6f2df6489abe7344f177d1690e7fed906986c46f7d0bc",
+    "artifacts/tasks/T24/fuzz/fuzz-receipt.json": "88624a2d73ef3752de9f711b8227daaa8b0492659ffa9a0cb15a0d28e9177384",
+    "artifacts/tasks/T24/receipt.json": "b956b007f9db9eb8c5cb97ef07d383e2ab959f124c81fba7ff8f0a95779cba4e",
+    "artifacts/tasks/T24/refresh-20260912/commands.log": "ebc970d3aabcdb68391e1faa780bee4908f59514534d6e2f8c6681c563a42448",
+    "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl": "291a86cad32c1453e622933906b6f72b8a7e58bb9e725e2f8a4340965c706867",
+    "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json": "c5df9a2b7b3cf86ddbb611899ef7c63675ec8de7b905bc8eaf8e54f0c41dfae5",
+    "artifacts/tasks/T24/refresh-20260912/prior-review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
+    "artifacts/tasks/T24/refresh-20260912/review-inputs.json": "224ea89d93143a13d88d81b81cd868834c909bc2cfd12e7d50fa1a233292f8f7",
+    "artifacts/tasks/T24/refresh-20260912/run.json": "22134c1496d983e37bf72d0814d0b7e73c479123564e9d2a25eb4aba495b8699",
     "artifacts/tasks/T24/review.md": "3880bec3d2922dae6e8b8e0c0058088e1a64eaabd1344f401a0b6b7d6e60d7bd",
-    "artifacts/tasks/T24/run.json": "7673d0fa55a79a8bdf12161ed346cb5321c53975e7cb9ba9450e29a5ec53f4b5"
+    "artifacts/tasks/T24/run.json": "1950244d51519e61823095b86b8d2d7b5ba266124900bb7d661895a920d8375b"
   },
   "criteria": {
     "Controlled oversized/truncated/HTML/SVG/polyglot/prototype/path inputs fail before dangerous allocation or resource use": [
       "artifacts/tasks/T24/commands.log",
       "artifacts/tasks/T24/run.json",
       "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
-      "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl"
+      "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl",
+      "artifacts/tasks/T24/refresh-20260912/run.json",
+      "artifacts/tasks/T24/refresh-20260912/commands.log",
+      "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
     ],
     "bounded fuzz receipts show no unexpected accepts/crashes/egress": [
       "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
       "artifacts/tasks/T24/fuzz/fuzz-cases.jsonl",
-      "artifacts/tasks/T24/commands.log"
+      "artifacts/tasks/T24/commands.log",
+      "artifacts/tasks/T24/refresh-20260912/run.json",
+      "artifacts/tasks/T24/refresh-20260912/commands.log",
+      "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
     ],
     "HTML export opens script-free": [
       "artifacts/tasks/T24/commands.log",
-      "artifacts/tasks/T24/run.json"
+      "artifacts/tasks/T24/run.json",
+      "artifacts/tasks/T24/refresh-20260912/run.json",
+      "artifacts/tasks/T24/refresh-20260912/commands.log",
+      "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
     ],
     "no archive decompression surface.": [
       "artifacts/tasks/T24/commands.log",
-      "artifacts/tasks/T24/fuzz/fuzz-receipt.json"
+      "artifacts/tasks/T24/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/refresh-20260912/run.json",
+      "artifacts/tasks/T24/refresh-20260912/commands.log",
+      "artifacts/tasks/T24/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T24/refresh-20260912/review-inputs.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-receipt.json",
+      "artifacts/tasks/T24/refresh-20260912/fuzz/fuzz-cases.jsonl"
     ]
   },
   "review": {

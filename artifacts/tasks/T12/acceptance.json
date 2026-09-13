@@ -3,8 +3,8 @@
   "task_id": "T12",
   "beads_id": "pdf-t12",
   "disposition": "accepted",
-  "evaluated_commit": "aea04d6025d2574fd7ec8239b4bbc19fcb3f7ffe",
-  "evaluated_at": "2026-09-12T01:37:11.194545+00:00",
+  "evaluated_commit": "456edb41f7a1ab4f5c2eadf87322bdfa1812b764",
+  "evaluated_at": "2026-09-12T19:40:34.299544+00:00",
   "contract_digest": "09fd571b83142b2214bff011ccaded4af9a5cef5bc0969074744a8f9bded0d4f",
   "worker": "devin-subagent-t12",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-9rrucdq7/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-z6nb8skb/results",
         "--test",
         "tests/alignment/alignment.test.mjs",
         "tests/alignment/normalization.test.mjs"
@@ -31,7 +31,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
       "environment": {}
     }
   ],
@@ -40,32 +40,55 @@
     "artifacts/tasks/T12/coordinator-commands.log": "e77a34a464448243ffe0b71757a164b0887ec21e5fa33bd89fccc5f27e6f4749",
     "artifacts/tasks/T12/criteria-evidence.md": "bccab555fbced8102d4cb932201bbdc8afae1979b3880aaf3d8f72ccb0d21f66",
     "artifacts/tasks/T12/experiment-granularity.md": "894ff38ee75f307b4bf32d6e82bf7a3e6b71d01b96aabee278497c2786c41c08",
-    "artifacts/tasks/T12/peer-review.md": "11bb01991341f49143cb7c667c558e2de10ec84a01b18230d43800099e6b48d6",
-    "artifacts/tasks/T12/receipt.json": "7098d665642525fc30334ce1ba7e41c41642f11dda0f68a239a228ab86c93480",
+    "artifacts/tasks/T12/receipt.json": "28d23bd14292227881e6d26bb4bc3a0b6355e981a5986427561ea7891231c9cd",
+    "artifacts/tasks/T12/refresh-20260912/commands.log": "a492b99ef68aa0850fba1cab20127c0638af3ab3c5795cf5fb6375cfe65897df",
+    "artifacts/tasks/T12/refresh-20260912/prior-review.md": "11bb01991341f49143cb7c667c558e2de10ec84a01b18230d43800099e6b48d6",
+    "artifacts/tasks/T12/refresh-20260912/review-inputs.json": "7e96591ffe90f06c898133aa2ea058eace087cb964cb9d142cd99431f11299ed",
+    "artifacts/tasks/T12/refresh-20260912/run.json": "a876137eaba194dff493ebbd0ae41ca96554818be454eb8fce7fc92fe808b69f",
     "artifacts/tasks/T12/review.md": "11bb01991341f49143cb7c667c558e2de10ec84a01b18230d43800099e6b48d6",
-    "artifacts/tasks/T12/run.json": "b5ba79a973520cea81182b5f49ef6809e93cd33cfebd9276e85dee01ed8d6fb3"
+    "artifacts/tasks/T12/run.json": "3193390429dbc0765383c35926ad7392ee8c2ff36f2c4f9ce3d80733fb623a5e"
   },
   "criteria": {
     "Digits/currency/sign/negation/combining marks cannot disappear": [
       "artifacts/tasks/T12/commands.log",
-      "artifacts/tasks/T12/criteria-evidence.md"
+      "artifacts/tasks/T12/criteria-evidence.md",
+      "artifacts/tasks/T12/refresh-20260912/run.json",
+      "artifacts/tasks/T12/refresh-20260912/commands.log",
+      "artifacts/tasks/T12/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T12/refresh-20260912/review-inputs.json"
     ],
     "four repeated equal values remain four occurrences": [
       "artifacts/tasks/T12/commands.log",
-      "artifacts/tasks/T12/criteria-evidence.md"
+      "artifacts/tasks/T12/criteria-evidence.md",
+      "artifacts/tasks/T12/refresh-20260912/run.json",
+      "artifacts/tasks/T12/refresh-20260912/commands.log",
+      "artifacts/tasks/T12/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T12/refresh-20260912/review-inputs.json"
     ],
     "ambiguous ties abstain": [
       "artifacts/tasks/T12/commands.log",
       "artifacts/tasks/T12/experiment-granularity.md",
-      "artifacts/tasks/T12/criteria-evidence.md"
+      "artifacts/tasks/T12/criteria-evidence.md",
+      "artifacts/tasks/T12/refresh-20260912/run.json",
+      "artifacts/tasks/T12/refresh-20260912/commands.log",
+      "artifacts/tasks/T12/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T12/refresh-20260912/review-inputs.json"
     ],
     "page-only inputs never become exact regional highlights": [
       "artifacts/tasks/T12/commands.log",
-      "artifacts/tasks/T12/criteria-evidence.md"
+      "artifacts/tasks/T12/criteria-evidence.md",
+      "artifacts/tasks/T12/refresh-20260912/run.json",
+      "artifacts/tasks/T12/refresh-20260912/commands.log",
+      "artifacts/tasks/T12/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T12/refresh-20260912/review-inputs.json"
     ],
     "no unbounded quadratic matching.": [
       "artifacts/tasks/T12/commands.log",
-      "artifacts/tasks/T12/criteria-evidence.md"
+      "artifacts/tasks/T12/criteria-evidence.md",
+      "artifacts/tasks/T12/refresh-20260912/run.json",
+      "artifacts/tasks/T12/refresh-20260912/commands.log",
+      "artifacts/tasks/T12/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T12/refresh-20260912/review-inputs.json"
     ]
   },
   "review": {

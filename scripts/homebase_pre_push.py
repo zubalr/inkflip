@@ -10,6 +10,8 @@ import re
 import subprocess
 import sys
 
+import native_followups as f
+
 REMOTE_URL = "/home/wertyp/.local/share/homebase-factory/git/inkflip.git"
 MAX_INPUT = 8192
 ZERO_SHA = "0" * 40
@@ -51,13 +53,21 @@ def guard(remote: str, url: str, updates: str) -> None:
     lines = [line for line in updates.splitlines() if line.strip()]
     branch = git("symbolic-ref", "--quiet", "HEAD")
     match = re.fullmatch(r"refs/heads/work/zcode/(t(?:0[1-9]|[1-4][0-9]|5[0-5]))", branch)
-    if match is None:
-        raise ValueError("Current branch must be work/zcode/t01 through work/zcode/t55")
+    if match is not None:
+        task = match[1]
+    else:
+        prefix = "refs/heads/work/zcode/"
+        if not branch.startswith(prefix):
+            raise ValueError("Current branch must be a work/zcode task branch")
+        task = branch.removeprefix(prefix)
+        # The relay verifies the active coordinator grant before collection.
+        # This offline hook only checks the exact branch/checkpoint identity.
+        f.validate_id(task)
     if len(lines) > 1:
         raise ValueError("At most one nonempty update is allowed")
     # Git supplies no updates for an already-published SHA; identity checks still apply.
     if lines:
-        validate_update(lines[0], branch, match[1])
+        validate_update(lines[0], branch, task)
 
 
 def main() -> int:

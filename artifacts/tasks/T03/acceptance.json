@@ -3,8 +3,8 @@
   "task_id": "T03",
   "beads_id": "pdf-t03",
   "disposition": "accepted",
-  "evaluated_commit": "216ae2f56e30c79829be0f69160396b8fbc389bd",
-  "evaluated_at": "2026-09-11T23:59:01.297018+00:00",
+  "evaluated_commit": "5cfa64e64242d464eee4dc15b4f8408f49e7971d",
+  "evaluated_at": "2026-09-12T22:03:39.698666+00:00",
   "contract_digest": "d7c3858af936814d640a4f0fb48aca218722a43b93834cca57378eb85fd128f4",
   "worker": "devin-subagent-t03",
   "commands": [
@@ -18,7 +18,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-5wvecjho/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-4u5c6z9d/results",
         "--test",
         "tests/contracts/contracts.test.mjs"
       ],
@@ -30,7 +30,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     },
     {
@@ -56,7 +56,7 @@
         "pytest",
         "native/tests/contracts",
         "-q",
-        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-h36rssjw/results"
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-d3a7kcss/results"
       ],
       "cwd": ".",
       "exit": 0,
@@ -66,33 +66,56 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T03/commands.log": "2b07476e590aff312be70e03e1309652cb9c0af28f9684d8aa6f54b6312a24c1",
-    "artifacts/tasks/T03/coordinator-commands.log": "b92cbe1cb10b944e2b5776fdadc85afeeb4cb30713a61ac3e585c00d4919fb7e",
-    "artifacts/tasks/T03/peer-review.md": "aa4a869e3f24028b360449ed334cb121e6dbbe71805551927d7720e142d342d4",
-    "artifacts/tasks/T03/receipt.json": "646c5f7966348585eb3920ab10b2dfcacbede81777ab751a288d201846a1f5e0",
+    "artifacts/tasks/T03/coordinator-commands.log": "642914c5f2811ddb0c59d59bbbfe51a6c244daf1380d612d0780ae283d0887fb",
+    "artifacts/tasks/T03/receipt.json": "46ddc0dd7a39ebed839c3c3623eeee22381df7251a8b374739213a9a0737e879",
+    "artifacts/tasks/T03/refresh-20260912/commands.log": "7a4a12fbd303c5d9f294ce111f11fc909c688f64da64f3f0656d9c70d7af28e9",
+    "artifacts/tasks/T03/refresh-20260912/prior-review.md": "aa4a869e3f24028b360449ed334cb121e6dbbe71805551927d7720e142d342d4",
+    "artifacts/tasks/T03/refresh-20260912/review-inputs.json": "50c856ba658c1d1631c848480cab33d26e187b309fcf0925e98e75721ddf4ac2",
+    "artifacts/tasks/T03/refresh-20260912/run.json": "623844be26d637e585e4e98d40b37b08c7612b603c6b455db21433d48f8e94b3",
     "artifacts/tasks/T03/review.md": "aa4a869e3f24028b360449ed334cb121e6dbbe71805551927d7720e142d342d4",
-    "artifacts/tasks/T03/run.json": "143d7c4b80c1d371296eb6cd851f950a3e9c1be8ac6c2dd5779b8ecc527da92f"
+    "artifacts/tasks/T03/run.json": "43651e0245f5a9e3f88e0721320dd78234c80f70eb4e1951b256727380a9f6d1"
   },
   "criteria": {
     "All valid/invalid fixtures and expected failure codes pass in TS/Python": [
-      "artifacts/tasks/T03/commands.log"
+      "artifacts/tasks/T03/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/run.json",
+      "artifacts/tasks/T03/refresh-20260912/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T03/refresh-20260912/review-inputs.json"
     ],
     "all hash vectors agree": [
-      "artifacts/tasks/T03/commands.log"
+      "artifacts/tasks/T03/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/run.json",
+      "artifacts/tasks/T03/refresh-20260912/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T03/refresh-20260912/review-inputs.json"
     ],
     "type generation is deterministic": [
-      "artifacts/tasks/T03/commands.log"
+      "artifacts/tasks/T03/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/run.json",
+      "artifacts/tasks/T03/refresh-20260912/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T03/refresh-20260912/review-inputs.json"
     ],
     "untrusted report never compiles a schema": [
-      "artifacts/tasks/T03/commands.log"
+      "artifacts/tasks/T03/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/run.json",
+      "artifacts/tasks/T03/refresh-20260912/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T03/refresh-20260912/review-inputs.json"
     ],
     "array order and hash-excluded timestamps behave as specified.": [
-      "artifacts/tasks/T03/commands.log"
+      "artifacts/tasks/T03/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/run.json",
+      "artifacts/tasks/T03/refresh-20260912/commands.log",
+      "artifacts/tasks/T03/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T03/refresh-20260912/review-inputs.json"
     ]
   },
   "review": {

@@ -3,8 +3,8 @@
   "task_id": "T04",
   "beads_id": "pdf-t04",
   "disposition": "accepted",
-  "evaluated_commit": "6ac16266c20584f6a70c0a065d68c4d9318b9f0d",
-  "evaluated_at": "2026-09-12T00:41:22.028301+00:00",
+  "evaluated_commit": "abbe8939c4547618a3bf35795159330c1b51358f",
+  "evaluated_at": "2026-09-12T22:03:58.386249+00:00",
   "contract_digest": "01e1f4d28829c273dd60fef4cea32513d02241c56bff1dae45f96376c146e566",
   "worker": "devin-subagent-t04",
   "commands": [
@@ -18,42 +18,62 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-qvfaeomw/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-bwmp8f9h/results",
         "--test",
+        "tests/geometry/followup-iy2.test.mjs",
         "tests/geometry/geometry.test.mjs"
       ],
       "cwd": ".",
       "exit": 0,
       "tests": {
-        "collected": 32,
-        "passed": 32,
+        "collected": 47,
+        "passed": 47,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-a",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T04/commands.log": "00eaed20c6ab5bd683a852035ea77b23b39bd5e078366b2e6f56810a2cc4ab0c",
     "artifacts/tasks/T04/coordinator-commands.log": "5408472471188370517adc6ee91c752f91a628129d5a5884763cb609d5524411",
-    "artifacts/tasks/T04/peer-review.md": "f7077d75d5af5ceaf4b159c52669b5a5b12cef05b2757f2f2df842e1b5465f04",
-    "artifacts/tasks/T04/receipt.json": "ec00cab8beff9de9bb87c2c3b1b868521deb45105fe567c093ef8cd3439d747d",
+    "artifacts/tasks/T04/receipt.json": "356b8d42278cad36829e0591b8314e488af5089d0ffff9918b8b2a95fefd3eba",
+    "artifacts/tasks/T04/refresh-20260912/commands.log": "d4bfa13dba59339779c96df7b1bd4df3fc81f8af3ef49ecb3d781f3af95b4674",
+    "artifacts/tasks/T04/refresh-20260912/prior-review.md": "f7077d75d5af5ceaf4b159c52669b5a5b12cef05b2757f2f2df842e1b5465f04",
+    "artifacts/tasks/T04/refresh-20260912/review-inputs.json": "d573f72e174964085d8fcb9bc095931f7e2f82e8a0ed6ba60ee44c6f50c4c13d",
+    "artifacts/tasks/T04/refresh-20260912/run.json": "7b28d5125996673983de0f6f1f48d77e22cbb7eff329d21fd7b503f6d6fc8b7b",
     "artifacts/tasks/T04/review.md": "f7077d75d5af5ceaf4b159c52669b5a5b12cef05b2757f2f2df842e1b5465f04",
-    "artifacts/tasks/T04/run.json": "97ee73109f07f253299f79f77b15db562d8d3e3a7d5447c1e3e192dc2297281f"
+    "artifacts/tasks/T04/run.json": "76573d2d0bee50d12526e6e4bcd9d86ffe46bc5ff53435c9bbaada01eb419260"
   },
   "criteria": {
     "All four rotations/nonzero origins/UserUnit worked examples pass <=1e-5pt": [
-      "artifacts/tasks/T04/commands.log"
+      "artifacts/tasks/T04/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/run.json",
+      "artifacts/tasks/T04/refresh-20260912/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
     ],
     "singular transforms rejected": [
-      "artifacts/tasks/T04/commands.log"
+      "artifacts/tasks/T04/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/run.json",
+      "artifacts/tasks/T04/refresh-20260912/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
     ],
     "estimated/page-only polygons obey schema": [
-      "artifacts/tasks/T04/commands.log"
+      "artifacts/tasks/T04/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/run.json",
+      "artifacts/tasks/T04/refresh-20260912/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
     ],
     "CSS/DPR tests verify correct page and p95<=2px, maximum 4 px once viewer integrates.": [
-      "artifacts/tasks/T04/commands.log"
+      "artifacts/tasks/T04/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/run.json",
+      "artifacts/tasks/T04/refresh-20260912/commands.log",
+      "artifacts/tasks/T04/refresh-20260912/prior-review.md",
+      "artifacts/tasks/T04/refresh-20260912/review-inputs.json"
     ]
   },
   "review": {

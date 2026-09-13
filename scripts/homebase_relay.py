@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Explicit Mac relay: publish after bd dolt push; collect [T01..T55].
+"""Explicit Mac relay: publish after bd dolt push; collect product tasks and granted follow-ups.
 
 No Beads writes or worker launching. JSON success is emitted only after all
 requested Git operations succeed. Failures may follow earlier collections;
@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 
 import coordination as c
+import native_followups as f
+import native_pass as p
 
 DOLT_REF = "refs/dolt/data"
 
@@ -68,12 +70,33 @@ def require_ancestor(base: str, candidate: str, context: str) -> None:
         raise ValueError(f"{context}: candidate does not descend from {base}") from error
 
 
+def beads_changes() -> object:
+    # Beads 1.2.2 emits a fixed plain-text response for an empty diff even
+    # with --json. Recognize only that exact response; other text fails closed.
+    output = c.run(["bd", "--sandbox", "--directory", str(c.canonical_root()),
+                    "--json", "--readonly", "diff", "origin/main", "HEAD"])
+    if output == "No changes between origin/main and HEAD":
+        return []
+    return json.loads(output)
+
+
+def require_published_beads() -> None:
+    """An old transport ref must not mask new coordinator grants left locally."""
+    changes = beads_changes()
+    if not isinstance(changes, list):
+        raise ValueError("Beads publication comparison is malformed; publication is unverified")
+    if changes:
+        raise ValueError("Local Beads changes differ from origin/main; run bd dolt commit and "
+                         "bd dolt push before relay publication")
+
+
 def publish() -> dict:
     validate_clone(config())
     if git("branch", "--show-current") != "main":
         raise ValueError("Publish requires main")
     if git("status", "--porcelain"):
         raise ValueError("Publish requires a clean checkout")
+    require_published_beads()
     refs = fetch_snapshot("origin", advertised(
         "origin", "refs/heads/main", "refs/heads/work/*", "refs/heads/review/*", DOLT_REF))
     if DOLT_REF not in refs:
@@ -86,19 +109,24 @@ def publish() -> dict:
             require_ancestor(sha, refs[ref], f"Homebase divergence at {ref}")
     # Atomic prevents a rejected code/state ref from looking like dispatched work.
     # Only the native storage snapshot may roll over, and only at the observed SHA.
+    require_published_beads()
     lease = f"--force-with-lease={DOLT_REF}:{previous.get(DOLT_REF, '')}"
     git("push", "--atomic", "--no-follow-tags", "--recurse-submodules=no", lease,
         "homebase", *(f"{sha}:{ref}" for ref, sha in refs.items()))
+    require_published_beads()
     return {"status": "published", "refs": refs}
 
 
 def grant_for(task: str, issues: dict) -> dict:
-    if not re.fullmatch(r"T(?:0[1-9]|[1-4][0-9]|5[0-5])", task):
-        raise ValueError("Use task T01 through T55")
-    issue = issues.get(c.bead_id(task), {})
-    grant = (issue.get("metadata") or {}).get("execution") or {}
+    product = re.fullmatch(r"T(?:0[1-9]|[1-4][0-9]|5[0-5])", task)
+    issue_id = c.bead_id(task) if product else task
+    issue = issues.get(issue_id, {})
+    grant = f.execution_grant(issue_id, issue)
     if issue.get("status") != "in_progress" or grant.get("app") != "zcode":
         raise ValueError(f"{task}: requires an active zcode grant")
+    if not product:
+        f.validate_grant(task, grant, p.plan())
+        return grant
     if grant.get("branch") != f"work/zcode/{task.lower()}":
         raise ValueError(f"{task}: unsafe or mismatched assigned branch")
     if not re.fullmatch(r"[0-9a-f]{40}", str(grant.get("base", ""))):
@@ -131,11 +159,18 @@ def collect_one(task: str, grant: dict) -> dict:
 def collect(task: str | None = None) -> dict:
     validate_clone(config())
     issues = c.issues_by_id()
-    tasks = [task] if task else sorted(
-        issue_id.removeprefix("pdf-").upper()
-        for issue_id, issue in issues.items()
-        if issue.get("status") == "in_progress"
-        and ((issue.get("metadata") or {}).get("execution") or {}).get("app") == "zcode")
+    if not isinstance(issues, dict):
+        raise ValueError("Malformed issue records")
+    tasks = [task] if task is not None else []
+    if task is None:
+        for issue_id, issue in issues.items():
+            if not isinstance(issue_id, str):
+                raise ValueError("Malformed issue ID")
+            grant = f.execution_grant(issue_id, issue)
+            if issue.get("status") == "in_progress" and grant.get("app") == "zcode":
+                product = re.fullmatch(r"pdf-t(?:0[1-9]|[1-4][0-9]|5[0-5])", issue_id)
+                tasks.append(issue_id.removeprefix("pdf-").upper() if product else issue_id)
+        tasks.sort()
     grants = [(tid, grant_for(tid, issues)) for tid in tasks]
     return {"status": "ok", "results": [collect_one(tid, grant) for tid, grant in grants]}
 

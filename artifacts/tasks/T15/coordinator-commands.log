@@ -9,11 +9,11 @@ Running 4 tests using 1 worker
 [1A[2K[2/4] tests/privacy/local.spec.ts:1218:1 › warm: second run reuses verified cached model — zero asset refetch
 [1A[2K[3/4] tests/privacy/local.spec.ts:1293:1 › offline: prepared page completes workflow with zero requests; cold offline fails specifically
 [1A[2K[4/4] tests/privacy/local.spec.ts:1426:1 › receipt: offline inspector validates every capture
-[1A[2K  4 passed (4.4s)
+[1A[2K  4 passed (6.8s)
 $ python3 scripts/task_acceptance.py run test:privacy tests/privacy/local.spec.ts
-(node:2135) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(node:3251) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[1A[2K(node:2136) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[1A[2K(node:3261) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 [1A[2Ktests/privacy/local.spec.ts:829:1 › cold: built-site own-file journey leaves zero document trace
 [33m[plugin builtin:vite-reporter] [33;1m

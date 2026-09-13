@@ -1,6 +1,7 @@
 import copy
 import importlib.util
 import json
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -9,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
 SPEC = importlib.util.spec_from_file_location("coordination", ROOT / "scripts/coordination.py")
 c = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(c)

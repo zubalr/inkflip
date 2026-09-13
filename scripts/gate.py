@@ -59,6 +59,22 @@ def check_prerequisites(gate: dict, issues: dict, ref: str = "HEAD") -> tuple[li
     return verified, errors
 
 
+def require_unblocked_owner(gate: dict) -> None:
+    """Live follow-up dependencies remain authoritative beyond the static plan."""
+    owner = coordination.bead_id(gate["task"])
+    dependencies = coordination.bd(["dep", "list", owner, "--type", "blocks"])
+    if not isinstance(dependencies, list):
+        raise GateError(f"{owner}: malformed Beads dependency list")
+    for dependency in dependencies:
+        if (not isinstance(dependency, dict)
+                or not isinstance(dependency.get("id"), str) or not dependency["id"]
+                or not isinstance(dependency.get("status"), str) or not dependency["status"]
+                or dependency.get("dependency_type") != "blocks"):
+            raise GateError(f"{owner}: malformed Beads blocking dependency")
+        if dependency["status"] != "closed":
+            raise GateError(f"{owner}: blocked by {dependency['id']} ({dependency['status']})")
+
+
 def run_scenarios(gate: dict, overrides: dict, registry: dict) -> tuple[list[dict], list[str]]:
     records, errors = [], []
     for command in gate["scenario_commands"]:
@@ -116,6 +132,7 @@ def main() -> int:
             os.environ["INKFLIP_PUBLIC_ORIGIN"] = args.target
 
         issues = coordination.issues_by_id()
+        require_unblocked_owner(gate)
         verified, errors = check_prerequisites(gate, issues)
         if errors:
             for error in errors:
@@ -135,6 +152,7 @@ def main() -> int:
             return 1
         if acceptance_receipts.require_clean_inputs() != head:
             raise GateError("HEAD changed while gate scenarios ran")
+        require_unblocked_owner(gate)
 
         receipt = args.receipt or ROOT / "artifacts/gates" / gate["id"] / "receipt.json"
         receipt.parent.mkdir(parents=True, exist_ok=True)

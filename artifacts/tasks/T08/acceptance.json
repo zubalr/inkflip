@@ -3,8 +3,8 @@
   "task_id": "T08",
   "beads_id": "pdf-t08",
   "disposition": "accepted",
-  "evaluated_commit": "cd222f4e62462fb19fca9c2e1bca8c3d41923400",
-  "evaluated_at": "2026-09-12T12:16:18.261192+00:00",
+  "evaluated_commit": "14533bfc2dbb52aa4ff53c91d4ce2e9339e57bc6",
+  "evaluated_at": "2026-09-12T19:41:50.922015+00:00",
   "contract_digest": "ff5303b4e0a975556ce132dca60611da47860a1aa46a9f3b0b5341a69feaa9da",
   "worker": "devin-swe-667d27e8",
   "commands": [
@@ -32,16 +32,16 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-b",
       "environment": {}
     }
   ],
   "evidence": {
     "artifacts/tasks/T08/commands.log": "c6704e89b95d3a9be1b8c850d147be3dff3a3860f1deff587e7d2fc2eded6f53",
-    "artifacts/tasks/T08/coordinator-commands.log": "4856a673f5bcfeebfe6f59451d820ced87346614cc173162e8b5e8332afe4f41",
+    "artifacts/tasks/T08/coordinator-commands.log": "ea748ad41b1c911c77d43888e2153f611242545b57a323541246c46a558ff03d",
     "artifacts/tasks/T08/receipt.json": "8e13c9a3c3ca2811c3844c0cd40d89dea2cb31722238fc17762b16939e88a503",
     "artifacts/tasks/T08/review.md": "fb39910c5f62cc6c0b0ca26fd07aea8f7545e6b6b4c20a18891c51b023a3597e",
-    "artifacts/tasks/T08/run.json": "d61cc6f53c557151a953baa3b81f19f85ce0483839423bca2006aec9198a1560"
+    "artifacts/tasks/T08/run.json": "c4f6b7208260bfe266a370918eb89182e54fb82ece733621f89c337067593e83"
   },
   "criteria": {
     "20MiB/1000-page and mobile limits exercised without giant allocations": [

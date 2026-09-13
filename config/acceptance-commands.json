@@ -200,7 +200,12 @@
       "status": "active",
       "collection": "harness-unittest",
       "argv": [
-        "python3",
+        "uv",
+        "run",
+        "--frozen",
+        "--project",
+        "native",
+        "python",
         "-m",
         "unittest",
         "discover",
@@ -209,7 +214,8 @@
         "-v"
       ],
       "requires": [
-        "scripts/make_fixtures.py"
+        "scripts/make_fixtures.py",
+        "native/uv.lock"
       ],
       "owner_task": "T05",
       "description": "Regenerate controlled fixtures and assert byte/source manifest expectations. Registered by the fixture owner (T05): the suite includes the generator --check determinism pass plus the TEST-05 structural contract."
