@@ -286,8 +286,27 @@ def problems_for(root: Path) -> list[str]:
             )
 
     dist_notices = dist / "notices"
-    if not _nonempty_dir(notices) and not _nonempty_dir(dist_notices):
-        missing.append(f"missing nonempty notices directory: {notices}")
+    index_path = dist_notices / "INDEX.json"
+    if not index_path.is_file():
+        missing.append(f"missing assembled notices index: {index_path}")
+    else:
+        index = _load_json(index_path)
+        if index is None:
+            missing.append(f"unreadable notices index: {index_path}")
+        else:
+            ids = {entry.get("id") for entry in index.get("entries") or [] if isinstance(entry, dict)}
+            for required in ("inkflip-mit", "pdfium-binary-appendix", "node-license"):
+                if required not in ids:
+                    missing.append(f"image notices missing required {required}")
+            pdfium = dist_notices / "pypdfium2-binary" / "BUILD_LICENSES" / "pdfium.txt"
+            node_license = dist_notices / "node" / "LICENSE"
+            app_mit = dist_notices / "inkflip-MIT.txt"
+            if not pdfium.is_file() or pdfium.stat().st_size == 0:
+                missing.append(f"PDFium binary license appendix missing: {pdfium}")
+            if not node_license.is_file() or node_license.stat().st_size == 0:
+                missing.append(f"Node bundled LICENSE missing: {node_license}")
+            if not app_mit.is_file() or app_mit.stat().st_size == 0:
+                missing.append(f"application MIT notice missing: {app_mit}")
 
     release_node = root / "release" / "node"
     release_models = root / "release" / "models"

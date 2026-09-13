@@ -56,7 +56,145 @@ def fail(message: str, code: int = 1) -> int:
     return code
 
 
+def _extract_zip_licenses(wheel: Path, dest: Path) -> list[dict]:
+    copied: list[dict] = []
+    with zipfile.ZipFile(wheel) as zf:
+        for name in zf.namelist():
+            lower = name.lower()
+            if not (
+                "/licenses/" in lower
+                or lower.endswith("license")
+                or lower.endswith("license.txt")
+                or lower.endswith("licence")
+                or "build_licenses/" in lower
+            ):
+                continue
+            if name.endswith("/"):
+                continue
+            rel = Path(name).name
+            # Keep BUILD_LICENSES and nested license paths.
+            parts = Path(name).parts
+            if "BUILD_LICENSES" in parts:
+                idx = parts.index("BUILD_LICENSES")
+                target = dest / "BUILD_LICENSES" / Path(*parts[idx + 1 :])
+            elif "LICENSES" in parts:
+                idx = parts.index("LICENSES")
+                target = dest / "LICENSES" / Path(*parts[idx + 1 :])
+            else:
+                target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            data = zf.read(name)
+            target.write_bytes(data)
+            copied.append({"source": name, "bytes": len(data)})
+    return copied
+
+
 def build_inkflip_wheel(out_dir: Path) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    proc = subprocess.run(
+        ["uv", "build", "--project", str(NATIVE), "--wheel", "--out-dir", str(out_dir)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"uv build failed:\n{proc.stdout}\n{proc.stderr}")
+    wheels = sorted(out_dir.glob("inkflip-*.whl"))
+    if len(wheels) != 1:
+        raise RuntimeError(f"expected one inkflip wheel, found {wheels}")
+    return wheels[0]
+
+
+def install_image_notices(
+    *,
+    dist: Path,
+    notices_dest: Path,
+    node_stamp: dict,
+    app_name: str,
+    app_sha: str,
+) -> dict:
+    """Ship PDFium binary appendix, Node LICENSE, and application MIT in the image."""
+    entries: list[dict] = []
+    license_src = ROOT / "LICENSE"
+    if license_src.is_file():
+        dest = notices_dest / "inkflip-MIT.txt"
+        shutil.copyfile(license_src, dest)
+        entries.append(
+            {
+                "id": "inkflip-mit",
+                "path": str(dest.relative_to(dist)),
+                "sha256": sha256_file(dest),
+                "bytes": dest.stat().st_size,
+            }
+        )
+
+    wheels_dir = dist / "wheels"
+    for wheel in sorted(wheels_dir.glob("pypdfium2-*.whl")):
+        dest = notices_dest / "pypdfium2-binary"
+        dest.mkdir(parents=True, exist_ok=True)
+        extracted = _extract_zip_licenses(wheel, dest)
+        pdfium_txt = dest / "BUILD_LICENSES" / "pdfium.txt"
+        if not pdfium_txt.is_file():
+            raise RuntimeError(f"pypdfium2 wheel {wheel.name} has no BUILD_LICENSES/pdfium.txt")
+        entries.append(
+            {
+                "id": "pdfium-binary-appendix",
+                "wheel": wheel.name,
+                "path": str(pdfium_txt.relative_to(dist)),
+                "sha256": sha256_file(pdfium_txt),
+                "bytes": pdfium_txt.stat().st_size,
+                "extracted": len(extracted),
+            }
+        )
+
+    node_name = node_stamp["filename"]
+    tarball = dist / "node" / node_name
+    if tarball.is_file():
+        import tarfile
+
+        node_notice_dir = notices_dest / "node"
+        node_notice_dir.mkdir(parents=True, exist_ok=True)
+        with tarfile.open(tarball) as tf:
+            members = [
+                m
+                for m in tf.getmembers()
+                if m.isfile()
+                and Path(m.name).name in {"LICENSE", "license", "LICENSE.md"}
+                and "node_modules" not in Path(m.name).parts
+            ]
+            # Prefer the runtime root LICENSE (shortest path).
+            members.sort(key=lambda m: (len(Path(m.name).parts), m.name))
+            if not members:
+                raise RuntimeError(f"Node tarball {node_name} has no LICENSE")
+            member = members[0]
+            extracted = tf.extractfile(member)
+            if extracted is None:
+                raise RuntimeError(f"cannot extract {member.name} from {node_name}")
+            data = extracted.read()
+            dest = node_notice_dir / "LICENSE"
+            dest.write_bytes(data)
+            entries.append(
+                {
+                    "id": "node-license",
+                    "source": member.name,
+                    "path": str(dest.relative_to(dist)),
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                    "bytes": len(data),
+                }
+            )
+
+    index = {
+        "kind": "inkflip-native-image-notices",
+        "schema_version": "1.0.0",
+        "application_wheel": {"filename": app_name, "sha256": app_sha},
+        "required": ["inkflip-mit", "pdfium-binary-appendix", "node-license"],
+        "entries": entries,
+    }
+    missing = [key for key in index["required"] if not any(e.get("id") == key for e in entries)]
+    if missing:
+        raise RuntimeError(f"image notices missing required entries: {missing}")
+    (notices_dest / "INDEX.json").write_text(json.dumps(index, indent=2, sort_keys=True) + "\n")
+    return index
     out_dir.mkdir(parents=True, exist_ok=True)
     proc = subprocess.run(
         ["uv", "build", "--project", str(NATIVE), "--wheel", "--out-dir", str(out_dir)],
@@ -191,7 +329,17 @@ def main() -> int:
     notices_dest = DIST / "notices"
     if notices_dest.exists():
         shutil.rmtree(notices_dest)
-    shutil.copytree(notices_src, notices_dest)
+    if notices_src.is_dir():
+        shutil.copytree(notices_src, notices_dest)
+    else:
+        notices_dest.mkdir(parents=True)
+    notice_index = install_image_notices(
+        dist=DIST,
+        notices_dest=notices_dest,
+        node_stamp=node_stamp,
+        app_name=app_name,
+        app_sha=app_sha,
+    )
 
     identity = {
         "kind": "inkflip-native-image-context",
@@ -205,6 +353,7 @@ def main() -> int:
         },
         "wheels": copied,
         "requirements_lock": "native/dist/requirements.lock",
+        "notices": notice_index,
         "dockerfile": "build/native/Dockerfile",
         "docker_platform": "linux/amd64",
         "note": "linux/arm64 checkout images are not this production hashed image",

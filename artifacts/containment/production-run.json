@@ -1,92 +1,189 @@
 {
   "counts": {
-    "collected": 15,
-    "passed": 15,
+    "collected": 28,
+    "passed": 27,
     "failed": 0,
-    "image": "inkflip-native:nrf-prod",
+    "blocked": 1,
+    "image": "inkflip-native:rrr-prod",
     "architecture": {
       "host_machine": "arm64",
       "docker_architecture_line": "aarch64 linux",
       "requested_platform": "linux/amd64",
       "emulated": true,
       "note": "linux/amd64 on Apple Silicon OrbStack is qemu; not native x86_64 reference performance"
-    }
+    },
+    "native_max_file_bytes": 104857600,
+    "emulated_linux_amd64": true,
+    "native_x86_64_reference": false
   },
   "cases": [
     {
       "name": "production-image-build",
       "ok": true,
-      "detail": "reused inkflip-native:nrf-prod"
+      "blocked": false,
+      "detail": "reused inkflip-native:rrr-prod"
     },
     {
       "name": "production-image-linux-amd64",
       "ok": true,
-      "detail": "sha256:4055655e16732189ad6c0a567010282656dc713db71c9ccf561b7a02369ec8d2 linux/amd64 166587587"
+      "blocked": false,
+      "detail": "sha256:d3ac1579545933854fa4c2d3df350d1b78311c01591908daeaa0136c03f8e5ce linux/amd64 166647121"
+    },
+    {
+      "name": "production-host-wheel-hash",
+      "ok": true,
+      "blocked": false,
+      "detail": "app.wheel.json 4fc4fa1b265813ae34bedcb948ab157e3f024914d59f01765ac64b7f6825d510 file 4fc4fa1b265813ae34bedcb948ab157e3f024914d59f01765ac64b7f6825d510 path=inkflip-0.0.0-py3-none-any.whl"
     },
     {
       "name": "production-inspect",
       "ok": true,
-      "detail": "Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:4055655e16732189ad6c0a567010282656dc713db71c9ccf561b7a02369ec8d2 lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-native-runtime-finish/build/native/image.lock.json\nWARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested\n"
+      "blocked": false,
+      "detail": "exit 0 kind=report Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:d3ac1579545933854fa4c2d3df350d1b78311c01591908daeaa0136c03f8e5ce lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-runtime-review-repairs/build/native/image.lock.json platform=linux/amd64\n"
+    },
+    {
+      "name": "production-output-bounds",
+      "ok": true,
+      "blocked": false,
+      "detail": "report_bytes=123945 cap=67108864"
     },
     {
       "name": "production-node-unpacked",
       "ok": true,
-      "detail": "exit 0 stdout='v22.23.2' stderr=''"
+      "blocked": false,
+      "detail": "exit 0 stdout='v22.23.2'"
     },
     {
       "name": "production-model-present",
       "ok": true,
+      "blocked": false,
       "detail": "True 4113088\n"
+    },
+    {
+      "name": "production-image-notices",
+      "ok": true,
+      "blocked": false,
+      "detail": "{'inkflip-MIT.txt': True, 'node/LICENSE': True, 'pypdfium2-binary/BUILD_LICENSES/pdfium.txt': True, 'INDEX.json': True}\n"
+    },
+    {
+      "name": "production-installed-wheel-resources",
+      "ok": true,
+      "blocked": false,
+      "detail": "0.0.0 True True ['inkflip']\n"
     },
     {
       "name": "production-no-checkout-tree",
       "ok": true,
+      "blocked": false,
       "detail": "exit 0 "
     },
     {
       "name": "production-nonroot-uid",
       "ok": true,
+      "blocked": false,
       "detail": "65532\n"
     },
     {
       "name": "production-no-egress",
       "ok": true,
+      "blocked": false,
       "detail": "~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/socket.py\", line 868, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.13/socket.py\", line 853, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nOSError: [Errno 101] Network is unreachable\n"
     },
     {
       "name": "production-readonly-input",
       "ok": true,
+      "blocked": false,
       "detail": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    open('/input/escape.txt','w').write('nope')\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 30] Read-only file system: '/input/escape.txt'\n"
     },
     {
       "name": "production-crash",
       "ok": true,
+      "blocked": false,
       "detail": "exit 99"
     },
     {
       "name": "production-timeout",
       "ok": true,
+      "blocked": false,
       "detail": "killed after 5s wall timeout"
+    },
+    {
+      "name": "production-process-tree-terminated",
+      "ok": true,
+      "blocked": false,
+      "detail": "no leftover container"
     },
     {
       "name": "production-oversize-input-fails-closed",
       "ok": true,
-      "detail": "exit 4 EOF marker not found\nError: Failed to parse PDF /input/huge.bin: Stream has ended unexpectedly\n"
+      "blocked": false,
+      "detail": "exit 5 (want [5]) Error: Source exceeds native.max_file_bytes 104857600 (got 104857601)\n"
     },
     {
-      "name": "production-neighbor-corpus-preserved",
+      "name": "production-oversize-did-not-write-report",
       "ok": true,
-      "detail": "exit 0 neighbor=True prior_intact=True"
+      "blocked": false,
+      "detail": "huge.json exists=False"
     },
     {
-      "name": "production-tesseract-missing-or-completes",
+      "name": "production-unknown-reader",
       "ok": true,
-      "detail": "exit 2 Error: --reader tesseract requires explicit --ocr-pages; raster source is PDFium\n"
+      "blocked": false,
+      "detail": "exit 2 (want [2]) Error: Unknown reader 'nope'; allowlisted readers are: pdfium, pypdf, tesseract\n"
+    },
+    {
+      "name": "production-malformed-report",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 2 (want [2]) Error: Contract validation failed: JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)\n"
+    },
+    {
+      "name": "production-tesseract-missing-binary-typed",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 3 reason=missing_binary: tesseract executable not found"
+    },
+    {
+      "name": "production-tesseract-inference",
+      "ok": false,
+      "blocked": true,
+      "detail": "blocked: production image has no pinned tesseract executable; eng.traineddata is present but inference cannot run"
+    },
+    {
+      "name": "production-report-html",
+      "ok": true,
+      "blocked": false,
+      "detail": "HTML report written to /output/report.html\n"
+    },
+    {
+      "name": "production-replay",
+      "ok": true,
+      "blocked": false,
+      "detail": "Replay report written to /output/replay.json\n"
+    },
+    {
+      "name": "production-compare-readers",
+      "ok": true,
+      "blocked": false,
+      "detail": "Comparison written to /output/compare\n"
+    },
+    {
+      "name": "production-corpus-neighbors",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 3 "
+    },
+    {
+      "name": "production-corpus-resume",
+      "ok": true,
+      "blocked": false,
+      "detail": "exit 3 "
     },
     {
       "name": "production-source-bytes-unchanged",
       "ok": true,
-      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-v0t703pa/source with spaces"
+      "blocked": false,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-d3fvxjro/source with spaces"
     }
   ]
 }

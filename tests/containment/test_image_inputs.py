@@ -118,6 +118,23 @@ class TestNativeImageInputs(unittest.TestCase):
         write(self.root, "native/dist/node/node-v22.23.2-linux-x64.tar.xz", tarball)
         write(self.root, "native/dist/models/tessdata/eng.traineddata", model)
         write(self.root, "release/notices/pillow/LICENSE", b"MIT\n")
+        write(self.root, "native/dist/notices/inkflip-MIT.txt", b"MIT License\n")
+        write(self.root, "native/dist/notices/node/LICENSE", b"Node MIT\n")
+        write(self.root, "native/dist/notices/pypdfium2-binary/BUILD_LICENSES/pdfium.txt", b"PDFium\n")
+        write(
+            self.root,
+            "native/dist/notices/INDEX.json",
+            json.dumps(
+                {
+                    "kind": "inkflip-native-image-notices",
+                    "entries": [
+                        {"id": "inkflip-mit"},
+                        {"id": "pdfium-binary-appendix"},
+                        {"id": "node-license"},
+                    ],
+                }
+            ).encode(),
+        )
         write(
             self.root,
             "release/native-wheels.manifest.json",

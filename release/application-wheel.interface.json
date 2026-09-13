@@ -1,0 +1,24 @@
+{
+  "kind": "inkflip-application-wheel-interface",
+  "schema_version": "1.0.0",
+  "owner": "cursor-native-assembly",
+  "consumer": "zcode-check-distribution",
+  "local_files": {
+    "stamp": "native/dist/app.wheel.json",
+    "wheel_glob": "native/dist/wheels/inkflip-*-py3-none-any.whl",
+    "complete_lock": "native/dist/requirements.lock",
+    "notices_index": "native/dist/notices/INDEX.json",
+    "build_context": "native/dist/BUILD-CONTEXT.json"
+  },
+  "required_notice_ids": [
+    "inkflip-mit",
+    "pdfium-binary-appendix",
+    "node-license"
+  ],
+  "proposed_manifest_field": "application_wheel",
+  "do_not_edit": [
+    "scripts/check_distribution.py",
+    "config/distribution-manifest.json",
+    "release/native-requirements.lock"
+  ]
+}
