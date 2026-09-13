@@ -1,5 +1,0 @@
-uv run --project native python -m pytest native/tests/runtime -q
-.....................................                             [100%]
-37 passed, 7 subtests passed in 11.74s
-
-Exit: 0

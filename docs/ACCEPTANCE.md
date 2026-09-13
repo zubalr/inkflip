@@ -1,97 +1,85 @@
-# Command and acceptance evidence
+# Validation and release evidence
 
-Run `bun run verify` for the checks currently implemented in the registry.
-Run `python3 scripts/task_acceptance.py task Txx` for a task's effective
-commands. Both fail when required tests are empty, skipped or unsuccessful.
-Declared commands remain unavailable until their owners install the tools and
-implement the suites. Neither command accepts a task in Beads.
+`bun run verify` checks command registration, repository boundaries and the
+validation harness. `python3 scripts/task_acceptance.py task Txx` executes a
+task's effective commands. Neither command marks a task accepted. Empty,
+failed or skipped required tests fail validation.
 
-The harness reads unittest result objects and JUnit XML from Node, pytest and
-Playwright. Custom test runners must write a JSON object with integer
-`collected`, `passed`, `failed` and `skipped` counts to the temporary path in
-`INKFLIP_TEST_REPORT_FILE`. Every collected required case must pass. An expected
-failure counts as skipped evidence. Check/build commands can have no test
-counts, but a complete task or gate must include a nonempty passing suite.
-Nested registered commands and gates propagate their counts to the task runner.
-JUnit arguments and temporary report paths are added by the harness; suite
-owners must not disable its reporter. T02 verifies the adapters against the
-resolved pytest/Playwright versions before registering those suites as active.
+The harness records structured unittest, pytest, Node and Playwright results.
+Custom runners write integer `collected`, `passed`, `failed` and `skipped`
+counts to `INKFLIP_TEST_REPORT_FILE`. A completed task requires a nonempty
+passing suite. Build commands may have no test counts.
 
-After committing implementation changes, the coordinator records a run:
+## Record a candidate
+
+Commit implementation changes before recording a run:
 
 ```sh
-python3 scripts/task_acceptance.py task T01 --report artifacts/tasks/T01/run.json
+python3 scripts/task_acceptance.py task Txx --report artifacts/tasks/Txx/run.json
 ```
 
-`--report` requires committed source before and after the run. The JSON records
-the evaluated commit, actual commands, output, exit codes and test counts.
-Evidence and Beads audit files may still change so the coordinator can record
-the results without pretending they existed before execution.
+The report binds the source revision, commands, outputs, exit codes and actual
+test counts. Changes to source during the run invalidate the report.
 
-The coordinator writes `artifacts/tasks/Txx/acceptance.json` only after review
-and merged-branch checks. Its version 1 format contains:
+Working records remain in the ignored `artifacts/tasks/` directory. Archive a
+task's current records in local Git object storage:
 
-- `schema_version: 1`, exact `task_id` and `beads_id`, and `disposition` matching
-  the permitted Beads disposition.
-- `evaluated_commit` as a full Git commit, `evaluated_at` as the actual run time,
-  and `contract_digest` from `acceptance_receipts.contract_digest(effective_task)`.
-- `commands`: the task run's ordered records. Each `segment` matches the
-  effective contract and executed `argv`; every command exits zero and every
-  required suite supplies passing counts. `cwd` is `.` relative to the absolute
-  recorded `checkout`, so receipts stay portable between prepared worktrees.
-- `evidence`: task-local paths mapped to their SHA-256 digests. Include the
-  worker receipt, command log, independent review, run JSON and any manual
-  evidence relied on by the review. Required artifacts must be nonempty.
-- `criteria`: every exact acceptance criterion mapped to one or more bound
-  evidence paths. Reviewers assess whether those files substantiate the claim.
-- `worker` and `review`: the review has `disposition: approved`, a bound `path`,
-  and a nonempty `reviewers` list distinct from the worker. Reviewer approval
-  remains a human/agent review decision; the validator checks its evidence
-  structure and does not infer that a manual test happened.
+```sh
+python3 scripts/acceptance_receipts.py archive Txx
+```
 
-Commit the evidence before setting `accepted_commit`, `accepted_receipt` and
-`disposition` in Beads and closing the task. `task Txx --require-evidence` then
-reruns commands and validates that committed acceptance. A worker's pending
-receipt cannot satisfy it. Empty JSON, failed/skipped commands, missing review,
-wrong criteria, changed evidence and stale code all fail.
+This prints a full commit identity and updates `refs/local/validation/Txx`.
+It does not change HEAD, source branches, the working tree or the normal
+index. Ordinary branch pushes do not publish this ref. Back up the local Git
+repository and working records together. A fresh clone does not contain
+current local records and cannot claim release acceptance without them.
 
-Freshness compares the evaluated commit with the accepted commit and current
-candidate over the task and dependency ownership scopes plus shared scripts,
-tool configuration and dependency manifests. Changes there require a new
-evaluation. This is conservative: later ownership handovers can require earlier
-tasks to be revalidated before a release gate. Unrelated evidence-only commits
-do not invalidate a result. Material scope changes need a coordinated contract
-update; do not narrow freshness inputs to reuse old results.
+## Independent review and acceptance
 
-`python3 scripts/gate.py G1` validates prerequisite acceptance and runs the
-gate's direct scenarios. It never calls task acceptance recursively. A successful
-gate writes its own candidate receipt. `pre-release` checks accepted G1–G4
-owner tasks and T48–T50, then runs the final-review scenarios. G5 requires an
-explicit HTTPS origin through `--target`; it runs checks only. Publication,
-deployment and rollback remain separately authorized runbook operations.
-
-## Building receipts after native app review
-
-The coordinator may generate the version 1 receipt from actual evidence:
+An independent reviewer examines the exact source candidate, required cases
+and manual observations. Record the real reviewer identity, findings, tested
+revision and disposition in the task directory. Archive that review and use
+its printed commit identity in the acceptance command:
 
 ```sh
 python3 scripts/acceptance_receipts.py verify-run Txx
-python3 scripts/acceptance_receipts.py record Txx --worker ACTUAL_WORKER --reviewer ACTUAL_REVIEWER --review-commit FULL_REVIEW_COMMIT --review-path artifacts/tasks/Txx/peer-review.md
+python3 scripts/acceptance_receipts.py record Txx --worker WORKER_ID --reviewer REVIEWER_ID --review-commit FULL_REVIEW_COMMIT --review-path artifacts/tasks/Txx/peer-review.md
+python3 scripts/acceptance_receipts.py archive Txx
+python3 scripts/acceptance_receipts.py verify Txx --commit FULL_ACCEPTANCE_COMMIT
 ```
 
-The run is `artifacts/tasks/Txx/run.json`. Commit source and peer review first.
-Every exact criterion in receipt.json needs status `executed` and `evidence` as
-a nonempty list of repository-relative, task-local evidence paths. Put narrative
-in a separate `detail` field. Each cited file must exist and be nonempty; the
-builder includes it in that criterion’s references and hashes its exact bytes.
-The builder checks run identity, executed commands/counts, freshness and a
-committed distinct review. It cannot decide whether the review's reasoning or
-manual evidence is sound: the independent reviewer and coordinator must do so.
-Commit generated evidence, then run `python3 scripts/acceptance_receipts.py
-verify Txx --commit FULL_RECEIPT_COMMIT`. Push code before setting acceptance
-metadata/closure in Beads, and then publish Beads with native Dolt sync.
+`FULL_ACCEPTANCE_COMMIT` is the identity printed by the final archive command.
+The state owner records it as `accepted_commit`, with the task's acceptance
+JSON path as `accepted_receipt`, after source integration and successful
+validation. Source and review authors must be distinct. Archive commands do
+not grant approval or change task status.
 
-Gate runs also check the owner task's live Beads blocking dependencies before
-scenarios and again before recording success. Newly discovered follow-up blockers
-remain authoritative even when absent from the frozen prerequisite list. Resolve
-them through reviewed work and coordinator disposition before rerunning the gate.
+Every exact acceptance criterion needs `status: executed` and a nonempty
+`evidence` list in the worker receipt. Each path stays within that task's
+directory and names a real nonempty file. Narrative belongs in `detail`.
+Missing device checks and unavailable capabilities remain explicitly blocked.
+
+Acceptance retains the existing version 1 schema: exact task and contract
+identity, evaluated source revision and timestamp, successful command records,
+evidence SHA-256 hashes, criterion references, and an independent approved
+review. Historical receipts committed on source branches remain readable.
+
+Local snapshots have exactly one source parent and may change only files in
+their named task directory. Validation checks source ancestry and freshness,
+immutable archived bytes, matching current evidence, command coverage and
+review identity. Modified, missing or symlinked local evidence fails. Local
+storage never substitutes for a test, a device observation or a review.
+
+## Run release gates
+
+`python3 scripts/gate.py G1` through `G4` validate accepted prerequisites and
+execute their direct scenarios. They also check live blocking dependencies
+before and after execution. Gates do not recursively accept their own tasks.
+
+Freshness covers the task, its dependencies and shared scripts, configuration
+and dependency manifests. Relevant source changes require affected checks
+and reviews to run again. A green historical result cannot certify new code.
+
+`pre-release` checks accepted capability gates and release prerequisites.
+G5 requires an explicit HTTPS origin through `--target`. It performs checks;
+publication and rollback remain separate operations.

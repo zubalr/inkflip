@@ -1,5 +1,0 @@
-uv run --project native python -m pytest native/tests/structure -q
-....................                                       [100%]
-20 passed, 14 subtests passed in 0.47s
-
-Exit: 0

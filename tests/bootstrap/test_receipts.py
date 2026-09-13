@@ -16,6 +16,7 @@ import acceptance_receipts as receipts
 import coordination
 import gate
 import native_pass
+import evidence_store
 
 
 class ReceiptTests(unittest.TestCase):
@@ -72,6 +73,88 @@ class ReceiptTests(unittest.TestCase):
         verified, errors = gate.check_prerequisites({"required_task_ids": ["T01"]}, {"pdf-t01": self.issue})
         self.assertFalse(errors)
         self.assertEqual(verified[0]["evaluated_commit"], self.evaluated)
+
+    def local_snapshot(self):
+        (self.root / ".gitignore").write_text("/artifacts/\n")
+        self.evaluated = self.commit()
+        self.data["evaluated_commit"] = self.evaluated
+        (self.root / self.path).write_text(json.dumps(self.data))
+        commit = evidence_store.snapshot(self.root, "T01")
+        self.issue["metadata"]["accepted_commit"] = commit
+        return commit
+
+    def test_local_snapshot_validates_without_publishing_or_changing_index(self):
+        commit = self.local_snapshot()
+        self.assertEqual(self.git("rev-parse", "HEAD"), self.evaluated)
+        self.assertEqual(self.git("status", "--porcelain"), "")
+        self.assertEqual(self.git("ls-files", "artifacts"), "")
+        self.assertEqual(self.git("rev-parse", "refs/local/validation/T01"), commit)
+        self.assertEqual(self.git("rev-parse", f"refs/local/validation-history/T01/{commit}"), commit)
+        self.assertEqual(receipts.validate("T01", self.issue)["accepted_commit"], commit)
+        with patch.object(coordination, "ROOT", self.root):
+            coordination.check_predecessors({"dependencies": ["T01"]},
+                                            {"pdf-t01": self.issue}, ref="HEAD")
+
+    def test_local_snapshot_rejects_modified_or_missing_evidence(self):
+        self.local_snapshot()
+        path = self.root / "artifacts/tasks/T01/review.md"
+        original = path.read_bytes()
+        for content in [b"Changed review", None]:
+            with self.subTest(content=content):
+                if content is None:
+                    path.unlink()
+                else:
+                    path.write_bytes(content)
+                with self.assertRaises(ValueError):
+                    receipts.validate("T01", self.issue)
+                path.write_bytes(original)
+
+    def test_local_snapshot_cannot_hide_changed_source(self):
+        self.local_snapshot()
+        (self.root / "package.json").write_text('{"changed":true}')
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "stale receipt"):
+            receipts.validate("T01", self.issue)
+
+    def test_local_snapshot_rejects_source_changes_in_evidence_commit(self):
+        self.local_snapshot()
+        (self.root / "package.json").write_text('{"changed":true}')
+        self.git("add", "package.json")
+        self.git("add", "-f", "artifacts")
+        tree = self.git("write-tree")
+        forged = self.git("commit-tree", tree, "-p", self.evaluated, "-m", "Synthetic invalid snapshot")
+        with self.assertRaisesRegex(ValueError, "outside its task namespace"):
+            evidence_store.require_ancestry(self.root, forged, self.evaluated, "T01")
+
+    def test_local_snapshot_rejects_symlink_evidence(self):
+        self.local_snapshot()
+        path = self.root / "artifacts/tasks/T01/review.md"
+        copy_path = self.root / "external-review.md"
+        copy_path.write_bytes(path.read_bytes())
+        path.unlink()
+        path.symlink_to(copy_path)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            receipts.validate("T01", self.issue)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            evidence_store.snapshot(self.root, "T01")
+
+    def test_local_snapshot_does_not_capture_unrelated_staged_work(self):
+        self.local_snapshot()
+        (self.root / "package.json").write_text('{"pending":true}')
+        self.git("add", "package.json")
+        index = self.git("write-tree")
+        snapshot = evidence_store.snapshot(self.root, "T01")
+        self.assertEqual(index, self.git("write-tree"))
+        self.assertEqual(self.git("show", f"{snapshot}:package.json"), "{}")
+
+    def test_existing_receipt_survives_untracking_with_identical_local_evidence(self):
+        self.save()
+        (self.root / ".gitignore").write_text("/artifacts/\n")
+        self.git("rm", "-r", "--cached", "artifacts")
+        self.commit()
+        # This exercises evidence storage, independently of source freshness.
+        receipts.validate_evidence(self.data, self.task,
+                                   self.issue["metadata"]["accepted_commit"], "HEAD")
 
     def test_native_admission_rejects_committed_empty_prerequisite_receipt(self):
         self.save({})

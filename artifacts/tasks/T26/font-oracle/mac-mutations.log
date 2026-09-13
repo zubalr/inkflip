@@ -1,6 +1,0 @@
-{"python": "3.13.15 (main, Sep  1 2026, 14:05:45) [Clang 22.1.3 ]", "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O", "binding": "5.8.0", "pdfium": "149.0.7825.0", "engine_sha256": ["3aed5632c54a689ade84a811b93943ea8afa8c3ccae6b3e7e9e58de87bea42af"], "raw_dollar_box": [48.0, 209.8719940185547, 74.68800354003906, 263.44000244140625]}
-{"case": "unmodified", "tests": 2, "assertion_failures": 0, "errors": 0}
-{"case": "UserUnit applied twice", "tests": 2, "assertion_failures": 4, "errors": 0}
-{"case": "y axis reversed", "tests": 2, "assertion_failures": 5, "errors": 0}
-{"case": "crop x translation omitted", "tests": 2, "assertion_failures": 1, "errors": 0}
-{"case": "last corner alone shifted", "tests": 2, "assertion_failures": 5, "errors": 0}

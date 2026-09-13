@@ -1,9 +1,0 @@
-# Independent review: pdf-iy2
-
-Reviewer: Codex/Astra integration lead, independent of writer Linnaeus (`01a09443-6116-7b40-90a4-b596ac388184`). Candidate: `d29ae7ad07e9a74aef666e733b300602db10fa05`, source `9ac2dc3d4d88693bfb5cf1c99d46afd05b3cac6e`, base `37ae85e`.
-
-Verdict: approved. Reviewed the entire committed source/test diff, registered T04 contract, underlying area/clipping and inverse validation paths, and recorded red/green evidence. The six-line shared extent validation covers all three public callers without a bypass; valid explicit extents and omitted defaults remain covered. Exactly zero signed-area clips become outside with source geometry retained; positive overlap and existing conservative construction threshold remain unchanged. Independent checks on the yielded clean candidate passed: 47 Node geometry tests, six Python exact-arithmetic oracle tests, and the registered geometry typecheck. Node was pinned to 22.23.2; the supplementary Python check used the existing canonical native virtual environment to run this checkout's tests, resolving the writer's missing-system-pytest limitation without changing dependencies. Source diff whitespace check passed. No source edits made during review.
-
-No blocking finding remains for the recorded follow-up. The 10,000-point sweep and direct helper tests meaningfully exercise behavior; the old vacuous assertion is removed. This is repair review, not renewed T04 acceptance or a device/visual claim. Parent still runs merged verification and revalidates all affected acceptance receipts in the integrated batch.
-
-Merged canonical candidate `dc30a3c` also passed registered T04 (47 Node tests), all six supplementary Python oracle tests, and 115 verify tests. Actual outputs are `merged-task.log`, `merged-run.json`, `merged-python.log`, `merged-verify.log`.

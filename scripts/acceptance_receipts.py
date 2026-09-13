@@ -15,6 +15,7 @@ from pathlib import Path, PurePosixPath
 
 import coordination
 import test_results
+import evidence_store
 
 ROOT = Path(__file__).resolve().parents[1]
 COMMON_INPUTS = ["scripts/", "config/", "package.json", "bun.lock", "bunfig.toml",
@@ -103,7 +104,7 @@ def validate_evidence(data: dict, task: dict, commit: str, ref: str) -> None:
         blob = git("show", f"{commit}:{path}")
         if not blob.strip() or hashlib.sha256(blob).hexdigest() != digest:
             raise ValueError(f"missing, empty or mismatched evidence: {path}")
-        if git("show", f"{ref}:{path}") != blob:
+        if evidence_store.current_blob(ROOT, ref, path) != blob:
             raise ValueError(f"stale evidence: {path}")
         if path.endswith(".json"):
             json.loads(blob)
@@ -125,7 +126,7 @@ def validate_evidence(data: dict, task: dict, commit: str, ref: str) -> None:
 
 def validate(task_id: str, issue: dict, ref: str = "HEAD") -> dict:
     commit, receipt = coordination.acceptance_reference(task_id, issue)
-    git("merge-base", "--is-ancestor", commit, ref)
+    evidence_store.require_ancestry(ROOT, commit, ref, task_id)
     try:
         data = json.loads(git("show", f"{commit}:{receipt}"))
         tasks, overrides = coordination.load_contracts()
@@ -203,7 +204,7 @@ def record_acceptance(task: dict, run_path: Path, worker: str, reviewer: str,
         raise ValueError("this task cannot close with that disposition")
     run = verified_run(task, run_path)
     evidence_path(review_path, task["id"])
-    git("merge-base", "--is-ancestor", review_commit, "HEAD")
+    evidence_store.require_ancestry(ROOT, review_commit, "HEAD", task["id"])
     review = git("show", f"{review_commit}:{review_path}")
     if not review.strip():
         raise ValueError("committed independent review is empty")
@@ -232,7 +233,7 @@ def record_acceptance(task: dict, run_path: Path, worker: str, reviewer: str,
 def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("verify-run", "record", "verify"))
+    parser.add_argument("command", choices=("verify-run", "record", "verify", "archive"))
     parser.add_argument("task")
     parser.add_argument("--run", type=Path)
     parser.add_argument("--worker")
@@ -246,7 +247,10 @@ def main() -> None:
     task = coordination.effective_task(tasks[args.task], overrides)
     path = args.run or ROOT / "artifacts/tasks" / args.task / "run.json"
     path = path if path.is_absolute() else ROOT / path
-    if args.command == "verify-run":
+    if args.command == "archive":
+        require_clean_inputs()
+        print(evidence_store.snapshot(ROOT, args.task))
+    elif args.command == "verify-run":
         print(json.dumps({"verified": args.task, "tests": verified_run(task, path)["tests"]}))
     elif args.command == "record":
         print(record_acceptance(task, path, args.worker, args.reviewer,

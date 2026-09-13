@@ -1,9 +1,0 @@
-node --test 'tests/bridge/*.test.mjs'
-
-Exit: 0
-
-uv run --project native python -m pytest native/tests/bridge -q
-............................                                             [100%]
-28 passed in 1.75s
-
-Exit: 0

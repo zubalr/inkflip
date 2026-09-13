@@ -74,20 +74,21 @@ class CoordinationTests(unittest.TestCase):
             c.acceptance_reference("T01", self.accepted)
 
     def test_unmerged_accepted_predecessor_is_blocked(self):
-        with patch.object(c, "run", side_effect=ValueError("not an ancestor")):
+        with patch("evidence_store.require_ancestry", side_effect=ValueError("not an ancestor")):
             with self.assertRaises(ValueError):
                 c.check_predecessors(self.tasks["T02"], {"pdf-t01": self.accepted}, ref="HEAD")
 
     def test_missing_committed_receipt_is_blocked(self):
-        with patch.object(c, "run", side_effect=["", ValueError("missing receipt")]):
+        with patch("evidence_store.require_ancestry"), \
+             patch.object(c, "run", side_effect=ValueError("missing receipt")):
             with self.assertRaises(ValueError):
                 c.check_predecessors(self.tasks["T02"], {"pdf-t01": self.accepted}, ref="HEAD")
 
     def test_receipt_must_be_a_file_not_a_tree(self):
-        with patch.object(c, "run", side_effect=["", "tree"]):
+        with patch("evidence_store.require_ancestry"), patch.object(c, "run", return_value="tree"):
             with self.assertRaises(ValueError):
                 c.check_predecessors(self.tasks["T02"], {"pdf-t01": self.accepted}, ref="HEAD")
-        with patch.object(c, "run", side_effect=["", "blob"]):
+        with patch("evidence_store.require_ancestry"), patch.object(c, "run", return_value="blob"):
             c.check_predecessors(self.tasks["T02"], {"pdf-t01": self.accepted}, ref="HEAD")
 
     def test_beads_readiness_is_required_even_with_accepted_parents(self):

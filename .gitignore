@@ -33,7 +33,26 @@ runs/
 .nox/
 *.egg-info/
 /native/build/
-coverage/
+/coverage/
 htmlcov/
 .coverage
 .coverage.*
+
+# Local workspace files.
+/.beads/
+/AGENTS.md
+/CLAUDE.md
+/START_HERE.md
+/prompts/
+/handoffs/
+/docs/handoffs/
+/docs/plans/independent-workbenches/
+/docs/proposals/
+/docs/HOMEBASE.md
+/docs/NATIVE_PASSES.md
+/docs/COORDINATION.md
+/artifacts/tasks/
+/artifacts/setup/
+/artifacts/followups/
+/artifacts/integration/
+/artifacts/gates/

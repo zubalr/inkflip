@@ -1,9 +1,0 @@
-node --test 'tests/security/import/*.test.mjs'
-
-Exit: 0
-
-python3 scripts/fuzz_reports.py --fixed-seed 8090 --cases 1000
-{"accepted": 172, "crashes": 0, "egress": 0, "rejected": 828, "unexpected_accepts": 0, "unexpected_rejects": 0}
-verdict=pass cases=1000 seed=8090 max_case_ms=25.21 wall_s=3.01 out=/Users/zubair/Code/Projects/pdf project/worktrees/integrate/artifacts/tasks/T24/fuzz
-
-Exit: 0

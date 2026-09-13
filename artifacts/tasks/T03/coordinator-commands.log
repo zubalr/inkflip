@@ -1,9 +1,0 @@
-node --test 'tests/contracts/*.test.mjs'
-
-Exit: 0
-
-uv run --project native python -m pytest native/tests/contracts -q
-............................. [100%]
-29 passed, 116 subtests passed in 0.17s
-
-Exit: 0

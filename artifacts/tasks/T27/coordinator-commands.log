@@ -1,6 +1,0 @@
-uv run --project native python -m pytest native/tests/ocr -q
-...................................................... [ 93%]
-....                                                                   [100%]
-58 passed, 20 subtests passed in 7.15s
-
-Exit: 0
