@@ -1,8 +1,8 @@
 {
   "task": "T12",
   "beads_id": "pdf-t12",
-  "evaluated_commit": "456edb41f7a1ab4f5c2eadf87322bdfa1812b764",
-  "evaluated_at": "2026-09-12T19:40:34.299544+00:00",
+  "evaluated_commit": "e9b8c4a4b4defbda46f0b03c098f8e558cc97895",
+  "evaluated_at": "2026-09-13T04:02:05.186185+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-z6nb8skb/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-6o29umqr/results",
         "--test",
         "tests/alignment/alignment.test.mjs",
         "tests/alignment/normalization.test.mjs"
@@ -38,7 +38,7 @@
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/refresh-c",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
       "environment": {}
     }
   ]

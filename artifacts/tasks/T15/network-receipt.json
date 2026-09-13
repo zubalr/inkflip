@@ -2,8 +2,8 @@
   "schema_version": 1,
   "tool": "scripts/inspect_network_receipt.py",
   "task": "T15",
-  "generated_at": "2026-09-12T15:25:08.368792+00:00",
-  "origin": "http://127.0.0.1:59828",
+  "generated_at": "2026-09-13T04:02:59.455468+00:00",
+  "origin": "http://127.0.0.1:62989",
   "canary": {
     "document_sha256_16": "c383a44b3cebd27f",
     "byte_length": 810,
@@ -77,8 +77,8 @@
       "label": "cold-boot-index",
       "mode": "cold",
       "surface": "/index.html",
-      "requests": 4,
-      "responses": 4,
+      "requests": 8,
+      "responses": 8,
       "websockets": 0,
       "egress_records": 0,
       "console_messages": 0,
@@ -95,8 +95,8 @@
       "label": "cold-open-mount",
       "mode": "cold",
       "surface": "/src/features/open/preview.html",
-      "requests": 14,
-      "responses": 14,
+      "requests": 15,
+      "responses": 15,
       "websockets": 0,
       "egress_records": 4,
       "console_messages": 1,
@@ -191,8 +191,8 @@
       "label": "cold-import-reopen",
       "mode": "cold",
       "surface": "/src/features/import/preview.html",
-      "requests": 7,
-      "responses": 7,
+      "requests": 8,
+      "responses": 8,
       "websockets": 0,
       "egress_records": 0,
       "console_messages": 0,
@@ -318,24 +318,27 @@
     }
   ],
   "census": {
-    "requests_total": 47,
+    "requests_total": 53,
     "methods": {
-      "GET": 47
+      "GET": 53
     },
     "unique_paths": [
       "/",
-      "/assets/ModalDialog-8VZc2_jj.js",
-      "/assets/ModalDialog-Dp0nC5og.css",
-      "/assets/global-CWUH7hDd.css",
-      "/assets/global-CbCfd5ku.js",
-      "/assets/import_-BFHhLnnB.js",
+      "/assets/App-C4AOSm7-.css",
+      "/assets/App.module-C_FLK2Uz.js",
+      "/assets/controller-7GfMuYep.js",
+      "/assets/controller-BR1IQLrW.css",
+      "/assets/controller-BzmPotlb.js",
+      "/assets/global-BHmqODga.js",
+      "/assets/global-CqVzJXWZ.css",
       "/assets/import_-BMq_ZVSZ.css",
-      "/assets/index-CRz5t4SE.js",
-      "/assets/open-B4SCvXnz.js",
-      "/assets/open-CwzWy_jt.css",
+      "/assets/import_-CRwxOFZZ.js",
+      "/assets/index-EolIzAYE.css",
+      "/assets/index-Rap4EGW-.js",
+      "/assets/open-T80fZIYU.js",
       "/assets/pdf.worker-DTrjDNvb.mjs",
       "/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
-      "/assets/privacy-BDKEFS6n.js",
+      "/assets/privacy-DCMiPyHv.js",
       "/assets/privacy-DSXHGIdZ.css",
       "/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
       "/assets/tesseract/7.0.0/worker.min.js",
@@ -344,7 +347,7 @@
       "/src/features/import/preview.html",
       "/src/features/open/preview.html"
     ],
-    "served_pairs": 20,
+    "served_pairs": 23,
     "downloads": [
       {
         "filename_sha256_16": "bf0a0960e7c71d2b",
@@ -363,10 +366,10 @@
       "id": "requests_same_origin",
       "criterion": "only fixed allowlisted same-origin asset paths",
       "status": "pass",
-      "detail": "every http(s) request resolved to the local static origin (19 additionally satisfied from browser HTTP cache \u2014 same-origin allowlisted paths)",
+      "detail": "every http(s) request resolved to the local static origin (22 additionally satisfied from browser HTTP cache \u2014 same-origin allowlisted paths)",
       "counts": {
-        "requests": 47,
-        "cache_satisfied": 19
+        "requests": 53,
+        "cache_satisfied": 22
       },
       "violations": []
     },
@@ -376,8 +379,8 @@
       "status": "pass",
       "detail": "every requested/served path is an exact member of the built-site file allowlist (dist listing plus /, /index.html, /favicon.ico)",
       "counts": {
-        "allowlist_size": 230,
-        "unique_paths": 20
+        "allowlist_size": 242,
+        "unique_paths": 23
       },
       "violations": []
     },
@@ -388,7 +391,7 @@
       "detail": "request methods are read-only static fetches",
       "counts": {
         "methods": {
-          "GET": 47
+          "GET": 53
         }
       },
       "violations": []
@@ -399,7 +402,7 @@
       "status": "pass",
       "detail": "no request URL or served path carried a query string",
       "counts": {
-        "requests": 47
+        "requests": 53
       },
       "violations": []
     },
@@ -485,9 +488,9 @@
       "id": "cold_fixed_assets",
       "criterion": "only fixed allowlisted same-origin asset paths",
       "status": "pass",
-      "detail": "cold navigation requested 4 fixed asset(s), all inside the built-site allowlist",
+      "detail": "cold navigation requested 8 fixed asset(s), all inside the built-site allowlist",
       "counts": {
-        "cold_requests": 4
+        "cold_requests": 8
       },
       "violations": []
     },
@@ -498,16 +501,20 @@
       "detail": "built JS/HTML/CSS contains no telemetry/collector endpoint literals and no external literal host that also appeared in runtime traffic; the full literal census (vendor spec links, xmlns namespaces, overridden CDN defaults, parser test vectors) is recorded for review and was never fetched at runtime",
       "counts": {
         "literal_hosts": {
-          "github.com": 24,
+          "rolldown.rs": 2,
+          "react.dev": 4,
+          "www.w3.org": 42,
+          "github.com": 27,
           "a": 9,
           "a@b": 3,
           "\u0442\u0435\u0441\u0442": 3,
           "x": 3,
-          "www.w3.org": 42,
           "${e}": 2,
           "example.com": 3,
           "foo.bar": 4,
-          "react.dev": 4,
+          "localhost:3000": 2,
+          "opencollective.com": 2,
+          "cdn.jsdelivr.net": 4,
           "www.apache.org": 1,
           "tc39.es": 75,
           "issues.chromium.org": 3,
@@ -518,11 +525,7 @@
           "url.spec.whatwg.org": 1,
           "${url}": 1,
           "www.xfa.org": 9,
-          "ns.adobe.com": 4,
-          "rolldown.rs": 1,
-          "localhost:3000": 1,
-          "opencollective.com": 1,
-          "cdn.jsdelivr.net": 3
+          "ns.adobe.com": 4
         }
       },
       "violations": []

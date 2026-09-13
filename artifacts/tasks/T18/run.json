@@ -1,0 +1,41 @@
+{
+  "task": "T18",
+  "beads_id": "pdf-t18",
+  "evaluated_commit": "9b9d23c2116f15e9b2c2fdd136a91182782e9a04",
+  "evaluated_at": "2026-09-13T00:06:47.464995+00:00",
+  "commands_run": 1,
+  "failures": [
+    "python scripts/gate.py G1"
+  ],
+  "evidence_errors": [
+    "zero tests collected \u2014 empty required suites fail"
+  ],
+  "tests": {
+    "collected": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python scripts/gate.py G1",
+      "argv": [
+        "python3",
+        "scripts/gate.py",
+        "G1"
+      ],
+      "executed_argv": [
+        "python3",
+        "scripts/gate.py",
+        "G1"
+      ],
+      "cwd": ".",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "prerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\nprerequisite unmet: stale receipt: validation inputs changed (tests/bootstrap/test_bootstrap.py)\n",
+      "error": "test evidence invalid: test counts must contain nonnegative integers",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/integrate",
+      "environment": {}
+    }
+  ]
+}

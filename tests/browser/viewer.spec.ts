@@ -367,73 +367,39 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     );
     await expect(page.locator("#viewer-stage")).toHaveCount(0);
 
-    // 2. Real PDF header bytes: accepted, but does NOT mount canned invoice findings
+    // 2. Real PDF magic but unparseable body: the real pipeline rejects it
+    // honestly — error surfaces, no canned findings mount.
     const validPdfPath = path.resolve(testDir, "my-tax-return.pdf");
     fs.writeFileSync(validPdfPath, "%PDF-1.4\n%real-bytes\n1 0 obj\n<<>>\nendobj\n");
     await page.locator("#input-open-pdf").setInputFiles(validPdfPath);
 
     // Viewer stage with canned findings must NOT be mounted
     await expect(page.locator("#viewer-stage")).toHaveCount(0);
-    // Explicit pipeline status notice must be rendered
-    const notice = page.locator("#pdf-received-notice");
-    await expect(notice).toBeVisible();
-    expect(await notice.textContent()).toContain("my-tax-return.pdf");
-    expect(await notice.textContent()).toContain("inspection pipeline is unavailable");
+    // The parse failure surfaces as an honest open error
+    await expect(page.locator("#import-error")).toBeVisible();
+    expect(await page.locator("#import-error").textContent()).toContain(
+      "could not open this PDF",
+    );
   });
 
-  test("canonical report import accepts page-level occurrences with polygon: null (P1)", async ({
+  test("canonical sealed report import mounts the viewer (P1)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(`${baseUrl}/#/workspace`);
     await page.waitForSelector('[data-testid="file-drop"]');
 
-    const fs = await import("node:fs");
-    const testDir = path.resolve(process.cwd(), "test-results");
-    fs.mkdirSync(testDir, { recursive: true });
-
-    // Canonical report with a page-level occurrence having polygon: null
-    const pageLevelReport = {
-      pages: [
-        {
-          index: 0,
-          canonical_size_pt: [612, 792],
-          limitations: ["Page-level inspection only"],
-        },
-      ],
-      readers: [],
-      occurrences: [
-        {
-          id: "occ-page-level-1",
-          reader_id: "reader-test",
-          page_index: 0,
-          ordinal: 1,
-          raw_text: "Page Level Notice",
-          normalized_text: "Page Level Notice",
-          geometry: {
-            precision: "page_only",
-            space: "canonical_page",
-            polygon: null,
-          },
-        },
-      ],
-      findings: [
-        {
-          id: "finding-page-level",
-          title: "Page-level structural observation",
-          description: "Whole page finding without coordinates",
-          category: "structural",
-          page_index: 0,
-          occurrence_ids: ["occ-page-level-1"],
-        },
-      ],
-    };
-
-    const reportPath = path.resolve(testDir, "page-level-report.json");
-    fs.writeFileSync(reportPath, JSON.stringify(pageLevelReport));
+    // The strict import gate (T24) verifies the report's seal — a
+    // hand-edited page-level occurrence breaks the digest, so the sealed
+    // canonical example is imported as-is. Page-level (polygon: null)
+    // rendering itself is covered by criterion 4's example finding.
+    const reportPath = path.resolve(
+      process.cwd(),
+      "planning/contracts/examples/valid/native-evidence.inkflip.json",
+    );
     await page.locator("#input-import-report").setInputFiles(reportPath);
 
-    // Must mount viewer stage cleanly without rejecting polygon: null
+    // Must mount viewer stage cleanly on the sealed import
     await page.waitForSelector("#viewer-stage");
     await expect(page.locator("#document-paper")).toBeVisible();
     await expect(page.locator("#import-error")).toHaveCount(0);
@@ -461,13 +427,13 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     }, Array.from(pdfBytes));
 
     await drop.dispatchEvent("drop", { dataTransfer });
-    await page.waitForTimeout(500);
 
     // Viewer stage must NOT mount canned findings
     await expect(page.locator("#viewer-stage")).toHaveCount(0);
-    // Explicit pipeline status notice must be rendered
-    const notice = page.locator("#pdf-received-notice");
+    // The dropped bytes are unparseable — the real pipeline surfaces an
+    // honest open error rather than a dead-end notice.
+    const notice = page.locator("#import-error");
     await expect(notice).toBeVisible();
-    expect(await notice.textContent()).toContain("dropped-document.pdf");
+    expect(await notice.textContent()).toContain("could not open this PDF");
   });
 });

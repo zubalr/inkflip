@@ -4,11 +4,11 @@
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/"
+      "url": "http://127.0.0.1:60849/"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/",
+      "url": "http://127.0.0.1:60849/",
       "status": 200,
       "headers": {
         "cache-control": "no-cache",
@@ -16,7 +16,7 @@
         "content-security-policy": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; font-src 'self' blob:; style-src 'self'; style-src-attr 'unsafe-inline'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'",
         "content-type": "text/html; charset=utf-8",
         "cross-origin-resource-policy": "same-origin",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:08 GMT",
         "keep-alive": "timeout=5",
         "referrer-policy": "no-referrer",
         "transfer-encoding": "chunked",
@@ -26,16 +26,16 @@
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/index-DwBZFsse.js"
+      "url": "http://127.0.0.1:60849/assets/index-BpAZCyfA.js"
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/index-BOovg_cS.css"
+      "url": "http://127.0.0.1:60849/assets/index-BOovg_cS.css"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/index-BOovg_cS.css",
+      "url": "http://127.0.0.1:60849/assets/index-BOovg_cS.css",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -46,13 +46,13 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:08 GMT",
         "content-type": "text/css"
       }
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/index-DwBZFsse.js",
+      "url": "http://127.0.0.1:60849/assets/index-BpAZCyfA.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -63,18 +63,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:08 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/pdf.worker-DTrjDNvb.mjs"
+      "url": "http://127.0.0.1:60849/assets/pdf.worker-DTrjDNvb.mjs"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/pdf.worker-DTrjDNvb.mjs",
+      "url": "http://127.0.0.1:60849/assets/pdf.worker-DTrjDNvb.mjs",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -85,18 +85,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:08 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
+      "url": "http://127.0.0.1:60849/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
+      "url": "http://127.0.0.1:60849/assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -107,18 +107,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:08 GMT",
         "content-type": "font/ttf"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/models/tessdata-fast-eng/7d4322bd/eng.traineddata"
+      "url": "http://127.0.0.1:60849/models/tessdata-fast-eng/7d4322bd/eng.traineddata"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
+      "url": "http://127.0.0.1:60849/models/tessdata-fast-eng/7d4322bd/eng.traineddata",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -129,18 +129,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:09 GMT",
         "content-type": "application/octet-stream"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/tesseract/7.0.0/worker.min.js"
+      "url": "http://127.0.0.1:60849/assets/tesseract/7.0.0/worker.min.js"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/tesseract/7.0.0/worker.min.js",
+      "url": "http://127.0.0.1:60849/assets/tesseract/7.0.0/worker.min.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -151,18 +151,18 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:09 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
     {
       "channel": "requests",
       "method": "GET",
-      "url": "http://127.0.0.1:60743/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
+      "url": "http://127.0.0.1:60849/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js"
     },
     {
       "channel": "responses",
-      "url": "http://127.0.0.1:60743/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
+      "url": "http://127.0.0.1:60849/assets/tesseract-core/7.0.0/tesseract-core-relaxedsimd-lstm.wasm.js",
       "status": 200,
       "headers": {
         "transfer-encoding": "chunked",
@@ -173,7 +173,7 @@
         "referrer-policy": "no-referrer",
         "x-content-type-options": "nosniff",
         "keep-alive": "timeout=5",
-        "date": "Sun, 13 Sep 2026 03:53:11 GMT",
+        "date": "Sun, 13 Sep 2026 03:54:09 GMT",
         "content-type": "text/javascript; charset=utf-8"
       }
     },
@@ -182,7 +182,7 @@
       "url": "download:inkflip-evidence-82750d99acf0.inkflip.json",
       "data": "{\n  \"kind\": \"report\",\n  \"schema_version\": \"1.0.0\",\n  \"report_id\": \"82750d99acf0905680fa44247d38ff2ec890d41121f00617fe8029649119e52b\",\n  \"document\": {\n    \"sha256\": \"3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39\",\n    \"byte_length\": 947,\n    \"page_count\": 1,\n    \"display_name\": null,\n    \"source_asset_id\": null\n  },\n  \"readers\": [\n    {\n      \"id\": \"pdfjs-6_3_289-text\",\n      \"name\": \"pdf.js text\",\n      \"version\": \"6.3.289\",\n      \"build\": \"pdfjs-dist-legacy\",\n      \"adapter_version\": \"1.0.0\",\n      \"method\": \"native_text\",\n      \"environment\": \"browser\",\n      \"settings\": {\n        \"normalization\": \"scalar-whitespace-v1\",\n        \"language\": null,\n        \"psm\": null,\n        \"render_reader_id\": null,\n        \"raster_dpi\": null,\n        \"annotation_mode\": \"not_applicable\"\n      },\n      \"capabilities\": [\n        {\n          \"name\": \"render\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        },\n        {\n          \"name\": \"native_text\",\n          \"support\": \"supported\",\n          \"limits\": [\n            \"raw_text is the unmodified getTextContent API string; the parser may still decode character mappings\",\n            \"occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance\",\n            \"a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item\",\n            \"marked-content records are preserved as counts only; they are never emitted as text occurrences\",\n            \"emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order\"\n          ]\n        },\n        {\n          \"name\": \"ocr\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        },\n        {\n          \"name\": \"object_render_mode\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        },\n        {\n          \"name\": \"crop_metadata\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        },\n        {\n          \"name\": \"paint_overlap\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        },\n        {\n          \"name\": \"reading_order\",\n          \"support\": \"approximate\",\n          \"limits\": [\n            \"raw emitted getTextContent order only; derived geometric/logical ordering belongs to the alignment layer\"\n          ]\n        },\n        {\n          \"name\": \"alignment\",\n          \"support\": \"unavailable\",\n          \"limits\": []\n        }\n      ],\n      \"model_hashes\": [],\n      \"limitations\": [\n        \"raw_text is the unmodified getTextContent API string; the parser may still decode character mappings\",\n        \"occurrence extent is estimated from TextItem transform, width/height and font ascent/descent — not a glyph-paint or per-character provenance\",\n        \"a multi-character TextItem carries no per-character advance boxes; highlight is the whole measured item\",\n        \"marked-content records are preserved as counts only; they are never emitted as text occurrences\",\n        \"emitted ordinal order is the raw API sequence, not a verified screen-reader or logical order\",\n        \"original MediaBox/CropBox are unavailable through the selected API: page.view is the effective view and original boxes are stored as null\",\n        \"no getOperatorList exposure: there is no occurrence-level visibility, render-mode or paint-overlap oracle on this boundary\"\n      ]\n    },\n    {\n      \"id\": \"pdfjs-6_3_289-render\",\n      \"name\": \"pdf.js render\",\n      \"version\": \"6.3.289\",\n      \"build\": \"pdfjs-dist-legacy\",\n      \"adapter_version\": \"1.0.0\",\n      \"method\": \"render\",\n      \"environment\": \"browser\",\n      \"settings\": {\n        \"normalization\": \"scalar-whitespace-v1\",\n        \"language\": null,\n        \"psm\": null,\n        \"render_reader_id\": null,\n        \"raster_dpi\": null,\n        \"annotation_mode\": \"static_appearance\"\n      },\n      \"capabilities\": [\n        {\n          \"name\": \"render\",\n          \"support\": \"supported\",\n          \"",
       "headers": {
-        "sha256": "56ff5b958865c753a6e0178d0db25f67156feffc34b09830626cdfee74cc18bc",
+        "sha256": "c9b980466f666d106b49414b5c47c16a8925204121037e0b14d08e687cc424d7",
         "bytes": "10931"
       }
     },
@@ -230,13 +230,13 @@
       "marker": "eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c",
       "channel": "downloads",
       "where": "data@9869",
-      "snippet": "46fcc\",\n    \"run_key\": \"eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c\",\n    \"status\": \"comple"
+      "snippet": "51051\",\n    \"run_key\": \"eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c\",\n    \"status\": \"comple"
     },
     {
       "marker": "eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c",
       "channel": "downloads",
       "where": "data@9869",
-      "snippet": "46fcc\",\n    \"run_key\": \"eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c\",\n    \"status\": \"comple"
+      "snippet": "51051\",\n    \"run_key\": \"eb714c2b38e23e67e0ee25ee56abcb72c60584666af00f0a0eab864b05fa687c\",\n    \"status\": \"comple"
     },
     {
       "marker": "3d5f32a15784883a7f557a06f3d831281deff6443cf2f0a7554e9b5280597c39",
@@ -255,7 +255,7 @@
   "serverLogStart": 16,
   "serverLog": [
     "GET /index.html",
-    "GET /assets/index-DwBZFsse.js",
+    "GET /assets/index-BpAZCyfA.js",
     "GET /assets/index-BOovg_cS.css",
     "GET /assets/pdf.worker-DTrjDNvb.mjs",
     "GET /assets/pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf",
