@@ -116,3 +116,29 @@ worker, WASM and model bytes and existing license notices are unchanged.
 ## T16 — portable JSON + escaped HTML export foundation (2026-09-13)
 
 - `packages/reports/export/html.ts`: The static HTML report stylesheet (`EXPORT_CSS`) and document layout adapt the reference template in `planning/tools/export_html.py` (an assigned project task input), with additions for `h3`, `.warn`, `ul` and strict static HTML hardening (meta CSP with runtime style SHA-256 derivation, script-free assertions, and sanitized PNG re-encoding).
+
+## T47 preparation — distribution inventory, license evidence and notices (2026-09-13)
+
+The ZCode distribution-completion batch added the distribution-preparation
+layer on top of this ledger (preparation only; T47 closure remains with the
+coordinator):
+
+- `config/distribution-manifest.json` declares the static browser
+  distribution surface; `scripts/check_distribution.py --release` verifies
+  declared files against actual bytes and requires per-group license
+  evidence; `tests/release/distribution/` proves the failure modes.
+- `licenses/` contains third-party license texts copied from the exact
+  installed distributions (or the canonical Apache-2.0 text for
+  `tessdata_fast eng.traineddata`), each with source file and SHA-256
+  recorded in `licenses/README.md`. Known visible gap: `tr46@0.0.3` ships no
+  license text upstream (package.json declares MIT).
+- `NOTICE` names the bundled third-party components (staged assets, model
+  data and the production bun.lock closure) plus the project's unresolved
+  license status.
+- `artifacts/sbom/zcode-preparation/` holds the deterministic inventory and
+  CycloneDX 1.5 SBOM (production closure, staged assets, prepared example;
+  transitive contents included) and the dated advisory scan raw output
+  (`bun audit`, OSV querybatch against exact frozen versions).
+- License declarations for the frozen PyPI packages still come from this
+  ledger (source-verified at the T02 freeze); no wheel bundles exist to
+  verify against yet.

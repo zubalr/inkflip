@@ -1,0 +1,6 @@
+bun audit (bun.lock, exact frozen versions)
+2026-09-13T13:23:42Z
+1.4.0
+bun audit v1.4.0 (34cbb9a40)
+
+No vulnerabilities found (checked 206 packages) [328.00ms]

@@ -1,0 +1,70 @@
+Inkflip — third-party notice
+============================
+
+Recorded: 2026-09-13, T47 preparation (ZCode distribution-completion batch).
+
+This notice covers the third-party material this snapshot distributes or
+compiles into its shipped browser bundle. It is preparation material for the
+final T47 notice bundle; per-file digests and evidence live in
+config/distribution-manifest.json and licenses/README.md.
+
+Project status
+--------------
+Inkflip's own license and copyright line are NOT finalized: no repository
+LICENSE file exists yet and no copyright-holder decision is recorded here.
+The recorded planning default (ADR-003) selects MIT for newly authored code
+and documentation; until the owner's distribution-rights decision lands
+(T47 closure), no completed license status is claimed. Provenance of the
+upstream snapshot import is recorded in docs/ORIGIN.md.
+
+Bundled third-party components (shipped browser bytes)
+------------------------------------------------------
+Staged same-origin assets and model data (browser-facing):
+
+- pdfjs-dist 6.3.289 — Apache-2.0 (cmaps, standard fonts, wasm codecs, ICC
+  profiles, and its LICENSE file are staged from the npm distribution;
+  Adobe-derived CMaps and ICC data are redistributed inside that package
+  with its complete notices).
+- tesseract.js 7.0.0 — Apache-2.0 (worker staged from the npm distribution).
+- tesseract.js-core 7.0.0 — Apache-2.0 (WASM OCR engine binaries staged from
+  the npm distribution).
+- tessdata_fast (eng.traineddata), pinned upstream commit 65727574dfcd264acb…
+  as recorded in config/resolved-assets.json) — Apache-2.0; staged language
+  model for the OCR reader.
+
+Libraries compiled into the production bundle (from the frozen bun.lock
+production closure; declared licenses read from the installed
+distributions, license texts under licenses/npm/):
+
+- react 19.2.8 — MIT
+- react-dom 19.2.8 — MIT
+- scheduler 0.27.0 — MIT
+- pdfjs-dist 6.3.289 — Apache-2.0
+- tesseract.js 7.0.0 — Apache-2.0
+- tesseract.js-core 7.0.0 — Apache-2.0
+- bmp-js 0.1.0 — MIT
+- idb-keyval 6.3.0 — MIT
+- is-url 1.2.4 — MIT
+- node-fetch 2.7.0 — MIT
+- opencollective-postinstall 2.0.3 — MIT
+- regenerator-runtime 0.13.11 — MIT
+- tr46 0.0.3 — MIT (package.json declaration only; upstream ships no
+  license text — recorded as an unresolved text in licenses/README.md)
+- wasm-feature-detect 1.9.0 — MIT
+- webidl-conversions 3.0.1 — MIT
+- whatwg-url 5.0.0 — MIT
+- zlibjs 0.3.1 — MIT
+
+Not bundled
+-----------
+- Native Python tooling (native/, the pinned PyPI packages in
+  native/uv.lock) is distributed as source plus lockfile and executed
+  locally; it is not shipped as built artifacts. License declarations are
+  recorded in the inventory (artifacts/sbom/zcode-preparation/) and the
+  attribution ledger (docs/ATTRIBUTION.md).
+- Development-only tooling (Playwright, Vite, TypeScript, oxlint/oxfmt,
+  wrangler, pytest, ajv) is never distributed to end users.
+- No experiment-derived assets are included: the T41–T45 experiment
+  candidates were rejected or withdrawn from main and are absent from this
+  distribution (verified by the inventory: no ONNX/RapidOCR model files,
+  no secondary-reader code).
