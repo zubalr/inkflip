@@ -1,0 +1,19 @@
+$ python3 scripts/task_acceptance.py run test:native
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/zubair/Code/Projects/pdf project/worktrees/integrate-agy-devin-20260913/native
+configfile: pyproject.toml
+collected 196 items
+
+native/tests/bootstrap/test_native_boundary.py ..                        [  1%]
+native/tests/bridge/test_bridge.py ............................          [ 15%]
+native/tests/contracts/test_contracts.py .............................   [ 30%]
+native/tests/ocr/test_ocr.py ........................................... [ 52%]
+...............                                                          [ 59%]
+native/tests/readers/test_readers.py ......................              [ 70%]
+native/tests/runtime/test_supervision.py ............................... [ 86%]
+......                                                                   [ 89%]
+native/tests/structure/test_structure.py ....................            [100%]
+
+- generated xml file: /var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-x0yf24wg/results -
+============================= 196 passed in 34.26s =============================

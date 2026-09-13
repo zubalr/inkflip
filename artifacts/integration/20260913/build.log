@@ -1,0 +1,17 @@
+$ python3 scripts/task_acceptance.py run build
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 148 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          0.55 kB │ gzip:   0.33 kB
+dist/assets/pdf.worker-DTrjDNvb.mjs  2,395.53 kB
+dist/assets/index-C6yWAR7U.css          34.62 kB │ gzip:   6.16 kB
+dist/assets/index-DnUCCk32.js        1,065.08 kB │ gzip: 312.35 kB
+
+✓ built in 745ms
