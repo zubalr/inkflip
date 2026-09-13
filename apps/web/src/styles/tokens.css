@@ -26,6 +26,12 @@
   --color-warning-border-hover: #d8be74;
   --color-warning-text: #746444;
 
+  /* Error and alert states */
+  --color-error-surface: #fdf2f2;
+  --color-error-border: #f1b5b5;
+  --color-error-text: #932020;
+  --color-rust-soft: #faeee7;
+
   /* Spacing scale (px). */
   --space-1: 4px;
   --space-2: 8px;
@@ -41,6 +47,9 @@
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-stage: 20px;
+  --radius-surface: 12px;
+  --radius-panel: 8px;
+  --radius-pill: 9999px;
   --shadow-stage: 0 12px 32px rgba(23, 42, 47, 0.06);
   --shadow-paper: 0 5px 10px rgba(30, 56, 44, 0.04);
 

@@ -26,9 +26,10 @@
 }
 
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: var(--control-min-height, 44px);
   font-family: var(--font-display);
   font-size: var(--space-5);
   font-weight: 700;
@@ -69,10 +70,66 @@
   color: var(--color-muted);
   text-decoration: none;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  min-height: var(--control-min-height, 44px);
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
 }
 
 .navLink:hover {
   color: var(--color-ink);
+}
+
+.navLink:focus-visible {
+  color: var(--color-ink);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.heroTabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.heroTab {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  font-family: inherit;
+  min-height: var(--control-min-height, 44px);
+  min-width: 44px;
+  padding: 0 var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroTab:hover {
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+
+.heroTabActive {
+  color: var(--color-ink);
+  font-weight: 700;
+  background-color: var(--color-paper-pure);
+  border-color: var(--color-line);
+  box-shadow: var(--shadow-paper);
+}
+
+.heroTab:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .main {
@@ -169,6 +226,11 @@
   border-color: var(--color-teal);
 }
 
+.btnPrimary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .btnSecondary {
   display: inline-flex;
   align-items: center;
@@ -189,6 +251,11 @@
 
 .btnSecondary:hover {
   background-color: var(--color-surface-subtle);
+}
+
+.btnSecondary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .heroRight {
@@ -244,6 +311,11 @@
   margin-top: var(--space-2);
 }
 
+.exampleFooterText {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
 .sectionHeading {
   font-family: var(--font-display);
   font-size: var(--space-6);
@@ -293,7 +365,7 @@
   }
   .navLinks {
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
   .main {
     padding: var(--space-5) var(--space-3);
@@ -301,14 +373,19 @@
 }
 
 @media (max-width: 480px) {
-  .navLinks a {
-    display: none;
+  .headerInner {
+    padding: var(--space-2);
+  }
+  .navLinks {
+    width: 100%;
+    justify-content: flex-start;
+    gap: var(--space-1);
   }
 }
 
 @media (max-width: 390px) {
   .headerInner {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2);
   }
   .main {
     padding: var(--space-4) var(--space-3);

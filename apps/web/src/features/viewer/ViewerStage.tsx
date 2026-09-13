@@ -173,6 +173,7 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     <div
       ref={stageRef}
       id="viewer-stage"
+      data-testid="viewer-stage"
       className={styles.stage}
       tabIndex={0}
       onKeyDown={handleStageKeyDown}
@@ -384,7 +385,14 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                     >
                       <span className={styles.findingToggleTitle}>{f.title}</span>
                       <span className={styles.findingMeta}>
-                        <span>Page {f.page_index + 1}</span> · <span>{f.priority}</span>
+                        <span>Page {f.page_index + 1}</span> ·{" "}
+                        <span data-priority={f.priority}>
+                          {f.priority === "material_token"
+                            ? "Material difference"
+                            : f.priority === "informational"
+                              ? "Informational"
+                              : "Ordinary"}
+                        </span>
                         {f.alignment === "ambiguous" && <span> · Ambiguous</span>}
                         {f.alignment === "page_level" && <span> · Page-level</span>}
                       </span>

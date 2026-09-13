@@ -13,6 +13,7 @@ import styles from "./Workspace.module.css";
 
 export interface WorkspaceProps {
   onNavigateHome: () => void;
+  onNavigateHelp?: () => void;
   initialWithExample?: boolean;
   initialDoc?: ViewerDoc | null;
   /** Public-example card id (T21): its captured report is fetched and run
@@ -325,6 +326,7 @@ const RUN_STATUS_COPY: Record<string, string> = {
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
+  onNavigateHelp,
   initialWithExample = true,
   initialDoc,
   initialExampleId = null,
@@ -446,9 +448,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         (report.document as { display_name?: string | null }).display_name ??
         snap.doc?.label ??
         "Inspection report")
-    : exampleDoc !== null
-      ? "Invoice-Example.pdf"
-      : "Workspace";
+    : snap.doc !== null
+      ? (snap.doc.label ?? "PDF Document")
+      : exampleDoc !== null
+        ? "Invoice-Example.pdf"
+        : "Workspace";
 
   const addNote = useCallback(
     (annotation: Annotation) => setUserNotes((prev) => [...prev, annotation]),
@@ -499,45 +503,32 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       />
 
       <header className={styles.documentBar}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className={styles.documentHeaderLeft}>
           <button
             id="btn-back-home"
             type="button"
-            className={styles.documentMeta}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
+            className={styles.backButton}
             onClick={onNavigateHome}
           >
             ← Home
           </button>
-          <span className={styles.documentTitle}>
+          <span id="workspace-doc-title" className={styles.documentTitle}>
             {viewerDoc || snap.doc ? docTitle : "Workspace"}
           </span>
           <span className={styles.documentMeta} data-testid="doc-stats">
             {viewerDoc
-              ? `${viewerDoc.pages.length} pages · ${viewerDoc.findings.length} findings`
+              ? `${viewerDoc.pages.length} ${viewerDoc.pages.length === 1 ? "page" : "pages"} · ${viewerDoc.findings.length} ${viewerDoc.findings.length === 1 ? "finding" : "findings"}`
               : snap.doc
-                ? `${snap.doc.pageCount} pages · not yet inspected`
+                ? `${snap.doc.pageCount} ${snap.doc.pageCount === 1 ? "page" : "pages"} · not yet inspected`
                 : "No document loaded"}
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className={styles.documentHeaderRight}>
           <button
             id="btn-header-import-report"
             type="button"
-            style={{
-              padding: "4px 12px",
-              fontSize: "var(--text-caption)",
-              borderRadius: "var(--radius-control)",
-              border: "1px solid var(--color-line)",
-              background: "var(--color-paper-pure)",
-              cursor: "pointer",
-            }}
+            className={styles.headerButton}
             onClick={() => reportInputRef.current?.click()}
           >
             Open saved report
@@ -545,14 +536,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           <button
             id="btn-header-open-pdf"
             type="button"
-            style={{
-              padding: "4px 12px",
-              fontSize: "var(--text-caption)",
-              borderRadius: "var(--radius-control)",
-              border: "1px solid var(--color-line)",
-              background: "var(--color-paper-pure)",
-              cursor: "pointer",
-            }}
+            className={styles.headerButton}
             onClick={() => pdfInputRef.current?.click()}
           >
             Open PDF
@@ -561,14 +545,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             <button
               id="btn-close-doc"
               type="button"
-              style={{
-                padding: "4px 12px",
-                fontSize: "var(--text-caption)",
-                borderRadius: "var(--radius-control)",
-                border: "1px solid var(--color-line)",
-                background: "var(--color-paper-pure)",
-                cursor: "pointer",
-              }}
+              className={styles.headerButton}
               onClick={closeAll}
             >
               Close Document
@@ -577,17 +554,20 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             <button
               id="btn-load-demo"
               type="button"
-              style={{
-                padding: "4px 12px",
-                fontSize: "var(--text-caption)",
-                borderRadius: "var(--radius-control)",
-                border: "1px solid var(--color-line)",
-                background: "var(--color-paper-pure)",
-                cursor: "pointer",
-              }}
+              className={styles.headerButton}
               onClick={() => setExampleDoc(EXAMPLE_DOC)}
             >
               Load Example
+            </button>
+          )}
+          {onNavigateHelp && (
+            <button
+              id="btn-header-help"
+              type="button"
+              className={styles.headerButton}
+              onClick={onNavigateHelp}
+            >
+              Help
             </button>
           )}
         </div>
@@ -793,14 +773,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <button
                       id="btn-attach-source"
                       type="button"
+                      className={styles.headerButton}
                       onClick={() => sourceInputRef.current?.click()}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: "var(--radius-control)",
-                        border: "1px solid var(--color-line)",
-                        background: "var(--color-paper-pure)",
-                        cursor: "pointer",
-                      }}
                     >
                       Attach original PDF
                     </button>
@@ -837,29 +811,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         {!busy && !running && fileState === "idle" && viewerDoc === null && (
           <div className={styles.emptyWorkspace}>
             <FileDrop phase="idle" onFile={(file) => void session.offerFile(file)} hasDocument={false} />
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "var(--space-3)",
-                marginTop: "var(--space-4)",
-                justifyContent: "center",
-              }}
-            >
+            <div className={styles.emptyActions}>
               <button
                 id="btn-import-report"
                 type="button"
-                style={{
-                  minHeight: "var(--control-min-height)",
-                  padding: "0 var(--space-4)",
-                  backgroundColor: "var(--color-paper-pure)",
-                  color: "var(--color-ink)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-control)",
-                  fontSize: "var(--text-body)",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
+                className={styles.emptyActionBtn}
                 onClick={() => reportInputRef.current?.click()}
               >
                 Open saved report
@@ -867,17 +823,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <button
                 id="btn-open-pdf"
                 type="button"
-                style={{
-                  minHeight: "var(--control-min-height)",
-                  padding: "0 var(--space-4)",
-                  backgroundColor: "var(--color-paper-pure)",
-                  color: "var(--color-ink)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-control)",
-                  fontSize: "var(--text-body)",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
+                className={styles.emptyActionBtn}
                 onClick={() => pdfInputRef.current?.click()}
               >
                 Open local PDF
@@ -885,17 +831,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <button
                 id="btn-empty-load-example"
                 type="button"
-                style={{
-                  minHeight: "var(--control-min-height)",
-                  padding: "0 var(--space-4)",
-                  backgroundColor: "var(--color-ink)",
-                  color: "var(--color-paper-pure)",
-                  border: "1px solid var(--color-line)",
-                  borderRadius: "var(--radius-control)",
-                  fontSize: "var(--text-body)",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
+                className={styles.emptyActionBtnPrimary}
                 onClick={() => setExampleDoc(EXAMPLE_DOC)}
               >
                 Try the example

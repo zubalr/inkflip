@@ -5,9 +5,14 @@ import { ExamplesGallery } from "../features/gallery/ExamplesGallery";
 export interface HomeProps {
   onNavigateWorkspace: (withExample?: boolean) => void;
   onOpenExample?: (exampleId: string) => void;
+  onNavigateHelp?: () => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }) => {
+export const Home: React.FC<HomeProps> = ({
+  onNavigateWorkspace,
+  onOpenExample,
+  onNavigateHelp,
+}) => {
   const [exampleMode, setExampleMode] = useState<"page" | "reading">("page");
 
   return (
@@ -40,10 +45,21 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }
             <a href="#limits" className={styles.navLink}>
               Limits
             </a>
+            <a
+              href="#/help"
+              className={styles.navLink}
+              onClick={(e) => {
+                if (onNavigateHelp) {
+                  e.preventDefault();
+                  onNavigateHelp();
+                }
+              }}
+            >
+              Help
+            </a>
             <button
               type="button"
               className={styles.btnSecondary}
-              style={{ minHeight: "36px", padding: "0 16px" }}
               onClick={() => onNavigateWorkspace(false)}
             >
               Open Workspace
@@ -100,17 +116,13 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }
             <div className={styles.exampleCard} aria-label="Prepared example demonstration">
               <div className={styles.exampleHeader}>
                 <span className={styles.exampleBadge}>PREPARED DEMO</span>
-                <div role="tablist" aria-label="Example view mode">
+                <div role="tablist" aria-label="Example view mode" className={styles.heroTabs}>
                   <button
                     type="button"
                     role="tab"
                     id="hero-tab-page"
                     aria-selected={exampleMode === "page"}
-                    className={styles.navLink}
-                    style={{
-                      fontWeight: exampleMode === "page" ? 700 : 400,
-                      marginRight: "8px",
-                    }}
+                    className={`${styles.heroTab} ${exampleMode === "page" ? styles.heroTabActive : ""}`}
                     onClick={() => setExampleMode("page")}
                   >
                     Page
@@ -120,8 +132,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }
                     role="tab"
                     id="hero-tab-reading"
                     aria-selected={exampleMode === "reading"}
-                    className={styles.navLink}
-                    style={{ fontWeight: exampleMode === "reading" ? 700 : 400 }}
+                    className={`${styles.heroTab} ${exampleMode === "reading" ? styles.heroTabActive : ""}`}
                     onClick={() => setExampleMode("reading")}
                   >
                     Reading
@@ -144,7 +155,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }
                 </div>
               </div>
 
-              <div style={{ fontSize: "var(--text-caption)", color: "var(--color-muted)" }}>
+              <div className={styles.exampleFooterText}>
                 <strong>Finding:</strong> This amount reads differently between rendered appearance
                 and underlying content stream.
               </div>
@@ -195,7 +206,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigateWorkspace, onOpenExample }
             <p className={styles.featureText}>
               Inkflip highlights localized differences between reader implementations. A difference
               does not establish which reading is correct, and the absence of differences does not
-              constitute a document correctness or safety certification (Invariant I06).
+              constitute a document correctness or safety certification.
             </p>
           </div>
         </section>

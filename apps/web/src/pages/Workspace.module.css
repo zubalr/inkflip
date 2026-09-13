@@ -30,16 +30,95 @@
   max-width: 100%;
 }
 
+.documentHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+.documentHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-min-height);
+  min-width: 44px;
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--text-caption);
+  color: var(--color-ink);
+  border-radius: var(--radius-control);
+  transition: color var(--motion-state);
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  color: var(--color-teal);
+}
+
+.backButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .documentTitle {
   font-family: var(--font-display);
   font-size: var(--text-body);
   font-weight: 600;
   color: var(--color-ink);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
 }
 
 .documentMeta {
   font-size: var(--text-caption);
   color: var(--color-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.headerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-min-height);
+  min-width: 44px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-line);
+  background: var(--color-paper-pure);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background var(--motion-state), border-color var(--motion-state);
+  box-sizing: border-box;
+}
+
+.headerButton:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--color-teal);
+}
+
+.headerButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .emptyWorkspace {
@@ -68,13 +147,110 @@
   margin-bottom: var(--space-5);
 }
 
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  justify-content: center;
+  width: 100%;
+}
+
+.emptyActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-min-height);
+  min-width: 44px;
+  padding: 0 var(--space-4);
+  background-color: var(--color-paper-pure);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  font-size: var(--text-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--motion-state), border-color var(--motion-state);
+  box-sizing: border-box;
+}
+
+.emptyActionBtn:hover {
+  background-color: var(--color-surface-subtle);
+  border-color: var(--color-teal);
+}
+
+.emptyActionBtn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.emptyActionBtnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-min-height);
+  min-width: 44px;
+  padding: 0 var(--space-4);
+  background-color: var(--color-ink);
+  color: var(--color-paper-pure);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  font-size: var(--text-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--motion-state), border-color var(--motion-state);
+  box-sizing: border-box;
+}
+
+.emptyActionBtnPrimary:hover {
+  background-color: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.emptyActionBtnPrimary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 @media (max-width: 767px) {
   .workspaceMain {
     padding: var(--space-2);
   }
 
   .documentBar {
-    padding: var(--space-2);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .documentHeaderLeft {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
     gap: var(--space-2);
+  }
+
+  .documentHeaderRight {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .headerButton {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .emptyActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .emptyActionBtn,
+  .emptyActionBtnPrimary {
+    width: 100%;
   }
 }

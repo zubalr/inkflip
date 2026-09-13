@@ -1,0 +1,497 @@
+import React, { useState, useEffect, useRef } from "react";
+import { ModalDialog } from "../../components/Dialogs";
+import styles from "./HelpPage.module.css";
+
+export interface HelpPageProps {
+  readonly onNavigateHome: () => void;
+  readonly onNavigateWorkspace: () => void;
+  readonly onReturnToWorkspace?: () => void;
+  readonly onOpenExample?: () => void;
+  readonly hasActiveWorkspace?: boolean;
+}
+
+type GuideId = "cli" | "a11y" | "corpus" | "readers" | "attribution";
+
+interface GuideInfo {
+  readonly id: GuideId;
+  readonly badge: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly modalTitle: string;
+  readonly modalDescription: string;
+  readonly content: React.ReactNode;
+}
+
+export const HelpPage: React.FC<HelpPageProps> = ({
+  onNavigateHome,
+  onNavigateWorkspace,
+  onReturnToWorkspace,
+  onOpenExample,
+  hasActiveWorkspace = false,
+}) => {
+  const [activeGuide, setActiveGuide] = useState<GuideId | null>(null);
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // Focus primary action on mount so keyboard focus is securely inside Help
+  useEffect(() => {
+    const returnBtn = document.getElementById("btn-help-back-workspace");
+    if (returnBtn) {
+      returnBtn.focus();
+    }
+  }, []);
+
+  // Handle Escape key to return to workspace when no guide modal is open
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeGuide !== null) return;
+      if (e.key === "Escape" && hasActiveWorkspace && onReturnToWorkspace) {
+        e.preventDefault();
+        onReturnToWorkspace();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeGuide, hasActiveWorkspace, onReturnToWorkspace]);
+
+  const guides: readonly GuideInfo[] = [
+    {
+      id: "cli",
+      badge: "Terminal Companion",
+      title: "Command-Line Interface",
+      summary: "Run batch corpus inspections, compare reader outputs, and replay sealed reports directly from the shell.",
+      modalTitle: "Command-Line Interface Guide",
+      modalDescription: "Terminal workflows for batch corpus inspections across macOS native and Docker environments.",
+      content: (
+        <div className={styles.guideModalContent}>
+          <div>
+            <h4>Supported Delivery Targets</h4>
+            <p>Inkflip officially targets modern desktop web browsers, the macOS native companion runtime, and a reproducible Docker CLI workflow. Separate Windows and Linux desktop applications remain deferred.</p>
+          </div>
+          <div>
+            <h4>macOS Companion CLI</h4>
+            <p>Inspect a local PDF using native engine profiles directly on macOS (requires <code>--out</code> for the output report JSON):</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli inspect &lt;pdf-file&gt; --out report.json</code></pre>
+            <p>Optional flags: <code>--profile native-default</code>, <code>--reader pdfium</code>, <code>--pages 1</code>, <code>--embed-source</code>.</p>
+          </div>
+          <div>
+            <h4>Report Generation (HTML Export)</h4>
+            <p>Export a self-contained HTML inspection report from an existing validated report JSON:</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli report &lt;report.json&gt; --format html --out report.html</code></pre>
+          </div>
+          <div>
+            <h4>Evidence Replay</h4>
+            <p>Replay recorded findings from a previously generated report file. When source bytes are not embedded, provide the original source PDF:</p>
+            <pre className={styles.guideCodeBlock}><code>python3 -m inkflip.cli replay &lt;report.json&gt; --source &lt;pdf-file&gt; --profile native-default --out replay.json</code></pre>
+          </div>
+          <div>
+            <h4>Reproducible Docker CLI Workflow</h4>
+            <p>Run batch inspections in a reproducible Linux container with pinned dependencies and zero network access. Requires built image <code>inkflip</code>; mount input directories read-only (<code>:ro</code>) and output directories writable (<code>:rw</code>):</p>
+            <pre className={styles.guideCodeBlock}><code>docker run --rm --network none -v "$PWD/input":/data/in:ro -v "$PWD/output":/data/out:rw inkflip inspect /data/in/&lt;pdf-file&gt; --out /data/out/report.json</code></pre>
+          </div>
+          <div>
+            <h4>Fail-Closed Security</h4>
+            <p>The CLI strictly refuses remote URLs and network paths (exit code 2). All execution remains confined to local files and isolated containers.</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "a11y",
+      badge: "Assistive Flows",
+      title: "Accessibility & Assistive Flows",
+      summary: "Keyboard navigation shortcuts, accessible text equivalents, and non-mouse candidate selection.",
+      modalTitle: "Accessibility & Assistive Flows Guide",
+      modalDescription: "Standards-compliant navigation, focus restoration, and screen reader equivalents.",
+      content: (
+        <div className={styles.guideModalContent}>
+          <div>
+            <h4>Keyboard Shortcuts</h4>
+            <ul>
+              <li><strong>f:</strong> Cycle view modes between Page, Reading, and Compare.</li>
+              <li><strong>+ / -:</strong> Zoom in and out; <strong>r:</strong> Rotate page 90 degrees.</li>
+              <li><strong>n:</strong> Navigate to next finding card; <strong>Tab / Shift+Tab:</strong> Standard control traversal.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Shortcut Suppression</h4>
+            <p>Typing inside user notes or form input fields automatically suppresses single-key shortcuts so typing is never interrupted.</p>
+          </div>
+          <div>
+            <h4>Candidate Selection &amp; Focus Restoration</h4>
+            <p>When multiple locations match an ambiguous finding, candidate buttons can be selected via Enter. Selecting or dismissing an occurrence returns focus to the originating finding card.</p>
+          </div>
+          <div>
+            <h4>400% Zoom Reflow</h4>
+            <p>The interface remains completely operable at 400% browser zoom reflow (320px CSS width equivalent) with zero horizontal document clipping.</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "corpus",
+      badge: "Fixture Testing",
+      title: "Corpus & Test Invariants",
+      summary: "Synthetic fixtures and real-world edge cases verifying multi-reader divergence detection.",
+      modalTitle: "Corpus & Test Invariants Guide",
+      modalDescription: "Ground-truth evaluation fixtures verifying detection across independent engines.",
+      content: (
+        <div className={styles.guideModalContent}>
+          <div>
+            <h4>Fixture Families (F01–F21)</h4>
+            <p>The evaluation corpus includes synthetic alignments, scanned raster receipts, font dictionary anomalies, and reading-order permutations.</p>
+          </div>
+          <div>
+            <h4>Bounded Comparison</h4>
+            <p>Differences are detected without assuming any single reader engine is authoritative or correct.</p>
+          </div>
+          <div>
+            <h4>Cryptographic Reproducibility</h4>
+            <p>Each fixture is pinned by cryptographic SHA-256 digests and immutable baselines to prevent test regression.</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "readers",
+      badge: "Engine Architecture",
+      title: "Reader Integration Guide",
+      summary: "Engine adapter specifications, canonical coordinate normalization, and explicit omission handling.",
+      modalTitle: "Reader Integration Guide",
+      modalDescription: "Standards for connecting independent extraction engines into Inkflip.",
+      content: (
+        <div className={styles.guideModalContent}>
+          <div>
+            <h4>Engine Adapter Contract</h4>
+            <p>Readers implement decoupled adapter interfaces producing standardized occurrences and check records.</p>
+          </div>
+          <div>
+            <h4>Canonical Coordinate Normalization</h4>
+            <p>Token bounding boxes are transformed from engine-specific coordinates into canonical PDF page points [x0, y0, x1, y1].</p>
+          </div>
+          <div>
+            <h4>Explicit Omission Protocol</h4>
+            <p>If an engine cannot parse an operator or skips content, it must record an explicit omission rather than omitting records silently.</p>
+          </div>
+          <div>
+            <h4>Integrated Engines</h4>
+            <ul>
+              <li><strong>PDF.js:</strong> Client-side JavaScript content stream extraction (in-browser and Node).</li>
+              <li><strong>PDFium:</strong> High-fidelity native C++ text and geometry extraction (macOS companion &amp; Docker CLI).</li>
+              <li><strong>Tesseract OCR:</strong> Optical character recognition for scanned raster pages (browser WASM &amp; native companion).</li>
+            </ul>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "attribution",
+      badge: "Licenses & Credits",
+      title: "Attribution & Licenses",
+      summary: "Credits and open-source licenses for bundled libraries, fonts, and extraction runtimes.",
+      modalTitle: "Attribution & Licenses Guide",
+      modalDescription: "Open-source notices and clean-room provenance.",
+      content: (
+        <div className={styles.guideModalContent}>
+          <div>
+            <h4>Bundled Open-Source Libraries</h4>
+            <ul>
+              <li><strong>PDF.js:</strong> Apache License 2.0 (Mozilla Foundation).</li>
+              <li><strong>Tesseract.js &amp; Tesseract.js-core:</strong> Apache License 2.0.</li>
+              <li><strong>React &amp; React-DOM:</strong> MIT License (Meta Platforms, Inc.).</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Typography</h4>
+            <p>Space Grotesk, JetBrains Mono, and Silkscreen are distributed under the SIL Open Font License 1.1.</p>
+          </div>
+          <div>
+            <h4>Privacy &amp; Telemetry Notice</h4>
+            <p>Inkflip contains zero telemetry, analytics, remote beacons, or third-party cloud connections.</p>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const currentGuide = guides.find((g) => g.id === activeGuide);
+
+  const handleCloseGuide = (id: GuideId | null) => {
+    setActiveGuide(null);
+    if (id) {
+      setTimeout(() => {
+        const btn = triggerRefs.current[id];
+        if (btn) {
+          btn.focus();
+        }
+      }, 20);
+    }
+  };
+
+  return (
+    <div className={styles.page} data-testid="help-page">
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <a
+            href="#/"
+            className={styles.brand}
+            aria-label="Inkflip home"
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigateHome();
+            }}
+          >
+            <span className={styles.mark} aria-hidden="true">
+              if
+            </span>
+            <span>inkflip</span>
+            <span className={styles.descriptor}>PDF reading inspector</span>
+          </a>
+
+          <nav className={styles.navActions} aria-label="Help navigation">
+            <button
+              id="btn-help-back-home"
+              type="button"
+              className={styles.btnSecondary}
+              onClick={onNavigateHome}
+            >
+              Home
+            </button>
+            <button
+              id="btn-help-back-workspace"
+              type="button"
+              className={styles.btnPrimary}
+              onClick={() => {
+                if (hasActiveWorkspace && onReturnToWorkspace) {
+                  onReturnToWorkspace();
+                } else {
+                  onNavigateWorkspace();
+                }
+              }}
+            >
+              {hasActiveWorkspace ? "Return to Workspace" : "Open Workspace"}
+            </button>
+            <button
+              id="btn-help-open-example"
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => {
+                if (onOpenExample) {
+                  onOpenExample();
+                } else {
+                  onNavigateWorkspace();
+                }
+              }}
+            >
+              Try Demo Example
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <main className={styles.main}>
+        <section className={styles.hero} aria-labelledby="help-headline">
+          <div className={styles.eyebrow}>Product Guide &amp; Principles</div>
+          <h1 id="help-headline" className={styles.headline}>
+            Understanding Inkflip
+          </h1>
+          <p className={styles.lede}>
+            Inkflip is a local-first PDF reading inspector. It exposes divergences between
+            visible page renderings and extracted text streams across independent reader engines.
+          </p>
+        </section>
+
+        <section aria-labelledby="core-concepts-heading">
+          <h2 id="core-concepts-heading" className={styles.sectionHeading}>
+            Core Concepts
+          </h2>
+          <div className={styles.grid}>
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Local-First Processing
+                <span className={`${styles.cardBadge} ${styles.cardBadgeHighlight}`}>
+                  Local Execution
+                </span>
+              </h3>
+              <p className={styles.cardText}>
+                Your documents never leave your device. All rendering, text extraction, coordinate
+                mapping, and alignment checks run locally inside your browser sandbox, macOS companion runtime, or reproducible Docker container.
+              </p>
+              <ul className={styles.cardList}>
+                <li>No telemetry, analytics, or remote data transmission.</li>
+                <li>Delivery targets: modern desktop browsers, macOS companion, and Docker CLI workflow.</li>
+                <li>Sandboxed Web Workers isolate reader engine execution.</li>
+              </ul>
+            </article>
+
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Multi-Reader Comparison &amp; OCR
+                <span className={styles.cardBadge}>Parallel Engines</span>
+              </h3>
+              <p className={styles.cardText}>
+                Different PDF readers interpret text streams, font encodings, and layout matrices in
+                divergent ways. Inkflip compares readings from distinct engines side-by-side.
+              </p>
+              <ul className={styles.cardList}>
+                <li>
+                  <strong>PDF.js:</strong> Standard browser client-side content stream extraction.
+                </li>
+                <li>
+                  <strong>PDFium:</strong> High-fidelity C++ engine extractions via macOS companion or Docker container.
+                </li>
+                <li>
+                  <strong>Tesseract OCR:</strong> Pixel-level optical character recognition from rendered raster images.
+                </li>
+              </ul>
+            </article>
+
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Geometry &amp; Alignment
+                <span className={styles.cardBadge}>Coordinate Space</span>
+              </h3>
+              <p className={styles.cardText}>
+                When reader engines provide bounding box coordinates, occurrences are mapped to
+                canonical PDF coordinate space. Selecting a finding highlights its bounds in the viewer.
+              </p>
+              <ul className={styles.cardList}>
+                <li>Page-level findings without localized coordinates display an explicit whole-page notice.</li>
+                <li>Ambiguous readings display candidate positions for comparison without claiming a single match.</li>
+                <li>Accessible text layer exposes character occurrences to screen readers and keyboard walks.</li>
+              </ul>
+            </article>
+
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Portable Reports &amp; Evidence Replay
+                <span className={styles.cardBadge}>Standard Schema</span>
+              </h3>
+              <p className={styles.cardText}>
+                Exported reports package check outcomes, reader extractions, and user annotations into
+                portable JSON files validated against the central schema.
+              </p>
+              <ul className={styles.cardList}>
+                <li>Evidence-replay mode allows reviewing recorded findings without re-running engines.</li>
+                <li>Re-running live reader comparisons or inspecting raster pages requires the original source PDF.</li>
+                <li>Strict import gate validates structure and cryptographic seals before mounting.</li>
+              </ul>
+            </article>
+
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Local Processing &amp; Offline Readiness
+                <span className={styles.cardBadge}>Disconnected Use</span>
+              </h3>
+              <p className={styles.cardText}>
+                Inspections run entirely locally without remote server calls. Once application assets,
+                WASM bundles, and OCR language models are cached by your browser, inspections run entirely offline.
+              </p>
+              <ul className={styles.cardList}>
+                <li>Browser cache persists engine assets for disconnected sessions.</li>
+                <li>Initial OCR run requires cached model assets before disconnecting.</li>
+                <li>No session timeouts or remote entitlement checks.</li>
+              </ul>
+            </article>
+
+            <article className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                Inspection Coverage &amp; Status
+                <span className={styles.cardBadge}>Check Status</span>
+              </h3>
+              <p className={styles.cardText}>
+                Inkflip reports check completion counts and reader character tallies across compared pages,
+                providing visibility into partial or skipped stages.
+              </p>
+              <ul className={styles.cardList}>
+                <li>Character counts per reader and per page.</li>
+                <li>Explicit indicators for incomplete, skipped, or unsupported checks.</li>
+                <li>Coverage reflects verification status, not an all-inclusive geometric guarantee.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section aria-labelledby="limits-heading">
+          <div className={styles.noticeCard}>
+            <h2 id="limits-heading" className={styles.noticeTitle}>
+              Important Principles &amp; Limitations
+            </h2>
+            <p className={styles.noticeText}>
+              <strong>Non-Certification Principle:</strong> Inkflip surfaces localized, observable
+              differences between independent reader implementations. Identifying a divergence does not
+              establish which reading is correct or authoritative. Crucially, the absence of detected
+              differences does NOT certify that a document is authentic, safe, accessible, or free of
+              hidden content.
+            </p>
+            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
+              <strong>Explicit Omission Reporting:</strong> When a reader engine fails, encounters
+              unsupported PDF operators, or skips unparseable content, Inkflip explicitly records the
+              condition as an omission or incomplete check. Silence is never substituted for missing coverage.
+            </p>
+            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
+              <strong>Platform Scope &amp; Availability:</strong> Official delivery targets are modern
+              desktop web browsers, the macOS native companion, and the reproducible Docker CLI workflow.
+              Separate Windows and Linux desktop GUI applications remain deferred; automated remediation
+              or silent modifications to PDF binaries are intentionally not supported.
+            </p>
+            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
+              <strong>Provenance &amp; Audit Trail:</strong> Exported inspection packages preserve reader
+              engine versions, adapter builds, and timestamped run metadata so findings can be independently
+              evaluated.
+            </p>
+          </div>
+        </section>
+
+        <section className={styles.guidesSection} aria-labelledby="guides-heading">
+          <h2 id="guides-heading" className={styles.sectionHeading}>
+            Available Project Guides
+          </h2>
+          <div className={styles.guidesGrid}>
+            {guides.map((guide) => (
+              <article key={guide.id} className={styles.guideCard}>
+                <span className={styles.guideBadge}>{guide.badge}</span>
+                <h3 className={styles.guideTitle}>{guide.title}</h3>
+                <p className={styles.guideDesc}>{guide.summary}</p>
+                <button
+                  id={`btn-guide-${guide.id}`}
+                  ref={(el) => {
+                    triggerRefs.current[guide.id] = el;
+                  }}
+                  type="button"
+                  className={styles.guideButton}
+                  onClick={() => setActiveGuide(guide.id)}
+                >
+                  Read Quick Guide
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {currentGuide && (
+        <ModalDialog
+          isOpen={true}
+          onClose={() => handleCloseGuide(currentGuide.id)}
+          title={currentGuide.modalTitle}
+          description={currentGuide.modalDescription}
+          triggerRef={{ current: triggerRefs.current[currentGuide.id] ?? null }}
+          footer={
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => handleCloseGuide(currentGuide.id)}
+            >
+              Close Guide
+            </button>
+          }
+        >
+          {currentGuide.content}
+        </ModalDialog>
+      )}
+    </div>
+  );
+};
+
+export default HelpPage;
+
