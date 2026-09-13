@@ -32,12 +32,21 @@ import type { ExportEngine } from "../export/types";
 import type { ImportEngine } from "../import/types";
 
 /** Host-installed reader allowlist — every runnable identity. */
-export function installedReaders(adapter: {
-  readers: { text: Reader; render: Reader };
-  ocrReader?: Reader | null;
-}): Reader[] {
+export function installedReaders(
+  adapter: {
+    readers: { text: Reader; render: Reader };
+    ocrReader?: Reader | null;
+  },
+  ocrReaders: readonly Reader[] = [],
+): Reader[] {
   const list: Reader[] = [adapter.readers.text, adapter.readers.render];
   if (adapter.ocrReader) list.push(adapter.ocrReader);
+  // The Tesseract reader is lazily constructed but always installable
+  // here (bundled engine, staged+hash-verified model assets) — declare
+  // its deterministic identities so replay readiness is honest.
+  for (const r of ocrReaders) {
+    if (!list.some((x) => x.id === r.id)) list.push(r);
+  }
   return list;
 }
 

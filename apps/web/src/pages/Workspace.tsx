@@ -298,8 +298,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   );
 
   useEffect(() => session.subscribe(() => setSnap(session.getState())), [session]);
-  // Test/inspection hook — the same handle pattern the preview mounts use.
+  // Unmounting the workspace releases the session's pdf.js handle,
+  // OCR worker and retained bytes.
+  useEffect(() => () => session.close(), [session]);
+  // Read-only test handle — present only in dev/test-hook builds
+  // (vite `__INKFLIP_TEST_HOOKS__` define; shipped builds omit it).
   useEffect(() => {
+    if (!__INKFLIP_TEST_HOOKS__) return;
     (globalThis as { __inspect?: InspectionSession }).__inspect = session;
     return () => {
       delete (globalThis as { __inspect?: InspectionSession }).__inspect;
@@ -686,8 +691,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       Attach original PDF
                     </button>
                   </>
-                ) : (
+                ) : snap.importedReplay.ready ? (
                   <p>Original document {snap.importedReplay.source}; replay ready.</p>
+                ) : (
+                  <p>
+                    Original document {snap.importedReplay.source}. Replay is not
+                    ready
+                    {snap.importedReplay.readersMissing.length > 0
+                      ? ` — missing reader${snap.importedReplay.readersMissing.length === 1 ? "" : "s"}: ${snap.importedReplay.readersMissing.join(", ")}`
+                      : ""}
+                    .
+                  </p>
                 )}
               </section>
             )}

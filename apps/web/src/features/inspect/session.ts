@@ -124,7 +124,10 @@ export class InspectionSession {
   private ocrReader: TesseractOcrReader | null = null;
   private ocrHandle: OcrHandle | null = null;
   private ocrSelections = new Map<string, OcrSelection>();
-  private rasters = new Map<number, PageRaster>();
+  private rasters = new Map<
+    number,
+    PageRaster & { generation: number; documentSha256: string }
+  >();
 
   private plansById = new Map<string, CheckPlan>();
   private regionsById = new Map<string, ContractRegion>();
@@ -171,10 +174,31 @@ export class InspectionSession {
     this.importController = new ImportController({
       host: this.coordinator,
       engine: this.importEngine,
-      installedReaders: () => installedReaders(this.adapter),
+      installedReaders: () => installedReaders(this.adapter, this.installedOcrReaders()),
       onEvent: (event) => this.onImportEvent(event),
     });
     this.coordinator.subscribe(() => this.onCoordinatorChange());
+  }
+
+  /**
+   * The OCR reader identities this build can actually construct — both
+   * PSM profiles bound to the live render reader. Deterministic, same
+   * values `startRun` plans with, so imported reports that name them
+   * resolve as installed.
+   */
+  private installedOcrReaders(): Reader[] {
+    return [OCR_PSM.PAGE, OCR_PSM.SINGLE_LINE].map((psm) =>
+      buildReader({
+        engineVersion: OCR_ENGINE_VERSION,
+        coreBuild: OCR_CORE_BUILD,
+        model: OCR_MODEL,
+        renderReaderId: this.adapter.readers.render.id,
+        rasterDpi: 0,
+        psm,
+        profile: this.profile.id,
+        limitations: [],
+      }),
+    );
   }
 
   subscribe(listener: () => void): () => void {
@@ -253,6 +277,15 @@ export class InspectionSession {
     if (!result.ok) {
       this.error = { message: "The selected file does not match this report's recorded document.", detail: result.detail };
       this.emit();
+      return;
+    }
+    // The controller hash-verified the candidate against the report's
+    // recorded document — retain it so the export source opt-in can
+    // include the file the user just attached.
+    try {
+      this.sourceBytes = new Uint8Array(await candidate.arrayBuffer());
+    } catch {
+      this.sourceBytes = null;
     }
   }
 
@@ -280,6 +313,7 @@ export class InspectionSession {
     this.ocrSelections = new Map();
     this.ocrReader = null;
     this.ocrHandle = null;
+    this.cancelPending = false;
     this.assembledForGeneration = -1;
 
     // OCR eligibility: user-drawn region pages first, then the rest of
@@ -482,7 +516,9 @@ export class InspectionSession {
       // report `failed`/`model_missing` honestly — never a silent stall.
       this.ocrReader = null;
       this.ocrHandle = null;
-      this.notice = `OCR model could not be prepared: ${error instanceof Error ? error.message.slice(0, 140) : "unavailable"}. OCR checks are recorded as failed.`;
+      if (!stale()) {
+        this.notice = `OCR model could not be prepared: ${error instanceof Error ? error.message.slice(0, 140) : "unavailable"}. OCR checks are recorded as failed.`;
+      }
     }
     if (stale()) return;
     if (this.coordinator.fileState === "preparing_assets") {
@@ -500,8 +536,15 @@ export class InspectionSession {
     handle: DocumentHandle,
     pageIndex: number,
   ): Promise<PageRaster> {
+    const generation = this.runGeneration;
     const cached = this.rasters.get(pageIndex);
-    if (cached) return cached;
+    if (
+      cached &&
+      cached.generation === generation &&
+      cached.documentSha256 === (this.doc?.sha256 ?? "")
+    ) {
+      return cached;
+    }
     const out = await this.adapter.extract(
       handle,
       {
@@ -549,7 +592,16 @@ export class InspectionSession {
         limitations: page.limitations,
       }),
     };
-    this.rasters.set(pageIndex, pageRaster);
+    if (
+      this.coordinator.currentGeneration === generation &&
+      this.runGeneration === generation
+    ) {
+      this.rasters.set(pageIndex, {
+        generation,
+        documentSha256: this.doc?.sha256 ?? "",
+        ...pageRaster,
+      });
+    }
     return pageRaster;
   }
 
@@ -657,6 +709,7 @@ export class InspectionSession {
       this.importedView = null;
       this.importedReplay = null;
       this.contractPages = [];
+      this.pageTransforms = [];
       this.sourceBytes = null;
       this.sourceAttached = false;
     }
@@ -672,6 +725,12 @@ export class InspectionSession {
         this.report = opened.imported.report as Report;
         this.reportSource = "import";
         this.doc = null;
+        // The import path bypasses the open controller's 'clear' event —
+        // the previous document's retained bytes and page metadata must
+        // end at the replacement boundary with it.
+        this.sourceBytes = null;
+        this.contractPages = [];
+        this.pageTransforms = [];
         this.error = null;
         this.notice = null;
         this.ocrNote = null;
@@ -697,6 +756,9 @@ export class InspectionSession {
       this.reportSource = null;
       this.importedView = null;
       this.importedReplay = null;
+      this.sourceBytes = null;
+      this.contractPages = [];
+      this.pageTransforms = [];
       this.sourceAttached = false;
     }
     this.emit();
@@ -704,6 +766,10 @@ export class InspectionSession {
 
   private onCoordinatorChange(): void {
     const state = this.coordinator.fileState;
+    // Coordinator-internal transitions (deadline timeouts, dependency
+    // cascades, clear intents) also push outbox intents — drain on every
+    // notify so terminate/dispatch work actually executes.
+    if (state === "running" || state === "preparing_assets") this.pump();
     if (
       (state === "complete" || state === "partial" || state === "failed") &&
       this.assembledForGeneration !== this.coordinator.currentGeneration
@@ -826,11 +892,13 @@ export class InspectionSession {
             },
           );
           result = outcome.result;
-          if (outcome.raster && check.capability === "render") {
+          if (outcome.raster && check.capability === "render" && !stale()) {
             for (const t of outcome.raster.transforms ?? []) {
               this.transforms.set(t.id, t);
             }
-            // Cache for the dependent OCR check's raster source.
+            // Cache for the dependent OCR check's raster source — bound
+            // to this run's generation and document so a late-settling
+            // render can never feed stale pixels to a later run.
             const page = this.contractPages[check.page_index];
             if (page) {
               const image = new ImageData(
@@ -839,6 +907,8 @@ export class InspectionSession {
                 outcome.raster.heightPx,
               );
               this.rasters.set(check.page_index, {
+                generation,
+                documentSha256: this.doc?.sha256 ?? "",
                 rasterId: outcome.raster.rasterId,
                 renderReaderId: this.adapter.readers.render.id,
                 scalePxPerPt: outcome.raster.scalePxPerPt,
@@ -896,23 +966,20 @@ export class InspectionSession {
         retained_occurrence_ids: [],
       };
     }
-    const selection = this.ocrSelections.get(check.id);
-    const emitted: Occurrence[] = [];
     const output = await reader.extract(
       handle,
       check,
       (_id, occs) => {
         if (stale()) return;
-        emitted.push(...occs);
         feedChunks(occs);
       },
       signal,
     );
+    if (stale()) return { id: check.id, status: "cancelled", reason: "user_cancel", produced_occurrence_count: 0, retained_occurrence_ids: [] };
     this.runReaders.set(output.reader.id, output.reader);
     for (const t of output.transforms ?? []) {
       this.transforms.set(t.id, t);
     }
-    void selection;
     return output.check;
   }
 

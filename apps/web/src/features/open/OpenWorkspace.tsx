@@ -378,13 +378,15 @@ export function OpenWorkspace({
                   </li>
                 ))}
               </ul>
-              <ul className={styles.planList} data-testid="plan-dispatched">
-                {plan.dispatched.map((job) => (
-                  <li key={job.jobId}>
-                    dispatched {job.checkId} on {job.jobId}
-                  </li>
-                ))}
-              </ul>
+              {plan.dispatched.length > 0 && (
+                <ul className={styles.planList} data-testid="plan-dispatched">
+                  {plan.dispatched.map((job) => (
+                    <li key={job.jobId}>
+                      dispatched {job.checkId} on {job.jobId}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
         </section>

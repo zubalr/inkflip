@@ -576,6 +576,9 @@ test.beforeAll(async () => {
   const vite = (await import(viteEntry)) as {
     build: (opts: Record<string, unknown>) => Promise<unknown>;
   };
+  // The gate drives the read-only `__inspect` session handle — enabled
+  // only via this build-time opt-in (shipped production builds omit it).
+  process.env.INKFLIP_TEST_HOOKS = "1";
   await vite.build({
     root: WEB,
     configFile: join(WEB, "vite.config.ts"),
@@ -1011,6 +1014,11 @@ test("G1 leg 3: export → local reopen → attach source → offline OCR", asyn
   const attached = await inspect(page);
   expect(attached.sourceAttached).toBe(true);
   expect(attached.importedReplay!.source).not.toBe("missing");
+  // Every reader this build produces is installed — the deterministic
+  // OCR identities resolve, so replay readiness is honestly reachable.
+  expect(attached.importedReplay!.readersMissing).toEqual([]);
+  expect(attached.importedReplay!.ready).toBe(true);
+  await expect(page.locator("[data-testid=replay-status]")).toContainText("replay ready");
 
   await endCapture(page, cap);
   // The downloads legitimately contain the report id/run key/canary text —
