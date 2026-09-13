@@ -1,0 +1,245 @@
+{
+  "experiment_id": "P11",
+  "task_id": "T42",
+  "status": "completed",
+  "disposition": "rejected_experiment",
+  "hypothesis": "Targeted OCR retry value",
+  "baseline": "Single selected-page OCR, no reread",
+  "candidate": "Padded selected/mismatched-region rerun with inverse transform",
+  "manifest": "evaluation/manifests/development.corpus.json",
+  "fixture_ids": [
+    "F14",
+    "F15",
+    "F16"
+  ],
+  "clean_controls": "Adjacent-field crops and normal clean rows",
+  "resource_costs": {
+    "total_megapixels": 3.1936,
+    "max_megapixels_budget": 20.0,
+    "runtime_seconds": 0.5069,
+    "max_runtime_seconds_budget": 120.0
+  },
+  "metrics": {
+    "total_jobs_evaluated": 8,
+    "useful_target_recoveries": 1,
+    "clean_neighbors_corrupted": 1,
+    "all_transforms_source_bound": true,
+    "precision_loss_pp": 12.5,
+    "target_recovery_gain_pct": 12.5
+  },
+  "rejection_reasons": [
+    "Clean neighbor fields corrupted by padded retry (adjacent field '$200' captured into '$100' crop in adjacent-crop-adjacent.pdf)",
+    "Target recovery gain (12.5%) fell short of >=20% required threshold",
+    "Precision loss (12.5 pp) exceeded <=1 pp allowed tolerance"
+  ],
+  "fixtures": [
+    {
+      "fixture_id": "F16",
+      "family": "adjacent-crop",
+      "variant": "control",
+      "path": "fixtures/development/adjacent-crop-control.pdf",
+      "sha256": "4722b3e2cf2af24facc0ab5849020aab371547f2dfde5e6e9d984035371033fe",
+      "crop_rect": [
+        30,
+        100,
+        240,
+        140
+      ],
+      "page_size_pt": [
+        210.0,
+        40.0
+      ],
+      "rendered_pixels": 33600,
+      "baseline": {
+        "text": "$100 $200",
+        "target_present": true,
+        "neighbor_corrupted": false
+      },
+      "candidate": {
+        "text": "$100 $200",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F16",
+      "family": "adjacent-crop",
+      "variant": "adjacent",
+      "path": "fixtures/development/adjacent-crop-adjacent.pdf",
+      "sha256": "a9146267e96fdf25c457ead6a4bf4e3f71f69e01c6f9164bfcbd91fd38e47ab3",
+      "crop_rect": [
+        30,
+        100,
+        150,
+        140
+      ],
+      "page_size_pt": [
+        120.0,
+        40.0
+      ],
+      "rendered_pixels": 19200,
+      "baseline": {
+        "text": "$100 \u00a7$",
+        "target_present": true,
+        "neighbor_corrupted": false
+      },
+      "candidate": {
+        "text": "$100 $200",
+        "target_recovered": false,
+        "neighbor_corrupted": true,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F16",
+      "family": "adjacent-crop",
+      "variant": "clipped",
+      "path": "fixtures/development/adjacent-crop-clipped.pdf",
+      "sha256": "aa8374c302294899c9818eff4af8a8118c816e26c0843e7b5234a7cfd23707f3",
+      "crop_rect": [
+        50,
+        100,
+        100,
+        140
+      ],
+      "page_size_pt": [
+        50.0,
+        40.0
+      ],
+      "rendered_pixels": 8000,
+      "baseline": {
+        "text": "100",
+        "target_present": false,
+        "neighbor_corrupted": false
+      },
+      "candidate": {
+        "text": "$100",
+        "target_recovered": true,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "variant": "control",
+      "path": "fixtures/development/ocr-material-control.pdf",
+      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "rendered_pixels": 307200,
+      "baseline": {
+        "text": "SEAMOUNT -+188.",
+        "ambiguity_resolved": false
+      },
+      "candidate": {
+        "text": "SEAMOUNT -+188.",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "variant": "digit-ambiguity",
+      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
+      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "rendered_pixels": 307200,
+      "baseline": {
+        "text": "SAMOUMT -+108.",
+        "ambiguity_resolved": false
+      },
+      "candidate": {
+        "text": "SAMOUMT -+108.",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F15",
+      "family": "ocr-material",
+      "variant": "sign-ambiguity",
+      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
+      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "rendered_pixels": 307200,
+      "baseline": {
+        "text": "SeMounT File.",
+        "ambiguity_resolved": false
+      },
+      "candidate": {
+        "text": "SeMounT File.",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F14",
+      "family": "native-unicode",
+      "variant": "control",
+      "path": "fixtures/development/native-unicode-control.pdf",
+      "sha256": "3456ae2c3cd0bac03c76656f7f0150b9e1be92ad384006d4b158a39feef7b421",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "rendered_pixels": 307200,
+      "native_text": "LATIN-$100",
+      "baseline": {
+        "text": "LATIN-$100",
+        "native_match": true
+      },
+      "candidate": {
+        "text": "LATIN-$100",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    },
+    {
+      "fixture_id": "F14",
+      "family": "native-unicode",
+      "variant": "native",
+      "path": "fixtures/development/native-unicode-native.pdf",
+      "sha256": "5ae99c803de6701b334c3328dedde576e9ee425d4c0aa040d5b5c8da7349b159",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "rendered_pixels": 307200,
+      "native_text": "$\n1\n0\n0",
+      "baseline": {
+        "text": "$\n1\n0\n0",
+        "native_match": true
+      },
+      "candidate": {
+        "text": "$\n1\n0\n0",
+        "target_recovered": false,
+        "neighbor_corrupted": false,
+        "transform": "padded_region_retry_inverse_affine",
+        "source_bound": true
+      }
+    }
+  ],
+  "note": "Executed real native Tesseract and PDFium evaluations across F14, F15, F16; verified clean neighbor field corruption."
+}
