@@ -8,6 +8,7 @@ from pathlib import Path
 
 import coordination as c
 import native_followups as f
+import acceptance_receipts as receipts
 
 
 def plan() -> dict:
@@ -19,6 +20,46 @@ def current_pass(config: dict, issues: dict) -> dict | None:
         if issues.get(f"pdf-pass{stage['id']}", {}).get("status") != "closed":
             return stage
     return None
+
+
+def admission_stage(config: dict, issues: dict, task_id: str) -> dict | None:
+    """Pass checkpoints track completion; dependencies may admit independent work."""
+    mode = config.get("admission_mode", "passes")
+    if mode == "passes":
+        return current_pass(config, issues)
+    if mode != "dependencies":
+        raise ValueError(f"Unknown admission mode: {mode}")
+    stages = [stage for stage in config["passes"] if task_id in stage["tasks"]]
+    if len(stages) != 1 or task_id in config.get("owner_release", []):
+        raise ValueError(f"{task_id}: requires one implementation stage; owner release is separate")
+    return stages[0]
+
+
+def workbench_for(config: dict, task_id: str, app: str) -> str | None:
+    matches = [(name, lane) for name, lane in config.get("workbenches", {}).items()
+               if task_id in lane["tasks"]]
+    if len(matches) > 1:
+        raise ValueError(f"{task_id}: ambiguous workbench routing")
+    if matches and matches[0][1]["app"] != app:
+        raise ValueError(f"{task_id}: workbench belongs to another app")
+    return matches[0][0] if matches else None
+
+
+def in_workbench(config: dict, task_id: str, grant: dict, app: str, lane: str | None) -> bool:
+    if lane is None:
+        return True
+    # Explicit saved identity wins. Infer only compatible legacy grants, never mutate them.
+    if grant.get("workbench"):
+        return grant["workbench"] == lane
+    return task_id in config["workbenches"][lane]["tasks"] and grant.get("app", app) == app
+
+
+def check_fresh_predecessors(task: dict, issues: dict, ref: str) -> None:
+    for parent in task["dependencies"]:
+        try:
+            receipts.validate(parent, issues.get(c.bead_id(parent), {}), ref)
+        except ValueError as error:
+            raise ValueError(f"{parent}: prerequisite acceptance invalid: {error}") from error
 
 
 def sync_state() -> None:
@@ -33,8 +74,12 @@ def publish_state() -> None:
 def assignment(config: dict, task_id: str, app: str, base: str, stage: int) -> dict:
     if task_id not in config["apps"][app]["tasks"]:
         raise ValueError(f"{task_id} is not owned by {app}")
-    return {"app": app, "branch": config["apps"][app]["branch_prefix"] + task_id.lower(),
-            "base": base, "pass": stage}
+    grant = {"app": app, "branch": config["apps"][app]["branch_prefix"] + task_id.lower(),
+             "base": base, "pass": stage}
+    lane = workbench_for(config, task_id, app)
+    if lane:
+        grant["workbench"] = lane
+    return grant
 
 
 def dispatch_errors(config: dict, stage: dict | None, task_id: str, issue: dict,
@@ -56,7 +101,8 @@ def dispatch_errors(config: dict, stage: dict | None, task_id: str, issue: dict,
 
 def dispatch(task_id: str, app: str) -> None:
     config = plan()
-    if c.run(["git", "config", "--get", "inkflip.role"]) != "integrator":
+    if (c.ROOT.resolve() != c.canonical_root().resolve()
+            or c.run(["git", "config", "--get", "inkflip.role"]) != "integrator"):
         raise ValueError(f"Only the designated {config['integration_owner']} integration clone may dispatch")
     c.run(["git", "fetch", "origin", "main"])
     base = c.run(["git", "rev-parse", "HEAD"])
@@ -69,7 +115,7 @@ def dispatch(task_id: str, app: str) -> None:
     with c.admission_lock():
         sync_state()
         issues = c.issues_by_id()
-        stage = current_pass(config, issues)
+        stage = admission_stage(config, issues, task_id)
         workers = c.active_workers(issues)
         errors = dispatch_errors(config, stage, task_id, issues.get(c.bead_id(task_id), {}), workers, app)
         if errors:
@@ -80,6 +126,7 @@ def dispatch(task_id: str, app: str) -> None:
         if c.bead_id(task_id) not in ready:
             raise ValueError("Beads dependencies are not ready")
         c.check_predecessors(task, issues, ref="HEAD")
+        check_fresh_predecessors(task, issues, "HEAD")
         c.check_scope_ownership(task, workers, tasks, overrides)
         grant = assignment(config, task_id, app, base, stage["id"])
         metadata = dict(issues[c.bead_id(task_id)].get("metadata") or {})
@@ -91,8 +138,10 @@ def dispatch(task_id: str, app: str) -> None:
         print(json.dumps(grant, indent=2))
 
 
-def status(app: str, sync: bool) -> None:
+def status(app: str, sync: bool, workbench: str | None = None) -> None:
     config = plan()
+    if workbench is not None and config.get("workbenches", {}).get(workbench, {}).get("app") != app:
+        raise ValueError("Unknown workbench or workbench belongs to another app")
     with c.admission_lock():
         if sync:
             sync_state()
@@ -106,6 +155,9 @@ def status(app: str, sync: bool) -> None:
     for issue_id, issue in sorted(issues.items()):
         grant = f.execution_grant(issue_id, issue)
         assignee = issue.get("assignee") or ""
+        task_id = product_ids.get(issue_id, issue_id)
+        if not in_workbench(config, task_id, grant, app, workbench):
+            continue
         if (issue.get("status") in {"open", "in_progress"} and not grant
                 and (assignee == app or assignee.startswith(app + "-"))):
             undelivered.append({"issue": issue_id, "reason": "Assignee has no execution grant; coordinator dispatch required"})
@@ -114,7 +166,7 @@ def status(app: str, sync: bool) -> None:
                 f.validate_grant(issue_id, grant, config)
             assignments.append({**grant, "task": product_ids.get(issue_id, issue_id),
                                 "assignee": issue.get("assignee"), "notes": issue.get("notes", "")})
-    print(json.dumps({"app": app, "current_pass": stage, "assignments": assignments,
+    print(json.dumps({"app": app, "workbench": workbench, "admission_mode": config.get("admission_mode", "passes"), "current_pass": stage, "assignments": assignments,
                       "undelivered": undelivered,
                       "worker_budget": config["worker_budgets"][app]}, indent=2))
 
@@ -146,6 +198,9 @@ def dispatch_followup(issue_id: str, app: str, mode: str, scopes: list[str], ins
         grant = {"kind": "followup", "app": app, "branch": config["apps"][app]["branch_prefix"] + issue_id,
                  "base": base, "pass": stage["id"], "mode": mode,
                  "allowed_scope": scopes, "instructions": instructions}
+        lane = workbench_for(config, issue_id, app)
+        if lane:
+            grant["workbench"] = lane
         f.validate_grant(issue_id, grant, config)
         ready = {i["id"] for i in c.bd(["list", "--ready", "--limit", "0"])}
         if issue_id not in ready:
@@ -166,6 +221,7 @@ def main() -> None:
     view = commands.add_parser("status")
     view.add_argument("app", choices=plan()["apps"])
     view.add_argument("--sync", action="store_true")
+    view.add_argument("--workbench", choices=plan().get("workbenches", {}))
     admit = commands.add_parser("dispatch")
     admit.add_argument("task")
     admit.add_argument("--app", required=True, choices=plan()["apps"])
@@ -181,7 +237,7 @@ def main() -> None:
     elif args.command == "dispatch-followup":
         dispatch_followup(args.issue, args.app, args.mode, args.scope, args.instructions_file.read_text())
     else:
-        status(args.app, args.sync)
+        status(args.app, args.sync, args.workbench)
 
 
 if __name__ == "__main__":

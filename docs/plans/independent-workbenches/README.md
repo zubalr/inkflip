@@ -1,3 +1,8 @@
+> Implementation update: setup issue pdf-enc adds dependency admission, static A–E
+> routing and `status APP --workbench A|B|C|D|E`. The sections below describe the
+> adoption rationale and checks; actual session activation is recorded separately
+> in `activation.md` and Beads. Source installation alone is not worker pickup.
+
 # Inkflip: independent workbench roadmap
 
 September 13, 2026. This is a static ownership/implementation plan, not a second task tracker. Beads remains live authority. The packet reflects the owner's latest preference: use Devin CLI for difficult work, Antigravity for interface work and ZCode for volume, without agent-to-agent chat.
@@ -18,7 +23,7 @@ Literal zero shared state would not work for one application. This design remove
 | B | Independent Devin CLI / SWE-2 | Native CLI, corpus, reader profiles, baseline/regression workflow | T30, T32, T33, T34, T35, T40 |
 | C | Antigravity on Mac | Browser interaction, evidence/export UX, accessibility, visual finish, docs | pdf-z2u, T19, T20, T23, T37, T38, T49, T50 |
 | D | Existing ZCode Goal on Homebase | Fixtures, gallery, development experiments | pdf-g78, T21, T41, T42, T43, T44, T45 |
-| E | Independent Devin CLI / SWE-2 | Independent review, supply chain, performance/parity, final quality | pdf-cks, pdf-pfl, T39, T46, T47, T53, T55 |
+| E | Independent Devin CLI / SWE-2 | Independent review, supply chain, performance/parity, final quality | pdf-q3b, pdf-cks, pdf-pfl, T39, T46, T47, T53, T55 |
 
 T54 remains the separate owner release decision after T55. All 35 open product/follow-up items in the inspected snapshot are mapped exactly once, including T54. Already closed tasks are not redispatched. `roadmap.json` supplies exact task dependencies and effective allowed scopes; task contracts and Beads take precedence over stale snapshots.
 
@@ -26,7 +31,7 @@ Five workbenches are ownership lanes, not permission to launch five parents plus
 
 ## Why this can start more useful work
 
-The current dispatcher restricts new product work to the current numbered pass. Direct prerequisite checks passed for T30, T44 and T45 against inspected canonical main even though their numbered passes are later. They can form independent lanes once admission uses actual dependencies. They do not require T18.
+The dispatcher before this setup restricted new product work to the current numbered pass. Direct prerequisite checks passed for T30, T44 and T45 against inspected canonical main even though their numbered passes are later. They can form independent lanes once admission uses actual dependencies. They do not require T18.
 
 T19, T20, T21 and T25 really do depend on T18. More sessions do not remove that dependency. Their full implementation starts after the joined public app journey and G1 are accepted. C can first resolve the independent export follow-up, provided its precise scope is granted and does not overlap the active composition writer. E can review delivered candidates and handle the small shared-contract/supply-chain proposals. A's acceptance/review throughput has priority over noncritical work because fresh accepted prerequisites unlock other lanes.
 
@@ -41,12 +46,12 @@ These are integration checkpoints, not global freezes. An unrelated lane may con
 
 ## One-time adoption: minimal change to the existing system
 
-A owns this bounded setup change. Keep `planning/` frozen and the existing Git/Beads/SSH machinery. No new orchestration service, chat relay, daemon or custom broker.
+Owner-authorized setup issue pdf-enc installs this bounded change; A owns ongoing operation. Keep `planning/` frozen and the existing Git/Beads/SSH machinery. No new orchestration service, chat relay, daemon or custom broker.
 
 1. Merge this packet at `docs/plans/independent-workbenches/` and publish it through the existing code relay so Mac and Homebase read the same version. Reconcile actual writers, including the resumed pdf-3g8 child and any current pdf-g78 writer. The previous Devin-only direction was superseded by this roadmap request, but reassignment happens only after the existing writer yields a checkpoint. Preserve every branch/worktree; do not restart the product.
 2. Record static lane routes and session identities in the existing execution configuration/Beads metadata. Update the existing app task allocation to this table. A is sole Beads writer. A standing lane list is authorization for automatic future dispatch when eligible, not a claim on all tasks or broad file ownership.
 3. Extend `scripts/native_pass.py` admission so a configured dependency mode can dispatch a mapped task from its own declared stage when all accepted merged prerequisites are fresh. Retain exact branch/base, unclaimed state, scope conflict, app allocation, provider/resource and publication checks. Stamp the task's actual stage in its grant; never pretend later tasks belong to pass 1. Existing pass checkpoint/acceptance rules remain unchanged.
-4. Use existing `status APP` output; workers filter it by the fixed task IDs in their packet and the recorded lane/session identity. Multiple Devin sessions must not consume each other's grants. No invented `--lane` CLI flag is assumed. A automatically dispatches the next eligible unclaimed item in each standing queue at each coordination cycle, without requiring a new user/worker message.
+4. Use `status APP --workbench A|B|C|D|E` from current canonical main. Multiple Devin sessions must not consume each other's grants. Unfiltered `status APP` preserves legacy assignments for migration inspection. A automatically dispatches the next eligible unclaimed item in each standing queue at each coordination cycle, without requiring a new user/worker message.
 5. Preserve existing per-task branches and receipt formats. Each workbench is a persistent agent session with separate task checkouts underneath it. Do not put all sessions in one writable checkout or one long branch spanning unrelated tasks. Mac shares the canonical Beads DB; Homebase consumes its replica. Same-session continuation still requires matching exact task branch/base.
 6. For Homebase, publish source and Beads, relay, and prove the expected grant appears in the existing Goal's synced inbox. Verify the real current branch matches the return ref. Preserve old t05 checkpoints; migrate deliberately to work/zcode/pdf-g78 and hb/inkflip/pdf-g78 when authorized. Never just change the push destination while leaving the old branch checked out. No duplicate Goal or reboot.
 7. Startup order: activate A and E's review role; assign B's T30 and D's eligible fixture/experiment work once scope/slots permit; use C for its scoped follow-up then browser tasks after T18. Do not keep an idle fifth session alive solely to fill the table.
@@ -96,4 +101,6 @@ Success is measured by the shipped public journey, the real native CLI/corpus up
 
 If the new admission mode fails validation, keep its mode disabled and preserve existing work/grants. The old dispatch path remains available while the defect is fixed. Do not revert candidate work or reset checkouts to roll back scheduling.
 
-This packet creates no sessions and changes no live claims. It is ready for the integrator's one-time implementation/adoption, not yet a deployed scheduler. Source snapshot and static coverage checks are in validation.txt. Start with A-START.md, then the appropriate B/C/D/E packet after activation.
+The original plan snapshot is in validation.txt. Current setup installation and observed session pickup are recorded in activation.md and Beads; use those facts before launch. Start with A-START.md, then the appropriate B/C/D/E packet after activation.
+
+September 13 priority correction: the initial plan check used receipt existence, not full acceptance validation. Actual validation found stale T18/T30 prerequisites. Setup now validates full receipts before admission. E first handles pdf-q3b (native prerequisite reruns), A finishes pdf-3g8/fixture correction and rebuilds reviewed acceptance. T30 is admitted only once fresh; optional experiments wait behind these unblockers. The original 35-item snapshot excludes this newly discovered corrective follow-up.

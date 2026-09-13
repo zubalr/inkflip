@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import acceptance_receipts as receipts
 import coordination
 import gate
+import native_pass
 
 
 class ReceiptTests(unittest.TestCase):
@@ -71,6 +72,25 @@ class ReceiptTests(unittest.TestCase):
         verified, errors = gate.check_prerequisites({"required_task_ids": ["T01"]}, {"pdf-t01": self.issue})
         self.assertFalse(errors)
         self.assertEqual(verified[0]["evaluated_commit"], self.evaluated)
+
+    def test_native_admission_rejects_committed_empty_prerequisite_receipt(self):
+        self.save({})
+        with self.assertRaisesRegex(ValueError, "prerequisite acceptance invalid"):
+            native_pass.check_fresh_predecessors({'dependencies': ['T01']},
+                                                {'pdf-t01': self.issue}, 'HEAD')
+
+    def test_native_admission_rejects_stale_predecessor_code(self):
+        self.save()
+        (self.root / "package.json").write_text('{"changed": true}\n')
+        self.commit()
+        with self.assertRaisesRegex(ValueError, "stale receipt"):
+            native_pass.check_fresh_predecessors({'dependencies': ['T01']},
+                                                {'pdf-t01': self.issue}, 'HEAD')
+
+    def test_native_admission_accepts_fresh_independently_reviewed_receipt(self):
+        self.save()
+        native_pass.check_fresh_predecessors({'dependencies': ['T01']},
+                                            {'pdf-t01': self.issue}, 'HEAD')
 
     def test_empty_or_malformed_receipt_cannot_pass(self):
         for value in ({}, [], {"task_id": "T02"}):

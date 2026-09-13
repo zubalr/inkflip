@@ -83,12 +83,12 @@ and [subagent docs](https://docs.devin.ai/cli/subagents) describe these capabili
 and model routing. Recheck pricing when the offer expires; do not silently switch
 to a paid route.
 
-Capture the current pass at startup; continue through subsequent passes only
-after the preceding checkpoint and gates pass. `pdf-pass1` through
-`pdf-pass3` are Beads checkpoints. Only the coordinator closes a checkpoint,
-after its listed tasks have valid acceptance and its listed gates pass on the
-integrated candidate. This prevents dispatch into the next pass before gates
-finish. Keep T54 outside the three passes.
+The active independent workbench routes are in `execution/passes.json` and
+`docs/plans/independent-workbenches/README.md`. Admission mode `dependencies`
+selects the task's actual stage, then checks Beads readiness, fresh accepted
+predecessors and scope/capacity. A later stage number alone does not block work.
+`pdf-pass1` through `pdf-pass3` remain completion checkpoints: only the coordinator
+closes them after all listed tasks and actual gates pass. T54 remains separate.
 
 ## Dispatch and isolation
 
@@ -100,9 +100,9 @@ python3 scripts/native_pass.py dispatch T13 --app antigravity
 python3 scripts/native_pass.py dispatch T05 --app zcode
 ```
 
-The command checks actual readiness, predecessor receipts, pass membership,
+The command checks actual readiness, predecessor receipts, implementation-stage membership,
 ownership, scope conflicts and any configured finite capacity. It claims the task and stores
-`metadata.execution`: app, branch, exact base commit and pass. Launch only
+`metadata.execution`: app, branch, exact base commit, actual task pass and workbench (for routed tasks). Launch only
 after successful Beads publication. A publication failure leaves a recoverable
 local claim; recover sync/publication rather than creating a second claim.
 Never force logical Beads conflict resolution or discard local changes. The
@@ -123,7 +123,7 @@ open, unassigned and dependency-ready. Audit grants allow writes only to that
 follow-up's evidence directory. Implementation grants require explicit write
 scopes and the same exclusive ownership checks as product tasks. Grants retain
 their exact base, branch and pass. Workers cannot turn an audit into implementation.
-Do not use follow-ups to bypass product task ownership, pass gates or acceptance.
+Do not use follow-ups to bypass product task ownership, dependencies or acceptance.
 
 `status APP` includes these grants in `assignments`, with `kind: followup`,
 the original `pdf-...` ID, `instructions`, `mode` and `allowed_scope`.
@@ -155,14 +155,13 @@ relay before resuming the existing grant. Do not rerun dispatch to replace it.
 When a provider ends a worker turn, use its supported resume facility; an empty
 inbox or a shell process alone does not prove that native execution is waiting.
 
-Admit independent workers across the project, including native children,
-with no fixed numeric project ceiling; native provider and session limits
-still apply. Allocate by disjoint scope, memory/load, independent review
-throughput and actual running descendants. A null per-app budget imposes no
-app cap — do not invent one; a configured finite budget still bounds its
-app. Account for every active native descendant in Beads, reserve
-independent review capacity, and close finished workers. Do not spawn idle
-recursive supervisors. Historical native UI cards are not a live count.
+Keep at most five active execution slots across all workbenches, including native
+children; lower provider limits apply. The dispatcher limits active grants to
+five. A must additionally count actual sessions and descendants in Beads before
+launch: a grant count alone cannot observe provider processes. A null app budget
+does not waive the global limit. Reserve independent review capacity and replace
+a yielded writer with its reviewer instead of adding a sixth session. Historical
+native UI cards are not a live count. Do not spawn idle recursive supervisors.
 Use native general SWE-2 subagents and Antigravity's installed native facilities.
 ZCode uses its existing Goal on Homebase. Codex stays inactive after this transfer.
 Only one heavy OCR/corpus/performance run may execute at a time; record its holder
@@ -232,8 +231,8 @@ When blocked on another app, do independent work first, then use bounded
 resumability/compaction. Local workers read the shared canonical Beads state
 without remote pulls; the coordinator handles remote synchronization.
 
-Workers continue through ready granted work and later passes as Devin opens
-them after actual gates. A wave ending is a checkpoint, not permission to
+Workers continue through ready granted work in their standing queues as Devin
+publishes grants after actual dependency checks. A wave ending is a checkpoint, not permission to
 dispatch themselves. Devin finishes when the authorized product scope is
 accepted with actual gate evidence, or records a specific external blocker. A single ticket or a
 temporarily empty inbox is not completion. Report accepted tasks, actual gate
@@ -241,3 +240,22 @@ results, main commit and material blockers. Quotas, authentication, native UI
 approvals or unavailable reference devices may require owner input; preserve
 work and report the exact need. The same prompt resumes the unfinished pass
 or selects the next one. Never reboot, shut down, power-cycle or suspend Homebase.
+
+## Independent workbench inboxes
+
+Use `python3 scripts/native_pass.py status devin --workbench B` for the native
+CLI lane, `--workbench E` for review/quality, and `--workbench A` for integration.
+Antigravity uses `status antigravity --workbench C`; Homebase uses
+`status zcode --workbench D --sync`. Run control commands from current canonical
+main even when a task's implementation checkout has older scripts. The unfiltered
+`status APP` remains the migration/audit view and preserves original saved grants.
+Explicit saved workbench IDs take precedence; compatible legacy grants are only
+filtered, never rewritten. Every grant still fixes its exact branch and base.
+
+A processes delivered candidates and eligible standing queues at each checkpoint.
+Workers communicate through committed task-local handoffs/reviews and Beads reads,
+without agent chat. End a worker turn cleanly when its grants are exhausted; A
+resumes its exact native session on the next published grant. A PID or published
+inbox proves neither pickup nor progress: record the native acknowledgement and
+actual tool/checkpoint activity. Never queue Desktop messages while productive
+children run: queued delivery can cancel the descendant family too.
