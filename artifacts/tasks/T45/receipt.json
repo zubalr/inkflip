@@ -1,0 +1,65 @@
+{
+  "task": "T45",
+  "beads_id": "pdf-t45",
+  "evaluated_commit": "bfd57611cd0e487bae5fc3426b0c2cfc1a9a67e0",
+  "evaluated_at": "2026-09-13T11:18:14.153735+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python experiments/P14/run.py --manifest evaluation/manifests/development.json --out artifacts/P14",
+      "argv": [
+        "python3",
+        "experiments/P14/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P14"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P14/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P14"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P14 complete: 9 fixtures evaluated, clean_corrupted=5, disposition=rejected_experiment, runtime=0.0793s\n",
+      "stderr": "",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    },
+    {
+      "segment": "python experiments/P14/test_experiment.py",
+      "argv": [
+        "python3",
+        "experiments/P14/test_experiment.py"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P14/test_experiment.py"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "test_clean_control_corruption_is_measured (__main__.TestP14Experiment.test_clean_control_corruption_is_measured) ... ok\ntest_experiment_runs_and_produces_valid_artifact (__main__.TestP14Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok\ntest_fixtures_exist_and_intact (__main__.TestP14Experiment.test_fixtures_exist_and_intact) ... ok\ntest_rejection_rationale_conforms_to_contract (__main__.TestP14Experiment.test_rejection_rationale_conforms_to_contract) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.079s\n\nOK\n",
+      "tests": {
+        "collected": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "environment": {}
+    }
+  ]
+}
