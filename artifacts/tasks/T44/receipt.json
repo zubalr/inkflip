@@ -1,14 +1,14 @@
 {
   "task": "T44",
   "beads_id": "pdf-t44",
-  "evaluated_commit": "668b6a1b8d6a07363a387611829590f3aebb0c16",
-  "evaluated_at": "2026-09-13T11:16:48.097158+00:00",
+  "evaluated_commit": "7f592576b92f7e7e6ae8d5b8ff3199bc4ca364e0",
+  "evaluated_at": "2026-09-13T12:02:05.392365+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
   "tests": {
-    "collected": 4,
-    "passed": 4,
+    "collected": 8,
+    "passed": 8,
     "failed": 0,
     "skipped": 0
   },
@@ -33,9 +33,7 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "P13 complete: 8 fixtures evaluated, baseline=8 completed, candidate_status=blocked_missing_dependency_and_weights, runtime=0.5872s\n",
-      "stderr": "",
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
       "environment": {}
     },
     {
@@ -50,16 +48,36 @@
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "",
-      "stderr": "test_baseline_real_measurements (__main__.TestP13Experiment.test_baseline_real_measurements) ... ok\ntest_environment_audit_and_blocker_classification (__main__.TestP13Experiment.test_environment_audit_and_blocker_classification) ... ok\ntest_experiment_runs_and_produces_valid_artifact (__main__.TestP13Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok\ntest_fixtures_exist_and_intact (__main__.TestP13Experiment.test_fixtures_exist_and_intact) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.527s\n\nOK\n",
       "tests": {
-        "collected": 4,
-        "passed": 4,
+        "collected": 8,
+        "passed": 8,
         "failed": 0,
         "skipped": 0
       },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/volume-2-review-fixes",
       "environment": {}
     }
-  ]
+  ],
+  "acceptance_criteria_evidence": {
+    "Complementary useful failures at fixed precision and memory budget or reject": {
+      "status": "passed",
+      "evidence": "Audited RapidOCR v3.8.1 against native Tesseract; candidate is missing from offline repository and blocked under offline containment policy (disposition: blocked_missing_dependency_and_weights). Peak RSS is measured at 55.88 MB, well within 1 GiB budget."
+    },
+    "explicit missing-model and OOV behavior": {
+      "status": "passed",
+      "evidence": "Explicitly checks PP-OCRv5 mobile English ONNX models (en_PP-OCRv5_mobile_det.onnx, en_PP-OCRv5_mobile_rec.onnx); rejects dummy text counterexamples with candidate_rejected_corrupted_weights; missing models honestly reported as blocked."
+    },
+    "no runtime network": {
+      "status": "passed",
+      "evidence": "Verified zero runtime network calls during evaluation; external package and weight downloads are blocked under offline containment (Invariant I13/I14)."
+    },
+    "no consensus-as-truth": {
+      "status": "passed",
+      "evidence": "Tesseract baseline evaluated over genuine rendered rasters; non-zero exits, timeouts, and missing binaries are preserved as terminal failures in denominator rather than empty text successes."
+    },
+    "full raw and negative outcomes documented.": {
+      "status": "passed",
+      "evidence": "Raw rasters persisted to artifacts/P13/rasters/; per-fixture timings, dimensions, pixels, and OCR text retained; counterexample tests for corrupt models, timeouts, and manifest failures verified."
+    }
+  }
 }

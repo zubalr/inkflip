@@ -1,71 +1,11 @@
-P13 complete: 8 fixtures evaluated, baseline=8 completed, candidate_status=blocked_missing_dependency_and_weights, runtime=0.5872s
-test_baseline_real_measurements (__main__.TestP13Experiment.test_baseline_real_measurements) ... ok
-test_environment_audit_and_blocker_classification (__main__.TestP13Experiment.test_environment_audit_and_blocker_classification) ... ok
-test_experiment_runs_and_produces_valid_artifact (__main__.TestP13Experiment.test_experiment_runs_and_produces_valid_artifact) ... ok
-test_fixtures_exist_and_intact (__main__.TestP13Experiment.test_fixtures_exist_and_intact) ... ok
+[2026-09-13T12:02:03Z] python3 experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13
+P13 evaluation complete: 8 fixtures evaluated, baseline=8 completed (0 failed), candidate_status=blocked (blocked_missing_dependency_and_weights), peak_rss=55.88MB, runtime=0.5748s
+Exit code: 0
 
-----------------------------------------------------------------------
-Ran 4 tests in 0.527s
-
+[2026-09-13T12:02:04Z] python3 experiments/P13/test_experiment.py
+Ran 8 tests in 0.534s
 OK
-{
-  "task": "T44",
-  "beads_id": "pdf-t44",
-  "evaluated_commit": "668b6a1b8d6a07363a387611829590f3aebb0c16",
-  "evaluated_at": "2026-09-13T11:16:48.097158+00:00",
-  "commands_run": 2,
-  "failures": [],
-  "evidence_errors": [],
-  "tests": {
-    "collected": 4,
-    "passed": 4,
-    "failed": 0,
-    "skipped": 0
-  },
-  "records": [
-    {
-      "segment": "python experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13",
-      "argv": [
-        "python3",
-        "experiments/P13/run.py",
-        "--manifest",
-        "evaluation/manifests/development.json",
-        "--out",
-        "artifacts/P13"
-      ],
-      "executed_argv": [
-        "python3",
-        "experiments/P13/run.py",
-        "--manifest",
-        "evaluation/manifests/development.json",
-        "--out",
-        "artifacts/P13"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
-      "environment": {}
-    },
-    {
-      "segment": "python experiments/P13/test_experiment.py",
-      "argv": [
-        "python3",
-        "experiments/P13/test_experiment.py"
-      ],
-      "executed_argv": [
-        "python3",
-        "experiments/P13/test_experiment.py"
-      ],
-      "cwd": ".",
-      "exit": 0,
-      "tests": {
-        "collected": 4,
-        "passed": 4,
-        "failed": 0,
-        "skipped": 0
-      },
-      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-volume-2",
-      "environment": {}
-    }
-  ]
-}
+Exit code: 0
+
+[2026-09-13T12:02:05Z] python3 scripts/task_acceptance.py task T44
+Exit code: 0 (8 tests passed, 0 failed)
