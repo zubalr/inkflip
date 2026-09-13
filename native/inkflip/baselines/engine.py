@@ -40,6 +40,25 @@ def _load_json(path: Path) -> Any:
         raise BaselineError(f"Cannot read {path}: {exc}") from exc
 
 
+def _read_json_file(path: Path, label: str) -> Any:
+    """Read one configuration JSON file, translating operator input faults.
+
+    A missing, unreadable or malformed configuration file (run index, run
+    identity, rules) is an input fault, never an unexpected internal error.
+    Translating it here keeps the documented CLI exit-2 contract for invalid
+    configuration while an internal invariant break still surfaces as a
+    generic failure upstream.
+    """
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise BaselineError(f"Cannot read {label} {path}: {exc}") from exc
+    try:
+        return core.loads_strict(raw)
+    except core.ContractError as exc:
+        raise BaselineError(f"Invalid {label} {path}: {exc}") from exc
+
+
 def _require_report(data: Any, path: Path) -> dict[str, Any]:
     if not isinstance(data, dict) or data.get("kind") != "report":
         raise BaselineError(f"{path} is not a report")
@@ -68,7 +87,7 @@ def _run_reports(run_dir: Path) -> dict[str, dict[str, Any]]:
 def _identity(run_dir: Path) -> dict[str, Any]:
     identity_path = run_dir / "identity.json"
     if identity_path.is_file():
-        return json.loads(identity_path.read_text(encoding="utf-8"))
+        return _read_json_file(identity_path, "run identity")
     return {}
 
 
@@ -106,7 +125,7 @@ def create_baseline(
     index_path = run_dir / "index.json"
     if not index_path.is_file():
         raise BaselineError(f"Run directory missing index.json: {run_dir}")
-    index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    index_data = _read_json_file(index_path, "run index")
     if index_data.get("status") != "complete" and not allow_incomplete:
         raise BaselineError(
             f"Run status is {index_data.get('status')!r}. Incomplete runs cannot become baselines."
@@ -118,9 +137,16 @@ def create_baseline(
     identity = _identity(run_dir)
     rules_sha = None
     if rules_path:
-        rules_bytes = Path(rules_path).read_bytes()
-        rules_data = core.loads_strict(rules_bytes)
-        core.validate(rules_data)
+        rules_path = Path(rules_path)
+        try:
+            rules_bytes = rules_path.read_bytes()
+        except OSError as exc:
+            raise BaselineError(f"Cannot read rules file {rules_path}: {exc}") from exc
+        try:
+            rules_data = core.loads_strict(rules_bytes)
+            core.validate(rules_data)
+        except core.ContractError as exc:
+            raise BaselineError(f"Invalid rules file {rules_path}: {exc}") from exc
         if rules_data.get("kind") != "acceptance_rules":
             raise BaselineError("Rules file is not kind acceptance_rules")
         rules_sha = _sha256_bytes(rules_bytes)

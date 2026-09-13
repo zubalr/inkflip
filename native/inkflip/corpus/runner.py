@@ -15,7 +15,12 @@ from inkflip.corpus.manifest import (
     CorpusEntry,
     load_and_validate_manifest,
 )
-from inkflip.profiles import BUILTIN_PROFILE_NAMES, default_profiles_dir, load_profile
+from inkflip.profiles import (
+    BUILTIN_PROFILE_NAMES,
+    ProfileError,
+    default_profiles_dir,
+    load_profile,
+)
 from inkflip.runtime import JobSpec, Limits, RunResult, Supervisor, SupervisionError
 from inkflip.runtime.artifacts import atomic_write_bytes
 
@@ -25,7 +30,12 @@ _NATIVE_ROOT = Path(__file__).resolve().parents[2]
 def _profile_identity(profile_name: str) -> tuple[str, str]:
     if profile_name in BUILTIN_PROFILE_NAMES:
         return profile_name, hashlib.sha256(f"builtin:{profile_name}".encode()).hexdigest()
-    profile = load_profile(profile_name, base_dir=default_profiles_dir())
+    try:
+        profile = load_profile(profile_name, base_dir=default_profiles_dir())
+    except ProfileError as exc:
+        # A named profile that is missing, untrusted or blocked is invalid
+        # configuration (CLI exit 2), not an unexpected runtime failure.
+        raise CorpusError(f"Unknown or unusable profile {profile_name!r}: {exc}") from exc
     return profile.name, profile.profile_sha256
 
 
