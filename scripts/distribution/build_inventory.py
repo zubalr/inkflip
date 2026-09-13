@@ -290,6 +290,28 @@ def build_inventory() -> dict:
 
     dev_npm = sorted((lock["workspaces"].get("", {}).get("devDependencies") or {}).keys())
 
+    # Tesseract Debian closure (production-image dependency, linux/amd64):
+    # recorded as its own bucket so the deb packages are neither double-
+    # counted with the python wheels nor silently absent from the SBOM.
+    native_deb_closure = []
+    tess_stamp_path = ROOT / "release" / "tesseract" / "tesseract.stamp.json"
+    if tess_stamp_path.is_file():
+        try:
+            tsd = json.loads(tess_stamp_path.read_text())
+        except json.JSONDecodeError:
+            tsd = {}
+        for pkg in tsd.get("packages", []):
+            native_deb_closure.append(
+                {
+                    "filename": pkg.get("filename"),
+                    "sha256": pkg.get("sha256"),
+                    "bytes": pkg.get("bytes"),
+                    "target": "linux/amd64 production image",
+                    "closure": f"{tsd.get('package')} {tsd.get('version')}",
+                    "license": tsd.get("license"),
+                }
+            )
+
     static_runtime = []
     sw = ROOT / "apps" / "web" / "public" / "sw.js"
     if sw.is_file():
@@ -338,7 +360,12 @@ def build_inventory() -> dict:
             "bundled_npm_packages": len(npm_components),
             "native_lock_packages": len(native_packages),
             "fixture_entries": len(fixture_entries),
+            "native_deb_packages": len(native_deb_closure),
             "unknown": len(unknown),
+        },
+        "native_deb_closure": {
+            "target": "linux/amd64 production image (Docker)",
+            "packages": native_deb_closure,
         },
         "static_runtime": static_runtime,
         "shipped_assets": shipped_assets,

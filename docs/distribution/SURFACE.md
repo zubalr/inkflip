@@ -11,6 +11,7 @@ freeze; re-generate after any dependency or asset change.
 | --- | --- |
 | bundled_npm_packages | 17 |
 | fixture_entries | 80 |
+| native_deb_packages | 70 |
 | native_lock_packages | 14 |
 | offline_manifest_example_entries | 54 |
 | prepared_example_files | 54 |
@@ -22,23 +23,23 @@ freeze; re-generate after any dependency or asset change.
 
 | Package | Version | Declared license |
 | --- | --- | --- |
-| bmp-js | 0.1.0 | MIT |
-| idb-keyval | 6.3.0 | Apache-2.0 |
-| is-url | 1.2.4 | MIT |
-| node-fetch | 2.7.0 | MIT |
-| opencollective-postinstall | 2.0.3 | MIT |
-| pdfjs-dist | 6.3.289 | Apache-2.0 |
-| react | 19.2.8 | MIT |
-| react-dom | 19.2.8 | MIT |
-| regenerator-runtime | 0.13.11 | MIT |
-| scheduler | 0.27.0 | MIT |
-| tesseract.js | 7.0.0 | Apache-2.0 |
-| tesseract.js-core | 7.0.0 | Apache-2.0 |
-| tr46 | 0.0.3 | MIT |
-| wasm-feature-detect | 1.9.0 | Apache-2.0 |
-| webidl-conversions | 3.0.1 | BSD-2-Clause |
-| whatwg-url | 5.0.0 | MIT |
-| zlibjs | 0.3.1 | MIT |
+| bmp-js | 0.1.0 | None |
+| idb-keyval | 6.3.0 | None |
+| is-url | 1.2.4 | None |
+| node-fetch | 2.7.0 | None |
+| opencollective-postinstall | 2.0.3 | None |
+| pdfjs-dist | 6.3.289 | None |
+| react | 19.2.8 | None |
+| react-dom | 19.2.8 | None |
+| regenerator-runtime | 0.13.11 | None |
+| scheduler | 0.27.0 | None |
+| tesseract.js | 7.0.0 | None |
+| tesseract.js-core | 7.0.0 | None |
+| tr46 | 0.0.3 | None |
+| wasm-feature-detect | 1.9.0 | None |
+| webidl-conversions | 3.0.1 | None |
+| whatwg-url | 5.0.0 | None |
+| zlibjs | 0.3.1 | None |
 
 ## Native runtime-tooling packages (frozen lock)
 
