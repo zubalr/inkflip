@@ -1,0 +1,44 @@
+{
+  "task_id": "T20",
+  "beads_id": "pdf-t20",
+  "disposition": "implemented_pending_review",
+  "branch": "work/devin/t20",
+  "base_commit": "f191be5",
+  "source_commit": "cbfd8d4",
+  "implementation_commit": "cbfd8d4",
+  "actor": "devin-t20",
+  "contract_version": "1.0.0",
+  "recorded_at": "2026-09-13",
+  "acceptance_criteria_evidence": {
+    "Repeated identical strings stay individually addressable by occurrence identity, never first textual match": {
+      "status": "executed",
+      "detail": "tests/browser/ambiguity.spec.ts test 1 runs a real PDF.js+Tesseract pipeline on a fixture with repeated identical amounts and selects occurrence #3 by its own id-addressed control, asserting the #3 highlight is selected and sibling #1 is not. OccurrenceCandidates resolves candidates strictly by occurrence id; identical-text siblings are labeled 'identical text — k of n at distinct positions' by named order.",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    },
+    "Ambiguous findings expose every candidate and never preselect": {
+      "status": "executed",
+      "detail": "ViewerStage.handleSelectFinding no longer assigns occurrence_ids[0] for ambiguous findings; ambiguity.spec test 2 asserts all three named candidates render, zero carry aria-pressed=true on selection, and a pointer click on a candidate sticks (review F1: click no longer bubbles to the card and wipes the pick). findings.ts unions every evaluated candidate pair into occurrence_ids so rival occurrences cannot vanish.",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    },
+    "Choosing a candidate updates the viewer selection; keyboard selection returns focus": {
+      "status": "executed",
+      "detail": "Test 2 asserts the clicked candidate's overlay polygon gets highlightSelected while other candidates render the distinct highlightAmbiguous candidate style. Test 5 focuses a candidate, presses Enter, and asserts focus returns to the originating finding card with the pick intact (stopPropagation prevents the card's Enter handler overwriting it); Escape returns focus without changing selection.",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    },
+    "Order-only differences classified order-only, never missing/changed text": {
+      "status": "executed",
+      "detail": "deriveFindings emits result.order_differences as observed_structure findings (basis records emission_order_differs and order distance) gated on groupText equality so differing-text inversions stay reading_difference. Test 3 drives the real reordered-stream fixture and asserts the order_only classification and that no 'readings differ' finding appears. A pre-spec real-pipeline probe confirmed the same sealed-report content (commands.log).",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    },
+    "Unmatched readings disclosed as unmatched evidence, not missing visible text": {
+      "status": "executed",
+      "detail": "Test 4 drives the real tiny fixture: the 1pt text-layer string OCR cannot see produces 'No matching reading found here' with classification unmatched and copy 'not proof of missing document text'; the spec asserts forbidden verdict phrasing never appears anywhere in the viewer.",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    },
+    "Alignment details and provenance remain inspectable; static CSS-module mappings": {
+      "status": "executed",
+      "detail": "AlignmentDetail renders the classification badge, honest body copy, 'How this was checked' basis and limitations inside the selected finding card; split/merge provenance is appended to matched-difference basis strings. BADGE_CLASS is a static Record — no dynamic CSS-module key indexing. Regression: 33/33 across viewer/open/g1/large-mobile after fixes (commands.log).",
+      "evidence": ["artifacts/tasks/T20/run.json", "artifacts/tasks/T20/commands.log"]
+    }
+  }
+}
