@@ -21,7 +21,7 @@
         "produced_occurrence_count": 1,
         "reason": null,
         "retained_occurrence_ids": [
-          "x"
+          "pdfium-native-aa00-p0-text-0"
         ],
         "status": "completed"
       },
@@ -30,8 +30,8 @@
         "produced_occurrence_count": 9,
         "reason": null,
         "retained_occurrence_ids": [
-          "a",
-          "b"
+          "tesseract-native-aa00-p0-text-0",
+          "tesseract-native-aa00-p0-text-1"
         ],
         "status": "completed"
       }
@@ -113,6 +113,100 @@
         "raw_text": "$100",
         "reader_id": "pdfium-native",
         "source_asset_id": null
+      },
+      {
+        "engine_score": null,
+        "geometry": {
+          "basis": "pdfium get_charbox(loose=True) index 0-3; C over pypdf crop/UserUnit",
+          "polygon": [
+            [
+              48.0,
+              220.0
+            ],
+            [
+              152.9,
+              220.0
+            ],
+            [
+              152.9,
+              257.2
+            ],
+            [
+              48.0,
+              257.2
+            ]
+          ],
+          "precision": "exact",
+          "space": "canonical_page",
+          "transform_ids": [
+            "pdfium-user-to-canonical-c"
+          ]
+        },
+        "id": "tesseract-native-aa00-p0-text-0",
+        "limitations": [],
+        "normalization_map": [
+          {
+            "normalized_end": 4,
+            "normalized_start": 0,
+            "operation": "identity",
+            "raw_end": 4,
+            "raw_start": 0
+          }
+        ],
+        "normalized_text": "$100",
+        "ordinal": 0,
+        "page_index": 0,
+        "raw_source_locator": "tesseract:word[0]:line0",
+        "raw_text": "$100",
+        "reader_id": "tesseract-native",
+        "source_asset_id": null
+      },
+      {
+        "engine_score": null,
+        "geometry": {
+          "basis": "pdfium get_charbox(loose=True) index 0-3; C over pypdf crop/UserUnit",
+          "polygon": [
+            [
+              48.0,
+              220.0
+            ],
+            [
+              152.9,
+              220.0
+            ],
+            [
+              152.9,
+              257.2
+            ],
+            [
+              48.0,
+              257.2
+            ]
+          ],
+          "precision": "exact",
+          "space": "canonical_page",
+          "transform_ids": [
+            "pdfium-user-to-canonical-c"
+          ]
+        },
+        "id": "tesseract-native-aa00-p0-text-1",
+        "limitations": [],
+        "normalization_map": [
+          {
+            "normalized_end": 4,
+            "normalized_start": 0,
+            "operation": "identity",
+            "raw_end": 4,
+            "raw_start": 0
+          }
+        ],
+        "normalized_text": "$100",
+        "ordinal": 1,
+        "page_index": 0,
+        "raw_source_locator": "tesseract:word[1]:line0",
+        "raw_text": "$100",
+        "reader_id": "tesseract-native",
+        "source_asset_id": null
       }
     ],
     "pages": [
@@ -164,6 +258,15 @@
             "pdfium-native"
           ],
           "region_id": null
+        },
+        {
+          "capability": "ocr",
+          "id": "check-ocr",
+          "page_index": 0,
+          "reader_ids": [
+            "tesseract-native"
+          ],
+          "region_id": null
         }
       ],
       "normalization_version": "scalar-whitespace-v1",
@@ -202,6 +305,34 @@
           "render_reader_id": "pdfium-native"
         },
         "version": "149.0.7825.0"
+      },
+      {
+        "adapter_version": "1.0.0",
+        "build": "tesseract 5.5.0",
+        "capabilities": [
+          {
+            "limits": [],
+            "name": "ocr",
+            "support": "supported"
+          }
+        ],
+        "environment": "native",
+        "id": "tesseract-native",
+        "limitations": [
+          "audit fixture manifest"
+        ],
+        "method": "ocr",
+        "model_hashes": [],
+        "name": "Tesseract",
+        "settings": {
+          "annotation_mode": "not_applicable",
+          "language": "eng",
+          "normalization": "scalar-whitespace-v1",
+          "psm": 6,
+          "raster_dpi": 300,
+          "render_reader_id": "pdfium-native"
+        },
+        "version": "5.5.0"
       }
     ],
     "report_id": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
@@ -237,8 +368,9 @@
   "rules": {
     "kind": "acceptance_rules",
     "policy": {
-      "baseline_refresh": "manual",
-      "rationale": "silent refresh forbidden"
+      "fail_on_coverage_loss": true,
+      "fail_on_error": true,
+      "unruled_change": "changed"
     },
     "rules": [
       {
@@ -252,7 +384,7 @@
         "page_index": 0,
         "reader_id": "pdfium-native",
         "region_id": null,
-        "type": "occurrence_count"
+        "type": "expected_occurrence_count"
       },
       {
         "capability": "ocr",
@@ -265,7 +397,7 @@
         "page_index": 0,
         "reader_id": "tesseract-native",
         "region_id": null,
-        "type": "occurrence_count"
+        "type": "expected_occurrence_count"
       }
     ],
     "schema_version": "1.0.0"

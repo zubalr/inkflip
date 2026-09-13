@@ -712,16 +712,6 @@ def _cmap_font_page(body: bytes, cmap: bytes, font_obj_index: int = 3) -> list[b
 
 
 def ligature_entries() -> list[dict]:
-    """F13: one painted code whose ToUnicode map expands to the multi-scalar
-    'fi' sequence, against a literal 'fi' control. Painted glyphs stay
-    constant; only the map and the painted codes differ."""
-    cmap = (b"/CIDInit /ProcSet findresource begin 12 dict begin begincmap\n"
-            b"/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n"
-            b"/CMapName /Owned def /CMapType 2 def\n"
-            b"1 begincodespacerange <00> <FF> endcodespacerange\n"
-            b"1 beginbfchar <A1> <00660069> endbfchar\n"
-            b"endcmap CMapName currentdict /CMap defineresource pop end end\n")
-def ligature_entries() -> list[dict]:
     """F13 within the frozen rights/gate boundary: a constant painted glyph
     (code A1 on every page) whose extraction is driven only by the ToUnicode
     map — identity control extracts the painted character, the expansion map
@@ -752,10 +742,6 @@ def ligature_entries() -> list[dict]:
     ]
 
 
-def unicode_entries() -> list[dict]:
-    """F14: Arabic/CJK/emoji logical strings carried by an Identity-H Type0
-    font whose ToUnicode CMap holds the real Unicode; no font program is
-    embedded (glyph appearance is not asserted, logical values are)."""
 def unicode_entries() -> list[dict]:
     """F14 within the frozen rights/gate boundary: the Identity-H/ToUnicode
     mechanism is demonstrated with Latin logical strings (single-scalar
@@ -882,7 +868,8 @@ def adjacent_entries() -> list[dict]:
                        "selection": "wrong-neighbor selection must be rejectable"}),
         catalog_entry("F16", "clipped", clipped,
                       {"crop": [50, 100, 100, 140], "in_crop": [],
-                       "clipped_glyph": "$100 cut by the crop edge at x=100",
+                       "clipped_glyph": "$100 cut by the left crop edge at x=50 "
+                                        "(text spans ~40-93pt; x=100 is the right edge)",
                        "selection": "partial glyph must not be read as a full amount"}),
     ]
 
@@ -1034,13 +1021,40 @@ def baseline_entries() -> list[dict]:
     """F23: mutations of a canonical-schema-valid report against an
     AcceptanceRules baseline context; unchanged stays accepted while
     coverage loss, document mismatch and silent refresh each fire their
-    declared rule."""
+    declared rule. All three sub-documents validate against the canonical
+    schema ($defs/Report, $defs/Baseline, $defs/AcceptanceRules) — the
+    semantic test asserts this so the claim cannot silently regress."""
     report = canonical_report("a" * 64, [
         {"id": "check-native-text", "status": "completed", "reason": None,
-         "produced_occurrence_count": 1, "retained_occurrence_ids": ["x"]},
+         "produced_occurrence_count": 1,
+         "retained_occurrence_ids": ["pdfium-native-aa00-p0-text-0"]},
         {"id": "check-ocr", "status": "completed", "reason": None,
-         "produced_occurrence_count": 2, "retained_occurrence_ids": ["a", "b"]},
+         "produced_occurrence_count": 2,
+         "retained_occurrence_ids": ["tesseract-native-aa00-p0-text-0",
+                                     "tesseract-native-aa00-p0-text-1"]},
     ])
+    # The retained_occurrence_ids above name real occurrences: declare the
+    # OCR reader, its planned check and the two occurrences it produced.
+    ocr_reader = json.loads(json.dumps(report["readers"][0]))
+    ocr_reader.update({"id": "tesseract-native", "name": "Tesseract",
+                       "version": "5.5.0", "build": "tesseract 5.5.0",
+                       "method": "ocr",
+                       "capabilities": [{"name": "ocr", "support": "supported",
+                                         "limits": []}]})
+    ocr_reader["settings"].update({"language": "eng", "psm": 6,
+                                   "raster_dpi": 300})
+    report["readers"].append(ocr_reader)
+    report["plan"]["checks"].append(
+        {"id": "check-ocr", "page_index": 0,
+         "reader_ids": ["tesseract-native"], "capability": "ocr",
+         "region_id": None})
+    for ordinal in range(2):
+        occurrence = json.loads(json.dumps(report["occurrences"][0]))
+        occurrence.update(
+            {"id": f"tesseract-native-aa00-p0-text-{ordinal}",
+             "reader_id": "tesseract-native", "ordinal": ordinal,
+             "raw_source_locator": f"tesseract:word[{ordinal}]:line0"})
+        report["occurrences"].append(occurrence)
     baseline = {
         "kind": "baseline",
         "schema_version": "1.0.0",
@@ -1055,20 +1069,21 @@ def baseline_entries() -> list[dict]:
     rules = {
         "kind": "acceptance_rules",
         "schema_version": "1.0.0",
-        "rules": [{"id": "rule-native-text", "type": "occurrence_count",
+        "rules": [{"id": "rule-native-text",
+                   "type": "expected_occurrence_count",
                    "document_sha256": "a" * 64, "page_index": 0,
                    "reader_id": "pdfium-native", "region_id": None,
                    "expected_text": None, "expected_count": 1,
                    "max_delta_pt": 0.0, "capability": "native_text",
                    "explanation": "native amount must stay findable"},
-                  {"id": "rule-ocr", "type": "occurrence_count",
+                  {"id": "rule-ocr", "type": "expected_occurrence_count",
                    "document_sha256": "a" * 64, "page_index": 0,
                    "reader_id": "tesseract-native", "region_id": None,
                    "expected_text": None, "expected_count": 2,
                    "max_delta_pt": 0.0, "capability": "ocr",
                    "explanation": "ocr occurrences must not drop"}],
-        "policy": {"baseline_refresh": "manual",
-                   "rationale": "silent refresh forbidden"},
+        "policy": {"fail_on_coverage_loss": True, "fail_on_error": True,
+                   "unruled_change": "changed"},
     }
     coverage_loss = json.loads(json.dumps(report))
     coverage_loss["checks"] = report["checks"][:1]
@@ -1078,7 +1093,9 @@ def baseline_entries() -> list[dict]:
     silent_refresh["checks"] = [
         report["checks"][0],
         {"id": "check-ocr", "status": "completed", "reason": None,
-         "produced_occurrence_count": 9, "retained_occurrence_ids": ["a", "b"]},
+         "produced_occurrence_count": 9,
+         "retained_occurrence_ids": ["tesseract-native-aa00-p0-text-0",
+                                     "tesseract-native-aa00-p0-text-1"]},
     ]
     context = {"baseline": baseline, "rules": rules}
     return [
@@ -1089,17 +1106,20 @@ def baseline_entries() -> list[dict]:
         catalog_entry("F23", "coverage-loss", json_payload({**context, "report": coverage_loss}),
                       {"scenario": "baseline lost the check-ocr entry",
                        "expected": "regression comparison cannot improve by losing checks",
-                       "canonical_schema": "report stays schema-valid; the rule stage fires"},
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the rule stage fires"},
                       "json"),
         catalog_entry("F23", "mismatched-doc", json_payload({**context, "report": mismatched}),
                       {"scenario": "report bound to a different document digest than the baseline",
                        "expected": "comparison refused; never silently re-based",
-                       "canonical_schema": "report stays schema-valid; the binding stage fires"},
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the binding stage fires"},
                       "json"),
         catalog_entry("F23", "silent-refresh", json_payload({**context, "report": silent_refresh}),
                       {"scenario": "ocr occurrence count edited from 2 to 9",
                        "expected": "silent baseline refresh forbidden; the declared rule fires",
-                       "canonical_schema": "report stays schema-valid; the rule stage fires"},
+                       "canonical_schema": "report/baseline/acceptance_rules all "
+                                           "schema-valid; the rule stage fires"},
                       "json"),
     ]
 
@@ -1193,11 +1213,11 @@ def cache_entries() -> list[dict]:
         if include_files:
             files = {
                 "model.bin": {"sha256": hashlib.sha256(model).hexdigest(),
-                              "content_base64": model.hex()},
+                              "content_hex": model.hex()},
                 "worker.bin": {"sha256": hashlib.sha256(worker).hexdigest(),
-                               "content_base64": worker.hex()},
+                               "content_hex": worker.hex()},
                 "core.bin": {"sha256": hashlib.sha256(core).hexdigest(),
-                             "content_base64": core.hex()},
+                             "content_hex": core.hex()},
             }
         return {"kind": "asset_cache_fixture", "manifest": manifest, "files": files}
 

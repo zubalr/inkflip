@@ -74,3 +74,28 @@ Revision: all 7 findings addressed; semantic consumer tests added.
 Checks: tests/fixtures 69 passed (50 integrity + 19 semantic); native/tests
 196 + 170 subtests; test:native exit 0; verify exit 0; determinism OK.
 ================================================================================
+================================================================================
+FIX ROUND (devin work/devin/pdf-g78, 2026-09-13) — review e8ab38a B1/B2 + nits
+$ git merge --no-ff integrate/pass1
+  -> merge 7fd8245: registered test:fixtures argv is now
+     `uv run --frozen --project native python -m unittest discover -s
+     tests/fixtures -v` (main 2010fc3); jsonschema/pypdfium2 resolve from
+     the pinned native lockfile env.
+$ python3 scripts/make_fixtures.py
+  -> generated 161 files under fixtures/
+$ python3 scripts/make_fixtures.py --check
+  -> check ok: 161 files match deterministic regeneration
+$ python3 scripts/make_fixtures.py --out /tmp/g78f1 ; --out /tmp/g78f2
+$ diff -r /tmp/g78f1 /tmp/g78f2   -> DETERMINISM OK (byte-identical)
+$ diff -r fixtures /tmp/g78f1     -> IN-PLACE OK (byte-identical)
+$ python3 scripts/task_acceptance.py run test:fixtures
+  -> exit 0; Ran 70 tests; OK
+$ uv run --frozen --project native python <re-validate F23 subdocs>
+  -> 4 variants x {Report,Baseline,AcceptanceRules}: 0 schema errors (12/12)
+Changes: F23 rules use expected_occurrence_count + canonical policy keys;
+retained_occurrence_ids name real occurrences (tesseract reader/plan/
+occurrences added); semantic test validates all three F23 sub-docs; dead
+ligature_entries/unicode_entries defs deleted; F26 content_base64 ->
+content_hex; F16 clipped intent corrected to the left crop edge x=50.
+Pre-existing: all 45 manifest entries field-identical; all pre-g78 fixture
+bytes unchanged. No planning/ writes; no Beads writes; no fonts acquired.

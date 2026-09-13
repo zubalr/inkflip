@@ -31,10 +31,16 @@ def payload(name: str) -> dict:
     return json.loads((FIXTURES / "development" / name).read_text())
 
 
-def report_validator() -> jsonschema.Draft202012Validator:
+def subdoc_validator(def_name: str) -> jsonschema.Draft202012Validator:
+    """Validator for one canonical $defs sub-document (Report, Baseline,
+    AcceptanceRules) with the full $defs available for $ref resolution."""
     return jsonschema.Draft202012Validator(
-        {"$ref": "#/$defs/Report", "$defs": SCHEMA["$defs"]}
+        {"$ref": f"#/$defs/{def_name}", "$defs": SCHEMA["$defs"]}
     )
+
+
+def report_validator() -> jsonschema.Draft202012Validator:
+    return subdoc_validator("Report")
 
 
 def rules_errors(report: dict, rules_doc: dict) -> list[str]:
@@ -92,13 +98,31 @@ class TestF22ImportStages(unittest.TestCase):
 
 
 class TestF23BaselineRules(unittest.TestCase):
-    """Rule-stage behavior: unchanged accepted; each declared fault fires."""
+    """Rule-stage behavior: unchanged accepted; each declared fault fires.
+    Every variant's three sub-documents must validate against the canonical
+    schema ($defs/Report, $defs/Baseline, $defs/AcceptanceRules) — the
+    expectation claims "all schema-valid" and this suite exercises it."""
 
     @staticmethod
     def errors_for(variant: str) -> list[str]:
         fixture = payload(f"baseline-misuse-{variant}.json")
-        report_validator().validate(fixture["report"])
+        subdoc_validator("Report").validate(fixture["report"])
+        subdoc_validator("Baseline").validate(fixture["baseline"])
+        subdoc_validator("AcceptanceRules").validate(fixture["rules"])
         return rules_errors(fixture["report"], fixture["rules"])
+
+    def test_every_subdocument_is_canonical_schema_valid(self):
+        for variant in ("control", "coverage-loss", "mismatched-doc",
+                        "silent-refresh"):
+            fixture = payload(f"baseline-misuse-{variant}.json")
+            for def_name, key in (("Report", "report"),
+                                  ("Baseline", "baseline"),
+                                  ("AcceptanceRules", "rules")):
+                errors = list(
+                    subdoc_validator(def_name).iter_errors(fixture[key]))
+                self.assertEqual(errors, [],
+                                 f"{variant}/{key} fails $defs/{def_name}: "
+                                 f"{[e.message for e in errors]}")
 
     def test_control_passes_every_rule(self):
         self.assertEqual(self.errors_for("control"), [])
@@ -131,7 +155,7 @@ class TestF26CacheVerification(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             for name, info in files.items():
                 target = Path(folder) / name
-                target.write_bytes(bytes.fromhex(info["content_base64"]))
+                target.write_bytes(bytes.fromhex(info["content_hex"]))
             required = {
                 "model.bin": manifest["required"]["model.sha256"],
                 "worker.bin": manifest["required"]["worker.sha256"],

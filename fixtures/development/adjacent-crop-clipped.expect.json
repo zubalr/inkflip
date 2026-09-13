@@ -8,7 +8,7 @@
   "mechanism": {
     "group_id": "F16",
     "intent": {
-      "clipped_glyph": "$100 cut by the crop edge at x=100",
+      "clipped_glyph": "$100 cut by the left crop edge at x=50 (text spans ~40-93pt; x=100 is the right edge)",
       "crop": [
         50,
         100,

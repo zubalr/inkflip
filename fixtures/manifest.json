@@ -1465,7 +1465,7 @@
       "bytes": 692,
       "control": "development/adjacent-crop-control.pdf",
       "expectations": "development/adjacent-crop-clipped.expect.json",
-      "expectations_sha256": "96d14e4fb488d568bde6c226bbcf2cd0b6e37b69d2168e9a383ad0fed34bb69b",
+      "expectations_sha256": "bf5a5ef3fb52ca1529aee8397a4661673372896fd8142a60980eec67edc31133",
       "family": "adjacent-crop",
       "fixture_id": "F16",
       "observation": "wrong-neighbor selection rejected",
@@ -1473,7 +1473,7 @@
       "recipe": {
         "group_id": "F16",
         "intent": {
-          "clipped_glyph": "$100 cut by the crop edge at x=100",
+          "clipped_glyph": "$100 cut by the left crop edge at x=50 (text spans ~40-93pt; x=100 is the right edge)",
           "crop": [
             50,
             100,
@@ -1636,7 +1636,7 @@
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 7077,
+      "bytes": 10496,
       "control": null,
       "expectations": "development/baseline-misuse-control.expect.json",
       "expectations_sha256": "b2c5f5cb91a7f57d6937f4ec1c98c8dcdd626e55d30e3d0139a70947d94526a5",
@@ -1655,15 +1655,15 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "8b455e78a3ff9135887c22187487ce146377a7adf65cd94fd3f7f188a2642242",
+      "sha256": "853248f49648b8f05e54b9b00e09de71a5bc470d78c8caf3de443dfdd1b3d26e",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 6862,
+      "bytes": 10221,
       "control": "development/baseline-misuse-control.json",
       "expectations": "development/baseline-misuse-coverage-loss.expect.json",
-      "expectations_sha256": "208700225a381173c44c427b8b7e712a0497befb5e23cd030722d8fddf8c5071",
+      "expectations_sha256": "89fe38ca1bf78694bc372dbe9820a098b2aa4ebdedbfddefa9a434e8e560c282",
       "family": "baseline-misuse",
       "fixture_id": "F23",
       "observation": "not improved due to missing checks",
@@ -1671,7 +1671,7 @@
       "recipe": {
         "group_id": "F23",
         "intent": {
-          "canonical_schema": "report stays schema-valid; the rule stage fires",
+          "canonical_schema": "report/baseline/acceptance_rules all schema-valid; the rule stage fires",
           "expected": "regression comparison cannot improve by losing checks",
           "scenario": "baseline lost the check-ocr entry"
         },
@@ -1679,15 +1679,15 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "54622502a997e2e5d171a5e348341b9ab3932fa5f2aa7529fa5312ed81b69316",
+      "sha256": "5e89588cac1381a14026037a94bd077b02920fa2af8aed740f5b6b052848fd26",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 7077,
+      "bytes": 10496,
       "control": "development/baseline-misuse-control.json",
       "expectations": "development/baseline-misuse-mismatched-doc.expect.json",
-      "expectations_sha256": "4db4cde0510ebf1664598c543f2673477f72b56bd82d979d74f0d4b7bce48d22",
+      "expectations_sha256": "1d93d905889b1c5fa43052e664f795fccaf08e9047c7c11d3804150a629b627d",
       "family": "baseline-misuse",
       "fixture_id": "F23",
       "observation": "not improved due to missing checks",
@@ -1695,7 +1695,7 @@
       "recipe": {
         "group_id": "F23",
         "intent": {
-          "canonical_schema": "report stays schema-valid; the binding stage fires",
+          "canonical_schema": "report/baseline/acceptance_rules all schema-valid; the binding stage fires",
           "expected": "comparison refused; never silently re-based",
           "scenario": "report bound to a different document digest than the baseline"
         },
@@ -1703,15 +1703,15 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "709c4d27eccc9d0c82e91930484767a58e44c622aef6bf8a093094c93d0b12f0",
+      "sha256": "633e0b876a0ab210b0d9435fc63a3367dd7d1ead8bf7bf2650344b8852b0539e",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 7077,
+      "bytes": 10496,
       "control": "development/baseline-misuse-control.json",
       "expectations": "development/baseline-misuse-silent-refresh.expect.json",
-      "expectations_sha256": "2c8cb5594aade97980d759f97e664dd8ef9cc373ba2505cdc7e6e13cedc4f56e",
+      "expectations_sha256": "4b2afd4cc0c7b32712aeb661132b0286416ab2ae037ff091ad4f47eac891c30d",
       "family": "baseline-misuse",
       "fixture_id": "F23",
       "observation": "not improved due to missing checks",
@@ -1719,7 +1719,7 @@
       "recipe": {
         "group_id": "F23",
         "intent": {
-          "canonical_schema": "report stays schema-valid; the rule stage fires",
+          "canonical_schema": "report/baseline/acceptance_rules all schema-valid; the rule stage fires",
           "expected": "silent baseline refresh forbidden; the declared rule fires",
           "scenario": "ocr occurrence count edited from 2 to 9"
         },
@@ -1727,7 +1727,7 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "dc8de396ac34e5263e2dba45f2dce1caafd2980d061e449b4c603089731e9dff",
+      "sha256": "dde5a08a8fda2414fe15adc66b1175f489aa41d163e8d336457803572a14f5fd",
       "split": "development"
     },
     {
@@ -1859,7 +1859,7 @@
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 1088,
+      "bytes": 1079,
       "control": null,
       "expectations": "development/asset-cache-control.expect.json",
       "expectations_sha256": "e4887d6de7001b2641767c7efde75bb4c730c62977f815eacbf6c1ff68dcdc98",
@@ -1878,12 +1878,12 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "d33f1053b23908645bcf7156db42b904526c5f26527797c9cb297f76a3a41ddb",
+      "sha256": "6c7e481ad4047356c5b231d7bf67810801e8b8d4a0639d80b6d0f754b85c5c79",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 1086,
+      "bytes": 1077,
       "control": "development/asset-cache-control.json",
       "expectations": "development/asset-cache-corrupt-model.expect.json",
       "expectations_sha256": "1a7b2204a8ab097ddaa0b7b5fa9ba8982fcee743e7fefa350d6e4a27b056d9d7",
@@ -1902,12 +1902,12 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "8318ad5331ec2b4d5554f77b9f7a623815a5486dc7e060582fc86b81e0413939",
+      "sha256": "42e85c71de9e51a8b4b596296e485cdd6abc371b2a1ee8bad4059f6fcf4c52c9",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 1088,
+      "bytes": 1079,
       "control": "development/asset-cache-control.json",
       "expectations": "development/asset-cache-stale-worker.expect.json",
       "expectations_sha256": "100f053d65e8deac4b58e7ef0fd1dd48432b3329199a7449d2d3fbaad6a1d79e",
@@ -1926,12 +1926,12 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "d8d69042c16b059aafa42ebc148cbf6c653ddd9d315df9a230df85e4c70d73f0",
+      "sha256": "ec1a149737168b4241b2b285a972daf30f03a721163669018a9d754f4747d8d1",
       "split": "development"
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 1088,
+      "bytes": 1079,
       "control": "development/asset-cache-control.json",
       "expectations": "development/asset-cache-stale-core.expect.json",
       "expectations_sha256": "b4d1994f5eb9b6e07cb74a741df551fe7acb45e62833d1876ee9ed603d14feaa",
@@ -1950,7 +1950,7 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "565bbc8bddade45113139958a8d436e9bc5cc2480a4386824df88550f371bda4",
+      "sha256": "29543e2b41caf41db717f7eca6441ce9b3aef9b9f810a4ee21643268603a1a95",
       "split": "development"
     },
     {
@@ -1979,7 +1979,7 @@
     },
     {
       "byte_stability": "byte-identical",
-      "bytes": 1088,
+      "bytes": 1079,
       "control": "development/asset-cache-control.json",
       "expectations": "development/asset-cache-offline-warm.expect.json",
       "expectations_sha256": "4bc8246ed017fb1522e80e78d7a56d1d122ba1a9aa16d4f2fa59c686cbf98fa3",
@@ -1998,12 +1998,12 @@
         "version": "g78.1"
       },
       "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
-      "sha256": "d33f1053b23908645bcf7156db42b904526c5f26527797c9cb297f76a3a41ddb",
+      "sha256": "6c7e481ad4047356c5b231d7bf67810801e8b8d4a0639d80b6d0f754b85c5c79",
       "split": "development"
     }
   ],
   "generator": "scripts/make_fixtures.py",
-  "generator_sha256": "aab2abe1fcfa1df43f1e6d4bce1d55e7b57a10818aec1bd634760c568ed59983",
+  "generator_sha256": "344baf33651dc854a994546118f27f9ef22edaeb45952d0fd8229e3e28d6a8db",
   "generator_version": "1.0.0",
   "rights": "Original synthetic sample of the Inkflip project, approved under the project's MIT terms; no embedded font program; no third-party material; no private or challenge-answer data.",
   "schema_version": "1.0.0",
