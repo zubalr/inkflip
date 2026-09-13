@@ -243,8 +243,10 @@ class DistCheckerTests(unittest.TestCase):
             "dist_root": "apps/web/dist",
             "reject_patterns": ["\\.map$", "\.log$"],
             "files": [
-                {"path": "apps/web/dist/index.html", "sha256": hashlib.sha256(index).hexdigest()},
-                {"path": "apps/web/dist/assets/app-ABC123.js", "sha256": hashlib.sha256(asset).hexdigest()},
+                {"path": "apps/web/dist/index.html", "bytes": len(index),
+                 "sha256": hashlib.sha256(index).hexdigest()},
+                {"path": "apps/web/dist/assets/app-ABC123.js", "bytes": len(asset),
+                 "sha256": hashlib.sha256(asset).hexdigest()},
             ],
         }
         self.write(".private/distribution/dist-manifest.json", json.dumps(manifest).encode())

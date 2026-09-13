@@ -354,7 +354,8 @@ def check_native_bundle(root: Path, nb: dict) -> list[str]:
 
 
 def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
-    """Verify the generated static dist against a recorded dist manifest."""
+    """Verify the generated static dist against a recorded dist manifest
+    (same fail-closed contract as check_static_dist.py)."""
     failures: list[str] = []
     path = root / dist_manifest_rel
     if not path.is_file():
@@ -366,7 +367,21 @@ def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
     dist_root = root / dm.get("dist_root", "apps/web/dist")
     if not dist_root.is_dir():
         return [f"dist root missing: {dm.get('dist_root', 'apps/web/dist')} (build first)"]
-    declared = {f["path"]: f for f in dm.get("files", [])}
+    declared: dict[str, dict] = {}
+    for f in dm.get("files", []):
+        rel = f.get("path") if isinstance(f, dict) else None
+        if not rel:
+            failures.append("dist manifest: malformed entry (missing path)")
+            continue
+        if rel in declared:
+            failures.append(f"dist manifest: duplicate entry for {rel}")
+            continue
+        if rel.startswith("/") or ".." in Path(rel).parts:
+            failures.append(f"dist manifest: entry escapes root (traversal/absolute): {rel}")
+            continue
+        if f.get("sha256") is None or f.get("bytes") is None:
+            failures.append(f"dist manifest: entry lacks required bytes/sha256: {rel}")
+        declared[rel] = f
     reject = dm.get("reject_patterns") or dm.get("reject_source_maps") and [r"\.map$"] or []
     import re as _re
     patterns = [_re.compile(pat) for pat in reject]
