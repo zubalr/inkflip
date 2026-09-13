@@ -20,7 +20,7 @@
     "no_new_privileges": true
   },
   "notes": [
-    "The production Dockerfile copies native/dist wheels produced by T47. Those paths are not in this checkout yet.",
-    "Dockerfile.checkout is a weaker source install for local debugging only."
+    "The production Dockerfile copies native/dist wheels produced by T47 plus an Inkflip wheel. Those hashed inputs are still absent here; scripts/check_native_image_inputs.py fails closed.",
+    "Dockerfile.checkout is a weaker source install. On 2026-09-13 it was built as inkflip-native:t40 and used for live restriction tests on linux/arm64 (native to this Mac, not emulated)."
   ]
 }
