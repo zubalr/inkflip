@@ -16,9 +16,16 @@ Not forced equal:
 - occurrence geometry
 - raster pixels / engine renders
 
+`python scripts/check_manual_receipts.py compatibility` is the registered
+acceptance command. It derives required profiles from
+`planning/quality/PERFORMANCE_AND_COMPATIBILITY.md` (Chromium, Firefox,
+physical Safari, Linux x86_64 native) and fails closed while coverage is
+incomplete. `--inventory` lists missing profiles without certifying them.
+Node PDF.js and Playwright WebKit are not substitutes for those profiles.
+
 ## Platforms
 
 See `docs/compatibility/manual-receipt.json` and `artifacts/P15/platforms.json`.
-Chromium, Firefox, WebKit GUI and Linux amd64 binaries were **unavailable**
-in this allocation and are recorded as such. Missing-device checks stay
-pending for final acceptance.
+Safari device observations and Linux amd64 native binaries remain missing
+and block final acceptance. Browser automation results, when present, are
+recorded per engine and never implied from the Node wrapper.
