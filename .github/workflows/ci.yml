@@ -1,30 +1,31 @@
-# Early CI: runs only checks that exist at bootstrap. No install step exists
-# until T02 freezes real locks, so nothing here resolves dependencies.
-# Action revisions are illustrative major tags (see planning example); T02
-# replaces them with reviewed commit SHAs before this workflow is hardened.
+# Registry, bootstrap and coordination integrity. Product acceptance and release
+# gates remain separate; this workflow does not certify the complete app.
 name: verify
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0 (P1: immutable pin, verified vs live tag)
-      - name: Bootstrap tests (unittest)
-        run: python3 -m unittest discover -s tests/bootstrap -v
-      - name: Native boundary tests (unittest)
-        run: python3 -m unittest discover -s native/tests/bootstrap -v
-      - name: Command harness self-check
-        run: python3 scripts/task_acceptance.py self-check
-      - name: Registered verify group
-        run: python3 scripts/task_acceptance.py run verify
-      - name: Declared suites fail explicitly
+      - name: Set up the frozen registry runner
+        # T02's existing uv pin. Install tooling explicitly before checks;
+        # verification commands themselves never install project dependencies.
         run: |
-          if python3 scripts/task_acceptance.py run test:browser; then
-            echo "test:browser must fail while playwright/specs are absent" >&2
-            exit 1
-          fi
-      - name: Coordination checks
-        run: python3 scripts/coordination.py check
+          python3 -m venv "$RUNNER_TEMP/ci-tools"
+          "$RUNNER_TEMP/ci-tools/bin/python" -m pip install uv==0.12.13 --only-binary=:all: --no-deps
+          echo "$RUNNER_TEMP/ci-tools/bin" >> "$GITHUB_PATH"
+      - name: Registered verify group
+        # Includes self-check, both bootstrap suites, coordination tests, and
+        # synthetic missing-runner/empty-suite failures. Run each suite once.
+        run: python3 scripts/task_acceptance.py run verify
