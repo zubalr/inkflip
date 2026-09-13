@@ -818,6 +818,31 @@ def cmd_models_prepare(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_corpus_run(args: argparse.Namespace) -> int:
+    from inkflip.corpus.runner import run_corpus
+    from inkflip.corpus.manifest import CorpusError
+
+    try:
+        result = run_corpus(
+            manifest_path=args.manifest,
+            source_root=args.source_root,
+            profile=args.profile,
+            out_dir=args.out,
+            jobs=args.jobs,
+            resume=args.resume,
+        )
+        if result.status == "complete":
+            return EXIT_OK
+        elif result.status == "partial":
+            return EXIT_PARTIAL_RUN
+        elif result.status == "cancelled":
+            return EXIT_CANCELLED
+        return EXIT_READ_FAILURE
+    except CorpusError as e:
+        sys.stderr.write(f"Corpus error: {e}\n")
+        return EXIT_INVALID_ARGS
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="inkflip",
@@ -877,6 +902,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_mp = models_sub.add_parser("prepare")
     p_mp.add_argument("--manifest", required=True, help="Path to models manifest")
 
+    # corpus run
+    p_corpus = subparsers.add_parser("corpus")
+    corpus_sub = p_corpus.add_subparsers(dest="subcommand", required=True)
+    p_crun = corpus_sub.add_parser("run")
+    p_crun.add_argument("--manifest", required=True, help="Path to corpus manifest JSON")
+    p_crun.add_argument("--source-root", required=True, help="Directory containing source PDFs")
+    p_crun.add_argument("--profile", required=True, help="Reader execution profile ID")
+    p_crun.add_argument("--out", required=True, help="Output directory for corpus run")
+    p_crun.add_argument("--jobs", type=int, default=1, help="Concurrent workers (default 1)")
+    p_crun.add_argument("--resume", action="store_true", help="Resume previous run preserving completed reports")
+
     return parser
 
 
@@ -907,6 +943,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "models":
             if args.subcommand == "prepare":
                 return cmd_models_prepare(args)
+        elif args.command == "corpus":
+            if args.subcommand == "run":
+                return cmd_corpus_run(args)
 
         raise ArgumentError(f"Unknown command: {args.command}")
 
