@@ -120,11 +120,11 @@ test.describe("Production Journey: Navigation, Focus, & Demo Reload Matrix", () 
 
     const dialogText = await dialog.innerText();
     // Module name must be inkflip.cli
-    expect(dialogText).toContain("python3 -m inkflip.cli inspect <pdf-file> --out report.json");
+    expect(dialogText).toContain("PYTHONPATH=native python -m inkflip.cli inspect <pdf-file> --out report.json");
     // Report export must be html
-    expect(dialogText).toContain("python3 -m inkflip.cli report <report.json> --format html --out report.html");
+    expect(dialogText).toContain("PYTHONPATH=native python -m inkflip.cli report <report.json> --format html --out report.html");
     // Replay syntax must be accurate
-    expect(dialogText).toContain("python3 -m inkflip.cli replay <report.json> --source <pdf-file> --profile native-default --out replay.json");
+    expect(dialogText).toContain("PYTHONPATH=native python -m inkflip.cli replay <report.json> --source <pdf-file> --profile native-default --out replay.json");
     // Hardened Docker mount syntax with :ro and :rw
     expect(dialogText).toContain("docker run --rm --network none");
     expect(dialogText).toContain("/data/in:ro");
