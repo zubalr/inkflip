@@ -1,0 +1,15 @@
+{
+  "_purpose": "Commands that the public documentation presents as working. `python3 scripts/check_claims.py --run-commands` executes each in order from the repository root and fails if any exits nonzero. Keep this list exactly in sync with the claims in docs/quickstart.md and README.md. Note: `bun run test:privacy` regenerates the committed capture files under artifacts/tasks/T15/capture/ as a side effect; restore them afterwards if your change did not intend to refresh that evidence.",
+  "commands": [
+    { "name": "registry-self-check", "argv": ["python3", "scripts/task_acceptance.py", "self-check"] },
+    { "name": "examples-check", "argv": ["python3", "scripts/prepare_examples.py", "--check"] },
+    { "name": "docs-checks", "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/docs"] },
+    { "name": "build", "argv": ["bun", "run", "build"] },
+    { "name": "verify", "argv": ["bun", "run", "verify"] },
+    { "name": "test:fixtures", "argv": ["bun", "run", "test:fixtures"] },
+    { "name": "test:a11y", "argv": ["bun", "run", "test:a11y"] },
+    { "name": "test:visual", "argv": ["bun", "run", "test:visual"] },
+    { "name": "test:native", "argv": ["bun", "run", "test:native"] },
+    { "name": "test:privacy", "argv": ["bun", "run", "test:privacy"] }
+  ]
+}
