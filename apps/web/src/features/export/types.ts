@@ -24,9 +24,11 @@ export interface ExportRequestLike {
 export interface ProjectionNoticesLike {
   readonly omittedOccurrenceCount: number;
   readonly omittedFindingIds: readonly string[];
+  readonly deselectedFindingIds?: readonly string[];
   readonly missingAssetIds: readonly string[];
   readonly requiredContextAssetIds: readonly string[];
   readonly unlinkedOccurrenceIds: readonly string[];
+  readonly requestedSourceMissing?: boolean;
   readonly omissions: readonly string[];
 }
 

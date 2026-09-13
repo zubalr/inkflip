@@ -130,19 +130,18 @@ export class ExportController {
     this.sourceUnavailable = false;
     const request = { ...this.request };
     if (request.sourcePdf === "carry") {
-      // 'carry' only valid for re-exports of already-embedded sources;
+      // 'carry' reuses already-embedded sources when present;
       // fresh exports pull actual bytes from the provider.
       const bytes = this.sourcePdfBytes?.() ?? null;
-      if (bytes === null) {
-        if (this.availability.hasSourcePdf) {
-          request.sourcePdf = "carry";
-        } else {
-          // Missing bytes stay missing: evidence-only, never replayable.
-          request.sourcePdf = null;
+      if (bytes !== null) {
+        request.sourcePdf = bytes;
+      } else {
+        // Keep 'carry' so engine.project records requestedSourceMissing if embedded bytes are absent,
+        // preserving the distinction between 'not requested' and 'requested but unavailable'.
+        request.sourcePdf = "carry";
+        if (!this.availability.hasSourcePdf) {
           this.sourceUnavailable = true;
         }
-      } else {
-        request.sourcePdf = bytes;
       }
     }
     try {

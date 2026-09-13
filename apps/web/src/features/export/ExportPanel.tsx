@@ -11,7 +11,7 @@
  * `types.ts` — so wiring to `@inkflip/reports/export` happens at app
  * composition, not inside this component.
  */
-import React, { useId, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import Button from "../../components/Controls/Button";
 import Notice from "../../components/Controls/Notice";
 import styles from "./ExportPanel.module.css";
@@ -121,8 +121,19 @@ export function ExportPanel({
       }),
     [engine, source, sourcePdfBytes],
   );
+  const [prevController, setPrevController] = useState(controller);
   const [state, setState] = useState(controller.state);
   const [downloaded, setDownloaded] = useState<string | null>(null);
+
+  if (prevController !== controller) {
+    setPrevController(controller);
+    setState(controller.state);
+    setDownloaded(null);
+  }
+
+  useEffect(() => {
+    setState(controller.state);
+  }, [controller]);
 
   const setRequest = (patch: Partial<ExportRequestLike>) => setState(controller.setOption(patch));
 
