@@ -1,0 +1,16 @@
+$ python3 scripts/task_acceptance.py task T44 --report artifacts/tasks/T44/receipt.json
+test_explicit_missing_model_behavior (__main__.TestRapidOCRExperiment.test_explicit_missing_model_behavior)
+Criterion: explicit missing-model and OOV behavior. ... ok
+test_full_raw_and_negative_outcomes_documented (__main__.TestRapidOCRExperiment.test_full_raw_and_negative_outcomes_documented)
+Criterion: full raw and negative outcomes documented. ... ok
+test_no_consensus_as_truth (__main__.TestRapidOCRExperiment.test_no_consensus_as_truth)
+Criterion: no consensus-as-truth (I16). ... ok
+test_no_runtime_network_during_evaluation (__main__.TestRapidOCRExperiment.test_no_runtime_network_during_evaluation)
+Criterion: no runtime network calls permitted. ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+P13 Experiment executed: status=rejected_experiment
+Artifact written to artifacts/P13/result.json

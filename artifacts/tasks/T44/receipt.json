@@ -1,0 +1,71 @@
+{
+  "task": "T44",
+  "beads_id": "pdf-t44",
+  "evaluated_commit": "17d23c9186ee1de38fcc4217566fd9a5be936f7c",
+  "evaluated_at": "2026-09-13T03:04:52.110326+00:00",
+  "commands_run": 2,
+  "failures": [],
+  "evidence_errors": [],
+  "tests": {
+    "collected": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "records": [
+    {
+      "segment": "python experiments/P13/run.py --manifest evaluation/manifests/development.json --out artifacts/P13",
+      "argv": [
+        "python3",
+        "experiments/P13/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P13"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P13/run.py",
+        "--manifest",
+        "evaluation/manifests/development.json",
+        "--out",
+        "artifacts/P13"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P13 Experiment executed: status=rejected_experiment\nArtifact written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/artifacts/P13/result.json\n",
+      "stderr": "",
+      "tests": {
+        "collected": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass",
+      "environment": {}
+    },
+    {
+      "segment": "python experiments/P13/test_experiment.py",
+      "argv": [
+        "python3",
+        "experiments/P13/test_experiment.py"
+      ],
+      "executed_argv": [
+        "python3",
+        "experiments/P13/test_experiment.py"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "stdout": "P13 Experiment executed: status=rejected_experiment\nArtifact written to /Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass/artifacts/P13/result.json\n",
+      "stderr": "test_explicit_missing_model_behavior (__main__.TestRapidOCRExperiment.test_explicit_missing_model_behavior)\nCriterion: explicit missing-model and OOV behavior. ... ok\ntest_full_raw_and_negative_outcomes_documented (__main__.TestRapidOCRExperiment.test_full_raw_and_negative_outcomes_documented)\nCriterion: full raw and negative outcomes documented. ... ok\ntest_no_consensus_as_truth (__main__.TestRapidOCRExperiment.test_no_consensus_as_truth)\nCriterion: no consensus-as-truth (I16). ... ok\ntest_no_runtime_network_during_evaluation (__main__.TestRapidOCRExperiment.test_no_runtime_network_during_evaluation)\nCriterion: no runtime network calls permitted. ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+      "tests": {
+        "collected": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "checkout": "/Users/zubair/Code/Projects/pdf project/worktrees/independent-ready-pass",
+      "environment": {}
+    }
+  ]
+}
