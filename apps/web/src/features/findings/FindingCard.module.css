@@ -206,7 +206,7 @@
   padding: 4px 10px;
   font-size: 12px;
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-standard);
+  transition: border-color var(--motion-state) ease-out;
 }
 
 .addNoteBtn:hover {
