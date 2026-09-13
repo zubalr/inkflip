@@ -132,6 +132,15 @@ do not authorize execution. Only Devin reconciles legacy note assignments:
 confirm the old writer has yielded, preserve its work, then publish a proper
 grant or record completed evidence. Do not clear a live assignment to redispatch it.
 
+During the upgrade, preserve an explicitly scoped coordinator grant that the
+existing native worker already acknowledged under the previous note protocol.
+That worker may finish its current revision and return a checkpoint on its
+already-authorized branch; an empty new inbox does not revoke that grant.
+The coordinator records the actual acknowledgement, branch/base and return ref,
+then reconciles the structured grant after the writer yields. Do not rename a
+live branch, reuse a completed product task's acceptance, or treat this migration
+rule as permission to start new work from an unacknowledged note.
+
 After publishing a grant, verify it appears in the target worker's synced inbox.
 Then require a native-session acknowledgement or a committed checkpoint before
 reporting pickup. A successful relay publication proves delivery, not execution.

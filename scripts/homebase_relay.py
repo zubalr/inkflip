@@ -70,12 +70,33 @@ def require_ancestor(base: str, candidate: str, context: str) -> None:
         raise ValueError(f"{context}: candidate does not descend from {base}") from error
 
 
+def beads_changes() -> object:
+    # Beads 1.2.2 emits a fixed plain-text response for an empty diff even
+    # with --json. Recognize only that exact response; other text fails closed.
+    output = c.run(["bd", "--sandbox", "--directory", str(c.canonical_root()),
+                    "--json", "--readonly", "diff", "origin/main", "HEAD"])
+    if output == "No changes between origin/main and HEAD":
+        return []
+    return json.loads(output)
+
+
+def require_published_beads() -> None:
+    """An old transport ref must not mask new coordinator grants left locally."""
+    changes = beads_changes()
+    if not isinstance(changes, list):
+        raise ValueError("Beads publication comparison is malformed; publication is unverified")
+    if changes:
+        raise ValueError("Local Beads changes differ from origin/main; run bd dolt commit and "
+                         "bd dolt push before relay publication")
+
+
 def publish() -> dict:
     validate_clone(config())
     if git("branch", "--show-current") != "main":
         raise ValueError("Publish requires main")
     if git("status", "--porcelain"):
         raise ValueError("Publish requires a clean checkout")
+    require_published_beads()
     refs = fetch_snapshot("origin", advertised(
         "origin", "refs/heads/main", "refs/heads/work/*", "refs/heads/review/*", DOLT_REF))
     if DOLT_REF not in refs:
@@ -88,9 +109,11 @@ def publish() -> dict:
             require_ancestor(sha, refs[ref], f"Homebase divergence at {ref}")
     # Atomic prevents a rejected code/state ref from looking like dispatched work.
     # Only the native storage snapshot may roll over, and only at the observed SHA.
+    require_published_beads()
     lease = f"--force-with-lease={DOLT_REF}:{previous.get(DOLT_REF, '')}"
     git("push", "--atomic", "--no-follow-tags", "--recurse-submodules=no", lease,
         "homebase", *(f"{sha}:{ref}" for ref, sha in refs.items()))
+    require_published_beads()
     return {"status": "published", "refs": refs}
 
 

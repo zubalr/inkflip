@@ -138,9 +138,17 @@ class EmptyRegistrationFailsTests(unittest.TestCase):
             self.assertIn("Ran 1 test", result.stderr)
 
     def test_gate_refuses_unaccepted_prerequisites(self):
-        result = run_tool(GATE, "pre-release")
+        # Missing prerequisites are a fixture, not a claim about live Beads.
+        # Otherwise finishing G1 makes verify execute real scenarios and fail.
+        probe = (
+            f"import sys; sys.path.insert(0, {str(ROOT / 'scripts')!r}); import gate; "
+            "gate.coordination.issues_by_id = lambda: {}; "
+            "gate.coordination.bd = lambda args: []; "
+            "sys.argv = ['gate.py', 'G1']; sys.exit(gate.main())"
+        )
+        result = run_tool("-c", probe)
         self.assertNotEqual(result.returncode, 0)
-        self.assertRegex(result.stderr, r"prerequisite unmet|gate blocked")
+        self.assertIn("prerequisite unmet", result.stderr)
 
     def test_gate_lists_registered_gates(self):
         result = run_tool(GATE, "--list")
