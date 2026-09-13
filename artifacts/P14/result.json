@@ -1,0 +1,292 @@
+{
+  "experiment_id": "P14",
+  "task_id": "T45",
+  "status": "completed",
+  "disposition": "rejected_experiment",
+  "hypothesis": "Original-preserving geometric raster value",
+  "baseline": "Unmodified render OCR",
+  "candidate": "Single deskew/strip-registration candidate with full transform chain",
+  "manifest": "evaluation/manifests/development.corpus.json",
+  "fixture_ids": [
+    "F06",
+    "F07",
+    "F09",
+    "F15"
+  ],
+  "clean_controls": "Ordinary ruled forms, already aligned clean pages",
+  "resource_costs": {
+    "total_pixels_evaluated": 3016000,
+    "total_megapixels": 3.016,
+    "runtime_seconds": 0.0752
+  },
+  "metrics": {
+    "total_fixtures_evaluated": 9,
+    "clean_controls_evaluated": 5,
+    "clean_controls_corrupted_count": 5,
+    "mean_edge_variance_loss_pct": 12.7451,
+    "max_subpixel_drift_px": 0.6244,
+    "lost_registration_detected": true,
+    "source_bytes_mutated_count": 0
+  },
+  "rejection_reasons": [
+    "Clean controls corrupted by resampling blur: 5 / 5 clean controls exhibited edge variance loss and anti-aliasing degradation",
+    "Subpixel coordinate drift detected on grid quantization (max drift: 0.6244 px)",
+    "Acceptance rule violation: 'Any lost registration or clean corruption rejects'"
+  ],
+  "fixtures": [
+    {
+      "path": "fixtures/development/ocr-material-control.pdf",
+      "sha256": "d78643ef2a2206d06b833c352992d985b04d01104da72bd992ce62cf3f40c0cf",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": true,
+      "baseline": {
+        "edge_variance": 903.1406
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 870.7027,
+        "edge_variance_loss_pct": 3.5917,
+        "mean_pixel_drift": 2.6658,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": true,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-digit-ambiguity.pdf",
+      "sha256": "0c72ca6ac9c632a31af9b0d20c9f6d0c9a6be70a8319a85bb2edab0ec4a29bad",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": false,
+      "baseline": {
+        "edge_variance": 1680.749
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 1017.562,
+        "edge_variance_loss_pct": 39.4578,
+        "mean_pixel_drift": 3.8232,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": false,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/ocr-material-sign-ambiguity.pdf",
+      "sha256": "cfb1d4b62cf655a5400a23ddcfff986bad7ebc23d4dd37513b8b4a82664ff547",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": false,
+      "baseline": {
+        "edge_variance": 1679.6347
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 1016.7344,
+        "edge_variance_loss_pct": 39.4669,
+        "mean_pixel_drift": 3.8227,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": false,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/partial-clip-control.pdf",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": true,
+      "baseline": {
+        "edge_variance": 622.4634
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 608.7571,
+        "edge_variance_loss_pct": 2.2019,
+        "mean_pixel_drift": 2.5078,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": true,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/partial-clip-partial.pdf",
+      "sha256": "f58e9283ad75db8e5153b0e2b3ca92445c160f014eda0944f8624ca4ca735722",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": false,
+      "baseline": {
+        "edge_variance": 555.6285
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 555.4142,
+        "edge_variance_loss_pct": 0.0386,
+        "mean_pixel_drift": 2.454,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": false,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/partial-clip-triangle.pdf",
+      "sha256": "515459c477b38146ebacadbbd3f59e2ae2f5fd3d2302d3b451e452e2accd248a",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": false,
+      "baseline": {
+        "edge_variance": 546.1753
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 548.106,
+        "edge_variance_loss_pct": -0.3535,
+        "mean_pixel_drift": 2.4387,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": false,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/huge-page-control.pdf",
+      "sha256": "e588ab80759c0e6e1615c1b3c8a1059a651611a7972e80486616c6d3e0461b1f",
+      "page_size_pt": [
+        320.0,
+        240.0
+      ],
+      "raster_dimensions": [
+        640,
+        480
+      ],
+      "pixels": 307200,
+      "is_clean_control": true,
+      "baseline": {
+        "edge_variance": 622.4634
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 608.7571,
+        "edge_variance_loss_pct": 2.2019,
+        "mean_pixel_drift": 2.5078,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.2018,
+        "clean_control_corrupted": true,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/userunit-1.pdf",
+      "sha256": "6f6201cebc34505d6af8ffc3bc555cf16ac94f874e5d674b11c451bb8f0d09cb",
+      "page_size_pt": [
+        520.0,
+        400.0
+      ],
+      "raster_dimensions": [
+        1040,
+        800
+      ],
+      "pixels": 832000,
+      "is_clean_control": true,
+      "baseline": {
+        "edge_variance": 1113.275
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 928.1024,
+        "edge_variance_loss_pct": 16.6331,
+        "mean_pixel_drift": 3.0785,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.6244,
+        "clean_control_corrupted": true,
+        "source_bound": true
+      }
+    },
+    {
+      "path": "fixtures/development/adjacent-crop-control.pdf",
+      "sha256": "4722b3e2cf2af24facc0ab5849020aab371547f2dfde5e6e9d984035371033fe",
+      "page_size_pt": [
+        210.0,
+        40.0
+      ],
+      "raster_dimensions": [
+        420,
+        80
+      ],
+      "pixels": 33600,
+      "is_clean_control": true,
+      "baseline": {
+        "edge_variance": 4511.1532
+      },
+      "candidate": {
+        "transform": "affine_deskew_bilinear_resample",
+        "theta_degrees": 1.0,
+        "roundtrip_edge_variance": 3993.82,
+        "edge_variance_loss_pct": 11.4679,
+        "mean_pixel_drift": 8.7849,
+        "max_pixel_drift": 255,
+        "subpixel_coordinate_drift_px": 0.3714,
+        "clean_control_corrupted": true,
+        "source_bound": true
+      }
+    }
+  ],
+  "integration_decision": "rejected_from_production",
+  "note": "Measured real PDFium renderings at 2.0x scale. Resampling deskew transforms introduced measurable edge variance loss (blur) and subpixel coordinate drift on clean ruled controls. Candidate is rejected; never automated repair or sanitization."
+}
