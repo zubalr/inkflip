@@ -1,0 +1,95 @@
+Inkflip — notice
+================
+
+Recorded: 2026-09-13, T47 preparation (release-preparation batch).
+
+This notice covers the third-party material this snapshot distributes or
+compiles into its shipped browser bundle, and the third-party inputs prepared
+for the native bundle (see `release/notices/` once populated). Per-file
+digests and evidence live in config/distribution-manifest.json and
+licenses/README.md.
+
+Project license
+---------------
+Inkflip is released under the MIT License — see the repository LICENSE file
+("Copyright (c) 2026 zubair"), recorded as the owner's license decision on
+2026-09-13. Provenance of the upstream snapshot import is recorded in
+docs/ORIGIN.md; the upstream project's own MIT license text is preserved
+byte-exact under third_party/origin/mib-intake/LICENSE.
+
+Bundled third-party components (shipped browser bytes)
+------------------------------------------------------
+Staged same-origin assets and model data (browser-facing):
+
+- pdfjs-dist 6.3.289 — Apache-2.0 (cmaps, standard fonts, wasm codecs, ICC
+  profiles, and its LICENSE file are staged from the npm distribution;
+  Adobe-derived CMaps and ICC data are redistributed inside that package
+  with its complete notices).
+- tesseract.js 7.0.0 — Apache-2.0 (worker staged from the npm distribution).
+- tesseract.js-core 7.0.0 — Apache-2.0 (WASM OCR engine binaries staged from
+  the npm distribution).
+- tessdata_fast (eng.traineddata), pinned upstream commit 65727574dfcd264acb…
+  as recorded in config/resolved-assets.json) — Apache-2.0; staged language
+  model for the OCR reader.
+
+Libraries compiled into the production bundle (from the frozen bun.lock
+production closure; declared licenses read from the installed
+distributions, license texts under licenses/npm/):
+
+- react 19.2.8 — MIT
+- react-dom 19.2.8 — MIT
+- scheduler 0.27.0 — MIT
+- pdfjs-dist 6.3.289 — Apache-2.0
+- tesseract.js 7.0.0 — Apache-2.0
+- tesseract.js-core 7.0.0 — Apache-2.0
+- bmp-js 0.1.0 — MIT
+- idb-keyval 6.3.0 — MIT
+- is-url 1.2.4 — MIT
+- node-fetch 2.7.0 — MIT
+- opencollective-postinstall 2.0.3 — MIT
+- regenerator-runtime 0.13.11 — MIT
+- tr46 0.0.3 — MIT (declaration in package.json only; neither the exact
+  npm tarball nor the upstream repository tag ships a license text — see
+  licenses/README.md for the recorded source identities)
+- wasm-feature-detect 1.9.0 — MIT
+- webidl-conversions 3.0.1 — MIT
+- whatwg-url 5.0.0 — MIT
+- zlibjs 0.3.1 — MIT
+
+Not bundled
+-----------
+- Native Python tooling (native/, the pinned PyPI packages in
+  native/uv.lock) is distributed as source plus lockfile and executed
+  locally; it is not shipped as built artifacts. The third-party wheels
+  prepared for the native bundle are hashed from the frozen lock and their
+  license texts are indexed under release/notices/ (see
+  docs/distribution/README.md). License declarations are also recorded in
+  the inventory and the attribution ledger (docs/ATTRIBUTION.md).
+- Development-only tooling (Playwright, Vite, TypeScript, oxlint/oxfmt,
+  wrangler, pytest, ajv) is never distributed to end users.
+- No experiment-derived assets are included: the T41–T45 experiment
+  candidates were rejected or withdrawn from main and are absent from this
+  distribution (verified by the inventory: no ONNX/RapidOCR model files,
+  no secondary-reader code).
+
+Native bundle third-party inputs (prepared for the container build)
+-------------------------------------------------------------------
+Prepared from the frozen native/uv.lock by
+scripts/distribution/prepare_native_bundle.py (hash-verified against the
+lock's own recorded hashes; license texts extracted from the selected
+wheels into release/notices/):
+
+- attrs 26.1.0 — MIT
+- jsonschema 4.26.0 — MIT
+- jsonschema-specifications 2025.9.1 — MIT
+- pillow 12.3.0 — MIT-CMU
+- pypdf 6.18.0 — BSD-3-Clause
+- pypdfium2 5.8.0 — Apache-2.0 OR BSD-3-Clause
+- referencing 0.37.0 — Apache-2.0
+- rpds-py 2026.6.3 — MIT
+
+Also prepared: Node.js 22.23.2 runtime (linux-x64, verified against the
+official nodejs.org SHASUMS256.txt; MIT) and the pinned tessdata_fast
+eng.traineddata model (Apache-2.0; notice in release/notices/). Inkflip's
+own application wheel and CLI entry point are the packaging lane's delivery
+and are not yet part of this bundle — an explicitly incomplete item.
