@@ -15,6 +15,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE = ROOT / "native"
+NATIVE_PYTHON = ROOT / "native" / ".venv" / "bin" / "python"
+
+
+def _reexec_native() -> None:
+    """The T35 command is `python -m unittest`; this host maps that to
+    system python3, which lacks the frozen native extras. Re-enter the
+    committed native interpreter so imports and subprocesses match the
+    project lock. README shell lines stay verbatim.
+    """
+    if not NATIVE_PYTHON.is_file():
+        return
+    if Path(sys.executable).resolve() == NATIVE_PYTHON.resolve():
+        return
+    os.execv(str(NATIVE_PYTHON), [str(NATIVE_PYTHON), *sys.argv])
+
+
+_reexec_native()
 if str(NATIVE) not in sys.path:
     sys.path.insert(0, str(NATIVE))
 
