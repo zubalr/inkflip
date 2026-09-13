@@ -116,3 +116,13 @@
 - **F1 — RESOLVED.** Verified by my own replays, not only the committed spec.
 - **F4 — RESOLVED.** Same-length corrupt `SOURCE_PDF` (last byte XOR `0x01`) through the real `source-file-input` asserts `source:sha256-mismatch` verbatim detail + ordered `[length-mismatch, sha256-mismatch]` rejection events — genuine same-size/different-hash refusal, exactly the missing branch. Fidelity confirmed.
 - **F2/F3/F5/F6/F7/F8/F9** — info-level per round 1; worker documented them as intentionally unchanged; no dispute.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** No owned files changed since the original review; the staleness was shared-input only (AGENTS.md, execution/config, bootstrap/coordination suites, merged fixture work).
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **13/13 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

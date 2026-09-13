@@ -116,3 +116,17 @@ Observed test counts (38 collected, 38 passed) match `commands.log` and `receipt
 **Verdict: `approved`**
 
 The delivery at `f30b870` satisfies all task requirements, respects non-negotiable invariants, adheres to honest evidence standards, and provides a dependable fixture foundation for Inkflip Pass 1.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned scope delta: `scripts/make_fixtures.py` and the fixture suite changed
+via merged `pdf-g78` (semantic catalog correction, `test_g78_semantic.py`), plus
+`execution/overrides.json` now runs `tests/fixtures` under the pinned uv env
+(the g78 suite needs `jsonschema`/`pypdfium2` absent from bare python). Verified:
+deterministic `--check` regenerates 161 files byte-identically; 70/70 green.
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **70/70 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

@@ -174,3 +174,13 @@ New boundary attacks: zombie-result misdelivery (**fail**, F1), zombie-progress 
 ## Bottom line for the writer
 
 F1: give `userJobId` a per-operation-unique component (`reader.ts:1271`). F2: give `OcrHandle.id` a clock-independent uniqueness component or compare handle identity directly (`reader.ts:581` plus the `.id` comparisons at `:696,:963,:1033,:1185,:1413`). Both are small, ownership-local fixes; everything else in the wave-4 revision verified clean.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** No owned files changed since the original review; the staleness was shared-input only (AGENTS.md, execution/config, bootstrap/coordination suites, merged fixture work).
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **45/45 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

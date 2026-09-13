@@ -56,3 +56,18 @@
 - `bun run build`/Vite bundling of the feature (no composition to bundle it yet).
 - Fuzz coverage of `sanitizePng` re-encode beyond the single hostile-chunk case in tests (T24 owns the bounded-PNG suite).
 - Evidence commit `335c2cb` files were read from `work/devin/t16`; this branch holds the identical source tree at `35f524b`.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned files unchanged. The composition added `features/inspect/engines.ts`
+`createExportEngine` — a consumer-side adapter implementing the T16
+`ExportEngine` port (`project`/`preview`/`serializeJson`/`renderHtml`/
+`fileName`); the export package itself was not modified. Export behavior
+re-verified end-to-end via the G1 journey (JSON + HTML downloads, omission
+defaults, script-free HTML) and this suite's 15/15.
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **15/15 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

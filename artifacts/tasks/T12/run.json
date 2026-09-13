@@ -1,8 +1,8 @@
 {
   "task": "T12",
   "beads_id": "pdf-t12",
-  "evaluated_commit": "e9b8c4a4b4defbda46f0b03c098f8e558cc97895",
-  "evaluated_at": "2026-09-13T04:02:05.186185+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:18:08.413204+00:00",
   "commands_run": 1,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-6o29umqr/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-2uuc71o4/results",
         "--test",
         "tests/alignment/alignment.test.mjs",
         "tests/alignment/normalization.test.mjs"

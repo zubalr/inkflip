@@ -1,8 +1,8 @@
 {
   "task": "T03",
   "beads_id": "pdf-t03",
-  "evaluated_commit": "e9b8c4a4b4defbda46f0b03c098f8e558cc97895",
-  "evaluated_at": "2026-09-13T04:01:32.224208+00:00",
+  "evaluated_commit": "412fb9b2b1a119ed8f7a6264a41f3b3049ad61b8",
+  "evaluated_at": "2026-09-13T04:17:34.852358+00:00",
   "commands_run": 2,
   "failures": [],
   "evidence_errors": [],
@@ -23,7 +23,7 @@
       "executed_argv": [
         "node",
         "--test-reporter=junit",
-        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-panpoe4u/results",
+        "--test-reporter-destination=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-8hiu_5am/results",
         "--test",
         "tests/contracts/contracts.test.mjs"
       ],
@@ -63,11 +63,11 @@
         "pytest",
         "native/tests/contracts",
         "-q",
-        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-8io_4sgq/results"
+        "--junitxml=/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-tests-xabjz527/results"
       ],
       "cwd": ".",
       "exit": 0,
-      "stdout": "............................. [100%]\n29 passed, 116 subtests passed in 0.16s\n",
+      "stdout": "............................. [100%]\n29 passed, 116 subtests passed in 0.17s\n",
       "stderr": "",
       "tests": {
         "collected": 29,

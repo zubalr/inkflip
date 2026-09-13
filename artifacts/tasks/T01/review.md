@@ -108,3 +108,19 @@ Checks actually performed:
 - Direct freshness check of the candidate's existing T01 acceptance receipt rejects it with `stale receipt: validation inputs changed (AGENTS.md)`. The changed guidance is reviewed and approved here; the coordinator must finish its already-planned fresh run/receipt binding before dispatch relies on T01 acceptance. This report does not make the old receipt current.
 
 Repository and Beads were not mutated by this reviewer. Concurrent coordinator edits to T01 run/receipt evidence were observed and excluded from the committed review scope. No applications, Cloud sessions, external-provider reviews, commits, pushes, or live Beads transport were launched. Prepared app folders and provider execution remain the coordinator's separate verification responsibility.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned scope delta since the original review: `scripts/gate.py`,
+`scripts/native_pass.py`, `config/acceptance-commands.json`, the bootstrap and
+coordination suites changed via the workbench-admission merge (`879ff3b`) and
+the receipt-freshness work. `execution/overrides.json` gained a command
+adaptation (fixtures suite under the pinned uv env). Reviewed the gate staleness
+logic and command registry while refreshing these receipts: the gate correctly
+flagged all stale receipts rather than silently accepting them.
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **56/56 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

@@ -210,3 +210,18 @@ All minor; none block acceptance.
   `run.json`, `eval.json` — internally consistent; criteria map to real
   executed assertions.
 - This file: `artifacts/tasks/T08/review.md`.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned scope delta: `features/open/OpenWorkspace.tsx` gained a lazy init
+from `controller.currentDocument` so a remount after the `metadata` event still
+renders the open document (composition wiring, pdf-3g8); `open.spec.ts` updated
+to the real surface. Reviewed in the pdf-3g8 independent review rounds — the
+lazy init reads controller state at mount, no behavior change on the original
+selection/validation paths.
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **13/13 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

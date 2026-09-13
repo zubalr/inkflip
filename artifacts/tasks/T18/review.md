@@ -46,3 +46,19 @@ python3 scripts/gate.py G1 --check-prereqs                  # fails on-branch (a
 ```
 
 Post-merge on main, `python3 scripts/gate.py G1` re-runs this identical Playwright command and writes the gate receipt. The branch is ready for that flow.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** This task IS the composition work. `tests/gates/g1.spec.ts` rewritten to
+drive the real public app (no private mounts): own-file open → real coordinator
+run (PDF.js text + raster, Tesseract OCR) → sealed report → cancel/replace →
+geometry/scan → JSON+HTML export → local reopen → source attach → offline OCR.
+3/3 legs green on the merged state. Two rounds of independent review on the
+composition commits (findings F1–F7 and round-2 stale-writer fix) are recorded
+in the pdf-3g8 session and this task's gate receipt.
+- **Fresh run:** Run evidence: the G1 gate receipt (`artifacts/gates/G1/receipt.json`) records the 3-leg journey result.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

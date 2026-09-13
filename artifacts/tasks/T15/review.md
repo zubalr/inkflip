@@ -125,3 +125,16 @@ Reviewed in this worktree on `work/devin/t15` @ `d11db83`, clean tree; all findi
 ## Round-2 verdict: **approved**
 
 F1 (fail-open validator) and F2 (unmonitored header channel + README overclaim) are resolved and probe-verified fail-closed; F3–F5 are fixed; F6/F7 are fixed to the bounded level now recorded as receipt limitations; F8–F11 are closed. The committed evidence reproduces deterministically (4/4 tests, 13/13 checks, 47 requests, marker-free artifacts), scope stayed inside `tests/privacy/` + `scripts/inspect_network_receipt.py` + task artifacts, `planning/` untouched, and nothing was weakened to pass. The G1 own-file no-egress claim now rests on a validator that fails closed on absent, hollowed, or smuggled evidence.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned files unchanged. Material context change: the application under
+test is now the real composition journey (file → readers → report → export →
+reopen), not the prior dead-end surface. Re-ran the full privacy suite against
+the merged app — 4/4 green, egress receipt clean, zero unexpected requests.
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **4/4 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

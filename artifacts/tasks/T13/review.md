@@ -177,3 +177,20 @@ Real CSS: `@media (max-width: 767px)` in `ComparePanes.module.css` flips the gri
 ## Recommendation
 
 Return to worker (or coordinator follow-up) for: **F1** (add the report-import/document-open entry to the owned composition and fix the dead affordance copy), **F2** (toolbar wrap below ~480px), **F3** (sanction or relocate the two CSS modules). F4–F6 are advisory. The five criteria need no rework — the viewer internals are solid.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** Owned scope delta (large): `App.tsx`/`Workspace.tsx` rewired by pdf-3g8 —
+the dead-end "inspection pipeline is unavailable" surface is replaced by the
+real session (open → run → report → viewer → export → reopen). This resolves
+the original review's **F1** (missing report-import/document-open entry).
+`viewer.spec.ts` updated to the real surface: invalid-PDF assertions now check
+`#import-error`; the polygon:null import test uses the sealed canonical example
+(the strict gate verifies the report digest, so a hand-patched report cannot
+pass — page-level rendering stays covered by criterion 4).
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **11/11 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

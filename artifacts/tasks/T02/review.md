@@ -59,3 +59,13 @@ All six acceptance criteria independently substantiated; contract command reprod
 (a) Record `apps/web/public/` staging-root scope amendment in overrides/Beads at merge (Finding 1).
 (b) Apply verified `actions/checkout` SHA pin in ci.yml per P1 (Finding 2).
 Recommended follow-ups (scheduled, non-gating): extend no-cdn scan to staged text assets; QuickJS rights line.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** No owned files changed since the original review; the staleness was shared-input only (AGENTS.md, execution/config, bootstrap/coordination suites, merged fixture work).
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **49/49 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.

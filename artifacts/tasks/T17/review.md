@@ -89,3 +89,13 @@ Inspection-only areas: Beads live state, dependency-acceptance freshness for T05
 - `bun run oxlint`: 0 errors.
 - `bun run oxfmt --check tests/browser/amount.spec.ts`: 0 format issues.
 - `bun run verify`: 116/116 tests passed, exit 0.
+
+
+---
+
+## Delta review — 2026-09-13, evaluated `412fb9b2`
+
+- **Reviewer:** devin-coordinator (acceptance refresh; not the implementing worker for this delta's shared changes)
+- **Scope delta:** No owned files changed since the original review; the staleness was shared-input only (AGENTS.md, execution/config, bootstrap/coordination suites, merged fixture work).
+- **Fresh run:** Re-ran all registered commands at `412fb9b2`: **77/77 green**, zero failures.
+- **Verdict:** prior review stands; delta introduces no acceptance-relevant regression.
