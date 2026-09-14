@@ -7,12 +7,17 @@ prepared artifacts) and dist fixtures in temporary directories and proves:
   - wrong-platform wheel filenames, duplicate entries, absent required
     components, unexpected packages, missing license evidence, missing or
     incomplete node/model stamps, and missing prepared artifacts FAIL;
-  - a recorded dist manifest passes and tampered/undeclared dist files FAIL.
+  - a recorded dist manifest passes and tampered/undeclared dist files FAIL;
+  - the producer and the consumer resolve one canonical prepared context, and
+    an alternate cache directory can never shadow it.
 """
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import importlib.util
+import io
 import json
 import os
 import subprocess
@@ -23,6 +28,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CHECKER = REPO_ROOT / "scripts" / "check_distribution.py"
+ASSEMBLE = REPO_ROOT / "scripts" / "distribution" / "assemble_native_image.py"
+PREPARE = REPO_ROOT / "scripts" / "distribution" / "prepare_native_bundle.py"
 
 WHEEL_SHA = hashlib.sha256(b"fake wheel bytes").hexdigest()
 
@@ -889,6 +896,120 @@ class ProductionImageDockerTests(unittest.TestCase):
         proc = self.run_with_stub()
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("tesseract stamp version", proc.stdout)
+
+
+class NativeBundlePathTests(unittest.TestCase):
+    """The prepared third-party context has exactly one canonical location.
+
+    prepare_native_bundle.py writes .private/distribution/native-bundle (also
+    declared by config/distribution-manifest.json) and assemble_native_image.py
+    must consume that same directory: an empty or stale alternate cache at
+    .private/cache/native-bundle can never shadow freshly prepared output, and
+    an explicit --bundle path stays authoritative."""
+
+    CANONICAL = Path(".private") / "distribution" / "native-bundle"
+    STALE = Path(".private") / "cache" / "native-bundle"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        spec = importlib.util.spec_from_file_location("assemble_native_image", ASSEMBLE)
+        self.assemble = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.assemble)
+
+    def write(self, rel, content):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+
+    def load_producer(self):
+        spec = importlib.util.spec_from_file_location("prepare_native_bundle", PREPARE)
+        module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(module)
+        except ModuleNotFoundError as exc:  # tomllib needs Python 3.11+
+            self.skipTest(f"prepare_native_bundle cannot import here: {exc}")
+        return module
+
+    def run_main(self, *argv):
+        """Run the real main() against the disposable fixture root, with the
+        module path globals redirected (as the producer tests do). The fixture
+        models the bundle check, so only the release manifests need to exist;
+        an exception is reported as a failure of the run, not of the test."""
+        module = self.assemble
+        saved = module.ROOT, module.PRIVATE, module.RELEASE, module.DIST
+        module.ROOT = self.root
+        module.PRIVATE = self.root / self.CANONICAL
+        module.RELEASE = self.root / "release"
+        module.DIST = self.root / "dist"
+        self.write("release/native-requirements.lock", b"# generated\n")
+        self.write("release/native-wheels.manifest.json",
+                   json.dumps({"wheels": []}).encode())
+        captured = io.StringIO()
+        saved_argv = sys.argv
+        sys.argv = ["assemble_native_image.py", *argv]
+        try:
+            with contextlib.redirect_stderr(captured):
+                code = module.main()
+        except Exception as exc:
+            code = f"raised {type(exc).__name__}: {exc}"
+        finally:
+            sys.argv = saved_argv
+            module.ROOT, module.PRIVATE, module.RELEASE, module.DIST = saved
+        return code, captured.getvalue()
+
+    def test_canonical_default_is_the_shared_prepared_context(self):
+        manifest = json.loads(
+            (REPO_ROOT / "config" / "distribution-manifest.json").read_text())
+        self.assertEqual(manifest["native_bundle"]["context_dir"], str(self.CANONICAL))
+        self.assertEqual(self.assemble.PRIVATE, REPO_ROOT / self.CANONICAL)
+        self.assertEqual(self.assemble.resolve_bundle(None), REPO_ROOT / self.CANONICAL)
+
+    def test_producer_and_consumer_agree_on_the_context(self):
+        producer = self.load_producer()
+        self.assertEqual(producer.PRIVATE, self.assemble.PRIVATE)
+
+    def test_empty_alternate_cache_cannot_mask_prepared_output(self):
+        (self.root / self.CANONICAL).mkdir(parents=True)  # freshly prepared
+        (self.root / self.STALE).mkdir(parents=True)      # empty leftover cache
+        self.assertEqual(self.assemble.resolve_bundle(None, self.root),
+                         self.root / self.CANONICAL)
+
+    def test_stale_alternate_cache_cannot_shadow_prepared_output(self):
+        (self.root / self.CANONICAL).mkdir(parents=True)
+        self.write(self.STALE / "wheels" / "pillow-12.3.0-cp313-cp313-manylinux_2_28_x86_64.whl",
+                   b"stale wheel bytes")
+        self.assertEqual(self.assemble.resolve_bundle(None, self.root),
+                         self.root / self.CANONICAL)
+
+    def test_absent_bundle_names_the_canonical_path_not_the_stale_cache(self):
+        self.write(self.STALE / "wheels" / "stale.whl", b"stale wheel bytes")
+        code, err = self.run_main()
+        self.assertEqual(code, 2, msg=err)
+        self.assertIn(str(self.root / self.CANONICAL), err)
+        self.assertNotIn(str(self.root / self.STALE), err)
+
+    def test_explicit_bundle_is_authoritative(self):
+        explicit = self.root / "explicit-bundle"
+        (self.root / self.CANONICAL).mkdir(parents=True)
+        self.write(self.STALE / "wheels" / "stale.whl", b"stale wheel bytes")
+        code, err = self.run_main("--bundle", str(explicit))
+        self.assertEqual(code, 2, msg=err)
+        self.assertIn(str(explicit), err)
+        self.assertNotIn(str(self.root / self.CANONICAL), err)
+
+    def test_explicit_bundle_is_used_verbatim(self):
+        explicit = self.root / "elsewhere" / "explicit-bundle"
+        explicit.mkdir(parents=True)
+        (self.root / self.CANONICAL).mkdir(parents=True)
+        self.assertEqual(self.assemble.resolve_bundle(explicit, self.root), explicit)
+
+    def test_help_documents_the_canonical_default(self):
+        proc = subprocess.run([sys.executable, str(ASSEMBLE), "--help"],
+                              capture_output=True, text=True, timeout=60)
+        self.assertEqual(proc.returncode, 0, msg=proc.stderr)
+        self.assertIn(str(self.CANONICAL), proc.stdout)
 
 
 if __name__ == "__main__":

@@ -32,8 +32,10 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PRIVATE = ROOT / ".private" / "cache" / "native-bundle"
-PRIVATE_LEGACY = ROOT / ".private" / "distribution" / "native-bundle"
+# Single canonical prepared context: prepare_native_bundle.py writes it and
+# config/distribution-manifest.json declares it (native_bundle.context_dir).
+PRIVATE_REL = Path(".private") / "distribution" / "native-bundle"
+PRIVATE = ROOT / PRIVATE_REL
 TESSERACT_CACHE = ROOT / ".private" / "cache" / "tesseract" / "debs"
 TESSERACT_CACHE_LEGACY = ROOT / ".private" / "tesseract" / "debs"
 DIST = ROOT / "native" / "dist"
@@ -79,6 +81,19 @@ def existing_cache(*candidates: Path, label: str) -> Path:
         if path.is_dir():
             return reject_external_symlink(path, ROOT, label)
     return candidates[0]
+
+
+def resolve_bundle(explicit: Path | None, root: Path | None = None) -> Path:
+    """Choose the prepared third-party build context to consume.
+
+    An explicit --bundle path is authoritative and returned verbatim; without
+    one the canonical prepared context is used. Alternate cache directories
+    (for example .private/cache/native-bundle) are never consulted implicitly:
+    an empty or stale directory there must not shadow freshly prepared output.
+    """
+    if explicit is not None:
+        return explicit
+    return (root if root is not None else ROOT) / PRIVATE_REL
 
 
 def _extract_zip_licenses(wheel: Path, dest: Path) -> list[dict]:
@@ -297,13 +312,12 @@ def main() -> int:
     parser.add_argument(
         "--bundle",
         type=Path,
-        default=PRIVATE,
-        help="prepared third-party context from prepare_native_bundle.py",
+        default=None,
+        help="prepared third-party context from prepare_native_bundle.py "
+             f"(default: {PRIVATE_REL}, an explicit path is used verbatim)",
     )
     args = parser.parse_args()
-    bundle = args.bundle
-    if bundle == PRIVATE and not bundle.is_dir() and PRIVATE_LEGACY.is_dir():
-        bundle = PRIVATE_LEGACY
+    bundle = resolve_bundle(args.bundle)
     try:
         if bundle.is_dir():
             reject_external_symlink(bundle, ROOT, "native-bundle cache")
