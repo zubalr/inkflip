@@ -637,47 +637,102 @@ CANDIDATE_ALLOWED = {"kind", "schema_version", "recorded_by", "recorded_at",
                      "production_image", "notes"}
 
 
-def load_candidate_binding(root: Path, candidate_rel: str, scope_notes: list) -> dict | None:
-    """Load the declared release candidate (trusted expected identity).
+def _reject_duplicate_keys(pairs):
+    seen = {}
+    for key, value in pairs:
+        if key in seen:
+            raise ValueError(f"duplicate key {key!r}")
+        seen[key] = value
+    return seen
 
-    Returns {image_ref, expected_image_digest, architecture, expected_wheel_sha256,
-    expected_model_sha256, expected_tesseract_version} or None when no candidate
-    is bound. Expected identity comes ONLY from this declared file — never from
-    the artifact being checked."""
-    path = root / candidate_rel
+
+CANDIDATE_TOP_KEYS = {"kind", "schema_version", "recorded_by", "recorded_at",
+                      "production_image", "notes", "source_label"}
+CANDIDATE_IMAGE_KEYS = {"ref", "digest", "architecture", "wheel_sha256",
+                        "model_sha256", "tesseract_version"}
+HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _load_candidate_strict(root: Path, rel: str):
+    """Load and fully validate the declared release candidate.
+
+    Returns (binding|None, problems, errors). `binding` is the trusted
+    expected identity for --docker verification; it is None whenever the
+    candidate is missing, unreadable, malformed, wrong-kind, incomplete or
+    contradictory — in which case a requested Docker check must fail
+    (nonzero), never succeed by skipping."""
+    problems: list[str] = []
+    errors: list[str] = []
+    path = root / rel
     if not path.is_file():
-        scope_notes.append(
-            f"no release candidate declared yet: {candidate_rel} "
-            "(bind after the final image rebuild; see docs/distribution/release-candidate.template.json)"
+        problems.append(
+            f"candidate: required release candidate not found: {rel} — bind it after the "
+            "final image rebuild (template: docs/distribution/release-candidate.template.json)"
         )
-        return None
+        return None, problems, errors
+    raw = path.read_text()
     try:
-        cand = json.loads(path.read_text())
+        cand = json.loads(raw, object_pairs_hook=_reject_duplicate_keys)
     except json.JSONDecodeError as exc:
-        scope_notes.append(f"release candidate unreadable ({exc}); image runtime verification skipped")
-        return None
+        return None, problems, [f"candidate: malformed JSON: {exc}"]
+    except ValueError as exc:
+        return None, problems, [f"candidate: {exc}"]
+    if not isinstance(cand, dict):
+        return None, problems, ["candidate: top level must be a JSON object"]
+
     if cand.get("kind") != "inkflip-release-candidate":
-        scope_notes.append("release candidate file has wrong kind; image runtime verification skipped")
-        return None
-    img = cand.get("production_image") or {}
+        errors.append(f"candidate: wrong kind {cand.get('kind')!r} (expected 'inkflip-release-candidate')")
+    if cand.get("schema_version") != "1.0.0":
+        errors.append(f"candidate: unsupported schema_version {cand.get('schema_version')!r}")
+    for field in ("recorded_by", "recorded_at"):
+        value = cand.get(field)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"candidate: missing required field {field!r}")
+    for key in cand:
+        if key not in CANDIDATE_TOP_KEYS:
+            errors.append(f"candidate: unknown top-level key {key!r}")
+
+    img = cand.get("production_image")
+    if not isinstance(img, dict):
+        errors.append("candidate: 'production_image' must be an object")
+        return None, problems, errors
+    for key in img:
+        if key not in CANDIDATE_IMAGE_KEYS:
+            errors.append(f"candidate: unknown production_image key {key!r}")
+
     ref = img.get("ref")
+    if not isinstance(ref, str) or not ref.strip() or re.search(r"\s", ref):
+        errors.append("candidate: production_image.ref must be a nonempty image reference without whitespace")
     digest = img.get("digest")
-    if not ref or not (isinstance(digest, str) and re.fullmatch(r"sha256:[0-9a-f]{64}", digest)):
-        scope_notes.append(
-            "release candidate not fully bound (ref/digest pending final rebuild); "
-            "image runtime verification skipped"
-        )
-        return None
-    binding = {"image_ref": ref, "expected_image_digest": digest,
-               "architecture": img.get("architecture", "amd64")}
-    for key in ("expected_wheel_sha256", "expected_model_sha256",
-                "expected_tesseract_version"):
-        if img.get(key):
-            binding[key] = img[key]
-    return binding
+    if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+        errors.append("candidate: production_image.digest must be 'sha256:' followed by 64 lowercase hex chars")
+    arch = img.get("architecture")
+    if not isinstance(arch, str) or not arch.strip():
+        errors.append("candidate: production_image.architecture must be a nonempty string")
+    tver = img.get("tesseract_version")
+    if not isinstance(tver, str) or not tver.strip():
+        errors.append("candidate: production_image.tesseract_version must be a nonempty string")
+    for key in ("wheel_sha256", "model_sha256"):
+        value = img.get(key)
+        if value is None:
+            errors.append(f"candidate: production_image.{key} is required")
+        elif not isinstance(value, str) or not HEX64_RE.match(value):
+            errors.append(f"candidate: production_image.{key} must be 64 lowercase hex chars")
+
+    if errors:
+        return None, problems, errors
+    binding = {
+        "image_ref": ref,
+        "expected_image_digest": digest,
+        "architecture": arch,
+        "expected_wheel_sha256": img["wheel_sha256"],
+        "expected_model_sha256": img["model_sha256"],
+        "expected_tesseract_version": tver,
+    }
+    return binding, problems, errors
 
 
-# ------------------------------------------------- production image (Docker)
+# ------------------------------------------------- production image (Docker)# ------------------------------------------------- production image (Docker)
 
 def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[str]:
     """Read-only verification of the declared production image via Docker:
@@ -797,34 +852,58 @@ def main() -> int:
         return 2
 
     problems, gate_scope_notes, code = run_checks(root, manifest, args.dist_manifest)
-    if args.docker and not problems:
+    errors: list[str] = []
+    if args.docker:
+        # Requested Docker verification must EXECUTE and PASS for release
+        # success. Missing/unreadable/malformed/wrong-kind/incomplete
+        # candidates fail the run (nonzero) — never a skip-to-success.
         nb = manifest.get("native_bundle") or {}
         image = nb.get("production_image") or {}
-        if image.get("declared"):
+        if not image.get("declared"):
+            problems.append(
+                "production image: --docker requested but "
+                "native_bundle.production_image.declared is not true"
+            )
+        else:
             import shutil as _shutil
-            docker_cmd = _shutil.which("docker")
-            if not docker_cmd:
-                problems.append("production image: docker CLI not found; --docker verification could not run")
-            else:
-                bound = load_candidate_binding(root, args.candidate, gate_scope_notes)
-                if bound is None:
-                    gate_scope_notes.append(
-                        "production image runtime verification skipped: no declared release "
-                        f"candidate bound ({args.candidate}); Devin binds it after the final rebuild"
+            binding, cproblems, cerr = _load_candidate_strict(root, args.candidate)
+            problems.extend(cproblems)
+            errors.extend(cerr)
+            if binding is not None:
+                if args.docker != binding["image_ref"]:
+                    problems.append(
+                        f"production image: requested target {args.docker!r} does not match "
+                        f"declared candidate ref {binding['image_ref']!r}"
                     )
                 else:
-                    image = {**image, **bound}
-                    problems.extend(verify_production_image(root, image, docker_cmd))
-                    gate_scope_notes.append(
-                        f"production image verified via docker against declared candidate: {bound['image_ref']}"
-                    )
-                code = (2 if any(e in problems for e in []) else 1) if problems else 0
+                    docker_cmd = _shutil.which("docker")
+                    if not docker_cmd:
+                        problems.append(
+                            "production image: docker CLI not found; the requested "
+                            "verification could not run"
+                        )
+                    else:
+                        merged = {**image, **binding}
+                        img_problems = verify_production_image(root, merged, docker_cmd)
+                        problems.extend(img_problems)
+                        if not img_problems and not problems:
+                            gate_scope_notes.append(
+                                "production image verified via docker against declared "
+                                f"candidate: {binding['image_ref']}"
+                            )
+    reportable = errors + problems
+    if errors:
+        code = 2
+    elif problems:
+        code = 1 if code != 2 else 2
+    # run_checks code 2 (static config errors) is preserved; candidate errors
+    # above force 2; plain candidate/static verification failures stay 1.
     scope_notes = gate_scope_notes + scope_report(root, manifest, args.dist_manifest)
     if args.json:
-        print(json.dumps({"ok": code == 0, "exit_code": code, "problems": problems,
+        print(json.dumps({"ok": code == 0, "exit_code": code, "problems": reportable,
                           "scope_notes": scope_notes}, indent=2))
     else:
-        if not problems:
+        if not reportable:
             scopes = ["browser static surface"]
             if manifest.get("native_bundle"):
                 scopes.append("native third-party dependency inputs")
@@ -837,8 +916,8 @@ def main() -> int:
                 print(f"  note: {note}")
             print(f"  groups: {len(manifest.get('groups', []))}, shipped roots: {len(manifest['distribution'].get('shipped_roots', []))}")
         else:
-            print(f"distribution check: {len(problems)} problem(s)")
-            for p in problems:
+            print(f"distribution check: {len(reportable)} problem(s)")
+            for p in reportable:
                 print(f"  - {p}")
     return code
 
