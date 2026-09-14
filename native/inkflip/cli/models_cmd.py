@@ -21,10 +21,29 @@ _SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$")
 
 
 def _safe_segment(value: str, what: str) -> str:
+    """A model id names one cache directory, so it stays a strict identifier."""
     if not _SAFE_SEGMENT.match(value) or value in {".", ".."}:
         raise ModelPrepareError(
             f"{what} {value!r} must be a single safe path segment "
             "(letters, digits, dot, underscore or hyphen; no separators)"
+        )
+    return value
+
+
+_UNSAFE_NAME = re.compile(r"[\x00-\x1f/:\\]")
+
+
+def _safe_file_name(value: str, what: str) -> str:
+    """A local artifact name must not escape its directory, but is otherwise free.
+
+    Rejecting non-ASCII here would be a gratuitous restriction: the cache holds
+    local model artifacts, and the contract puts no character repertoire on their
+    names. Only path separators, NUL/control characters and the two dot names are
+    refused, which is what containment actually requires.
+    """
+    if not value or value in {".", ".."} or _UNSAFE_NAME.search(value):
+        raise ModelPrepareError(
+            f"{what} {value!r} must be a single file name without path separators"
         )
     return value
 
@@ -66,6 +85,7 @@ def prepare_models(manifest_path: Path, cache_dir: Path) -> dict[str, Any]:
     cache_dir.mkdir(parents=True, exist_ok=True)
     prepared: list[dict[str, Any]] = []
     unavailable: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
     for entry in models:
         if not isinstance(entry, dict):
             raise ModelPrepareError("Each model entry must be an object")
@@ -76,6 +96,13 @@ def prepare_models(manifest_path: Path, cache_dir: Path) -> dict[str, Any]:
         if not isinstance(model_id, str) or not model_id:
             raise ModelPrepareError("Model id is required")
         _safe_segment(model_id, "Model id")
+        if model_id in seen_ids:
+            # Two entries sharing an id would land in one cache directory and the
+            # index could claim two different artifacts for the same id.
+            raise ModelPrepareError(
+                f"Duplicate model id {model_id!r}: each model id may be declared once"
+            )
+        seen_ids.add(model_id)
         if not isinstance(digest, str) or len(digest) != 64:
             raise ModelPrepareError(f"Model {model_id!r} is missing a 64-hex sha256")
         if purpose not in ALLOWED_PURPOSES:
@@ -98,7 +125,7 @@ def prepare_models(manifest_path: Path, cache_dir: Path) -> dict[str, Any]:
                 }
             )
             continue
-        _safe_segment(source_path.name, "Model file name")
+        _safe_file_name(source_path.name, "Model file name")
         destination = cache_dir / model_id / source_path.name
         # Defence in depth: the composed destination must stay inside the cache root.
         cache_root = cache_dir.resolve()

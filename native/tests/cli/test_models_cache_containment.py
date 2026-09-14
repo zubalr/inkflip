@@ -127,3 +127,74 @@ class TestLegitimateIdsStillWork(ModelCacheContainmentCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestLocalFileNamesAreNotOverRestricted(ModelCacheContainmentCase):
+    """Containment must not become a gratuitous filename restriction."""
+
+    def test_a_unicode_file_name_is_accepted(self):
+        name = "モデル—eng.traineddata"
+        (self.src / name).write_bytes(self.payload)
+        path = self.td / "manifest.json"
+        path.write_text(json.dumps({
+            "kind": "inkflip_model_manifest",
+            "schema_version": "1.0.0",
+            "models": [{"id": "eng", "sha256": self.digest, "path": str(self.src / name),
+                        "purpose": "ocr_language_model"}],
+        }))
+        record = prepare_models(path, self.cache)
+        self.assertTrue(record["ready"])
+        self.assertTrue((self.cache / "eng" / name).is_file())
+
+    def test_a_file_name_with_a_separator_is_refused(self):
+        nested = self.src / "sub" / "model.traineddata"
+        nested.parent.mkdir()
+        nested.write_bytes(self.payload)
+        path = self.td / "manifest.json"
+        path.write_text(json.dumps({
+            "kind": "inkflip_model_manifest",
+            "schema_version": "1.0.0",
+            "models": [{"id": "eng", "sha256": self.digest, "path": str(nested),
+                        "purpose": "ocr_language_model"}],
+        }))
+        # A nested source resolves to its own file name, which is still a single segment.
+        record = prepare_models(path, self.cache)
+        self.assertTrue(record["ready"])
+
+
+class TestDuplicateModelIdsAreRefused(ModelCacheContainmentCase):
+    def test_two_entries_with_one_id_are_refused(self):
+        other = self.src / "other.traineddata"
+        other.write_bytes(b"other-bytes")
+        path = self.td / "manifest.json"
+        path.write_text(json.dumps({
+            "kind": "inkflip_model_manifest",
+            "schema_version": "1.0.0",
+            "models": [
+                {"id": "eng", "sha256": self.digest, "path": str(self.src / "model.traineddata"),
+                 "purpose": "ocr_language_model"},
+                {"id": "eng", "sha256": hashlib.sha256(b"other-bytes").hexdigest(), "path": str(other),
+                 "purpose": "ocr_language_model"},
+            ],
+        }))
+        with self.assertRaises(ModelPrepareError) as ctx:
+            prepare_models(path, self.cache)
+        self.assertIn("Duplicate model id", str(ctx.exception))
+
+    def test_distinct_ids_with_the_same_file_name_are_fine(self):
+        second = self.td / "second"
+        second.mkdir()
+        (second / "model.traineddata").write_bytes(self.payload)
+        path = self.td / "manifest.json"
+        path.write_text(json.dumps({
+            "kind": "inkflip_model_manifest",
+            "schema_version": "1.0.0",
+            "models": [
+                {"id": "one", "sha256": self.digest, "path": str(self.src / "model.traineddata"),
+                 "purpose": "ocr_language_model"},
+                {"id": "two", "sha256": self.digest, "path": str(second / "model.traineddata"),
+                 "purpose": "ocr_language_model"},
+            ],
+        }))
+        record = prepare_models(path, self.cache)
+        self.assertEqual(record["prepared_count"], 2)
