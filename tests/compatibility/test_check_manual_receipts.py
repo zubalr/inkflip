@@ -391,14 +391,13 @@ class CheckerContractTests(unittest.TestCase):
         )
         self.assertEqual(code, 0, err)
 
-    def test_macos_release_profile_accessibility_defers_nvda_only(self):
+    def test_macos_release_profile_accessibility_waives_owner_deferred_at(self):
         required = [item["id"] for item in self.mod.required_profiles("accessibility", "macos")]
         self.assertNotIn("screen-reader-nvda-firefox", required)
-        self.assertIn("screen-reader-voiceover-safari", required)
+        self.assertNotIn("screen-reader-voiceover-safari", required)
         self.assertEqual(
             required,
-            ["keyboard", "amount-alternatives", "zoom-400", "reduced-motion",
-             "screen-reader-voiceover-safari"],
+            ["keyboard", "amount-alternatives", "zoom-400", "reduced-motion"],
         )
 
     def test_historical_accessibility_still_requires_nvda_and_voiceover(self):
@@ -407,9 +406,9 @@ class CheckerContractTests(unittest.TestCase):
         self.assertIn("screen-reader-voiceover-safari", required)
         self.assertEqual(len(required), 6)
 
-    def test_macos_accessibility_still_fails_on_missing_voiceover(self):
+    def test_macos_accessibility_passes_with_waived_at_rows_unavailable(self):
         platforms = []
-        for profile in self.mod.required_profiles("accessibility", "macos"):
+        for profile in self.mod.required_profiles("accessibility"):
             platforms.append(
                 {
                     "id": profile["id"],
@@ -419,34 +418,12 @@ class CheckerContractTests(unittest.TestCase):
                 }
             )
         for row in platforms:
-            if row["id"] == "screen-reader-voiceover-safari":
+            if row["id"] in (
+                "screen-reader-nvda-firefox",
+                "screen-reader-voiceover-safari",
+            ):
                 row["status"] = "unavailable"
-        payload = {
-            "schema_version": "1.0.0",
-            "kind": "accessibility",
-            "status": "partial",
-            "host": {"os": "Darwin arm64", "cpu": "arm64"},
-            "platforms": platforms,
-        }
-        self.write_kind("accessibility", payload)
-        code, err = self.mod.check_kind(
-            "accessibility", root=self.root, mode="acceptance", release_profile="macos"
-        )
-        self.assertEqual(code, 1)
-        self.assertIn("voiceover", err.lower())
-        self.assertNotIn("nvda", err.lower())
-
-    def test_macos_accessibility_accepts_without_nvda_row(self):
-        platforms = []
-        for profile in self.mod.required_profiles("accessibility", "macos"):
-            platforms.append(
-                {
-                    "id": profile["id"],
-                    "status": "executed",
-                    "evidence": [self.write_evidence(f"docs/accessibility/{profile['id']}.md")],
-                    "identity": {"at": profile["id"], "os": "macOS"},
-                }
-            )
+                row["note"] = "owner-waived for the macOS release scope"
         payload = {
             "schema_version": "1.0.0",
             "kind": "accessibility",
@@ -461,6 +438,35 @@ class CheckerContractTests(unittest.TestCase):
         self.assertEqual(code, 0, err)
         code, err = self.check("accessibility")
         self.assertEqual(code, 1)
+        self.assertIn("voiceover", err.lower())
+
+    def test_macos_accessibility_still_fails_on_missing_mechanical(self):
+        platforms = []
+        for profile in self.mod.required_profiles("accessibility"):
+            platforms.append(
+                {
+                    "id": profile["id"],
+                    "status": "executed",
+                    "evidence": [self.write_evidence(f"docs/accessibility/{profile['id']}.md")],
+                    "identity": {"at": profile["id"], "os": "macOS"},
+                }
+            )
+        for row in platforms:
+            if row["id"] == "zoom-400":
+                row["status"] = "unavailable"
+        payload = {
+            "schema_version": "1.0.0",
+            "kind": "accessibility",
+            "status": "partial",
+            "host": {"os": "Darwin arm64", "cpu": "arm64"},
+            "platforms": platforms,
+        }
+        self.write_kind("accessibility", payload)
+        code, err = self.mod.check_kind(
+            "accessibility", root=self.root, mode="acceptance", release_profile="macos"
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("zoom-400", err.lower())
 
     def test_webkit_labelled_safari_is_forged(self):
         platforms = self.complete_compatibility_platforms()

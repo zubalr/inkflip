@@ -69,6 +69,13 @@ _ACCESSIBILITY = (
     {"id": "screen-reader-nvda-firefox", "aliases": frozenset({"screen-reader-nvda-firefox", "nvda-firefox", "a10-nvda"})},
     {"id": "screen-reader-voiceover-safari", "aliases": frozenset({"screen-reader-voiceover-safari", "voiceover-safari", "a10-voiceover"})},
 )
+# AT profiles the owner excluded from the macOS release scope. Waiving a
+# required manual leg is an owner decision recorded in the receipt's
+# 'unavailable' rows — it is never used to fabricate executed evidence, and
+# the historical (full) profile still requires every profile.
+_MACOS_WAIVED_AT = frozenset(
+    {"screen-reader-nvda-firefox", "screen-reader-voiceover-safari"}
+)
 
 
 def required_profiles(kind: str, release_profile: str = "historical") -> list[dict[str, Any]]:
@@ -78,12 +85,15 @@ def required_profiles(kind: str, release_profile: str = "historical") -> list[di
         return [dict(item) for item in _COMPATIBILITY]
     if kind == "accessibility":
         if release_profile == "macos":
-            # Owner-approved 2026-09-13 macOS scope defers NVDA/Firefox as a
-            # Windows AT profile. VoiceOver+Safari remains mandatory on macOS.
+            # Owner-approved macOS scope: NVDA/Firefox is a Windows AT profile
+            # (deferred 2026-09-13, pdf-u28); VoiceOver/Safari was waived by the
+            # owner on 2026-09-14. Both rows stay recorded as unavailable in the
+            # receipt — waived, never fabricated. The historical profile below
+            # still requires all six.
             return [
                 dict(item)
                 for item in _ACCESSIBILITY
-                if item["id"] != "screen-reader-nvda-firefox"
+                if item["id"] not in _MACOS_WAIVED_AT
             ]
         return [dict(item) for item in _ACCESSIBILITY]
     if kind == "release":
@@ -91,7 +101,7 @@ def required_profiles(kind: str, release_profile: str = "historical") -> list[di
             return [dict(item) for item in _MACOS_COMPATIBILITY] + [
                 item
                 for item in _ACCESSIBILITY
-                if item["id"] != "screen-reader-nvda-firefox"
+                if item["id"] not in _MACOS_WAIVED_AT
             ]
         return [dict(item) for item in _COMPATIBILITY] + [dict(item) for item in _ACCESSIBILITY]
     raise KeyError(kind)

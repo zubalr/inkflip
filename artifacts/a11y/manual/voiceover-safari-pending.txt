@@ -1,9 +1,14 @@
-T37 manual assistive-technology leg — pending owner-assisted run
+T37 manual assistive-technology leg — WAIVED by owner 2026-09-14
 =================================================================
 
 Required profile: screen-reader-voiceover-safari (real VoiceOver in real
-Safari on this Mac). Playwright WebKit is not a substitute and is not
-claimed as evidence here.
+Safari on this Mac). The owner declared this leg not needed for the
+release on 2026-09-14. This file records that the row is waived, not
+executed — no VoiceOver/Safari evidence exists or is claimed.
+
+If the profile is ever reinstated, the guided sequence below remains the
+correct procedure. Playwright WebKit is not a substitute and is not
+claimed as evidence.
 
 Owner-assisted sequence (about 15 minutes, guided):
 

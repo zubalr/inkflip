@@ -77,7 +77,7 @@
       "evidence": [
         "artifacts/a11y/manual/voiceover-safari-pending.txt"
       ],
-      "note": "NVDA+Firefox is a Windows assistive-technology profile. The release scope decision (pdf-u28, 2026-09-13) defers Windows desktop and NVDA-on-Windows certification; the macOS release gate (release kind, macos profile) excludes this row. Not executed and not claimed."
+      "note": "NVDA+Firefox is a Windows assistive-technology profile. The release scope decision (pdf-u28, 2026-09-13) defers Windows desktop and NVDA-on-Windows certification; the macOS release profile excludes this row. Not executed and not claimed."
     },
     {
       "id": "screen-reader-voiceover-safari",
@@ -85,7 +85,7 @@
       "evidence": [
         "artifacts/a11y/manual/voiceover-safari-pending.txt"
       ],
-      "note": "Real VoiceOver + real Safari on this Mac not yet executed. Requires one owner-assisted ~15 minute guided run (Cmd+F5, nine-step checklist). Playwright WebKit is not a substitute and is not claimed. NVDA/Firefox is a Windows profile deferred outside the macOS release scope."
+      "note": "Real VoiceOver + real Safari on this Mac was never executed — the owner waived this leg for the release on 2026-09-14. This row stays 'unavailable': a waiver removes the requirement, it does not create evidence. Playwright WebKit was not used as a substitute. The historical profile still requires it."
     }
   ]
 }

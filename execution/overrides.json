@@ -11,6 +11,10 @@
       "uv run --frozen --project native python -m unittest discover -s tests/fixtures"
     ],
     [
+      "python scripts/check_manual_receipts.py accessibility",
+      "python scripts/check_manual_receipts.py accessibility --release-profile macos"
+    ],
+    [
       "pnpm exec ",
       "bun x --no-install "
     ],
