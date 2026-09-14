@@ -37,11 +37,12 @@ test("gallery renders six cards; detail shows real files; open report imports", 
   const gallery = page.getByTestId("examples-gallery");
   await expect(gallery).toBeVisible({ timeout: 15000 });
   await expect(gallery.getByRole("button")).toHaveCount(6);
-  await expect(gallery.getByText("The same $100, four times")).toBeVisible();
+  await expect(gallery.getByText("Repeated amounts at different positions")).toBeVisible();
 
   await page.getByTestId("example-card-duplicates").click();
   const detail = page.getByTestId("example-detail-duplicates");
   await expect(detail).toBeVisible();
+  await detail.locator("summary").click();
   await expect(detail.getByText("duplicates-four.pdf")).toBeVisible();
   await expect(detail.getByText("tesseract.js 7.0.0")).toBeVisible();
 

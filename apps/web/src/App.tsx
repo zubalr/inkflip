@@ -88,6 +88,7 @@ export default function App() {
     initial.loadSyntheticFixture,
   );
   const [openIntent, setOpenIntent] = useState<WorkspaceOpenIntent>(initial.openIntent);
+  const [incomingFile, setIncomingFile] = useState<File | null>(null);
   const [workspaceEpoch, setWorkspaceEpoch] = useState<number>(0);
 
   // Preserve workspace state across temporary Help visits
@@ -117,6 +118,7 @@ export default function App() {
         setExampleId(null);
         setLoadSyntheticFixture(false);
         setOpenIntent(null);
+        setIncomingFile(null);
       }
       setRoute(current.route);
     };
@@ -176,6 +178,16 @@ export default function App() {
     }
   }, []);
 
+  const offerLocalFile = (file: File) => {
+    setIncomingFile(file);
+    setWorkspaceEpoch((e) => e + 1);
+    navigateToWorkspace(false, null);
+  };
+
+  const consumeIncomingFile = useCallback(() => {
+    setIncomingFile(null);
+  }, []);
+
   const navigateToExampleReport = (id: string) => {
     setWorkspaceEverMounted(true);
     setWithExample(false);
@@ -191,6 +203,7 @@ export default function App() {
 
   const navigateToHome = () => {
     setWorkspaceEverMounted(false);
+    setIncomingFile(null);
     setRoute("home");
     window.location.hash = "#/";
   };
@@ -217,6 +230,7 @@ export default function App() {
           navigateToWorkspace(Boolean(withExample), open ?? null)}
         onOpenExample={navigateToExampleReport}
         onNavigateHelp={navigateToHelp}
+        onOfferLocalFile={offerLocalFile}
       />
     );
   }
@@ -249,6 +263,8 @@ export default function App() {
             loadSyntheticFixture={loadSyntheticFixture}
             initialOpen={openIntent}
             onOpenIntentHandled={consumeOpenIntent}
+            incomingFile={incomingFile}
+            onIncomingFileHandled={consumeIncomingFile}
           />
         </div>
       )}

@@ -74,7 +74,7 @@ export const WORKSPACE_COPY = {
   planDetails: "Show technical check list",
   /** Plain-language OCR line above the consent control. */
   ocrPlain:
-    "OCR reads the text inside the page image — useful for scans where no text can be selected.",
+    "OCR reads the text inside the page image. Useful for scans where no text can be selected.",
 } as const;
 
 export const LIMITS_COPY = {

@@ -139,7 +139,7 @@ test.describe("Export payload, source opt-in, and reimport", () => {
 
     await page.getByLabel("Include the original PDF").check();
     await expect(
-      page.getByText("Original bytes unavailable — this export is evidence-only."),
+      page.getByText("Original bytes are unavailable. This export is evidence-only."),
     ).toBeVisible();
     const payload = await downloadJson(page);
     expect(payload.assets ?? []).toHaveLength(0);

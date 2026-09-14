@@ -344,7 +344,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     const detail = page.locator('[data-testid="alignment-detail"]');
     await expect(detail).toHaveAttribute("data-alignment-class", "ambiguous");
     await expect(page.locator('[data-testid="alignment-class-badge"]')).toHaveText(
-      "Ambiguous — candidates kept",
+      "Ambiguous, candidates kept",
     );
 
     // Each candidate button's accessible name carries its alternative.

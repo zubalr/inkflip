@@ -282,7 +282,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
                 }
               }}
             >
-              Try Demo Example
+              Try an example
             </button>
           </nav>
         </div>
@@ -290,12 +290,12 @@ export const HelpPage: React.FC<HelpPageProps> = ({
 
       <main className={styles.main}>
         <section className={styles.hero} aria-labelledby="help-headline">
-          <div className={styles.eyebrow}>Help</div>
           <h1 id="help-headline" className={styles.headline}>
             How to check a PDF
           </h1>
           <p className={styles.lede}>
-            Compare the text inside a PDF with what appears on the page.
+            Compare the text you see with the text software reads. Files stay in
+            this browser.
           </p>
         </section>
 
@@ -323,18 +323,26 @@ export const HelpPage: React.FC<HelpPageProps> = ({
           <dl className={styles.faq}>
             <dt>What is compared?</dt>
             <dd>
-              The text inside a PDF against what appears on the page, across PDF.js and Tesseract
-              OCR in the browser.
+              The PDF text layer against what appears on the page, using PDF.js
+              and Tesseract OCR in the browser.
             </dd>
             <dt>Where do my files go?</dt>
-            <dd>They stay in your browser. Nothing is uploaded.</dd>
+            <dd>They stay in this tab. Nothing is uploaded.</dd>
             <dt>How do I read a difference?</dt>
             <dd>
-              A highlighted difference needs review. It does not prove fraud or correctness.
+              A highlighted difference needs review. It does not prove fraud or
+              correctness.
             </dd>
             <dt>What gets saved?</dt>
             <dd>
-              A report of the findings and your notes, which you can reopen through the same tool.
+              An HTML report for reading, or a JSON file you can reopen here.
+              The original PDF is included in JSON only when you choose that.
+            </dd>
+            <dt>Does this work in Safari?</dt>
+            <dd>
+              Yes. Check a PDF on Home opens the file picker from that click. If
+              you cancel, you stay on Home and can choose a file again. A saved
+              link to the workspace may not raise the picker; use Open PDF there.
             </dd>
           </dl>
         </section>

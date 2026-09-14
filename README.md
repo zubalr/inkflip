@@ -1,29 +1,25 @@
 # Inkflip
 
-**[Live demo](https://inkflip-jubairjashim1975gmailcoms-projects.vercel.app)** — same app on [inkflip-rose.vercel.app](https://inkflip-rose.vercel.app). Do not use `inkflip.vercel.app` (a different site).
+**[Live demo](https://inkflip-rose.vercel.app)**
 
-**Your PDF can look right and read wrong.**
+Check the text behind your PDF.
 
-Inkflip is a local-first PDF reading inspector. It compares what a page
-shows with the text its layers claim, so a `$100` that extracts as `$1,000`
+Inkflip is a local-first PDF reading inspector. It compares the text you
+see with the text software reads, so a `$100` that extracts as `$1,000`
 is visible before it reaches a spreadsheet or a model. Analysts, engineers,
 and anyone who has to trust extracted PDF text can open a file in the
 browser, inspect a disagreement, and save a portable report. Nothing is
 uploaded.
 
-![Desktop home: check actions on the left and a real $100 vs $1,000 sample on the right](docs/images/home-desktop.png)
+![Desktop home: check actions on the left and a $100 vs $1,000 sample on the right](docs/images/home-desktop.png)
 
 ![The same home stacked on a 390px phone layout](docs/images/home-narrow.png)
 
 ![The amount example open in the inspector, with the difference selected](docs/images/example-difference.png)
 
-The first two images are the two-column Home captured from the UI worktree.
-The live demo still serves the previous stacked Home until that composition
-is integrated. The inspector screenshot matches the live example.
-
 ## Try it
 
-1. Open the [live demo](https://inkflip-jubairjashim1975gmailcoms-projects.vercel.app) and choose **Try an example**, or **Check a PDF** with a file on your computer.
+1. Open the [live demo](https://inkflip-rose.vercel.app) and choose **Try an example**, or **Check a PDF** with a file on your computer.
 2. Select a difference and look at the named readings on the page.
 3. Save a JSON report to reopen in Inkflip, or a script-free HTML report to read without the app.
 
@@ -52,7 +48,6 @@ embed the original PDF.
   is still open.
 - A linux/amd64 native image was built and exercised locally. It is not a
   signed, bit-identical, cross-platform public release.
-- `inkflip.vercel.app` is not this project.
 
 Dated snapshot detail lives in [docs/limitations.md](docs/limitations.md).
 

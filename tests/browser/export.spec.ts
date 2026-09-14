@@ -260,7 +260,7 @@ test.describe("T16 Browser Export", () => {
     await sourceOption.click();
 
     // Warning renders indicating original bytes unavailable
-    const warning = page.locator("p").filter({ hasText: "Original bytes unavailable — this export is evidence-only." });
+    const warning = page.locator("p").filter({ hasText: "Original bytes are unavailable. This export is evidence-only." });
     await expect(warning).toBeVisible();
 
     // Clear prior downloads and download JSON

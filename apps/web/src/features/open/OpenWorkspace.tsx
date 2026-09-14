@@ -443,11 +443,11 @@ export function OpenWorkspace({
                 </label>
                 {!selection.has(previewPage) ? (
                   <span className={styles.previewNote} data-testid="preview-notselected">
-                    Page {previewPage + 1} is not selected — its region will not be checked.
+                    Page {previewPage + 1} is not selected. Its region will not be checked.
                   </span>
                 ) : omittedRegionPages.includes(previewPage) ? (
                   <span className={styles.previewNote} data-testid="preview-ocromitted">
-                    Page {previewPage + 1} region exceeds the {profile.maxOcrPagesPerRun}-page OCR cap — native text and render checks will run, but OCR is omitted.
+                    Page {previewPage + 1} region exceeds the {profile.maxOcrPagesPerRun}-page OCR cap. Native text and render checks will run, but OCR is omitted.
                   </span>
                 ) : null}
               </div>

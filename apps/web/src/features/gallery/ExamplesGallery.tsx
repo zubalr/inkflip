@@ -2,9 +2,9 @@
  * ExamplesGallery — the six public example cards (T21).
  *
  * Renders the generated `/examples/index.json` card list and a per-card
- * detail view backed by the real captured manifests. Every card is backed
- * by an actual sealed run of the inspection pipeline (report.json) and
- * real staged source bytes — no prepared-looking placeholder is shown.
+ * detail view backed by the real captured manifests. Everyday titles and
+ * one-line descriptions are a presentation overlay; sealed reports and
+ * generated manifests are not rewritten here.
  *
  * "Open report" routes into the workspace's real import gate — the
  * captured report is validated like any user-supplied file before it
@@ -12,6 +12,7 @@
  */
 import React, { useEffect, useState } from "react";
 import styles from "./ExamplesGallery.module.css";
+import { exampleDisplayCopy } from "./displayCopy";
 import { loadExampleIndex, loadExampleManifest } from "./loader";
 import type { ExampleCard, ExampleIndex, ExampleManifest } from "./types";
 
@@ -40,14 +41,13 @@ function CardDetail({
   onOpen: () => void;
   onClose: () => void;
 }) {
+  const display = exampleDisplayCopy(card.example_id, card.card_title, card.mechanism);
   return (
     <div className={styles.detail} data-testid={`example-detail-${card.example_id}`}>
       <div className={styles.detailHeader}>
         <div>
-          <h3 className={styles.detailTitle}>{card.card_title}</h3>
-          <p className={styles.sub}>
-            {card.fixture_id} · {card.family} · prepared from a real captured run
-          </p>
+          <h3 className={styles.detailCardTitle}>{display.title}</h3>
+          <p className={styles.detailLead}>{display.description}</p>
         </div>
         <button type="button" className={styles.close} onClick={onClose}>
           Close
@@ -57,17 +57,21 @@ function CardDetail({
       {manifest === null ? (
         <p className={styles.sub}>Loading manifest…</p>
       ) : (
-        <>
+        <details className={styles.techDetails} data-testid="example-tech-details">
+          <summary>Fixture, readers, and files</summary>
+          <p className={styles.sub}>
+            {card.fixture_id} · {card.family}
+          </p>
           <div className={styles.mechanismSection} data-testid="card-mechanism-section">
-            <h4>What this demonstrates</h4>
             <p className={styles.mechanismText}>{card.mechanism}</p>
             {card.example_id === "duplicates" && (
               <p className={styles.evidenceNote} data-testid="duplicates-evidence-note">
-                Four distinct &ldquo;$100&rdquo; occurrences appear at separate page coordinates (occurrences #0, #2, #3, and #5). In Reading mode or the accessible text layer, each occurrence is individually addressable and selectable by occurrence ordinal, demonstrating that identical text strings are never collapsed by string matching.
+                Four distinct &ldquo;$100&rdquo; occurrences appear at separate page coordinates
+                (occurrences #0, #2, #3, and #5). In Reading mode or the accessible text layer, each
+                occurrence is individually addressable and selectable by occurrence ordinal.
               </p>
             )}
           </div>
-
           {card.timing_ms != null && (
             <p className={styles.sha}>Recorded run: {card.timing_ms} ms</p>
           )}
@@ -81,7 +85,7 @@ function CardDetail({
                       <a href={f.download_url} download={f.filename}>
                         {f.filename}
                       </a>{" "}
-                      — {f.role}
+                      ({f.role})
                     </span>
                     <span className={styles.sha}>
                       {shortSha(f.sha256)} · {formatBytes(f.byte_length)}
@@ -95,7 +99,7 @@ function CardDetail({
               <ul className={styles.readerList}>
                 {Object.values(manifest.readers).map((r) => (
                   <li key={r.id ?? r.name}>
-                    {r.name} {r.version} — {r.method}
+                    {r.name} {r.version} ({r.method})
                   </li>
                 ))}
               </ul>
@@ -110,7 +114,7 @@ function CardDetail({
             </section>
           </div>
           <p className={styles.rights}>{manifest.rights}</p>
-        </>
+        </details>
       )}
 
       <div className={styles.openActions}>
@@ -120,7 +124,7 @@ function CardDetail({
           data-testid={`open-example-${card.example_id}`}
           onClick={onOpen}
         >
-          Open this report in the workspace
+          Inspect this example
         </button>
       </div>
     </div>
@@ -171,14 +175,17 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onOpenExample 
 
   return (
     <section className={styles.section} aria-labelledby="examples-heading" data-testid="examples-gallery">
-      <h2 id="examples-heading" className={styles.detailTitle}>
-        Real examples
-      </h2>
-      <p className={styles.sub}>
-        Six situations where a PDF shows one thing and says another. Open one
-        to inspect its captured report — bytes, readers and findings recorded.
-      </p>
-      {error !== null && <p className={styles.error} role="alert">{error}</p>}
+      <header className={styles.headingGroup}>
+        <h2 id="examples-heading" className={styles.heading}>
+          Try an example
+        </h2>
+        <p className={styles.lede}>Open a sample PDF and inspect its results.</p>
+      </header>
+      {error !== null && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {openCard !== null && (
         <CardDetail
@@ -190,24 +197,27 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onOpenExample 
       )}
 
       <div className={styles.grid}>
-        {(index?.cards ?? []).map((card) => (
-          <button
-            key={card.example_id}
-            type="button"
-            className={styles.card}
-            data-testid={`example-card-${card.example_id}`}
-            aria-expanded={openId === card.example_id}
-            onClick={() => setOpenId(openId === card.example_id ? null : card.example_id)}
-          >
-            <h3 className={styles.cardTitle}>{card.card_title}</h3>
-            <p className={styles.mechanism}>{card.mechanism}</p>
-            <span className={styles.cardMeta}>
-              <span>
-                {card.finding_count} finding{card.finding_count === 1 ? "" : "s"}
+        {(index?.cards ?? []).map((card) => {
+          const display = exampleDisplayCopy(card.example_id, card.card_title, card.mechanism);
+          return (
+            <button
+              key={card.example_id}
+              type="button"
+              className={styles.card}
+              data-testid={`example-card-${card.example_id}`}
+              aria-expanded={openId === card.example_id}
+              onClick={() => setOpenId(openId === card.example_id ? null : card.example_id)}
+            >
+              <h3 className={styles.cardTitle}>{display.title}</h3>
+              <p className={styles.mechanism}>{display.description}</p>
+              <span className={styles.cardMeta}>
+                <span>
+                  {card.finding_count} finding{card.finding_count === 1 ? "" : "s"}
+                </span>
               </span>
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </section>
   );

@@ -1,25 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./Home.module.css";
 import { ExamplesGallery } from "../features/gallery/ExamplesGallery";
+import { exampleDisplayCopy } from "../features/gallery/displayCopy";
 import { loadHomeSample, type HomeSample } from "./homeExample";
 
 export interface HomeProps {
   onNavigateWorkspace: (withExample?: boolean, open?: "pdf" | "report") => void;
   onOpenExample?: (exampleId: string) => void;
   onNavigateHelp?: () => void;
+  /** Offer a local PDF or saved report from a Home click (Safari gesture). */
+  onOfferLocalFile?: (file: File) => void;
 }
+
+function takeChosenFile(
+  event: React.ChangeEvent<HTMLInputElement>,
+  offer?: (file: File) => void,
+): void {
+  const file = event.currentTarget.files?.[0];
+  event.currentTarget.value = "";
+  if (file && offer) offer(file);
+}
+
+const InspectionPreview: React.FC<{
+  sample: HomeSample | null;
+  loading: boolean;
+}> = ({ sample, loading }) => {
+  const visual = sample?.visualAmount ?? "";
+  const extracted = sample?.extractedAmount ?? "";
+  const finding = sample?.findingTitle ?? "Selected difference";
+
+  return (
+    <div
+      className={styles.inspectStage}
+      data-testid="home-inspect-stage"
+      aria-busy={loading}
+    >
+      <div className={styles.inspectPage} aria-label="Page preview">
+        <p className={styles.inspectPageLabel}>Page</p>
+        <p className={styles.inspectPageBody}>
+          Invoice total{" "}
+          {loading ? (
+            <span className={styles.inspectMarkMuted}>…</span>
+          ) : visual ? (
+            <mark className={styles.inspectMark}>{visual}</mark>
+          ) : (
+            <span className={styles.inspectMarkMuted}>amount</span>
+          )}
+        </p>
+        <p className={styles.inspectPageHint}>
+          Highlighted text is what you see on the page.
+        </p>
+      </div>
+      <div className={styles.inspectPanel}>
+        <p className={styles.inspectPanelLabel}>Differences</p>
+        <article className={styles.inspectFinding}>
+          <h3 className={styles.inspectFindingTitle}>{loading ? "Loading sample…" : finding}</h3>
+          <dl className={styles.inspectReadings}>
+            <div>
+              <dt>On the page</dt>
+              <dd>{loading ? "…" : visual || "unavailable"}</dd>
+            </div>
+            <div>
+              <dt>Extracted text</dt>
+              <dd>{loading ? "…" : extracted || "unavailable"}</dd>
+            </div>
+          </dl>
+        </article>
+        <p className={styles.inspectSaveHint}>
+          Save an HTML report to read, or JSON to reopen this inspection later.
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export const Home: React.FC<HomeProps> = ({
   onNavigateWorkspace,
   onOpenExample,
   onNavigateHelp,
+  onOfferLocalFile,
 }) => {
-  // One real shipped example, loaded from its recorded manifest for the
-  // hero's right side. Load/failure states keep the page honest and usable.
   const [sample, setSample] = useState<HomeSample | null>(null);
   const [sampleFailed, setSampleFailed] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const reportInputRef = useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let cancelled = false;
     loadHomeSample()
       .then((s) => {
@@ -33,9 +99,58 @@ export const Home: React.FC<HomeProps> = ({
     };
   }, []);
 
+  const openPdfPicker = () => {
+    if (onOfferLocalFile) {
+      pdfInputRef.current?.click();
+      return;
+    }
+    onNavigateWorkspace(false, "pdf");
+  };
+
+  const openReportPicker = () => {
+    if (onOfferLocalFile) {
+      reportInputRef.current?.click();
+      return;
+    }
+    onNavigateWorkspace(false, "report");
+  };
+
+  const goHelp = (e?: React.MouseEvent) => {
+    if (onNavigateHelp) {
+      e?.preventDefault();
+      onNavigateHelp();
+    }
+  };
+
+  const sampleDisplay = exampleDisplayCopy(
+    "amount",
+    sample?.title ?? "Example",
+    sample?.mechanism ?? "",
+  );
+
   return (
     <div className={styles.page}>
-      {/* Compact header: brand plus a single Help link. */}
+      <input
+        ref={pdfInputRef}
+        id="home-input-open-pdf"
+        type="file"
+        accept="application/pdf,.pdf"
+        className={styles.visuallyHidden}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => takeChosenFile(event, onOfferLocalFile)}
+      />
+      <input
+        ref={reportInputRef}
+        id="home-input-open-report"
+        type="file"
+        accept="application/json,.json,.inkflip.json"
+        className={styles.visuallyHidden}
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => takeChosenFile(event, onOfferLocalFile)}
+      />
+
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a href="#/" className={styles.brand} aria-label="Inkflip home">
@@ -50,12 +165,7 @@ export const Home: React.FC<HomeProps> = ({
             <a
               href="#/help"
               className={styles.navLink}
-              onClick={(e) => {
-                if (onNavigateHelp) {
-                  e.preventDefault();
-                  onNavigateHelp();
-                }
-              }}
+              onClick={(e) => goHelp(e)}
             >
               Help
             </a>
@@ -64,16 +174,14 @@ export const Home: React.FC<HomeProps> = ({
       </header>
 
       <main className={styles.main}>
-        {/* Hero: actions on the left, one real shipped example on the right. */}
         <section className={styles.hero} aria-labelledby="hero-headline">
           <div className={styles.heroLead}>
             <h1 id="hero-headline" className={styles.headline}>
-              Your PDF can look right and <em>read wrong</em>.
+              Check the text behind your PDF.
             </h1>
             <p className={styles.lede}>
-              Inkflip compares what a PDF shows on the page with the text its
-              layers claim — so a "$100" that extracts as "$1,000" is caught
-              before it reaches your data.
+              Compare the text you see with the text software reads. Choose a PDF
+              to inspect the differences.
             </p>
             <p className={styles.privacyNote}>Your files stay in your browser.</p>
 
@@ -82,7 +190,7 @@ export const Home: React.FC<HomeProps> = ({
                 id="btn-open-locally"
                 type="button"
                 className={styles.btnPrimary}
-                onClick={() => onNavigateWorkspace(false, "pdf")}
+                onClick={openPdfPicker}
               >
                 Check a PDF
               </button>
@@ -98,117 +206,210 @@ export const Home: React.FC<HomeProps> = ({
                 id="btn-open-report"
                 type="button"
                 className={styles.btnQuiet}
-                onClick={() => onNavigateWorkspace(false, "report")}
+                onClick={openReportPicker}
               >
                 Open a saved report
               </button>
             </div>
           </div>
 
-          {/* Right side: the real amount example, from its recorded manifest. */}
-          <aside className={styles.heroSample} aria-label="Real example from the shipped app">
+          <aside className={styles.heroSample} aria-label="Example">
             {sample === null ? (
               sampleFailed ? (
-                // Failure fallback: the page stays honest and usable.
                 <p className={styles.sampleFallback}>
-                  The sample panel is unavailable — every example is still in
-                  the gallery below.
+                  The sample panel is unavailable. Every example is still in the
+                  gallery below.
                 </p>
               ) : (
                 <p className={styles.sampleFallback} aria-live="polite">
-                  Loading a real sample…
+                  Loading example…
                 </p>
               )
             ) : (
               <>
-                <p className={styles.sampleKicker}>From a real captured run</p>
-                <p className={styles.sampleTitle}>{sample.title}</p>
+                <p className={styles.sampleLabel}>Example</p>
+                <p className={styles.sampleTitle}>{sampleDisplay.title}</p>
                 {sample.visualAmount !== null && sample.extractedAmount !== null && (
                   <div className={styles.sampleReadings} role="group" aria-label="The two readings">
                     <div className={styles.sampleReading}>
-                      <span className={styles.sampleReadingLabel}>Shown on the page</span>
+                      <span className={styles.sampleReadingLabel}>On the page</span>
                       <span className={styles.sampleReadingValue}>{sample.visualAmount}</span>
                     </div>
-                    <span className={styles.sampleVs} aria-hidden="true">
-                      vs
-                    </span>
                     <div className={`${styles.sampleReading} ${styles.sampleReadingAlt}`}>
-                      <span className={styles.sampleReadingLabel}>Text layer says</span>
+                      <span className={styles.sampleReadingLabel}>Extracted text</span>
                       <span className={styles.sampleReadingValue}>{sample.extractedAmount}</span>
                     </div>
                   </div>
                 )}
-                <p className={styles.sampleMechanism}>{sample.mechanism}</p>
-                <p className={styles.sampleReaders}>
-                  Read by{" "}
-                  {sample.readers.map((r) => `${r.name} ${r.version}`).join(" · ")}
-                </p>
-                <p className={styles.sampleActions}>
-                  <a className={styles.sampleLink} href={sample.sampleUrl} target="_blank" rel="noopener">
-                    Open the full sample
-                  </a>
-                  {onOpenExample !== undefined && (
-                    <button
-                      type="button"
-                      className={styles.sampleLinkBtn}
-                      onClick={() => onOpenExample("amount")}
-                    >
-                      Inspect its captured report
-                    </button>
-                  )}
-                  <a className={styles.sampleLink} href={sample.reportUrl} download>
-                    Captured report (JSON)
-                  </a>
-                </p>
-                <p className={styles.sampleNote}>Sample document — not your file, not a verdict.</p>
+                {onOpenExample !== undefined && (
+                  <button
+                    type="button"
+                    className={styles.btnPrimary}
+                    onClick={() => onOpenExample("amount")}
+                  >
+                    Inspect this example
+                  </button>
+                )}
+                <details className={styles.sampleDetails}>
+                  <summary className={styles.detailsSummary}>Example files and readers</summary>
+                  <p className={styles.sampleMechanism}>{sample.mechanism}</p>
+                  <p className={styles.sampleReaders}>
+                    Read by{" "}
+                    {sample.readers.map((r) => `${r.name} ${r.version}`.trim()).join(" · ")}
+                  </p>
+                  <p className={styles.sampleActions}>
+                    <a className={styles.sampleLink} href={sample.sampleUrl} target="_blank" rel="noopener">
+                      Open the full sample
+                    </a>
+                    <a className={styles.sampleLink} href={sample.reportUrl} download>
+                      Captured report (JSON)
+                    </a>
+                  </p>
+                  <p className={styles.sampleNote}>This is a sample, not a file you uploaded.</p>
+                </details>
               </>
             )}
           </aside>
         </section>
 
-        {/* How it works: one plain paragraph; native companion in a disclosure. */}
         <section
-          id="how-it-works"
-          className={styles.sectionNarrow}
-          aria-labelledby="how-it-works-heading"
+          id="inspection"
+          className={styles.sectionWide}
+          aria-labelledby="inspection-heading"
         >
-          <h2 id="how-it-works-heading" className={styles.sectionHeading}>
-            How it works
+          <h2 id="inspection-heading" className={styles.sectionHeading}>
+            Inspection workflow
           </h2>
           <p className={styles.sectionText}>
-            Inkflip runs entirely in your browser: it renders each page, reads
-            the text layer, and reads the rendered pixels with OCR — then shows
-            the readings side by side.
+            Inkflip renders the page, reads the PDF text layer, and reads the
+            page image with OCR (optical character recognition: reading letters
+            from pixels). Then it shows those readings together so you can see
+            where they differ.
           </p>
-          <details className={styles.details}>
-            <summary className={styles.detailsSummary}>About the readers and the native companion</summary>
+          {sampleFailed ? (
             <p className={styles.sectionText}>
-              Pages render with PDF.js 6.3.289 and OCR runs on Tesseract 7.0.0
-              (English). The same inspection also exists as a native PDFium
-              reader through the macOS/Docker companion, used to compare
-              independent reader implementations.
+              The recorded sample could not be loaded. The gallery below still
+              opens each example in the inspector.
             </p>
-          </details>
+          ) : (
+            <InspectionPreview sample={sample} loading={sample === null} />
+          )}
+        </section>
+
+        <section
+          id="capabilities"
+          className={styles.sectionWide}
+          aria-labelledby="capabilities-heading"
+        >
+          <h2 id="capabilities-heading" className={styles.sectionHeading}>
+            What you can inspect
+          </h2>
+          <dl className={styles.capabilityList}>
+            <div>
+              <dt>Pages and regions</dt>
+              <dd>Choose which pages to check, or outline one region on a page.</dd>
+            </div>
+            <div>
+              <dt>Repeated text</dt>
+              <dd>
+                Identical strings at different positions stay separate, so a
+                repeated amount is not collapsed into one hit.
+              </dd>
+            </div>
+            <div>
+              <dt>Notes</dt>
+              <dd>
+                Add your own notes on a finding. Notes are not reader output and
+                do not change the evidence.
+              </dd>
+            </div>
+            <div>
+              <dt>Source PDF in JSON</dt>
+              <dd>
+                A JSON report can include the original PDF, or omit it. HTML
+                reports do not embed the file.
+              </dd>
+            </div>
+          </dl>
         </section>
 
         {onOpenExample !== undefined && (
-          <section id="examples" className={styles.sectionWide} aria-label="Real examples you can inspect">
+          <section id="examples" className={styles.sectionWide} aria-label="Examples">
             <ExamplesGallery onOpenExample={onOpenExample} />
           </section>
         )}
 
-        {/* Honest limits. */}
-        <section id="limits" className={styles.sectionNarrow} aria-labelledby="limits-heading">
-          <h2 id="limits-heading" className={styles.sectionHeading}>
-            Limits
+        <section id="reports" className={styles.sectionWide} aria-labelledby="reports-heading">
+          <h2 id="reports-heading" className={styles.sectionHeading}>
+            Reports you can save
+          </h2>
+          <div className={styles.reportGrid}>
+            <article className={styles.reportCard}>
+              <h3 className={styles.reportTitle}>HTML, for reading</h3>
+              <p className={styles.sectionText}>
+                A script-free page you can open without Inkflip. It lists the
+                findings and readings. It does not embed the original PDF.
+              </p>
+              <div className={styles.htmlPreview} aria-label="HTML report excerpt">
+                <p className={styles.htmlPreviewTitle}>
+                  {sample?.findingTitle ?? "This amount reads differently"}
+                </p>
+                <p className={styles.htmlPreviewBody}>
+                  {sample?.visualAmount && sample?.extractedAmount
+                    ? `On the page: ${sample.visualAmount}. Extracted text: ${sample.extractedAmount}.`
+                    : "Named readings from each reader, with the page they came from."}
+                </p>
+              </div>
+            </article>
+            <article className={styles.reportCard}>
+              <h3 className={styles.reportTitle}>JSON, for reopening</h3>
+              <p className={styles.sectionText}>
+                A file you can open again in Inkflip through the same validation
+                as any other saved report. Include the original PDF only when
+                you choose to.
+              </p>
+              <ul className={styles.reportFacts}>
+                <li>Reopens in this browser app.</li>
+                <li>Original PDF is opt-in, not default.</li>
+                <li>Notes export only when you include them.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="local" className={styles.sectionNarrow} aria-labelledby="local-heading">
+          <h2 id="local-heading" className={styles.sectionHeading}>
+            Browser-local operation
           </h2>
           <p className={styles.sectionText}>
-            A difference needs human review: Inkflip shows both readings and
-            never decides which one is correct. A missing difference is not a
-            certificate, and OCR quality depends on the scan.
+            Files stay in this tab. There is no account and no upload. Closing
+            the tab discards the session unless you saved a report. OCR uses a
+            model loaded from this app; it still runs locally after that.
           </p>
         </section>
       </main>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <button type="button" className={styles.btnPrimary} onClick={openPdfPicker}>
+            Check a PDF
+          </button>
+          <nav className={styles.footerNav} aria-label="Footer">
+            <a href="https://github.com/zubalr/inkflip">GitHub</a>
+            <a href="#/help" onClick={(e) => goHelp(e)}>
+              Help
+            </a>
+          </nav>
+          <details className={styles.footerDetails}>
+            <summary className={styles.detailsSummary}>macOS and Docker companion</summary>
+            <p className={styles.sectionText}>
+              The same inspection also exists as a native PDFium reader through
+              the macOS and Docker companion, used to compare independent reader
+              implementations. See Help for CLI commands.
+            </p>
+          </details>
+        </div>
+      </footer>
     </div>
   );
 };

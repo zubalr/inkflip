@@ -125,7 +125,7 @@ export const OccurrenceCandidates: React.FC<OccurrenceCandidatesProps> = ({
                 </span>
                 {candidate.identicalSiblings > 0 && (
                   <span className={styles.identicalTag} data-testid={`occ-identical-${occ.id}`}>
-                    identical text — {candidate.identicalRank} of {candidate.identicalSiblings + 1}{" "}
+                    identical text, {candidate.identicalRank} of {candidate.identicalSiblings + 1}{" "}
                     at distinct positions
                   </span>
                 )}

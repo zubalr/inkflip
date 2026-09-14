@@ -289,14 +289,39 @@ test("example=true maps to the amount captured report with coverage, export, and
   expect(reimported.hasSourceBytes).toBe(false);
 });
 
+test("Home Check a PDF keeps you on Home until a file is chosen", async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.goto(`${baseUrl}/#/`);
+  await expect(page.locator("#hero-headline")).toBeVisible();
+
+  const firstChooser = page.waitForEvent("filechooser");
+  await page.locator("#btn-open-locally").click();
+  await firstChooser;
+  expect(page.url()).not.toMatch(/workspace/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#hero-headline")).toBeVisible();
+  expect(page.url()).not.toMatch(/workspace/);
+
+  const secondChooser = page.waitForEvent("filechooser");
+  await page.locator("#btn-open-locally").click();
+  const chooser = await secondChooser;
+  await chooser.setFiles(CONTROL_PDF);
+  await expect(page).toHaveURL(/#\/workspace/);
+  await expect(page.getByTestId("doc-label")).toHaveText("mapping-control.pdf", {
+    timeout: 30_000,
+  });
+});
+
 test("Home Try the example and empty-workspace Load Example reach the captured amount report", async ({
   page,
 }) => {
   await page.goto(`${baseUrl}/#/`);
   await expect(page.getByTestId("examples-gallery")).toBeVisible();
-  await expect(page.getByText("PREPARED DEMO")).toBeVisible();
+  await expect(page.getByTestId("examples-gallery").getByRole("heading", { name: "Try an example" })).toBeVisible();
   await page.getByTestId("example-card-amount").click();
-  await expect(page.getByText("prepared from a real captured run")).toBeVisible();
+  await expect(page.getByTestId("example-detail-amount")).toBeVisible();
   await page.locator("#btn-try-example").click();
   await waitForSha(page, AMOUNT_SHA);
   expect(page.url()).toContain("example=true");

@@ -298,8 +298,7 @@ async function main() {
   const written = [];
   try {
     /* Land on the workspace's empty state through the real app shell. */
-    await page.goto(baseURL);
-    await page.locator("#btn-open-report").click();
+    await page.goto(`${baseURL}/#/workspace`);
     await page.waitForFunction(
       () => globalThis.__inspect !== undefined,
       undefined,

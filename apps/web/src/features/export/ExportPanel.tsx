@@ -64,8 +64,13 @@ function defaultDownload(name: string, text: string): void {
   a.href = url;
   a.download = name;
   a.rel = "noopener";
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 2000);
 }
 
 function formatBytes(n: number): string {
@@ -343,7 +348,7 @@ export function ExportPanel({
           )}
           {state.sourceUnavailable && (
             <p className={styles.warning}>
-              Original bytes unavailable — this export is evidence-only.
+              Original bytes are unavailable. This export is evidence-only.
             </p>
           )}
         </div>
