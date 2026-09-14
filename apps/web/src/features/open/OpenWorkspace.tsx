@@ -3,7 +3,7 @@ import Button from "../../components/Controls/Button";
 import Notice from "../../components/Controls/Notice";
 import ReplaceConfirmDialog from "../../components/Dialogs/ReplaceConfirmDialog";
 import styles from "./OpenWorkspace.module.css";
-import { LIMITS_COPY, OPEN_COPY, SELECTION_COPY, fill } from "./copy";
+import { LIMITS_COPY, OPEN_COPY, SELECTION_COPY, WORKSPACE_COPY, fill } from "./copy";
 import { FileDrop, type OpenPhase } from "./FileDrop";
 import type { OpenController } from "./controller";
 import type {
@@ -77,10 +77,12 @@ function byteLabel(bytes: number): string {
 }
 
 /**
- * The open+selection workspace composition: drop/replace intake on top,
- * loaded-document panel beneath, then the bounded page/region selection
- * and the plan-producing "Compare selected pages" action. Everything the
- * UI shows is derived from the coordinator snapshot and the controller's
+ * The open+selection workspace composition: drop/replace intake on top, the
+ * loaded-file summary beneath it, then what to check — the bounded page
+ * picker followed immediately by the plan-producing "Check selected pages"
+ * action. Only after that action come the optional region/preview tuning and
+ * the device limits, so the ordinary path is file → pages → check. Everything
+ * the UI shows is derived from the coordinator snapshot and the controller's
  * last outcome — no parallel state can drift (I07).
  */
 export function OpenWorkspace({
@@ -304,8 +306,9 @@ export function OpenWorkspace({
 
       {doc !== null && (
         <section className={styles.document} aria-label="Open document">
-          <div className={styles.docHeader}>
-            <div>
+          <div className={styles.summary}>
+            <div className={styles.summaryText}>
+              <p className={styles.summaryLabel}>{WORKSPACE_COPY.fileLabel}</p>
               <p className={styles.docLabel} data-testid="doc-label">
                 {doc.label}
               </p>
@@ -334,54 +337,32 @@ export function OpenWorkspace({
             </div>
           </div>
 
-          <section
-            className={styles.limits}
-            aria-label={LIMITS_COPY.title}
-            data-testid="run-limits"
-            data-profile={profile.id}
-          >
-            <h3 className={styles.limitsTitle}>{LIMITS_COPY.title}</h3>
-            <ul className={styles.limitsList}>
-              <li>
-                {fill(LIMITS_COPY.mode, {
-                  mode:
-                    profile.id === "mobile"
-                      ? "mobile (low-memory mode)"
-                      : "desktop",
-                })}
-              </li>
-              <li>
-                {fill(LIMITS_COPY.file, {
-                  limit: byteLabel(profile.maxFileBytes),
-                })}
-              </li>
-              <li>
-                {fill(LIMITS_COPY.pages, {
-                  limit: profile.maxDocumentPages.toLocaleString(),
-                })}
-              </li>
-              <li>
-                {fill(LIMITS_COPY.native, {
-                  limit: String(profile.maxNativePagesPerRun),
-                })}
-              </li>
-              <li>
-                {fill(LIMITS_COPY.ocr, {
-                  limit: String(profile.maxOcrPagesPerRun),
-                })}
-              </li>
-              <li>
-                {fill(LIMITS_COPY.raster, {
-                  limit: profile.maxRasterPixels.toLocaleString(),
-                })}
-              </li>
-            </ul>
-          </section>
-
           <PagePicker
             selection={selection}
             onChange={() => setSelectionRev((r) => r + 1)}
           />
+
+          {/* The primary action follows the selection it acts on — the
+              optional tuning and the device limits sit below it. */}
+          <div className={styles.startRow}>
+            <Button
+              variant="primary"
+              onClick={runStart}
+              disabled={selection.size === 0 || !startRun}
+              disabledReason={
+                selection.size === 0 ? "Select at least one page" : undefined
+              }
+              data-testid="start-run"
+            >
+              {SELECTION_COPY.start}
+            </Button>
+            <span className={styles.startNote}>
+              {fill(SELECTION_COPY.summary, {
+                selected: String(selection.size),
+                total: String(doc.pageCount),
+              })}
+            </span>
+          </div>
 
           <div className={styles.previewRow}>
             <label className={styles.previewLabel}>
@@ -496,25 +477,51 @@ export function OpenWorkspace({
             </div>
           )}
 
-          <div className={styles.startRow}>
-            <Button
-              variant="primary"
-              onClick={runStart}
-              disabled={selection.size === 0 || !startRun}
-              disabledReason={
-                selection.size === 0 ? "Select at least one page" : undefined
-              }
-              data-testid="start-run"
-            >
-              {SELECTION_COPY.start}
-            </Button>
-            <span className={styles.startNote}>
-              {fill(SELECTION_COPY.summary, {
-                selected: String(selection.size),
-                total: String(doc.pageCount),
-              })}
-            </span>
-          </div>
+          {/* Reference material, not part of the ordinary path: the bounds
+              this device enforces are stated once, below the action. */}
+          <section
+            className={styles.limits}
+            aria-label={LIMITS_COPY.title}
+            data-testid="run-limits"
+            data-profile={profile.id}
+          >
+            <h3 className={styles.limitsTitle}>{LIMITS_COPY.title}</h3>
+            <ul className={styles.limitsList}>
+              <li>
+                {fill(LIMITS_COPY.mode, {
+                  mode:
+                    profile.id === "mobile"
+                      ? "mobile (low-memory mode)"
+                      : "desktop",
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.file, {
+                  limit: byteLabel(profile.maxFileBytes),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.pages, {
+                  limit: profile.maxDocumentPages.toLocaleString(),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.native, {
+                  limit: String(profile.maxNativePagesPerRun),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.ocr, {
+                  limit: String(profile.maxOcrPagesPerRun),
+                })}
+              </li>
+              <li>
+                {fill(LIMITS_COPY.raster, {
+                  limit: profile.maxRasterPixels.toLocaleString(),
+                })}
+              </li>
+            </ul>
+          </section>
 
           {plan && (
             <section className={styles.plan} aria-label="Check plan" data-testid="plan">

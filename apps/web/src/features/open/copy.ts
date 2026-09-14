@@ -50,13 +50,23 @@ export const SELECTION_COPY = {
   nativeLimit:
     "Check up to {limit} pages in this run. Other pages remain not checked.",
   /** pages.start */
-  start: "Compare selected pages",
+  start: "Check selected pages",
   /** pages.region / hint / expanded */
   region: "Select a region",
   regionHint:
     "Drag a region on the page, or enter its boundaries with the keyboard.",
   regionExpanded:
     "OCR includes the outlined padding around this region.",
+} as const;
+
+/**
+ * Plain-language labels for the open workspace's own groups. These are not
+ * part of the frozen planning mirror — they name the visible regions of the
+ * intake/selection screen (file summary, optional tuning, planned checks).
+ */
+export const WORKSPACE_COPY = {
+  /** Small label above the loaded file's name. */
+  fileLabel: "Loaded PDF",
 } as const;
 
 export const LIMITS_COPY = {
