@@ -342,8 +342,13 @@ export function ImportWorkspace({ controller, host }: ImportWorkspaceProps) {
           setFailure(null);
           setSourceError(null);
         } else if (event.type === "rejected") {
-          setOpened(null);
           setFailure(event.failure);
+          // A refused candidate must not hide a still-valid session.
+          // The controller only tears down after a candidate has passed
+          // the gate; validation failures leave currentImport in place.
+          if (controller.currentImport === null) {
+            setOpened(null);
+          }
         } else if (event.type === "clear") {
           // The old report is gone regardless of what the new offer
           // does next — never show a stale report.

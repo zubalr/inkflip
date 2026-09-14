@@ -10,14 +10,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const PROTOCOL = "inkflip.reader.pdfjs-node";
 const PROTOCOL_VERSION = "1.0.0";
 const MAX_REQUEST_BYTES = 32 * 1024 * 1024;
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
 
 function okResponse(result) {
   return { ok: true, protocol: PROTOCOL, version: PROTOCOL_VERSION, ...result };
@@ -70,22 +68,16 @@ function readRequest() {
 }
 
 function resolvePdfJs() {
-  const candidates = [];
-  try {
-    candidates.push(require.resolve("pdfjs-dist/package.json"));
-  } catch {
-    // bun keeps the pinned pdfjs-dist under apps/web/node_modules.
+  const localPkg = path.join(HERE, "node_modules", "pdfjs-dist", "package.json");
+  if (!fs.existsSync(localPkg)) {
+    throw new Error(
+      "Cannot find module 'pdfjs-dist/package.json' in the isolated Node wrapper. " +
+        "Install the pinned lock with: cd packages/readers-pdfjs/node && bun install --frozen-lockfile " +
+        "(do not add pdfjs-dist to a parent package.json; NODE_PATH is not used)",
+    );
   }
-  const workspacePinned = path.resolve(HERE, "../../../apps/web/node_modules/pdfjs-dist/package.json");
-  if (fs.existsSync(workspacePinned)) {
-    candidates.push(workspacePinned);
-  }
-  const pkgJson = candidates[0];
-  if (!pkgJson) {
-    throw new Error("Cannot find module 'pdfjs-dist/package.json'");
-  }
-  const pkgDir = path.dirname(pkgJson);
-  const pkg = JSON.parse(fs.readFileSync(pkgJson, "utf8"));
+  const pkgDir = path.dirname(localPkg);
+  const pkg = JSON.parse(fs.readFileSync(localPkg, "utf8"));
   const buildDir = path.join(pkgDir, "legacy", "build");
   const pdfPath = path.join(buildDir, "pdf.mjs");
   const workerPath = path.join(buildDir, "pdf.worker.mjs");
