@@ -232,6 +232,21 @@ export class InspectionSession {
     this.sourceBytesGeneration = generation;
   }
 
+  /**
+   * The post-open source-byte read is owned by the handle/document that
+   * started it. Generation alone is not enough: startRun advances
+   * generation on the same document, while a later open of the same
+   * PDF is a different handle. A stale mismatch/exception must not
+   * clear someone else's retained bytes.
+   */
+  private sourceRetentionOwned(handle: unknown, documentSha256: string | null): boolean {
+    if (handle == null || documentSha256 === null) return false;
+    return (
+      this.openController.currentHandle === handle &&
+      this.doc?.sha256 === documentSha256
+    );
+  }
+
   getState(): InspectionState {
     const snap = this.coordinator.snapshot();
     return {
@@ -279,17 +294,25 @@ export class InspectionSession {
     // Retain the original bytes locally for the explicit export
     // source-inclusion opt-in — read once, identity-verified against the
     // document the controller actually opened (a superseding offer must
-    // never inherit stale bytes).
+    // never inherit stale bytes). Success, mismatch and exception all
+    // require ownership of this open; a hash mismatch against a newer
+    // document must not clear that document's bytes.
+    const retentionHandle = this.openController.currentHandle;
+    const retentionSha = this.doc?.sha256 ?? null;
     try {
       const bytes = new Uint8Array(await candidate.arrayBuffer());
       const hex = await sha256Hex(bytes);
+      if (!this.sourceRetentionOwned(retentionHandle, retentionSha)) return;
       if (hex === this.doc?.sha256) {
         this.retainImmutableSource(bytes, hex, this.coordinator.snapshot().generation);
       } else {
         this.clearRetainedSource();
       }
+      this.emit();
     } catch {
+      if (!this.sourceRetentionOwned(retentionHandle, retentionSha)) return;
       this.clearRetainedSource();
+      this.emit();
     }
   }
 
@@ -829,9 +852,9 @@ export class InspectionSession {
   sourcePdfBytes = (): Uint8Array | null => {
     if (this.sourceBytes === null || this.sourceBytesDocumentSha256 === null) return null;
     const expected = this.report?.document.sha256 ?? this.doc?.sha256 ?? null;
-    if (expected !== null && expected !== this.sourceBytesDocumentSha256) return null;
-    const generation = this.coordinator.snapshot().generation;
-    if (this.sourceBytesGeneration !== null && this.sourceBytesGeneration !== generation) return null;
+    // Bind to the live document identity. startRun advances generation on
+    // the same file; that must not hide bytes already verified for it.
+    if (expected === null || expected !== this.sourceBytesDocumentSha256) return null;
     return this.sourceBytes;
   };
 
