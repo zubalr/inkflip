@@ -181,6 +181,36 @@ export class ImportController {
     }
     this.busy = true;
     try {
+      const failClosed = (failure: ImportFailureLike, mutateLifecycle: boolean): ImportOutcomeLike => {
+        this.emit({
+          type: "rejected",
+          generation: this.host.currentGeneration,
+          failure,
+        });
+        if (mutateLifecycle) {
+          this.host.requestClear("idle");
+        }
+        return { ok: false, failure };
+      };
+
+      // Cheap declared-size gate and full validation happen BEFORE any
+      // workspace replacement so a refused import cannot wipe a different
+      // valid session.
+      if (!Number.isFinite(candidate.size) || candidate.size > this.engine.maxJsonBytes) {
+        return failClosed(tooLargeFailure("import:declared-size"), false);
+      }
+      let bytes: Uint8Array;
+      try {
+        bytes = new Uint8Array(await candidate.arrayBuffer());
+      } catch {
+        return failClosed(invalidFailure("BYTES", "import:unreadable"), false);
+      }
+
+      const outcome = this.engine.openReport(bytes);
+      if (!outcome.ok) {
+        return failClosed(outcome.failure, false);
+      }
+
       const state = this.host.fileState;
       if (state === "idle") {
         this.host.openFile();
@@ -189,7 +219,8 @@ export class ImportController {
       } else if (state === "clearing") {
         return { ok: false, failure: BUSY_FAILURE };
       } else {
-        // selecting/running/terminal states: generation-first replacement.
+        // selecting/running/terminal states: generation-first replacement
+        // only after the candidate has been proven to be a report.
         this.emit({
           type: "clear",
           generation: this.host.currentGeneration,
@@ -197,32 +228,7 @@ export class ImportController {
         });
         this.host.requestClear("replace");
       }
-      // fileState is now validating_file either way.
-      const fail = (failure: ImportFailureLike): ImportOutcomeLike => {
-        this.emit({
-          type: "rejected",
-          generation: this.host.currentGeneration,
-          failure,
-        });
-        this.host.requestClear("idle");
-        return { ok: false, failure };
-      };
 
-      // Cheap declared-size gate before any byte is read.
-      if (!Number.isFinite(candidate.size) || candidate.size > this.engine.maxJsonBytes) {
-        return fail(tooLargeFailure("import:declared-size"));
-      }
-      let bytes: Uint8Array;
-      try {
-        bytes = new Uint8Array(await candidate.arrayBuffer());
-      } catch {
-        return fail(invalidFailure("BYTES", "import:unreadable"));
-      }
-
-      const outcome = this.engine.openReport(bytes);
-      if (!outcome.ok) {
-        return fail(outcome.failure);
-      }
       const imported = outcome.imported;
       const report = imported.report as {
         document: { sha256: string; page_count: number };
@@ -351,12 +357,20 @@ export class ImportController {
     }
     const check = this.engine.verifySource(current.imported.report, bytes);
     if (!check.ok) {
+      if (this.current !== current || this.host.currentGeneration !== generation) {
+        return { ok: false, kind: "superseded", detail: "source:superseded" };
+      }
       this.emit({
         type: "source_rejected",
         generation: this.host.currentGeneration,
         detail: check.detail,
       });
       return check;
+    }
+    // Re-check after hashing: a replace that landed during verify must
+    // not attach or overwrite the newer report with the stale current.
+    if (this.current !== current || this.host.currentGeneration !== generation) {
+      return { ok: false, kind: "superseded", detail: "source:superseded" };
     }
     this.sourceAttached = true;
     this.host.own(bytes, "source-bytes", () => {
@@ -376,7 +390,12 @@ export class ImportController {
       sha256: check.sha256,
       replay,
     });
-    return check;
+    return {
+      ...check,
+      bytes,
+      generation: this.host.currentGeneration,
+      documentSha256: check.sha256,
+    };
   }
 
   /**

@@ -6,6 +6,7 @@ import { FileDrop } from "../features/open/FileDrop";
 import { OpenWorkspace } from "../features/open/OpenWorkspace";
 import { resolveProfile } from "../features/open";
 import { InspectionSession } from "../features/inspect/session";
+import { isLocalExampleUrl } from "../features/gallery/loader";
 import { ReplaceConfirmDialog } from "../components/Dialogs/ReplaceConfirmDialog";
 import { CoveragePanel } from "../features/coverage/CoveragePanel";
 import { ExportPanel } from "../features/export/ExportPanel";
@@ -365,25 +366,42 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     if (initialExampleId === null) return;
     let cancelled = false;
     setExampleError(null);
-    void fetch(`examples/${initialExampleId}/report.json`, { credentials: "same-origin" })
-      .then((res) => {
-        if (!res.ok) throw new Error(`example report unavailable (${res.status})`);
-        return res.text();
-      })
-      .then((text) => {
+    void (async () => {
+      try {
+        const reportRes = await fetch(`examples/${initialExampleId}/report.json`, {
+          credentials: "same-origin",
+        });
+        if (!reportRes.ok) throw new Error(`example report unavailable (${reportRes.status})`);
+        const text = await reportRes.text();
         if (cancelled) return;
         const file = new File([text], `${initialExampleId}.inkflip.json`, {
           type: "application/json",
         });
-        void session.offerFile(file);
-      })
-      .catch((exc) => {
+        await session.offerFile(file);
+        if (cancelled) return;
+        const generation = session.getState().generation;
+        const manifestRes = await fetch(`examples/${initialExampleId}/manifest.json`, {
+          credentials: "same-origin",
+        });
+        if (!manifestRes.ok) return;
+        const manifest = (await manifestRes.json()) as {
+          files?: { source?: { download_url?: string; sha256?: string } };
+        };
+        const downloadUrl = manifest.files?.source?.download_url;
+        const expectedSha = manifest.files?.source?.sha256;
+        if (!downloadUrl || !expectedSha || !isLocalExampleUrl(downloadUrl)) return;
+        const sourceRes = await fetch(downloadUrl, { credentials: "same-origin" });
+        if (!sourceRes.ok || cancelled) return;
+        const bytes = new Uint8Array(await sourceRes.arrayBuffer());
+        await session.retainVerifiedSourceBytes(bytes, expectedSha, generation);
+      } catch (exc) {
         if (!cancelled) {
           setExampleError(
             `Could not load the prepared example: ${exc instanceof Error ? exc.message : String(exc)}`,
           );
         }
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };

@@ -807,23 +807,43 @@ test("hostile corpus: every input rejected, zero egress, nothing executed", asyn
   }
 
   // UI-level proof: representative hostile files through the real
-  // input. The first offer replaces the open report — the confirm
-  // dialog stands first, then the rejection shows.
+  // input. Confirming replacement with a non-report refuses the import
+  // and keeps the previously validated session.
+  const preservedTitle = await page.locator("[data-testid=report-title]").textContent();
   await offerReport(page, "page.html", "<html><body><script>alert(1)</script></body></html>");
   const hostileDialog = page.locator("[role=dialog]");
   await expect(hostileDialog).toBeVisible();
   await hostileDialog.getByRole("button", { name: "Clear and open report" }).click();
   await expect(page.locator("#import-error-not_a_report")).toBeVisible();
-  await expect(page.locator("[data-testid=import-report]")).toHaveCount(0);
-  await offerReport(
-    page,
-    "bundle.zip",
-    Buffer.from(Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 1, 2, 3, 4])),
-  );
-  await expect(page.locator("#import-error-not_a_report")).toBeVisible();
-  await offerReport(page, "other.inkflip.json", COMPARISON_ARTIFACT);
-  await expect(page.locator("#import-error-not_a_report")).toBeVisible();
-  await expect(page.locator("[data-testid=import-report]")).toHaveCount(0);
+  await expect(page.locator("[data-testid=import-report]")).toBeVisible();
+  await expect(page.locator("[data-testid=report-title]")).toHaveText(preservedTitle ?? "");
+  const zipRefused = await page.evaluate(async () => {
+    const t = (globalThis as any).__t22;
+    const out = await t.controller.offer({
+      name: "bundle.zip",
+      size: 8,
+      arrayBuffer: async () => Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 1, 2, 3, 4]).buffer,
+    });
+    return {
+      ok: out.ok,
+      kind: out.ok ? null : out.failure.kind,
+      stillOpen: t.controller.currentImport !== null,
+    };
+  });
+  expect(zipRefused).toEqual({ ok: false, kind: "not_a_report", stillOpen: true });
+  const otherRefused = await page.evaluate(async (comparison) => {
+    const t = (globalThis as any).__t22;
+    const bytes = new TextEncoder().encode(comparison);
+    const out = await t.controller.offer({
+      name: "other.inkflip.json",
+      size: bytes.byteLength,
+      arrayBuffer: async () => bytes.buffer,
+    });
+    return { ok: out.ok, kind: out.ok ? null : out.failure.kind, stillOpen: t.controller.currentImport !== null };
+  }, COMPARISON_ARTIFACT.toString("utf8"));
+  expect(otherRefused.ok).toBe(false);
+  expect(otherRefused.stillOpen).toBe(true);
+  await expect(page.locator("[data-testid=import-report]")).toBeVisible();
 
   // Zero egress: every recorded request is same-origin, and the
   // tripwires captured nothing beyond Vite's HMR socket.

@@ -85,7 +85,10 @@ def main(argv: list[str] | None = None) -> int:
         body["browser"] = browser
 
     settings = _settings(root)
-    current = receipt.source_binding(root)
+    # CLI current binding still carries the full implementation identity
+    # (cli/browser/docker hashes). Browser freshness is compared against
+    # that live browser_sha256, never against the CLI inputs_sha256.
+    current = receipt.source_binding(root, producer="cli")
     try:
         problems = receipt.validate_receipt(
             body,

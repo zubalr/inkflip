@@ -86,6 +86,11 @@ const OCR_RASTER_SCALE = 2.0;
 /** Whole-run wall budget surfaced on the contract plan. */
 const RUN_BUDGET_MS = 120_000;
 
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export interface InspectionState {
   readonly fileState: string;
   readonly generation: number;
@@ -99,6 +104,7 @@ export interface InspectionState {
   readonly importedView: ReportViewLike | null;
   readonly importedReplay: ReplayViewLike | null;
   readonly sourceAttached: boolean;
+  readonly hasSourceBytes: boolean;
 }
 
 export class InspectionSession {
@@ -114,6 +120,8 @@ export class InspectionSession {
   private doc: OpenedDocumentInfo | null = null;
   private contractPages: Page[] = [];
   private sourceBytes: Uint8Array | null = null;
+  private sourceBytesDocumentSha256: string | null = null;
+  private sourceBytesGeneration: number | null = null;
   private error: InspectionState["error"] = null;
   private notice: string | null = null;
 
@@ -212,6 +220,18 @@ export class InspectionSession {
     for (const listener of this.listeners) listener();
   }
 
+  private clearRetainedSource(): void {
+    this.sourceBytes = null;
+    this.sourceBytesDocumentSha256 = null;
+    this.sourceBytesGeneration = null;
+  }
+
+  private retainImmutableSource(bytes: Uint8Array, sha256: string, generation: number): void {
+    this.sourceBytes = new Uint8Array(bytes);
+    this.sourceBytesDocumentSha256 = sha256;
+    this.sourceBytesGeneration = generation;
+  }
+
   getState(): InspectionState {
     const snap = this.coordinator.snapshot();
     return {
@@ -227,6 +247,7 @@ export class InspectionSession {
       importedView: this.importedView,
       importedReplay: this.importedReplay,
       sourceAttached: this.sourceAttached,
+      hasSourceBytes: this.sourceBytes !== null,
     };
   }
 
@@ -261,37 +282,73 @@ export class InspectionSession {
     // never inherit stale bytes).
     try {
       const bytes = new Uint8Array(await candidate.arrayBuffer());
-      const digest = await crypto.subtle.digest("SHA-256", bytes);
-      const hex = [...new Uint8Array(digest)]
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const hex = await sha256Hex(bytes);
       if (hex === this.doc?.sha256) {
-        this.sourceBytes = bytes;
+        this.retainImmutableSource(bytes, hex, this.coordinator.snapshot().generation);
+      } else {
+        this.clearRetainedSource();
       }
     } catch {
-      this.sourceBytes = null;
+      this.clearRetainedSource();
     }
+  }
+
+  /**
+   * Retain locally available bytes only after they hash to the active
+   * report/document. Used for named gallery examples whose staged PDF is
+   * already same-origin; never fetches user files over the network.
+   */
+  async retainVerifiedSourceBytes(
+    bytes: Uint8Array,
+    expectedSha256: string,
+    generation: number,
+  ): Promise<boolean> {
+    const snap = this.coordinator.snapshot();
+    if (snap.generation !== generation) return false;
+    const active =
+      this.report?.document.sha256 ?? this.doc?.sha256 ?? null;
+    if (!active || active !== expectedSha256) return false;
+    const hex = await sha256Hex(bytes);
+    if (hex !== expectedSha256) return false;
+    if (this.coordinator.snapshot().generation !== generation) return false;
+    if ((this.report?.document.sha256 ?? this.doc?.sha256) !== expectedSha256) return false;
+    this.retainImmutableSource(bytes, hex, generation);
+    this.emit();
+    return true;
   }
 
   /** Explicit local source PDF for replay on an open imported report. */
   async attachSource(candidate: { name: string; size: number; arrayBuffer(): Promise<ArrayBuffer> }): Promise<void> {
+    const attachGeneration = this.coordinator.snapshot().generation;
+    const reportId = this.report?.report_id ?? null;
+    const documentSha = this.report?.document.sha256 ?? null;
     const result = await this.importController.offerSource(candidate);
     if (!result.ok) {
+      if (result.kind === "superseded") return;
       this.error = { message: "The selected file does not match this report's recorded document.", detail: result.detail };
       this.emit();
       return;
     }
-    // The controller hash-verified the candidate against the report's
-    // recorded document — retain it so the export source opt-in can
-    // include the file the user just attached. The sourceAttached flag
-    // (set by the controller's source_attached event) binds this write
-    // to the import that verified it.
-    try {
-      const bytes = new Uint8Array(await candidate.arrayBuffer());
-      if (this.sourceAttached) this.sourceBytes = bytes;
-    } catch {
-      this.sourceBytes = null;
+    const snap = this.coordinator.snapshot();
+    if (
+      snap.generation !== attachGeneration ||
+      this.report?.report_id !== reportId ||
+      this.report?.document.sha256 !== documentSha
+    ) {
+      return;
     }
+    const verified = result as {
+      readonly ok: true;
+      readonly sha256: string;
+      readonly bytes?: Uint8Array;
+      readonly generation?: number;
+      readonly documentSha256?: string;
+    };
+    if (!verified.bytes || verified.sha256 !== documentSha) return;
+    if (verified.generation !== undefined && verified.generation !== snap.generation) return;
+    if (verified.documentSha256 && verified.documentSha256 !== documentSha) return;
+    this.retainImmutableSource(verified.bytes, verified.sha256, snap.generation);
+    this.emit();
   }
 
   /**
@@ -761,6 +818,7 @@ export class InspectionSession {
     this.notice = null;
     this.ocrNote = null;
     this.sourceAttached = false;
+    this.clearRetainedSource();
     if (this.coordinator.fileState !== "idle") {
       this.openController.clear();
     }
@@ -768,7 +826,14 @@ export class InspectionSession {
   }
 
   /** Original bytes for the explicit export opt-in (file-scoped). */
-  sourcePdfBytes = (): Uint8Array | null => this.sourceBytes;
+  sourcePdfBytes = (): Uint8Array | null => {
+    if (this.sourceBytes === null || this.sourceBytesDocumentSha256 === null) return null;
+    const expected = this.report?.document.sha256 ?? this.doc?.sha256 ?? null;
+    if (expected !== null && expected !== this.sourceBytesDocumentSha256) return null;
+    const generation = this.coordinator.snapshot().generation;
+    if (this.sourceBytesGeneration !== null && this.sourceBytesGeneration !== generation) return null;
+    return this.sourceBytes;
+  };
 
   // -----------------------------------------------------------------
   // coordinator event wiring
@@ -803,7 +868,7 @@ export class InspectionSession {
       this.importedReplay = null;
       this.contractPages = [];
       this.pageTransforms = [];
-      this.sourceBytes = null;
+      this.clearRetainedSource();
       this.sourceAttached = false;
     }
     this.emit();
@@ -820,8 +885,10 @@ export class InspectionSession {
         this.doc = null;
         // The import path bypasses the open controller's 'clear' event —
         // the previous document's retained bytes and page metadata must
-        // end at the replacement boundary with it.
-        this.sourceBytes = null;
+        // end at the replacement boundary with it. Matching gallery bytes
+        // may be retained afterwards via retainVerifiedSourceBytes.
+        this.clearRetainedSource();
+        this.sourceAttached = false;
         this.contractPages = [];
         this.pageTransforms = [];
         this.error = null;
@@ -849,7 +916,7 @@ export class InspectionSession {
       this.reportSource = null;
       this.importedView = null;
       this.importedReplay = null;
-      this.sourceBytes = null;
+      this.clearRetainedSource();
       this.contractPages = [];
       this.pageTransforms = [];
       this.sourceAttached = false;
