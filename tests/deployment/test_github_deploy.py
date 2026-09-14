@@ -139,6 +139,23 @@ class DeployGuardDecisionTests(unittest.TestCase):
             guard.CONTINUE,
         )
 
+    def test_promote_rejects_cli_help_line_as_candidate(self) -> None:
+        self.assertEqual(
+            guard.decide(
+                trigger_event="push",
+                trigger_branch="main",
+                trigger_conclusion="success",
+                trigger_sha=CURRENT,
+                current_main_sha=CURRENT,
+                phase="before_promote",
+                candidate_id=(
+                    "  vercel curl https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app "
+                    "--scope jubairjashim1975gmailcoms-projects"
+                ),
+            ),
+            guard.REJECT,
+        )
+
 
 class DeployGuardCliTests(unittest.TestCase):
     def test_cli_skip_is_success_and_not_continue(self) -> None:
@@ -243,6 +260,55 @@ class WorkflowWiresTheGuardTests(unittest.TestCase):
         self.assertIn("secrets.VERCEL_TOKEN", self.text)
         self.assertNotIn("echo $VERCEL_TOKEN", self.text)
         self.assertNotIn('echo "$VERCEL_TOKEN"', self.text)
+
+    def test_candidate_url_is_extracted_by_the_guard(self) -> None:
+        self.assertIn("--extract-candidate-from", self.text)
+        self.assertNotIn("grep -E 'https://", self.text)
+
+
+class ExtractCandidateUrlTests(unittest.TestCase):
+    MESSY_LOG = """
+▲ Production      https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app
+https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.appBuilding…
+▲ Aliased         https://inkflip-jubairjashim1975gmailcoms-projects.vercel.app
+  vercel curl https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app --scope jubairjashim1975gmailcoms-projects
+  vercel inspect inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app --logs --scope jubairjashim1975gmailcoms-projects
+"""
+
+    def test_extracts_unique_host_not_alias_or_curl_hint(self) -> None:
+        self.assertEqual(
+            guard.extract_candidate_url(self.MESSY_LOG),
+            "https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app",
+        )
+
+    def test_extract_cli_writes_github_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "vercel.log"
+            log.write_text(self.MESSY_LOG, encoding="utf-8")
+            output = Path(tmp) / "github_output"
+            env = os.environ.copy()
+            env["GITHUB_OUTPUT"] = str(output)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(GUARD),
+                    "--extract-candidate-from",
+                    str(log),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                env=env,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertEqual(
+                proc.stdout.strip(),
+                "https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app",
+            )
+            self.assertEqual(
+                output.read_text(),
+                "url=https://inkflip-bu47dnn87-jubairjashim1975gmailcoms-projects.vercel.app\n",
+            )
 
 
 if __name__ == "__main__":
