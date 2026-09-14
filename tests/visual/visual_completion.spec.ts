@@ -82,7 +82,7 @@ test.describe("T38: Visual Completion — Responsive Viewport Overflow", () => {
     test(`Workspace (loaded): width ${vp.width}px (${vp.name}) has zero horizontal overflow`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto(`${baseUrl}/#/workspace?example=true`);
-      await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+      await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
       const overflow = await checkNoPageHorizontalOverflow(page);
       expect(overflow.hasOverflow).toBe(false);
@@ -153,7 +153,7 @@ test.describe("T38: Visual Completion — Touch Targets & Focus Tokens", () => {
   test("Workspace header and mode controls satisfy 44px minimum touch target", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     const controls = [
       "#btn-back-home",
@@ -199,7 +199,7 @@ test.describe("T38: Visual Completion — Touch Targets & Focus Tokens", () => {
   test("Active focus outline styling adheres to 3px focus token", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     // Focus mode tab
     const tab = page.locator("#tab-mode-page");
@@ -215,7 +215,7 @@ test.describe("T38: Visual Completion — Touch Targets & Focus Tokens", () => {
   test("Finding selection preserves aria-current disclosure semantics", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     // Click finding toggle
     const findingToggle = page.locator('[id^="finding-item-"]').first();

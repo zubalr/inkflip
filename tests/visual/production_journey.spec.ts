@@ -27,13 +27,13 @@ test.describe("Production Journey: Navigation, Focus, & Demo Reload Matrix", () 
   }) => {
     // 1. Start with demo example
     await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
-    await expect(page.locator("#workspace-doc-title")).toContainText("Invoice-Example.pdf");
-
-    // 2. Replace demo with real own file
-    await page.locator("#input-open-pdf").setInputFiles(REAL_PDF);
-    await page.waitForSelector("#workspace-doc-title");
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
     await expect(page.locator("#workspace-doc-title")).toContainText("mapping-amount.pdf");
+
+    // 2. Replace demo with a different own file (confirm replacement)
+    await page.locator("#input-open-pdf").setInputFiles(CONTROL_PDF);
+    await page.getByRole("button", { name: "Clear and open file" }).click();
+    await expect(page.locator("#workspace-doc-title")).toContainText("mapping-control.pdf");
 
     // 3. Visit Help
     await page.click("#btn-header-help");
@@ -42,10 +42,10 @@ test.describe("Production Journey: Navigation, Focus, & Demo Reload Matrix", () 
 
     // 4. In Help, click "Try Demo Example"
     await page.click("#btn-help-open-example");
-    await page.waitForSelector('[data-testid="viewer-stage"]');
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     // 5. Verify demo example was actually reloaded and replaced the real file!
-    await expect(page.locator("#workspace-doc-title")).toContainText("Invoice-Example.pdf");
+    await expect(page.locator("#workspace-doc-title")).toContainText("mapping-amount.pdf");
   });
 
   test("2. Escape on modal dialog closes active modal before affecting parent Help surface", async ({
@@ -234,8 +234,8 @@ test.describe("Production Journey: Failure, Rejection, & Recovery", () => {
   test("2. Malformed report JSON preserves existing session intact", async ({ page }) => {
     // 1. Load valid demo first
     await page.goto(`${baseUrl}/#/workspace?example=true`);
-    await page.waitForSelector('[data-testid="viewer-stage"]');
-    await expect(page.locator("#workspace-doc-title")).toContainText("Invoice-Example.pdf");
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
+    await expect(page.locator("#workspace-doc-title")).toContainText("mapping-amount.pdf");
 
     // 2. Offer a malformed report JSON
     const malformedPath = path.join(tmpdir(), "malformed-report.json");
@@ -243,10 +243,11 @@ test.describe("Production Journey: Failure, Rejection, & Recovery", () => {
 
     try {
       await page.locator("#input-import-report").setInputFiles(malformedPath);
+      await page.getByRole("button", { name: "Clear and open file" }).click();
       await page.waitForTimeout(500);
 
       // 3. Existing session must remain intact
-      await expect(page.locator("#workspace-doc-title")).toContainText("Invoice-Example.pdf");
+      await expect(page.locator("#workspace-doc-title")).toContainText("mapping-amount.pdf");
       await expect(page.locator('[data-testid="viewer-stage"]')).toBeVisible();
     } finally {
       try {

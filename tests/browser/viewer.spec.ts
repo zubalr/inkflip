@@ -48,7 +48,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Zoom in to 150% (2 clicks on zoom-in)
@@ -109,7 +109,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
 
   test("criterion 2: two views sync without scroll loop in compare mode", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Switch to compare mode
@@ -162,7 +162,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
   }) => {
     // Narrow mobile viewport (360px width)
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Switch to compare mode
@@ -201,7 +201,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Select the unknown / page-level finding on page 1
@@ -234,7 +234,7 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Reachable accessible text layer

@@ -164,7 +164,7 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
 
     // Clicking "Try Demo Example" loads the demo example
     await exBtn.click();
-    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
     expect(page.url()).toContain("example=true");
   });
 
@@ -185,7 +185,7 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
 
     // Press Enter to return to workspace
     await page.keyboard.press("Enter");
-    await page.waitForSelector('[data-testid="viewer-stage"]');
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     // Focus is restored to #btn-header-help
     await page.waitForFunction(
@@ -300,7 +300,7 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
 
     // Press Escape
     await page.keyboard.press("Escape");
-    await page.waitForSelector('[data-testid="viewer-stage"]');
+    await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
     expect(page.url()).toContain("#/workspace");
   });
 });

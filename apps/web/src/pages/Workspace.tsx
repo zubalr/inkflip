@@ -6,7 +6,12 @@ import { FileDrop } from "../features/open/FileDrop";
 import { OpenWorkspace } from "../features/open/OpenWorkspace";
 import { resolveProfile } from "../features/open";
 import { InspectionSession } from "../features/inspect/session";
-import { exampleAssetUrl, isLocalExampleUrl } from "../features/gallery/loader";
+import {
+  DEFAULT_PUBLIC_EXAMPLE_ID,
+  exampleAssetUrl,
+  isLocalExampleUrl,
+} from "../features/gallery/loader";
+import { EXAMPLE_DOC } from "./exampleDoc.fixture";
 import { ReplaceConfirmDialog } from "../components/Dialogs/ReplaceConfirmDialog";
 import { CoveragePanel } from "../features/coverage/CoveragePanel";
 import { ExportPanel } from "../features/export/ExportPanel";
@@ -15,283 +20,14 @@ import styles from "./Workspace.module.css";
 export interface WorkspaceProps {
   onNavigateHome: () => void;
   onNavigateHelp?: () => void;
-  initialWithExample?: boolean;
+  onLoadPublicExample?: () => void;
   initialDoc?: ViewerDoc | null;
   /** Public-example card id (T21): its captured report is fetched and run
    *  through the real import gate, never mounted directly. */
   initialExampleId?: string | null;
+  /** Test-hooks-only: mount the synthetic viewer fixture. */
+  loadSyntheticFixture?: boolean;
 }
-
-const EXAMPLE_DOC: ViewerDoc = {
-  pages: [
-    {
-      index: 0,
-      media_box: [0, 0, 612, 792],
-      crop_box: [0, 0, 612, 792],
-      effective_view_box: [0, 0, 612, 792],
-      box_source: "media_box",
-      user_unit: 1.0,
-      rotation: 0,
-      canonical_size_pt: [612, 792],
-      raw_to_canonical_transform_id: "t_p0",
-      limitations: ["OCR verification was not run on page 0."],
-    },
-    {
-      index: 1,
-      media_box: [0, 0, 612, 792],
-      crop_box: [0, 0, 612, 792],
-      effective_view_box: [0, 0, 612, 792],
-      box_source: "media_box",
-      user_unit: 1.0,
-      rotation: 0,
-      canonical_size_pt: [612, 792],
-      raw_to_canonical_transform_id: "t_p1",
-      limitations: [],
-    },
-  ],
-  readers: [
-    {
-      id: "reader-pdfium",
-      name: "PDFium",
-      version: "149.0.7825.0",
-      build: "pdfium-wasm",
-      adapter_version: "1.0.0",
-      method: "native_text",
-      environment: "browser",
-      settings: {
-        normalization: "scalar-whitespace-v1",
-        language: null,
-        psm: null,
-        render_reader_id: null,
-        raster_dpi: null,
-        annotation_mode: "none",
-      },
-      capabilities: [],
-      model_hashes: [],
-      limitations: [],
-    },
-    {
-      id: "reader-pypdf",
-      name: "pypdf",
-      version: "6.18.0",
-      build: "pypdf-wasm",
-      adapter_version: "1.0.0",
-      method: "native_text",
-      environment: "browser",
-      settings: {
-        normalization: "scalar-whitespace-v1",
-        language: null,
-        psm: null,
-        render_reader_id: null,
-        raster_dpi: null,
-        annotation_mode: "none",
-      },
-      capabilities: [],
-      model_hashes: [],
-      limitations: [],
-    },
-  ],
-  occurrences: [
-    {
-      id: "occ-p0-dup1",
-      reader_id: "reader-pdfium",
-      page_index: 0,
-      ordinal: 1,
-      raw_text: "$1,000.00",
-      normalized_text: "$1,000.00",
-      normalization_map: [],
-      geometry: {
-        precision: "exact",
-        space: "canonical_page",
-        polygon: [
-          [100, 150],
-          [180, 150],
-          [180, 170],
-          [100, 170],
-        ],
-        transform_ids: [],
-        basis: "pdfium_char_boxes",
-      },
-      engine_score: null,
-      source_asset_id: null,
-      raw_source_locator: "p0:line1",
-      limitations: [],
-    },
-    {
-      id: "occ-p0-dup2",
-      reader_id: "reader-pdfium",
-      page_index: 0,
-      ordinal: 2,
-      raw_text: "$1,000.00",
-      normalized_text: "$1,000.00",
-      normalization_map: [],
-      geometry: {
-        precision: "exact",
-        space: "canonical_page",
-        polygon: [
-          [100, 350],
-          [180, 350],
-          [180, 370],
-          [100, 370],
-        ],
-        transform_ids: [],
-        basis: "pdfium_char_boxes",
-      },
-      engine_score: null,
-      source_asset_id: null,
-      raw_source_locator: "p0:line5",
-      limitations: [],
-    },
-    {
-      id: "occ-p0-pypdf1",
-      reader_id: "reader-pypdf",
-      page_index: 0,
-      ordinal: 1,
-      raw_text: "$10,000.00",
-      normalized_text: "$10,000.00",
-      normalization_map: [],
-      geometry: {
-        precision: "exact",
-        space: "canonical_page",
-        polygon: [
-          [100, 150],
-          [185, 150],
-          [185, 170],
-          [100, 170],
-        ],
-        transform_ids: [],
-        basis: "pypdf_boxes",
-      },
-      engine_score: null,
-      source_asset_id: null,
-      raw_source_locator: "p0:block1",
-      limitations: [],
-    },
-    {
-      id: "occ-p1-item1",
-      reader_id: "reader-pdfium",
-      page_index: 1,
-      ordinal: 1,
-      raw_text: "Total Amount Due",
-      normalized_text: "Total Amount Due",
-      normalization_map: [],
-      geometry: {
-        precision: "exact",
-        space: "canonical_page",
-        polygon: [
-          [120, 200],
-          [240, 200],
-          [240, 220],
-          [120, 220],
-        ],
-        transform_ids: [],
-        basis: "pdfium_char_boxes",
-      },
-      engine_score: null,
-      source_asset_id: null,
-      raw_source_locator: "p1:line2",
-      limitations: [],
-    },
-    {
-      id: "occ-p1-pagelevel",
-      reader_id: "reader-pypdf",
-      page_index: 1,
-      ordinal: 2,
-      raw_text: "Metadata font dictionary notice",
-      normalized_text: "Metadata font dictionary notice",
-      normalization_map: [],
-      geometry: {
-        precision: "page_only",
-        space: "canonical_page",
-        polygon: null,
-        transform_ids: [],
-        basis: "page_level_font_dict",
-      },
-      engine_score: null,
-      source_asset_id: null,
-      raw_source_locator: "p1:dict",
-      limitations: ["Page-level property only; no localized bounding coordinates."],
-    },
-  ],
-  findings: [
-    {
-      id: "finding-dup1",
-      kind: "reading_difference",
-      title: "Amount reads differently (occurrence #1)",
-      explanation: "PDFium returned “$1,000.00”. pypdf returned “$10,000.00”.",
-      page_index: 0,
-      occurrence_ids: ["occ-p0-dup1", "occ-p0-pypdf1"],
-      check_ids: ["chk-1"],
-      alignment: "unique",
-      region_id: "region-1",
-      priority: "material_token",
-      basis: "Exact coordinate alignment.",
-      limitations: ["A difference does not establish which reading is correct."],
-    },
-    {
-      id: "finding-dup2",
-      kind: "reading_difference",
-      title: "Amount reads differently (occurrence #2)",
-      explanation: "Duplicate amount token at lower section of Page 1.",
-      page_index: 0,
-      occurrence_ids: ["occ-p0-dup2"],
-      check_ids: ["chk-2"],
-      alignment: "unique",
-      region_id: "region-2",
-      priority: "material_token",
-      basis: "Exact coordinate alignment.",
-      limitations: ["A difference does not establish which reading is correct."],
-    },
-    {
-      id: "finding-page1-unknown",
-      kind: "observed_structure",
-      title: "Font metadata structure observation (Page 2)",
-      explanation: "Font dictionary observation on Page 2 without localized coordinate bounding.",
-      page_index: 1,
-      occurrence_ids: ["occ-p1-pagelevel"],
-      check_ids: ["chk-3"],
-      alignment: "page_level",
-      region_id: null,
-      priority: "informational",
-      basis: "Font dictionary parsing.",
-      limitations: ["Page-level only; no localized bounding coordinates."],
-    },
-    {
-      id: "finding-ambig-amounts",
-      kind: "reading_difference",
-      title: "Several locations could match this reading",
-      explanation:
-        "We could not select one location reliably. Compare the candidates without a precise-match claim.",
-      page_index: 0,
-      occurrence_ids: ["occ-p0-dup1", "occ-p0-dup2", "occ-p0-pypdf1"],
-      check_ids: ["chk-1", "chk-2"],
-      alignment: "ambiguous",
-      region_id: null,
-      priority: "ordinary",
-      basis:
-        "region-match-v1 bounded matching over retained reader occurrences; ambiguity reason tie.",
-      limitations: ["A difference does not establish which reading is correct."],
-    },
-    {
-      id: "finding-order-columns",
-      kind: "observed_structure",
-      title: "Same readings in a different emitted order",
-      explanation:
-        "The compared readers produced the same readings here in a different emitted sequence. This is an order difference — not a text difference and not, by itself, an accessibility verdict.",
-      page_index: 0,
-      occurrence_ids: ["occ-p0-dup1", "occ-p0-pypdf1"],
-      check_ids: ["chk-1"],
-      alignment: "not_applicable",
-      region_id: null,
-      priority: "informational",
-      basis:
-        "region-match-v1 bounded matching over retained reader occurrences; order-only difference (emission_order_differs, order distance 0.5000).",
-      limitations: [
-        "Reading-order differences do not establish an accessibility fault.",
-      ],
-    },
-  ],
-};
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -325,19 +61,29 @@ const RUN_STATUS_COPY: Record<string, string> = {
   preparing_assets: "Preparing the OCR model…",
 };
 
+function sessionOccupied(session: InspectionSession): boolean {
+  const snap = session.getState();
+  return snap.report !== null || snap.doc !== null;
+}
+
 export const Workspace: React.FC<WorkspaceProps> = ({
   onNavigateHome,
   onNavigateHelp,
-  initialWithExample = true,
+  onLoadPublicExample,
   initialDoc,
   initialExampleId = null,
+  loadSyntheticFixture = false,
 }) => {
   const profile = useMemo(() => resolveProfile(), []);
   const session = useMemo(() => new InspectionSession(profile), [profile]);
   const [snap, setSnap] = useState(() => session.getState());
-  const [exampleDoc, setExampleDoc] = useState<ViewerDoc | null>(
-    initialDoc ?? (initialWithExample && initialExampleId === null ? EXAMPLE_DOC : null),
-  );
+  const [exampleDoc, setExampleDoc] = useState<ViewerDoc | null>(() => {
+    if (initialDoc) return initialDoc;
+    if (__INKFLIP_TEST_HOOKS__ && loadSyntheticFixture) return EXAMPLE_DOC;
+    return null;
+  });
+  const [localExampleId, setLocalExampleId] = useState<string | null>(null);
+  const exampleIdToLoad = initialExampleId ?? localExampleId;
 
   // Human notes (T23) live outside the sealed report — they are added to a
   // projection at export time only, never mutate machine evidence. Notes
@@ -358,16 +104,44 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     };
   }, [session]);
 
+  const exampleIntentRef = useRef(0);
+  const bumpExampleIntent = useCallback(() => {
+    exampleIntentRef.current += 1;
+  }, []);
+
+  const loadPublicExample = useCallback(() => {
+    bumpExampleIntent();
+    if (onLoadPublicExample) {
+      onLoadPublicExample();
+      return;
+    }
+    setLocalExampleId(DEFAULT_PUBLIC_EXAMPLE_ID);
+  }, [bumpExampleIntent, onLoadPublicExample]);
+
   // T21 gallery handoff: fetch the card's committed captured report and run
   // it through the real import gate — validation, replay-readiness and the
-  // evidence UI are identical to a user-supplied file.
+  // evidence UI are identical to a user-supplied file. Unmount cancellation
+  // is not enough: a newer local file in the same mounted workspace must
+  // also own the session.
   const [exampleError, setExampleError] = useState<string | null>(null);
   useEffect(() => {
-    if (initialExampleId === null) return;
-    const reportUrl = exampleAssetUrl(initialExampleId, "report.json");
-    const manifestUrl = exampleAssetUrl(initialExampleId, "manifest.json");
+    if (exampleIdToLoad === null) return;
+    const reportUrl = exampleAssetUrl(exampleIdToLoad, "report.json");
+    const manifestUrl = exampleAssetUrl(exampleIdToLoad, "manifest.json");
     if (!reportUrl || !manifestUrl) return;
+    const intent = ++exampleIntentRef.current;
+    const startedGeneration = session.getState().generation;
+    const startedOccupied = sessionOccupied(session);
     let cancelled = false;
+    const stillOurs = (): boolean =>
+      !cancelled && exampleIntentRef.current === intent;
+    const mayOffer = (): boolean => {
+      if (!stillOurs()) return false;
+      const snap = session.getState();
+      if (snap.generation !== startedGeneration) return false;
+      if (!startedOccupied && sessionOccupied(session)) return false;
+      return true;
+    };
     setExampleError(null);
     void (async () => {
       try {
@@ -376,17 +150,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         });
         if (!reportRes.ok) throw new Error(`example report unavailable (${reportRes.status})`);
         const text = await reportRes.text();
-        if (cancelled) return;
-        const file = new File([text], `${initialExampleId}.inkflip.json`, {
+        if (!mayOffer()) return;
+        const file = new File([text], `${exampleIdToLoad}.inkflip.json`, {
           type: "application/json",
         });
         await session.offerFile(file);
-        if (cancelled) return;
+        if (!stillOurs()) return;
         const generation = session.getState().generation;
         const manifestRes = await fetch(manifestUrl, {
           credentials: "same-origin",
         });
-        if (!manifestRes.ok) return;
+        if (!manifestRes.ok || !stillOurs()) return;
         const manifest = (await manifestRes.json()) as {
           files?: { source?: { download_url?: string; sha256?: string } };
         };
@@ -394,11 +168,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         const expectedSha = manifest.files?.source?.sha256;
         if (!downloadUrl || !expectedSha || !isLocalExampleUrl(downloadUrl)) return;
         const sourceRes = await fetch(downloadUrl, { credentials: "same-origin" });
-        if (!sourceRes.ok || cancelled) return;
+        if (!sourceRes.ok || !stillOurs()) return;
         const bytes = new Uint8Array(await sourceRes.arrayBuffer());
+        if (!stillOurs()) return;
         await session.retainVerifiedSourceBytes(bytes, expectedSha, generation);
       } catch (exc) {
-        if (!cancelled) {
+        if (stillOurs()) {
           setExampleError(
             `Could not load the prepared example: ${exc instanceof Error ? exc.message : String(exc)}`,
           );
@@ -407,8 +182,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     })();
     return () => {
       cancelled = true;
+      if (exampleIntentRef.current === intent) {
+        exampleIntentRef.current += 1;
+      }
     };
-  }, [session, initialExampleId]);
+  }, [session, exampleIdToLoad]);
 
   const reportInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -423,6 +201,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       const file = event.target.files?.[0];
       event.target.value = "";
       if (!file) return;
+      bumpExampleIntent();
       const occupied = session.getState().doc !== null || session.getState().report !== null;
       if (occupied) {
         setPendingFile(file);
@@ -430,7 +209,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       }
       void session.offerFile(file);
     },
-    [session],
+    [bumpExampleIntent, session],
   );
 
   const onSourceChange = useCallback(
@@ -491,10 +270,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   }, [report, snap.doc, exampleDoc]);
 
   const closeAll = useCallback(() => {
+    bumpExampleIntent();
     session.close();
     setExampleDoc(null);
+    setLocalExampleId(null);
     setUserNotes([]);
-  }, [session]);
+  }, [bumpExampleIntent, session]);
 
   return (
     <div className={styles.workspace}>
@@ -576,7 +357,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               id="btn-load-demo"
               type="button"
               className={styles.headerButton}
-              onClick={() => setExampleDoc(EXAMPLE_DOC)}
+              onClick={loadPublicExample}
             >
               Load Example
             </button>
@@ -831,7 +612,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
         {!busy && !running && fileState === "idle" && viewerDoc === null && (
           <div className={styles.emptyWorkspace}>
-            <FileDrop phase="idle" onFile={(file) => void session.offerFile(file)} hasDocument={false} />
+            <FileDrop
+              phase="idle"
+              onFile={(file) => {
+                bumpExampleIntent();
+                void session.offerFile(file);
+              }}
+              hasDocument={false}
+            />
             <div className={styles.emptyActions}>
               <button
                 id="btn-import-report"
@@ -853,7 +641,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 id="btn-empty-load-example"
                 type="button"
                 className={styles.emptyActionBtnPrimary}
-                onClick={() => setExampleDoc(EXAMPLE_DOC)}
+                onClick={loadPublicExample}
               >
                 Try the example
               </button>
@@ -868,7 +656,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         onConfirm={() => {
           const file = pendingFile;
           setPendingFile(null);
-          if (file) void session.offerFile(file);
+          if (file) {
+            bumpExampleIntent();
+            void session.offerFile(file);
+          }
         }}
       />
     </div>

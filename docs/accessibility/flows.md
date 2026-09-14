@@ -13,7 +13,8 @@ axe-core 4.13 (`@axe-core/playwright`), tags
 
 | Target                   | Route / entry                                                                             | What it mounts                                                                                                                                               |
 | ------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Bundled example document | `/#/workspace?example=true`                                                               | `Workspace` + `ViewerStage` over `EXAMPLE_DOC` (ambiguous amount finding, page-level finding, order-only finding). No report → no CoveragePanel/ExportPanel. |
+| Public demo example      | `/#/workspace?example=true`                                                               | Maps to the captured `amount` gallery report through the real import gate → ViewerStage + CoveragePanel + ExportPanel. Source bytes hash-verified; inclusion opt-in. |
+| Synthetic viewer fixture | `/#/workspace?example=fixture` (test-hooks builds only)                                   | `Workspace` + `ViewerStage` over the historical synthetic document (ambiguous amount finding, page-level finding, order-only finding). No captured report. |
 | Captured scan report     | `/#/workspace?example=scan`                                                               | `examples/scan/report.json` through the real import gate → ViewerStage + CoveragePanel + replay status + ExportPanel.                                        |
 | Sealed contract report   | `#input-import-report` → `planning/contracts/examples/valid/native-evidence.inkflip.json` | Same surfaces; 2 of 3 checks completed (alignment check recorded `unsupported`) → partial coverage.                                                          |
 
@@ -56,7 +57,7 @@ within it, `Escape` and the "Keep this file" cancel path both restore focus to
 
 ### 3. Announcements (`announcements: ambiguous amount alternatives …`)
 
-- **Ambiguous amount alternatives** (`?example=true`,
+- **Ambiguous amount alternatives** (`?example=fixture`,
   `finding-ambig-amounts`): each candidate button's accessible name carries its
   alternative — `$1,000.00` (occurrences #1/#2, identical text labelled "k of n
   at distinct positions") and `$10,000.00` (pypdf). After keyboard selection,

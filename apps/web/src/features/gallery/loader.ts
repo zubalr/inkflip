@@ -33,6 +33,27 @@ function isManifest(v: unknown): v is ExampleManifest {
   );
 }
 
+/** Public Try Demo / `?example=true` maps to this captured gallery card. */
+export const DEFAULT_PUBLIC_EXAMPLE_ID = "amount";
+
+/** Test-hooks-only query value that still mounts the synthetic viewer fixture. */
+export const SYNTHETIC_EXAMPLE_FIXTURE_ID = "fixture";
+
+export function namedExampleId(raw: string | null | undefined): string | null {
+  if (!raw || raw === "true" || raw === SYNTHETIC_EXAMPLE_FIXTURE_ID) return null;
+  return /^[a-z0-9-]+$/.test(raw) ? raw : null;
+}
+
+/** Resolve the captured card loaded through the real import gate. */
+export function resolvePublicExampleId(
+  wantsPublicDemo: boolean,
+  rawNamed: string | null | undefined,
+): string | null {
+  const named = namedExampleId(rawNamed);
+  if (named) return named;
+  return wantsPublicDemo ? DEFAULT_PUBLIC_EXAMPLE_ID : null;
+}
+
 /** True only for site-relative paths under /examples/ — blocks URL exfil
  *  and path traversal (`..` segments stay inside the mounted prefix). */
 export function isLocalExampleUrl(url: string): boolean {

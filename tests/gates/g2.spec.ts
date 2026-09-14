@@ -57,8 +57,8 @@
  *      full pipeline (native_text + render + real Tesseract OCR +
  *      alignment) to a sealed report, then drive the normal viewer
  *      controls (finding select → aria-current + highlight, zoom).
- *   3. Repeated + ambiguous occurrence UI on the bundled example
- *      (?example=true): the ambiguous finding lists all three candidates
+ *   3. Repeated + ambiguous occurrence UI on the synthetic viewer fixture
+ *      (?example=fixture, test-hooks only): the ambiguous finding lists all three candidates
  *      with identical-text labelling and none pre-picked; a candidate
  *      pick sticks (aria-pressed + selected highlight, never
  *      first-match); the page-level finding keeps its page-level notice;
@@ -786,9 +786,9 @@ test("G2 leg 3: ambiguous candidates, repeated occurrences, page-level notice", 
     const page = await ctx.newPage();
     const cap = captureNet(page);
     await page.setViewportSize({ width: 1280, height: 900 });
-    // The bundled example document mounts through the public
-    // ?example=true workspace entry — no fetch, no run.
-    await page.goto(`${baseURL}/#/workspace?example=true`);
+    // The synthetic viewer fixture mounts through the test-hooks
+    // ?example=fixture workspace entry — no fetch, no run.
+    await page.goto(`${baseURL}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // Repeated identical strings stay individually addressable: the
@@ -1186,7 +1186,7 @@ test("G2 leg 6: 360px mobile profile — limits, consent, windowed list, no over
     // compare mode stacks panes instead of squeezing.
     const viewerPage = await ctx.newPage();
     await viewerPage.goto(`${baseURL}/#/workspace?example=true`);
-    await viewerPage.waitForSelector("#viewer-stage");
+    await viewerPage.waitForSelector("#viewer-stage", { timeout: 15_000 });
     const finding = viewerPage.locator("[id^=finding-item-]").first();
     await expect(finding).toBeVisible();
     await finding.click();
