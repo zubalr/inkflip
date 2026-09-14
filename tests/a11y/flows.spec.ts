@@ -258,7 +258,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     await closeBtn.focus();
     await page.keyboard.press("Enter");
     await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
-    await expect(page.locator("#btn-open-pdf")).toBeVisible();
+    await expect(page.locator("#btn-header-open-pdf")).toBeVisible();
   });
 
   test("replace-confirmation dialog traps focus and restores it to the originating control", async ({

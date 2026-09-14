@@ -143,13 +143,13 @@ test("pending example does not repopulate a closed workspace", async ({ page }) 
   await page.locator("#input-import-report").setInputFiles(DUPLICATES_REPORT);
   await waitForSha(page, DUPLICATES_SHA);
   await page.locator("#btn-close-doc").click();
-  await expect(page.locator("#btn-empty-load-example")).toBeVisible();
+  await expect(page.locator("#btn-load-demo")).toBeVisible();
   held.release();
   await page.waitForTimeout(800);
   const after = await inspect(page);
   expect(after.sha).toBeNull();
   await expect(page.getByTestId("example-error")).toHaveCount(0);
-  await expect(page.locator("#btn-empty-load-example")).toBeVisible();
+  await expect(page.locator("#btn-load-demo")).toBeVisible();
 });
 
 test("pending example does not overwrite a newer PDF", async ({ page }) => {
@@ -256,6 +256,10 @@ test("example=true maps to the amount captured report with coverage, export, and
   const live = await inspect(page);
   expect(live.reportSource).toBe("import");
   expect(live.hasSourceBytes).toBe(true);
+  await expect(page.locator("#btn-attach-source")).toHaveCount(0);
+  await expect(page.getByTestId("replay-status")).toContainText(
+    "The original PDF is available with this report",
+  );
 
   const finding = page.locator("[id^=finding-item-]").first();
   await finding.click();
@@ -299,7 +303,7 @@ test("Home Try the example and empty-workspace Load Example reach the captured a
   await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible();
 
   await page.locator("#btn-close-doc").click();
-  await page.locator("#btn-empty-load-example").click();
+  await page.locator("#btn-load-demo").click();
   await waitForSha(page, AMOUNT_SHA);
   await expect(page.getByRole("heading", { name: "What was checked" })).toBeVisible();
 });

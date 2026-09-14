@@ -27,6 +27,8 @@ export interface WorkspaceProps {
   initialExampleId?: string | null;
   /** Test-hooks-only: mount the synthetic viewer fixture. */
   loadSyntheticFixture?: boolean;
+  /** Home/hash intent: open the matching local file picker once. */
+  initialOpen?: "pdf" | "report" | null;
 }
 
 interface ErrorBoundaryProps {
@@ -73,6 +75,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   initialDoc,
   initialExampleId = null,
   loadSyntheticFixture = false,
+  initialOpen = null,
 }) => {
   const profile = useMemo(() => resolveProfile(), []);
   const session = useMemo(() => new InspectionSession(profile), [profile]);
@@ -191,6 +194,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const reportInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const sourceInputRef = useRef<HTMLInputElement>(null);
+  const openedIntentRef = useRef<"pdf" | "report" | null>(null);
+
+  useEffect(() => {
+    if (initialOpen === null) return;
+    if (openedIntentRef.current === initialOpen) return;
+    openedIntentRef.current = initialOpen;
+    const node = initialOpen === "report" ? reportInputRef.current : pdfInputRef.current;
+    node?.click();
+  }, [initialOpen]);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -556,7 +568,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             />
             {snap.reportSource === "import" && snap.importedReplay !== null && (
               <section
-                aria-label="Replay readiness"
+                aria-label="Original PDF"
                 data-testid="replay-status"
                 style={{
                   marginTop: "var(--space-3)",
@@ -566,11 +578,19 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   fontSize: "var(--text-caption)",
                 }}
               >
-                {snap.importedReplay.source === "missing" ? (
+                {session.sourcePdfBytes() !== null ||
+                snap.importedReplay.source === "embedded" ||
+                snap.importedReplay.source === "attached" ? (
+                  <p>
+                    {snap.importedReplay.readersMissing.length > 0
+                      ? `The original PDF is available. Replay still needs: ${snap.importedReplay.readersMissing.join(", ")}.`
+                      : "The original PDF is available with this report. Export can include it if you choose."}
+                  </p>
+                ) : snap.importedReplay.source === "missing" ? (
                   <>
                     <p>
-                      The original PDF was not embedded in this report. Attach the
-                      matching file to enable source replay.
+                      This saved report did not include the original PDF. Attach the
+                      matching file to compare against the page.
                     </p>
                     <button
                       id="btn-attach-source"
@@ -581,17 +601,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       Attach original PDF
                     </button>
                   </>
-                ) : snap.importedReplay.ready ? (
-                  <p>Original document {snap.importedReplay.source}; replay ready.</p>
                 ) : (
-                  <p>
-                    Original document {snap.importedReplay.source}. Replay is not
-                    ready
-                    {snap.importedReplay.readersMissing.length > 0
-                      ? ` — missing reader${snap.importedReplay.readersMissing.length === 1 ? "" : "s"}: ${snap.importedReplay.readersMissing.join(", ")}`
-                      : ""}
-                    .
-                  </p>
+                  <p>This report does not require the original PDF for replay.</p>
                 )}
               </section>
             )}
@@ -620,32 +631,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               }}
               hasDocument={false}
             />
-            <div className={styles.emptyActions}>
-              <button
-                id="btn-import-report"
-                type="button"
-                className={styles.emptyActionBtn}
-                onClick={() => reportInputRef.current?.click()}
-              >
-                Open saved report
-              </button>
-              <button
-                id="btn-open-pdf"
-                type="button"
-                className={styles.emptyActionBtn}
-                onClick={() => pdfInputRef.current?.click()}
-              >
-                Open local PDF
-              </button>
-              <button
-                id="btn-empty-load-example"
-                type="button"
-                className={styles.emptyActionBtnPrimary}
-                onClick={loadPublicExample}
-              >
-                Try the example
-              </button>
-            </div>
           </div>
         )}
       </main>
