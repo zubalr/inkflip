@@ -158,8 +158,10 @@ not rebuild, patch, or re-record anything on the way.
    <retained dist manifest>` adds the distribution-surface checks. A mismatch
    stops the rollback.
 4. **Redeploy that exact static tree with the same reviewed uploader** used for
-   the original publication. No uploader, deploy script or hosting automation
-   ships in this repository.
+   the original publication. The current reviewed path is the Vercel adapter
+   documented in `docs/vercel-static-deploy.md`: `scripts/vercel_output.py
+   prepare` + `check`, `vercel deploy --prebuilt`, then `vercel promote
+   <deployment>` of the staged bytes.
 5. **Verify the retained artifact itself** — the restored static tree is
    re-verified against the retained manifest, not against a freshly built
    one:
@@ -193,10 +195,12 @@ Rollback rules:
 
 ## 8. What this guide does not do
 
-- No hosting provider is added, and no deployment or promotion automation:
-  `wrangler.json` declares the static-assets configuration that the local
-  preflight validates, and publication remains an owner-run action outside the
-  repository.
+- Publication and promotion stay owner-run actions: nothing in this repository
+  publishes or promotes on its own. `wrangler.json` declares the Cloudflare
+  static-assets configuration that the local preflight validates, and the
+  Vercel adapter (`vercel.json` + `scripts/vercel_output.py`, see
+  `docs/vercel-static-deploy.md`) only packages an already-built dist for the
+  owner-authorized Vercel publication.
 - No CI change: `.github/workflows/ci.yml` continues to check repository and
   command integrity, and a green run there does not certify release readiness.
 - No publication is performed by this repository, and this guide certifies no
