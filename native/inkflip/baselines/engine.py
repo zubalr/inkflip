@@ -108,6 +108,11 @@ def _identity(run_dir: Path) -> dict[str, Any]:
     identity_path = run_dir / "identity.json"
     if identity_path.is_file():
         data = _read_json_file(identity_path, "run identity")
+        if not isinstance(data, dict):
+            raise BaselineError(
+                f"Run identity {identity_path} is not a JSON object; "
+                "refusing to compare an inconsistent bundle"
+            )
         for field in ("profile_sha256", "corpus_manifest_sha256"):
             value = data.get(field)
             if value is None:

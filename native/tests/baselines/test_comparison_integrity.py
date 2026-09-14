@@ -33,6 +33,14 @@ from inkflip.baselines.engine import (  # noqa: E402
 from inkflip.baselines.models import BaselineError, BaselineOverwriteError  # noqa: E402
 from inkflip.cli.main import EXIT_POLICY_FAILURE, main  # noqa: E402
 from inkflip.contracts import core  # noqa: E402
+from inkflip.profiles.models import ReaderProfile  # noqa: E402
+from inkflip.profiles.registry import (  # noqa: E402
+    BUNDLED_WRAPPERS,
+    compute_profile_sha256,
+    file_sha256,
+    load_profile,
+    save_profile,
+)
 
 AMOUNT = FIXTURES / "public" / "mapping-amount.pdf"
 CONTROL = FIXTURES / "public" / "mapping-control.pdf"
@@ -51,11 +59,33 @@ def _inspect(destination: Path, source: Path, reader: str = "pdfium") -> dict:
     return data
 
 
+def _install_pypdf_profile(profiles_dir: Path, name: str, *, executable: str | None = None) -> str:
+    """Write and reload a valid installed pypdf profile; return its computed digest."""
+    wrapper = BUNDLED_WRAPPERS["pypdf"]
+    profile = ReaderProfile(
+        name=name,
+        reader="pypdf",
+        version="6.18.0",
+        executable=Path(executable or sys.executable),
+        platform=sys.platform,
+        python_version=".".join(map(str, sys.version_info[:3])),
+        artifact_digest=None,
+        profile_sha256="",
+        wrapper_path=wrapper,
+        wrapper_sha256=file_sha256(wrapper),
+        created_at="2026-09-14T00:00:00Z",
+    )
+    save_profile(profile, base_dir=profiles_dir)
+    loaded = load_profile(name, base_dir=profiles_dir)
+    return loaded.profile_sha256
+
+
 def _write_run(
     directory: Path,
     reports: dict[str, dict],
     *,
     profile_sha256: str = PROFILE_BEFORE,
+    profile_name: str = "native-default",
     intended_keys: list[str] | None = None,
     algorithm_id: str = "inkflip-inspect-v1",
 ) -> Path:
@@ -80,7 +110,7 @@ def _write_run(
         "kind": "inkflip-corpus-identity",
         "corpus_manifest_sha256": CORPUS_SHA,
         "profile_sha256": profile_sha256,
-        "profile_name": "native-default",
+        "profile_name": profile_name,
         "algorithm_id": algorithm_id,
         "intended_keys": keys,
     }
@@ -248,6 +278,76 @@ class TestComparisonProvenance(ComparisonIntegrityCase):
         self.assertNotEqual(result.status, "incomparable")
         comparison = self._comparison(self.case / "cmp-distinct")
         self.assertTrue(any("profile" in item.lower() for item in comparison["limitations"]))
+
+    def test_renamed_same_reader_profiles_compare_and_disclose_identity(self):
+        profiles = self.case / "profiles"
+        left_hash = _install_pypdf_profile(profiles, "alias-a")
+        right_hash = _install_pypdf_profile(profiles, "alias-b")
+        self.assertNotEqual(left_hash, right_hash)
+        left = _write_run(
+            self.case / "left",
+            {"mapping-amount": self.amount},
+            profile_sha256=left_hash,
+            profile_name="alias-a",
+        )
+        right = _write_run(
+            self.case / "right",
+            {"mapping-amount": self.amount},
+            profile_sha256=right_hash,
+            profile_name="alias-b",
+        )
+        out = self.case / "cmp-renamed"
+        result = compare(left, right, None, out)
+        self.assertNotEqual(result.exit_code, EXIT_INVALID_ARGS)
+        self.assertFalse(any("inconsistent" in item.lower() for item in result.violations))
+        self.assertEqual(result.exit_code, EXIT_OK)
+        self.assertEqual(result.status, "unchanged")
+        comparison = self._comparison(out)
+        joined = " ".join(comparison["limitations"])
+        self.assertIn(left_hash, joined)
+        self.assertIn(right_hash, joined)
+        self.assertTrue(
+            any("not equal" in item.lower() or "differ" in item.lower() for item in comparison["limitations"])
+        )
+
+    def test_same_reader_different_install_path_compares(self):
+        wrapper = BUNDLED_WRAPPERS["pypdf"]
+        digest = file_sha256(wrapper)
+        shared = {
+            "name": "copied-install",
+            "reader": "pypdf",
+            "version": "6.18.0",
+            "platform": sys.platform,
+            "python_version": ".".join(map(str, sys.version_info[:3])),
+            "artifact_digest": None,
+            "wrapper_path": str(wrapper),
+            "wrapper_sha256": digest,
+        }
+        install_a = self.case / "install-a" / "python"
+        install_b = self.case / "install-b" / "python"
+        install_a.parent.mkdir()
+        install_b.parent.mkdir()
+        os.symlink(sys.executable, install_a)
+        os.symlink(sys.executable, install_b)
+        left_hash = compute_profile_sha256({**shared, "executable": str(install_a)})
+        right_hash = compute_profile_sha256({**shared, "executable": str(install_b)})
+        self.assertNotEqual(left_hash, right_hash)
+        left = _write_run(self.case / "left", {"mapping-amount": self.amount}, profile_sha256=left_hash)
+        right = _write_run(self.case / "right", {"mapping-amount": self.amount}, profile_sha256=right_hash)
+        result = compare(left, right, None, self.case / "cmp-path")
+        self.assertEqual(result.exit_code, EXIT_OK)
+        self.assertEqual(result.status, "unchanged")
+        comparison = self._comparison(self.case / "cmp-path")
+        self.assertTrue(any(left_hash in item and right_hash in item for item in comparison["limitations"]))
+
+    def test_malformed_identity_top_level_type_is_typed_config_error(self):
+        left = _write_run(self.case / "left", {"mapping-amount": self.amount})
+        right = _write_run(self.case / "right", {"mapping-amount": self.amount})
+        (right / "identity.json").write_text("[]\n")
+        result = compare(left, right, None, self.case / "cmp-id-type")
+        self.assertEqual(result.exit_code, EXIT_INVALID_ARGS)
+        self.assertTrue(any("identity" in item.lower() for item in result.violations))
+        self.assertFalse((self.case / "cmp-id-type" / "comparison.json").is_file())
 
     def test_malformed_profile_digest_is_invalid_configuration(self):
         left = _write_run(self.case / "left", {"mapping-amount": self.amount})
