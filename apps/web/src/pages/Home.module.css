@@ -61,7 +61,7 @@
 .navLinks {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .navLink {
@@ -92,46 +92,6 @@
   outline-offset: 2px;
 }
 
-.heroTabs {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.heroTab {
-  font-size: var(--text-caption);
-  font-weight: 500;
-  color: var(--color-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-control);
-  cursor: pointer;
-  font-family: inherit;
-  min-height: var(--control-min-height, 44px);
-  min-width: 44px;
-  padding: 0 var(--space-3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.heroTab:hover {
-  color: var(--color-ink);
-  border-color: var(--color-line);
-}
-
-.heroTabActive {
-  color: var(--color-ink);
-  font-weight: 700;
-  background-color: var(--color-paper-pure);
-  border-color: var(--color-line);
-  box-shadow: var(--shadow-paper);
-}
-
-.heroTab:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
 .main {
   max-width: var(--layout-max);
   margin: 0 auto;
@@ -139,48 +99,24 @@
   box-sizing: border-box;
 }
 
-.heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: var(--space-7);
-  align-items: center;
+/* Single-column hero with a comfortable reading measure. */
+.hero {
+  display: flex;
+  flex-direction: column;
+  /* ~640px reading measure built from tokens */
+  max-width: calc(var(--space-8) * 10);
   margin-bottom: var(--space-8);
   box-sizing: border-box;
 }
 
-@media (max-width: 1099px) {
-  .heroGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-}
-
-.heroLeft {
-  display: flex;
-  flex-direction: column;
-}
-
-.eyebrow {
-  font-size: var(--text-caption);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-teal);
-  margin-bottom: var(--space-2);
-}
-
 .headline {
   font-family: var(--font-display);
-  font-size: var(--text-heading-desktop);
-  line-height: 1.07;
+  /* The tamed hero size (42px), close to the 40px intent */
+  font-size: var(--text-heading-mobile);
+  line-height: 1.12;
   color: var(--color-ink);
-  margin-bottom: var(--space-4);
-}
-
-@media (max-width: 767px) {
-  .headline {
-    font-size: var(--text-heading-mobile);
-  }
+  margin: 0 0 var(--space-4);
+  overflow-wrap: break-word;
 }
 
 .headline em {
@@ -192,13 +128,20 @@
   font-size: var(--text-body);
   line-height: var(--line-body);
   color: var(--color-muted);
-  margin-bottom: var(--space-6);
-  max-width: 540px;
+  margin: 0 0 var(--space-2);
+}
+
+.privacyNote {
+  font-size: var(--text-caption);
+  line-height: var(--line-body);
+  color: var(--color-muted);
+  margin: 0 0 var(--space-6);
 }
 
 .actionRow {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
   box-sizing: border-box;
 }
@@ -258,96 +201,65 @@
   outline-offset: 2px;
 }
 
-.heroRight {
-  display: flex;
-  flex-direction: column;
-}
-
-.exampleCard {
-  background-color: var(--color-surface-subtle);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-stage);
-  box-shadow: var(--shadow-stage);
-  padding: var(--space-5);
-}
-
-.exampleHeader {
-  display: flex;
+.btnQuiet {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-
-.exampleBadge {
-  background-color: var(--color-badge-bg);
-  border: 1px solid var(--color-badge-border);
-  color: var(--color-badge-text);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: var(--text-caption);
-  font-weight: 600;
-}
-
-.exampleCrop {
-  background-color: var(--color-paper-pure);
-  border: 1px solid var(--color-line);
+  justify-content: center;
+  min-height: var(--control-min-height);
+  padding: 0 var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--color-teal);
+  font-size: var(--text-body);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
   border-radius: var(--radius-control);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-  text-align: center;
+  font-family: inherit;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-.exampleAmount {
-  font-family: var(--font-mono);
-  font-size: var(--space-6);
-  font-weight: 700;
+.btnQuiet:hover {
   color: var(--color-ink);
 }
 
-.exampleDiffInfo {
-  font-size: var(--text-caption);
-  color: var(--color-rust);
-  font-weight: 600;
-  margin-top: var(--space-2);
+.btnQuiet:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
-.exampleFooterText {
-  font-size: var(--text-caption);
-  color: var(--color-muted);
+.section {
+  /* ~640px reading measure built from tokens */
+  max-width: calc(var(--space-8) * 10);
+  margin-bottom: var(--space-7);
+  box-sizing: border-box;
 }
 
 .sectionHeading {
   font-family: var(--font-display);
   font-size: var(--space-6);
   color: var(--color-ink);
-  margin-bottom: var(--space-4);
+  margin: 0 0 var(--space-3);
 }
 
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-5);
-  margin-top: var(--space-6);
-}
-
-.featureCard {
-  background-color: var(--color-surface-subtle);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
-}
-
-.featureTitle {
+.sectionText {
   font-size: var(--text-body);
-  font-weight: 600;
-  color: var(--color-ink);
-  margin-bottom: var(--space-2);
-}
-
-.featureText {
-  font-size: var(--text-caption);
   line-height: var(--line-body);
   color: var(--color-muted);
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-teal);
+  margin-bottom: var(--space-2);
 }
 
 @media (max-width: 767px) {
@@ -363,39 +275,21 @@
   .descriptor {
     display: none;
   }
-  .navLinks {
-    flex-wrap: wrap;
-    gap: var(--space-1);
-  }
   .main {
     padding: var(--space-5) var(--space-3);
   }
 }
 
-@media (max-width: 480px) {
-  .headerInner {
-    padding: var(--space-2);
-  }
-  .navLinks {
-    width: 100%;
-    justify-content: flex-start;
-    gap: var(--space-1);
-  }
-}
-
 @media (max-width: 390px) {
-  .headerInner {
-    padding: var(--space-2);
-  }
   .main {
     padding: var(--space-4) var(--space-3);
   }
   .actionRow {
     flex-direction: column;
+    align-items: stretch;
     width: 100%;
   }
   .actionRow button {
     width: 100%;
   }
 }
-

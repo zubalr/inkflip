@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./Home.module.css";
 import { ExamplesGallery } from "../features/gallery/ExamplesGallery";
 
@@ -13,11 +13,9 @@ export const Home: React.FC<HomeProps> = ({
   onOpenExample,
   onNavigateHelp,
 }) => {
-  const [exampleMode, setExampleMode] = useState<"page" | "reading">("page");
-
   return (
     <div className={styles.page}>
-      {/* 64px Header */}
+      {/* Compact header: brand plus a single Help link. */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a href="#/" className={styles.brand} aria-label="Inkflip home">
@@ -29,22 +27,6 @@ export const Home: React.FC<HomeProps> = ({
           </a>
 
           <nav className={styles.navLinks} aria-label="Main navigation">
-            <a href="#examples" className={styles.navLink}>
-              Examples
-            </a>
-            <button
-              type="button"
-              className={styles.navLink}
-              onClick={() => onNavigateWorkspace(true)}
-            >
-              Try Example
-            </button>
-            <a href="#how-it-works" className={styles.navLink}>
-              How it works
-            </a>
-            <a href="#limits" className={styles.navLink}>
-              Limits
-            </a>
             <a
               href="#/help"
               className={styles.navLink}
@@ -57,158 +39,81 @@ export const Home: React.FC<HomeProps> = ({
             >
               Help
             </a>
-            <button
-              type="button"
-              className={styles.btnSecondary}
-              onClick={() => onNavigateWorkspace(false)}
-            >
-              Open Workspace
-            </button>
           </nav>
         </div>
       </header>
 
-      {/* Main Landing Content */}
       <main className={styles.main}>
-        {/* Editorial 2-Column Hero */}
-        <section className={styles.heroGrid} aria-labelledby="hero-headline">
-          {/* Left Column (Editorial) */}
-          <div className={styles.heroLeft}>
-            <span className={styles.eyebrow}>One document. More than one reading.</span>
-            <h1 id="hero-headline" className={styles.headline}>
-              Your PDF can look right and <em>read wrong</em>.
-            </h1>
-            <p className={styles.lede}>
-              Compare the visible page with named text extractions and OCR. Pinpoint differences,
-              inspect coordinate sources, and keep portable evidence on your device.
-            </p>
+        {/* Single-column hero. */}
+        <section className={styles.hero} aria-labelledby="hero-headline">
+          <h1 id="hero-headline" className={styles.headline}>
+            Your PDF can look right and <em>read wrong</em>.
+          </h1>
+          <p className={styles.lede}>
+            Compare the text inside a PDF with what appears on the page.
+          </p>
+          <p className={styles.privacyNote}>Your files stay in your browser.</p>
 
-            <div className={styles.actionRow}>
-              <button
-                id="btn-try-example"
-                type="button"
-                className={styles.btnPrimary}
-                onClick={() => onNavigateWorkspace(true)}
-              >
-                Try the example
-              </button>
-              <button
-                id="btn-open-report"
-                type="button"
-                className={styles.btnSecondary}
-                onClick={() => onNavigateWorkspace(false)}
-              >
-                Open saved report
-              </button>
-              <button
-                id="btn-open-locally"
-                type="button"
-                className={styles.btnSecondary}
-                onClick={() => onNavigateWorkspace(false)}
-              >
-                Open locally
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column (Above-the-fold prepared example stage) */}
-          <div className={styles.heroRight}>
-            <div className={styles.exampleCard} aria-label="Prepared example demonstration">
-              <div className={styles.exampleHeader}>
-                <span className={styles.exampleBadge}>PREPARED DEMO</span>
-                <div role="tablist" aria-label="Example view mode" className={styles.heroTabs}>
-                  <button
-                    type="button"
-                    role="tab"
-                    id="hero-tab-page"
-                    aria-selected={exampleMode === "page"}
-                    className={`${styles.heroTab} ${exampleMode === "page" ? styles.heroTabActive : ""}`}
-                    onClick={() => setExampleMode("page")}
-                  >
-                    Page
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    id="hero-tab-reading"
-                    aria-selected={exampleMode === "reading"}
-                    className={`${styles.heroTab} ${exampleMode === "reading" ? styles.heroTabActive : ""}`}
-                    onClick={() => setExampleMode("reading")}
-                  >
-                    Reading
-                  </button>
-                </div>
-              </div>
-
-              <div
-                className={styles.exampleCrop}
-                role="region"
-                aria-label="Demonstrated reading difference"
-              >
-                <div className={styles.exampleAmount}>
-                  {exampleMode === "page" ? "$100.00" : "$1,000.00"}
-                </div>
-                <div className={styles.exampleDiffInfo}>
-                  {exampleMode === "page"
-                    ? "Rendered visual pixel crop reads: $100.00"
-                    : "Native reader stream extracted: $1,000.00"}
-                </div>
-              </div>
-
-              <div className={styles.exampleFooterText}>
-                <strong>Finding:</strong> This amount reads differently between rendered appearance
-                and underlying content stream.
-              </div>
-            </div>
+          <div className={styles.actionRow}>
+            <button
+              id="btn-open-locally"
+              type="button"
+              className={styles.btnPrimary}
+              onClick={() => onNavigateWorkspace(false)}
+            >
+              Check a PDF
+            </button>
+            <button
+              id="btn-try-example"
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => onNavigateWorkspace(true)}
+            >
+              Try an example
+            </button>
+            <button
+              id="btn-open-report"
+              type="button"
+              className={styles.btnQuiet}
+              onClick={() => onNavigateWorkspace(false)}
+            >
+              Open a saved report
+            </button>
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" style={{ marginBottom: "var(--space-8)" }}>
-          <h2 className={styles.sectionHeading}>How Inkflip Works</h2>
-          <div className={styles.featureGrid}>
-            <article className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>1. Extract Multiple Readings</h3>
-              <p className={styles.featureText}>
-                Run parallel independent PDF reader implementations (PDF.js, PDFium, OCR) directly
-                in your browser with isolated sandboxing.
-              </p>
-            </article>
-
-            <article className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>2. Align &amp; Compare Geometry</h3>
-              <p className={styles.featureText}>
-                Map character positions and bounding boxes to canonical page points. Detect material
-                token differences without probabilistic guessing.
-              </p>
-            </article>
-
-            <article className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>3. Preserve Evidence Locally</h3>
-              <p className={styles.featureText}>
-                Export self-contained, replayable HTML and JSON evidence reports. No files or
-                document data ever leave your machine.
-              </p>
-            </article>
-          </div>
+        {/* How it works: one plain paragraph naming the real reader roles. */}
+        <section
+          id="how-it-works"
+          className={styles.section}
+          aria-labelledby="how-it-works-heading"
+        >
+          <h2 id="how-it-works-heading" className={styles.sectionHeading}>
+            How it works
+          </h2>
+          <p className={styles.sectionText}>
+            PDF.js and Tesseract OCR run in the browser and compare the text inside a PDF with what
+            appears on the page. The native PDFium reader is available through the separate
+            macOS/Docker companion.
+          </p>
         </section>
 
         {onOpenExample !== undefined && (
-          <div id="examples">
+          <section id="examples" className={styles.section} aria-label="Prepared example demos">
+            <span className={styles.eyebrow}>Prepared demo</span>
             <ExamplesGallery onOpenExample={onOpenExample} />
-          </div>
+          </section>
         )}
 
-        {/* Limitations & Invariants Section */}
-        <section id="limits">
-          <h2 className={styles.sectionHeading}>Explicit Limits &amp; Boundaries</h2>
-          <div className={styles.featureCard}>
-            <p className={styles.featureText}>
-              Inkflip highlights localized differences between reader implementations. A difference
-              does not establish which reading is correct, and the absence of differences does not
-              constitute a document correctness or safety certification.
-            </p>
-          </div>
+        {/* Honest limits. */}
+        <section id="limits" className={styles.section} aria-labelledby="limits-heading">
+          <h2 id="limits-heading" className={styles.sectionHeading}>
+            Limits
+          </h2>
+          <p className={styles.sectionText}>
+            Differences need human review: a highlighted difference does not prove fraud or
+            correctness, and the absence of differences is not a certification.
+          </p>
         </section>
       </main>
     </div>
