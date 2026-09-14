@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
+from pathlib import Path
 
 CONTINUE = "CONTINUE"
 SKIP = "SKIP"
@@ -24,15 +26,45 @@ BEFORE_PROMOTE = "before_promote"
 ALLOWED_EVENTS = {"push"}
 REQUIRED_BRANCH = "main"
 REQUIRED_CONCLUSION = "success"
+CANDIDATE_URL_RE = re.compile(r"https://[a-zA-Z0-9._-]+\.vercel\.app")
+CANDIDATE_ID_RE = re.compile(r"dpl_[A-Za-z0-9]+")
+PRODUCTION_ALIAS_HOSTS = frozenset(
+    {
+        "inkflip-jubairjashim1975gmailcoms-projects.vercel.app",
+        "inkflip-rose.vercel.app",
+        "inkflip.vercel.app",
+    }
+)
 
 
 def _looks_like_candidate(value: str) -> bool:
     text = value.strip()
-    if text.startswith("dpl_"):
+    if CANDIDATE_ID_RE.fullmatch(text):
         return True
-    if text.startswith("https://") and "vercel.app" in text:
-        return True
-    return False
+    if not CANDIDATE_URL_RE.fullmatch(text):
+        return False
+    host = text.removeprefix("https://")
+    return host not in PRODUCTION_ALIAS_HOSTS
+
+
+def extract_candidate_url(log_text: str) -> str | None:
+    """Pick the unique Vercel deployment URL out of noisy CLI output.
+
+    `vercel deploy --skip-domain` prints the candidate host, the production
+    alias, progress glued onto the URL (`…vercel.appBuilding…`), and a later
+    `vercel curl <url> --scope …` hint. Promote must receive only the
+    candidate URL.
+    """
+    cleaned = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", log_text)
+    found: list[str] = []
+    for url in CANDIDATE_URL_RE.findall(cleaned):
+        host = url.removeprefix("https://")
+        if host in PRODUCTION_ALIAS_HOSTS:
+            continue
+        found.append(url)
+    if not found:
+        return None
+    return found[-1]
 
 
 def decide(
@@ -71,7 +103,31 @@ def _write_github_output(decision: str) -> None:
         handle.write(f"decision={decision}\n")
 
 
+def _write_github_url(url: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if not path:
+        return
+    with open(path, "a", encoding="utf-8") as handle:
+        handle.write(f"url={url}\n")
+
+
+def _extract_from_log(path: str) -> int:
+    url = extract_candidate_url(Path(path).read_text(encoding="utf-8", errors="replace"))
+    if not url:
+        print("REJECT", file=sys.stderr)
+        return 2
+    print(url)
+    _write_github_url(url)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if any(arg == "--extract-candidate-from" or arg.startswith("--extract-candidate-from=") for arg in argv):
+        extractor = argparse.ArgumentParser(description=__doc__)
+        extractor.add_argument("--extract-candidate-from", required=True)
+        extract_args = extractor.parse_args(argv)
+        return _extract_from_log(extract_args.extract_candidate_from)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase", required=True, choices=(BEFORE_WORK, BEFORE_PROMOTE))
     parser.add_argument("--trigger-event", required=True)
