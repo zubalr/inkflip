@@ -113,6 +113,34 @@ class TestCombinedNativeLifecycle(unittest.TestCase):
         self.assertEqual(comparison["status"], "unchanged")
         self.assertTrue((comparison_dir / "comparison.html").is_file())
 
+        # 4b. a declared regression is reported with its own exit code and evidence
+        rules = self.td / "rules.json"
+        rules.write_text(json.dumps({
+            "kind": "acceptance_rules",
+            "schema_version": "1.0.0",
+            "policy": {"fail_on_coverage_loss": True, "fail_on_error": True, "unruled_change": "changed"},
+            "rules": [{
+                "id": "must-be-present",
+                "type": "expected_text",
+                "document_sha256": hashlib.sha256((PUBLIC / "mapping-amount.pdf").read_bytes()).hexdigest(),
+                "page_index": 0,
+                "reader_id": None,
+                "region_id": None,
+                "expected_text": "NOT PRESENT ANYWHERE",
+                "expected_count": None,
+                "max_delta_pt": None,
+                "capability": None,
+                "explanation": "a declared requirement the fixture cannot satisfy",
+            }],
+        }))
+        regressed_dir = self.td / "cmp-regressed"
+        result = cli("compare", str(baseline), str(fresh), "--out", str(regressed_dir), "--rules", str(rules))
+        self.assertEqual(result.returncode, 5, result.stderr)
+        regressed = json.loads((regressed_dir / "comparison.json").read_text())
+        core.validate(regressed)
+        self.assertEqual(regressed["status"], "regressed")
+        self.assertTrue(regressed["changes"], "a regression must carry its evidence")
+
         # 5. HTML export is script-free and carries its policy
         html = self.td / "report.html"
         result = cli("report", str(self.run / "reports" / "amount.json"), "--format", "html", "--out", str(html))
