@@ -69,12 +69,13 @@ presented as working:
   day. Not claimed: bit-identical rebuilds, signing/provenance attestations
   (never executed), native x86_64 hardware behavior, Windows/macOS-packaged
   desktop builds.
-- **The pdfjs Node-profile bridge needs a module path hint in this
-  checkout layout**: the native profiles test `test_real_pdfjs_not_stub`
-  requires `NODE_PATH=apps/web/node_modules` (Bun's isolated linker keeps
-  pdfjs-dist under apps/web). With it the native suite is 249/249; without
-  it, that one test fails on module resolution. Environment requirement of
-  the merged profile code, recorded 2026-09-13.
+- **The pdfjs Node profile has its own isolated workspace.** The profile
+  bridge resolves the pinned `pdfjs-dist@6.3.289` from
+  `packages/readers-pdfjs/node/`, installed separately with
+  `cd packages/readers-pdfjs/node && bun install --frozen-lockfile`.
+  Without that install, the native profiles suite skips the real-PDF.js
+  test (explicitly, not silently) — the browser app's copy under
+  `apps/web/node_modules` is a fallback, not the required source.
 - **Accessibility**: automated flows are merged and green (T37 suite); the
   manual assistive-technology review remains open (tracked separately) —
   no AT-conformance claim is made.

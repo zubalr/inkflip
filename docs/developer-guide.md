@@ -97,6 +97,11 @@ build); everything else runs in seconds to a minute.
 - **Python**: `native/pyproject.toml` pins `requires-python == 3.13.15`;
   `.python-version` matches. `uv run --frozen` is mandatory — never let uv
   resolve a new environment for product code.
+- **pdf.js Node profile workspace**: `packages/readers-pdfjs/node/` has its
+  own frozen lock (`bun install --frozen-lockfile` inside it). The native
+  profiles suite skips the real-PDF.js test with an explicit skip when this
+  workspace is not installed — it never falls back to a stub and never needs
+  a NODE_PATH workaround.
 - `patches/tesseract.js@7.0.0.patch` pins the OCR wrapper's behavior
   (CDN-off, worker lifecycle); it is applied via `patchedDependencies`.
 - `apps/web/src` must typecheck cleanly in CI-critical paths; the standalone
