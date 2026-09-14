@@ -14,7 +14,10 @@
     "docs/distribution/SURFACE.md",
     "docs/case-study.md",
     "docs/launch/CLAIMS-INDEX.md",
-    "docs/distribution/EXECUTED-EXAMPLES.md"
+    "docs/distribution/EXECUTED-EXAMPLES.md",
+    "docs/release-and-rollback.md",
+    "docs/distribution/release-candidate.template.json",
+    "docs/distribution/release-candidate.merged-example.json"
   ],
   "checked_docs": [
     "README.md",
@@ -30,7 +33,10 @@
     "docs/distribution/SURFACE.md",
     "docs/case-study.md",
     "docs/launch/CLAIMS-INDEX.md",
-    "docs/distribution/EXECUTED-EXAMPLES.md"
+    "docs/distribution/EXECUTED-EXAMPLES.md",
+    "docs/release-and-rollback.md",
+    "docs/distribution/release-candidate.template.json",
+    "docs/distribution/release-candidate.merged-example.json"
   ],
   "forbidden_phrases": [
     "what AI sees",
