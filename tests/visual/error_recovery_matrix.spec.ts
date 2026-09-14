@@ -149,3 +149,43 @@ test.describe("Workspace: oversized input, cancellation, and replacement disclos
     ).toBeVisible({ timeout: 15000 });
   });
 });
+
+test.describe("Workspace: notes stay with their document", () => {
+  const NOTE = "note-bound-to-this-document";
+
+  async function addNote(page: import("@playwright/test").Page) {
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector("#btn-header-import-report");
+    await page.locator("#input-import-report").setInputFiles(EXAMPLE_REPORT);
+    // Finding ids are content-derived (f_<hash>), so wait for the first card
+    // rather than hardcoding an id that belongs to one particular fixture.
+    const finding = page.locator('[id^="finding-item-"]').first();
+    await finding.waitFor({ state: "visible", timeout: 20000 });
+    await finding.click();
+    await page.getByTestId("note-input").fill(NOTE);
+    await page.getByTestId("note-add").click();
+    await expect(page.getByTestId("finding-notes")).toContainText(NOTE);
+  }
+
+  test("typing a viewer shortcut inside the note field does not change the viewer mode", async ({ page }) => {
+    await addNote(page);
+    const before = await page.locator("#tab-mode-page").getAttribute("aria-selected");
+    await page.getByTestId("note-input").press("3");
+    await page.waitForTimeout(300);
+    expect(await page.locator("#tab-mode-page").getAttribute("aria-selected")).toBe(before);
+  });
+
+  test("a note does not migrate to a different document", async ({ page }) => {
+    await addNote(page);
+
+    await page.locator("#input-open-pdf").setInputFiles(OTHER);
+    await expect(page.getByText(/open a different pdf/i).first()).toBeVisible({ timeout: 15000 });
+    const replace = page.getByRole("button", { name: /clear|replace|continue/i }).first();
+    await replace.click();
+    await expect(page.getByText("not yet inspected").first()).toBeVisible({ timeout: 15000 });
+
+    const body = await page.locator("body").innerText();
+    expect(body, "the previous document's note must not appear in the new session").not.toContain(NOTE);
+    await expect(page.getByTestId("finding-notes")).toHaveCount(0);
+  });
+});
