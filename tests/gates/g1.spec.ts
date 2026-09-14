@@ -1080,7 +1080,9 @@ test("G1 leg 3: export → local reopen → attach source → offline OCR", asyn
   // OCR identities resolve, so replay readiness is honestly reachable.
   expect(attached.importedReplay!.readersMissing).toEqual([]);
   expect(attached.importedReplay!.ready).toBe(true);
-  await expect(page.locator("[data-testid=replay-status]")).toContainText("replay ready");
+  await expect(page.locator("[data-testid=replay-status]")).toContainText(
+    "The original PDF is available",
+  );
 
   await endCapture(page, cap);
   // The downloads legitimately contain the report id/run key/canary text —

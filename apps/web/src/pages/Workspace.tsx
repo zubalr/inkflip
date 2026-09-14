@@ -29,6 +29,8 @@ export interface WorkspaceProps {
   loadSyntheticFixture?: boolean;
   /** Home/hash intent: open the matching local file picker once. */
   initialOpen?: "pdf" | "report" | null;
+  /** Called after the intent's picker was raised so the same intent can fire again. */
+  onOpenIntentHandled?: () => void;
 }
 
 interface ErrorBoundaryProps {
@@ -76,6 +78,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   initialExampleId = null,
   loadSyntheticFixture = false,
   initialOpen = null,
+  onOpenIntentHandled,
 }) => {
   const profile = useMemo(() => resolveProfile(), []);
   const session = useMemo(() => new InspectionSession(profile), [profile]);
@@ -197,12 +200,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const openedIntentRef = useRef<"pdf" | "report" | null>(null);
 
   useEffect(() => {
-    if (initialOpen === null) return;
+    if (initialOpen === null) {
+      openedIntentRef.current = null;
+      return;
+    }
     if (openedIntentRef.current === initialOpen) return;
     openedIntentRef.current = initialOpen;
     const node = initialOpen === "report" ? reportInputRef.current : pdfInputRef.current;
     node?.click();
-  }, [initialOpen]);
+    onOpenIntentHandled?.();
+  }, [initialOpen, onOpenIntentHandled]);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 

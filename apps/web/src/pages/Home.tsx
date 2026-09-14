@@ -3,7 +3,7 @@ import styles from "./Home.module.css";
 import { ExamplesGallery } from "../features/gallery/ExamplesGallery";
 
 export interface HomeProps {
-  onNavigateWorkspace: (withExample?: boolean) => void;
+  onNavigateWorkspace: (withExample?: boolean, open?: "pdf" | "report") => void;
   onOpenExample?: (exampleId: string) => void;
   onNavigateHelp?: () => void;
 }
@@ -59,7 +59,7 @@ export const Home: React.FC<HomeProps> = ({
               id="btn-open-locally"
               type="button"
               className={styles.btnPrimary}
-              onClick={() => onNavigateWorkspace(false)}
+              onClick={() => onNavigateWorkspace(false, "pdf")}
             >
               Check a PDF
             </button>
@@ -75,7 +75,7 @@ export const Home: React.FC<HomeProps> = ({
               id="btn-open-report"
               type="button"
               className={styles.btnQuiet}
-              onClick={() => onNavigateWorkspace(false)}
+              onClick={() => onNavigateWorkspace(false, "report")}
             >
               Open a saved report
             </button>

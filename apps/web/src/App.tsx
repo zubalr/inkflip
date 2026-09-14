@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Home } from "./pages/Home";
 import { Workspace } from "./pages/Workspace";
 import { HelpPage } from "./pages/help";
@@ -147,20 +147,34 @@ export default function App() {
     previousRoute.current = route;
   }, [route]);
 
-  const navigateToWorkspace = (loadExample = false) => {
+  const navigateToWorkspace = (loadExample = false, open: WorkspaceOpenIntent = null) => {
     setWorkspaceEverMounted(true);
     setWithExample(loadExample);
     setExampleId(resolvePublicExampleId(loadExample, null));
     setLoadSyntheticFixture(false);
-    setOpenIntent(null);
+    setOpenIntent(open);
     if (loadExample) {
       setWorkspaceEpoch((e) => e + 1);
     }
     setRoute("workspace");
-    const targetHash = loadExample ? "#/workspace?example=true" : "#/workspace";
+    const targetHash = loadExample
+      ? "#/workspace?example=true"
+      : open
+        ? `#/workspace?open=${open}`
+        : "#/workspace";
     lastWorkspaceHash.current = targetHash;
     window.location.hash = targetHash;
   };
+
+  // The workspace consumes an open intent once, then clears it so the same
+  // Home action can raise its picker again later in the session.
+  const consumeOpenIntent = useCallback(() => {
+    setOpenIntent(null);
+    if (window.location.hash.includes("open=")) {
+      lastWorkspaceHash.current = "#/workspace";
+      window.history.replaceState(null, "", "#/workspace");
+    }
+  }, []);
 
   const navigateToExampleReport = (id: string) => {
     setWorkspaceEverMounted(true);
@@ -199,7 +213,8 @@ export default function App() {
   if (route === "home") {
     return (
       <Home
-        onNavigateWorkspace={(withExample?: boolean) => navigateToWorkspace(Boolean(withExample))}
+        onNavigateWorkspace={(withExample?: boolean, open?: WorkspaceOpenIntent) =>
+          navigateToWorkspace(Boolean(withExample), open ?? null)}
         onOpenExample={navigateToExampleReport}
         onNavigateHelp={navigateToHelp}
       />
@@ -233,6 +248,7 @@ export default function App() {
             initialExampleId={exampleId}
             loadSyntheticFixture={loadSyntheticFixture}
             initialOpen={openIntent}
+            onOpenIntentHandled={consumeOpenIntent}
           />
         </div>
       )}
