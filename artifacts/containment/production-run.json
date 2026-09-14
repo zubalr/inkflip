@@ -4,7 +4,7 @@
     "passed": 32,
     "failed": 0,
     "blocked": 0,
-    "image": "inkflip-native:pc-prod",
+    "image": "inkflip-native:merged",
     "architecture": {
       "host_machine": "arm64",
       "docker_architecture_line": "aarch64 linux",
@@ -21,25 +21,25 @@
       "name": "production-image-build",
       "ok": true,
       "blocked": false,
-      "detail": "reused inkflip-native:pc-prod"
+      "detail": "reused inkflip-native:merged"
     },
     {
       "name": "production-image-linux-amd64",
       "ok": true,
       "blocked": false,
-      "detail": "sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33 linux/amd64 241717979"
+      "detail": "sha256:cd2598829fbb47011071ce76ebf983fc73926cd64311c8ec7d7c20efb658ce30 linux/amd64 241737306"
     },
     {
       "name": "production-host-wheel-hash",
       "ok": true,
       "blocked": false,
-      "detail": "app.wheel.json c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291 file c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291 path=inkflip-0.0.0-py3-none-any.whl"
+      "detail": "app.wheel.json 99679314fd7b87e224bf3ed2c40cb34c4bbc6a3048b869d173210e352932d2f5 file 99679314fd7b87e224bf3ed2c40cb34c4bbc6a3048b869d173210e352932d2f5 path=inkflip-0.0.0-py3-none-any.whl"
     },
     {
       "name": "production-inspect",
       "ok": true,
       "blocked": false,
-      "detail": "exit 0 kind=report Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33 lock=/Users/zubair/Code/Projects/pdf project/worktrees/cursor-performance-completion/build/native/image.lock.json platform=linux/amd64\n"
+      "detail": "exit 0 kind=report Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:cd2598829fbb47011071ce76ebf983fc73926cd64311c8ec7d7c20efb658ce30 lock=/Users/zubair/Code/Projects/pdf project/original/build/native/image.lock.json platform=linux/amd64\n"
     },
     {
       "name": "production-output-bounds",
@@ -207,7 +207,7 @@
       "name": "production-source-bytes-unchanged",
       "ok": true,
       "blocked": false,
-      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-267smgma/source with spaces"
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-prod-ppl_c65b/source with spaces"
     }
   ]
 }

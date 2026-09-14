@@ -1,10 +1,32 @@
 {
   "generated_from": {
     "lock": "native/uv.lock",
-    "lock_sha256": "dd128c84665e7e4b6b4ec6530ceb960f44cbce242e1e7d592fcfa2351a38ee73"
+    "lock_sha256": "f0ed7c5ac5a5472271f07e6cb67f0c704d0bc29a64a922cbe49a7a9a19649ffe"
   },
   "kind": "inkflip-native-wheels-manifest",
   "missing_app_wheel": "Inkflip's own application wheel and CLI entry point are prepared by the packaging lane and are NOT part of this third-party bundle",
+  "model": {
+    "bytes": 4113088,
+    "license": "Apache-2.0",
+    "name": "tessdata_fast (eng.traineddata)",
+    "path_in_context": "models/tessdata/",
+    "rights": "tessdata_fast eng.traineddata from the official tesseract-ocr/tessdata_fast repository at the pinned commit; Apache-2.0 per repository LICENSE.",
+    "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "source": "config/resolved-assets.json (staged same-origin asset)",
+    "version": "pinned commit 7d4322bd"
+  },
+  "node": {
+    "binary_sha256": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327",
+    "filename": "node-v22.23.2-linux-x64.tar.xz",
+    "license": "MIT (Node.js; bundled third-party components per official NOTICE \u2014 fetched with the runtime at build time)",
+    "name": "node",
+    "platform": "linux-x64",
+    "purpose": "comparison-bridge runtime for the native bundle",
+    "sha256": "d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307",
+    "shasums256_source": "https://nodejs.org/dist/v22.23.2/SHASUMS256.txt",
+    "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+    "version": "22.23.2"
+  },
   "platform": {
     "abi_tag": "cp313",
     "arch": "x86_64",
