@@ -225,15 +225,22 @@ test.describe("Workspace: repeated navigation and modal nesting", () => {
       await expect(dialog).toHaveCount(1, { timeout: 15000 });
 
       // Focus must be inside the dialog while it is open.
-      // Check every dialog element, not just the first: the app may keep more than
-      // one in the DOM, and only the open one is expected to hold focus.
-      const inside = await page.evaluate(() => {
-        const active = document.activeElement as HTMLElement | null;
-        return Array.from(document.querySelectorAll('[role="dialog"]')).some((dialog) =>
-          dialog.contains(active),
-        );
-      });
-      expect(inside, "focus must move into the dialog when it opens").toBe(true);
+      // Poll rather than sample once: the dialog is present in the DOM a tick
+      // before focus lands inside it, and sampling once made this assertion racy.
+      // Every dialog element is checked, not just the first - the app may keep
+      // more than one, and only the open one is expected to hold focus.
+      await expect
+        .poll(
+          () =>
+            page.evaluate(() => {
+              const active = document.activeElement as HTMLElement | null;
+              return Array.from(document.querySelectorAll('[role="dialog"]')).some((dialog) =>
+                dialog.contains(active),
+              );
+            }),
+          { message: "focus must move into the dialog when it opens", timeout: 10000 },
+        )
+        .toBe(true);
 
       await page.keyboard.press("Escape");
       await expect(dialog).toHaveCount(0, { timeout: 15000 });
