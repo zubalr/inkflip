@@ -1,0 +1,48 @@
+{
+  "run": "test:a11y",
+  "task": "T37",
+  "contract": "TEST-37",
+  "date": "2026-09-13T14:49Z",
+  "command": "bun run test:a11y",
+  "argv": ["bun", "x", "--no-install", "playwright", "test", "tests/a11y"],
+  "environment": {
+    "runner": "Playwright 1.57 / Chromium (headless)",
+    "axe": "@axe-core/playwright 4.13",
+    "axeTags": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
+    "os": "macOS (darwin arm64)"
+  },
+  "result": {
+    "collected": 14,
+    "passed": 13,
+    "failed": 1,
+    "skipped": 0,
+    "exitCode": 1
+  },
+  "failedTests": [
+    {
+      "spec": "tests/a11y/flows.spec.ts",
+      "test": "axe: zero serious or critical violations with a finding expanded",
+      "finding": "T37-F1",
+      "detail": "nested-interactive (serious) on #finding-item-f_3b9b34d179df717d — the expanded finding card is role=option/tabindex=0 and contains focusable descendants (occurrence candidate buttons, notes textarea, note buttons). See docs/accessibility/flows.md and artifacts/a11y/axe-expanded-finding.json.",
+      "status": "honest product failure — left failing; not a test bug"
+    }
+  ],
+  "passedLegs": [
+    "T07 primitives: axe preview clean, keyboard/tab/disclosure operation, escape+focus return, focus trap, polite progress, 44px targets + 3px focus outline, replace-dialog copy/focus (7 tests)",
+    "T37 core flow keyboard-only: tab walk through every workspace control, Enter selection, candidate pick returns focus, Escape returns focus, f/+/-/r/n/p shortcuts, notes typed+saved by keyboard, export checkbox Space toggle + aria-live preview, JSON download Enter + role=status success, close document",
+    "T37 replace-confirmation dialog: aria-modal, focus moves in, Tab cycles inside, Escape and Keep-this-file both restore focus to #btn-header-open-pdf",
+    "T37 announcements: ambiguous amount alternatives in candidate accessible names ($1,000.00/$10,000.00) and expanded option name; page-level finding announced via role=status aria-live=polite; page-0 OCR limit published in labelled region; imported sealed report announces 1 Unsupported check + 2/3 checks completed in coverage panel and aria-live export preview",
+    "T37 400% zoom equivalent (320x256): no page-level horizontal overflow; finding select, in-app zoom to 400%, n/p navigation and Select-button focus all keyboard-operable",
+    "T37 reduced motion: prefers-reduced-motion honored — --motion-state 0ms, transition/animation durations ~0.01ms on animated surfaces",
+    "T37 axe: zero serious/critical on intake, example-doc listed, imported-report listed states"
+  ],
+  "manualLeg": {
+    "command": "python scripts/check_manual_receipts.py accessibility",
+    "status": "BLOCKED — scripts/check_manual_receipts.py does not exist in this worktree (coordinator/Cursor checkpoint scope, not T37 test scope)",
+    "checklist": "docs/accessibility/flows.md#manual-checklist-second-acceptance-leg"
+  },
+  "artifacts": {
+    "axeDetail": "artifacts/a11y/axe-expanded-finding.json",
+    "docs": "docs/accessibility/flows.md"
+  }
+}

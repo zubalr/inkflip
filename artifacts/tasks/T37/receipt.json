@@ -1,0 +1,50 @@
+{
+  "acceptance_criteria_evidence": {
+    "All core flows completed without mouse": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log"
+      ]
+    },
+    "focus restored": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log"
+      ]
+    },
+    "amount alternatives and partial coverage announced correctly": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log",
+        "docs/compatibility/accessibility-manual-receipt.json"
+      ]
+    },
+    "400% zoom usable": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log"
+      ]
+    },
+    "reduced motion honored": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log"
+      ]
+    },
+    "zero serious/critical automated and zero blocked manual critical flow.": {
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/axe-expanded-finding.json",
+        "artifacts/a11y/manual/voiceover-safari-pending.txt",
+        "docs/compatibility/accessibility-manual-receipt.json"
+      ]
+    }
+  },
+  "task": "T37",
+  "note": "Mechanical profiles executed on this Mac under the macOS release profile. VoiceOver/Safari and NVDA/Firefox AT legs are owner-waived/deferred and recorded 'unavailable' — waived, not fabricated. check_manual_receipts accessibility --release-profile macos => ok."
+}
