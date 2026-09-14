@@ -101,12 +101,36 @@ runs over identical content are byte-identical. Working output goes to the
 local ignored tree (`.private/distribution/`); a compact public digest of
 the current surface lives in [SURFACE.md](SURFACE.md).
 
-## The native CLI in Docker (macOS + Docker) — verified
+## The native CLI in Docker (macOS + Docker)
 
-Docker is a required, supported delivery surface. The production profile is
-built for **linux/amd64** via `--platform linux/amd64` (qemu emulation on an
-Apple Silicon Mac is acceptable and labeled — it is not native x86_64
-hardware certification, which remains deferred).
+Two container profiles exist for the native CLI. Both run as UID 65532 with
+`--network none` during processing; image *setup* may use the network. Docker
+is a required, supported delivery surface.
+
+**Checkout image (functional verification).** Built directly from a source
+checkout; it is explicitly *not* the digest-pinned release profile.
+
+```sh
+git checkout <candidate>
+docker build -f build/native/Dockerfile.checkout -t inkflip-native:checkout .
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/fixtures/public:/data/in:ro" -v "$PWD/out:/data/out" \
+  inkflip-native:checkout inspect /data/in/mapping-amount.pdf --out /data/out/report.json
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/out:/data/out:ro" inkflip-native:checkout validate /data/out/report.json
+```
+
+**Production profile (digest-pinned, linux/amd64).** Built for
+**linux/amd64** via `--platform linux/amd64` (qemu emulation on an Apple
+Silicon Mac is acceptable and labeled — it is not native x86_64 hardware
+certification, which remains deferred). Assembled from the third-party
+bundle plus the built application wheel:
+
+```sh
+python3 scripts/distribution/prepare_native_bundle.py   # third-party inputs (explicit network step)
+python3 scripts/distribution/assemble_native_image.py   # adds the Inkflip wheel + notices + identities
+docker build --platform linux/amd64 -f build/native/Dockerfile -t inkflip-native:prod .
+```
 
 **Production profile — built and verified on this Mac (2026-09-13,
 candidate `84c839c`):** image `inkflip-native:pc-prod`, digest
@@ -145,74 +169,6 @@ profile that does not match the recorded run profile; remote URL sources are
 refused. Preparation steps that use the network (deb/wheel download, image
 build) are explicit and separate from offline processing.
 
-The gate can verify the declared image identity read-only against the actual
-Docker daemon:
-
-```sh
-python3 scripts/check_distribution.py --release \
-  --docker inkflip-native:pc-prod
-```
-
-This checks image identity and architecture, hashes the application wheel
-and model inside the image, verifies the tesseract version and hashes every
-required notice entry from the image's own `INDEX.json`. A tag or JSON label
-alone is not proof. Re-running it against a rebuilt image requires the
-declared digest in `config/distribution-manifest.json` to be updated through
-the normal recorded-artifact flow.
-
-## Release-candidate binding (declarative, no hardcoded image)
-
-The gate no longer hardcodes an image tag or digest. The trusted expected
-identity comes from a **declared release candidate** —
-`config/release-candidate.json` (template:
-[release-candidate.template.json](release-candidate.template.json)). When the
-candidate is not yet bound (digest pending the final rebuild), image runtime
-verification is skipped with a visible note; when bound, `--docker` verifies
-the actual image against it. Expected identity is trusted declared input and
-is never adopted from the artifact being checked. Generated example
-declarations for observed fixed images live next to the template
-(`release-candidate.merged-example.json` for
-`inkflip-native:merged` / `sha256:cd2598829fbb…` — an amd64 emulated-on-Mac
-artifact that predates later native fixes; `inkflip-native:pc-prod`
-(`sha256:1923b04a…`) is preserved locally as the previous candidate).
-
-## Inventory and SBOM
-
-`scripts/distribution/build_inventory.py` generates a deterministic
-inventory and CycloneDX 1.5 SBOM from the frozen inputs (production npm
-closure, staged assets, prepared example, native lock packages). Outputs
-depend only on input-content digests — never on HEAD or wall-clock — so two
-runs over identical content are byte-identical. Working output goes to the
-local ignored tree (`.private/distribution/`); a compact public digest of
-the current surface lives in [SURFACE.md](SURFACE.md).
-
-## The native CLI in Docker (macOS + Docker)
-
-Two container profiles exist for the native CLI. Both run as UID 65532 with
-`--network none` during processing; image *setup* may use the network.
-
-**Checkout image (functional verification).** Built directly from a source
-checkout; it is explicitly *not* the digest-pinned release profile.
-
-```sh
-git checkout <candidate>
-docker build -f build/native/Dockerfile.checkout -t inkflip-native:checkout .
-docker run --rm --network none --user 65532:65532 \
-  -v "$PWD/fixtures/public:/data/in:ro" -v "$PWD/out:/data/out" \
-  inkflip-native:checkout inspect /data/in/mapping-amount.pdf --out /data/out/report.json
-docker run --rm --network none --user 65532:65532 \
-  -v "$PWD/out:/data/out:ro" inkflip-native:checkout validate /data/out/report.json
-```
-
-**Production profile (digest-pinned, linux/amd64).** Assembled from the
-third-party bundle plus the built application wheel:
-
-```sh
-python3 scripts/distribution/prepare_native_bundle.py   # third-party inputs (explicit network step)
-python3 scripts/distribution/assemble_native_image.py   # adds the Inkflip wheel + notices + identities
-docker build --platform linux/amd64 -f build/native/Dockerfile -t inkflip-native:prod .
-```
-
 Verified on 2026-09-13 on this Mac's local Docker (linux/aarch64): the
 checkout image built from a clean clone of candidate `b50c9d2` (image ID
 `9012f41fb6b9`, manifest digest `sha256:9012f41fb6b9…d6d52a`) and completed
@@ -237,6 +193,22 @@ Honest boundaries:
   `assemble_native_image.py`; reproducibility of the wheel bytes across
   machines is expected (pure-Python wheel) but cross-host reproduction has
   not been independently verified yet.
+
+The gate can verify the declared image identity read-only against the actual
+Docker daemon, using the identity declared in `config/release-candidate.json`
+(never the artifact being checked):
+
+```sh
+python3 scripts/check_distribution.py --release \
+  --docker inkflip-native:pc-prod
+```
+
+This checks image identity and architecture, hashes the application wheel
+and model inside the image, verifies the tesseract version and hashes every
+required notice entry from the image's own `INDEX.json`. A tag or JSON label
+alone is not proof. Re-running it against a rebuilt image requires the
+declared digest in `config/distribution-manifest.json` to be updated through
+the normal recorded-artifact flow.
 
 ## Advisory evidence
 
