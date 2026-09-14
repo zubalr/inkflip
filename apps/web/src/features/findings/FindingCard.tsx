@@ -76,22 +76,27 @@ export const FindingCard: React.FC<FindingCardProps> = ({
       <p className={styles.explanation}>{explanation.explanation}</p>
 
       {explanation.readings.length > 0 && (
-        <div className={styles.readingsGrid} role="group" aria-label="Comparative readings">
-          {explanation.readings.map((item, idx) => (
-            <div key={`${item.readerId}-${item.occurrenceId}-${idx}`} className={styles.readingBox}>
-              <span className={styles.readerLabel}>
-                {item.readerName} {item.readerVersion ? `v${item.readerVersion}` : ""}
-                {item.ordinal !== undefined ? ` (occurrence #${item.ordinal})` : ""}
-              </span>
-              <div
-                className={`${styles.readingValue} ${idx > 0 ? styles.readingAlt : ""}`}
-                dir="auto"
-              >
-                <bdi>{item.readingText}</bdi>
+        <details className={styles.readingsDetails}>
+          <summary className={styles.readingsSummary}>
+            Reader readings ({explanation.readings.length})
+          </summary>
+          <div className={styles.readingsGrid} role="group" aria-label="Comparative readings">
+            {explanation.readings.map((item, idx) => (
+              <div key={`${item.readerId}-${item.occurrenceId}-${idx}`} className={styles.readingBox}>
+                <span className={styles.readerLabel}>
+                  {item.readerName} {item.readerVersion ? `v${item.readerVersion}` : ""}
+                  {item.ordinal !== undefined ? ` (occurrence #${item.ordinal})` : ""}
+                </span>
+                <div
+                  className={`${styles.readingValue} ${idx > 0 ? styles.readingAlt : ""}`}
+                  dir="auto"
+                >
+                  <bdi>{item.readingText}</bdi>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </details>
       )}
 
       <p className={styles.disclaimer}>{explanation.disclaimer}</p>

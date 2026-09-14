@@ -300,7 +300,7 @@ test.describe("Production Journey: Export & Privacy UI Verification", () => {
     await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
 
     // Verify Export section is visible
-    const exportHeading = page.getByRole("heading", { name: "Preview what you will export" });
+    const exportHeading = page.getByRole("heading", { name: "Save report" });
     await expect(exportHeading).toBeVisible();
 
     // Verify default privacy opt-ins: Source PDF must be unchecked by default
@@ -318,7 +318,7 @@ test.describe("Production Journey: Export & Privacy UI Verification", () => {
 
     // Trigger JSON download
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     const download = await downloadPromise;
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);

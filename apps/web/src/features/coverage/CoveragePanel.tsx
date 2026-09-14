@@ -40,55 +40,78 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({
         <p className={styles.summaryText}>{coverage.summary}</p>
       </header>
 
-      {/* Numerical Stats Breakdown */}
-      <div className={styles.statsGrid} role="group" aria-label="Check statistics">
-        <div className={`${styles.statCard} ${styles.statCompleted}`}>
-          <span className={styles.statValue}>{breakdown.completed}</span>
-          <span className={styles.statLabel}>Completed</span>
+      {/* Completed vs incomplete at a glance; exact counts in details */}
+      <p className={styles.countLine} aria-live="polite">
+        Completed {breakdown.completed} of{" "}
+        {breakdown.completed +
+          breakdown.timeout +
+          breakdown.model_missing +
+          breakdown.unsupported +
+          breakdown.failed +
+          breakdown.cancelled +
+          breakdown.skipped}{" "}
+        checks.
+        {breakdown.timeout +
+          breakdown.model_missing +
+          breakdown.unsupported +
+          breakdown.failed +
+          breakdown.cancelled +
+          breakdown.skipped >
+        0
+          ? " Incomplete or failed checks are listed below."
+          : ""}
+      </p>
+      <details className={styles.countDetails}>
+        <summary className={styles.countDetailsSummary}>Check counts by result</summary>
+        <div className={styles.statsGrid} role="group" aria-label="Check statistics">
+          <div className={`${styles.statCard} ${styles.statCompleted}`}>
+            <span className={styles.statValue}>{breakdown.completed}</span>
+            <span className={styles.statLabel}>Completed</span>
+          </div>
+
+          {breakdown.timeout > 0 && (
+            <div className={`${styles.statCard} ${styles.statTimeout}`} id="stat-timeout">
+              <span className={styles.statValue}>{breakdown.timeout}</span>
+              <span className={styles.statLabel}>Timed Out</span>
+            </div>
+          )}
+
+          {breakdown.model_missing > 0 && (
+            <div className={`${styles.statCard} ${styles.statModelMissing}`} id="stat-model-missing">
+              <span className={styles.statValue}>{breakdown.model_missing}</span>
+              <span className={styles.statLabel}>Model Missing</span>
+            </div>
+          )}
+
+          {breakdown.unsupported > 0 && (
+            <div className={`${styles.statCard} ${styles.statUnsupported}`} id="stat-unsupported">
+              <span className={styles.statValue}>{breakdown.unsupported}</span>
+              <span className={styles.statLabel}>Unsupported</span>
+            </div>
+          )}
+
+          {breakdown.failed > 0 && (
+            <div className={`${styles.statCard} ${styles.statFailed}`} id="stat-failed">
+              <span className={styles.statValue}>{breakdown.failed}</span>
+              <span className={styles.statLabel}>Failed</span>
+            </div>
+          )}
+
+          {breakdown.cancelled > 0 && (
+            <div className={`${styles.statCard} ${styles.statCancelled}`} id="stat-cancelled">
+              <span className={styles.statValue}>{breakdown.cancelled}</span>
+              <span className={styles.statLabel}>Cancelled</span>
+            </div>
+          )}
+
+          {breakdown.skipped > 0 && (
+            <div className={`${styles.statCard} ${styles.statSkipped}`} id="stat-skipped">
+              <span className={styles.statValue}>{breakdown.skipped}</span>
+              <span className={styles.statLabel}>Skipped</span>
+            </div>
+          )}
         </div>
-
-        {breakdown.timeout > 0 && (
-          <div className={`${styles.statCard} ${styles.statTimeout}`} id="stat-timeout">
-            <span className={styles.statValue}>{breakdown.timeout}</span>
-            <span className={styles.statLabel}>Timed Out</span>
-          </div>
-        )}
-
-        {breakdown.model_missing > 0 && (
-          <div className={`${styles.statCard} ${styles.statModelMissing}`} id="stat-model-missing">
-            <span className={styles.statValue}>{breakdown.model_missing}</span>
-            <span className={styles.statLabel}>Model Missing</span>
-          </div>
-        )}
-
-        {breakdown.unsupported > 0 && (
-          <div className={`${styles.statCard} ${styles.statUnsupported}`} id="stat-unsupported">
-            <span className={styles.statValue}>{breakdown.unsupported}</span>
-            <span className={styles.statLabel}>Unsupported</span>
-          </div>
-        )}
-
-        {breakdown.failed > 0 && (
-          <div className={`${styles.statCard} ${styles.statFailed}`} id="stat-failed">
-            <span className={styles.statValue}>{breakdown.failed}</span>
-            <span className={styles.statLabel}>Failed</span>
-          </div>
-        )}
-
-        {breakdown.cancelled > 0 && (
-          <div className={`${styles.statCard} ${styles.statCancelled}`} id="stat-cancelled">
-            <span className={styles.statValue}>{breakdown.cancelled}</span>
-            <span className={styles.statLabel}>Cancelled</span>
-          </div>
-        )}
-
-        {breakdown.skipped > 0 && (
-          <div className={`${styles.statCard} ${styles.statSkipped}`} id="stat-skipped">
-            <span className={styles.statValue}>{breakdown.skipped}</span>
-            <span className={styles.statLabel}>Skipped</span>
-          </div>
-        )}
-      </div>
+      </details>
 
       {/* Normal Invisible Scan Notice (I11: informative, never a warning solely for invisibility) */}
       {coverage.normalScanNotice && (

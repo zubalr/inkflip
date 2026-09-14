@@ -67,7 +67,7 @@ async function openExportPreview(page: Page): Promise<void> {
     undefined,
     { timeout: 30_000 },
   );
-  await expect(page.locator("h2")).toContainText("Preview what you will export");
+  await expect(page.locator("h2")).toContainText("Save report");
 }
 
 test.describe("T16 Browser Export", () => {
@@ -86,7 +86,7 @@ test.describe("T16 Browser Export", () => {
     await expect(filenameCheckbox).toBeChecked({ checked: true });
 
     // Focus JSON download button
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await jsonBtn.focus();
     await expect(jsonBtn).toBeFocused();
 
@@ -163,7 +163,7 @@ test.describe("T16 Browser Export", () => {
     });
 
     // Click JSON download button
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await jsonBtn.click();
 
     const downloadData = await page.evaluate(() => {
@@ -187,7 +187,7 @@ test.describe("T16 Browser Export", () => {
     expect(downloadData.filename).toMatch(/^inkflip-evidence-[a-f0-9]{12}\.inkflip\.json$/);
 
     // Download HTML
-    const htmlBtn = page.getByRole("button", { name: "Download readable HTML" });
+    const htmlBtn = page.getByRole("button", { name: "Save HTML report (readable)" });
     await htmlBtn.click();
 
     const htmlData = await page.evaluate(() => {
@@ -231,7 +231,7 @@ test.describe("T16 Browser Export", () => {
     await expect(errorNotice.first()).toContainText("evidence-only");
 
     // Verify JSON download button is disabled
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await expect(jsonBtn).toBeDisabled();
 
     // Uncheck "Include the original PDF"
@@ -266,7 +266,7 @@ test.describe("T16 Browser Export", () => {
       const h = (globalThis as unknown as { __exportHarness?: ExportHarnessApi }).__exportHarness;
       h?.clearDownloads();
     });
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await jsonBtn.click();
 
     const omissions = await page.evaluate(() => {
@@ -309,7 +309,7 @@ test.describe("T16 Browser Export", () => {
     await expect(limitsWarning).toBeVisible();
 
     // JSON export button is disabled
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await expect(jsonBtn).toBeDisabled();
   });
 });

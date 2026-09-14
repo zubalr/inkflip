@@ -139,3 +139,19 @@
   font-size: var(--text-caption);
   margin: var(--space-3) 0 0;
 }
+
+/* Simplified export (plain-language pass) */
+.explainer {
+  margin: 0 0 12px;
+  color: var(--ink-muted, #5a554b);
+  font-size: 0.95rem;
+}
+.details {
+  margin: 12px 0;
+}
+.detailsSummary {
+  cursor: pointer;
+  color: var(--ink-muted, #5a554b);
+  font-size: 0.9rem;
+}
+.detailsSummary:hover { text-decoration: underline; }

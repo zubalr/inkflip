@@ -20,7 +20,9 @@ import { ExportController } from "./controller";
 
 /** Copy keys from planning/product/copy.json (verbatim strings). */
 const COPY = {
-  title: "Preview what you will export",
+  title: "Save report",
+  explainer:
+    "Save a readable HTML report to share, or a JSON file you can reopen here in Inkflip.",
   selected: "Selected evidence",
   full: "Full run evidence",
   source: "Include the original PDF",
@@ -33,8 +35,8 @@ const COPY = {
     "These images show complete pages, not only the selected crop. Review them before sharing.",
   cropWarning:
     "Review the actual crop for nearby private information. Cropping is not a redaction guarantee.",
-  html: "Download readable HTML",
-  json: "Download portable JSON",
+  html: "Save HTML report (readable)",
+  json: "Save JSON (reopens in Inkflip)",
   replayAbsent:
     "Original PDF not included. This report can be inspected, but replay requires the matching original.",
   replayPresent: "Original PDF included. Replay also requires the recorded reader environment.",
@@ -184,6 +186,7 @@ export function ExportPanel({
       <h2 id={`${baseId}-title`} className={styles.title}>
         {COPY.title}
       </h2>
+      <p className={styles.explainer}>{COPY.explainer}</p>
 
       <fieldset className={styles.options}>
         <legend className={styles.legend}>Inclusion</legend>
@@ -257,32 +260,35 @@ export function ExportPanel({
           <h3 className={styles.previewTitle}>
             {state.request.scope === "run" ? COPY.full : COPY.selected}
           </h3>
-          <dl className={styles.previewGrid}>
-            <dt>Findings</dt>
-            <dd>{counts?.findings ?? 0}</dd>
-            <dt>Readings kept / produced</dt>
-            <dd>
-              {counts?.retainedOccurrences ?? 0} / {counts?.producedOccurrences ?? 0}
-            </dd>
-            <dt>Checks complete</dt>
-            <dd>
-              {counts?.checksCompleted ?? 0} / {counts?.checks ?? 0}
-            </dd>
-            <dt>Pages selected</dt>
-            <dd>
-              {counts?.pagesSelected ?? 0} / {counts?.pageCount ?? 0}
-            </dd>
-            <dt>Crops / page images</dt>
-            <dd>
-              {counts?.crops ?? 0} / {counts?.pageRenders ?? 0}
-            </dd>
-            <dt>Notes</dt>
-            <dd>{counts?.annotations ?? 0}</dd>
-            <dt>JSON size</dt>
-            <dd>{formatBytes(preview.bytes.jsonBytes)}</dd>
-            <dt>Decoded assets</dt>
-            <dd>{formatBytes(preview.bytes.decodedAssetBytes)}</dd>
-          </dl>
+          <details className={styles.details}>
+            <summary className={styles.detailsSummary}>Report details</summary>
+            <dl className={styles.previewGrid}>
+              <dt>Findings</dt>
+              <dd>{counts?.findings ?? 0}</dd>
+              <dt>Readings kept / produced</dt>
+              <dd>
+                {counts?.retainedOccurrences ?? 0} / {counts?.producedOccurrences ?? 0}
+              </dd>
+              <dt>Checks complete</dt>
+              <dd>
+                {counts?.checksCompleted ?? 0} / {counts?.checks ?? 0}
+              </dd>
+              <dt>Pages selected</dt>
+              <dd>
+                {counts?.pagesSelected ?? 0} / {counts?.pageCount ?? 0}
+              </dd>
+              <dt>Crops / page images</dt>
+              <dd>
+                {counts?.crops ?? 0} / {counts?.pageRenders ?? 0}
+              </dd>
+              <dt>Notes</dt>
+              <dd>{counts?.annotations ?? 0}</dd>
+              <dt>JSON size</dt>
+              <dd>{formatBytes(preview.bytes.jsonBytes)}</dd>
+              <dt>Decoded assets</dt>
+              <dd>{formatBytes(preview.bytes.decodedAssetBytes)}</dd>
+            </dl>
+          </details>
           <p className={styles.manifest} data-testid="export-manifest">
             Included: {preview.included.join(", ")}. Excluded: {preview.omissions.join(" ")}
           </p>

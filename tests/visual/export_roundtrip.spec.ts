@@ -43,14 +43,14 @@ async function downloadNamed(page: Page, button: string): Promise<{ name: string
   return { name: download.suggestedFilename(), body: readFileSync(file as string) };
 }
 
-async function downloadJson(page: Page, button = "Download portable JSON"): Promise<Record<string, any>> {
+async function downloadJson(page: Page, button = "Save JSON (reopens in Inkflip)"): Promise<Record<string, any>> {
   const { body } = await downloadNamed(page, button);
   return JSON.parse(body.toString("utf8"));
 }
 
 async function waitForImportedReport(page: Page) {
   await expect(page.locator('[data-testid="viewer-stage"]')).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByRole("button", { name: "Download portable JSON" })).toBeEnabled({
+  await expect(page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" })).toBeEnabled({
     timeout: 20_000,
   });
 }
@@ -189,7 +189,7 @@ test.describe("Export payload, source opt-in, and reimport", () => {
   test("HTML download is script-free and carries CSP", async ({ page }) => {
     await page.goto(`${baseUrl}/#/workspace?example=${CARD}`);
     await waitForImportedReport(page);
-    const { body } = await downloadNamed(page, "Download readable HTML");
+    const { body } = await downloadNamed(page, "Save HTML report (readable)");
     const html = body.toString("utf8");
     expect(html.toLowerCase()).toContain("<!doctype html>");
     expect(html).toContain("Content-Security-Policy");
@@ -227,7 +227,7 @@ test.describe("Export payload, source opt-in, and reimport", () => {
       expect(noteText).toContain("evil.invalid");
     }
 
-    const { body: htmlBody } = await downloadNamed(page, "Download readable HTML");
+    const { body: htmlBody } = await downloadNamed(page, "Save HTML report (readable)");
     const html = htmlBody.toString("utf8");
     expect(html.toLowerCase()).not.toContain("<script");
     expect(html).not.toContain('src="https://evil.invalid');

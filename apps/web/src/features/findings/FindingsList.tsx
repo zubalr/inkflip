@@ -52,7 +52,7 @@ export const FindingsList: React.FC<FindingsListProps> = ({
     <section id="findings-list" className={styles.container} aria-labelledby="findings-heading">
       <div className={styles.listHeader}>
         <h2 id="findings-heading" className={styles.headerTitle}>
-          Document Differences & Readings
+          Differences found
         </h2>
         <span className={styles.countBadge} aria-live="polite">
           {findings.length} {findings.length === 1 ? "finding" : "findings"}

@@ -963,7 +963,7 @@ test("G1 leg 3: export → local reopen → attach source → offline OCR", asyn
 
   // Export preview: the disclosure panel itself is a privacy gate — the
   // real copy asserts the selection scope and no source PDF.
-  await expect(page.getByText("Preview what you will export")).toBeVisible();
+  await expect(page.getByText("Save report")).toBeVisible();
   await expect(page.getByText("Selected evidence")).toBeVisible();
   await expect(
     page.getByText("Original PDF not included.", { exact: false }).first(),
@@ -978,7 +978,7 @@ test("G1 leg 3: export → local reopen → attach source → offline OCR", asyn
 
   // JSON download: a real browser download of the selected projection.
   const dlJson = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   const jsonDl = await dlJson;
   const jsonPath = await recordDownload(cap, jsonDl, "export.inkflip-report.json");
   const exported = JSON.parse(readFileSync(jsonPath, "utf8"));
@@ -998,7 +998,7 @@ test("G1 leg 3: export → local reopen → attach source → offline OCR", asyn
 
   // HTML download: human-readable inspection, self-contained.
   const dlHtml = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download readable HTML" }).click();
+  await page.getByRole("button", { name: "Save HTML report (readable)" }).click();
   const htmlDl = await dlHtml;
   const htmlPath = await recordDownload(cap, htmlDl, "export.inkflip-report.html");
   const htmlBody = readFileSync(htmlPath, "utf8");

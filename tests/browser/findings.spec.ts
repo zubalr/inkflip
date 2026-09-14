@@ -83,6 +83,9 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
   }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=incomplete-statuses`);
     await page.waitForSelector('[role="group"][aria-label="Check statistics"]');
+    // stat cards live inside the collapsed "Check counts by result" details
+    const countsDetails = page.locator("details", { has: page.locator("#stat-completed, .statCompleted") }).first();
+    if (await countsDetails.count()) await countsDetails.locator("summary").click();
 
     // Check stats cards breakdown
     const timeoutCard = page.locator("#stat-timeout");
@@ -237,6 +240,9 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
   }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=all-terminal-statuses`);
     await page.waitForSelector('[role="group"][aria-label="Check statistics"]');
+    // stat cards live inside the collapsed "Check counts by result" details
+    const countsDetails = page.locator("details", { has: page.locator("#stat-completed, .statCompleted") }).first();
+    if (await countsDetails.count()) await countsDetails.locator("summary").click();
 
     // All terminal categories have distinct stat cards
     await expect(page.locator("#stat-timeout")).toBeVisible();

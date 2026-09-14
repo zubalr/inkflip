@@ -52,7 +52,7 @@ test("gallery renders six cards; detail shows real files; open report imports", 
     timeout: 30000,
   });
   await expect(page.locator("#doc-stats, [data-testid=doc-stats]")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Save report" })).toBeVisible();
   const card = page.locator("[id^=finding-item-]").first();
   await expect(card).toBeVisible();
   await card.click();

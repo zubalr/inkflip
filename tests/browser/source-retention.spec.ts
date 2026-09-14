@@ -363,7 +363,7 @@ test("after the A→B race, B's verified bytes are the only source a real export
 
   await expect(page.getByTestId("start-run")).toBeEnabled({ timeout: 15_000 });
   await page.getByTestId("start-run").click();
-  await expect(page.getByRole("button", { name: "Download portable JSON" })).toBeEnabled({
+  await expect(page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" })).toBeEnabled({
     timeout: 60_000,
   });
   const live = await page.evaluate(() => {
@@ -387,7 +387,7 @@ test("after the A→B race, B's verified bytes are the only source a real export
   expect(live.bytes).toBe(DUPLICATES_BYTES);
 
   const defaultPending = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   const defaultFile = await (await defaultPending).path();
   expect(defaultFile).toBeTruthy();
   const defaultPayload = JSON.parse(readFileSync(defaultFile as string, "utf8"));
@@ -404,7 +404,7 @@ test("after the A→B race, B's verified bytes are the only source a real export
     0,
   );
   const includedPending = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   const includedFile = await (await includedPending).path();
   expect(includedFile).toBeTruthy();
   const includedPayload = JSON.parse(readFileSync(includedFile as string, "utf8"));

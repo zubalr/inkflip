@@ -1326,7 +1326,7 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
         (globalThis as any).__t15.showExportPanel(args[0], args[1]),
       [report, Array.from(CANARY_BYTES)] as const,
     );
-    await expect(page.getByText("Preview what you will export")).toBeVisible();
+    await expect(page.getByText("Save report")).toBeVisible();
     // Explicit opt-ins: original bytes, filename and notes ride inside the
     // LOCAL download — the strongest canary-carrying artifact the app makes.
     await page.getByLabel("Include the original PDF").check();
@@ -1335,7 +1335,7 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
     await expect(page.getByText("Original PDF included.")).toBeVisible();
 
     const dlJson = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     const jsonDl = await dlJson;
     exportFileName = jsonDl.suggestedFilename();
     const jsonPath = await jsonDl.path();
@@ -1356,7 +1356,7 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
     });
 
     const dlHtml = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download readable HTML" }).click();
+    await page.getByRole("button", { name: "Save HTML report (readable)" }).click();
     const htmlDl = await dlHtml;
     const htmlPath = await htmlDl.path();
     const htmlBytes = readFileSync(htmlPath!);

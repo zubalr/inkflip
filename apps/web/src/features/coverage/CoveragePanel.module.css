@@ -214,3 +214,18 @@
   color: var(--color-muted);
   margin: 0;
 }
+
+/* Simplified coverage (plain-language pass) */
+.countLine {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.countDetails {
+  margin: 0 0 12px;
+}
+.countDetailsSummary {
+  cursor: pointer;
+  color: var(--ink-muted, #5a554b);
+  font-size: 0.9rem;
+}
+.countDetailsSummary:hover { text-decoration: underline; }

@@ -216,7 +216,7 @@ test("rejected local import keeps the live captured example", async ({ page }) =
   await page.getByRole("button", { name: "Clear and open file" }).click();
   await expect(page.locator("#import-error")).toBeVisible();
   expect((await inspect(page)).sha).toBe(AMOUNT_SHA);
-  await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Save report" })).toBeVisible();
 });
 
 test("replace confirmation cancel keeps the live example", async ({ page }) => {
@@ -251,7 +251,7 @@ test("example=true maps to the amount captured report with coverage, export, and
   await waitForSha(page, AMOUNT_SHA);
   await expect(page.locator("#workspace-doc-title")).toContainText("mapping-amount.pdf");
   await expect(page.getByRole("heading", { name: "What was checked" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Save report" })).toBeVisible();
   await expect(page.getByTestId("run-progress")).toHaveCount(0);
   const live = await inspect(page);
   expect(live.reportSource).toBe("import");
@@ -266,7 +266,7 @@ test("example=true maps to the amount captured report with coverage, export, and
   await expect(finding).toHaveAttribute("aria-current", "true");
 
   const pending = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   const download = await pending;
   const file = await download.path();
   expect(file).toBeTruthy();
@@ -300,7 +300,7 @@ test("Home Try the example and empty-workspace Load Example reach the captured a
   await page.locator("#btn-try-example").click();
   await waitForSha(page, AMOUNT_SHA);
   expect(page.url()).toContain("example=true");
-  await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Save report" })).toBeVisible();
 
   await page.locator("#btn-close-doc").click();
   await page.locator("#btn-load-demo").click();

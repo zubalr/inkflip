@@ -230,3 +230,14 @@
   color: var(--color-ink);
   box-sizing: border-box;
 }
+
+/* Simplified findings (plain-language pass) */
+.readingsDetails {
+  margin: 8px 0;
+}
+.readingsSummary {
+  cursor: pointer;
+  color: var(--ink-muted, #5a554b);
+  font-size: 0.9rem;
+}
+.readingsSummary:hover { text-decoration: underline; }

@@ -92,7 +92,7 @@ async function openExportPreview(page: Page): Promise<void> {
     undefined,
     { timeout: 30_000 },
   );
-  await expect(page.locator("h2")).toContainText("Preview what you will export");
+  await expect(page.locator("h2")).toContainText("Save report");
 }
 
 interface DownloadedJson {
@@ -107,7 +107,7 @@ interface DownloadedJson {
 
 async function downloadJson(page: Page): Promise<DownloadedJson> {
   const before = await withHarness(page, (h) => h.getDownloads().length);
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   await page.waitForFunction(
     (n) =>
       (globalThis as unknown as { __exportHarness: ExportHarnessApi }).__exportHarness
@@ -280,7 +280,7 @@ test.describe("T23 authored notes", () => {
     await expect(page.getByTestId("notes-excluded-with-findings")).toContainText("1 note(s)");
 
     let dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     let text = await (await dl).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);
@@ -293,7 +293,7 @@ test.describe("T23 authored notes", () => {
     // Re-selecting restores both the finding and its note.
     await page.getByTestId("finding-check-f_amount").check();
     dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     text = await (await dl).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);
@@ -328,7 +328,7 @@ test.describe("T23 authored notes", () => {
 
     // Default export: the authored note stays out.
     let dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     let text = await (await dl).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);
@@ -341,7 +341,7 @@ test.describe("T23 authored notes", () => {
     // absent from `occurrences` (it never becomes a machine reading).
     await notesBox.check();
     dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     text = await (await dl).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);

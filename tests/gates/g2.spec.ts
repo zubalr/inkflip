@@ -614,7 +614,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
     );
     await expect(page.locator("[id^=finding-item-]").first()).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Preview what you will export" }),
+      page.getByRole("heading", { name: "Save report" }),
     ).toBeVisible();
 
     // The deep-link path on a cold load: #/workspace?example=scan fetches
@@ -765,7 +765,7 @@ test("G2 leg 2: own-file open, region selection, full run, viewer controls", asy
     await expect(page.locator("#label-zoom")).toHaveText("125%");
     await expect(page.getByText("What was checked").first()).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Preview what you will export" }),
+      page.getByRole("heading", { name: "Save report" }),
     ).toBeVisible();
     await expect(page.locator("[data-testid=export-findings]")).toBeVisible();
 
@@ -897,7 +897,7 @@ test("G2 leg 4: sealed report import → privacy preview → selection → JSON/
     // no source bytes, no filename, no notes — and the real crop pixels
     // are shown with the not-a-redaction disclosure.
     await expect(
-      page.getByRole("heading", { name: "Preview what you will export" }),
+      page.getByRole("heading", { name: "Save report" }),
     ).toBeVisible();
     for (const label of [
       "Include the original PDF",
@@ -924,7 +924,7 @@ test("G2 leg 4: sealed report import → privacy preview → selection → JSON/
     await expect(page.getByTestId("deselected-findings")).toContainText("f_amount");
 
     let download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     let text = await (await download).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);
@@ -949,7 +949,7 @@ test("G2 leg 4: sealed report import → privacy preview → selection → JSON/
     // out of the portable JSON.
     await findingBox.check();
     download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download portable JSON" }).click();
+    await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
     text = await (await download).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);
@@ -966,7 +966,7 @@ test("G2 leg 4: sealed report import → privacy preview → selection → JSON/
 
     // The readable HTML export is a real, self-contained download.
     download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download readable HTML" }).click();
+    await page.getByRole("button", { name: "Save HTML report (readable)" }).click();
     const html = await (await download).createReadStream().then(async (s) => {
       const chunks: Buffer[] = [];
       for await (const c of s) chunks.push(c as Buffer);

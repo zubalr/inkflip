@@ -119,7 +119,7 @@ const MINIMAL_PDF = Buffer.from(
 async function openScanReport(page: Page): Promise<void> {
   await page.goto(`${baseUrl}/#/workspace?example=scan`);
   await page.waitForSelector("#viewer-stage", { timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: "Preview what you will export" })).toBeVisible({
+  await expect(page.getByRole("heading", { name: "Save report" })).toBeVisible({
     timeout: 30_000,
   });
 }
@@ -246,7 +246,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     await page.keyboard.press("Space");
     await expect(firstFindingCheck).toBeChecked();
 
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await jsonBtn.focus();
     const download = page.waitForEvent("download", { timeout: 15_000 }).catch(() => null);
     await page.keyboard.press("Enter");
@@ -510,7 +510,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     );
     expect(paperReduced).toBeLessThanOrEqual(0.05);
 
-    const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+    const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     const btnReduced = maxDurationMs(
       await jsonBtn.evaluate((el) => getComputedStyle(el).transitionDuration),
     );

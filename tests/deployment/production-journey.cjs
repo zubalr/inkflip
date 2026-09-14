@@ -76,11 +76,11 @@ function record(step, ok, detail) {
   await page.waitForSelector("[id^=finding-item-]", { timeout: 90000 });
 
   // ---- export default JSON (no source) ----
-  const jsonButton = page.getByRole("button", { name: "Download portable JSON" });
+  const jsonButton = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
   await jsonButton.waitFor({ state: "visible", timeout: 60000 });
   await page.waitForFunction(() => {
     const buttons = [...document.querySelectorAll("button")];
-    const b = buttons.find(x => /Download portable JSON/.test(x.textContent || ""));
+    const b = buttons.find(x => /Save JSON \(reopens in Inkflip\)/.test(x.textContent || ""));
     return b && !b.disabled;
   }, { timeout: 90000 });
   const exportDefault = page.waitForEvent("download", { timeout: 60000 });
@@ -102,11 +102,11 @@ function record(step, ok, detail) {
   await sourceToggle.check();
   await page.waitForFunction(() => {
     const buttons = [...document.querySelectorAll("button")];
-    const b = buttons.find(x => /Download portable JSON/.test(x.textContent || ""));
+    const b = buttons.find(x => /Save JSON \(reopens in Inkflip\)/.test(x.textContent || ""));
     return b && !b.disabled;
   }, { timeout: 90000 });
   const exportSource = page.waitForEvent("download", { timeout: 60000 });
-  await page.getByRole("button", { name: "Download portable JSON" }).click();
+  await page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" }).click();
   const dl2 = await exportSource;
   const sourcePath = path.join(EVIDENCE, "export-with-source.json");
   await dl2.saveAs(sourcePath);

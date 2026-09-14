@@ -542,7 +542,7 @@ test.describe("T39 built-app workspace budgets", () => {
               snap.fileState === "failed"),
         );
       }, { timeout: 180_000 });
-      const jsonBtn = page.getByRole("button", { name: "Download portable JSON" });
+      const jsonBtn = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
       if (await jsonBtn.isEnabled()) {
         const [download] = await Promise.all([page.waitForEvent("download", { timeout: 30_000 }), jsonBtn.click()]);
         await download.path();
