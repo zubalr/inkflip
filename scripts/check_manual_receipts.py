@@ -77,6 +77,14 @@ def required_profiles(kind: str, release_profile: str = "historical") -> list[di
             return [dict(item) for item in _MACOS_COMPATIBILITY]
         return [dict(item) for item in _COMPATIBILITY]
     if kind == "accessibility":
+        if release_profile == "macos":
+            # Owner-approved 2026-09-13 macOS scope defers NVDA/Firefox as a
+            # Windows AT profile. VoiceOver+Safari remains mandatory on macOS.
+            return [
+                dict(item)
+                for item in _ACCESSIBILITY
+                if item["id"] != "screen-reader-nvda-firefox"
+            ]
         return [dict(item) for item in _ACCESSIBILITY]
     if kind == "release":
         if release_profile == "macos":
