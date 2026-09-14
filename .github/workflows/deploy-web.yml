@@ -2,10 +2,12 @@
 # Native Vercel Git builds stay disconnected: they default to npm and would
 # ship a different tree than the frozen Bun/Python adapter.
 #
-# Path: verify (existing) succeeds on a push to main → this workflow builds
-# that SHA locally with the same commands as a developer machine, then
-# `vercel deploy --prebuilt --prod`. Feature branches and pull requests
-# never receive the production alias.
+# Path: verify succeeds on a push to main → this workflow checks that SHA
+# is still current main, builds it, runs a small production-browser smoke,
+# uploads an immutable candidate (`--prod --skip-domain`), re-checks main,
+# then `vercel promote`. Feature branches and pull requests never receive
+# the production alias. Job cancellation is not a substitute for the
+# freshness checks or for promote serialization.
 name: deploy-web
 on:
   workflow_run:
@@ -13,18 +15,22 @@ on:
     types: [completed]
 permissions:
   contents: read
-concurrency:
-  group: vercel-production
-  cancel-in-progress: true
 jobs:
-  publish:
+  candidate:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     environment: production
+    concurrency:
+      group: vercel-production-candidate
+      cancel-in-progress: true
+    outputs:
+      decision: ${{ steps.guard.outputs.decision }}
+      deployment: ${{ steps.deploy.outputs.url }}
+      sha: ${{ github.event.workflow_run.head_sha }}
     env:
       VERCEL_ORG_ID: team_2UPHADaxTemfNa0cbgC08Eyy
       VERCEL_PROJECT_ID: prj_sEtj12msmLcppTxQu8qpbqiXJrL0
@@ -32,10 +38,24 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+      - name: Skip stale main before expensive work
+        id: guard
+        run: |
+          git fetch --depth=1 origin main
+          python3 scripts/github_deploy_guard.py \
+            --phase before_work \
+            --trigger-event "${{ github.event.workflow_run.event }}" \
+            --trigger-branch "${{ github.event.workflow_run.head_branch }}" \
+            --trigger-conclusion "${{ github.event.workflow_run.conclusion }}" \
+            --trigger-sha "${{ github.event.workflow_run.head_sha }}" \
+            --current-main-sha "$(git rev-parse origin/main)"
       - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        if: steps.guard.outputs.decision == 'CONTINUE'
         with:
           bun-version: 1.4.0
       - name: Frozen install and production web build
+        if: steps.guard.outputs.decision == 'CONTINUE'
         env:
           INKFLIP_TEST_HOOKS: ""
         run: |
@@ -43,19 +63,75 @@ jobs:
           unset INKFLIP_TEST_HOOKS
           bun run build
       - name: Prepare and check Vercel Build Output
+        if: steps.guard.outputs.decision == 'CONTINUE'
         run: |
           python3 scripts/vercel_output.py prepare
           python3 scripts/vercel_output.py check
+      - name: Install Chromium for the prepublish smoke
+        if: steps.guard.outputs.decision == 'CONTINUE'
+        run: bunx --bun playwright install --with-deps chromium
+      - name: Production-build browser smoke
+        if: steps.guard.outputs.decision == 'CONTINUE'
+        run: node tests/deployment/prepublish-smoke.cjs
       - name: Link the existing inkflip project without Git integration
+        if: steps.guard.outputs.decision == 'CONTINUE'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           test -n "$VERCEL_TOKEN"
           mkdir -p .vercel
           printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-      - name: Deploy prebuilt production bytes
+      - name: Upload immutable production candidate without aliasing
+        if: steps.guard.outputs.decision == 'CONTINUE'
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          bunx --bun vercel@59.16.0 deploy --prebuilt --prod --yes \
+          set -euo pipefail
+          log=$(mktemp)
+          bunx --bun vercel@59.16.0 deploy --prebuilt --prod --skip-domain --yes \
+            --scope jubairjashim1975gmailcoms-projects >"$log" 2>&1
+          cat "$log"
+          url=$(grep -E 'https://[a-zA-Z0-9._-]+\.vercel\.app' "$log" | tail -n 1 | tr -d '\r')
+          test -n "$url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+  promote:
+    needs: candidate
+    if: needs.candidate.outputs.decision == 'CONTINUE' && needs.candidate.outputs.deployment != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    concurrency:
+      group: vercel-production-promote
+      cancel-in-progress: false
+    env:
+      VERCEL_ORG_ID: team_2UPHADaxTemfNa0cbgC08Eyy
+      VERCEL_PROJECT_ID: prj_sEtj12msmLcppTxQu8qpbqiXJrL0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.candidate.outputs.sha }}
+          fetch-depth: 1
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: 1.4.0
+      - name: Skip stale main immediately before alias promotion
+        id: guard
+        run: |
+          git fetch --depth=1 origin main
+          python3 scripts/github_deploy_guard.py \
+            --phase before_promote \
+            --trigger-event push \
+            --trigger-branch main \
+            --trigger-conclusion success \
+            --trigger-sha "${{ needs.candidate.outputs.sha }}" \
+            --current-main-sha "$(git rev-parse origin/main)" \
+            --candidate-id "${{ needs.candidate.outputs.deployment }}"
+      - name: Promote the candidate to the production alias
+        if: steps.guard.outputs.decision == 'CONTINUE'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          test -n "$VERCEL_TOKEN"
+          bunx --bun vercel@59.16.0 promote "${{ needs.candidate.outputs.deployment }}" --yes \
             --scope jubairjashim1975gmailcoms-projects

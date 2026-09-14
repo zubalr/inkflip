@@ -21,6 +21,7 @@ Intended publication path (local frozen build, prebuilt upload):
   python3 scripts/vercel_output.py prepare
   python3 scripts/vercel_output.py check
   bunx --bun vercel@59.16.0 deploy --prebuilt --prod --skip-domain --yes
+  bunx --bun vercel@59.16.0 promote <deployment-url-or-id> --yes
 
 Exit codes: 0 pass, 1 verification failures, 2 config/usage error.
 """
