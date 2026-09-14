@@ -24,12 +24,10 @@ the documented example commands.
 | `inkflip baseline create` / `compare` / exit 5 / baseline immutability | executed by `tests/examples/test_reader_upgrade.py` (10/10) on the documented example commands |
 | same-origin constraint | remote fetch refusal holds inside the Docker container too (see [distribution README](README.md)) |
 
-## Implementation defects found while executing (for the integrator)
+## Previously recorded defects — fixed on main (re-verified)
 
-1. `inkflip baseline create` with a schema-invalid rules file exits **4**
-   (contract: 2 for invalid arguments/configuration) and prints an internal
-   dump prefixed `Unexpected error: SCHEMA: {…}` instead of a clean
-   diagnostic. Reproduced 2026-09-13; the rules schema itself is the native
-   lane's contract.
-2. `inspect --embed-source` exists in the CLI but is not yet mentioned in
-   [docs/CLI.md](../CLI.md) (minor docs gap; flag works).
+1. `inkflip baseline create` with a schema-invalid rules file now exits **2**
+   (contract-correct, clean diagnostic); the earlier exit-4/internal-dump
+   behavior was fixed and re-verified 2026-09-14 on the merged tree.
+2. `inspect --embed-source` is now documented in [docs/CLI.md](../CLI.md)
+   including its privacy implication.

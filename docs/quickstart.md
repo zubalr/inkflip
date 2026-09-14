@@ -17,6 +17,7 @@ product's Python code runs on). Do not conflate them.
 | [uv](https://docs.astral.sh/uv/) | native project runner: resolves the pinned interpreter and frozen lock | **≥ 0.12.13** on a cold host (recorded freeze in [config/test-toolchain.json](../config/test-toolchain.json)) | Older uv cannot be relied on to resolve the pinned interpreter's download index. |
 | Pinned CPython | native product interpreter | exactly 3.13.15 (`.python-version`, `native/pyproject.toml`) | Provisioned automatically by `uv sync --frozen`. |
 | Playwright browsers | browser, privacy, a11y, visual suites | Chromium via `@playwright/test` | Install explicitly with `bun x playwright install chromium`; browsers are never installed by an install script. |
+| pdf.js Node profile (optional) | native `--reader` profiles that use the PDF.js bridge | pinned `pdfjs-dist@6.3.289` (own lock) | `cd packages/readers-pdfjs/node && bun install --frozen-lockfile` |
 
 The frozen toolchain also records Node 22.23.2 (`.node-version`) as the
 comparison-runtime baseline.
