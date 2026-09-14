@@ -1,0 +1,8 @@
+{
+  "selected_pages": [
+    0
+  ],
+  "region_id": "selected-page-region",
+  "page_count": 1,
+  "note": "region_id is recorded on the check; pdf.js text extraction is still page-scoped, not a raster clip"
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,21 @@ from inkflip.runtime.artifacts import atomic_write_bytes
 
 ALLOWED_KINDS = {"inkflip_model_manifest"}
 ALLOWED_PURPOSES = {"ocr_language_model", "tessdata", "generic"}
+
+# A model id names one directory under the cache root and a source file names one
+# leaf inside it. Both come from an untrusted manifest, so both are restricted to a
+# single safe path segment: without this an id such as "../../outside/x" or
+# "/tmp/escape" made the cache write outside the cache root entirely.
+_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$")
+
+
+def _safe_segment(value: str, what: str) -> str:
+    if not _SAFE_SEGMENT.match(value) or value in {".", ".."}:
+        raise ModelPrepareError(
+            f"{what} {value!r} must be a single safe path segment "
+            "(letters, digits, dot, underscore or hyphen; no separators)"
+        )
+    return value
 
 
 class ModelPrepareError(ValueError):
@@ -59,6 +75,7 @@ def prepare_models(manifest_path: Path, cache_dir: Path) -> dict[str, Any]:
         purpose = entry.get("purpose", "generic")
         if not isinstance(model_id, str) or not model_id:
             raise ModelPrepareError("Model id is required")
+        _safe_segment(model_id, "Model id")
         if not isinstance(digest, str) or len(digest) != 64:
             raise ModelPrepareError(f"Model {model_id!r} is missing a 64-hex sha256")
         if purpose not in ALLOWED_PURPOSES:
@@ -81,7 +98,14 @@ def prepare_models(manifest_path: Path, cache_dir: Path) -> dict[str, Any]:
                 }
             )
             continue
+        _safe_segment(source_path.name, "Model file name")
         destination = cache_dir / model_id / source_path.name
+        # Defence in depth: the composed destination must stay inside the cache root.
+        cache_root = cache_dir.resolve()
+        if cache_root not in destination.resolve().parents:
+            raise ModelPrepareError(
+                f"Model {model_id!r} would write outside the cache directory {cache_root}"
+            )
         destination.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_bytes(destination, source_path.read_bytes())
         prepared.append(

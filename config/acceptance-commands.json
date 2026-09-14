@@ -264,15 +264,18 @@
         "scripts/check_static_dist.py",
         "apps/web/dist",
         "--config",
-        "wrangler.json"
+        "wrangler.json",
+        "--dist-manifest",
+        ".private/distribution/dist-manifest.json"
       ],
       "requires": [
         "scripts/check_static_dist.py",
         "wrangler.json",
-        "apps/web/dist/"
+        "apps/web/dist/",
+        ".private/distribution/dist-manifest.json"
       ],
       "owner_task": "T48",
-      "description": "No dynamic server artifact or paid bindings; hashes/sizes/notices/external allowlist."
+      "description": "No dynamic server artifact or paid bindings; hashes/sizes/notices/external allowlist. The dist manifest is recorded by scripts/distribution/record_dist.py after a real build."
     }
   }
 }

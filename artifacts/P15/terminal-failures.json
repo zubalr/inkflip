@@ -1,0 +1,16 @@
+{
+  "unsupported_ocr": {
+    "checkId": "chk_p0_ocr",
+    "capability": "ocr",
+    "page_index": 0,
+    "region_id": null,
+    "status": "unsupported",
+    "reason": "unsupported:capability ocr is unavailable on the pinned pdf.js API boundary",
+    "emitted": 0,
+    "raw_texts": [],
+    "ms": 0,
+    "extractError": null,
+    "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
+  },
+  "native_environment": "Python 3.13.15; darwin; algorithm=inkflip-inspect-v1; profile_name=native-default"
+}
