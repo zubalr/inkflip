@@ -1,0 +1,99 @@
+{
+  "collected": 18,
+  "passed": 18,
+  "failed": 0,
+  "skipped": 0,
+  "live_container_cases": 7,
+  "cases": [
+    {
+      "name": "invocation-flags",
+      "ok": true,
+      "detail": "missing=[]"
+    },
+    {
+      "name": "digest-pinned-dockerfile",
+      "ok": true,
+      "detail": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285"
+    },
+    {
+      "name": "nonroot-user",
+      "ok": true,
+      "detail": "65532"
+    },
+    {
+      "name": "no-processing-network-in-script",
+      "ok": true,
+      "detail": "network none"
+    },
+    {
+      "name": "checkout-entrypoint-inkflip",
+      "ok": true,
+      "detail": "inkflip"
+    },
+    {
+      "name": "checkout-image-build",
+      "ok": true,
+      "detail": " kB)\n#9 6.119 Installing collected packages: rpds-py, pypdfium2, pypdf, Pillow, attrs, referencing, jsonschema-specifications, jsonschema\n#9 6.583 \n#9 6.584 Successfully installed Pillow-12.3.0 attrs-26.1.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 pypdf-6.18.0 pypdfium2-5.8.0 referencing-0.37.0 rpds-py-2026.6.3\n#9 6.584 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unu"
+    },
+    {
+      "name": "container-no-network-execution",
+      "ok": true,
+      "detail": "Report written to /output/report.json\ninkflip-container image=inkflip-native@sha256:f62e9f957d535f35051cfc8cb697d785d5f19322b3b0cd0726c6ce0700eeb3f3 lock=/Users/zubair/Code/Projects/pdf project/original/build/native/image.lock.json\n"
+    },
+    {
+      "name": "retained-unrelated-output",
+      "ok": true,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-contain-8fpdb8vz/out with spaces/report.json"
+    },
+    {
+      "name": "container-nonroot-uid",
+      "ok": true,
+      "detail": "65532\n"
+    },
+    {
+      "name": "container-no-egress",
+      "ok": true,
+      "detail": "~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/socket.py\", line 868, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/lib/python3.13/socket.py\", line 853, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nOSError: [Errno 101] Network is unreachable\n"
+    },
+    {
+      "name": "container-readonly-input",
+      "ok": true,
+      "detail": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    open('/input/escape.txt','w').write('nope')\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 30] Read-only file system: '/input/escape.txt'\n"
+    },
+    {
+      "name": "container-crash-injection",
+      "ok": true,
+      "detail": "exit 99"
+    },
+    {
+      "name": "container-hang-injection",
+      "ok": true,
+      "detail": "killed after 5s wall timeout"
+    },
+    {
+      "name": "container-stdout-flood-injection",
+      "ok": true,
+      "detail": "exit 0 stdout=1000001"
+    },
+    {
+      "name": "unchanged-prior-output",
+      "ok": true,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-contain-8fpdb8vz/out with spaces/report.json"
+    },
+    {
+      "name": "unchanged-source-bytes",
+      "ok": true,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-contain-8fpdb8vz/source with spaces/mapping-control.pdf"
+    },
+    {
+      "name": "refuses-home-root-mount",
+      "ok": true,
+      "detail": "exit 2"
+    },
+    {
+      "name": "host-source-untouched",
+      "ok": true,
+      "detail": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/t40-contain-8fpdb8vz/source with spaces"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:49943/#/workspace?example=scan",
+  "url": "http://localhost:62846/#/workspace?example=scan",
   "tags": [
     "wcag2a",
     "wcag2aa",
@@ -7,7 +7,7 @@
     "wcag21aa",
     "wcag22aa"
   ],
-  "scannedAt": "2026-09-14T03:49:40.739Z",
+  "scannedAt": "2026-09-14T09:46:53.501Z",
   "violationCount": 0,
   "seriousOrCritical": []
 }

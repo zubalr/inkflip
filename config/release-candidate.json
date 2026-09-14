@@ -1,0 +1,16 @@
+{
+  "kind": "inkflip-release-candidate",
+  "schema_version": "1.0.0",
+  "recorded_by": "devin-integrator",
+  "recorded_at": "2026-09-14T08:05:00+03:00",
+  "source_label": "main@f97f0dd5f69351ec01619e0bc65ba6c58984216a",
+  "production_image": {
+    "ref": "inkflip-native:prod",
+    "digest": "sha256:210cd586b6f3250f0602ac537e28e0758d843dd03ac12201dc4f81c9da503152",
+    "architecture": "amd64",
+    "wheel_sha256": "b688261643dbfe79d93006952c348bca488996dfe9e54a6404f973959445f810",
+    "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "tesseract_version": "5.5.0"
+  },
+  "notes": "Trusted declared input for check_distribution.py --docker. The expected digest comes from this file, never from the artifact being checked. amd64 image runs emulated on this arm64 Mac; it is not native-arm64 evidence."
+}

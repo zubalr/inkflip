@@ -31,7 +31,7 @@
     ]
   },
   "pdfjs_version": "6.3.289",
-  "node": "v22.23.2",
+  "node": "v26.7.0",
   "page_status": "completed",
   "raw_text_len": 116
 }
