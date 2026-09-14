@@ -1,0 +1,19 @@
+{
+  "kind": "inkflip-notice-index",
+  "schema_version": "1.0.0",
+  "recorded": "2026-09-14",
+  "entries": [
+    {
+      "id": "inkflip-mit",
+      "path": "LICENSE",
+      "sha256": "43ce7343d58fa9904da18bae9a47d7d224989db71a4ed549c701ae59ada7d507",
+      "bytes": 1063
+    },
+    {
+      "id": "tesseract-apache",
+      "path": "licenses/tessdata-fast-eng/NOTICE.txt",
+      "sha256": "cd77eea3b79399cc2c14f2fb20b0871967b84699a974b439cdd60d6e027cbf57",
+      "bytes": 12484
+    }
+  ]
+}
