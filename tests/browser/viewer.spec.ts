@@ -230,6 +230,36 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     });
   });
 
+  test("page navigation is independent of finding selection and clamps honestly", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
+    await page.waitForSelector("#viewer-stage");
+
+    const paper = page.locator("#document-paper");
+    await expect(paper).toHaveAttribute("data-page-index", "0");
+    await expect(page.locator("#page-indicator")).toHaveText("Page 1 of 2");
+    await expect(page.locator("#btn-page-prev")).toBeDisabled();
+
+    // Next moves to page 2 without selecting any finding — pages are
+    // reachable even when no finding names them.
+    await page.locator("#btn-page-next").click();
+    await expect(paper).toHaveAttribute("data-page-index", "1");
+    await expect(page.locator("#page-indicator")).toHaveText("Page 2 of 2");
+    await expect(page.locator("[id^=finding-item-][aria-current='true']")).toHaveCount(0);
+
+    // Clamped at the last page: next is disabled rather than wrapping.
+    await expect(page.locator("#btn-page-next")).toBeDisabled();
+
+    // Previous returns to page 1; selecting a finding then still wins.
+    await page.locator("#btn-page-prev").click();
+    await expect(paper).toHaveAttribute("data-page-index", "0");
+    const unknownFinding = page.locator("#finding-item-finding-page1-unknown");
+    await unknownFinding.click();
+    await expect(paper).toHaveAttribute("data-page-index", "1");
+  });
+
   test("criterion 5: canvas has equivalent reachable content and limits (WCAG 2.2 AA)", async ({
     page,
   }) => {

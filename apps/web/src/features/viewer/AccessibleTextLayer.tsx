@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Occurrence, Reader } from "../../../../../packages/contracts/src/index.ts";
 import styles from "./AccessibleTextLayer.module.css";
 
@@ -9,6 +9,10 @@ export interface AccessibleTextLayerProps {
   selectedOccurrenceId?: string | null;
   onSelectOccurrence?: (occ: Occurrence) => void;
   limitations?: string[];
+  /** Reading view mounts the layer as the main content — open by default.
+   *  Below the page it collapses on narrow viewports so the findings
+   *  panel is not pushed thousands of pixels down. */
+  defaultDetailsOpen?: boolean;
 }
 
 export const AccessibleTextLayer: React.FC<AccessibleTextLayerProps> = ({
@@ -18,7 +22,17 @@ export const AccessibleTextLayer: React.FC<AccessibleTextLayerProps> = ({
   selectedOccurrenceId,
   onSelectOccurrence,
   limitations = [],
+  defaultDetailsOpen,
 }) => {
+  // Resolved once at mount: the `open` attribute is initial markup; React
+  // does not rewrite it on later renders, so user toggling persists.
+  // `defaultDetailsOpen === true` (Reading view) forces them open.
+  const [autoOpen] = useState<boolean>(() =>
+    typeof window === "undefined"
+      ? true
+      : window.matchMedia("(min-width: 1100px)").matches,
+  );
+  const detailsOpen = defaultDetailsOpen === true ? true : autoOpen;
   const readerMap = new Map<string, Reader>();
   for (const r of readers) {
     readerMap.set(r.id, r);
@@ -53,46 +67,54 @@ export const AccessibleTextLayer: React.FC<AccessibleTextLayerProps> = ({
 
         return (
           <div key={readerId} className={styles.readerGroup}>
-            <h4 className={styles.readerHeader}>{readerLabel}</h4>
-            <ul className={styles.occurrenceList} role="list">
-              {occs.map((occ) => {
-                const isSelected = occ.id === selectedOccurrenceId;
-                return (
-                  <li
-                    key={occ.id}
-                    id={`text-occ-${occ.id}`}
-                    className={`${styles.occurrenceItem} ${
-                      isSelected ? styles.occurrenceSelected : ""
-                    }`}
-                  >
-                    <span className={styles.occurrenceText}>{occ.raw_text}</span>
-                    <span className={styles.occurrenceMeta}>
-                      occurrence #{occ.ordinal}
-                      {occ.geometry.precision === "page_only" ||
-                      occ.geometry.precision === "unknown"
-                        ? " (page-level only)"
-                        : ` (${occ.geometry.precision})`}
-                    </span>
-                    <button
-                      type="button"
-                      className={styles.selectBtn}
-                      onClick={() => onSelectOccurrence?.(occ)}
-                      aria-pressed={isSelected}
+            <details className={styles.readerDetails} open={detailsOpen}>
+              <summary className={styles.readerSummary}>
+                <h4 className={styles.readerHeader}>
+                  {readerLabel} · {occs.length} {occs.length === 1 ? "reading" : "readings"}
+                </h4>
+              </summary>
+              <ul className={styles.occurrenceList} role="list">
+                {occs.map((occ) => {
+                  const isSelected = occ.id === selectedOccurrenceId;
+                  return (
+                    <li
+                      key={occ.id}
+                      id={`text-occ-${occ.id}`}
+                      className={`${styles.occurrenceItem} ${
+                        isSelected ? styles.occurrenceSelected : ""
+                      }`}
                     >
-                      {isSelected ? "Selected" : "Select"}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {reader && reader.limitations.length > 0 && (
-              <ul className={styles.limitsList} aria-label={`${readerLabel} limitations`}>
-                {reader.limitations.map((lim, i) => (
-                  <li key={i}>{lim}</li>
-                ))}
+                      <span className={styles.occurrenceText}>
+                        {occ.raw_text === "" ? "(no text captured)" : occ.raw_text}
+                      </span>
+                      <span className={styles.occurrenceMeta}>
+                        occurrence #{occ.ordinal}
+                        {occ.geometry.precision === "page_only" ||
+                        occ.geometry.precision === "unknown"
+                          ? " (page-level only)"
+                          : ` (${occ.geometry.precision})`}
+                      </span>
+                      <button
+                        type="button"
+                        className={styles.selectBtn}
+                        onClick={() => onSelectOccurrence?.(occ)}
+                        aria-pressed={isSelected}
+                      >
+                        {isSelected ? "Selected" : "Select"}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
-            )}
+
+              {reader && reader.limitations.length > 0 && (
+                <ul className={styles.limitsList} aria-label={`${readerLabel} limitations`}>
+                  {reader.limitations.map((lim, i) => (
+                    <li key={i}>{lim}</li>
+                  ))}
+                </ul>
+              )}
+            </details>
           </div>
         );
       })}

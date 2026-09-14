@@ -96,6 +96,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   });
   const [localExampleId, setLocalExampleId] = useState<string | null>(null);
   const exampleIdToLoad = initialExampleId ?? localExampleId;
+  // Set once the gallery example's report actually passed the import gate
+  // — the workspace then labels the result as a prepared example rather
+  // than a fresh inspection of the user's own file.
+  const [loadedExampleId, setLoadedExampleId] = useState<string | null>(null);
 
   // Human notes (T23) live outside the sealed report — they are added to a
   // projection at export time only, never mutate machine evidence. Notes
@@ -168,6 +172,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         });
         await session.offerFile(file);
         if (!stillOurs()) return;
+        setLoadedExampleId(exampleIdToLoad);
         const generation = session.getState().generation;
         const manifestRes = await fetch(manifestUrl, {
           credentials: "same-origin",
@@ -232,6 +237,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     queueMicrotask(() => {
       if (cancelled || incomingOfferGen.current !== gen) return;
       bumpExampleIntent();
+      setLoadedExampleId(null);
       void session.offerFile(file).finally(() => {
         if (!cancelled && incomingOfferGen.current === gen) {
           onIncomingFileHandled?.();
@@ -253,6 +259,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       event.target.value = "";
       if (!file) return;
       bumpExampleIntent();
+      setLoadedExampleId(null);
       const occupied = session.getState().doc !== null || session.getState().report !== null;
       if (occupied) {
         setPendingFile(file);
@@ -275,16 +282,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
   const report = snap.report;
   // A real document or report always takes precedence over the example.
-  const viewerDoc: ViewerDoc | null = report
-    ? {
-        pages: report.pages,
-        readers: report.readers,
-        occurrences: report.occurrences,
-        findings: report.findings,
-      }
-    : snap.doc === null
-      ? exampleDoc
-      : null;
+  // Memoized: the viewer keys position/selection reset on this identity,
+  // so a fresh object every render would trap it on page 1.
+  const viewerDoc: ViewerDoc | null = useMemo(
+    () =>
+      report
+        ? {
+            pages: report.pages,
+            readers: report.readers,
+            occurrences: report.occurrences,
+            findings: report.findings,
+          }
+        : snap.doc === null
+          ? exampleDoc
+          : null,
+    [report, snap.doc, exampleDoc],
+  );
 
   const fileState = snap.fileState;
   const busy =
@@ -325,6 +338,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     session.close();
     setExampleDoc(null);
     setLocalExampleId(null);
+    setLoadedExampleId(null);
     setUserNotes([]);
   }, [bumpExampleIntent, session]);
 
@@ -375,6 +389,25 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 ? `${snap.doc.pageCount} ${snap.doc.pageCount === 1 ? "page" : "pages"} · not yet inspected`
                 : "No document loaded"}
           </span>
+          {report !== null && (
+            <span
+              data-testid="result-provenance"
+              className={styles.provenanceBadge}
+              title={
+                loadedExampleId !== null
+                  ? "Captured once with this example's recorded settings — a fresh inspection of the same file can legitimately produce different findings."
+                  : snap.reportSource === "run"
+                    ? "Produced by inspecting the open file just now."
+                    : "A report saved earlier and opened for review."
+              }
+            >
+              {loadedExampleId !== null
+                ? "Prepared example"
+                : snap.reportSource === "run"
+                  ? "Fresh inspection"
+                  : "Saved report"}
+            </span>
+          )}
         </div>
 
         <div className={styles.documentHeaderRight}>
@@ -572,6 +605,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           >
             <ViewerStage
               doc={viewerDoc}
+              renderPage={session.renderViewerPage}
+              pageSourceAvailable={snap.doc !== null || snap.hasSourceBytes}
               annotations={userNotes}
               onAddAnnotation={addNote}
               onRemoveAnnotation={removeNote}
@@ -643,6 +678,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 ) : (
                   <p>This report does not require the original PDF for replay.</p>
                 )}
+                {loadedExampleId !== null && (
+                  <p data-testid="prepared-example-note">
+                    This is a saved example captured with the settings recorded in
+                    its manifest. Re-checking the same PDF fresh — a different
+                    page scope or OCR region — can legitimately report different
+                    findings.
+                  </p>
+                )}
               </section>
             )}
             <ExportPanel
@@ -666,6 +709,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               phase="idle"
               onFile={(file) => {
                 bumpExampleIntent();
+                setLoadedExampleId(null);
                 void session.offerFile(file);
               }}
               hasDocument={false}
@@ -682,6 +726,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           setPendingFile(null);
           if (file) {
             bumpExampleIntent();
+            setLoadedExampleId(null);
             void session.offerFile(file);
           }
         }}

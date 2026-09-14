@@ -24,6 +24,27 @@
   margin-bottom: var(--space-4);
 }
 
+.readerDetails {
+  margin: 0;
+}
+
+.readerSummary {
+  cursor: pointer;
+  list-style-position: outside;
+  margin-bottom: var(--space-2);
+}
+
+.readerSummary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+.readerSummary .readerHeader {
+  display: inline;
+  margin: 0;
+}
+
 .readerHeader {
   font-size: var(--text-caption);
   font-weight: 600;

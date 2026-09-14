@@ -4,6 +4,15 @@
   box-sizing: border-box;
 }
 
+/* Disclosure expansion (finding details, reader lists) grows page height
+   and, on platforms with classic scrollbars, makes a vertical scrollbar
+   appear — narrowing the viewport and shifting the centered layout
+   sideways. Reserving the gutter keeps the shift from ever happening; on
+   overlay-scrollbar platforms this is a no-op. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   background: var(--color-canvas);

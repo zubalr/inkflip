@@ -25,33 +25,83 @@
   pointer-events: none;
 }
 
+/*
+ * SVG polygons do not read HTML box properties (border/background). The
+ * default SVG fill is opaque black, which is exactly the defect this
+ * replaces: every state below uses an explicit translucent fill plus a
+ * token-colored stroke so the painted page text stays readable.
+ * Order matters — later rules win when a polygon carries both a
+ * precision class and a selection/candidate class.
+ */
 .highlightBox {
-  position: absolute;
-  box-sizing: border-box;
   pointer-events: auto;
   cursor: pointer;
-  border-radius: var(--space-1);
+  fill: none;
+  stroke: none;
 }
 
 .highlightExact {
-  border: 2px solid var(--color-teal);
-  background-color: var(--color-surface-subtle);
+  fill: var(--color-teal);
+  fill-opacity: 0.14;
+  stroke: var(--color-teal);
+  stroke-width: 1.5;
 }
 
 .highlightEstimated {
-  border: 2px dotted var(--color-muted);
-  background-color: var(--color-surface-muted);
+  fill: var(--color-muted);
+  fill-opacity: 0.1;
+  stroke: var(--color-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
 }
 
 .highlightAmbiguous {
-  border: 2px dashed var(--color-rust);
-  background-color: var(--color-warning-surface);
+  fill: var(--color-rust);
+  fill-opacity: 0.13;
+  stroke: var(--color-rust);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
 }
 
 .highlightSelected {
-  border-color: var(--color-focus);
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
+  fill-opacity: 0.2;
+  stroke: var(--color-focus);
+  stroke-width: 2.5;
+  stroke-dasharray: none;
+}
+
+.pageState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+  line-height: var(--line-body);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 11px,
+      var(--color-surface-muted) 11px,
+      var(--color-surface-muted) 12px
+    ),
+    var(--color-paper);
+}
+
+.pageStateTitle {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.pageStateNote {
+  max-width: 34em;
+  margin: 0;
 }
 
 .pageLevelNotice {

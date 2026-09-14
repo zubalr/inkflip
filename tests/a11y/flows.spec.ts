@@ -469,7 +469,12 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     expect(counter).toMatch(/of 5/);
 
     // Scrollable paper area keeps focusable content reachable: a text-
-    // equivalent Select button accepts focus and scrolls into view.
+    // equivalent Select button accepts focus and scrolls into view. At
+    // this width the per-reader occurrence lists are collapsed by default
+    // — open the first one first (summary is natively keyboard-operable).
+    const firstSummary = page.locator("#accessible-text-equivalent details summary").first();
+    await firstSummary.focus();
+    await page.keyboard.press("Enter");
     const selectBtn = page.locator("#accessible-text-equivalent li button").first();
     await selectBtn.focus();
     await expect(selectBtn).toBeFocused();

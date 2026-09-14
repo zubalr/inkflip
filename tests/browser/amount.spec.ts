@@ -1,5 +1,5 @@
 /**
- * TEST-17: Browser amount demo and prepared manifest verification (T17).
+ * TEST-17: Browser amount example and prepared manifest verification (T17).
  *
  * Acceptance criteria (from planning/tasks/T17.md):
  * 1. Renamed identical bytes produce same reading (F01 mapping-amount / F02).
@@ -9,6 +9,10 @@
  * 5. Actual timing visible, not decorative scan animation.
  * 6. Clean counterpart renders equal under same renderer (0 pixel difference, diverging text).
  * 7. Accessibility: No critical or serious WCAG violations.
+ *
+ * The standalone /examples/amount/index.html page is a redirect into the
+ * real inspector; these criteria now run against #/workspace?example=amount
+ * and a real local-file inspection.
  */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -23,7 +27,8 @@ import { checkSchema, validateReport } from "../../packages/contracts/src/index.
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const WEB = join(ROOT, "apps", "web");
 const FIXTURE_PUBLIC = join(ROOT, "fixtures", "public");
-const DEMO_URL = "/examples/amount/index.html";
+const EXAMPLE_URL = "/#/workspace?example=amount";
+const REDIRECT_URL = "/examples/amount/index.html";
 
 interface Harness {
   base: string;
@@ -65,164 +70,177 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.setTimeout(60_000);
+test.setTimeout(180_000);
 
 function sha256Hex(buf: Buffer | Uint8Array): string {
   return createHash("sha256").update(buf).digest("hex");
 }
 
+/** Open a local PDF through the workspace's real file input. */
+async function openPdf(page: Page, bytes: Buffer, name: string) {
+  await page.locator("#input-open-pdf").setInputFiles({
+    name,
+    mimeType: "application/pdf",
+    buffer: bytes,
+  });
+  await page.waitForSelector('[data-testid="pages-summary"]', { timeout: 30_000 });
+}
+
+/** Render page 0 through the session's real PDF.js render path. */
+async function renderDigest(page: Page): Promise<{ w: number; h: number; sha: string } | null> {
+  return page.evaluate(async () => {
+    const session = (window as unknown as { __inspect?: any }).__inspect;
+    if (!session?.renderViewerPage) return null;
+    const raster = await session.renderViewerPage(0, 1.5, new AbortController().signal);
+    if (!raster) return null;
+    const digest = await crypto.subtle.digest("SHA-256", raster.imageData);
+    return {
+      w: raster.widthPx,
+      h: raster.heightPx,
+      sha: [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+    };
+  });
+}
+
+async function reportSha256(page: Page): Promise<string | null> {
+  return page.evaluate(
+    () => (window as unknown as { __inspect?: any }).__inspect?.getState().report?.document.sha256 ?? null,
+  );
+}
+
 test.describe("T17: Browser Amount Demo and Prepared Manifest", () => {
   test("criterion 1: renamed identical bytes produce same reading", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
-    await page.waitForSelector("#file-input");
+    await page.goto(`${harness.base}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-input"]');
 
-    // Read original mapping-amount.pdf (F01) bytes
     const amountBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
     const amountHash = sha256Hex(amountBytes);
 
-    // Upload with a completely different file name
-    await page.setInputFiles("#file-input", {
-      name: "renamed-accounting-invoice-2026.pdf",
-      mimeType: "application/pdf",
-      buffer: amountBytes,
-    });
+    // Upload under a completely different name and run a real inspection.
+    await openPdf(page, amountBytes, "renamed-accounting-invoice-2026.pdf");
+    await expect(page.locator("#workspace-doc-title")).toContainText(
+      "renamed-accounting-invoice-2026.pdf",
+    );
+    await page.locator('[data-testid="start-run"]').click();
+    await page.waitForSelector("#viewer-stage", { timeout: 120_000 });
 
-    // Wait for live processing to finish
-    await page.waitForSelector('#live-result-container[data-state="complete"]', {
-      timeout: 15_000,
-    });
+    // The report binds to the byte identity, not the file name.
+    expect(await reportSha256(page)).toBe(amountHash);
 
-    // Assert renamed file name is displayed
-    const nameText = await page.locator("#live-file-name").textContent();
-    expect(nameText).toBe("renamed-accounting-invoice-2026.pdf");
+    // The real reading is the recorded $1,000 text-layer value.
+    await expect(page.locator("#accessible-text-equivalent")).toContainText("$1,000");
 
-    // Assert SHA-256 matches exact original mapping-amount.pdf
-    const hashText = await page.locator("#live-file-hash").textContent();
-    expect(hashText).toBe(amountHash);
-
-    // Assert live extraction produces $1,000 (same reading based on bytes, not name)
-    await expect(page.locator("#live-extracted-text")).toContainText("$1,000");
-
-    // Now test with mapping-control.pdf renamed
+    // Same bytes under a control name read differently — mapping-control.pdf
+    // carries identity ToUnicode, so its text layer reads $100.
+    await page.locator("#btn-close-doc").click();
     const controlBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-control.pdf"));
     const controlHash = sha256Hex(controlBytes);
-
-    await page.setInputFiles("#file-input", {
-      name: "completely-different-name-control.pdf",
-      mimeType: "application/pdf",
-      buffer: controlBytes,
-    });
-
-    // Wait for text and hash to update to control values
-    await expect(page.locator("#live-file-hash")).toHaveText(controlHash);
-    await expect(page.locator("#live-extracted-text")).toContainText("$100");
+    await openPdf(page, controlBytes, "completely-different-name-control.pdf");
+    await expect(page.locator("#workspace-doc-title")).toContainText(
+      "completely-different-name-control.pdf",
+    );
+    await page.locator('[data-testid="start-run"]').click();
+    await page.waitForSelector("#viewer-stage", { timeout: 120_000 });
+    expect(await reportSha256(page)).toBe(controlHash);
+    await expect(page.locator("#accessible-text-equivalent")).toContainText("$100");
   });
 
   test("criterion 2: modified bytes cannot replay old prepared result", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
-    await page.waitForSelector("#file-input");
-
-    // Read mapping-amount.pdf and tamper with its bytes (append valid comment)
     const originalBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
     const modifiedBytes = Buffer.concat([originalBytes, Buffer.from("\n% tampered comment\n")]);
     const modifiedHash = sha256Hex(modifiedBytes);
+    const reportBytes = readFileSync(
+      join(WEB, "public", "examples", "amount", "report.json"),
+    );
 
-    // Upload modified PDF
-    await page.setInputFiles("#file-input", {
+    // Attach tampered bytes as the source of the prepared report: the
+    // import/attach gate must reject them as not matching the recorded
+    // document — the prepared result cannot be replayed onto other bytes.
+    await page.goto(`${harness.base}/#/workspace`);
+    await page.locator("#input-import-report").setInputFiles({
+      name: "amount.inkflip.json",
+      mimeType: "application/json",
+      buffer: reportBytes,
+    });
+    await page.waitForSelector("#btn-attach-source", { timeout: 30_000 });
+    await page.locator("#input-attach-source").setInputFiles({
       name: "modified-tampered-amount.pdf",
       mimeType: "application/pdf",
       buffer: modifiedBytes,
     });
-
-    // Wait for live processing to complete
-    await page.waitForSelector('#live-result-container[data-state="complete"]', {
+    await expect(page.locator("#import-error")).toContainText("does not match", {
       timeout: 15_000,
     });
 
-    // Assert hash is different from prepared manifest
-    const hashText = await page.locator("#live-file-hash").textContent();
-    expect(hashText).toBe(modifiedHash);
-
-    // Assert replay rejection notice appears with tamper-warning class
-    const notice = page.locator("#replay-notice");
-    await expect(notice).toBeVisible();
-    await expect(notice).toHaveClass(/tamper-warning/);
-    const noticeText = await notice.textContent();
-    expect(noticeText).toContain("Modified bytes detected");
-    expect(noticeText).toContain("Prepared report replay rejected");
-
-    // Evaluate client state to verify canned replay was NOT performed
-    const lastResult = await page.evaluate(() => (window as any).__lastLiveResult);
-    expect(lastResult).toBeDefined();
-    expect(lastResult.replayedPrepared).toBe(false);
-    expect(lastResult.hash).toBe(modifiedHash);
+    // The same modified bytes opened directly get their own fresh
+    // inspection bound to the modified digest — never the prepared one.
+    await page.locator("#btn-close-doc").click();
+    await openPdf(page, modifiedBytes, "modified-tampered-amount.pdf");
+    await page.locator('[data-testid="start-run"]').click();
+    await page.waitForSelector("#viewer-stage", { timeout: 120_000 });
+    expect(await reportSha256(page)).toBe(modifiedHash);
+    await expect(page.locator('[data-testid="result-provenance"]')).toHaveText("Fresh inspection");
   });
 
   test("criterion 3: live and prepared paths label provenance correctly", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
+    // Prepared example: imported captured report keeps its gallery label.
+    await page.goto(`${harness.base}${EXAMPLE_URL}`);
+    await page.waitForSelector("#viewer-stage", { timeout: 30_000 });
+    const badge = page.locator('[data-testid="result-provenance"]');
+    await expect(badge).toHaveText("Prepared example");
+    await expect(page.locator('[data-testid="prepared-example-note"]')).toBeVisible();
 
-    // Prepared state on initial load
-    const badge = page.locator("#provenance-badge");
-    await expect(badge).toBeVisible();
-    await expect(badge).toHaveText("prepared");
-    await expect(badge).toHaveAttribute("data-provenance", "prepared");
-    await expect(badge).toHaveClass(/badge-prepared/);
+    // A report opened by hand (no gallery card) is a plain saved report.
+    await page.goto(`${harness.base}/#/workspace`);
+    await page.locator("#input-import-report").setInputFiles({
+      name: "amount.inkflip.json",
+      mimeType: "application/json",
+      buffer: readFileSync(join(WEB, "public", "examples", "amount", "report.json")),
+    });
+    await page.waitForSelector("#viewer-stage", { timeout: 30_000 });
+    await expect(badge).toHaveText("Saved report");
 
-    // Prepared timing display
-    const timing = page.locator("#timing-display");
-    await expect(timing).toBeVisible();
-    expect(await timing.textContent()).toMatch(/^\d+\s*ms$/);
-
-    // Now trigger live path via upload
+    // A fresh local inspection of the same source file is labelled as such.
+    await page.locator("#btn-close-doc").click();
     const amountBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
-    await page.setInputFiles("#file-input", {
-      name: "live-test.pdf",
-      mimeType: "application/pdf",
-      buffer: amountBytes,
-    });
-
-    await page.waitForSelector('#live-result-container[data-state="complete"]', {
-      timeout: 15_000,
-    });
-
-    // Provenance badge must now say 'live'
-    await expect(badge).toHaveText("live");
-    await expect(badge).toHaveAttribute("data-provenance", "live");
-    await expect(badge).toHaveClass(/badge-live/);
+    await openPdf(page, amountBytes, "live-run.pdf");
+    await page.locator('[data-testid="start-run"]').click();
+    await page.waitForSelector("#viewer-stage", { timeout: 120_000 });
+    await expect(badge).toHaveText("Fresh inspection");
   });
 
-  test("criterion 4: real source downloadable and verifiable", async ({ request, page }) => {
-    // Check download links exist on the page
-    await page.goto(`${harness.base}${DEMO_URL}`);
-    const sourceLink = page.locator("#download-source");
-    const controlLink = page.locator("#download-control");
-    const manifestLink = page.locator("#view-manifest");
-    const reportLink = page.locator("#view-report");
+  test("criterion 4: real source downloadable and verifiable", async ({ request }) => {
+    // The redirect page keeps every publicly linked dependency reachable.
+    const resPage = await request.get(`${harness.base}${REDIRECT_URL}`);
+    expect(resPage.status()).toBe(200);
+    const html = await resPage.text();
+    expect(html).toContain("/#/workspace?example=amount");
+    for (const asset of [
+      "mapping-amount.pdf",
+      "mapping-control.pdf",
+      "manifest.json",
+      "report.json",
+    ]) {
+      expect(html).toContain(`/examples/amount/${asset}`);
+    }
 
-    await expect(sourceLink).toBeVisible();
-    await expect(controlLink).toBeVisible();
-    await expect(manifestLink).toBeVisible();
-    await expect(reportLink).toBeVisible();
+    const expectedSourceBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
+    const expectedControlBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-control.pdf"));
 
-    // 1. Download source PDF (mapping-amount.pdf)
     const resSource = await request.get(`${harness.base}/examples/amount/mapping-amount.pdf`);
     expect(resSource.status()).toBe(200);
     expect(resSource.headers()["content-type"]).toContain("application/pdf");
     const downloadedSourceBytes = await resSource.body();
-    const expectedSourceBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
     expect(sha256Hex(downloadedSourceBytes)).toBe(sha256Hex(expectedSourceBytes));
     expect(downloadedSourceBytes.length).toBe(expectedSourceBytes.length);
 
-    // 2. Download clean control PDF (mapping-control.pdf)
     const resControl = await request.get(`${harness.base}/examples/amount/mapping-control.pdf`);
     expect(resControl.status()).toBe(200);
     expect(resControl.headers()["content-type"]).toContain("application/pdf");
     const downloadedControlBytes = await resControl.body();
-    const expectedControlBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-control.pdf"));
     expect(sha256Hex(downloadedControlBytes)).toBe(sha256Hex(expectedControlBytes));
     expect(downloadedControlBytes.length).toBe(expectedControlBytes.length);
 
-    // 3. Manifest JSON validation
     const resManifest = await request.get(`${harness.base}/examples/amount/manifest.json`);
     expect(resManifest.status()).toBe(200);
     const manifest = await resManifest.json();
@@ -233,7 +251,6 @@ test.describe("T17: Browser Amount Demo and Prepared Manifest", () => {
     expect(manifest.files.control.filename).toBe("mapping-control.pdf");
     expect(manifest.files.control.sha256).toBe(sha256Hex(expectedControlBytes));
 
-    // 4. Report JSON validation with Inkflip contracts
     const resReport = await request.get(`${harness.base}/examples/amount/report.json`);
     expect(resReport.status()).toBe(200);
     const report = await resReport.json();
@@ -242,82 +259,70 @@ test.describe("T17: Browser Amount Demo and Prepared Manifest", () => {
     expect(() => validateReport(report)).not.toThrow();
   });
 
-  test("criterion 5: actual timing visible, not decorative scan animation", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
+  test("criterion 5: actual timing visible, not decorative scan animation", async ({
+    request,
+    page,
+  }) => {
+    // The recorded timing lives in the manifest and the sealed report's
+    // execution record — real measured values, not a decorative spinner.
+    const manifest = await (
+      await request.get(`${harness.base}/examples/amount/manifest.json`)
+    ).json();
+    expect(typeof manifest.timing?.duration_ms).toBe("number");
+    expect(manifest.timing.duration_ms).toBeGreaterThan(0);
+    expect(manifest.timing.method).toBe("browser_measured");
+    const report = await (
+      await request.get(`${harness.base}/examples/amount/report.json`)
+    ).json();
+    expect(report.execution.duration_ms).toBe(manifest.timing.duration_ms);
 
-    // Initial timing display exists and has actual numeric ms
-    const timing = page.locator("#timing-display");
-    await expect(timing).toBeVisible();
-    const initialText = await timing.textContent();
-    expect(initialText).toMatch(/^\d+\s*ms$/);
-
-    // Verify there are no decorative infinite loading animations or fake progress bars
+    await page.goto(`${harness.base}${EXAMPLE_URL}`);
+    await page.waitForSelector("#viewer-stage", { timeout: 30_000 });
     const spinners = await page.locator(".spinner, .scan-line, .fake-scan, .loading-bar").count();
     expect(spinners).toBe(0);
-
-    // Process a live file
-    const amountBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
-    await page.setInputFiles("#file-input", {
-      name: "timing-check.pdf",
-      mimeType: "application/pdf",
-      buffer: amountBytes,
-    });
-
-    await page.waitForSelector('#live-result-container[data-state="complete"]', {
-      timeout: 15_000,
-    });
-
-    // Assert timing updated to actual numeric execution time
-    const updatedText = await timing.textContent();
-    expect(updatedText).toMatch(/^\d+\s*ms$/);
-
-    // Check performance.now() elapsed recorded in client state
-    const elapsed = await page.evaluate(() => (window as any).__lastLiveResult?.elapsed);
-    expect(typeof elapsed).toBe("number");
-    expect(elapsed).toBeGreaterThanOrEqual(0);
+    // Real check accounting is shown for the prepared run.
+    await expect(page.locator("text=Completed 4 of 4 checks")).toBeVisible();
   });
 
   test("criterion 6: clean counterpart renders equal under same renderer", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
+    await page.goto(`${harness.base}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-input"]');
 
-    // Wait for source PDF to finish initial render
-    await page.waitForFunction(() => (window as any).__sourceRenderResult !== undefined, {
-      timeout: 15_000,
-    });
+    // Render both PDFs through the session's real PDF.js render path and
+    // compare the actual pixels — identical operators must paint identically.
+    const amountBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-amount.pdf"));
+    await openPdf(page, amountBytes, "mapping-amount.pdf");
+    const source = await renderDigest(page);
+    expect(source).not.toBeNull();
 
-    const sourceResult = await page.evaluate(() => {
-      const res = (window as any).__sourceRenderResult;
-      return {
-        textItems: res.textItems,
-      };
-    });
-    expect(sourceResult.textItems).toContain("$1,000");
+    await page.locator("#btn-close-doc").click();
+    const controlBytes = readFileSync(join(FIXTURE_PUBLIC, "mapping-control.pdf"));
+    await openPdf(page, controlBytes, "mapping-control.pdf");
+    const control = await renderDigest(page);
+    expect(control).not.toBeNull();
 
-    // Click compare button to render control PDF and compute pixel diff
-    const compareBtn = page.locator("#btn-compare-control");
-    await compareBtn.click();
+    // Same raster dimensions and byte-identical pixels: 0 differing pixels.
+    expect(control!.w).toBe(source!.w);
+    expect(control!.h).toBe(source!.h);
+    expect(control!.sha).toBe(source!.sha);
 
-    // Wait for comparison result
-    await page.waitForFunction(() => (window as any).__controlComparison !== undefined, {
-      timeout: 15_000,
-    });
-
-    const comparison = await page.evaluate(() => (window as any).__controlComparison);
-    expect(comparison.totalPixels).toBeGreaterThan(0);
-    // Pixel difference MUST be exactly 0 (100% equal rendering)
-    expect(comparison.diffCount).toBe(0);
-
-    // Text reading of control MUST be $100 (differs from source $1,000)
-    expect(comparison.controlText).toContain("$100");
-
-    // Status label confirms 100% pixel match
-    const statusEl = page.locator("#pixel-match-status");
-    await expect(statusEl).toContainText("100% pixel match — 0 differing pixels");
+    // The control's sealed report records the diverging text-layer reading.
+    const resReport = await page.request.get(
+      `${harness.base}/examples/amount/report.control.json`,
+    );
+    expect(resReport.status()).toBe(200);
+    const controlReport = await resReport.json();
+    expect(checkSchema(controlReport)).toEqual([]);
+    expect(() => validateReport(controlReport)).not.toThrow();
+    expect(controlReport.document.sha256).toBe(sha256Hex(controlBytes));
+    const controlTexts = controlReport.occurrences.map((o: { raw_text: string }) => o.raw_text);
+    expect(controlTexts).toContain("$100");
+    expect(controlTexts).not.toContain("$1,000");
   });
 
   test("criterion 7: accessibility check (WCAG AA)", async ({ page }) => {
-    await page.goto(`${harness.base}${DEMO_URL}`);
-    await page.waitForSelector("#rendered-amount-canvas");
+    await page.goto(`${harness.base}${EXAMPLE_URL}`);
+    await page.waitForSelector("#viewer-stage", { timeout: 30_000 });
 
     const axe = await new AxeBuilder({ page }).analyze();
     const seriousOrCritical = axe.violations.filter(

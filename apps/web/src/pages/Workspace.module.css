@@ -93,6 +93,17 @@
   flex-shrink: 0;
 }
 
+.provenanceBadge {
+  font-size: var(--text-caption);
+  color: var(--color-badge-text);
+  background: var(--color-badge-bg);
+  border: 1px solid var(--color-badge-border);
+  border-radius: var(--radius-pill);
+  padding: 2px var(--space-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .headerButton {
   display: inline-flex;
   align-items: center;

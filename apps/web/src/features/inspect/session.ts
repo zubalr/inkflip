@@ -220,13 +220,40 @@ export class InspectionSession {
     for (const listener of this.listeners) listener();
   }
 
+  /**
+   * A second document handle opened over retained source bytes so the
+   * report viewer can paint imported reports (the live document handle
+   * only exists while a PDF is open for inspection). Keyed by the
+   * verified document sha; released whenever retained bytes end.
+   */
+  private viewerDocHandle: DocumentHandle | null = null;
+  private viewerDocSha: string | null = null;
+  private viewerDocPromise: Promise<DocumentHandle | null> | null = null;
+
   private clearRetainedSource(): void {
     this.sourceBytes = null;
     this.sourceBytesDocumentSha256 = null;
     this.sourceBytesGeneration = null;
+    this.releaseViewerHandle();
+  }
+
+  private releaseViewerHandle(): void {
+    const handle = this.viewerDocHandle;
+    this.viewerDocHandle = null;
+    this.viewerDocSha = null;
+    if (handle !== null && !handle.closed) {
+      void this.adapter.close(handle).catch(() => undefined);
+    }
   }
 
   private retainImmutableSource(bytes: Uint8Array, sha256: string, generation: number): void {
+    // A viewer handle bound to the previous source identity must not
+    // outlive it — the next open would overwrite the reference and leak
+    // the old document. In-flight opens self-close on the sha check in
+    // viewerSourceHandle.
+    if (this.viewerDocSha !== null && this.viewerDocSha !== sha256) {
+      this.releaseViewerHandle();
+    }
     this.sourceBytes = new Uint8Array(bytes);
     this.sourceBytesDocumentSha256 = sha256;
     this.sourceBytesGeneration = generation;
@@ -725,6 +752,92 @@ export class InspectionSession {
     );
     const raster = outcome.raster;
     if (!raster) throw new Error(outcome.result.reason ?? "render failed");
+    return {
+      widthPx: raster.widthPx,
+      heightPx: raster.heightPx,
+      scalePxPerPt: raster.scalePxPerPt,
+      imageData: raster.imageData,
+      limitations: raster.limitations,
+    };
+  };
+
+  /**
+   * The document handle the report viewer may paint from: the live open
+   * document when a file is open, else a lazily opened handle over the
+   * retained, digest-verified source bytes of the current report.
+   */
+  private async viewerSourceHandle(): Promise<DocumentHandle | null> {
+    const live = this.openController.currentHandle as DocumentHandle | null;
+    if (live !== null && !live.closed) return live;
+    const bytes = this.sourcePdfBytes();
+    const sha = this.sourceBytesDocumentSha256;
+    if (bytes === null || sha === null) return null;
+    if (
+      this.viewerDocHandle !== null &&
+      !this.viewerDocHandle.closed &&
+      this.viewerDocSha === sha
+    ) {
+      return this.viewerDocHandle;
+    }
+    if (this.viewerDocPromise !== null) return this.viewerDocPromise;
+    const generation = this.coordinator.snapshot().generation;
+    const opening = this.adapter
+      .open({ bytes, sha256: sha, generation })
+      .then((handle) => {
+        // Retained bytes may have been replaced/cleared while opening —
+        // a handle bound to a stale identity must not paint.
+        if (this.sourcePdfBytes() === null || this.sourceBytesDocumentSha256 !== sha) {
+          void this.adapter.close(handle).catch(() => undefined);
+          return null;
+        }
+        this.viewerDocHandle = handle;
+        this.viewerDocSha = sha;
+        return handle;
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (this.viewerDocPromise === opening) this.viewerDocPromise = null;
+      });
+    this.viewerDocPromise = opening;
+    return opening;
+  }
+
+  /**
+   * Paint one report page through the real render path. Reuses the live
+   * document or the verified retained source; never re-runs OCR and never
+   * fabricates pixels from extracted text. Returns null when no source
+   * exists, the page index is out of range, or the request was stale.
+   */
+  renderViewerPage = async (
+    pageIndex: number,
+    scalePxPerPt: number,
+    signal: AbortSignal,
+  ): Promise<{
+    readonly widthPx: number;
+    readonly heightPx: number;
+    readonly scalePxPerPt: number;
+    readonly imageData: Uint8ClampedArray;
+    readonly limitations: readonly string[];
+  } | null> => {
+    const handle = await this.viewerSourceHandle();
+    if (handle === null || handle.closed || signal.aborted) return null;
+    if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= handle.doc.numPages) {
+      return null;
+    }
+    let checks;
+    try {
+      checks = this.adapter.plan(handle, { pages: [pageIndex], capabilities: ["render"] });
+    } catch {
+      return null;
+    }
+    const check = checks[0];
+    if (!check) return null;
+    const outcome = await this.adapter
+      .extract(handle, check, () => undefined, { signal }, { renderScalePxPerPt: scalePxPerPt })
+      .catch(() => null);
+    if (outcome === null || signal.aborted) return null;
+    const raster = outcome.raster;
+    if (!raster) return null;
     return {
       widthPx: raster.widthPx,
       heightPx: raster.heightPx,

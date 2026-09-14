@@ -61,7 +61,6 @@ export interface OfflineManifest {
 const EXAMPLE_ENTRIES: readonly OfflineManifestEntry[] = [
   { path: "/examples/index.json", sha256: null, kind: "example" },
   { path: "/examples/amount/amount.css", sha256: null, kind: "example" },
-  { path: "/examples/amount/amount.js", sha256: null, kind: "example" },
   { path: "/examples/amount/index.html", sha256: null, kind: "example" },
   { path: "/examples/amount/manifest.json", sha256: null, kind: "example" },
   {

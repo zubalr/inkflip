@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import type { Page, Occurrence, Finding } from "../../../../../packages/contracts/src/index.ts";
-import type { RotationDegree } from "./types";
+import type { PageRasterView, RotationDegree, ViewerPaintStatus } from "./types";
 import { isOrderOnlyFinding } from "../findings/alignment/classify.ts";
+import { canonicalToDisplay, displaySize } from "../selection/region.ts";
 import styles from "./CanvasOverlay.module.css";
 
 export interface CanvasOverlayProps {
@@ -13,6 +14,10 @@ export interface CanvasOverlayProps {
   rotation?: RotationDegree;
   onSelectOccurrence?: (occ: Occurrence) => void;
   renderCanvas?: boolean;
+  /** Real rendered page pixels in display space, when a source exists. */
+  raster?: PageRasterView | null;
+  rasterStatus?: ViewerPaintStatus;
+  rasterNote?: string | null;
 }
 
 export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
@@ -24,33 +29,45 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
   rotation = 0,
   onSelectOccurrence,
   renderCanvas = true,
+  raster = null,
+  rasterStatus = "unavailable",
+  rasterNote = null,
 }) => {
   const [w, h] = page.canonical_size_pt;
   const s = zoom / 100;
 
+  // Intrinsic page rotation is already baked into the rendered raster:
+  // geometry is canonical (unrotated), pixels are display-space. The
+  // paper box is therefore display-sized, then viewer rotation swaps it.
+  const [dispW, dispH] = displaySize({ widthPt: w, heightPt: h, rotation: page.rotation });
   const isRotatedQuarter = rotation === 90 || rotation === 270;
-  const displayWidth = (isRotatedQuarter ? h : w) * s;
-  const displayHeight = (isRotatedQuarter ? w : h) * s;
+  const displayWidth = (isRotatedQuarter ? dispH : dispW) * s;
+  const displayHeight = (isRotatedQuarter ? dispW : dispH) * s;
 
   const mapPoint = (cx: number, cy: number): [number, number] => {
-    let rx = cx;
-    let ry = cy;
+    const [dx, dy] = canonicalToDisplay(cx, cy, {
+      widthPt: w,
+      heightPt: h,
+      rotation: page.rotation,
+    });
+    let rx = dx;
+    let ry = dy;
     switch (rotation) {
       case 0:
-        rx = cx;
-        ry = cy;
+        rx = dx;
+        ry = dy;
         break;
       case 90:
-        rx = h - cy;
-        ry = cx;
+        rx = dispH - dy;
+        ry = dx;
         break;
       case 180:
-        rx = w - cx;
-        ry = h - cy;
+        rx = dispW - dx;
+        ry = dispH - dy;
         break;
       case 270:
-        rx = cy;
-        ry = w - cx;
+        rx = dy;
+        ry = dispW - dx;
         break;
     }
     return [rx * s, ry * s];
@@ -81,6 +98,65 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
     : selectedFinding && selectedFinding.alignment === "page_level" && namedHavePolygons
       ? "estimated"
       : null;
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Paint the real rendered page. The raster is display-space pixels;
+  // viewer rotation is applied as a draw transform. Device pixel ratio
+  // sizes the backing store so text stays sharp on Retina screens.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !renderCanvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(displayWidth * dpr));
+    canvas.height = Math.max(1, Math.round(displayHeight * dpr));
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!raster || raster.imageData.length === 0) return;
+
+    const src = document.createElement("canvas");
+    src.width = raster.widthPx;
+    src.height = raster.heightPx;
+    const srcCtx = src.getContext("2d");
+    if (!srcCtx) return;
+    srcCtx.putImageData(
+      new ImageData(new Uint8ClampedArray(raster.imageData), raster.widthPx, raster.heightPx),
+      0,
+      0,
+    );
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bw = displayWidth;
+    const bh = displayHeight;
+    // Image is display-space (dispW×dispH scaled); rotate it into the
+    // viewer box (displayWidth×displayHeight) for quarter turns.
+    switch (rotation) {
+      case 90:
+        ctx.translate(bw, 0);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(src, 0, 0, bh, bw);
+        break;
+      case 180:
+        ctx.translate(bw, bh);
+        ctx.rotate(Math.PI);
+        ctx.drawImage(src, 0, 0, bw, bh);
+        break;
+      case 270:
+        ctx.translate(0, bh);
+        ctx.rotate(-Math.PI / 2);
+        ctx.drawImage(src, 0, 0, bh, bw);
+        break;
+      default:
+        ctx.drawImage(src, 0, 0, bw, bh);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }, [raster, displayWidth, displayHeight, rotation, renderCanvas]);
+
+  const showCanvas = renderCanvas && raster !== null;
+  const effectiveStatus: ViewerPaintStatus = raster !== null ? "ready" : rasterStatus;
+  const showState = renderCanvas && !showCanvas;
 
   return (
     <div className={styles.wrapper}>
@@ -113,15 +189,37 @@ export const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
         data-rotation={rotation}
         data-zoom={zoom}
       >
-        {renderCanvas && (
+        {showCanvas && (
           <canvas
+            ref={canvasRef}
             id={`page-canvas-${page.index}`}
             className={styles.canvas}
-            width={displayWidth}
-            height={displayHeight}
             role="img"
             aria-label={`Rendered visual page ${page.index + 1}`}
           />
+        )}
+
+        {showState && (
+          <div
+            id={`page-state-${page.index}`}
+            className={styles.pageState}
+            role={effectiveStatus === "error" ? "alert" : undefined}
+          >
+            <span className={styles.pageStateTitle}>
+              {effectiveStatus === "loading"
+                ? "Rendering page…"
+                : effectiveStatus === "error"
+                  ? "The page image could not be rendered"
+                  : "No original PDF to render"}
+            </span>
+            {effectiveStatus !== "loading" && (
+              <p className={styles.pageStateNote}>
+                {effectiveStatus === "error"
+                  ? (rasterNote ?? "Rendering failed for this page.")
+                  : "This report has no verified source PDF attached, so there is no page image to paint. Recorded positions still appear as highlights; attach the original PDF to see it."}
+              </p>
+            )}
+          </div>
         )}
 
         <svg

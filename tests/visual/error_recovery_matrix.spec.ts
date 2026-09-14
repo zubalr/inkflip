@@ -62,6 +62,10 @@ test.describe("Workspace: encrypted input and recovery", () => {
   test("a refused encrypted input does not replace an existing usable session", async ({ page }) => {
     await page.goto(`${baseUrl}/#/workspace?example=duplicates`);
     await page.waitForSelector('[data-testid="viewer-stage"]', { timeout: 15000 });
+    // Let the example finish painting before the snapshot — the transient
+    // "Rendering page…" notice is real stage text while the raster is in
+    // flight, and the canvas only mounts once pixels are ready.
+    await page.waitForSelector("#page-canvas-0", { timeout: 30000 });
     const before = await page.locator('[data-testid="viewer-stage"]').innerText();
 
     await page.locator("#input-open-pdf").setInputFiles(ENCRYPTED);

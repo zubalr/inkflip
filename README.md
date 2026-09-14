@@ -104,6 +104,27 @@ The production bundle is written to `apps/web/dist/`. GitHub Actions verifies
 main, builds the app, runs a browser smoke test and publishes it to Vercel.
 See [release and rollback](docs/release-and-rollback.md) for deployment details.
 
+## What CI actually checks
+
+Two workflows cover different things, and neither alone is product acceptance:
+
+- **[verify](.github/workflows/ci.yml)** runs `bun run verify`: the
+  registered bootstrap, native-bootstrap and coordination suites plus
+  registry and contract checks. It guards repository and coordination
+  integrity — it does not exercise the rendered product.
+- **[deploy-web](.github/workflows/deploy-web.yml)** triggers on a green
+  verify run for the same commit, builds `apps/web`, checks the static
+  output, and runs a production browser smoke
+  (`tests/deployment/prepublish-smoke.cjs`) against a candidate deployment
+  before promoting the production alias. The smoke checks real page pixels,
+  highlight styles, reader-labelled comparison and controls — but it is a
+  smoke test, not the full suite.
+
+The broader product checks listed above (`test:browser`, `test:privacy`,
+`test:a11y`, `test:visual`, `test:native`, `test:fixtures`,
+`test:regression`) run on demand. Green CI means the deploy gates passed;
+treat it as a gate, not a certification of the visible product.
+
 ## Explore the code
 
 | Directory | Contents |

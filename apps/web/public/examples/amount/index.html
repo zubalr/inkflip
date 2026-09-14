@@ -3,127 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The amount that reads differently — Inkflip Demo</title>
+  <meta http-equiv="refresh" content="0; url=/#/workspace?example=amount">
+  <title>The amount that reads differently — Inkflip</title>
   <link rel="stylesheet" href="./amount.css">
 </head>
 <body>
-  <div class="demo-page">
-    <header class="demo-header">
-      <div class="brand-row">
-        <span class="brand-mark" aria-hidden="true">if</span>
-        <span class="brand-name">inkflip</span>
-        <span class="brand-sub">Gallery &middot; Card 1</span>
-      </div>
-      <div class="provenance-row">
-        <span id="provenance-badge" class="badge badge-prepared" data-provenance="prepared">prepared</span>
-        <span id="timing-display" class="timing-label">249 ms</span>
-      </div>
-    </header>
-
-    <main class="demo-main">
-      <section class="card-hero" aria-labelledby="card-title">
-        <h1 id="card-title" class="card-title">The amount that reads differently</h1>
-        <p class="card-mechanism">
-          Font ToUnicode maps the displayed <code>1</code> to <code>1,0</code>; visual <code>$100</code> becomes extracted <code>$1,000</code>.
-        </p>
-        <p class="card-rights">
-          Original synthetic sample of the Inkflip project. No third-party material or private data.
-        </p>
-      </section>
-
-      <section class="downloads-section" aria-label="Downloads and Manifest">
-        <h2>Downloadable Source &amp; Evidence</h2>
-        <div class="download-links">
-          <a id="download-source" href="/examples/amount/mapping-amount.pdf" download="mapping-amount.pdf" class="btn btn-secondary">
-            Download Source PDF (1,437 B)
-          </a>
-          <a id="download-control" href="/examples/amount/mapping-control.pdf" download="mapping-control.pdf" class="btn btn-secondary">
-            Download Clean Control PDF (1,429 B)
-          </a>
-          <a id="view-manifest" href="/examples/amount/manifest.json" target="_blank" class="btn btn-outline">
-            View Manifest JSON
-          </a>
-          <a id="view-report" href="/examples/amount/report.json" target="_blank" class="btn btn-outline">
-            View Prepared Report JSON
-          </a>
-        </div>
-      </section>
-
-      <section class="comparison-grid" aria-label="Evidence comparison">
-        <article class="pane" aria-labelledby="pane-rendered-title">
-          <h2 id="pane-rendered-title" class="pane-title">Visual Rendering (What You See)</h2>
-          <div class="canvas-wrapper">
-            <canvas id="rendered-amount-canvas" width="520" height="400" aria-label="Rendered page showing visual $100"></canvas>
-          </div>
-          <div class="reading-meta">
-            <span class="label">Renderer:</span> PDF.js 6.3.289 Canvas &middot; <span class="badge">Visual: $100</span>
-          </div>
-        </article>
-
-        <article class="pane" aria-labelledby="pane-extracted-title">
-          <h2 id="pane-extracted-title" class="pane-title">Extracted Text vs OCR</h2>
-          <div class="results-box">
-            <div class="result-row">
-              <span class="result-name">PDF.js native text:</span>
-              <strong id="extracted-pdfjs-text" class="result-value diff-highlight">$1,000</strong>
-            </div>
-            <div class="result-row">
-              <span class="result-name">Tesseract.js OCR crop:</span>
-              <strong id="extracted-ocr-text" class="result-value">$100</strong>
-            </div>
-            <div id="amount-difference-finding" class="finding-card" role="alert">
-              <div class="finding-badge">Reading Difference</div>
-              <p class="finding-text">
-                PDF.js native text extraction returned &ldquo;$1,000&rdquo; due to font ToUnicode mapping. Tesseract.js OCR of the rendered crop recognized &ldquo;$100&rdquo;.
-              </p>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section class="control-section" aria-label="Clean Counterpart Equal Rendering Verification">
-        <h2>Clean Counterpart Control (Pixel Equality Verification)</h2>
-        <p class="control-description">
-          The clean mapping control (<code>mapping-control.pdf</code>) paints identical operators and font programs, but carries an identity ToUnicode mapping. Under the same renderer, pixels are 100% equal while text readings diverge.
-        </p>
-        <div class="control-actions">
-          <button id="btn-compare-control" type="button" class="btn btn-primary">
-            Verify Pixel Equality with Control
-          </button>
-          <span id="pixel-match-status" class="pixel-status">Not tested yet</span>
-        </div>
-        <div class="control-canvas-row">
-          <div class="canvas-wrapper">
-            <canvas id="control-rendered-canvas" width="520" height="400" aria-label="Control rendered canvas"></canvas>
-          </div>
-          <div class="reading-meta">
-            <span class="label">Control PDF.js reading:</span>
-            <strong id="control-pdfjs-text">$100</strong> (matches visual)
-          </div>
-        </div>
-      </section>
-
-      <section class="live-intake-section" aria-label="Live Verification and Hash Audit">
-        <h2>Live File Intake &amp; Tamper Audit</h2>
-        <p class="intake-description">
-          Drop or select a PDF to test live execution against prepared evidence. Renamed identical bytes produce the same reading; modified bytes cannot replay old prepared results.
-        </p>
-        <div class="intake-box">
-          <label for="file-input" class="intake-label">Select or drop a PDF:</label>
-          <input type="file" id="file-input" accept="application/pdf,.pdf" class="file-input">
-        </div>
-        <div id="live-result-container" class="live-results" style="display: none;">
-          <div id="replay-notice" class="notice-box" role="status"></div>
-          <div class="live-metrics">
-            <div><span class="label">File name:</span> <span id="live-file-name"></span></div>
-            <div><span class="label">SHA-256:</span> <code id="live-file-hash"></code></div>
-            <div><span class="label">Extracted text:</span> <strong id="live-extracted-text"></strong></div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script type="module" src="./amount.js"></script>
+  <main class="moved-page">
+    <h1>The amount that reads differently</h1>
+    <p>
+      This example now opens inside the Inkflip inspector, where the real page
+      is rendered, the finding is selectable, and both named readings
+      (PDF.js text vs Tesseract.js OCR) are shown with their evidence.
+    </p>
+    <p>
+      <a class="btn" href="/#/workspace?example=amount">Open this example in the inspector</a>
+    </p>
+    <p class="assets-heading">Evidence files for this example:</p>
+    <ul class="asset-links">
+      <li><a href="/examples/amount/mapping-amount.pdf" download="mapping-amount.pdf">Source PDF — mapping-amount.pdf</a></li>
+      <li><a href="/examples/amount/mapping-control.pdf" download="mapping-control.pdf">Clean control PDF — mapping-control.pdf</a></li>
+      <li><a href="/examples/amount/report.json">Captured report — report.json</a></li>
+      <li><a href="/examples/amount/report.control.json">Control report — report.control.json</a></li>
+      <li><a href="/examples/amount/native-unicode-native.pdf" download="native-unicode-native.pdf">Unicode-native variant — native-unicode-native.pdf</a></li>
+      <li><a href="/examples/amount/report.native-unicode-native.json">Variant report — report.native-unicode-native.json</a></li>
+      <li><a href="/examples/amount/native-unicode-control.pdf" download="native-unicode-control.pdf">Unicode control — native-unicode-control.pdf</a></li>
+      <li><a href="/examples/amount/report.native-unicode-control.json">Variant control report — report.native-unicode-control.json</a></li>
+      <li><a href="/examples/amount/manifest.json">Example manifest — manifest.json</a></li>
+    </ul>
+    <p class="back"><a href="/#/">Back to Inkflip</a></p>
+  </main>
 </body>
 </html>

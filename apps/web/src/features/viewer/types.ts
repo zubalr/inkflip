@@ -39,3 +39,31 @@ export interface ViewerDoc {
   occurrences: Occurrence[];
   findings: Finding[];
 }
+
+/**
+ * A real rendered page in display space (intrinsic page rotation already
+ * applied by the reader adapter). The viewer never reconstructs a page
+ * from extracted text — it either paints these pixels or says plainly
+ * that no source is available.
+ */
+export interface PageRasterView {
+  readonly widthPx: number;
+  readonly heightPx: number;
+  readonly scalePxPerPt: number;
+  readonly imageData: Uint8ClampedArray;
+  readonly limitations: readonly string[];
+}
+
+export type ViewerPaintStatus = "loading" | "ready" | "unavailable" | "error";
+
+/**
+ * Paint a report page through the session/PDF.js render boundary.
+ * `scalePxPerPt` is the requested CSS-pixel density per display-space
+ * point; the adapter may clamp it. Returns null when no usable source
+ * or page image exists. `signal` cancels a stale request.
+ */
+export type RenderPageFn = (
+  pageIndex: number,
+  scalePxPerPt: number,
+  signal: AbortSignal,
+) => Promise<PageRasterView | null>;

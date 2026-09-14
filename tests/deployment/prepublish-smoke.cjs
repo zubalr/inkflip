@@ -155,6 +155,180 @@ function record(results, step, ok, detail) {
     const current = await page.locator("[id^=finding-item-]").first().getAttribute("aria-current");
     record(results, "example: a difference can be selected", current === "true", String(current));
 
+    // --- Real rendering: the page canvas must contain painted source
+    // pixels, not a blank element. Wait for paint, then sample. ---
+    await page
+      .waitForFunction(
+        () => {
+          const c = document.getElementById("page-canvas-0");
+          if (!c || !c.width || !c.height) return false;
+          const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+          for (let i = 0; i < d.length; i += 400) {
+            if (d[i + 3] > 0 && d[i] < 240) return true;
+          }
+          return false;
+        },
+        { timeout: 30_000 },
+      )
+      .catch(() => {});
+    const paintInfo = await page.evaluate(() => {
+      const c = document.getElementById("page-canvas-0");
+      if (!c || !c.width || !c.height) return { canvas: false };
+      const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+      const colors = new Set();
+      let dark = 0;
+      for (let i = 0; i < d.length; i += 400) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], a = d[i + 3];
+        if (a > 0 && r < 245 && g < 245 && b < 245) dark++;
+        if (colors.size < 64) colors.add((r << 16) | (g << 8) | b);
+      }
+      return { canvas: true, w: c.width, h: c.height, dark, colors: colors.size };
+    });
+    record(
+      results,
+      "render: page canvas painted with source pixels",
+      Boolean(paintInfo.canvas) && paintInfo.dark > 20 && paintInfo.colors > 3,
+      JSON.stringify(paintInfo),
+    );
+
+    // --- Highlight masks must be translucent, never opaque black. ---
+    const highlights = await page.evaluate(() =>
+      [...document.querySelectorAll("[id^=highlight-]")].map((el) => {
+        const cs = getComputedStyle(el);
+        const m = /rgba?\(([^)]+)\)/.exec(cs.fill || "");
+        const fillAlpha = m && m[1].split(",").length === 4 ? parseFloat(m[1].split(",")[3]) : 1;
+        const black = m ? m[1].split(",").slice(0, 3).every((v) => parseFloat(v) === 0) : false;
+        return {
+          id: el.id,
+          alpha: fillAlpha * parseFloat(cs.fillOpacity || "1") * parseFloat(cs.opacity || "1"),
+          black,
+        };
+      }),
+    );
+    const opaque = highlights.filter((h) => h.alpha >= 0.9);
+    const blackMask = highlights.filter((h) => h.black && h.alpha >= 0.9);
+    record(
+      results,
+      "highlights: translucent, no opaque masks",
+      highlights.length > 0 && opaque.length === 0 && blackMask.length === 0,
+      `${highlights.length} highlights` +
+        (opaque.length ? ` opaque:${opaque.map((h) => h.id).join(",")}` : ""),
+    );
+
+    // --- Finding disclosure toggles closed and open on repeat clicks. ---
+    const firstFinding = page.locator("[id^=finding-item-]").first();
+    const expanded1 = await firstFinding.getAttribute("aria-expanded");
+    await firstFinding.click();
+    const collapsed = await firstFinding.getAttribute("aria-expanded");
+    await firstFinding.click();
+    const expanded2 = await firstFinding.getAttribute("aria-expanded");
+    record(
+      results,
+      "disclosure: finding card toggles closed/open",
+      expanded1 === "true" && collapsed === "false" && expanded2 === "true",
+      `${expanded1}->${collapsed}->${expanded2}`,
+    );
+
+    // --- Compare names the finding's readers; both panes paint. ---
+    await page.locator("#tab-mode-compare").click();
+    await page.waitForSelector("#compare-panes-container", { timeout: 15_000 });
+    const compare = await page.evaluate(() => {
+      const sel = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const opt = el.tagName === "SELECT" ? el.options[el.selectedIndex] : el;
+        return opt ? opt.textContent.trim() : null;
+      };
+      const painted = (paneId) => {
+        const pane = document.getElementById(paneId);
+        if (!pane) return false;
+        const c = pane.querySelector("canvas");
+        if (!c || !c.width) return false;
+        const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+        for (let i = 0; i < d.length; i += 400) {
+          if (d[i + 3] > 0 && d[i] < 240) return true;
+        }
+        return false;
+      };
+      return {
+        left: sel("compare-reader-left"),
+        right: sel("compare-reader-right"),
+        leftPainted: painted("compare-pane-left"),
+        rightPainted: painted("compare-pane-right"),
+        readings: document.querySelectorAll("[id^=compare-reading-]").length,
+      };
+    });
+    record(
+      results,
+      "compare: panes name the finding's readers",
+      Boolean(compare.left) &&
+        Boolean(compare.right) &&
+        compare.left !== compare.right &&
+        /pdf\.js|tesseract|pypdf|pdfium/i.test(compare.left + compare.right),
+      `${compare.left} vs ${compare.right}`,
+    );
+    record(
+      results,
+      "compare: both panes painted + named readings shown",
+      compare.leftPainted && compare.rightPainted && compare.readings >= 2,
+      JSON.stringify(compare),
+    );
+
+    // --- Reading mode exposes the text layer as the main content. ---
+    await page.locator("#tab-mode-reading").click();
+    await page.waitForSelector("#accessible-text-equivalent", { timeout: 15_000 });
+    const reading = await page.evaluate(() => {
+      const layer = document.getElementById("accessible-text-equivalent");
+      const stage = document.getElementById("viewer-stage");
+      return {
+        layerText: layer ? layer.innerText.length : 0,
+        stageText: stage ? stage.innerText.length : 0,
+        occurrences: document.querySelectorAll("#accessible-text-equivalent li").length,
+      };
+    });
+    record(
+      results,
+      "reading: text layer is the main content",
+      reading.layerText > 50 && reading.occurrences >= 1,
+      JSON.stringify(reading),
+    );
+
+    // --- Fit: page must fit inside the pane with no page-level overflow. ---
+    await page.locator("#tab-mode-page").click();
+    await page.waitForSelector("#document-paper", { timeout: 15_000 });
+    await page.locator("#btn-zoom-fit").click();
+    await page.waitForTimeout(300);
+    const fit = await page.evaluate(() => {
+      const paper = document.getElementById("document-paper");
+      const area = document.getElementById("viewer-paper-area");
+      return {
+        zoom: (document.getElementById("label-zoom") || {}).textContent,
+        paperW: paper ? paper.offsetWidth : 0,
+        areaW: area ? area.clientWidth : 0,
+        docOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    record(
+      results,
+      "controls: fit sizes page to pane, no horizontal overflow",
+      fit.paperW > 0 && fit.paperW <= fit.areaW + 2 && fit.docOverflow <= 1,
+      JSON.stringify(fit),
+    );
+
+    // --- Page navigation exists and reports page state honestly. ---
+    const pageNav = await page.evaluate(() => ({
+      indicator: (document.getElementById("page-indicator") || {}).textContent || "",
+      prevDisabled: (document.getElementById("btn-page-prev") || {}).disabled,
+      nextDisabled: (document.getElementById("btn-page-next") || {}).disabled,
+    }));
+    record(
+      results,
+      "controls: page navigation present and honest",
+      /1/.test(pageNav.indicator) && pageNav.prevDisabled === true,
+      JSON.stringify(pageNav),
+    );
+
     const jsonButton = page.getByRole("button", { name: "Save JSON (reopens in Inkflip)" });
     await jsonButton.waitFor({ state: "visible", timeout: 60_000 });
     await page.waitForFunction(() => {
@@ -188,6 +362,73 @@ function record(results, step, ok, detail) {
       /amount|reads|differ|\$/.test(reimported),
       reimported.split("\n")[0],
     );
+
+    // --- Public example dependencies: every linked asset must serve. ---
+    const indexJson = JSON.parse(readFileSync(join(DIST, "examples/index.json"), "utf8"));
+    for (const card of indexJson.cards || []) {
+      const manifestRes = await page.request.get(baseUrl + card.manifest_url);
+      const reportRes = await page.request.get(baseUrl + card.report_url);
+      let ok = manifestRes.ok() && reportRes.ok();
+      let detail = `manifest=${manifestRes.status()} report=${reportRes.status()}`;
+      if (manifestRes.ok()) {
+        const manifest = JSON.parse(await manifestRes.text());
+        for (const [key, file] of Object.entries(manifest.files || {})) {
+          if (file.download_url) {
+            const r = await page.request.get(baseUrl + file.download_url);
+            if (!r.ok()) {
+              ok = false;
+              detail += ` ${key}=${r.status()}`;
+            }
+          }
+          if (file.report_file) {
+            const r = await page.request.get(
+              baseUrl + `/examples/${card.example_id}/${file.report_file}`,
+            );
+            if (!r.ok()) {
+              ok = false;
+              detail += ` ${file.report_file}=${r.status()}`;
+            }
+          }
+        }
+      }
+      record(results, `example deps: ${card.example_id}`, ok, detail);
+    }
+
+    // --- Every public example loads through the real inspector route. ---
+    for (const card of indexJson.cards || []) {
+      await page.goto(`${baseUrl}/#/workspace?example=${card.example_id}`, {
+        waitUntil: "networkidle",
+        timeout: 60_000,
+      });
+      const opened = await page
+        .waitForSelector("#viewer-stage", { timeout: 45_000 })
+        .then(() => true)
+        .catch(() => false);
+      const importError = opened
+        ? await page.locator("#import-error").count()
+        : -1;
+      record(
+        results,
+        `example opens: ${card.example_id}`,
+        opened && importError === 0,
+        opened ? `findings=${await page.locator("[id^=finding-item-]").count()}` : "no viewer-stage",
+      );
+    }
+
+    // --- The retired standalone amount page must redirect into the
+    // inspector and must not reference node_modules. ---
+    const legacyPath = join(DIST, "examples/amount/index.html");
+    if (existsSync(legacyPath)) {
+      const legacy = readFileSync(legacyPath, "utf8");
+      record(
+        results,
+        "legacy amount page redirects into inspector",
+        /workspace\?example=amount/.test(legacy) && !/node_modules/.test(legacy),
+        legacy.slice(0, 0),
+      );
+    } else {
+      record(results, "legacy amount page redirects into inspector", true, "page removed");
+    }
   } finally {
     await browser.close();
     await new Promise((resolve) => server.close(resolve));

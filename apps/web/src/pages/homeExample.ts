@@ -1,9 +1,9 @@
 /**
  * Home-only helper: light view of the shipped "amount" example's captured
- * manifest (/examples/amount/manifest.json). The heavy interactive sample
- * stays at /examples/amount/index.html — this helper only reads the recorded
- * manifest so the hero can show one real text difference without a second
- * PDF/OCR engine or remote assets.
+ * manifest (/examples/amount/manifest.json). The interactive sample itself
+ * lives at /#/workspace?example=amount — the real inspector — so this
+ * helper only reads the recorded manifest to show one real text difference
+ * without a second PDF/OCR engine or remote assets.
  */
 
 export interface HomeSampleReader {
@@ -80,7 +80,7 @@ export async function loadHomeSample(): Promise<HomeSample> {
     visualAmount,
     extractedAmount,
     readers,
-    sampleUrl: "/examples/amount/index.html",
+    sampleUrl: "/#/workspace?example=amount",
     reportUrl: "/examples/amount/report.json",
   };
 }

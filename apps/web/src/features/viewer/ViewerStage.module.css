@@ -103,6 +103,21 @@
   text-align: center;
 }
 
+.pageNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pageIndicator {
+  font-size: var(--text-caption);
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+  min-width: 88px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .workspaceGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--layout-evidence-column);

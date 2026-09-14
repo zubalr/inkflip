@@ -36,7 +36,8 @@ included for traceability — the source of truth for intent is
 │           rendered-region tesseract                              │
 │  checks/structure: bounded structural observations               │
 │  runtime: supervised workers, atomic partial artifacts           │
-│  (planned, not built: the `inkflip` CLI over these modules)      │
+│  inkflip CLI (native/inkflip/cli) — inspect/corpus/baseline       │
+│  commands over these modules                                      │
 └──────────────────────────────────────────────────────────────────┘
           ▲ shared report/schema identity
 ┌─────────┴────────────────────────────────────────────────────────┐
@@ -94,13 +95,16 @@ comparison itself.
 evidence reports; TypeScript types are generated from it
 (`packages/contracts`). Report identity is canonical (hash of normalized
 content, not of serialization accidents), which is what makes stored runs
-comparable later — the foundation the corpus/baseline tooling will build on.
+comparable later — the property the corpus runner and baseline engine
+(`native/inkflip/corpus/`, `native/inkflip/baselines/`) build on.
 
 ## Why static and local (the security posture)
 
 - **No server compute.** The app is a static bundle (ADR-001); there is no
-  extraction API to attack or to trust, and the deployment target has no
-  application compute path (the preflight check for that is a pending task).
+  extraction API to attack or to trust. The deployment preflight
+  (`scripts/check_static_dist.py`, run by `scripts/vercel_output.py check`
+  in the deploy workflow) verifies the built `dist/` is static and
+  same-origin before promotion.
 - **No egress by construction.** The browser path has no upload code. The
   claim is continuously verified by the privacy canary suite
   ([tests/privacy/README.md](../tests/privacy/README.md)), which inspects
@@ -109,7 +113,9 @@ comparable later — the foundation the corpus/baseline tooling will build on.
   removes the CDN from the trust base and makes offline behavior coherent.
 - **Bounded local processes.** Native work runs under a supervisor with
   resource budgets, atomic partial results, and explicit cleanup (ADR-008,
-  T29); native containment/failure-recovery hardening (T40) is still pending.
+  T29); containment and failure recovery were verified under T40
+  (fail-injected hangs, crashes, and output floods; non-root read-only
+  mounts; recorded container digest).
 - **Strict import.** The only externally supplied data the app parses beyond
   the opened PDF is an exported report; its parser is schema-validated,
   size-bounded and adversarially tested.
