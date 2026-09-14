@@ -38,38 +38,45 @@ def stage_ok(samples: list[float] | None = None, *, failures: int = 0) -> dict:
     return body
 
 
-def valid_identity(rec, root: Path) -> dict:
+def valid_identity(rec, root: Path, *, producer: str = "cli") -> dict:
     identity = rec.implementation_identity(root)
     fixture = root / "fixtures" / "public" / "mapping-control.pdf"
     settings = root / "planning" / "config" / "settings.json"
+    key = rec.producer_hash_key(producer)
     return {
+        "producer": producer,
         "fixture_path": "fixtures/public/mapping-control.pdf",
         "fixture_sha256": rec.sha256_file(fixture),
         "settings_sha256": rec.sha256_file(settings),
         "implementation": identity,
+        "inputs_sha256": identity.get(key),
         "git_head": identity.get("git_head"),
+        "collection": {"unchanged": True},
     }
 
 
-def valid_browser() -> dict:
+def valid_browser(rec=None) -> dict:
     files = [
         {"path": "index.html", "sha256": "a" * 64, "bytes": 12},
         {"path": "assets/app.js", "sha256": "b" * 64, "bytes": 40},
     ]
-    rec = load_receipt()
+    rec = rec or load_receipt()
     canonical = "".join(f"{item['path']} {item['sha256']}\n" for item in files)
     tree = rec.sha256_bytes(canonical.encode("utf-8"))
+    binding = valid_identity(rec, ROOT, producer="browser")
     preview = stage_ok()
     preview["proof"] = "first_rendered_page"
     return {
         "kind": "inkflip-performance-browser",
         "schema_version": "2.2.0",
+        "source_binding": binding,
         "host": {"is_specified_reference_desktop": False, "is_physical_mobile": False},
         "build": {
             "production": True,
             "vite_dev_server": False,
             "inkflip_test_hooks": True,
             "tree_sha256": tree,
+            "built_from_browser_sha256": binding["inputs_sha256"],
             "files": files,
         },
         "stages": {
@@ -148,7 +155,7 @@ def valid_receipt(rec) -> dict:
                 "ocr_cli": copy.deepcopy(cli),
             }
         },
-        "browser": valid_browser(),
+        "browser": valid_browser(rec),
     }
 
 
@@ -203,10 +210,13 @@ class TestNegativeMutations(unittest.TestCase):
         joined = " ".join(self.problems())
         self.assertIn("stale implementation identity: cli_sha256", joined)
 
-    def test_dirty_tree_claimed_clean_fails(self) -> None:
+    def test_dirty_cli_subset_claimed_clean_fails(self) -> None:
         self.body["source_binding"]["implementation"]["dirty"] = False
+        self.body["source_binding"]["implementation"]["dirty_cli"] = False
         current = copy.deepcopy(self.current)
         current["implementation"]["dirty"] = True
+        current["implementation"]["dirty_cli"] = True
+        current["implementation"]["dirty_docker"] = False
         problems = self.rec.validate_receipt(
             self.body,
             mode="accept",
@@ -214,7 +224,63 @@ class TestNegativeMutations(unittest.TestCase):
             settings=self.settings,
             current_binding=current,
         )
-        self.assertTrue(any("dirty" in item for item in problems), problems)
+        self.assertTrue(any("dirty" in item and "cli" in item for item in problems), problems)
+
+    def test_docker_only_dirty_does_not_invalidate_cli_or_browser(self) -> None:
+        current = copy.deepcopy(self.current)
+        current["implementation"]["dirty"] = True
+        current["implementation"]["dirty_docker"] = True
+        current["implementation"]["dirty_cli"] = False
+        current["implementation"]["dirty_browser"] = False
+        current["implementation"]["docker_sha256"] = "d" * 64
+        problems = self.rec.validate_receipt(
+            self.body,
+            mode="accept",
+            profile="local-mac",
+            settings=self.settings,
+            current_binding=current,
+        )
+        self.assertEqual(problems, [], problems)
+
+    def test_old_browser_new_cli_is_rejected(self) -> None:
+        browser = copy.deepcopy(self.body["browser"])
+        browser["source_binding"]["implementation"]["browser_sha256"] = "b" * 64
+        browser["source_binding"]["inputs_sha256"] = "b" * 64
+        browser["build"]["built_from_browser_sha256"] = "b" * 64
+        self.body["browser"] = browser
+        joined = " ".join(self.problems())
+        self.assertIn("stale implementation identity: browser_sha256", joined)
+
+    def test_new_browser_old_cli_is_rejected(self) -> None:
+        self.body["source_binding"]["implementation"]["cli_sha256"] = "c" * 64
+        self.body["source_binding"]["inputs_sha256"] = "c" * 64
+        joined = " ".join(self.problems())
+        self.assertIn("stale implementation identity: cli_sha256", joined)
+
+    def test_missing_browser_binding_fails_even_with_cli_binding(self) -> None:
+        del self.body["browser"]["source_binding"]
+        joined = " ".join(self.problems())
+        self.assertIn("CLI identity is not a substitute", joined)
+
+    def test_cli_binding_cannot_stand_in_for_browser(self) -> None:
+        self.body["browser"]["source_binding"] = copy.deepcopy(self.body["source_binding"])
+        joined = " ".join(self.problems())
+        self.assertIn("CLI identity cannot stand in for browser identity", joined)
+
+    def test_tampered_browser_file_list_fails(self) -> None:
+        self.body["browser"]["build"]["files"][0]["sha256"] = "c" * 64
+        joined = " ".join(self.problems())
+        self.assertIn("tree_sha256 does not match hashed file list", joined)
+
+    def test_browser_build_not_bound_to_recorded_source_fails(self) -> None:
+        self.body["browser"]["build"]["built_from_browser_sha256"] = "e" * 64
+        joined = " ".join(self.problems())
+        self.assertIn("not bound to the recorded browser source identity", joined)
+
+    def test_collection_identity_change_fails(self) -> None:
+        self.body["source_binding"]["collection"] = {"unchanged": False, "error": "edited"}
+        joined = " ".join(self.problems())
+        self.assertIn("changed during collection", joined)
 
     def test_stale_browser_build_production_flag_only(self) -> None:
         self.body["browser"]["build"] = {"production": True, "vite_dev_server": False}

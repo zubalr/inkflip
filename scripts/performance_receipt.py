@@ -78,8 +78,14 @@ IDENTITY_SEMANTICS = (
     "browser_sha256 hashes the web/runtime/reader/geometry/contracts sources plus the same "
     "settings and fixture. docker_sha256 hashes the production Dockerfile, assemble script, "
     "native product, and release stamps/lock. git_head is informational and never sufficient. "
-    "Dirty means git reports uncommitted changes in those product paths at measurement time; "
-    "accept still requires the content hashes to match the current tree."
+    "Each measurement producer records its own relevant source/settings/fixture identity; "
+    "the browser producer also records actual built-byte identity. CLI identity is never a "
+    "substitute for browser identity. Accept binds CLI stages to the CLI subset and browser "
+    "stages to the browser subset plus built bytes. A packaging-only docker change does not "
+    "invalidate unrelated CLI OCR or browser timings. Dirty is recorded per subset; a dirty "
+    "docker manifest does not stale CLI/browser measurements. Accept still requires the "
+    "relevant content hashes to match the current tree and rejects a clean claim on a dirty "
+    "subset."
 )
 
 
@@ -192,15 +198,33 @@ def product_paths() -> tuple[str, ...]:
     return tuple(dict.fromkeys((*CLI_INPUT_PATHS, *BROWSER_INPUT_PATHS, *DOCKER_INPUT_PATHS)))
 
 
-def implementation_dirty(root: Path) -> bool:
+def subset_dirty(root: Path, spec: Iterable[str]) -> bool:
     proc = subprocess.run(
-        ["git", "status", "--porcelain", "--", *product_paths()],
+        ["git", "status", "--porcelain", "--", *spec],
         cwd=root,
         capture_output=True,
         text=True,
         timeout=20,
     )
     return bool((proc.stdout or "").strip())
+
+
+def implementation_dirty(root: Path) -> bool:
+    return subset_dirty(root, product_paths())
+
+
+def producer_paths(producer: str) -> tuple[str, ...]:
+    if producer == "cli":
+        return CLI_INPUT_PATHS
+    if producer == "browser":
+        return BROWSER_INPUT_PATHS
+    if producer == "docker":
+        return DOCKER_INPUT_PATHS
+    raise ValueError(f"unknown performance producer {producer!r}")
+
+
+def producer_hash_key(producer: str) -> str:
+    return f"{producer}_sha256"
 
 
 def git_head(root: Path) -> str | None:
@@ -220,18 +244,24 @@ def git_head(root: Path) -> str | None:
 
 
 def implementation_identity(root: Path) -> dict[str, Any]:
+    dirty_cli = subset_dirty(root, CLI_INPUT_PATHS)
+    dirty_browser = subset_dirty(root, BROWSER_INPUT_PATHS)
+    dirty_docker = subset_dirty(root, DOCKER_INPUT_PATHS)
     return {
         "schema": "inkflip-implementation-identity/1",
         "semantics": IDENTITY_SEMANTICS,
         "cli_sha256": hash_input_spec(root, CLI_INPUT_PATHS),
         "browser_sha256": hash_input_spec(root, BROWSER_INPUT_PATHS),
         "docker_sha256": hash_input_spec(root, DOCKER_INPUT_PATHS),
-        "dirty": implementation_dirty(root),
+        "dirty": dirty_cli or dirty_browser or dirty_docker,
+        "dirty_cli": dirty_cli,
+        "dirty_browser": dirty_browser,
+        "dirty_docker": dirty_docker,
         "git_head": git_head(root),
         "git_head_note": (
-            "Informational checkout pointer only. Accept binds cli/browser/docker "
+            "Informational checkout pointer only. Accept binds each producer's "
             "content hashes. A notes-only commit that does not touch product inputs "
-            "keeps those hashes stable; dirty product files change the hashes."
+            "keeps those hashes stable; dirty files in a subset stale only that subset."
         ),
     }
 
@@ -253,20 +283,53 @@ def build_artifact_identity(dist_dir: Path) -> dict[str, Any]:
     }
 
 
-def source_binding(root: Path) -> dict[str, Any]:
+def source_binding(root: Path, *, producer: str = "cli") -> dict[str, Any]:
     fixture = root / "fixtures" / "public" / "mapping-control.pdf"
     settings = root / "planning" / "config" / "settings.json"
     identity = implementation_identity(root)
+    key = producer_hash_key(producer)
     binding: dict[str, Any] = {
         "root": str(root),
+        "producer": producer,
         "fixture_path": "fixtures/public/mapping-control.pdf",
         "fixture_sha256": sha256_file(fixture) if fixture.is_file() else None,
         "fixture_bytes": fixture.stat().st_size if fixture.is_file() else None,
         "settings_sha256": sha256_file(settings) if settings.is_file() else None,
         "implementation": identity,
+        "inputs_sha256": identity.get(key),
         "git_head": identity.get("git_head"),
     }
     return binding
+
+
+def collection_fingerprint(binding: dict[str, Any]) -> dict[str, Any]:
+    producer = binding.get("producer") if binding.get("producer") in {"cli", "browser", "docker"} else "cli"
+    identity = binding.get("implementation") if isinstance(binding.get("implementation"), dict) else {}
+    key = producer_hash_key(producer)
+    return {
+        "producer": producer,
+        "fixture_sha256": _digest_field(binding.get("fixture_sha256")),
+        "settings_sha256": _digest_field(binding.get("settings_sha256")),
+        "inputs_sha256": _digest_field(binding.get("inputs_sha256") or identity.get(key)),
+        key: _digest_field(identity.get(key)),
+        f"dirty_{producer}": identity.get(f"dirty_{producer}"),
+    }
+
+
+def bind_collection(start: dict[str, Any], end: dict[str, Any]) -> dict[str, Any]:
+    start_fp = collection_fingerprint(start)
+    end_fp = collection_fingerprint(end)
+    unchanged = start_fp == end_fp
+    return {
+        "unchanged": unchanged,
+        "start": start_fp,
+        "end": end_fp,
+        **(
+            {}
+            if unchanged
+            else {"error": "product inputs or subset dirty-state changed during collection"}
+        ),
+    }
 
 
 def load_json_object(path: Path) -> tuple[dict[str, Any] | None, str | None]:
@@ -489,57 +552,128 @@ def _digest_field(value: Any) -> str | None:
     return None
 
 
-def _binding_problems(body: dict[str, Any], current: dict[str, Any] | None) -> list[str]:
+def _shared_source_problems(binding: dict[str, Any], current: dict[str, Any] | None) -> list[str]:
     problems: list[str] = []
-    binding = body.get("source_binding") or (body.get("measurement") or {}).get("source")
-    if not isinstance(binding, dict):
-        return ["missing source/build binding"]
     digest = _digest_field(binding.get("sha256") or binding.get("fixture_sha256"))
     if digest is None:
         problems.append("source binding is missing fixture sha256")
     settings_digest = _digest_field(binding.get("settings_sha256"))
     if settings_digest is None:
         problems.append("source binding is missing settings_sha256")
+    if not current:
+        return problems
+    current_digest = _digest_field(current.get("fixture_sha256"))
+    if digest is None:
+        pass
+    elif current_digest and digest != current_digest:
+        problems.append(
+            f"stale source identity: receipt fixture sha256 {digest} != current {current_digest}"
+        )
+    elif not current_digest:
+        problems.append("current tree is missing fixture sha256; cannot verify source binding")
+    current_settings = _digest_field(current.get("settings_sha256"))
+    if settings_digest is None:
+        pass
+    elif current_settings and settings_digest != current_settings:
+        problems.append("stale source identity: planning/config/settings.json hash does not match this tree")
+    elif not current_settings:
+        problems.append("current tree is missing settings_sha256; cannot verify source binding")
+    return problems
+
+
+def _recorded_subset_dirty(identity: dict[str, Any], producer: str) -> bool | None:
+    value = identity.get(f"dirty_{producer}")
+    if isinstance(value, bool):
+        return value
+    return None
+
+
+def _producer_freshness_problems(
+    recorded: dict[str, Any],
+    current: dict[str, Any],
+    producer: str,
+) -> list[str]:
+    problems: list[str] = []
+    key = producer_hash_key(producer)
+    got = _digest_field(recorded.get(key) or recorded.get("inputs_sha256"))
+    expected = _digest_field(current.get(key))
+    if got is None:
+        problems.append(f"missing implementation {key}")
+    elif expected and got != expected:
+        problems.append(f"stale implementation identity: {key} {got} != current {expected}")
+    elif got and not expected:
+        problems.append(f"current tree is missing implementation {key}")
+    recorded_dirty = _recorded_subset_dirty(recorded, producer)
+    current_dirty = current.get(f"dirty_{producer}")
+    if recorded_dirty is False and current_dirty is True:
+        problems.append(
+            f"measured {producer} implementation is dirty but the receipt claims a clean {producer} subset"
+        )
+    return problems
+
+
+def _binding_problems(body: dict[str, Any], current: dict[str, Any] | None) -> list[str]:
+    problems: list[str] = []
+    binding = body.get("source_binding") or (body.get("measurement") or {}).get("source")
+    if not isinstance(binding, dict):
+        return ["missing source/build binding"]
+    if binding.get("producer") not in {None, "cli"}:
+        problems.append("CLI receipt source_binding.producer must be cli")
+    problems.extend(_shared_source_problems(binding, current))
     identity = _implementation_from_body(body)
     if not isinstance(identity, dict):
         problems.append("missing implementation identity (git HEAD is not a substitute)")
         identity = {}
-    for key in ("cli_sha256", "browser_sha256", "docker_sha256"):
-        if _digest_field(identity.get(key)) is None:
-            problems.append(f"missing implementation {key}")
-    if "dirty" not in identity or not isinstance(identity.get("dirty"), bool):
+    if _digest_field(identity.get("cli_sha256") or binding.get("inputs_sha256")) is None:
+        problems.append("missing implementation cli_sha256")
+    has_bool_dirty = isinstance(identity.get("dirty"), bool) or isinstance(identity.get("dirty_cli"), bool)
+    if not has_bool_dirty:
         problems.append("implementation dirty flag is missing (HEAD does not identify a dirty tree)")
+    collection = binding.get("collection")
+    if isinstance(collection, dict) and collection.get("unchanged") is False:
+        problems.append("CLI product inputs changed during collection")
     if current:
-        current_digest = _digest_field(current.get("fixture_sha256"))
-        if digest is None:
-            pass
-        elif current_digest and digest != current_digest:
-            problems.append(
-                f"stale source identity: receipt fixture sha256 {digest} != current {current_digest}"
-            )
-        elif not current_digest:
-            problems.append("current tree is missing fixture sha256; cannot verify source binding")
-        current_settings = _digest_field(current.get("settings_sha256"))
-        if settings_digest is None:
-            pass
-        elif current_settings and settings_digest != current_settings:
-            problems.append("stale source identity: planning/config/settings.json hash does not match this tree")
-        elif not current_settings:
-            problems.append("current tree is missing settings_sha256; cannot verify source binding")
         current_impl = current.get("implementation") if isinstance(current.get("implementation"), dict) else {}
-        for key in ("cli_sha256", "browser_sha256", "docker_sha256"):
-            recorded = _digest_field(identity.get(key))
-            expected = _digest_field(current_impl.get(key))
-            if recorded and expected and recorded != expected:
-                problems.append(
-                    f"stale implementation identity: {key} {recorded} != current {expected}"
-                )
-            elif recorded and not expected:
-                problems.append(f"current tree is missing implementation {key}")
-        if current_impl.get("dirty") is True and identity.get("dirty") is False:
-            problems.append(
-                "measured implementation is dirty but the receipt claims a clean tree"
-            )
+        problems.extend(_producer_freshness_problems(identity, current_impl, "cli"))
+    return problems
+
+
+def _browser_identity_problems(
+    browser: dict[str, Any],
+    current: dict[str, Any] | None,
+    *,
+    cli_binding: dict[str, Any] | None,
+) -> list[str]:
+    problems: list[str] = []
+    binding = browser.get("source_binding")
+    if not isinstance(binding, dict):
+        return [
+            "browser evidence is missing its own source/build binding; CLI identity is not a substitute"
+        ]
+    producer = binding.get("producer")
+    if producer == "cli":
+        problems.append("CLI identity cannot stand in for browser identity")
+    elif producer not in {None, "browser"}:
+        problems.append(f"browser source_binding.producer {producer!r} is not browser")
+    if cli_binding is not None and binding is cli_binding:
+        problems.append("CLI identity cannot stand in for browser identity")
+    problems.extend(_shared_source_problems(binding, current))
+    identity = binding.get("implementation") if isinstance(binding.get("implementation"), dict) else {}
+    if not identity:
+        problems.append("browser evidence is missing its own implementation identity")
+    if current:
+        current_impl = current.get("implementation") if isinstance(current.get("implementation"), dict) else {}
+        problems.extend(_producer_freshness_problems(identity, current_impl, "browser"))
+    collection = binding.get("collection")
+    if isinstance(collection, dict) and collection.get("unchanged") is False:
+        problems.append("browser product inputs changed during collection")
+    build = browser.get("build") if isinstance(browser.get("build"), dict) else {}
+    built_from = _digest_field(build.get("built_from_browser_sha256"))
+    browser_hash = _digest_field(identity.get("browser_sha256") or binding.get("inputs_sha256"))
+    if built_from is None:
+        problems.append("browser build is missing built_from_browser_sha256 (source identity at build time)")
+    elif browser_hash and built_from != browser_hash:
+        problems.append("browser build is not bound to the recorded browser source identity")
     return problems
 
 
@@ -647,6 +781,10 @@ def validate_receipt(
             problems.append("browser evidence claimed the 4-core/8 GiB reference on this host")
         build = browser.get("build") if isinstance(browser.get("build"), dict) else {}
         if needs_browser:
+            cli_binding = body.get("source_binding") if isinstance(body.get("source_binding"), dict) else None
+            problems.extend(
+                _browser_identity_problems(browser, current_binding, cli_binding=cli_binding)
+            )
             problems.extend(_browser_build_problems(build))
         browser_stages = browser.get("stages") if isinstance(browser.get("stages"), dict) else {}
         preview = browser_stages.get("preview") if isinstance(browser_stages.get("preview"), dict) else {}
@@ -702,3 +840,14 @@ def inventory_lines(problems: list[str], *, profile: str, mode: str) -> list[str
     for item in problems:
         lines.append(f"- incomplete/unavailable: {item}")
     return lines
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Dump a producer source binding as JSON")
+    parser.add_argument("--producer", choices=("cli", "browser", "docker"), default="cli")
+    parser.add_argument("--root", type=Path, default=None)
+    args = parser.parse_args()
+    root = args.root.resolve() if args.root is not None else Path(__file__).resolve().parent.parent
+    print(json.dumps(source_binding(root, producer=args.producer), indent=2))

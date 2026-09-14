@@ -12,3 +12,8 @@ Install this workspace independently:
 ```sh
 cd packages/readers-pdfjs/node && bun install --frozen-lockfile
 ```
+
+The wrapper resolves only `./node_modules/pdfjs-dist` (this lock). It does
+not read `NODE_PATH` and does not require adding `pdfjs-dist` to a parent
+`package.json`. Root `bun install --frozen-lockfile` does not install this
+nested lock.

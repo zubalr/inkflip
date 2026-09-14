@@ -195,20 +195,86 @@ class TestPdfjsWrapper(unittest.TestCase):
         if node is None:
             self.skipTest("node is not installed")
         bridge = ROOT / "packages" / "readers-pdfjs" / "node" / "bridge.mjs"
+        local = ROOT / "packages" / "readers-pdfjs" / "node" / "node_modules" / "pdfjs-dist"
         pdf = FIXTURES / "public" / "mapping-amount.pdf"
+        env = os.environ.copy()
+        env["NODE_PATH"] = ""
         proc = subprocess.run(
             [node, str(bridge)],
             input=json.dumps({"action": "extract", "pdf_path": str(pdf), "pages": [0]}),
             capture_output=True,
             text=True,
+            env=env,
         )
-        if proc.returncode != 0 and "Cannot find package" in (proc.stderr or ""):
-            self.skipTest("pdfjs-dist node workspace is not installed")
+        if not local.exists():
+            self.fail(
+                "isolated pdfjs-dist is not installed. Documented setup: "
+                "cd packages/readers-pdfjs/node && bun install --frozen-lockfile. "
+                f"bridge stderr={proc.stderr!r} stdout={proc.stdout!r}"
+            )
         data = json.loads(proc.stdout)
         self.assertTrue(data.get("ok"), data)
         self.assertEqual(data.get("pdfjs_version") or data["reader"]["version"], "6.3.289")
         texts = [page.get("raw_text") or "" for page in data.get("pages") or []]
         self.assertTrue(any(texts), "PDF.js wrapper must extract real text, not a stub")
+
+    def test_missing_local_install_names_the_documented_command(self):
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("node is not installed")
+        with tempfile.TemporaryDirectory(prefix="inkflip-pdfjs-missing-") as raw:
+            td = Path(raw)
+            bridge = ROOT / "packages" / "readers-pdfjs" / "node" / "bridge.mjs"
+            # Copy only the wrapper, not node_modules.
+            dest = td / "bridge.mjs"
+            dest.write_bytes(bridge.read_bytes())
+            env = os.environ.copy()
+            env["NODE_PATH"] = str(ROOT / "apps" / "web" / "node_modules")
+            proc = subprocess.run(
+                [node, str(dest)],
+                input=json.dumps({"action": "describe"}),
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=td,
+            )
+            combined = (proc.stdout or "") + (proc.stderr or "")
+            self.assertIn("bun install --frozen-lockfile", combined)
+            self.assertIn("packages/readers-pdfjs/node", combined)
+            if proc.stdout.strip():
+                data = json.loads(proc.stdout)
+                self.assertFalse(data.get("ok", True))
+
+    def test_wrong_version_is_a_typed_profile_failure(self):
+        node_dir = ROOT / "packages" / "readers-pdfjs" / "node"
+        if not (node_dir / "node_modules" / "pdfjs-dist").exists():
+            self.fail(
+                "isolated pdfjs-dist is not installed. Documented setup: "
+                "cd packages/readers-pdfjs/node && bun install --frozen-lockfile"
+            )
+        with tempfile.TemporaryDirectory(prefix="inkflip-pdfjs-ver-") as raw:
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(NATIVE)
+            env["NODE_PATH"] = ""
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(INSTALLER),
+                    "--name",
+                    "wrong",
+                    "--reader",
+                    "pdfjs-node",
+                    "--version",
+                    "9.9.9",
+                    "--profile-dir",
+                    raw,
+                ],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            self.assertEqual(proc.returncode, 3, proc.stderr)
+            self.assertIn("version mismatch", (proc.stderr or "").lower())
 
 
 class TestWorkerFailuresStayFailed(unittest.TestCase):

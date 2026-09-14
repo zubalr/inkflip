@@ -51,6 +51,7 @@ const MIME: Record<string, string> = {
 let server: Server;
 let baseUrl: string;
 let buildId = "";
+let browserBindingStart: Record<string, unknown>;
 let buildIdentity: {
   production: boolean;
   vite_dev_server: boolean;
@@ -58,9 +59,18 @@ let buildIdentity: {
   tree_sha256: string;
   file_count: number;
   files: { path: string; sha256: string; bytes: number }[];
+  built_from_browser_sha256: string;
   out_dir: string;
   note: string;
 };
+
+function dumpProducerBinding(producer: "cli" | "browser" | "docker"): Record<string, unknown> {
+  const script = path.join(ROOT, "scripts", "performance_receipt.py");
+  const out = execFileSync("python3", [script, "--producer", producer, "--root", ROOT], {
+    encoding: "utf8",
+  });
+  return JSON.parse(out) as Record<string, unknown>;
+}
 
 function hashBuild(dist: string) {
   const files: { path: string; sha256: string; bytes: number }[] = [];
@@ -139,6 +149,7 @@ function chromiumTreeRssBytes(): number | null {
 }
 
 test.beforeAll(async () => {
+  browserBindingStart = dumpProducerBinding("browser");
   const viteModulePath = path.resolve(WEB_ROOT, "node_modules/vite/dist/node/index.js");
   const { build } = await import(pathToFileURL(viteModulePath).href);
   process.env.INKFLIP_TEST_HOOKS = "1";
@@ -156,6 +167,11 @@ test.beforeAll(async () => {
   if (!existsSync(index)) throw new Error(`production build missing ${index}`);
   buildId = readFileSync(index, "utf8").slice(0, 120);
   const hashed = hashBuild(DIST);
+  const impl = (browserBindingStart.implementation ?? {}) as { browser_sha256?: string };
+  const builtFrom =
+    (typeof browserBindingStart.inputs_sha256 === "string" && browserBindingStart.inputs_sha256) ||
+    impl.browser_sha256 ||
+    "";
   buildIdentity = {
     production: true,
     vite_dev_server: false,
@@ -163,8 +179,9 @@ test.beforeAll(async () => {
     tree_sha256: hashed.tree_sha256,
     file_count: hashed.file_count,
     files: hashed.files,
+    built_from_browser_sha256: builtFrom,
     out_dir: DIST,
-    note: "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1), bound to hashed built bytes. Not a shipped unlabeled artifact.",
+    note: "Identified instrumented production Vite build (INKFLIP_TEST_HOOKS=1), bound to hashed built bytes and the browser source identity captured at build time. Not a shipped unlabeled artifact.",
   };
   const distRoot = path.resolve(DIST) + path.sep;
   server = createServer((req, res) => {
@@ -559,9 +576,41 @@ test.describe("T39 built-app workspace budgets", () => {
     const peakRss = rss.length ? Math.max(...rss) : null;
     const lastRss = rss.at(-1) ?? null;
     const lastHeap = heap.at(-1) ?? null;
+    const browserBindingEnd = dumpProducerBinding("browser");
+    const startImpl = (browserBindingStart.implementation ?? {}) as { browser_sha256?: string };
+    const endImpl = (browserBindingEnd.implementation ?? {}) as { browser_sha256?: string };
+    const collectionUnchanged =
+      browserBindingStart.inputs_sha256 === browserBindingEnd.inputs_sha256 &&
+      browserBindingStart.fixture_sha256 === browserBindingEnd.fixture_sha256 &&
+      browserBindingStart.settings_sha256 === browserBindingEnd.settings_sha256 &&
+      startImpl.browser_sha256 === endImpl.browser_sha256;
+    const sourceBinding = {
+      ...browserBindingEnd,
+      collection: {
+        unchanged: collectionUnchanged,
+        start: {
+          producer: "browser",
+          fixture_sha256: browserBindingStart.fixture_sha256,
+          settings_sha256: browserBindingStart.settings_sha256,
+          inputs_sha256: browserBindingStart.inputs_sha256,
+          browser_sha256: startImpl.browser_sha256,
+        },
+        end: {
+          producer: "browser",
+          fixture_sha256: browserBindingEnd.fixture_sha256,
+          settings_sha256: browserBindingEnd.settings_sha256,
+          inputs_sha256: browserBindingEnd.inputs_sha256,
+          browser_sha256: endImpl.browser_sha256,
+        },
+        ...(collectionUnchanged
+          ? {}
+          : { error: "product inputs or subset dirty-state changed during collection" }),
+      },
+    };
     const evidence = {
       kind: "inkflip-performance-browser",
       schema_version: "2.2.0",
+      source_binding: sourceBinding,
       host: {
         profile_requested: "local-mac",
         browserName,

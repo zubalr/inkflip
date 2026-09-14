@@ -371,7 +371,12 @@ def main(argv: list[str] | None = None) -> int:
 
     identity = host_identity(args.profile)
     args.out.mkdir(parents=True, exist_ok=True)
+    start_binding = receipt.source_binding(ROOT, producer="cli")
     measurement = measure_cli_stages(max(args.samples, 1), args.out)
+    end_binding = receipt.source_binding(ROOT, producer="cli")
+    collection = receipt.bind_collection(start_binding, end_binding)
+    end_binding = dict(end_binding)
+    end_binding["collection"] = collection
     browser_evidence = None
     if args.browser_evidence:
         loaded, error = receipt.load_json_object(args.browser_evidence)
@@ -387,7 +392,7 @@ def main(argv: list[str] | None = None) -> int:
         "mode": args.mode,
         "accepting": False,
         "contention": "caller must keep competing OCR/container jobs idle; this process does not inspect other PIDs",
-        "source_binding": receipt.source_binding(ROOT),
+        "source_binding": end_binding,
         "evidence_location": (
             "artifacts/performance is local/untracked evidence; do not treat a "
             "committed receipt as the implementation identity"

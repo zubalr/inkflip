@@ -19,6 +19,7 @@ SOURCE_ROOT=""
 OUT_DIR=""
 SCRATCH_DIR=""
 IMAGE="${INKFLIP_NATIVE_IMAGE:-}"
+CHECK_MOUNTS=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -38,6 +39,10 @@ while [ "$#" -gt 0 ]; do
       IMAGE="${2:-}"
       shift 2
       ;;
+    --check-mounts)
+      CHECK_MOUNTS=1
+      shift
+      ;;
     --)
       shift
       break
@@ -53,22 +58,128 @@ while [ "$#" -gt 0 ]; do
 done
 
 [ -n "$SOURCE_ROOT" ] && [ -n "$OUT_DIR" ] || usage
-[ "$#" -gt 0 ] || usage
-
-SOURCE_ROOT="$(CDPATH= cd -- "$SOURCE_ROOT" && pwd)"
-mkdir -p "$OUT_DIR"
-OUT_DIR="$(CDPATH= cd -- "$OUT_DIR" && pwd)"
-if [ -n "$SCRATCH_DIR" ]; then
-  mkdir -p "$SCRATCH_DIR"
-  SCRATCH_DIR="$(CDPATH= cd -- "$SCRATCH_DIR" && pwd)"
+if [ "$CHECK_MOUNTS" != 1 ]; then
+  [ "$#" -gt 0 ] || usage
 fi
 
-case "$SOURCE_ROOT" in
-  /|/etc|/etc/*|/var/run|/var/run/*|/home|/Users)
-    echo "inkflip: refusing to mount a broad host root as source: $SOURCE_ROOT" >&2
+strip_slash() {
+  p=$1
+  while [ "$p" != "/" ] && [ "${p%/}" != "$p" ]; do
+    p=${p%/}
+  done
+  printf '%s\n' "$p"
+}
+
+literal_forbidden() {
+  p=$(strip_slash "$1")
+  case "$p" in
+    /|/etc|/private/etc|/var/run|/private/var/run|/home|/Users|/System/Volumes/Data/Users)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+resolve_existing_dir() {
+  (CDPATH= cd -- "$1" && pwd -P)
+}
+
+resolve_maybe_new_dir() {
+  if [ -d "$1" ]; then
+    resolve_existing_dir "$1"
+  else
+    parent=$(dirname -- "$1")
+    base=$(basename -- "$1")
+    parent_r=$(resolve_existing_dir "$parent")
+    printf '%s/%s\n' "$parent_r" "$base"
+  fi
+}
+
+forbidden_mount() {
+  resolved=$(strip_slash "$1")
+  role=$2
+  case "$resolved" in
+    /|/etc|/etc/*|/private/etc|/private/etc/*|/var/run|/var/run/*|/private/var/run|/private/var/run/*|/home|/Users|/System/Volumes/Data/Users)
+      echo "inkflip: refusing to mount a broad host root as ${role}: $resolved" >&2
+      return 0
+      ;;
+  esac
+  if [ -n "${HOME:-}" ]; then
+    home_phys=$(strip_slash "$HOME")
+    if [ "$resolved" = "$HOME" ] || [ "$resolved" = "$home_phys" ]; then
+      echo "inkflip: refusing to mount a home directory as ${role}: $resolved" >&2
+      return 0
+    fi
+  fi
+  case "$resolved" in
+    /Users/*|/System/Volumes/Data/Users/*)
+      rest=${resolved#/Users/}
+      rest=${rest#/System/Volumes/Data/Users/}
+      case "$rest" in
+        */*) ;;
+        *)
+          echo "inkflip: refusing to mount a home directory as ${role}: $resolved" >&2
+          return 0
+          ;;
+      esac
+      ;;
+    /home/*)
+      rest=${resolved#/home/}
+      case "$rest" in
+        */*) ;;
+        *)
+          echo "inkflip: refusing to mount a home directory as ${role}: $resolved" >&2
+          return 0
+          ;;
+      esac
+      ;;
+  esac
+  return 1
+}
+
+if literal_forbidden "$SOURCE_ROOT"; then
+  echo "inkflip: refusing to mount a broad host root as source: $SOURCE_ROOT" >&2
+  exit 2
+fi
+SOURCE_ROOT="$(resolve_existing_dir "$SOURCE_ROOT")"
+if forbidden_mount "$SOURCE_ROOT" "source"; then
+  exit 2
+fi
+
+if literal_forbidden "$OUT_DIR"; then
+  echo "inkflip: refusing to mount a broad host root as output: $OUT_DIR" >&2
+  exit 2
+fi
+OUT_DIR="$(resolve_maybe_new_dir "$OUT_DIR")"
+if forbidden_mount "$OUT_DIR" "output"; then
+  exit 2
+fi
+mkdir -p "$OUT_DIR"
+OUT_DIR="$(resolve_existing_dir "$OUT_DIR")"
+if forbidden_mount "$OUT_DIR" "output"; then
+  exit 2
+fi
+
+if [ -n "$SCRATCH_DIR" ]; then
+  if literal_forbidden "$SCRATCH_DIR"; then
+    echo "inkflip: refusing to mount a broad host root as scratch: $SCRATCH_DIR" >&2
     exit 2
-    ;;
-esac
+  fi
+  SCRATCH_DIR="$(resolve_maybe_new_dir "$SCRATCH_DIR")"
+  if forbidden_mount "$SCRATCH_DIR" "scratch"; then
+    exit 2
+  fi
+  mkdir -p "$SCRATCH_DIR"
+  SCRATCH_DIR="$(resolve_existing_dir "$SCRATCH_DIR")"
+  if forbidden_mount "$SCRATCH_DIR" "scratch"; then
+    exit 2
+  fi
+fi
+
+if [ "$CHECK_MOUNTS" = 1 ]; then
+  echo "inkflip: mount guard ok source=${SOURCE_ROOT} out=${OUT_DIR} scratch=${SCRATCH_DIR:-}" >&2
+  exit 0
+fi
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "inkflip: docker executable not found" >&2
