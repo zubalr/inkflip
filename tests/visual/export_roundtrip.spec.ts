@@ -240,6 +240,17 @@ test.describe("Tampered import refusal preserves a valid session", () => {
   async function loadValidExport(page: Page): Promise<Record<string, any>> {
     await page.goto(`${baseUrl}/#/workspace?example=${CARD}`);
     await waitForImportedReport(page);
+    // Opt in to source inclusion so the payload carries the verified
+    // source_pdf asset — without it `assets` is empty and an asset-identity
+    // mutation degenerates into re-importing the untouched valid payload.
+    await page.waitForFunction(
+      () =>
+        (
+          globalThis as { __inspect?: { getState(): { hasSourceBytes: boolean } } }
+        ).__inspect?.getState().hasSourceBytes === true,
+      { timeout: 15_000 },
+    );
+    await page.getByLabel("Include the original PDF").check();
     return downloadJson(page);
   }
 
@@ -257,6 +268,9 @@ test.describe("Tampered import refusal preserves a valid session", () => {
   }) => {
     const valid = await loadValidExport(page);
     const title = valid.findings[0].title;
+    // The asset-identity mutation must be real: without a carried asset the
+    // body is byte-identical to the valid export and asserts a stale error.
+    expect(valid.assets?.length ?? 0).toBeGreaterThan(0);
     const mutations: Array<[string, (body: Record<string, any>) => void]> = [
       ["report_id", (b) => {
         b.report_id = "0".repeat(64);
