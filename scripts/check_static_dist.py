@@ -363,6 +363,10 @@ CSS_EXT_RE = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 
+# Canonical metadata names the public page without fetching it. Exempt only
+# this exact element, never its URL in scripts or assets.
+CANONICAL_ELEMENT = '<link rel="canonical" href="https://inkflip-rose.vercel.app/" />'
+
 
 def is_external(url: str) -> bool:
     """External = any non-same-origin target. Protocol-relative (//host)
@@ -396,7 +400,8 @@ def check_same_origin(dist: Path) -> list[str]:
             continue
         contexts = [(m.group(1), "fetch/worker/import context") for m in LOAD_CONTEXT_RE.finditer(text)]
         if path.suffix == ".html":
-            contexts += [(m.group(1), "HTML loading attribute") for m in HTML_ATTR_RE.finditer(text)]
+            contexts += [(m.group(1), "HTML loading attribute")
+                         for m in HTML_ATTR_RE.finditer(text.replace(CANONICAL_ELEMENT, ""))]
         if path.suffix == ".css":
             contexts += [(m.group(1) or m.group(2), "CSS url/import") for m in CSS_EXT_RE.finditer(text)]
         for url, kind in contexts:

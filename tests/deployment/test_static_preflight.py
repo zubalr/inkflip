@@ -395,6 +395,20 @@ class SameOriginTests(unittest.TestCase):
         out = self.case(b'fetch("//example.invalid/telemetry")', name="examples/amount/x.js")
         self.assertIn("example.invalid", out)
 
+    def test_canonical_metadata_element_is_exempt_but_remote_links_fail(self):
+        out = self.case(
+            b'<link rel="canonical" href="https://inkflip-rose.vercel.app/" />'
+            b'<link rel="stylesheet" href="https://evil.invalid/x.css">',
+            name="index.html")
+        self.assertIn("evil.invalid", out)
+        self.assertNotIn("inkflip-rose.vercel.app", out)
+
+    def test_canonical_rel_combination_still_fails(self):
+        out = self.case(
+            b'<link rel="canonical stylesheet" href="https://inkflip-rose.vercel.app/" />',
+            name="index.html")
+        self.assertIn("inkflip-rose.vercel.app", out)
+
 
 class RealDistTests(unittest.TestCase):
     def test_real_dist_passes_preflight(self):
