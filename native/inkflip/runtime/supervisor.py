@@ -607,6 +607,7 @@ class Supervisor:
         resume: bool = False,
         parallel_admission: ParallelAdmission | None = None,
         validate_report: Callable[[bytes], None] | None = None,
+        hold_claim_after_run: bool = False,
     ):
         if not POSIX:
             raise SupervisionError("native supervision requires POSIX process groups")
@@ -639,6 +640,11 @@ class Supervisor:
         # caller releases it with close(), which the corpus wrapper does after it
         # has written identity.json - so no writer can slip in behind run().
         self._claim = claim_output_directory(self.out_dir)
+        # A caller that publishes something after run() returns (the corpus wrapper
+        # writes identity.json) keeps the claim by asking for it; every other caller
+        # releases when the run ends, so a sequential second Supervisor on the same
+        # directory is not refused by the first one's leftovers.
+        self._hold_claim_after_run = hold_claim_after_run
         self.reports_dir = self.out_dir / "reports"
         self.scratch_root = self.out_dir / "scratch"
         self.journal_path = self.out_dir / "journal.jsonl"
@@ -1160,6 +1166,24 @@ class Supervisor:
         self.close()
 
     def run(self, jobs: Iterable[JobSpec]) -> RunResult:
+        """Run the plan, releasing a non-holding claim on every exit path.
+
+        A caller that does not publish after run() - every caller except the
+        corpus wrapper - stops owning the directory as soon as run() returns,
+        *and* as soon as it raises. Leaving the claim held on an exception would
+        strand the directory for the rest of the process.
+        """
+        try:
+            result = self._run_impl(jobs)
+        except BaseException:
+            if not self._hold_claim_after_run:
+                self.close()
+            raise
+        if not self._hold_claim_after_run:
+            self.close()
+        return result
+
+    def _run_impl(self, jobs: Iterable[JobSpec]) -> RunResult:
         jobs = list(jobs)
         if not jobs:
             raise SupervisionError("an empty job plan is refused (no vacuous run)")
