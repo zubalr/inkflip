@@ -6,7 +6,8 @@
  * (rejected, prior session preserved, next valid file still works) and the
  * wrong-source disclosure on an imported report.
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { test, expect } from "@playwright/test";
 import { startProdServer, type ProdServerInstance, ROOT } from "./prod_server.ts";
@@ -18,6 +19,7 @@ const FIXTURES = path.join(ROOT, "fixtures");
 const ENCRYPTED = path.join(FIXTURES, "development", "bad-pdf-encrypted.pdf");
 const VALID = path.join(FIXTURES, "public", "mapping-amount.pdf");
 const EXAMPLE_REPORT = path.join(ROOT, "apps/web/public/examples/duplicates/report.json");
+const OTHER = path.join(FIXTURES, "public", "covered-amount.pdf");
 
 test.beforeAll(async () => {
   prodServer = await startProdServer();
@@ -92,5 +94,58 @@ test.describe("Workspace: imported report source disclosure", () => {
     const body = await page.locator("body").innerText();
     expect(body.toLowerCase()).not.toContain("all checked");
     expect(body.toLowerCase()).not.toContain("document is safe");
+  });
+});
+
+test.describe("Workspace: oversized input, cancellation, and replacement disclosure", () => {
+  function oversizedFixture(): string {
+    const target = path.join(tmpdir(), "oversized-input.pdf");
+    // One byte over the documented 20 MiB local browser limit.
+    writeFileSync(target, Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(21 * 1024 * 1024, 0x41)]));
+    return target;
+  }
+
+  test("an oversized file is refused with the limit and the actual size", async ({ page }) => {
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+
+    await page.locator("#input-open-pdf").setInputFiles(oversizedFixture());
+
+    const refusal = page.getByText(/exceeds the 20 MiB local browser limit/i).first();
+    await expect(refusal).toBeVisible({ timeout: 15000 });
+    const text = await refusal.textContent();
+    expect(text, "the refusal must state the measured size, not just the limit").toMatch(/\d{7,}\s*>\s*20971520/);
+
+    // Recovery: the intake still works for an acceptable file.
+    await page.locator("#input-open-pdf").setInputFiles(VALID);
+    await expect(page.getByText("not yet inspected").first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test("a run can be cancelled and reports a terminal cancelled state", async ({ page }) => {
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+    await page.locator("#input-open-pdf").setInputFiles(VALID);
+    await expect(page.getByText("not yet inspected").first()).toBeVisible({ timeout: 15000 });
+
+    await expect(page.locator("#btn-cancel-run")).toHaveCount(0, { timeout: 5000 });
+    await page.locator('[data-testid="start-run"]').click();
+    await expect(page.locator("#btn-cancel-run")).toHaveCount(1, { timeout: 15000 });
+
+    await page.locator("#btn-cancel-run").click();
+    await expect(page.getByText(/inspection run was cancelled/i).first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test("selecting a different file discloses the unsaved report before replacing", async ({ page }) => {
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector('[data-testid="file-drop"]');
+    await page.locator("#input-open-pdf").setInputFiles(VALID);
+    await expect(page.getByText("not yet inspected").first()).toBeVisible({ timeout: 15000 });
+
+    await page.locator("#input-open-pdf").setInputFiles(OTHER);
+
+    await expect(page.getByText(/open a different pdf/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByText(/clears the current file and its unsaved report/i).first(),
+    ).toBeVisible({ timeout: 15000 });
   });
 });
