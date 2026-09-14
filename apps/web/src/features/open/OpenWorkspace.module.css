@@ -147,31 +147,95 @@
   color: var(--color-ink);
 }
 
+/* Optional tuning and device limits are grouped by a rule, not by another
+   outlined card: the summary line is the group heading and stays a 44px
+   touch target with the shared focus ring. */
+.tuning,
 .limits {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  background: var(--color-paper-pure);
-  padding: var(--space-3);
+  border-top: 1px solid var(--color-line);
+  padding-top: var(--space-2);
 }
 
-.limitsTitle {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-caption);
+.tuningSummary,
+.limitsSummary,
+.planSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: center;
+  gap: 2px var(--space-3);
+  min-height: var(--control-min-height);
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.tuningSummary:focus-visible,
+.limitsSummary:focus-visible,
+.planSummary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/* Drawn marker rather than a glyph, so nothing decorative is announced. */
+.tuningSummary::after,
+.limitsSummary::after,
+.planSummary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid var(--color-muted);
+  border-bottom: 2px solid var(--color-muted);
+  transform: rotate(45deg);
+  transition: transform var(--motion-state);
+}
+
+.tuning[open] > .tuningSummary::after,
+.limits[open] > .limitsSummary::after,
+.planDetails[open] > .planSummary::after {
+  transform: rotate(225deg);
+}
+
+.disclosureTitle {
+  font-size: var(--text-body);
   font-weight: 600;
+}
+
+.disclosureHint {
+  font-size: var(--text-caption);
   color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+}
+
+.limitsMode {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuningBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) 0 var(--space-1);
 }
 
 .limitsList {
   margin: 0;
-  padding-left: var(--space-4);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
   font-size: var(--text-caption);
   color: var(--color-ink);
   display: flex;
   flex-direction: column;
   gap: 2px;
   font-variant-numeric: tabular-nums;
+}
+
+.planDetails > .planSummary {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
 }
 
 .previewRequest {
@@ -182,6 +246,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+.ocrConsentPlain {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-ink);
 }
 
 .ocrConsentLabel {

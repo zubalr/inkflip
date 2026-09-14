@@ -79,11 +79,12 @@ function byteLabel(bytes: number): string {
 /**
  * The open+selection workspace composition: drop/replace intake on top, the
  * loaded-file summary beneath it, then what to check — the bounded page
- * picker followed immediately by the plan-producing "Check selected pages"
- * action. Only after that action come the optional region/preview tuning and
- * the device limits, so the ordinary path is file → pages → check. Everything
- * the UI shows is derived from the coordinator snapshot and the controller's
- * last outcome — no parallel state can drift (I07).
+ * picker, the OCR cap/consent decisions the run acts on, and the plan-producing
+ * "Check selected pages" action. Every optional or advanced group (region and
+ * preview tuning, device limits) sits below that action, so the ordinary path
+ * is file → pages → check. Everything the UI shows is derived from the
+ * coordinator snapshot and the controller's last outcome — no parallel state
+ * can drift (I07).
  */
 export function OpenWorkspace({
   controller,
@@ -342,102 +343,9 @@ export function OpenWorkspace({
             onChange={() => setSelectionRev((r) => r + 1)}
           />
 
-          {/* The primary action follows the selection it acts on — the
-              optional tuning and the device limits sit below it. */}
-          <div className={styles.startRow}>
-            <Button
-              variant="primary"
-              onClick={runStart}
-              disabled={selection.size === 0 || !startRun}
-              disabledReason={
-                selection.size === 0 ? "Select at least one page" : undefined
-              }
-              data-testid="start-run"
-            >
-              {SELECTION_COPY.start}
-            </Button>
-            <span className={styles.startNote}>
-              {fill(SELECTION_COPY.summary, {
-                selected: String(selection.size),
-                total: String(doc.pageCount),
-              })}
-            </span>
-          </div>
-
-          <div className={styles.previewRow}>
-            <label className={styles.previewLabel}>
-              Preview page
-              <input
-                className={styles.previewInput}
-                type="number"
-                min={1}
-                max={doc.pageCount}
-                value={previewPage + 1}
-                data-testid="preview-page"
-                onChange={(event) => {
-                  const n = Number.parseInt(event.currentTarget.value, 10);
-                  if (Number.isInteger(n) && n >= 1 && n <= doc.pageCount) {
-                    setPreviewPage(n - 1);
-                    setPreviewRequested(false);
-                  }
-                }}
-              />
-            </label>
-            {!selection.has(previewPage) ? (
-              <span className={styles.previewNote} data-testid="preview-notselected">
-                Page {previewPage + 1} is not selected — its region will not be checked.
-              </span>
-            ) : omittedRegionPages.includes(previewPage) ? (
-              <span className={styles.previewNote} data-testid="preview-ocromitted">
-                Page {previewPage + 1} region exceeds the {profile.maxOcrPagesPerRun}-page OCR cap — native text and render checks will run, but OCR is omitted.
-              </span>
-            ) : null}
-          </div>
-
-          {lowMemory && !previewRequested && (
-            <div className={styles.previewRequest}>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => setPreviewRequested(true)}
-                data-testid="render-preview"
-              >
-                {LIMITS_COPY.renderPreview}
-              </Button>
-            </div>
-          )}
-
-          {rasterError && (
-            <Notice type="warning" title="Preview render failed" id="raster-error">
-              {rasterError}
-            </Notice>
-          )}
-
-          {previewMeta && (
-            <RegionEditor
-              page={previewMeta}
-              raster={raster}
-              box={previewRegion?.box ?? null}
-              label={previewRegion?.label ?? "Region 1"}
-              onCommit={(box, label) => commitRegion(previewPage, box, label)}
-              onClear={() => clearRegion(previewPage)}
-              onLabelChange={(next) => {
-                if (!previewRegion) return;
-                const trimmed = next.trim() || "Region 1";
-                const updated = new Map(regions);
-                updated.set(previewPage, {
-                  ...previewRegion,
-                  label: next,
-                  region: {
-                    ...previewRegion.region,
-                    label: trimmed.slice(0, 200),
-                  },
-                });
-                setRegions(updated);
-              }}
-            />
-          )}
-
+          {/* The OCR cap and the opt-in consent are decisions the run acts
+              on, not advanced tuning: they stay visible and keep their place
+              ahead of the action. */}
           {omittedRegionPages.length > 0 ? (
             <Notice
               type="warning"
@@ -462,6 +370,7 @@ export function OpenWorkspace({
 
           {lowMemory && (
             <div className={styles.ocrConsent} data-testid="ocr-consent-row">
+              <p className={styles.ocrConsentPlain}>{WORKSPACE_COPY.ocrPlain}</p>
               <label className={styles.ocrConsentLabel}>
                 <input
                   type="checkbox"
@@ -477,24 +386,139 @@ export function OpenWorkspace({
             </div>
           )}
 
+          {/* The primary action closes the selection step: every optional or
+              advanced group (region/preview tuning, device limits) sits below
+              it. */}
+          <div className={styles.startRow}>
+            <Button
+              variant="primary"
+              onClick={runStart}
+              disabled={selection.size === 0 || !startRun}
+              disabledReason={
+                selection.size === 0 ? "Select at least one page" : undefined
+              }
+              data-testid="start-run"
+            >
+              {SELECTION_COPY.start}
+            </Button>
+            <span className={styles.startNote}>
+              {fill(SELECTION_COPY.summary, {
+                selected: String(selection.size),
+                total: String(doc.pageCount),
+              })}
+            </span>
+          </div>
+
+          {/* Optional tuning: the preview page and the region editor. Open by
+              default so every control stays visible and reachable; collapsing
+              it hides the pixels without unmounting the editor's state. */}
+          <details className={styles.tuning} open>
+            <summary className={styles.tuningSummary}>
+              <span className={styles.disclosureTitle}>
+                {WORKSPACE_COPY.tuning}
+              </span>
+              <span className={styles.disclosureHint}>
+                {WORKSPACE_COPY.tuningHint}
+              </span>
+            </summary>
+            <div className={styles.tuningBody}>
+              <div className={styles.previewRow}>
+                <label className={styles.previewLabel}>
+                  Preview page
+                  <input
+                    className={styles.previewInput}
+                    type="number"
+                    min={1}
+                    max={doc.pageCount}
+                    value={previewPage + 1}
+                    data-testid="preview-page"
+                    onChange={(event) => {
+                      const n = Number.parseInt(event.currentTarget.value, 10);
+                      if (Number.isInteger(n) && n >= 1 && n <= doc.pageCount) {
+                        setPreviewPage(n - 1);
+                        setPreviewRequested(false);
+                      }
+                    }}
+                  />
+                </label>
+                {!selection.has(previewPage) ? (
+                  <span className={styles.previewNote} data-testid="preview-notselected">
+                    Page {previewPage + 1} is not selected — its region will not be checked.
+                  </span>
+                ) : omittedRegionPages.includes(previewPage) ? (
+                  <span className={styles.previewNote} data-testid="preview-ocromitted">
+                    Page {previewPage + 1} region exceeds the {profile.maxOcrPagesPerRun}-page OCR cap — native text and render checks will run, but OCR is omitted.
+                  </span>
+                ) : null}
+              </div>
+
+              {lowMemory && !previewRequested && (
+                <div className={styles.previewRequest}>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setPreviewRequested(true)}
+                    data-testid="render-preview"
+                  >
+                    {LIMITS_COPY.renderPreview}
+                  </Button>
+                </div>
+              )}
+
+              {rasterError && (
+                <Notice type="warning" title="Preview render failed" id="raster-error">
+                  {rasterError}
+                </Notice>
+              )}
+
+              {previewMeta && (
+                <RegionEditor
+                  page={previewMeta}
+                  raster={raster}
+                  box={previewRegion?.box ?? null}
+                  label={previewRegion?.label ?? "Region 1"}
+                  onCommit={(box, label) => commitRegion(previewPage, box, label)}
+                  onClear={() => clearRegion(previewPage)}
+                  onLabelChange={(next) => {
+                    if (!previewRegion) return;
+                    const trimmed = next.trim() || "Region 1";
+                    const updated = new Map(regions);
+                    updated.set(previewPage, {
+                      ...previewRegion,
+                      label: next,
+                      region: {
+                        ...previewRegion.region,
+                        label: trimmed.slice(0, 200),
+                      },
+                    });
+                    setRegions(updated);
+                  }}
+                />
+              )}
+            </div>
+          </details>
+
           {/* Reference material, not part of the ordinary path: the bounds
-              this device enforces are stated once, below the action. */}
-          <section
+              this device enforces are stated once, below the action. The
+              summary keeps the device mode readable while the individual
+              bounds stay one disclosure away. */}
+          <details
             className={styles.limits}
-            aria-label={LIMITS_COPY.title}
             data-testid="run-limits"
             data-profile={profile.id}
           >
-            <h3 className={styles.limitsTitle}>{LIMITS_COPY.title}</h3>
-            <ul className={styles.limitsList}>
-              <li>
+            <summary className={styles.limitsSummary}>
+              <span className={styles.disclosureTitle}>{LIMITS_COPY.title}</span>
+              <span className={styles.limitsMode}>
                 {fill(LIMITS_COPY.mode, {
                   mode:
                     profile.id === "mobile"
                       ? "mobile (low-memory mode)"
                       : "desktop",
                 })}
-              </li>
+              </span>
+            </summary>
+            <ul className={styles.limitsList}>
               <li>
                 {fill(LIMITS_COPY.file, {
                   limit: byteLabel(profile.maxFileBytes),
@@ -521,7 +545,7 @@ export function OpenWorkspace({
                 })}
               </li>
             </ul>
-          </section>
+          </details>
 
           {plan && (
             <section className={styles.plan} aria-label="Check plan" data-testid="plan">
@@ -529,24 +553,31 @@ export function OpenWorkspace({
                 Planned checks · {plan.selectedPagesTotal}{" "}
                 {plan.selectedPagesTotal === 1 ? "page" : "pages"} selected
               </h3>
-              <ul className={styles.planList} data-testid="plan-checks">
-                {plan.checks.map((check) => (
-                  <li key={check.id} data-check-id={check.id} data-page={check.page_index} data-capability={check.capability} data-region={check.region_id ?? ""}>
-                    <code>{check.id}</code> — page {check.page_index + 1},{" "}
-                    {check.capability}
-                    {check.region_id ? ` · region ${check.region_id}` : ""}
-                  </li>
-                ))}
-              </ul>
-              {plan.dispatched.length > 0 && (
-                <ul className={styles.planList} data-testid="plan-dispatched">
-                  {plan.dispatched.map((job) => (
-                    <li key={job.jobId}>
-                      dispatched {job.checkId} on {job.jobId}
+              {/* The heading above stays visible; the raw check ids and the
+                  dispatch intents are one disclosure down, still mounted. */}
+              <details className={styles.planDetails}>
+                <summary className={styles.planSummary}>
+                  {WORKSPACE_COPY.planDetails}
+                </summary>
+                <ul className={styles.planList} data-testid="plan-checks">
+                  {plan.checks.map((check) => (
+                    <li key={check.id} data-check-id={check.id} data-page={check.page_index} data-capability={check.capability} data-region={check.region_id ?? ""}>
+                      <code>{check.id}</code> — page {check.page_index + 1},{" "}
+                      {check.capability}
+                      {check.region_id ? ` · region ${check.region_id}` : ""}
                     </li>
                   ))}
                 </ul>
-              )}
+                {plan.dispatched.length > 0 && (
+                  <ul className={styles.planList} data-testid="plan-dispatched">
+                    {plan.dispatched.map((job) => (
+                      <li key={job.jobId}>
+                        dispatched {job.checkId} on {job.jobId}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </details>
             </section>
           )}
         </section>

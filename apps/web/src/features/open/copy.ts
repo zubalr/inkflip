@@ -1,10 +1,10 @@
 /**
  * Canonical user-facing strings for the open feature.
  *
- * Source of truth: `planning/product/copy.json` (state labels are shared with
- * RUNTIME_LIFECYCLE.md). The planning package is frozen, so the strings are
- * mirrored here verbatim — if the two ever disagree, copy.json wins and this
- * file must be corrected through the contract owner, not edited ad hoc.
+ * Source of truth: this file. `planning/product/copy.json` is the frozen
+ * historical mirror of the first release's copy — the planning package is no
+ * longer edited, so the implemented strings here are authoritative and the
+ * JSON stands as the record of the earlier wording.
  */
 
 export const OPEN_COPY = {
@@ -13,9 +13,9 @@ export const OPEN_COPY = {
   /** input.private — privacy statement shown before reading. */
   private: "Your file is processed in this browser. It is not uploaded.",
   /** input.validation — progress while sniffing the candidate. */
-  validation: "Checking the file…",
+  validation: "Checking the PDF…",
   /** input.metadata — progress while the reader loads page metadata. */
-  metadata: "Opening the page information…",
+  metadata: "Opening the PDF…",
   /** input.notpdf — wrong declared type and/or missing %PDF- header. */
   notPdf:
     "This file could not be opened as a PDF. Choose a PDF you are permitted to inspect.",
@@ -27,14 +27,14 @@ export const OPEN_COPY = {
     "Encrypted PDFs are not supported in this release. Open an unencrypted copy you are permitted to inspect.",
   /** input.malformed — the reader could not open the file. */
   malformed:
-    "The reader could not open this PDF. No document check was completed.",
+    "The reader could not open this PDF. No check was completed.",
   /** pages.toomany — document exceeds the supported page count. */
   tooManyPages:
     "This PDF exceeds the supported page count. No pages were silently skipped.",
   /** input.replace.* — replacement confirmation (also T07 dialog copy). */
   replaceTitle: "Open a different PDF?",
   replaceBody:
-    "This clears the current file and its unsaved report from the workspace. Download the evidence first to keep it.",
+    "This clears the current file and its unsaved report from the workspace. Save the report first to keep it.",
   replaceConfirm: "Clear and open file",
   replaceCancel: "Keep this file",
   /** clear.action / clear.done — workspace clearing labels. */
@@ -67,6 +67,14 @@ export const SELECTION_COPY = {
 export const WORKSPACE_COPY = {
   /** Small label above the loaded file's name. */
   fileLabel: "Loaded PDF",
+  /** Optional tuning disclosure (preview page + region editor). */
+  tuning: "Preview and region (optional)",
+  tuningHint: "Only needed when you want to check one area of a page.",
+  /** The raw planned-check list inside the plan section. */
+  planDetails: "Show technical check list",
+  /** Plain-language OCR line above the consent control. */
+  ocrPlain:
+    "OCR reads the text inside the page image — useful for scans where no text can be selected.",
 } as const;
 
 export const LIMITS_COPY = {
