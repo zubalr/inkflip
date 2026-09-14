@@ -51,7 +51,7 @@ export const FindingNotes: React.FC<FindingNotesProps> = ({
     >
       <h4 className={styles.heading}>My notes</h4>
       <p className={styles.humanOnly}>
-        Your notes stay yours — they are never reader output and never change the evidence.
+        Your notes stay yours. They are never reader output and never change the evidence.
       </p>
       {own.length > 0 && (
         <ul className={styles.list}>
@@ -60,7 +60,7 @@ export const FindingNotes: React.FC<FindingNotesProps> = ({
               <span className={styles.noteText}>
                 {note.text}
                 {note.author_label !== null && (
-                  <span className={styles.noteAuthor}> — {note.author_label}</span>
+                  <span className={styles.noteAuthor}> · {note.author_label}</span>
                 )}
               </span>
               <button

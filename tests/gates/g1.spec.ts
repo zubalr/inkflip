@@ -504,9 +504,8 @@ function assertCaptureClean(cap: Capture): void {
 /** Land on the workspace's empty state through the real app shell. */
 async function gotoWorkspace(page: Page): Promise<void> {
   await page.goto(baseURL);
-  await expect(page.locator("h1")).toContainText("Your PDF can look right");
-  await page.locator("#btn-open-report").click();
-  await expect(page).toHaveURL(/#\/workspace/);
+  await expect(page.locator("h1")).toContainText("Check the text behind your PDF.");
+  await page.goto(`${baseURL}/#/workspace`);
   await page.waitForFunction(() => (window as never as Record<string, unknown>).__inspect !== undefined);
 }
 

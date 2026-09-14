@@ -89,7 +89,7 @@ function classify(finding: Finding): AlignmentClass {
 const CLASS_BADGE: Record<AlignmentClass, string> = {
   difference: "Readings differ",
   order_only: "Order-only difference",
-  ambiguous: "Ambiguous — candidates kept",
+  ambiguous: "Ambiguous, candidates kept",
   unmatched: "No matching reading",
   page_level: "Page-level only",
   incomplete: "Incomplete coverage",
@@ -100,14 +100,14 @@ const CLASS_BODY: Record<AlignmentClass, string> = {
   difference:
     "These named readings differ at this location. The difference does not establish which reading is correct.",
   order_only:
-    "The compared readers produced the same readings in a different emitted sequence. This is an order difference — not a text difference and not, by itself, an accessibility verdict.",
+    "The compared readers produced the same readings in a different emitted sequence. This is an order difference, not a text difference, and not by itself an accessibility verdict.",
   ambiguous:
-    "The alignment engine could not settle one pairing; every evaluated candidate remains listed. No candidate is pre-selected — picking one is a navigation choice, not a match claim.",
+    "The alignment engine could not settle one pairing; every evaluated candidate remains listed. No candidate is pre-selected. Picking one is a navigation choice, not a match claim.",
   unmatched:
-    "This reading has no aligned counterpart. It may be a reader omission, extra output, or an alignment limit — it is not proof of missing document text.",
+    "This reading has no aligned counterpart. It may be a reader omission, extra output, or an alignment limit. It is not proof of missing document text.",
   page_level: "This comparison is page-level: no localized coordinates support a narrower claim.",
   incomplete:
-    "The planned check did not complete, so coverage here is partial. Retained readings are shown for inspection — they are not a complete result.",
+    "The planned check did not complete, so coverage here is partial. Retained readings are shown for inspection. They are not a complete result.",
   one_sided:
     "Only one reader produced a reading here; no comparison ran. A single reader's output is not a comparison result.",
 };

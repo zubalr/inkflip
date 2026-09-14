@@ -150,6 +150,7 @@ test.describe("AutoClaw FND-002: Duplicates Example & Occurrence Navigation", ()
     // Verify detail view
     const detail = page.locator('[data-testid="example-detail-duplicates"]');
     await expect(detail).toBeVisible();
+    await detail.locator("summary").click();
 
     // Verify mechanism explanation is present
     const mechanismSection = page.locator('[data-testid="card-mechanism-section"]');

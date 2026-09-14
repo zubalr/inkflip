@@ -9,8 +9,8 @@ cannot do yet, see [limitations.md](limitations.md).
 
 A PDF page has a visual appearance (the marks a renderer paints) and one or
 more machine readings (the embedded text layer, OCR of the rendered pixels,
-native reader extractions). Usually they agree. When they don't — a displayed
-`$100` whose text layer says `$1,000` is the classic case — the discrepancy
+native reader extractions). Usually they agree. When they don't, a displayed
+`$100` whose text layer says `$1,000` is the classic case, and the discrepancy
 is easy to miss and hard to evidence. Inkflip renders the page, obtains named
 readings, aligns them to the same coordinates, and shows disagreements as
 navigable evidence you can export. A disagreement is a fact about two
@@ -21,23 +21,23 @@ document's safety, honesty or legality.
 
 Launch the app ([quickstart.md](quickstart.md)) and open the printed URL.
 
-- **The example gallery** — six prepared synthetic examples, each generated
+- **The example gallery** shows six prepared synthetic examples, each generated
   from this repository's own fixtures and openable without any local file:
-  1. *The amount that reads differently* — the font's ToUnicode table maps
+  1. *An amount changes during extraction.* The font's ToUnicode table maps
      the displayed 1 to 1,0, so visual `$100` becomes extracted `$1,000`;
      clean control files isolate the cause as text extraction.
-  2. *The amount hidden under white paint* — the render shows nothing while
+  2. *Text covered by a white box.* The render shows nothing while
      the text layer still carries the amount.
-  3. *A normal scan — and its invisible-layer siblings* — a searchable scan
+  3. *A scan with a hidden text layer.* A searchable scan
      carries an invisible text layer over the raster; raster-only and
      shifted siblings show when readings still agree. A normal searchable
      scan is not evidence of wrongdoing.
-  4. *The same ink at four rotations* — identical content under
+  4. *The same page, rotated.* Identical content under
      0/90/180/270° rotation; readers must reconcile geometry through the
      recorded transforms.
-  5. *The same readings in a different order* — two columns emitted
+  5. *Columns read in a different order.* Two columns emitted
      right-then-left; the same text arrives in a different stream order.
-  6. *The same $100, four times* — four identical amounts at distinct
+  6. *Repeated amounts at different positions.* Four identical amounts at distinct
      positions stay individually addressable; a string match must never
      collapse them.
   All examples are synthetic originals; behavior shown in one synthetic file

@@ -31,6 +31,10 @@ export interface WorkspaceProps {
   initialOpen?: "pdf" | "report" | null;
   /** Called after the intent's picker was raised so the same intent can fire again. */
   onOpenIntentHandled?: () => void;
+  /** File chosen on Home in the same click (Safari user-activation). */
+  incomingFile?: File | null;
+  /** Called after the incoming file has been offered to the session. */
+  onIncomingFileHandled?: () => void;
 }
 
 interface ErrorBoundaryProps {
@@ -79,6 +83,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   loadSyntheticFixture = false,
   initialOpen = null,
   onOpenIntentHandled,
+  incomingFile = null,
+  onIncomingFileHandled,
 }) => {
   const profile = useMemo(() => resolveProfile(), []);
   const session = useMemo(() => new InspectionSession(profile), [profile]);
@@ -200,6 +206,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const openedIntentRef = useRef<"pdf" | "report" | null>(null);
 
   useEffect(() => {
+    if (incomingFile) {
+      openedIntentRef.current = null;
+      return;
+    }
     if (initialOpen === null) {
       openedIntentRef.current = null;
       return;
@@ -209,7 +219,29 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     const node = initialOpen === "report" ? reportInputRef.current : pdfInputRef.current;
     node?.click();
     onOpenIntentHandled?.();
-  }, [initialOpen, onOpenIntentHandled]);
+  }, [incomingFile, initialOpen, onOpenIntentHandled]);
+
+  // Defer the offer to a microtask so React Strict Mode's setup/cleanup/setup
+  // cycle does not start two overlapping opens (idle -> loading_metadata).
+  const incomingOfferGen = useRef(0);
+  useEffect(() => {
+    if (!incomingFile) return;
+    let cancelled = false;
+    const gen = ++incomingOfferGen.current;
+    const file = incomingFile;
+    queueMicrotask(() => {
+      if (cancelled || incomingOfferGen.current !== gen) return;
+      bumpExampleIntent();
+      void session.offerFile(file).finally(() => {
+        if (!cancelled && incomingOfferGen.current === gen) {
+          onIncomingFileHandled?.();
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [incomingFile, session, bumpExampleIntent, onIncomingFileHandled]);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 

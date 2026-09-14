@@ -12,8 +12,10 @@ export interface HomeSampleReader {
 }
 
 export interface HomeSample {
-  /** Human situation line, e.g. "The amount that reads differently". */
+  /** Human situation line from the recorded manifest (gallery overlays everyday copy). */
   title: string;
+  /** First recorded finding title, when the manifest lists one. */
+  findingTitle: string | null;
   /** Recorded mechanism sentence from the example manifest. */
   mechanism: string;
   /** The visual amount and the extracted amount, parsed from the recorded mechanism. */
@@ -31,6 +33,7 @@ interface ManifestLike {
   card_title?: unknown;
   mechanism?: unknown;
   readers?: unknown;
+  findings?: unknown;
 }
 
 export async function loadHomeSample(): Promise<HomeSample> {
@@ -42,6 +45,13 @@ export async function loadHomeSample(): Promise<HomeSample> {
 
   const title = typeof m.card_title === "string" ? m.card_title : "";
   const mechanism = typeof m.mechanism === "string" ? m.mechanism : "";
+  const firstFinding = Array.isArray(m.findings) ? m.findings[0] : null;
+  const findingTitle =
+    firstFinding !== null &&
+    typeof firstFinding === "object" &&
+    typeof (firstFinding as { title?: unknown }).title === "string"
+      ? (firstFinding as { title: string }).title
+      : null;
 
   const readers: HomeSampleReader[] = Object.values(m.readers ?? {})
     .filter(
@@ -65,6 +75,7 @@ export async function loadHomeSample(): Promise<HomeSample> {
 
   return {
     title,
+    findingTitle,
     mechanism,
     visualAmount,
     extractedAmount,

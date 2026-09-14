@@ -160,7 +160,7 @@ test.describe("T38: Help Journey & Workspace Preservation", () => {
 
     // Since user deep-linked and has no active workspace, button says "Open Workspace"
     await expect(wsBtn).toHaveText("Open Workspace");
-    await expect(exBtn).toHaveText("Try Demo Example");
+    await expect(exBtn).toHaveText("Try an example");
 
     // Clicking "Try Demo Example" loads the demo example
     await exBtn.click();

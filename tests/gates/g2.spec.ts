@@ -346,9 +346,8 @@ const inspect = (page: Page): Promise<SessionSnapshot> =>
 /** Land on the workspace's empty state through the real app shell. */
 async function gotoWorkspace(page: Page): Promise<void> {
   await page.goto(baseURL);
-  await expect(page.locator("h1")).toContainText("Your PDF can look right");
-  await page.locator("#btn-open-report").click();
-  await expect(page).toHaveURL(/#\/workspace/);
+  await expect(page.locator("h1")).toContainText("Check the text behind your PDF.");
+  await page.goto(`${baseURL}/#/workspace`);
   await page.waitForFunction(
     () => (window as never as Record<string, unknown>).__inspect !== undefined,
   );
@@ -508,7 +507,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
     const page = await ctx.newPage();
     const cap = captureNet(page);
     await page.goto(baseURL);
-    await expect(page.locator("h1")).toContainText("Your PDF can look right");
+    await expect(page.locator("h1")).toContainText("Check the text behind your PDF.");
 
     // The gallery is the shipped surface: all six cards render from the
     // real /examples/index.json the built dist serves.
@@ -602,6 +601,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
     await page.getByTestId("example-card-duplicates").click();
     const detail = page.getByTestId("example-detail-duplicates");
     await expect(detail).toBeVisible();
+    await detail.locator("summary").click();
     await expect(detail.getByText("duplicates-four.pdf")).toBeVisible();
     await expect(detail.getByText("tesseract.js 7.0.0")).toBeVisible();
     await page.getByTestId("open-example-duplicates").click();
@@ -999,7 +999,7 @@ test("G2 leg 5: offline is explicit — nothing ambient, explicit prepare, offli
     // Plain loads of the shipped app register NOTHING and cache NOTHING —
     // offline capability is an explicit action, never ambient.
     await page.goto(baseURL);
-    await expect(page.locator("h1")).toContainText("Your PDF can look right");
+    await expect(page.locator("h1")).toContainText("Check the text behind your PDF.");
     const surface0 = await page.evaluate(async (prefix) => ({
       registrations: (await navigator.serviceWorker.getRegistrations()).length,
       caches: (await caches.keys()).filter((n) => n.startsWith(prefix))

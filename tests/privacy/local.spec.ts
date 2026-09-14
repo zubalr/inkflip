@@ -940,7 +940,7 @@ test("cold: built-site own-file journey leaves zero document trace", async ({
   await leg(capBoot, "navigate-index", async () => {
     await page.goto(`${harness.base}/`);
     await expect(
-      page.getByText("Your PDF can look right"),
+      page.getByText("Check the text behind your PDF."),
       "shipped scaffold should render",
     ).toBeVisible();
   });
