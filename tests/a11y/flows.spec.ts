@@ -16,8 +16,9 @@ import AxeBuilder from "@axe-core/playwright";
  * 6. Zero serious/critical automated violations.
  *
  * Drives the public workspace (/#/workspace) through a Vite dev server:
- * - ?example=true mounts the bundled example document — ambiguous
- *   amount finding, page-level finding, order-only finding.
+ * - ?example=true maps to the captured amount gallery report.
+ * - ?example=fixture (test-hooks only) mounts the synthetic viewer document
+ *   used for deterministic ambiguous/page-level occurrence assertions.
  * - ?example=scan imports the captured scan report through the real
  *   import gate, mounting CoveragePanel and ExportPanel.
  * - The sealed native-evidence contract example imports through
@@ -331,7 +332,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
   }) => {
     test.setTimeout(60_000);
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     // -- Ambiguous amount finding: alternatives are individually named --
@@ -433,7 +434,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     test.setTimeout(60_000);
     // 1280px baseline at 400% browser zoom ≈ 320 CSS px of layout.
     await page.setViewportSize({ width: 320, height: 256 });
-    await page.goto(`${baseUrl}/#/workspace?example=true`);
+    await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
     const overflow = await page.evaluate(

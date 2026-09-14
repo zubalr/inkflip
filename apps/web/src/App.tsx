@@ -2,37 +2,61 @@ import React, { useState, useEffect, useRef } from "react";
 import { Home } from "./pages/Home";
 import { Workspace } from "./pages/Workspace";
 import { HelpPage } from "./pages/help";
+import {
+  resolvePublicExampleId,
+  SYNTHETIC_EXAMPLE_FIXTURE_ID,
+} from "./features/gallery/loader";
 
 export type Route = "home" | "workspace" | "help";
+
+function parseWorkspaceExample(hash: string, search: string): {
+  withExample: boolean;
+  exampleId: string | null;
+  loadSyntheticFixture: boolean;
+} {
+  const withExample = search.includes("example=true") || hash.includes("example=true");
+  const exampleMatch = hash.match(/example=([a-z0-9-]+)/);
+  const raw = exampleMatch?.[1] ?? null;
+  const loadSyntheticFixture =
+    raw === SYNTHETIC_EXAMPLE_FIXTURE_ID && __INKFLIP_TEST_HOOKS__;
+  if (loadSyntheticFixture) {
+    return { withExample: false, exampleId: null, loadSyntheticFixture: true };
+  }
+  return {
+    withExample,
+    exampleId: resolvePublicExampleId(withExample, raw),
+    loadSyntheticFixture: false,
+  };
+}
 
 export default function App() {
   const getInitialRoute = (): {
     route: Route;
     withExample: boolean;
     exampleId: string | null;
+    loadSyntheticFixture: boolean;
   } => {
     const hash = window.location.hash.toLowerCase();
     const pathname = window.location.pathname.toLowerCase();
     const search = window.location.search.toLowerCase();
-
-    const withExample = search.includes("example=true") || hash.includes("example=true");
-    const exampleMatch = hash.match(/example=([a-z0-9-]+)/);
-    const exampleId =
-      exampleMatch && exampleMatch[1] !== "true" ? exampleMatch[1] : null;
+    const example = parseWorkspaceExample(hash, search);
 
     if (hash.includes("help") || pathname.includes("help")) {
-      return { route: "help", withExample: false, exampleId: null };
+      return { route: "help", withExample: false, exampleId: null, loadSyntheticFixture: false };
     }
     if (hash.includes("workspace") || pathname.includes("workspace")) {
-      return { route: "workspace", withExample, exampleId };
+      return { route: "workspace", ...example };
     }
-    return { route: "home", withExample: false, exampleId: null };
+    return { route: "home", withExample: false, exampleId: null, loadSyntheticFixture: false };
   };
 
   const initial = getInitialRoute();
   const [route, setRoute] = useState<Route>(initial.route);
   const [withExample, setWithExample] = useState<boolean>(initial.withExample);
   const [exampleId, setExampleId] = useState<string | null>(initial.exampleId);
+  const [loadSyntheticFixture, setLoadSyntheticFixture] = useState<boolean>(
+    initial.loadSyntheticFixture,
+  );
   const [workspaceEpoch, setWorkspaceEpoch] = useState<number>(0);
 
   // Preserve workspace state across temporary Help visits
@@ -54,10 +78,12 @@ export default function App() {
         lastWorkspaceHash.current = window.location.hash || "#/workspace";
         setWithExample(current.withExample);
         setExampleId(current.exampleId);
+        setLoadSyntheticFixture(current.loadSyntheticFixture);
       } else if (current.route === "home") {
         setWorkspaceEverMounted(false);
         setWithExample(false);
         setExampleId(null);
+        setLoadSyntheticFixture(false);
       }
       setRoute(current.route);
     };
@@ -91,7 +117,8 @@ export default function App() {
   const navigateToWorkspace = (loadExample = false) => {
     setWorkspaceEverMounted(true);
     setWithExample(loadExample);
-    setExampleId(null);
+    setExampleId(resolvePublicExampleId(loadExample, null));
+    setLoadSyntheticFixture(false);
     if (loadExample) {
       setWorkspaceEpoch((e) => e + 1);
     }
@@ -105,6 +132,7 @@ export default function App() {
     setWorkspaceEverMounted(true);
     setWithExample(false);
     setExampleId(id);
+    setLoadSyntheticFixture(false);
     setWorkspaceEpoch((e) => e + 1);
     setRoute("workspace");
     const targetHash = `#/workspace?example=${id}`;
@@ -136,7 +164,7 @@ export default function App() {
   if (route === "home") {
     return (
       <Home
-        onNavigateWorkspace={() => navigateToWorkspace(false)}
+        onNavigateWorkspace={(withExample?: boolean) => navigateToWorkspace(Boolean(withExample))}
         onOpenExample={navigateToExampleReport}
         onNavigateHelp={navigateToHelp}
       />
@@ -163,11 +191,12 @@ export default function App() {
           inert={route !== "workspace" ? true : undefined}
         >
           <Workspace
-            key={`${withExample}-${exampleId ?? "default"}-${workspaceEpoch}`}
+            key={`${loadSyntheticFixture ? "fixture" : withExample}-${exampleId ?? "default"}-${workspaceEpoch}`}
             onNavigateHome={navigateToHome}
             onNavigateHelp={navigateToHelp}
-            initialWithExample={withExample}
+            onLoadPublicExample={() => navigateToWorkspace(true)}
             initialExampleId={exampleId}
+            loadSyntheticFixture={loadSyntheticFixture}
           />
         </div>
       )}

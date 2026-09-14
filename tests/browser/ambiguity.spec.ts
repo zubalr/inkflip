@@ -157,8 +157,8 @@ test("ambiguous finding exposes every candidate and pre-picks none", async ({ pa
   await page.setViewportSize({ width: 1280, height: 900 });
   // The bundled example document carries a deterministic ambiguous
   // finding naming three occurrences — two of them identical strings.
-  // It mounts through the public ?example=true workspace entry.
-  await page.goto(`${baseUrl}/#/workspace?example=true`);
+  // Deterministic synthetic fixture kept for occurrence-identity assertions.
+  await page.goto(`${baseUrl}/#/workspace?example=fixture`);
   await page.waitForSelector("#viewer-stage");
 
   await page.locator("#finding-item-finding-ambig-amounts").click();
@@ -246,7 +246,7 @@ test("unmatched readings are never claimed as missing visible text", async ({ pa
 
 test("keyboard selection returns focus to the originating finding", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(`${baseUrl}/#/workspace?example=true`);
+  await page.goto(`${baseUrl}/#/workspace?example=fixture`);
   await page.waitForSelector("#viewer-stage");
 
   const card = page.locator("#finding-item-finding-ambig-amounts");
