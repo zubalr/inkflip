@@ -17,6 +17,10 @@ uploaded.
 
 ![The amount example open in the inspector, with the difference selected](docs/images/example-difference.png)
 
+The first two images are the two-column Home captured from the UI worktree.
+The live demo still serves the previous stacked Home until that composition
+is integrated. The inspector screenshot matches the live example.
+
 ## Try it
 
 1. Open the [live demo](https://inkflip-jubairjashim1975gmailcoms-projects.vercel.app) and choose **Try an example**, or **Check a PDF** with a file on your computer.
