@@ -64,6 +64,9 @@ htmlcov/
 # Provider local dev output (wrangler dev temp state; T48 preflight).
 /.wrangler/
 
+# Local-only journey evidence captured by tests/deployment/production-journey.cjs.
+/tests/deployment/evidence/
+
 # Vercel CLI link metadata, env pulls, and generated Build Output API tree.
 # Publication uploads only the prepared static output via --prebuilt.
 .vercel/

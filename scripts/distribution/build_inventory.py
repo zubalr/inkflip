@@ -397,11 +397,12 @@ def parse_bun_lock() -> dict:
 def workspace_table(lock: dict, workspace: str, field: str) -> dict:
     """Validated {field} table of one bun.lock workspace entry.
 
-    Absent or null means "no workspace entry / no table" -> empty. The entry
-    and the table must be JSON objects when present: a list, string or number
+    An absent entry means "no workspace entry" -> empty, and an absent or null
+    table means "no table" -> empty. The entry and the table must be JSON
+    objects when present: an explicit null entry, or a list, string or number
     in either place is a named config error, never an AttributeError."""
-    entry = lock["workspaces"].get(workspace)
-    if entry is None:
+    entry = lock["workspaces"].get(workspace, _ABSENT)
+    if entry is _ABSENT:
         return {}
     if not isinstance(entry, dict):
         raise ConfigError(f'bun.lock: workspaces["{workspace}"] must be a JSON object')
