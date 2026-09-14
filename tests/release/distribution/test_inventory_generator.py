@@ -689,7 +689,8 @@ class CheckModeReadOnlyTests(InventoryGeneratorTests):
 class MalformedWorkspaceTests(InventoryGeneratorTests):
     """The consumed workspace/dependency values are validated before use: a
     malformed shape is a named config error (exit 2, no traceback, no
-    partial output); absent, null and empty tables stay valid."""
+    partial output); absent workspace entries, and absent, null or empty
+    dependency tables, stay valid."""
 
     def rewrite_workspaces(self, **entries):
         lock = self.read_doc("bun.lock")
@@ -699,6 +700,7 @@ class MalformedWorkspaceTests(InventoryGeneratorTests):
 
     def test_malformed_workspace_values_are_named_config_errors(self):
         cases = [
+            ({"apps/web": None}, 'bun.lock: workspaces["apps/web"] must be a JSON object'),
             ({"apps/web": []}, 'bun.lock: workspaces["apps/web"] must be a JSON object'),
             ({"apps/web": "x"}, 'bun.lock: workspaces["apps/web"] must be a JSON object'),
             ({"apps/web": {"dependencies": []}},
@@ -724,7 +726,6 @@ class MalformedWorkspaceTests(InventoryGeneratorTests):
     def test_null_or_empty_dependency_tables_stay_valid(self):
         prod = sorted(PROD_PACKAGES)
         cases = [
-            ({"apps/web": None}, [], ["vitest"]),
             ({"apps/web": {"dependencies": None}}, [], ["vitest"]),
             ({"apps/web": {"dependencies": {}}}, [], ["vitest"]),
             ({"apps/web": {}}, [], ["vitest"]),
