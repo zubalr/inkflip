@@ -1,4 +1,4 @@
-"""Section D remainder: path shapes, directory-vs-file, and cache recovery.
+"""Path shapes, directory-vs-file handling, and cache recovery.
 
 Every case runs the shipped CLI as a real subprocess, so exit status, streams and
 on-disk effects are the contract. Behaviour here was verified by probing first and

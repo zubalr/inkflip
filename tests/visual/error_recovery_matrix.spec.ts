@@ -1,7 +1,7 @@
 /**
- * Section G — real error, rejection and recovery cases AGY's suite does not cover.
+ * Real error, rejection and recovery cases the existing journey suite does not cover.
  *
- * AGY covers a corrupt PDF, malformed report JSON and a cancelled replace.
+ * The existing journey suite covers a corrupt PDF, malformed report JSON and a cancelled replace.
  * This file adds the two the goal names that were untested: an encrypted input
  * (rejected, prior session preserved, next valid file still works) and the
  * wrong-source disclosure on an imported report.
@@ -28,7 +28,7 @@ test.afterAll(async () => {
   await prodServer?.close();
 });
 
-test.describe("Section G: encrypted input and recovery", () => {
+test.describe("Workspace: encrypted input and recovery", () => {
   test("an encrypted PDF is refused and the next valid file still loads", async ({ page }) => {
     await page.goto(`${baseUrl}/#/workspace`);
     await page.waitForSelector('[data-testid="file-drop"]');
@@ -70,7 +70,7 @@ test.describe("Section G: encrypted input and recovery", () => {
   });
 });
 
-test.describe("Section G: imported report source disclosure", () => {
+test.describe("Workspace: imported report source disclosure", () => {
   test("an imported report without its source is disclosed, not presented as complete", async ({ page }) => {
     await page.goto(`${baseUrl}/#/workspace`);
     await page.waitForSelector('[data-testid="file-drop"]');

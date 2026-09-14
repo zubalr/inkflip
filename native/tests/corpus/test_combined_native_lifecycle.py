@@ -1,8 +1,8 @@
-"""Section J — the combined native lifecycle, end to end as one real run.
+"""The combined native lifecycle, end to end as one real run.
 
 corpus run -> corpus resume -> baseline create -> corpus run -> compare -> HTML report -> replay,
 each step a real subprocess on the pinned interpreter, with the artefacts of every
-step asserted. Captured first (evidence/secJ-lifecycle.log), then pinned here.
+step asserted.
 """
 from __future__ import annotations
 

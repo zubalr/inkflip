@@ -1,4 +1,4 @@
-"""Section E — connect committed fixture facts to real CLI behaviour.
+"""Committed fixture facts asserted through the real CLI.
 
 The family tests read fixture bytes; these run the shipped CLI over the same
 fixtures and assert that the produced report carries the fixture's declared facts.
