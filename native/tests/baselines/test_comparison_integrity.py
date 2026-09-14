@@ -128,6 +128,17 @@ def _as_upgrade_report(report: dict, version: str, environment: str) -> dict:
     return sealed
 
 
+def _with_embedded_profile_sha256(report: dict, sha256: str) -> dict:
+    """A report whose recorded environment carries the profile identity it ran under."""
+    mutated = json.loads(json.dumps(report))
+    mutated["execution"]["environment"] = (
+        mutated["execution"]["environment"] + f"; profile_sha256={sha256}"
+    )
+    sealed = core.seal(mutated)
+    core.validate(sealed)
+    return sealed
+
+
 def _with_lost_coverage(report: dict) -> dict:
     """Schema-valid coverage loss: drop an occurrence and repair every reference."""
     mutated = json.loads(json.dumps(report))
@@ -216,14 +227,27 @@ class ComparisonIntegrityCase(unittest.TestCase):
 
 
 class TestComparisonProvenance(ComparisonIntegrityCase):
-    def test_tampered_profile_hash_with_identical_environments_is_invalid(self):
-        left = _write_run(self.case / "left", {"mapping-amount": self.amount}, profile_sha256=PROFILE_BEFORE)
-        right = _write_run(self.case / "right", {"mapping-amount": self.amount}, profile_sha256="f" * 64)
+    def test_identity_declaring_a_different_profile_than_its_reports_is_invalid(self):
+        """The detectable rewrite: identity.json disagrees with its own reports."""
+        recorded = _with_embedded_profile_sha256(self.amount, PROFILE_BEFORE)
+        left = _write_run(self.case / "left", {"mapping-amount": recorded}, profile_sha256=PROFILE_BEFORE)
+        right = _write_run(self.case / "right", {"mapping-amount": recorded}, profile_sha256="f" * 64)
         result = compare(left, right, None, self.case / "cmp-tamper")
         self.assertEqual(result.exit_code, EXIT_INVALID_ARGS)
         self.assertNotEqual(result.status, "unchanged")
-        self.assertTrue(any("inconsistent" in item.lower() for item in result.violations))
+        self.assertTrue(any("does not match" in item.lower() for item in result.violations))
         self.assertFalse((self.case / "cmp-tamper" / "comparison.json").is_file())
+
+    def test_different_profile_identities_without_recorded_hashes_stay_comparable(self):
+        """Reports produced without a profile record no hash; differing declared
+        identities are then legitimate separate profiles, not rewritten metadata."""
+        left = _write_run(self.case / "left", {"mapping-amount": self.amount}, profile_sha256=PROFILE_BEFORE)
+        right = _write_run(self.case / "right", {"mapping-amount": self.amount}, profile_sha256="f" * 64)
+        result = compare(left, right, None, self.case / "cmp-distinct")
+        self.assertNotEqual(result.exit_code, EXIT_INVALID_ARGS)
+        self.assertNotEqual(result.status, "incomparable")
+        comparison = self._comparison(self.case / "cmp-distinct")
+        self.assertTrue(any("profile" in item.lower() for item in comparison["limitations"]))
 
     def test_malformed_profile_digest_is_invalid_configuration(self):
         left = _write_run(self.case / "left", {"mapping-amount": self.amount})

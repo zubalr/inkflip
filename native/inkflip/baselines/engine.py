@@ -143,41 +143,51 @@ def _reader_fingerprint(report: dict[str, Any]) -> tuple[tuple[Any, ...], ...]:
     )
 
 
-def _bundle_environments_equivalent(
-    left_reports: dict[str, dict[str, Any] | None],
-    right_reports: dict[str, dict[str, Any] | None],
-) -> bool:
-    compared = False
-    for key in set(left_reports) | set(right_reports):
-        left = left_reports.get(key)
-        right = right_reports.get(key)
-        if not isinstance(left, dict) or not isinstance(right, dict):
-            continue
-        compared = True
-        left_env = (left.get("execution") or {}).get("environment")
-        right_env = (right.get("execution") or {}).get("environment")
-        if _reader_fingerprint(left) != _reader_fingerprint(right) or left_env != right_env:
-            return False
-    return compared
+def _embedded_profile_sha256(report: dict[str, Any]) -> str | None:
+    environment = (report.get("execution") or {}).get("environment")
+    if not isinstance(environment, str):
+        return None
+    for part in environment.split(";"):
+        item = part.strip()
+        if item.startswith("profile_sha256="):
+            return item.split("=", 1)[1]
+    return None
 
 
-def _profile_identity_conflict(
-    left_meta: dict[str, Any] | None,
-    right_meta: dict[str, Any] | None,
-    left_reports: dict[str, dict[str, Any] | None],
-    right_reports: dict[str, dict[str, Any] | None],
+def _identity_matches_own_reports(
+    meta: dict[str, Any] | None,
+    reports: dict[str, dict[str, Any] | None],
+    side: str,
 ) -> str | None:
-    left_profile = (left_meta or {}).get("profile_sha256")
-    right_profile = (right_meta or {}).get("profile_sha256")
-    if not _is_sha256(left_profile) or not _is_sha256(right_profile):
-        return None
-    if left_profile == right_profile:
-        return None
-    if _bundle_environments_equivalent(left_reports, right_reports):
+    """Verify a run's declared profile identity against the evidence it wraps.
+
+    ``profile_sha256`` hashes the profile name plus its executable and wrapper
+    paths, so two runs legitimately report different hashes whenever profiles
+    are separately named or installed; a cross-run difference is provenance,
+    never inconsistency, and ``_provenance_limitations`` already records it.
+    The locally verifiable failure is narrower: an identity.json that declares a
+    different profile hash than the run's own reports recorded, or reports that
+    disagree among themselves. Either means the bundle's metadata was rewritten
+    after the reports were produced.
+    """
+    declared = (meta or {}).get("profile_sha256")
+    embedded: set[str] = set()
+    for report in reports.values():
+        if not isinstance(report, dict):
+            continue
+        value = _embedded_profile_sha256(report)
+        if value is not None:
+            embedded.add(value)
+    if len(embedded) > 1:
         return (
-            "Profile identities differ while recorded reader versions and execution "
-            f"environments match (left profile_sha256={left_profile}, right={right_profile}). "
-            "This is inconsistent run metadata, not a reader upgrade."
+            f"{side} reports disagree on the recorded profile identity "
+            f"({sorted(embedded)}); refusing to compare an inconsistent bundle."
+        )
+    if embedded and _is_sha256(declared) and declared not in embedded:
+        return (
+            f"{side} identity.json declares profile_sha256={declared} but its reports "
+            f"recorded profile_sha256={next(iter(embedded))}; the run identity does not "
+            "match the evidence it wraps."
         )
     return None
 
@@ -1006,9 +1016,13 @@ def compare(
 
     try:
         _refuse_comparison_output_overlap(left_path, right_path, Path(out_dir) if out_dir else None)
-        conflict = _profile_identity_conflict(_left_meta, _right_meta, left_reports, right_reports)
-        if conflict:
-            raise BaselineError(conflict)
+        for side, meta, reports in (
+            (_left_kind, _left_meta, left_reports),
+            (_right_kind, _right_meta, right_reports),
+        ):
+            conflict = _identity_matches_own_reports(meta, reports, side)
+            if conflict:
+                raise BaselineError(conflict)
     except BaselineError as exc:
         return ComparisonResult(
             status="incomparable",
