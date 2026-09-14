@@ -21,14 +21,17 @@ site. The production bundle is written to `apps/web/dist/`.
 ## 2. Record the static dist manifest
 
 ```sh
-python3 scripts/distribution/record_dist.py              # build + record
-python3 scripts/distribution/record_dist.py --skip-build # record an existing dist
+python3 scripts/distribution/record_dist.py --skip-build # record the dist built in §1
 ```
 
 The recorder walks `apps/web/dist/` and writes a deterministic manifest —
 relative path, byte count and SHA-256 per file, plus a `file_set_sha256` over
 the whole set — to `.private/distribution/dist-manifest.json` (override with
-`--out PATH`).
+`--out PATH`). With `--skip-build` it records the dist that §1 just built, so
+following this guide in order builds exactly once. The default form,
+`record_dist.py` with no flag, first runs `bun run build` and then records:
+that one-shot "build and record" is the convenience for when you have not
+built yet.
 
 It is **recorded rather than committed** on purpose: the built bundle is
 regenerated, not committed, and a manifest only means something while it
@@ -72,12 +75,12 @@ bytes; `--dist-manifest` additionally verifies the built static output against
 its recorded manifest. Exit codes: 0 pass, 1 verification failures, 2 config
 error.
 
-Honest state of this checkout (2026-09-14): the gate reports one problem —
-`native bundle: build context not prepared locally
-(.private/distribution/native-bundle; run
-scripts/distribution/prepare_native_bundle.py)` — because the explicit network
-preparation in the next step has not been run here. The native-bundle scope
-fails closed until it is.
+The native-bundle scope of the gate fails closed until the native bundle
+context has been prepared by the explicit network step in §5
+(`scripts/distribution/prepare_native_bundle.py`), which is a separate,
+network-using step. The gate's exit-code contract stays 0 pass,
+1 verification failures, 2 config error; an unprepared native context is a
+verification failure, never a skip.
 
 ## 5. Native bundle and container image (explicit network step)
 
@@ -87,8 +90,14 @@ application itself never retrieves anything automatically:
 ```sh
 python3 scripts/distribution/prepare_native_bundle.py   # third-party inputs (network)
 python3 scripts/distribution/assemble_native_image.py   # adds the Inkflip wheel + notices + identities
+python3 scripts/distribution/prepare_native_bundle.py --check  # read-only verification of the prepared context
 docker build --platform linux/amd64 -f build/native/Dockerfile -t inkflip-native:prod .
 ```
+
+`--check` re-derives the expected wheel identities from `native/uv.lock` and
+verifies the prepared artifacts, the recorded stamps and the manifest without
+downloading, writing or creating anything; it must exit 0 before the image
+build.
 
 The production profile is pinned to **linux/amd64**: on this arm64 Mac it
 needs emulation, and a plain non-emulated build must fail — that failure is
@@ -151,12 +160,25 @@ not rebuild, patch, or re-record anything on the way.
 4. **Redeploy that exact static tree with the same reviewed uploader** used for
    the original publication. No uploader, deploy script or hosting automation
    ships in this repository.
-5. **Verify the restored artifact:** the static preflight re-validates the
-   local tree and configuration, including the `_headers` CSP/cache rules and
-   the absence of any Worker script or compute binding; on the destination,
-   capture the response headers and confirm the deployed configuration still
-   contains no Worker script or bindings; re-run the offline/privacy canary,
-   `bun run test:privacy`, against the restored build.
+5. **Verify the retained artifact itself** — the restored static tree is
+   re-verified against the retained manifest, not against a freshly built
+   one:
+
+   ```sh
+   python3 scripts/check_static_dist.py apps/web/dist \
+     --config wrangler.json \
+     --dist-manifest <retained dist manifest>
+   ```
+
+   This must exit 0 with the recomputed `file_set_sha256` equal to the
+   accepted build's recorded value; optionally re-run the distribution gate
+   with `--dist-manifest <retained dist manifest>` to re-add the
+   distribution-surface checks. On the destination, capture the response
+   headers and confirm the deployed `_headers` CSP/cache rules are present
+   and the configuration still contains no Worker script or bindings.
+   `bun run test:privacy` is its **own local regression build** that
+   compiles and serves its own test output, so it does **not** certify a
+   retained or restored artifact, nor a deployed hostname.
 6. **Document the rollback and the affected capability** so the defect and the
    temporary capability loss are both on the record.
 
