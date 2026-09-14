@@ -1,0 +1,61 @@
+# GitHub-triggered production publish of the existing Vite static app.
+# Native Vercel Git builds stay disconnected: they default to npm and would
+# ship a different tree than the frozen Bun/Python adapter.
+#
+# Path: verify (existing) succeeds on a push to main → this workflow builds
+# that SHA locally with the same commands as a developer machine, then
+# `vercel deploy --prebuilt --prod`. Feature branches and pull requests
+# never receive the production alias.
+name: deploy-web
+on:
+  workflow_run:
+    workflows: [verify]
+    types: [completed]
+permissions:
+  contents: read
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      VERCEL_ORG_ID: team_2UPHADaxTemfNa0cbgC08Eyy
+      VERCEL_PROJECT_ID: prj_sEtj12msmLcppTxQu8qpbqiXJrL0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: 1.4.0
+      - name: Frozen install and production web build
+        env:
+          INKFLIP_TEST_HOOKS: ""
+        run: |
+          bun install --frozen-lockfile
+          unset INKFLIP_TEST_HOOKS
+          bun run build
+      - name: Prepare and check Vercel Build Output
+        run: |
+          python3 scripts/vercel_output.py prepare
+          python3 scripts/vercel_output.py check
+      - name: Link the existing inkflip project without Git integration
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          test -n "$VERCEL_TOKEN"
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+      - name: Deploy prebuilt production bytes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          bunx --bun vercel@59.16.0 deploy --prebuilt --prod --yes \
+            --scope jubairjashim1975gmailcoms-projects
