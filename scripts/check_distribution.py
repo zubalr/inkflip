@@ -790,7 +790,11 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
         failures.append(f"production image: tesseract version line missing/mismatched (expected {tver!r})")
     # notice inventory: parse INDEX.json (id -> path/sha256) and hash-check
     # each required entry's actual bytes inside the image — labels are not proof.
+    # Notice metadata is DATA: ids, paths and digests are validated before any
+    # container command is constructed, and hashing uses argv form (no shell),
+    # so INDEX content can never inject or escape the container command.
     index_entries: dict[str, dict] = {}
+    duplicate_ids: list[str] = []
     rc_idx, index_json = docker("run", "--rm", "--network", "none", "--user", "0",
                                 "--entrypoint", "cat", ref, "/app/notices/INDEX.json")
     if rc_idx != 0 or not index_json.strip():
@@ -798,26 +802,56 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
     else:
         try:
             parsed = json.loads(index_json)
-            for e in parsed.get("entries", []):
-                if isinstance(e, dict) and e.get("id"):
-                    index_entries[e["id"]] = e
         except json.JSONDecodeError:
             failures.append("production image: notice INDEX.json is not valid JSON")
+            parsed = None
+        if parsed is not None:
+            entries = parsed.get("entries")
+            if not isinstance(entries, list):
+                failures.append("production image: notice INDEX.json 'entries' must be a list")
+            else:
+                for e in entries:
+                    if not isinstance(e, dict):
+                        failures.append("production image: notice INDEX has a malformed entry")
+                        continue
+                    nid = e.get("id")
+                    if not isinstance(nid, str) or not nid:
+                        failures.append("production image: notice INDEX entry missing 'id'")
+                        continue
+                    if nid in index_entries:
+                        duplicate_ids.append(nid)
+                        continue
+                    index_entries[nid] = e
+    for nid in sorted(set(duplicate_ids)):
+        failures.append(f"production image: duplicate notice id in INDEX.json: {nid!r}")
+
+    notices_root = "/app/notices/"
     for notice_id in image.get("required_notice_ids", []):
         entry = index_entries.get(notice_id)
         if entry is None:
             failures.append(f"production image: required notice id absent from image notice inventory: {notice_id}")
             continue
         entry_path, entry_sha = entry.get("path"), entry.get("sha256")
-        if entry_path and entry_sha:
-            rc2, hash_out = docker("run", "--rm", "--network", "none", "--user", "0",
-                                   "--entrypoint", "sh", ref,
-                                   "-c", f"sha256sum /app/{entry_path} 2>/dev/null")
-            actual = hash_out.split()[0] if rc2 == 0 and hash_out.split() else None
-            if actual != entry_sha:
-                failures.append(
-                    f"production image: notice {notice_id!r} bytes do not match INDEX (expected {entry_sha[:12]}…, got {str(actual)[:12]}…)"
-                )
+        if not isinstance(entry_path, str) or not entry_path:
+            failures.append(f"production image: required notice {notice_id!r} has no path in INDEX")
+            continue
+        if not isinstance(entry_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", entry_sha):
+            failures.append(f"production image: required notice {notice_id!r} has missing or malformed sha256 in INDEX")
+            continue
+        in_image = "/app/" + entry_path
+        if not in_image.startswith(notices_root) or ".." in Path(in_image).parts:
+            failures.append(
+                f"production image: notice {notice_id!r} path escapes the notices root: {in_image!r}"
+            )
+            continue
+        # argv-form hashing: no shell, notice data never interpreted
+        rc2, hash_out = docker("run", "--rm", "--network", "none", "--user", "0",
+                               "--entrypoint", "sha256sum", ref, in_image)
+        actual = hash_out.split()[0] if rc2 == 0 and hash_out.split() else None
+        if actual != entry_sha:
+            failures.append(
+                f"production image: notice {notice_id!r} bytes do not match INDEX (expected {entry_sha[:12]}…, got {str(actual)[:12]}…)"
+            )
     return failures
 
 
