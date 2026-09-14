@@ -281,7 +281,7 @@ class TestLockTargetIsNeverFollowed(OutputClaimCase):
 
 class TestOwnershipIsReleasedOnEveryFailurePath(OutputClaimCase):
     def test_a_populated_directory_refusal_releases_ownership_for_the_same_process(self):
-        """The exact reported reproduction: refuse, then claim again in-process."""
+        """The reported reproduction across processes: refuse, then claim again."""
         self.out.mkdir(parents=True, exist_ok=True)
         (self.out / "marker.txt").write_text("unrelated\n")
 
@@ -289,10 +289,57 @@ class TestOwnershipIsReleasedOnEveryFailurePath(OutputClaimCase):
         self.assertNotEqual(result.returncode, EXIT_OK, result.stderr)
         self.assertIn("not empty", result.stderr)
 
-        # Before the wrapper-wide release this raised "already owned by another run".
         claim = claim_output_directory(self.out)
         claim.release()
         self.assertEqual((self.out / "marker.txt").read_text(), "unrelated\n")
+
+    def test_an_in_process_run_corpus_refusal_releases_ownership(self):
+        """A refusal inside this process must not strand the flock it acquired."""
+        from inkflip.corpus.manifest import CorpusError
+        from inkflip.corpus.runner import run_corpus
+
+        self.out.mkdir(parents=True, exist_ok=True)
+        (self.out / "marker.txt").write_text("unrelated\n")
+
+        with self.assertRaises(CorpusError) as ctx:
+            run_corpus(
+                manifest_path=self.manifest,
+                source_root=self.root,
+                profile="native-default",
+                out_dir=self.out,
+            )
+        self.assertIn("not empty", str(ctx.exception))
+
+        # The subprocess variant of this check cannot see the leak: process exit
+        # drops the flock. Claiming again here proves the release really ran.
+        claim = claim_output_directory(self.out)
+        claim.release()
+        self.assertEqual((self.out / "marker.txt").read_text(), "unrelated\n")
+
+    def test_an_in_process_failed_identity_write_releases_ownership(self):
+        """run() succeeded, the publish step failed: ownership is still released."""
+        from inkflip.corpus import runner
+        from inkflip.corpus.runner import run_corpus
+
+        original = runner.atomic_write_bytes
+
+        def fail(path, data):
+            raise OSError("simulated publish failure")
+
+        runner.atomic_write_bytes = fail
+        try:
+            with self.assertRaises(OSError):
+                run_corpus(
+                    manifest_path=self.manifest,
+                    source_root=self.root,
+                    profile="native-default",
+                    out_dir=self.out,
+                )
+        finally:
+            runner.atomic_write_bytes = original
+
+        claim = claim_output_directory(self.out)
+        claim.release()
 
     def test_a_failed_identity_write_releases_ownership(self):
         self.out.mkdir(parents=True, exist_ok=True)
