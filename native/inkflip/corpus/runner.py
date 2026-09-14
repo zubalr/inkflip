@@ -104,13 +104,16 @@ def run_corpus(
 
     if limits is None:
         limits = Limits(jobs=jobs, wall_seconds=180.0, memory_bytes=1 << 30)
-    supervisor = Supervisor(
-        out_dir,
-        limits,
-        resume=resume,
-        validate_report=_validate_committed_report,
-    )
+    # The Supervisor constructor itself validates limits and admission, so it must
+    # sit inside the translation: otherwise an unsupported jobs>1 request escaped as
+    # an untranslated internal error with exit 4 instead of the documented exit 2.
     try:
+        supervisor = Supervisor(
+            out_dir,
+            limits,
+            resume=resume,
+            validate_report=_validate_committed_report,
+        )
         result = supervisor.run(job_specs)
     except SupervisionError as exc:
         raise CorpusError(str(exc)) from exc
