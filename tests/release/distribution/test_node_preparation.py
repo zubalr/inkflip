@@ -22,6 +22,23 @@ manifest recording both stamps with no artifact on disk exited 0 as
 "verified". Check mode now hashes the prepared artifacts against the recorded
 stamps and against config/resolved-assets.json.
 
+Regression root (spot review 2026-09-14, cold-cache success recorded as
+failure): prepare_node appended "cache missing" before an authorized fetch of
+a valid xz archive and kept that error after publishing a valid stamp, so
+successful first-time preparation still exited 1. Missing/corrupt/offline
+outcomes stay failures; a verified recovery does not.
+
+Regression root (spot review 2026-09-14, duplicate wheel identity): a healthy
+manifest entry followed by a duplicate with a conflicting hash passed --check
+because setdefault kept the first. Duplicate package identities are refused
+in either order, and lock-derived version/path_in_context must match.
+
+Regression root (spot review 2026-09-14, notice path / wheel selection):
+--check treated an absolute, `..`, or symlink license_evidence path as
+satisfied if any non-empty file existed there. Evidence must stay inside the
+fixture root and must not be a symlink. select_wheel's sort also preferred
+newer glibc tags despite the recorded oldest-glibc policy.
+
 All tests use disposable caches and stub fetch functions; no network.
 """
 
@@ -32,6 +49,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import shutil
 import sys
 import tarfile
 import tempfile
@@ -259,6 +277,111 @@ class NodePreparationTests(unittest.TestCase):
         self.assertEqual(failures2, [], failures2)
         self.assertEqual(stamp2.get("sha256"), GOOD_SHA)
         self.assertEqual(calls["download"], 0, "verified cache must not re-download")
+
+    def genuine_archive(self) -> bytes:
+        payload = b"#!/bin/sh\n# fixture node binary\n"
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:xz") as tf:
+            info = tarfile.TarInfo(f"node-v{VERSION}-linux-x64/bin/node")
+            info.size = len(payload)
+            tf.addfile(info, io.BytesIO(payload))
+        return buf.getvalue()
+
+    def test_missing_cache_authorized_fetch_of_genuine_archive_is_success(self):
+        """Confirmed probe: remove only the valid tarball, restore it through
+        fetch_to, and a published stamp must not keep a cache-missing error."""
+        archive = self.genuine_archive()
+        digest = hashlib.sha256(archive).hexdigest()
+        self.write_stamp(sha=digest)
+        dest = self.private / "node" / FILENAME
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(archive)
+        saved = dest.read_bytes()
+        dest.unlink()
+
+        stamp, failures = self.run_prepare(
+            do_download=True,
+            fetch_shasums=lambda url: (_ for _ in ()).throw(AssertionError("stamp already pins the digest")),
+            fetch_to=lambda url, dest_path: dest_path.write_bytes(saved),
+        )
+        self.assertEqual(failures, [], failures)
+        self.assertEqual(stamp.get("sha256"), digest)
+        self.assertTrue(dest.is_file())
+        self.assertEqual(hashlib.sha256(dest.read_bytes()).hexdigest(), digest)
+        published = json.loads((self.release / "node" / "node.stamp.json").read_text())
+        self.assertEqual(published["sha256"], digest)
+
+    def test_corrupt_cache_authorized_fetch_of_genuine_archive_is_success(self):
+        archive = self.genuine_archive()
+        digest = hashlib.sha256(archive).hexdigest()
+        self.write_stamp(sha=digest)
+        corrupt = b"corrupt cache bytes"
+        dest = self.write_cache(corrupt)
+        stamp, failures = self.run_prepare(
+            do_download=True,
+            fetch_to=lambda url, dest_path: dest_path.write_bytes(archive),
+        )
+        self.assertEqual(failures, [], failures)
+        self.assertEqual(stamp.get("sha256"), digest)
+        self.assertEqual(dest.read_bytes(), archive)
+        self.assertNotEqual(dest.read_bytes(), corrupt)
+
+    def test_missing_cache_network_failure_does_not_publish_a_stamp(self):
+        def fail_fetch(url, dest):
+            raise OSError("connection reset")
+
+        stamp, failures = self.run_prepare(do_download=True, fetch_to=fail_fetch)
+        self.assertEqual(stamp, {})
+        self.assertTrue(any("missing" in f for f in failures), failures)
+        self.assertTrue(any("download failed" in f for f in failures), failures)
+        self.assertFalse((self.release / "node" / "node.stamp.json").is_file())
+        dest = self.private / "node" / FILENAME
+        self.assertFalse(dest.is_file() and dest.stat().st_size > 0)
+
+    def test_missing_cache_bad_bytes_do_not_publish_a_stamp(self):
+        archive = self.genuine_archive()
+        digest = hashlib.sha256(archive).hexdigest()
+        self.write_stamp(sha=digest)
+
+        stamp, failures = self.run_prepare(
+            do_download=True,
+            fetch_to=lambda url, dest_path: dest_path.write_bytes(b"wrong bytes"),
+        )
+        self.assertEqual(stamp, {})
+        self.assertTrue(any("does not match pinned" in f for f in failures), failures)
+        dest = self.private / "node" / FILENAME
+        self.assertFalse(dest.is_file())
+        published = json.loads((self.release / "node" / "node.stamp.json").read_text())
+        self.assertEqual(published["sha256"], digest, "trusted stamp digest must not become the bad bytes")
+
+
+class WheelSelectionTests(unittest.TestCase):
+    def wheel(self, plat, digest="a" * 64, size=1):
+        return {
+            "url": f"https://example.invalid/demo-1.0.0-cp313-cp313-{plat}.whl",
+            "hash": f"sha256:{digest}",
+            "size": size,
+        }
+
+    def test_oldest_glibc_tag_is_chosen_over_newer(self):
+        newer = self.wheel("manylinux_2_28_x86_64", "1" * 64)
+        older = self.wheel("manylinux_2_17_x86_64", "2" * 64)
+        for order, wheels in (("new-first", [newer, older]), ("old-first", [older, newer])):
+            with self.subTest(order):
+                pkg = {"name": "demo", "version": "1.0.0", "wheels": wheels}
+                chosen, err = pnb.select_wheel(pkg)
+                self.assertIsNone(err, err)
+                self.assertIn("manylinux_2_17_x86_64", chosen["url"])
+
+    def test_manylinux2014_is_wider_than_manylinux_2_28(self):
+        newer = self.wheel("manylinux_2_28_x86_64", "3" * 64)
+        older = self.wheel("manylinux2014_x86_64", "4" * 64)
+        for order, wheels in (("new-first", [newer, older]), ("old-first", [older, newer])):
+            with self.subTest(order):
+                pkg = {"name": "demo", "version": "1.0.0", "wheels": wheels}
+                chosen, err = pnb.select_wheel(pkg)
+                self.assertIsNone(err, err)
+                self.assertIn("manylinux2014_x86_64", chosen["url"])
 
 
 class CheckModeVerificationTests(unittest.TestCase):
@@ -678,6 +801,126 @@ class CheckModeVerificationTests(unittest.TestCase):
         self.assertEqual(code, 2, out + err)
         self.assertIn("config error: native/uv.lock not found", err)
         self.assert_tree_unchanged(before, root)
+
+    def test_first_time_authorized_node_fetch_prepares_successfully(self):
+        """Successful recovery of a missing cache must not fail the bundle."""
+        node_bytes = self.node_path.read_bytes()
+        node_sha = hashlib.sha256(node_bytes).hexdigest()
+        self.node_path.unlink()
+        real_prepare_node = pnb.prepare_node
+
+        def stub_prepare_node(failures, do_download, **kwargs):
+            return real_prepare_node(
+                failures, do_download,
+                fetch_shasums=lambda url: (_ for _ in ()).throw(
+                    AssertionError("stamp already pins the digest")),
+                fetch_to=lambda url, dest: dest.write_bytes(node_bytes))
+
+        def no_network(*args, **kwargs):
+            raise AssertionError("wheel/model path must not touch the network")
+
+        with mock.patch.object(pnb, "prepare_node", stub_prepare_node), \
+                mock.patch.object(pnb, "download", no_network), \
+                mock.patch.object(pnb.urllib.request, "urlopen", no_network), \
+                mock.patch.object(pnb.urllib.request, "urlretrieve", no_network):
+            code, out, err = self.run_main()
+        self.assertEqual(code, 0, f"{out}{err}")
+        self.assertIn("native bundle prepared: 1 wheels", out)
+        self.assertNotIn("cache missing", out)
+        self.assertEqual(hashlib.sha256(self.node_path.read_bytes()).hexdigest(), node_sha)
+        before = self.snapshot()
+        check_code, check_out = self.check()
+        self.assertEqual(check_code, 0, check_out)
+        self.assert_tree_unchanged(before)
+
+    def rewrite_wheels(self, wheels):
+        document = json.loads(self.manifest_path.read_text())
+        document["wheels"] = wheels
+        self.manifest_path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+        return document
+
+    def test_duplicate_conflicting_hash_healthy_first_is_refused(self):
+        document = json.loads(self.manifest_path.read_text())
+        healthy = dict(document["wheels"][0])
+        conflict = dict(healthy)
+        conflict["sha256"] = "0" * 64
+        self.rewrite_wheels([healthy, conflict])
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertIn("duplicate package identity", out)
+        self.assertIn(self.WHEEL_NAME, out)
+        self.assertNotIn("native bundle verified:", out)
+        self.assert_tree_unchanged(before)
+
+    def test_duplicate_conflicting_hash_conflict_first_is_refused(self):
+        document = json.loads(self.manifest_path.read_text())
+        healthy = dict(document["wheels"][0])
+        conflict = dict(healthy)
+        conflict["sha256"] = "0" * 64
+        self.rewrite_wheels([conflict, healthy])
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertIn("duplicate package identity", out)
+        self.assertIn(self.WHEEL_NAME, out)
+        self.assertNotIn("native bundle verified:", out)
+        self.assert_tree_unchanged(before)
+
+    def test_manifest_version_contradiction_is_named(self):
+        document = json.loads(self.manifest_path.read_text())
+        item = dict(document["wheels"][0])
+        item["version"] = "0.0.0"
+        self.rewrite_wheels([item])
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertIn("manifest wheel version drift", out)
+        self.assertIn(self.WHEEL_NAME, out)
+        self.assert_tree_unchanged(before)
+
+    def test_manifest_path_in_context_contradiction_is_named(self):
+        document = json.loads(self.manifest_path.read_text())
+        item = dict(document["wheels"][0])
+        item["path_in_context"] = "wheels/other.whl"
+        self.rewrite_wheels([item])
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertIn("manifest wheel path_in_context drift", out)
+        self.assert_tree_unchanged(before)
+
+    def test_license_evidence_outside_the_tree_is_named(self):
+        document = json.loads(self.manifest_path.read_text())
+        item = dict(document["wheels"][0])
+        cases = {}
+        absolute = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(absolute, ignore_errors=True))
+        (absolute / "NOTICE.txt").write_text("harmless generated notice\n")
+        cases["absolute"] = str(absolute)
+        sibling = self.root.parent / f"harmless-notices-{self.root.name}"
+        sibling.mkdir()
+        self.addCleanup(lambda: shutil.rmtree(sibling, ignore_errors=True))
+        (sibling / "NOTICE.txt").write_text("harmless generated notice\n")
+        cases["relative-escape"] = f"../{sibling.name}"
+        link = self.release / "notices" / "escaped-link"
+        link.symlink_to(absolute)
+        cases["symlink"] = str(link.relative_to(self.root))
+        for label, evidence in cases.items():
+            with self.subTest(label):
+                mutated = dict(item)
+                mutated["license_evidence"] = evidence
+                self.rewrite_wheels([mutated])
+                before = self.snapshot()
+                code, out = self.check()
+                self.assertEqual(code, 1, out)
+                self.assertNotIn("Traceback", out)
+                self.assertNotIn("native bundle verified:", out)
+                if label == "symlink":
+                    self.assertIn("license evidence is a symlink", out)
+                else:
+                    self.assertIn("license evidence path escapes the repository", out)
+                self.assert_tree_unchanged(before)
 
 
 if __name__ == "__main__":
