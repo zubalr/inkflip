@@ -71,6 +71,22 @@ The application wheel, CLI entry point and container build itself are owned
 by the packaging lane; until that wheel exists, the native bundle is an
 explicitly incomplete distribution, not a finished container.
 
+## Release-candidate binding (declarative, no hardcoded image)
+
+The gate no longer hardcodes an image tag or digest. The trusted expected
+identity comes from a **declared release candidate** —
+`config/release-candidate.json` (template:
+[release-candidate.template.json](release-candidate.template.json)). When the
+candidate is not yet bound (digest pending the final rebuild), image runtime
+verification is skipped with a visible note; when bound, `--docker` verifies
+the actual image against it. Expected identity is trusted declared input and
+is never adopted from the artifact being checked. Generated example
+declarations for observed fixed images live next to the template
+(`release-candidate.merged-example.json` for
+`inkflip-native:merged` / `sha256:cd2598829fbb…` — an amd64 emulated-on-Mac
+artifact that predates later native fixes; `inkflip-native:pc-prod`
+(`sha256:1923b04a…`) is preserved locally as the previous candidate).
+
 ## Inventory and SBOM
 
 `scripts/distribution/build_inventory.py` generates a deterministic
@@ -139,6 +155,22 @@ required notice entry from the image's own `INDEX.json`. A tag or JSON label
 alone is not proof. Re-running it against a rebuilt image requires the
 declared digest in `config/distribution-manifest.json` to be updated through
 the normal recorded-artifact flow.
+
+## Release-candidate binding (declarative, no hardcoded image)
+
+The gate no longer hardcodes an image tag or digest. The trusted expected
+identity comes from a **declared release candidate** —
+`config/release-candidate.json` (template:
+[release-candidate.template.json](release-candidate.template.json)). When the
+candidate is not yet bound (digest pending the final rebuild), image runtime
+verification is skipped with a visible note; when bound, `--docker` verifies
+the actual image against it. Expected identity is trusted declared input and
+is never adopted from the artifact being checked. Generated example
+declarations for observed fixed images live next to the template
+(`release-candidate.merged-example.json` for
+`inkflip-native:merged` / `sha256:cd2598829fbb…` — an amd64 emulated-on-Mac
+artifact that predates later native fixes; `inkflip-native:pc-prod`
+(`sha256:1923b04a…`) is preserved locally as the previous candidate).
 
 ## Inventory and SBOM
 

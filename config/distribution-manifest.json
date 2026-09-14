@@ -575,13 +575,9 @@
     },
     "production_image": {
       "declared": true,
-      "image_ref": "inkflip-native:pc-prod",
-      "expected_image_digest": "sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33",
+      "candidate_file": "config/release-candidate.json",
       "architecture": "amd64",
       "os": "linux",
-      "expected_wheel_sha256": "c9d760227db2f4928b395524fd9a6462f42a0e8783fb62adfaaec16f08974291",
-      "expected_model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
-      "expected_tesseract_version": "5.5.0",
       "required_notice_ids": [
         "inkflip-mit",
         "pdfium-binary-appendix",
@@ -589,7 +585,14 @@
         "tesseract-apache"
       ],
       "notice_dir_in_image": "/app/notices",
-      "verification": "docker inspect + read-only container checks (identity, arch, wheel/model digests, tesseract version, notice inventory)"
+      "verification": "docker inspect + read-only container checks bound to the declared candidate identity",
+      "superseded_images": [
+        {
+          "ref": "inkflip-native:pc-prod",
+          "digest": "sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33",
+          "note": "old candidate, preserved locally; superseded by inkflip-native:merged"
+        }
+      ]
     }
   }
 }

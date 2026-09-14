@@ -654,12 +654,26 @@ class ProductionImageDockerTests(unittest.TestCase):
         }
         self.write("distribution.json", json.dumps(manifest))
 
-    def run_with_stub(self):
+    def run_with_stub(self, candidate=True):
         self.write_stub()
+        if candidate:
+            self.write("config/release-candidate.json", json.dumps({
+                "kind": "inkflip-release-candidate",
+                "production_image": {
+                    "ref": "inkflip-native:pc-prod",
+                    "digest": self.IMAGE_ID,
+                    "architecture": "amd64",
+                    "expected_wheel_sha256": self.WHEEL_SHA,
+                    "expected_model_sha256": self.MODEL_SHA,
+                    "expected_tesseract_version": "5.5.0",
+                },
+            }))
+        args = [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+                "--root", str(self.root),
+                "--candidate", "config/release-candidate.json",
+                "--docker", "inkflip-native:pc-prod"]
         return subprocess.run(
-            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
-             "--root", str(self.root), "--docker", "inkflip-native:pc-prod"],
-            capture_output=True, text=True, timeout=120,
+            args, capture_output=True, text=True, timeout=120,
             env={**os.environ,
                  "PATH": f"{self.bin_dir}:{os.environ['PATH']}",
                  "DOCKER_STUB_STATE": json.dumps(self.state)},
@@ -678,7 +692,10 @@ class ProductionImageDockerTests(unittest.TestCase):
     def test_wrong_identity_fails(self):
         self.base_manifest()
         self.state["inspect"]["id"] = "sha256:" + "2" * 64
-        self.expect(self.run_with_stub(), 1, "identity mismatch")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("identity mismatch", proc.stdout)
+        self.assertIn("declared sha256:1111", proc.stdout)
 
     def test_wrong_architecture_fails(self):
         self.base_manifest()
@@ -704,6 +721,25 @@ class ProductionImageDockerTests(unittest.TestCase):
         self.base_manifest()
         self.state["run_sha"]["tesseract.txt"] = "0" * 64
         self.expect(self.run_with_stub(), 1, "notice 'tesseract-apache' bytes do not match")
+
+    def test_unbound_candidate_skips_image_verification(self):
+        self.base_manifest()
+        proc = self.run_with_stub(candidate=False)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("no release candidate declared", proc.stdout)
+        self.assertIn("image runtime verification skipped", proc.stdout)
+
+    def test_partially_bound_candidate_skips_verification(self):
+        self.base_manifest()
+        self.state["inspect"]["id"] = "sha256:" + "9" * 64  # any mismatch would fail if verified
+        self.write("config/release-candidate.json", json.dumps({
+            "kind": "inkflip-release-candidate",
+            "production_image": {"ref": "inkflip-native:merged",
+                                 "digest": "pending-final-rebuild"},
+        }))
+        proc = self.run_with_stub(candidate=False)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("not fully bound", proc.stdout)
 
     def test_tesseract_stamp_version_mismatch_is_config_error(self):
         self.base_manifest()
