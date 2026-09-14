@@ -89,8 +89,11 @@ jobs:
         run: |
           set -euo pipefail
           log=$(mktemp)
-          bunx --bun vercel@59.16.0 deploy --prebuilt --prod --skip-domain --yes \
-            --scope jubairjashim1975gmailcoms-projects >"$log" 2>&1
+          if ! bunx --bun vercel@59.16.0 deploy --prebuilt --prod --skip-domain --yes \
+            --scope jubairjashim1975gmailcoms-projects >"$log" 2>&1; then
+            cat "$log"
+            exit 1
+          fi
           cat "$log"
           url=$(python3 scripts/github_deploy_guard.py --extract-candidate-from "$log")
           test -n "$url"
