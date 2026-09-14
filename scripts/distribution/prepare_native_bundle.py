@@ -152,20 +152,25 @@ def select_wheel(pkg: dict) -> tuple[dict | None, str | None]:
         if py not in ("cp313", "py3") or abi not in ("cp313", "abi3", "none"):
             continue
         if plat == "any":
-            matches.append((0, filename, w))
+            matches.append(((0, 0), filename, w))
             continue
         if "musllinux" in plat or "x86_64" not in plat:
             continue
         if not re.search(r"manylinux(?:_\d+_\d+|2014|1)", plat):
             continue
-        glibc = int(m.group(1)) if (m := re.search(r"manylinux_(\d+)_", plat)) else (2014 if "manylinux2014" in plat else 1)
+        if (m := re.search(r"manylinux_(\d+)_(\d+)", plat)):
+            glibc = (int(m.group(1)), int(m.group(2)))
+        elif "manylinux2014" in plat:
+            glibc = (2, 17)
+        else:
+            glibc = (2, 5)  # manylinux1
         matches.append((glibc, filename, w))
     if not matches:
         return None, (
             f"no wheel for {name}=={version} matches the contract platform "
             f"(cp313/py3, cp313/abi3/none, glibc manylinux x86_64 or any)"
         )
-    matches.sort(key=lambda m: (-m[0]))  # widest compatibility = oldest glibc first
+    matches.sort(key=lambda m: (m[0], m[1]))  # widest compatibility = oldest glibc first
     return matches[0][2], None
 
 
@@ -288,6 +293,12 @@ def prepare_node(failures: list[str], do_download: bool, *,
                      pinned expected digest (zero bytes, truncation, wrong
                      bytes are all 'corrupt')
       offline        --no-download blocked the repair of missing/corrupt state
+      repaired       a verified authorized fetch replaced missing/corrupt bytes
+
+    A repaired outcome is success: missing/corrupt diagnostics are not kept
+    after a valid stamp is published. Offline, network failure and bad
+    downloaded bytes still fail, keep useful existing data, and never publish
+    a false success stamp.
 
     The pinned expected digest always comes from the trusted source (official
     SHASUMS256.txt, or a previously published stamp whose recorded digest was
@@ -330,18 +341,22 @@ def prepare_node(failures: list[str], do_download: bool, *,
                       "version": version, "platform": "linux-x64"})
         return stamp
 
+    # Cache state is recorded only if recovery does not succeed. A verified
+    # authorized fetch is a success, not a leftover "missing"/"corrupt" error.
+    state_failures: list[str] = []
     if present and expected:
-        failures.append(
+        state_failures.append(
             f"node runtime cache corrupt: {dest} (cached sha256 {actual[:12]}… "
             f"does not match pinned {expected[:12]}…)"
         )
     elif not present:
-        failures.append(
+        state_failures.append(
             f"node runtime cache missing: {dest} — run "
             "python3 scripts/distribution/prepare_native_bundle.py (explicit network step)"
         )
     if not do_download:
         # Offline refusal: keep any existing artifact intact for later repair.
+        failures.extend(state_failures)
         if present and expected:
             failures.append(
                 "node runtime cache left unrepaired because --no-download was set; "
@@ -366,6 +381,7 @@ def prepare_node(failures: list[str], do_download: bool, *,
                     expected = digest
                     break
             if expected is None:
+                failures.extend(state_failures)
                 failures.append(
                     f"official SHASUMS256.txt for node v{version} lists no entry for {filename}"
                 )
@@ -374,6 +390,7 @@ def prepare_node(failures: list[str], do_download: bool, *,
         fetch_to(download_url, temp)
         downloaded = sha256_file(temp)
         if downloaded != expected:
+            failures.extend(state_failures)
             failures.append(
                 f"node tarball download rejected: sha256 {downloaded[:12]}… does not match "
                 f"pinned {expected[:12]}…; the previous cache file is left in place"
@@ -382,6 +399,7 @@ def prepare_node(failures: list[str], do_download: bool, *,
             return {}
         os.replace(temp, dest)
     except (OSError, urllib.error.URLError) as error:
+        failures.extend(state_failures)
         failures.append(
             f"node runtime download failed ({error}); the previous cache file is left in place"
         )
@@ -393,6 +411,7 @@ def prepare_node(failures: list[str], do_download: bool, *,
             binary = tf.extractfile(f"node-v{version}-linux-x64/bin/node")
             node_sha = hashlib.sha256(binary.read()).hexdigest() if binary else None
     except (tarfile.TarError, OSError, EOFError) as error:
+        failures.extend(state_failures)
         failures.append(
             f"node runtime tarball unreadable after verification ({error}); "
             "treated as failed preparation — no stamp published"
@@ -459,6 +478,19 @@ def _display(path: Path) -> str:
         return str(path.relative_to(ROOT))
     except ValueError:
         return str(path)
+
+
+def _contained(root: Path, rel: str) -> bool:
+    """True if rel resolves to a location inside root (no absolute/`..` escape)."""
+    if not isinstance(rel, str) or not rel or rel.startswith(("/", "\\")):
+        return False
+    if len(rel) > 1 and rel[1] == ":":
+        return False
+    try:
+        (root / rel).resolve().relative_to(root.resolve())
+    except (ValueError, OSError):
+        return False
+    return True
 
 
 def _json_object(path: Path, label: str, failures: list[str]) -> dict | None:
@@ -562,15 +594,32 @@ def verify_wheels_manifest(entries: list[dict], failures: list[str]) -> None:
         return
 
     by_name: dict[str, dict] = {}
+    seen_at: dict[str, int] = {}
     for index, item in enumerate(recorded):
-        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+        if not isinstance(item, dict) or not isinstance(item.get("name"), str) or not item["name"]:
             failures.append(f"{label} wheel entry {index} is not an object recording a package name")
             continue
-        by_name.setdefault(item["name"], item)
+        name = item["name"]
+        if name in seen_at:
+            failures.append(
+                f"{label} duplicate package identity: {name} (entries {seen_at[name]} and {index})"
+            )
+        else:
+            seen_at[name] = index
+            by_name[name] = item
         evidence = item.get("license_evidence")
-        evidence_dir = ROOT / evidence if isinstance(evidence, str) else None
-        if evidence_dir is None or not evidence_dir.is_dir() \
-                or not any(p.is_file() and p.stat().st_size > 0 for p in evidence_dir.rglob("*")):
+        if not isinstance(evidence, str) or not evidence:
+            failures.append(f"manifest license evidence missing or empty: {evidence}")
+            continue
+        declared = ROOT / evidence
+        if declared.is_symlink():
+            failures.append(f"manifest license evidence is a symlink: {evidence}")
+            continue
+        if not _contained(ROOT, evidence):
+            failures.append(f"manifest license evidence path escapes the repository: {evidence}")
+            continue
+        if not declared.is_dir() \
+                or not any(p.is_file() and p.stat().st_size > 0 for p in declared.rglob("*")):
             failures.append(f"manifest license evidence missing or empty: {evidence}")
 
     for entry in entries:
@@ -578,6 +627,11 @@ def verify_wheels_manifest(entries: list[dict], failures: list[str]) -> None:
         if item is None:
             failures.append(f"manifest wheel entry missing: {entry['name']}=={entry['version']}")
             continue
+        if item.get("version") != entry["version"]:
+            failures.append(
+                f"manifest wheel version drift for {entry['name']}: lock {entry['version']}, "
+                f"manifest {item.get('version')}"
+            )
         if item.get("filename") != entry["filename"]:
             failures.append(
                 f"manifest wheel filename drift for {entry['name']}: lock {entry['filename']}, "
@@ -592,6 +646,11 @@ def verify_wheels_manifest(entries: list[dict], failures: list[str]) -> None:
             failures.append(
                 f"manifest wheel size drift for {entry['filename']}: lock {entry['bytes']}, "
                 f"manifest {item.get('bytes')}"
+            )
+        if item.get("path_in_context") != entry["path_in_context"]:
+            failures.append(
+                f"manifest wheel path_in_context drift for {entry['name']}: lock "
+                f"{entry['path_in_context']}, manifest {item.get('path_in_context')}"
             )
     for name, item in sorted(by_name.items()):
         failures.append(f"manifest records unexpected wheel: {name} ({item.get('filename')})")
