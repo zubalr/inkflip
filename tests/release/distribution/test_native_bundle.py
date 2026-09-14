@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -241,9 +242,12 @@ class DistCheckerTests(unittest.TestCase):
         self.write("apps/web/dist/assets/app-ABC123.js", asset)
         manifest = {
             "dist_root": "apps/web/dist",
+            "reject_patterns": ["\\.map$", "\.log$"],
             "files": [
-                {"path": "apps/web/dist/index.html", "sha256": hashlib.sha256(index).hexdigest()},
-                {"path": "apps/web/dist/assets/app-ABC123.js", "sha256": hashlib.sha256(asset).hexdigest()},
+                {"path": "apps/web/dist/index.html", "bytes": len(index),
+                 "sha256": hashlib.sha256(index).hexdigest()},
+                {"path": "apps/web/dist/assets/app-ABC123.js", "bytes": len(asset),
+                 "sha256": hashlib.sha256(asset).hexdigest()},
             ],
         }
         self.write(".private/distribution/dist-manifest.json", json.dumps(manifest).encode())
@@ -280,11 +284,435 @@ class DistCheckerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("dist: undeclared file", proc.stdout)
 
+    def test_source_map_in_dist_fails(self):
+        self.record_dist()
+        self.write("apps/web/dist/assets/app-ABC123.js.map", b"{\"sources\":[]}")
+        proc = self.run_checker("--dist-manifest", ".private/distribution/dist-manifest.json")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("prohibited development material present", proc.stdout)
+
     def test_missing_dist_manifest_fails(self):
         self.record_dist()
         proc = self.run_checker("--dist-manifest", ".private/distribution/absent.json")
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("dist manifest missing", proc.stdout)
+
+
+
+class ApplicationWheelImageTests(unittest.TestCase):
+    """The application-wheel / complete-image audit interface: absence,
+    mismatch and image-without-wheel cases (recovery review item)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.write("NOTICE", b"NOTICE\n")
+
+    def write(self, rel: str, content: bytes):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        return path
+
+    def base_manifest(self, wheel=None, image=None):
+        self.write(".private/distribution/native-bundle/.prepared", b"")  # context prepared
+        self.write(
+            "release/native-requirements.lock", b"# generated\n"
+        )
+        self.write(
+            "release/native-wheels.manifest.json",
+            json.dumps({"wheels": []}).encode(),
+        )
+        self.write(
+            "release/node/node.stamp.json",
+            json.dumps({"version": "22.23.2", "sha256": "a" * 64, "url": "u",
+                        "shasums256_source": "s"}).encode(),
+        )
+        self.write(
+            "release/models/model.stamp.json",
+            json.dumps({"name": "m", "sha256": "b" * 64, "license": "Apache-2.0",
+                        "source": "s"}).encode(),
+        )
+        manifest = {
+            "distribution": {"shipped_roots": []},
+            "groups": [],
+            "notice": "NOTICE",
+            "native_bundle": {
+                "requirements_lock": "release/native-requirements.lock",
+                "wheels_manifest": "release/native-wheels.manifest.json",
+                "expected_runtime_packages": [],
+                "context_dir": ".private/distribution/native-bundle",
+                "node_stamp": "release/node/node.stamp.json",
+                "model_stamp": "release/models/model.stamp.json",
+                "notices_dir": "release/notices/",
+                "application_wheel": wheel,
+                "application_image": image,
+            },
+        }
+        self.write("distribution.json", json.dumps(manifest).encode())
+
+    def run_checker(self) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+             "--root", str(self.root)],
+            capture_output=True, text=True, timeout=60,
+        )
+
+    def test_undeclared_wheel_stays_explicitly_incomplete(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("no application wheel is declared", proc.stdout)
+
+    def test_declared_wheel_missing_fails(self):
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": "c" * 64},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("declared application wheel missing", proc.stdout)
+
+    def test_declared_wheel_digest_mismatch_fails(self):
+        self.write("native/dist/inkflip-1.0-py3-none-any.whl", b"actual wheel bytes")
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": "c" * 64},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("application wheel digest mismatch", proc.stdout)
+
+    def test_declared_wheel_with_matching_digest_passes(self):
+        wheel_bytes = b"real wheel bytes"
+        digest = hashlib.sha256(wheel_bytes).hexdigest()
+        self.write("native/dist/inkflip-1.0-py3-none-any.whl", wheel_bytes)
+        self.base_manifest(
+            wheel={"declared": True, "path": "native/dist/inkflip-1.0-py3-none-any.whl",
+                   "sha256": digest},
+            image={"declared": False, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+
+    def test_image_declared_without_wheel_fails(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": True, "image_lock": None, "expected_image_digest": "sha256:d" * 1},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("not a complete shipped application image", proc.stdout)
+
+    def test_image_declared_without_digest_fails(self):
+        self.base_manifest(
+            wheel={"declared": False, "path": None, "sha256": None},
+            image={"declared": True, "image_lock": None, "expected_image_digest": None},
+        )
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("without expected_image_digest", proc.stdout)
+
+
+class ApplicationWheelStampTests(unittest.TestCase):
+    """Stamp-interface audit (Cursor's app.wheel.json / BUILD-CONTEXT.json):
+    read-only verification of the assembled-context identity when present."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.write("NOTICE", b"NOTICE\n")
+        self.write("release/native-requirements.lock", b"# generated\n")
+        self.write("release/native-wheels.manifest.json", json.dumps({"wheels": []}).encode())
+        self.write("release/node/node.stamp.json", json.dumps(
+            {"version": "22.23.2", "sha256": "a" * 64, "url": "u", "shasums256_source": "s"}).encode())
+        self.write("release/models/model.stamp.json", json.dumps(
+            {"name": "m", "sha256": "b" * 64, "license": "Apache-2.0", "source": "s"}).encode())
+        self.write(".private/distribution/native-bundle/.prepared", b"")
+        wheel = b"PY_LENGTH_ZERO_WHEN_EMPTY"
+        self.write("native/dist/wheels/inkflip-0.0.0-py3-none-any.whl", wheel)
+        self.write("native/dist/app.wheel.json", json.dumps({
+            "assembled_path": "native/dist/wheels/inkflip-0.0.0-py3-none-any.whl",
+            "filename": "inkflip-0.0.0-py3-none-any.whl",
+            "sha256": hashlib.sha256(wheel).hexdigest(),
+            "bytes": len(wheel),
+            "wheel_tag": "py3-none-any",
+        }).encode())
+        self.write("native/dist/BUILD-CONTEXT.json", json.dumps({
+            "kind": "inkflip-native-image-context",
+            "docker_platform": "linux/amd64",
+            "dockerfile": "build/native/Dockerfile",
+        }).encode())
+        manifest = {
+            "distribution": {"shipped_roots": []},
+            "groups": [],
+            "notice": "NOTICE",
+            "native_bundle": {
+                "requirements_lock": "release/native-requirements.lock",
+                "wheels_manifest": "release/native-wheels.manifest.json",
+                "expected_runtime_packages": [],
+                "context_dir": ".private/distribution/native-bundle",
+                "node_stamp": "release/node/node.stamp.json",
+                "model_stamp": "release/models/model.stamp.json",
+                "notices_dir": "release/notices/",
+                "application_wheel": {"declared": False, "path": None, "sha256": None},
+                "application_image": {"declared": False, "image_lock": None,
+                                      "expected_image_digest": None},
+                "application_wheel_stamp": "native/dist/app.wheel.json",
+                "build_context_identity": "native/dist/BUILD-CONTEXT.json",
+            },
+        }
+        self.write("distribution.json", json.dumps(manifest).encode())
+
+    def write(self, rel, content):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+
+    def run_checker(self):
+        return subprocess.run(
+            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+             "--root", str(self.root)],
+            capture_output=True, text=True, timeout=60,
+        )
+
+    def test_consistent_stamp_passes(self):
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+
+    def test_tampered_wheel_fails_against_stamp(self):
+        self.write("native/dist/wheels/inkflip-0.0.0-py3-none-any.whl", b"tampered")
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("application wheel digest mismatch", proc.stdout)
+
+    def test_stamp_missing_field_fails(self):
+        stamp = json.loads((self.root / "native/dist/app.wheel.json").read_text())
+        del stamp["wheel_tag"]
+        self.write("native/dist/app.wheel.json", json.dumps(stamp).encode())
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("lacks 'wheel_tag'", proc.stdout)
+
+    def test_stamped_wheel_missing_fails(self):
+        (self.root / "native/dist/wheels/inkflip-0.0.0-py3-none-any.whl").unlink()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("stamped application wheel missing", proc.stdout)
+
+    def test_absent_stamp_is_scope_note_not_failure(self):
+        (self.root / "native/dist/app.wheel.json").unlink()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("application wheel stamp not present yet", proc.stdout)
+
+    def test_build_context_missing_fields_fail(self):
+        self.write("native/dist/BUILD-CONTEXT.json", json.dumps({"kind": "x"}).encode())
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("build-context identity lacks", proc.stdout)
+
+
+class ProductionImageDockerTests(unittest.TestCase):
+    """--docker production-image verification against a stub docker binary:
+    identity/arch mismatch, missing wheel, tesseract version and notice
+    inventory negatives (labels are not proof)."""
+
+    IMAGE_ID = "sha256:" + "1" * 64
+    WHEEL_SHA = hashlib.sha256(b"app wheel").hexdigest()
+    MODEL_SHA = hashlib.sha256(b"model").hexdigest()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.bin_dir = self.root / "bin"
+        self.bin_dir.mkdir(parents=True)
+        self.index = {"entries": [
+            {"id": "inkflip-mit", "path": "notices/inkflip-MIT.txt",
+             "sha256": hashlib.sha256(b"MIT text").hexdigest()},
+            {"id": "pdfium-binary-appendix", "path": "notices/pdfium.txt",
+             "sha256": hashlib.sha256(b"pdfium appendix").hexdigest()},
+            {"id": "node-license", "path": "notices/node/LICENSE",
+             "sha256": hashlib.sha256(b"node license").hexdigest()},
+            {"id": "tesseract-apache", "path": "notices/tesseract.txt",
+             "sha256": hashlib.sha256(b"tesseract apache").hexdigest()},
+        ]}
+        self.state = {
+            "inspect": {"id": self.IMAGE_ID, "architecture": "amd64", "os": "linux"},
+            "run_sha": {
+                "inkflip-0.0.0-py3-none-any.whl": self.WHEEL_SHA,
+                "eng.traineddata": self.MODEL_SHA,
+                "inkflip-MIT.txt": self.index["entries"][0]["sha256"],
+                "pdfium.txt": self.index["entries"][1]["sha256"],
+                "LICENSE": self.index["entries"][2]["sha256"],
+                "tesseract.txt": self.index["entries"][3]["sha256"],
+            },
+            "run_index": self.index,
+            "run_tesseract": "tesseract 5.5.0",
+        }
+
+    def write(self, rel, content):
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content if isinstance(content, bytes) else content.encode())
+        return path
+
+    def write_stub(self):
+        """Write a stub `docker` script driven entirely by DOCKER_STUB_STATE
+        (JSON): {'inspect': {...}, 'run_sha': {basename: sha}, 'run_index': {...},
+        'run_tesseract': 'version line'} — word-matching on sha256sum args."""
+        stub_src = (
+            "#!/usr/bin/env python3\n"
+            "import json, os, sys\n"
+            "state = json.loads(os.environ['DOCKER_STUB_STATE'])\n"
+            "args = sys.argv[1:]\n"
+            "joined = ' '.join(args)\n"
+            "if args and args[0] == 'inspect':\n"
+            "    i = state['inspect']\n"
+            "    print(i['id']); print(i['architecture']); print(i['os']); sys.exit(0)\n"
+            "if 'INDEX.json' in joined:\n"
+            "    sys.stdout.write(json.dumps(state['run_index'])); sys.exit(0)\n"
+            "if 'sha256sum' in joined:\n"
+            "    import re\n"
+            "    seen = set()\n"
+            "    for word in joined.split():\n"
+            "        base = os.path.basename(word)\n"
+            "        if '*' in word:\n"
+            "            pattern = re.escape(base).replace(re.escape('*'), '.*')\n"
+            "            for name, sha in state['run_sha'].items():\n"
+            "                if re.fullmatch(pattern, name) and name not in seen:\n"
+            "                    seen.add(name); print(sha, name)\n"
+            "        elif base in state['run_sha'] and base not in seen:\n"
+            "            seen.add(base); print(state['run_sha'][base], base)\n"
+            "    if '--version' in joined:\n"
+            "        print(state['run_tesseract'])\n"
+            "    sys.exit(0)\n"
+            "if '--version' in joined:\n"
+            "    print(state['run_tesseract']); sys.exit(0)\n"
+            "sys.exit(0)\n"
+        )
+        stub = self.bin_dir / "docker"
+        stub.write_text(stub_src)
+        stub.chmod(0o755)
+        return str(stub)
+
+    def base_manifest(self):
+        self.write("NOTICE", b"NOTICE\n")
+        self.write("release/native-requirements.lock", b"# generated\n")
+        self.write("release/native-wheels.manifest.json", json.dumps({"wheels": []}))
+        self.write("release/node/node.stamp.json", json.dumps(
+            {"version": "22.23.2", "sha256": "a" * 64, "url": "u", "shasums256_source": "s"}))
+        self.write("release/models/model.stamp.json", json.dumps(
+            {"name": "m", "sha256": "b" * 64, "license": "Apache-2.0", "source": "s"}))
+        self.write(".private/distribution/native-bundle/.prepared", b"")
+        self.write("release/tesseract/tesseract.stamp.json", json.dumps({
+            "kind": "inkflip-native-tesseract-debs", "package": "tesseract-ocr",
+            "version": "5.5.0-1+b1", "arch": "amd64",
+            "license": "Apache-2.0 (Tesseract)",
+            "packages": [{"filename": "a.deb", "sha256": "c" * 64, "bytes": 10}]}))
+        manifest = {
+            "distribution": {"shipped_roots": []},
+            "groups": [],
+            "notice": "NOTICE",
+            "native_bundle": {
+                "requirements_lock": "release/native-requirements.lock",
+                "wheels_manifest": "release/native-wheels.manifest.json",
+                "expected_runtime_packages": [],
+                "context_dir": ".private/distribution/native-bundle",
+                "node_stamp": "release/node/node.stamp.json",
+                "model_stamp": "release/models/model.stamp.json",
+                "notices_dir": "release/notices/",
+                "tesseract_stamp": {
+                    "path": "release/tesseract/tesseract.stamp.json",
+                    "expected_package": "tesseract-ocr",
+                    "expected_version": "5.5.0-1+b1",
+                    "expected_arch": "amd64",
+                    "debs_dir": None,
+                },
+                "application_wheel": {"declared": False, "path": None, "sha256": None},
+                "production_image": {
+                    "declared": True,
+                    "image_ref": "inkflip-native:pc-prod",
+                    "expected_image_digest": self.IMAGE_ID,
+                    "architecture": "amd64",
+                    "os": "linux",
+                    "expected_wheel_sha256": self.WHEEL_SHA,
+                    "expected_model_sha256": self.MODEL_SHA,
+                    "expected_tesseract_version": "5.5.0",
+                    "required_notice_ids": ["inkflip-mit", "pdfium-binary-appendix",
+                                            "node-license", "tesseract-apache"],
+                },
+            },
+        }
+        self.write("distribution.json", json.dumps(manifest))
+
+    def run_with_stub(self):
+        self.write_stub()
+        return subprocess.run(
+            [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
+             "--root", str(self.root), "--docker", "inkflip-native:pc-prod"],
+            capture_output=True, text=True, timeout=120,
+            env={**os.environ,
+                 "PATH": f"{self.bin_dir}:{os.environ['PATH']}",
+                 "DOCKER_STUB_STATE": json.dumps(self.state)},
+        )
+
+    def expect(self, proc, code, needle):
+        self.assertEqual(proc.returncode, code, msg=proc.stdout + proc.stderr)
+        self.assertIn(needle, proc.stdout)
+
+    # ---- cases ----
+
+    def test_consistent_image_passes(self):
+        self.base_manifest()
+        self.expect(self.run_with_stub(), 0, "production image verified via docker")
+
+    def test_wrong_identity_fails(self):
+        self.base_manifest()
+        self.state["inspect"]["id"] = "sha256:" + "2" * 64
+        self.expect(self.run_with_stub(), 1, "identity mismatch")
+
+    def test_wrong_architecture_fails(self):
+        self.base_manifest()
+        self.state["inspect"]["architecture"] = "arm64"
+        self.expect(self.run_with_stub(), 1, "architecture is 'arm64'")
+
+    def test_missing_wheel_fails(self):
+        self.base_manifest()
+        self.state["run_sha"]["inkflip-0.0.0-py3-none-any.whl"] = "0" * 64
+        self.expect(self.run_with_stub(), 1, "application wheel digest mismatch")
+
+    def test_tesseract_version_mismatch_fails(self):
+        self.base_manifest()
+        self.state["run_tesseract"] = "tesseract 5.3.0"
+        self.expect(self.run_with_stub(), 1, "tesseract version line missing/mismatched")
+
+    def test_missing_notice_id_fails(self):
+        self.base_manifest()
+        self.state["run_index"] = {"entries": self.index["entries"][:3]}
+        self.expect(self.run_with_stub(), 1, "tesseract-apache")
+
+    def test_notice_bytes_mismatch_fails(self):
+        self.base_manifest()
+        self.state["run_sha"]["tesseract.txt"] = "0" * 64
+        self.expect(self.run_with_stub(), 1, "notice 'tesseract-apache' bytes do not match")
+
+    def test_tesseract_stamp_version_mismatch_is_config_error(self):
+        self.base_manifest()
+        stamp = json.loads((self.root / "release/tesseract/tesseract.stamp.json").read_text())
+        stamp["version"] = "5.3.0"
+        self.write("release/tesseract/tesseract.stamp.json", json.dumps(stamp))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("tesseract stamp version is '5.3.0', expected '5.5.0-1+b1'", proc.stdout)
 
 
 if __name__ == "__main__":

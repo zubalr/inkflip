@@ -81,6 +81,127 @@ runs over identical content are byte-identical. Working output goes to the
 local ignored tree (`.private/distribution/`); a compact public digest of
 the current surface lives in [SURFACE.md](SURFACE.md).
 
+## The native CLI in Docker (macOS + Docker) — verified
+
+Docker is a required, supported delivery surface. The production profile is
+built for **linux/amd64** via `--platform linux/amd64` (qemu emulation on an
+Apple Silicon Mac is acceptable and labeled — it is not native x86_64
+hardware certification, which remains deferred).
+
+**Production profile — built and verified on this Mac (2026-09-13,
+candidate `84c839c`):** image `inkflip-native:pc-prod`, digest
+`sha256:1923b04a483b7744c49bc3d7530d7dea98c71aa689355810cfdaeba024f6da33`,
+amd64/linux, containing the hashed application wheel (`c9d76022…`), the
+digest-pinned OCR model (`7d4322bd…`), Debian `tesseract-ocr 5.5.0-1+b1`
+(70-deb hashed closure) and a four-id notice inventory
+(`inkflip-mit`, `pdfium-binary-appendix`, `node-license`, `tesseract-apache`).
+
+Executable offline workflow (verified; note the quoted path with a space and
+the read-only input mount):
+
+```sh
+docker run --rm --network none --user 65532:65532 \
+  -v "/path with spaces/in:/data/in:ro" -v "/path with spaces/out:/data/out" \
+  inkflip-native:pc-prod inspect /data/in/mapping-amount.pdf \
+    --pages 1 --ocr-pages 1 --out /data/out/report-ocr.json
+docker run --rm --network none --user 65532:65532 \
+  -v "/path with spaces/out:/data/out:ro" \
+  inkflip-native:pc-prod validate /data/out/report-ocr.json
+docker run --rm --network none --user 65532:65532 \
+  -v "/path with spaces/out:/data/out" \
+  inkflip-native:pc-prod report /data/out/report-ocr.json --format html \
+    --out /data/out/report-ocr.html
+docker run --rm --network none --user 65532:65532 \
+  -v "/path with spaces/in:/data/in:ro" -v "/path with spaces/out:/data/out" \
+  inkflip-native:pc-prod replay /data/out/report-ocr.json \
+    --source /data/in/mapping-amount.pdf --profile native-default \
+    --out /data/out/replay.json --replace-output
+```
+
+Observed behavior (executed): inspect exits 0 (with OCR through the image's
+tesseract 5.5.0); validate exits 0; report/replay refuse overwriting existing
+outputs (exit 2) unless `--replace-output` is given; `replay` refuses a
+profile that does not match the recorded run profile; remote URL sources are
+refused. Preparation steps that use the network (deb/wheel download, image
+build) are explicit and separate from offline processing.
+
+The gate can verify the declared image identity read-only against the actual
+Docker daemon:
+
+```sh
+python3 scripts/check_distribution.py --release \
+  --docker inkflip-native:pc-prod
+```
+
+This checks image identity and architecture, hashes the application wheel
+and model inside the image, verifies the tesseract version and hashes every
+required notice entry from the image's own `INDEX.json`. A tag or JSON label
+alone is not proof. Re-running it against a rebuilt image requires the
+declared digest in `config/distribution-manifest.json` to be updated through
+the normal recorded-artifact flow.
+
+## Inventory and SBOM
+
+`scripts/distribution/build_inventory.py` generates a deterministic
+inventory and CycloneDX 1.5 SBOM from the frozen inputs (production npm
+closure, staged assets, prepared example, native lock packages). Outputs
+depend only on input-content digests — never on HEAD or wall-clock — so two
+runs over identical content are byte-identical. Working output goes to the
+local ignored tree (`.private/distribution/`); a compact public digest of
+the current surface lives in [SURFACE.md](SURFACE.md).
+
+## The native CLI in Docker (macOS + Docker)
+
+Two container profiles exist for the native CLI. Both run as UID 65532 with
+`--network none` during processing; image *setup* may use the network.
+
+**Checkout image (functional verification).** Built directly from a source
+checkout; it is explicitly *not* the digest-pinned release profile.
+
+```sh
+git checkout <candidate>
+docker build -f build/native/Dockerfile.checkout -t inkflip-native:checkout .
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/fixtures/public:/data/in:ro" -v "$PWD/out:/data/out" \
+  inkflip-native:checkout inspect /data/in/mapping-amount.pdf --out /data/out/report.json
+docker run --rm --network none --user 65532:65532 \
+  -v "$PWD/out:/data/out:ro" inkflip-native:checkout validate /data/out/report.json
+```
+
+**Production profile (digest-pinned, linux/amd64).** Assembled from the
+third-party bundle plus the built application wheel:
+
+```sh
+python3 scripts/distribution/prepare_native_bundle.py   # third-party inputs (explicit network step)
+python3 scripts/distribution/assemble_native_image.py   # adds the Inkflip wheel + notices + identities
+docker build --platform linux/amd64 -f build/native/Dockerfile -t inkflip-native:prod .
+```
+
+Verified on 2026-09-13 on this Mac's local Docker (linux/aarch64): the
+checkout image built from a clean clone of candidate `b50c9d2` (image ID
+`9012f41fb6b9`, manifest digest `sha256:9012f41fb6b9…d6d52a`) and completed
+the offline sequence above — inspect (exit 0), validate (`VALID`, 98
+occurrences), script-free HTML report, and the remote-source refusal (exit 2,
+"Remote URL sources are not permitted"). The production assembly chain also
+completed on this Mac: third-party bundle → application wheel
+(`inkflip-0.0.0-py3-none-any.whl`, sha256 `4fc4fa1b265813ae…`, built from
+this source by `assemble_native_image.py`) → notices index →
+`native/dist/BUILD-CONTEXT.json`.
+
+Honest boundaries:
+
+- The production Dockerfile's wheel lock pins the recorded contract platform
+  (**linux/amd64**). On this Mac's aarch64 Docker the build fails at pip
+  exactly as it should for a platform-pinned lock ("no matching distribution"
+  for the compiled wheels); building the recorded amd64 profile requires
+  emulation, which is out of scope for this release. The arm64 checkout run
+  above is a functional check — **not** the recorded release profile and
+  **not** native Linux hardware certification.
+- The assembled wheel's provenance is this checkout's source built by
+  `assemble_native_image.py`; reproducibility of the wheel bytes across
+  machines is expected (pure-Python wheel) but cross-host reproduction has
+  not been independently verified yet.
+
 ## Advisory evidence
 
 Dated advisory scans against the exact selected versions are recorded with

@@ -22,7 +22,7 @@ PDFium fallback.
 
 ```sh
 inkflip readers list --json
-inkflip inspect FILE --out REPORT [--reader pdfium|pypdf|tesseract] [--pages 1] [--ocr-pages PAGES] [--region x0,y0,x1,y1] [--profile native-default]
+inkflip inspect FILE --out REPORT [--reader pdfium|pypdf|tesseract] [--pages 1] [--ocr-pages PAGES] [--region x0,y0,x1,y1] [--profile native-default] [--embed-source]
 inkflip compare-readers FILE --readers A,B --out DIR
 inkflip models prepare --manifest FILE [--cache DIR]
 inkflip corpus run --manifest FILE --source-root DIR --profile ID --out DIR [--jobs 1] [--resume]
@@ -33,6 +33,10 @@ inkflip replay REPORT --source FILE --profile ID --out FILE
 inkflip validate REPORT
 ```
 
+`--embed-source` includes the original document bytes inside the exported
+report, enabling `replay` on another machine without the source file. It
+increases report size and means the report carries a copy of the document —
+treat the exported file with the same care as the original PDF.
 `--reader tesseract` requires `--ocr-pages`. Model preparation copies
 allowlisted files after digest verification; `{}` is not a ready cache.
 

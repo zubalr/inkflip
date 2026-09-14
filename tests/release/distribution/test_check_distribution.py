@@ -142,7 +142,7 @@ class DistributionCheckerTests(unittest.TestCase):
         self.build_valid_distribution()
         proc = self.run_checker()
         self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
-        self.assertIn("all checks passed", proc.stdout)
+        self.assertIn("PASSED for", proc.stdout)
 
     def test_hash_tampering_fails(self):
         self.build_valid_distribution()

@@ -59,5 +59,11 @@ htmlcov/
 /artifacts/followups/
 /artifacts/integration/
 /artifacts/gates/
+<<<<<<< HEAD
 /artifacts/performance/*.json
 
+=======
+
+# Provider local dev output (wrangler dev temp state; T48 preflight).
+/.wrangler/
+>>>>>>> e4da7fdebce7519fe162ad0152556e970f93851a

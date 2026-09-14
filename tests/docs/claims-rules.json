@@ -11,7 +11,10 @@
     "docs/limitations.md",
     "docs/development-history.md",
     "docs/distribution/README.md",
-    "docs/distribution/SURFACE.md"
+    "docs/distribution/SURFACE.md",
+    "docs/case-study.md",
+    "docs/launch/CLAIMS-INDEX.md",
+    "docs/distribution/EXECUTED-EXAMPLES.md"
   ],
   "checked_docs": [
     "README.md",
@@ -24,7 +27,10 @@
     "docs/limitations.md",
     "docs/development-history.md",
     "docs/distribution/README.md",
-    "docs/distribution/SURFACE.md"
+    "docs/distribution/SURFACE.md",
+    "docs/case-study.md",
+    "docs/launch/CLAIMS-INDEX.md",
+    "docs/distribution/EXECUTED-EXAMPLES.md"
   ],
   "forbidden_phrases": [
     "what AI sees",
@@ -83,7 +89,13 @@
       "name": "pypdf",
       "doc_pattern": "pypdf\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
       "pin_file": "native/pyproject.toml",
-      "pin_regex": "pypdf==([0-9.]+)"
+      "pin_regex": "pypdf==([0-9.]+)",
+      "allowed_other_versions": [
+        {
+          "version": "5.9.0",
+          "reason": "exploratory before-profile of the reader-upgrade example (installed in isolation, deliberately not the frozen pin)"
+        }
+      ]
     },
     {
       "name": "pypdfium2",

@@ -45,6 +45,7 @@ From the repository root (verified 2026-09-13 on this snapshot, macOS/arm64):
 | `bun run verify` | passes — 176 tests across three suites (63 bootstrap + 2 native bootstrap + 111 coordination) plus a 16-command registry self-check |
 | `bun run build` | passes — production bundle in `apps/web/dist/` |
 | `bun run test:native` | passes — native reader/runtime/bridge suites |
+| `bun run test:privacy` (offline lifecycle) | the cache suite verifies prepare/removal semantics with digest re-verification |
 | `bun run test:browser` | passes — full browser flow suite |
 | `bun run test:fixtures` | passes — fixture generator + prepared example integrity |
 | `bun run test:privacy` | passes — cold/warm/offline/receipt no-egress canary |

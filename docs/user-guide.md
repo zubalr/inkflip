@@ -21,12 +21,27 @@ document's safety, honesty or legality.
 
 Launch the app ([quickstart.md](quickstart.md)) and open the printed URL.
 
-- **Try Example** opens the workspace on the prepared synthetic amount
-  example, generated from this repository's own fixtures. It demonstrates
-  the whole workflow without any local file: one synthetic PDF renders
-  `$100` while the PDF.js text layer extracts `$1,000`, with a
-  clean-mapping control file whose pixels match exactly — one synthetic
-  file under named reader versions, not a claim about PDFs in general.
+- **The example gallery** — six prepared synthetic examples, each generated
+  from this repository's own fixtures and openable without any local file:
+  1. *The amount that reads differently* — the font's ToUnicode table maps
+     the displayed 1 to 1,0, so visual `$100` becomes extracted `$1,000`;
+     clean control files isolate the cause as text extraction.
+  2. *The amount hidden under white paint* — the render shows nothing while
+     the text layer still carries the amount.
+  3. *A normal scan — and its invisible-layer siblings* — a searchable scan
+     carries an invisible text layer over the raster; raster-only and
+     shifted siblings show when readings still agree. A normal searchable
+     scan is not evidence of wrongdoing.
+  4. *The same ink at four rotations* — identical content under
+     0/90/180/270° rotation; readers must reconcile geometry through the
+     recorded transforms.
+  5. *The same readings in a different order* — two columns emitted
+     right-then-left; the same text arrives in a different stream order.
+  6. *The same $100, four times* — four identical amounts at distinct
+     positions stay individually addressable; a string match must never
+     collapse them.
+  All examples are synthetic originals; behavior shown in one synthetic file
+  under named reader versions is not a claim about PDFs in general.
 - **Open Workspace** starts with an empty workspace for your own file.
 
 ## Open a PDF
@@ -122,7 +137,31 @@ stacked layout rather than a shrunken desktop grid.
 
 Exports are the intended way to hand evidence to someone else: they can open
 the JSON or HTML without Inkflip, or reopen the JSON in Inkflip to continue
-investigating.
+investigating. A reopened report can carry its original document bytes (when
+the export explicitly included them), letting the recipient replay the
+inspection locally — the workspace states exactly when a reopened report is
+replay-ready and which source it refers to.
+
+## Working offline
+
+Inkflip is built to keep working without a network once prepared:
+
+- **Prepare for offline use** downloads and integrity-checks this release's
+  app, reader and model files (the exact allowlisted paths for this release —
+  application shell, reader runtimes, the pinned OCR model, and the example
+  assets) and stores verified copies in the browser. Every stored entry is
+  digest-verified when stored and again when served; a mismatching entry is
+  discarded, never served.
+- Offline readiness covers exactly the prepared release files. Your documents
+  never enter the offline cache; anything not on the release allowlist still
+  needs the network.
+- **Remove offline assets** deletes those prepared copies. It is separate
+  from closing a document (which clears the document, its readings and its
+  workers but keeps prepared offline assets) and from removing downloaded
+  OCR data. Removal deletes the app's own caches only — browser memory, the
+  HTTP cache and OS storage are beyond an app's reach.
+- A cold page with nothing prepared fails with an explicit offline error
+  rather than silently reaching for the network.
 
 ## Privacy in practice
 
@@ -151,3 +190,5 @@ an explicit parity task yet. There is no mobile app and no hosted service.
   exports actually work.
 - [distribution/README.md](distribution/README.md) — what this repository
   ships and how its license/notice evidence is organized.
+- [case-study.md](case-study.md) — one investigation walked through end to
+  end, with a reader-upgrade example and reproduction instructions.

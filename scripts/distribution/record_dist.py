@@ -61,11 +61,20 @@ def main() -> int:
                     "sha256": sha256_file(path),
                 }
             )
+    h = hashlib.sha256()
+    for f in sorted(files, key=lambda x: x["path"]):
+        h.update(f["path"].encode())
+        h.update(str(f["bytes"]).encode())
+        h.update(f["sha256"].encode())
     manifest = {
         "schema_version": "1.0.0",
         "kind": "inkflip-dist-manifest",
         "dist_root": "apps/web/dist",
         "file_count": len(files),
+        "file_set_sha256": h.hexdigest(),
+        # Release-contract prohibition (this project's distribution policy):
+        # built source maps and other development material are not shipped.
+        "reject_patterns": ["\\.map$", "__pycache__", "\.log$"],
         "files": files,
     }
     out = ROOT / args.out

@@ -48,13 +48,15 @@ distributions, license texts under licenses/npm/):
 - node-fetch 2.7.0 — MIT
 - opencollective-postinstall 2.0.3 — MIT
 - regenerator-runtime 0.13.11 — MIT
-- tr46 0.0.3 — MIT (declaration in package.json only; neither the exact
-  npm tarball nor the upstream repository tag ships a license text — see
-  licenses/README.md for the recorded source identities)
 - wasm-feature-detect 1.9.0 — MIT
 - webidl-conversions 3.0.1 — MIT
 - whatwg-url 5.0.0 — MIT
 - zlibjs 0.3.1 — MIT
+
+Not shipped in browser bytes: tr46 0.0.3 (and whatwg-url 5.0.0, node-fetch
+2.7.0) reach the npm production closure only via tesseract.js's Node.js-path
+dependencies and are not bundled into the browser build — verified by a
+content search of the built distribution (licenses/README.md).
 
 Not bundled
 -----------

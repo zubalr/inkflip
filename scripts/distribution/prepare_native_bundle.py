@@ -205,8 +205,16 @@ def prepare_node(failures: list[str], do_download: bool) -> dict:
     stamp: dict = {}
     if stamp_path.is_file():
         stamp = json.loads(stamp_path.read_text())
-    if stamp.get("version") == version and stamp.get("sha256"):
+    dest = PRIVATE / "node" / filename
+    # A stamp records identity, not local presence: the bulky tarball may be
+    # absent in a fresh checkout, in which case it must be (re-)downloaded
+    # unless the caller explicitly declined network access.
+    artifact_present = dest.is_file() and dest.stat().st_size > 0
+    if stamp.get("version") == version and stamp.get("sha256") and artifact_present:
         return stamp
+    if stamp.get("version") == version and stamp.get("sha256") and not do_download and not artifact_present:
+        failures.append(f"node runtime tarball not prepared locally and --no-download set ({filename})")
+        return {}
     if not do_download:
         failures.append(f"node runtime not prepared and --no-download set ({filename})")
         return {}
@@ -220,7 +228,6 @@ def prepare_node(failures: list[str], do_download: bool) -> dict:
     if expected is None:
         failures.append(f"official SHASUMS256.txt for node v{version} lists no entry for {filename}")
         return {}
-    dest = PRIVATE / "node" / filename
     dest.parent.mkdir(parents=True, exist_ok=True)
     urllib.request.urlretrieve(download_url, dest)
     actual = sha256_file(dest)
