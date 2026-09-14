@@ -13,7 +13,7 @@ freeze; re-generate after any dependency or asset change.
 | fixture_entries | 80 |
 | native_deb_packages | 70 |
 | native_lock_packages | 14 |
-| notice_inventory_entries | 0 |
+| notice_inventory_entries | 2 |
 | offline_manifest_example_entries | 54 |
 | prepared_example_files | 54 |
 | prepared_example_in_offline_manifest | 54 |
