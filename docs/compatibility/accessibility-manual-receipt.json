@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "accessibility",
+  "status": "partial",
+  "task": "T37",
+  "host": {
+    "os": "Darwin arm64",
+    "python": "3.13.15",
+    "node": "v22.23.2",
+    "cpu": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "playwright": "1.57.0"
+  },
+  "platforms": [
+    {
+      "id": "keyboard",
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log",
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log"
+      ],
+      "identity": {
+        "browser": "chromium (Playwright headless)",
+        "playwright": "1.57.0",
+        "git_head": "349c096"
+      },
+      "note": "Full keyboard-only operation verified on the real workspace: tab walk through every control, Enter selection, candidate pick returns focus, Escape returns focus, viewer shortcuts (f/+/-/r/n/p), notes typed and saved by keyboard, export checkbox Space toggle, JSON download via Enter, Help opens from keyboard and focus returns to its trigger, no keyboard traps, replace-confirmation dialog traps and restores focus."
+    },
+    {
+      "id": "amount-alternatives",
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log"
+      ],
+      "identity": {
+        "browser": "chromium (Playwright headless)",
+        "playwright": "1.57.0",
+        "git_head": "349c096"
+      },
+      "note": "Ambiguous amount findings expose each alternative as an individually named occurrence candidate ($1,000.00 vs $10,000.00 reach the accessible name); the expanded option name carries them; imported sealed reports announce unsupported checks and partial coverage (1 Unsupported, 2/3 completed) through the coverage panel and aria-live export preview."
+    },
+    {
+      "id": "zoom-400",
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log",
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log"
+      ],
+      "identity": {
+        "browser": "chromium (Playwright headless)",
+        "playwright": "1.57.0",
+        "git_head": "349c096"
+      },
+      "note": "400%-equivalent reflow (320 CSS px): scrollWidth == clientWidth, zero page-level horizontal overflow; finding select, in-app zoom to 400%, n/p navigation and Select-button focus remain keyboard-operable at that width."
+    },
+    {
+      "id": "reduced-motion",
+      "status": "executed",
+      "evidence": [
+        "artifacts/a11y/run-2026-09-14-test-a11y.json",
+        "artifacts/a11y/manual/a11y-flows-2026-09-14.log",
+        "artifacts/a11y/manual/accessibility-matrix-2026-09-14.log"
+      ],
+      "identity": {
+        "browser": "chromium (Playwright headless)",
+        "playwright": "1.57.0",
+        "git_head": "349c096"
+      },
+      "note": "prefers-reduced-motion: reduce collapses --motion-state to 0ms and sampled transition/animation durations to ~0.01ms on animated surfaces."
+    },
+    {
+      "id": "screen-reader-nvda-firefox",
+      "status": "unavailable",
+      "evidence": [
+        "artifacts/a11y/manual/voiceover-safari-pending.txt"
+      ],
+      "note": "NVDA+Firefox is a Windows assistive-technology profile. The release scope decision (pdf-u28, 2026-09-13) defers Windows desktop and NVDA-on-Windows certification; the macOS release gate (release kind, macos profile) excludes this row. Not executed and not claimed."
+    },
+    {
+      "id": "screen-reader-voiceover-safari",
+      "status": "unavailable",
+      "evidence": [
+        "artifacts/a11y/manual/voiceover-safari-pending.txt"
+      ],
+      "note": "Real VoiceOver + real Safari on this Mac not yet executed. Requires one owner-assisted ~15 minute guided run (Cmd+F5, nine-step checklist). Playwright WebKit is not a substitute and is not claimed. NVDA/Firefox is a Windows profile deferred outside the macOS release scope."
+    }
+  ]
+}

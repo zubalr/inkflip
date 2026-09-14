@@ -1,0 +1,18 @@
+(node:13435) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+(node:13629) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[33m[plugin builtin:vite-reporter] [33;1m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[0m[39m
+  ✓  1 [tests] › tests/visual/accessibility_matrix.spec.ts:22:3 › Accessibility: reflow, motion and focus › a 400%-zoom-equivalent width reflows without horizontal overflow (146ms)
+  ✓  2 [tests] › tests/visual/accessibility_matrix.spec.ts:38:3 › Accessibility: reflow, motion and focus › reduced motion collapses transition and animation durations (120ms)
+  ✓  3 [tests] › tests/visual/accessibility_matrix.spec.ts:60:3 › Accessibility: reflow, motion and focus › Help opens from the keyboard and Escape returns focus to its trigger (152ms)
+  ✓  4 [tests] › tests/visual/accessibility_matrix.spec.ts:85:3 › Accessibility: reflow, motion and focus › tabbing from the top reaches a focusable control without a keyboard trap (125ms)
+
+  4 passed (1.8s)

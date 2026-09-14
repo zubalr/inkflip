@@ -1,0 +1,37 @@
+T37 manual assistive-technology leg — pending owner-assisted run
+=================================================================
+
+Required profile: screen-reader-voiceover-safari (real VoiceOver in real
+Safari on this Mac). Playwright WebKit is not a substitute and is not
+claimed as evidence here.
+
+Owner-assisted sequence (about 15 minutes, guided):
+
+1. On this Mac open a terminal and run:
+       bun run build && bunx vite preview --port 4173 --strictPort
+   (the production build, served locally; nothing leaves the machine)
+
+2. In Safari (not a test browser) open http://localhost:4173/
+
+3. Enable VoiceOver with Cmd+F5. VoiceOver speaks the focused element.
+
+4. Follow the nine-step checklist in
+   handoffs/parallel-closeout-20260914/autoclaw-parallel-closeout/MANUAL-AT-FLOW.md
+   (also summarised in
+   handoffs/parallel-closeout-20260914/MANUAL-EVIDENCE.md):
+   - load the scan example via VO+Space on the control;
+   - VO+Right/Left through the workspace header and finding list;
+   - select a finding, confirm its announced name includes the finding
+     text and alternatives for ambiguous amounts;
+   - open Help, confirm focus enters and returns on Escape;
+   - confirm announcements are spoken (page-level state, OCR limits).
+
+5. While running, note anything VoiceOver fails to announce or any focus
+   that is lost. Record observations (what was heard per step) in a file
+   dropped into this directory, e.g. voiceover-safari-YYYY-MM-DD.txt.
+
+6. VoiceOver off with Cmd+F5. Stop the preview server.
+
+Acceptance: the receipt row is upgraded from "unavailable" to "executed"
+only with the recorded observation file. No safaridriver, no WebKit
+automation, no headless substitution.

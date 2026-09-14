@@ -1,0 +1,25 @@
+(node:13817) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Running 14 tests using 2 workers
+
+(node:13823) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:13822) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+  ✓   1 [tests] › tests/a11y/primitives.spec.ts:42:3 › T07: Accessible Controls, Dialogs, and Navigation › no serious or critical automated accessibility violations (WCAG 2.2 AA) (584ms)
+  ✓   3 [tests] › tests/a11y/primitives.spec.ts:53:3 › T07: Accessible Controls, Dialogs, and Navigation › keyboard can reach and operate all controls (buttons, tabs, disclosures) (190ms)
+  ✓   2 [tests] › tests/a11y/flows.spec.ts:133:3 › T37: accessibility flows on the real workspace › core flow: every control operated by keyboard only — walk, select, candidates, modes, export, close (949ms)
+  ✓   4 [tests] › tests/a11y/primitives.spec.ts:104:3 › T07: Accessible Controls, Dialogs, and Navigation › escape key and focus return work cleanly on modal dialogs (260ms)
+  ✓   6 [tests] › tests/a11y/primitives.spec.ts:134:3 › T07: Accessible Controls, Dialogs, and Navigation › focus is trapped inside modal and not trapped outside modal (268ms)
+  ✓   5 [tests] › tests/a11y/flows.spec.ts:249:3 › T37: accessibility flows on the real workspace › replace-confirmation dialog traps focus and restores it to the originating control (483ms)
+  ✓   7 [tests] › tests/a11y/primitives.spec.ts:186:3 › T07: Accessible Controls, Dialogs, and Navigation › dynamic progress does not announce every OCR token (polite stage announcements only) (221ms)
+  ✓   9 [tests] › tests/a11y/primitives.spec.ts:203:3 › T07: Accessible Controls, Dialogs, and Navigation › interactive controls adhere to 44px minimum touch target size and 3px focus outline (195ms)
+  ✓   8 [tests] › tests/a11y/flows.spec.ts:313:3 › T37: accessibility flows on the real workspace › announcements: ambiguous amount alternatives reach accessible names; page-level state and partial coverage are announced (456ms)
+  ✓  10 [tests] › tests/a11y/primitives.spec.ts:232:3 › T07: Accessible Controls, Dialogs, and Navigation › replace confirmation dialog displays canonical copy and restores focus on cancel (264ms)
+  ✓  11 [tests] › tests/a11y/flows.spec.ts:396:3 › T37: accessibility flows on the real workspace › 400% zoom equivalent: no page-level horizontal overflow and core controls stay keyboard-operable (348ms)
+  ✓  12 [tests] › tests/a11y/flows.spec.ts:441:3 › T37: accessibility flows on the real workspace › reduced motion: prefers-reduced-motion collapses transition and animation durations (323ms)
+  ✓  13 [tests] › tests/a11y/flows.spec.ts:475:3 › T37: accessibility flows on the real workspace › axe: zero serious or critical violations on loaded workspace states (1.2s)
+  ✓  14 [tests] › tests/a11y/flows.spec.ts:513:3 › T37: accessibility flows on the real workspace › axe: zero serious or critical violations with a finding expanded (753ms)
+
+  14 passed (5.4s)
