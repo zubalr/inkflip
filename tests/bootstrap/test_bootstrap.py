@@ -176,6 +176,32 @@ class EmptyRegistrationFailsTests(unittest.TestCase):
 
 
 class WorkspaceBoundaryTests(unittest.TestCase):
+    def assert_local_entry_resources(self, html):
+        # Canonical metadata names the public page without fetching it. Exempt
+        # only this exact metadata element, never its URL in scripts or assets.
+        canonical = '<link rel="canonical" href="https://inkflip-rose.vercel.app/" />'
+        self.assertNotRegex(
+            html.replace(canonical, ""),
+            re.compile(r"https?://|(?:src|href)\s*=\s*['\"]//", re.IGNORECASE),
+            "index.html must not reference remote resources",
+        )
+
+    def test_canonical_metadata_does_not_exempt_remote_resources(self):
+        canonical = '<link rel="canonical" href="https://inkflip-rose.vercel.app/" />'
+        self.assert_local_entry_resources(canonical + '<script src="/src/main.tsx"></script>')
+        for resource in (
+            '<script src="https://example.com/app.js"></script>',
+            '<script src="https://inkflip-rose.vercel.app/app.js"></script>',
+            '<link rel="stylesheet" href="https://example.com/app.css">',
+            '<link rel="preload" href="https://example.com/font.woff2">',
+            '<img src="https://example.com/pixel.png">',
+            '<script src="//example.com/app.js"></script>',
+            '<script>fetch("https://example.com/upload")</script>',
+            '<link rel="canonical stylesheet" href="https://inkflip-rose.vercel.app/" />',
+        ):
+            with self.subTest(resource=resource), self.assertRaises(AssertionError):
+                self.assert_local_entry_resources(canonical + resource)
+
     def test_bunfig_uses_isolated_linker(self):
         config = tomllib.loads((ROOT / "bunfig.toml").read_text())
         self.assertEqual(config["install"]["linker"], "isolated")
@@ -210,7 +236,7 @@ class WorkspaceBoundaryTests(unittest.TestCase):
         self.assertIn("5181", vite)
         self.assertIn("strictPort", vite)
         html = (ROOT / "apps/web/index.html").read_text()
-        self.assertNotRegex(html, re.compile(r"https?://"), "index.html must not reference remote resources")
+        self.assert_local_entry_resources(html)
         for path in ("apps/web/src/main.tsx", "apps/web/src/App.tsx",
                      "apps/web/src/styles/tokens.css", "apps/web/src/styles/README.md"):
             self.assertTrue((ROOT / path).is_file(), f"{path} missing")
