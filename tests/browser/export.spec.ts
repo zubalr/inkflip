@@ -132,6 +132,8 @@ test.describe("T16 Browser Export", () => {
   test("prop synchronization: changing source prop refreshes controller and preview (F7)", async ({ page }) => {
     await openExportPreview(page);
 
+    // the stat grid lives inside the collapsed "Report details" disclosure
+    await page.locator("details summary", { hasText: "Report details" }).click();
     const previewGrid = page.locator("dl");
     await expect(previewGrid).toBeVisible();
     const initialFindings = await previewGrid.locator("dd").first().innerText();

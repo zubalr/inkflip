@@ -400,6 +400,9 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     });
 
     await expect(page.locator("#coverage-heading")).toHaveText("What was checked");
+    // stat cards live inside the collapsed "Check counts by result" details —
+    // open it before asserting card visibility
+    await page.locator("details summary", { hasText: "Check counts by result" }).click();
     await expect(page.locator("#stat-unsupported")).toBeVisible();
     await expect(page.locator("#stat-unsupported")).toContainText("1");
     await expect(page.locator("#stat-unsupported")).toContainText("Unsupported");
@@ -407,9 +410,7 @@ test.describe("T37: accessibility flows on the real workspace", () => {
     await expect(incompleteList).toBeVisible();
     await expect(incompleteList).toContainText("c_alignment");
     await expect(incompleteList).toContainText("Not supported by this reader");
-    await expect(
-      page.locator("text=2 checks completed · 1 incomplete or unsupported"),
-    ).toBeVisible();
+    await expect(page.locator("text=Completed 2 of 3 checks")).toBeVisible();
 
     // The aria-live export preview states the partial coverage too.
     const preview = page.locator('[class*="preview"][aria-live="polite"]');

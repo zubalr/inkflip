@@ -101,7 +101,7 @@
       "",
       "Rendered marks and extracted text are separate."
     ],
-    "ms": 137,
+    "ms": 17,
     "extractError": null,
     "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
   },
@@ -121,7 +121,7 @@
   "warm": {
     "status": "completed",
     "emitted": 7,
-    "ms": 11
+    "ms": 4
   },
   "render": {
     "status": "completed",
@@ -145,7 +145,7 @@
     "hasStreamTextContent": true,
     "nativeAsyncIterator": true
   },
-  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-firefox-rTQDC5",
-  "harness": "http://127.0.0.1:55752",
+  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-firefox-6Lh2X9",
+  "harness": "http://127.0.0.1:59219",
   "note": null
 }

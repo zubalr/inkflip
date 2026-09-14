@@ -82,11 +82,10 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
     page,
   }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=incomplete-statuses`);
-    await page.waitForSelector('[role="group"][aria-label="Check statistics"]');
     // stat cards live inside the collapsed "Check counts by result" details —
-    // open it before asserting card visibility
+    // attached (not visible) until that disclosure is opened
+    await page.waitForSelector('[role="group"][aria-label="Check statistics"]', { state: "attached" });
     await page.locator("details summary", { hasText: "Check counts by result" }).click();
-    await page.waitForSelector("#stat-completed", { timeout: 5000 });
 
     // Check stats cards breakdown
     const timeoutCard = page.locator("#stat-timeout");
@@ -240,11 +239,10 @@ test.describe("T14: Findings, Coverage and Plain Explanations", () => {
     page,
   }) => {
     await page.goto(`${baseUrl}${PREVIEW_PATH}?scenario=all-terminal-statuses`);
-    await page.waitForSelector('[role="group"][aria-label="Check statistics"]');
     // stat cards live inside the collapsed "Check counts by result" details —
-    // open it before asserting card visibility
+    // attached (not visible) until that disclosure is opened
+    await page.waitForSelector('[role="group"][aria-label="Check statistics"]', { state: "attached" });
     await page.locator("details summary", { hasText: "Check counts by result" }).click();
-    await page.waitForSelector("#stat-completed", { timeout: 5000 });
 
     // All terminal categories have distinct stat cards
     await expect(page.locator("#stat-timeout")).toBeVisible();
