@@ -63,6 +63,42 @@ def contained(root: Path, rel: str) -> bool:
     return True
 
 
+def _has_allowed_evidence_content(path: Path) -> bool:
+    """True if path is a non-empty regular file, or a directory that holds one.
+
+    Nested symlinks are not followed; an outside target cannot satisfy the
+    evidence claim. The declared path itself must already have been rejected
+    when it is a symlink.
+    """
+    if path.is_symlink():
+        return False
+    try:
+        if path.is_file():
+            return path.stat().st_size > 0
+        if not path.is_dir():
+            return False
+    except OSError:
+        return False
+    stack = [path]
+    while stack:
+        current = stack.pop()
+        try:
+            children = list(current.iterdir())
+        except OSError:
+            continue
+        for child in children:
+            if child.is_symlink():
+                continue
+            try:
+                if child.is_dir():
+                    stack.append(child)
+                elif child.is_file() and child.stat().st_size > 0:
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def drive_prefix(rel: str) -> bool:
     return len(rel) > 1 and rel[1] == ":"
 
@@ -408,18 +444,35 @@ def check_native_bundle(root: Path, nb: dict, scope_notes: list | None = None) -
         if not e.get("license_evidence"):
             failures.append(f"native bundle: wheel entry lacks license evidence: {filename}")
         else:
-            ev = root / e["license_evidence"]
-            has_content = (ev.is_file() and ev.stat().st_size > 0) or (
-                ev.is_dir() and any(f.stat().st_size > 0 for f in ev.rglob("*") if f.is_file())
-            )
-            if not has_content:
-                failures.append(f"native bundle: license evidence missing or empty: {e['license_evidence']}")
+            evidence = e["license_evidence"]
+            if not isinstance(evidence, str):
+                failures.append(f"native bundle: wheel entry lacks license evidence: {filename}")
+            elif evidence.startswith(("/", "\\")) or drive_prefix(evidence):
+                failures.append(f"native bundle: license evidence path escapes the repository: {evidence}")
+            else:
+                ev = root / evidence
+                if ev.is_symlink():
+                    failures.append(f"native bundle: license evidence is a symlink: {evidence}")
+                elif not contained(root, evidence):
+                    failures.append(f"native bundle: license evidence path escapes the repository: {evidence}")
+                elif not _has_allowed_evidence_content(ev):
+                    failures.append(f"native bundle: license evidence missing or empty: {evidence}")
         if context_ready and e.get("path_in_context"):
-            artifact = root / nb["context_dir"] / e["path_in_context"]
-            if not artifact.is_file():
-                failures.append(f"native bundle: prepared wheel missing from context: {e['path_in_context']}")
-            elif e.get("sha256") and sha256_file(artifact) != e["sha256"]:
-                failures.append(f"native bundle: prepared wheel hash mismatch: {e['path_in_context']}")
+            pic = e.get("path_in_context")
+            if not isinstance(pic, str):
+                failures.append(f"native bundle: prepared wheel path malformed: {pic!r}")
+            elif pic.startswith(("/", "\\")) or drive_prefix(pic):
+                failures.append(f"native bundle: prepared wheel path escapes the context: {pic}")
+            else:
+                artifact = context / pic
+                if artifact.is_symlink():
+                    failures.append(f"native bundle: prepared wheel is a symlink: {filename}")
+                elif not contained(context, pic):
+                    failures.append(f"native bundle: prepared wheel path escapes the context: {pic}")
+                elif not artifact.is_file():
+                    failures.append(f"native bundle: prepared wheel missing from context: {pic}")
+                elif e.get("sha256") and sha256_file(artifact) != e["sha256"]:
+                    failures.append(f"native bundle: prepared wheel hash mismatch: {pic}")
 
     # Tesseract Debian closure stamp (production OCR dependency, linux/amd64)
     ts = nb.get("tesseract_stamp") or {}

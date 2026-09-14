@@ -493,6 +493,34 @@ def _contained(root: Path, rel: str) -> bool:
     return True
 
 
+def _has_regular_evidence_bytes(path: Path) -> bool:
+    """True if a directory holds at least one non-empty regular file.
+
+    Nested symlinks are not followed; an outside target cannot satisfy the
+    evidence claim.
+    """
+    if path.is_symlink() or not path.is_dir():
+        return False
+    stack = [path]
+    while stack:
+        current = stack.pop()
+        try:
+            children = list(current.iterdir())
+        except OSError:
+            continue
+        for child in children:
+            if child.is_symlink():
+                continue
+            try:
+                if child.is_dir():
+                    stack.append(child)
+                elif child.is_file() and child.stat().st_size > 0:
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def _json_object(path: Path, label: str, failures: list[str]) -> dict | None:
     """Read ``path`` as a JSON object.
 
@@ -611,6 +639,9 @@ def verify_wheels_manifest(entries: list[dict], failures: list[str]) -> None:
         if not isinstance(evidence, str) or not evidence:
             failures.append(f"manifest license evidence missing or empty: {evidence}")
             continue
+        if evidence.startswith(("/", "\\")) or (len(evidence) > 1 and evidence[1] == ":"):
+            failures.append(f"manifest license evidence path escapes the repository: {evidence}")
+            continue
         declared = ROOT / evidence
         if declared.is_symlink():
             failures.append(f"manifest license evidence is a symlink: {evidence}")
@@ -618,8 +649,7 @@ def verify_wheels_manifest(entries: list[dict], failures: list[str]) -> None:
         if not _contained(ROOT, evidence):
             failures.append(f"manifest license evidence path escapes the repository: {evidence}")
             continue
-        if not declared.is_dir() \
-                or not any(p.is_file() and p.stat().st_size > 0 for p in declared.rglob("*")):
+        if not _has_regular_evidence_bytes(declared):
             failures.append(f"manifest license evidence missing or empty: {evidence}")
 
     for entry in entries:
