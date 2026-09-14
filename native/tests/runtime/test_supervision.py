@@ -614,6 +614,86 @@ class TestJobsAdmission(unittest.TestCase):
             self.assertEqual(result.status, "complete")
             self.assertLess(elapsed, 2.2)  # sequential would exceed 2.4s
 
+    def test_admitted_jobs_overlap_proven_by_handshake_not_by_timing(self):
+        """Two admitted children are live at the same instant, proven by the
+        children's own announcements rather than by a duration threshold.
+
+        The budget is an explicit disposable test input: two child slots and 2 GiB
+        of admitted RAM, with each child bounded to 64 MiB so both fit. It says
+        nothing about this machine.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            markers = Path(tmp) / "markers"
+            admission = ParallelAdmission(cpu_count=2, memory_bytes=2 << 30)
+            supervisor = Supervisor(
+                Path(tmp) / "run",
+                limits(jobs=2, memory_bytes=64 << 20, wall_seconds=60.0),
+                parallel_admission=admission,
+            )
+            jobs = [
+                spec(
+                    f"file-{key}",
+                    "barrier-report",
+                    "--key",
+                    f"file-{key}",
+                    "--markers",
+                    str(markers),
+                    produces="report.json",
+                )
+                for key in ("a", "b")
+            ]
+            errors: list[BaseException] = []
+
+            def drive() -> None:
+                try:
+                    supervisor.run(jobs)
+                except BaseException as exc:  # pragma: no cover - reported below
+                    errors.append(exc)
+
+            worker = threading.Thread(target=drive, daemon=True)
+            worker.start()
+            deadline = time.monotonic() + 30
+            while time.monotonic() < deadline:
+                if len(list(markers.glob("*.started"))) == 2:
+                    break
+                time.sleep(0.02)
+
+            started = sorted(markers.glob("*.started"))
+            released = sorted(markers.glob("*.released"))
+            self.assertEqual(len(started), 2, "both admitted children must reach their handshake")
+            self.assertEqual(
+                released, [], "neither child had been released, so both were alive simultaneously"
+            )
+
+            for marker in started:
+                marker.with_name(marker.name.replace(".started", ".release")).write_text("go")
+            worker.join(60)
+            supervisor.close()
+            self.assertEqual(errors, [], f"the admitted run must complete: {errors}")
+            self.assertEqual(sorted(p.name for p in (Path(tmp) / "run" / "reports").glob("*.json")),
+                             ["file-a.json", "file-b.json"])
+
+    def test_peak_admission_refuses_more_jobs_than_admitted_cpus(self):
+        """Peak admission is the declared budget, not the requested job count."""
+        with tempfile.TemporaryDirectory() as tmp:
+            admission = ParallelAdmission(cpu_count=2, memory_bytes=2 << 30)
+            with self.assertRaises(SupervisionError) as ctx:
+                Supervisor(
+                    Path(tmp) / "run", limits(jobs=3), parallel_admission=admission
+                )
+            self.assertIn("exceeds admitted CPU count", str(ctx.exception))
+
+    def test_peak_admission_refuses_more_children_than_the_admitted_ram_allows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            admission = ParallelAdmission(cpu_count=8, memory_bytes=100 << 20)
+            with self.assertRaises(SupervisionError) as ctx:
+                Supervisor(
+                    Path(tmp) / "run",
+                    limits(jobs=2, memory_bytes=64 << 20),
+                    parallel_admission=admission,
+                )
+            self.assertIn("exceeds admitted budget", str(ctx.exception))
+
 
 class TestEnvironmentAndThreads(unittest.TestCase):
     """Minimal child env allowlist; supervision is process-based, no threads."""

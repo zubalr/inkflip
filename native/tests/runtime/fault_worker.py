@@ -186,8 +186,29 @@ def scenario_env_report(_argv: list) -> int:
     return 0
 
 
+def scenario_barrier_report(argv: list) -> int:
+    """Announce that this child is running, wait for a release, then report.
+
+    A test-only handshake: the parent can therefore prove that two admitted jobs
+    were live at the same instant without comparing wall-clock timings, which is
+    what a duration threshold would do.
+    """
+    markers = Path(argv[argv.index("--markers") + 1])
+    key = argv[argv.index("--key") + 1]
+    markers.mkdir(parents=True, exist_ok=True)
+    (markers / f"{key}.started").write_text(str(os.getpid()))
+    deadline = time.monotonic() + 30
+    release = markers / f"{key}.release"
+    while time.monotonic() < deadline and not release.exists():
+        time.sleep(0.02)
+    (markers / f"{key}.released").write_text("1")
+    _write_report({"key": key, "handshake": True})
+    return 0
+
+
 SCENARIOS = {
     "report": scenario_report,
+    "barrier-report": scenario_barrier_report,
     "empty": scenario_empty,
     "exit-fail": scenario_exit_fail,
     "crash": scenario_crash,
