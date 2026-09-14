@@ -101,7 +101,7 @@
       "",
       "Rendered marks and extracted text are separate."
     ],
-    "ms": 19.400000005960464,
+    "ms": 21.099999994039536,
     "extractError": null,
     "workerSrc": "/vendor/pdfjs/pdf.worker.mjs"
   },
@@ -121,7 +121,7 @@
   "warm": {
     "status": "completed",
     "emitted": 7,
-    "ms": 1.300000011920929
+    "ms": 1.2999999821186066
   },
   "render": {
     "status": "completed",
@@ -145,7 +145,7 @@
     "hasStreamTextContent": true,
     "nativeAsyncIterator": true
   },
-  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-chromium-2sAH2c",
-  "harness": "http://127.0.0.1:63904",
+  "profile": "/var/folders/8t/wzpzt6_j76l5rvq3kfyx35ym0000gn/T/inkflip-p15-chromium-NPTQDc",
+  "harness": "http://127.0.0.1:55752",
   "note": null
 }
