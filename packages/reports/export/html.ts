@@ -28,22 +28,30 @@ import { ContractError } from "../../contracts/src/index.ts";
 /**
  * Fixed application-owned stylesheet.
  * Adapted from the reference stylesheet in `planning/tools/export_html.py` with
- * additional rules for h3, .warn, and ul styling.
+ * additional rules for h3, .warn, .lede, wrapping, print, and ul styling.
  * Any edit changes the CSP hash — the two are derived together at render time
  * so they can never drift. Palette follows the product tokens (paper/ink, teal/rust accents).
  */
 export const EXPORT_CSS =
-  "body{margin:0;background:#f5f3ee;color:#192327;font:16px/1.6 system-ui,sans-serif}" +
-  "main{max-width:850px;margin:auto;padding:40px 24px}h1{font-size:36px;line-height:1.15}" +
-  "h2{font-size:23px;margin-top:32px}h3{font-size:18px;margin-top:24px}" +
-  ".note{border-left:4px solid #84621e;padding:12px 18px;background:#fff9e9}" +
-  ".warn{border-left:4px solid #934420;padding:12px 18px;background:#fdf0e6}" +
-  "section{background:white;padding:20px 24px;margin:20px 0;border:1px solid #d5d9d7;border-radius:12px}" +
-  "pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 ui-monospace,monospace}" +
-  "img{max-width:100%;height:auto;border:1px solid #d5d9d7}dt{font-weight:700}dd{margin:0 0 12px}" +
-  "table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #ddd;text-align:left;padding:8px;vertical-align:top}" +
-  "code{overflow-wrap:anywhere}ul{margin:8px 0;padding-left:24px}footer{font-size:13px}" +
-  "@media(max-width:500px){main{padding:20px 14px}section{padding:14px}h1{font-size:28px}}";
+  "body{margin:0;background:#f5f3ee;color:#192327;font:16px/1.55 system-ui,sans-serif}" +
+  "main{max-width:1100px;margin:0 auto;padding:32px 24px}" +
+  "h1{font-size:28px;line-height:1.2;overflow-wrap:anywhere;margin:8px 0 16px}" +
+  "h2{font-size:20px;margin-top:28px;overflow-wrap:anywhere}" +
+  "h3{font-size:16px;margin-top:20px;overflow-wrap:anywhere}" +
+  ".lede{font-size:18px;margin:0 0 16px;overflow-wrap:anywhere}" +
+  ".note{border-left:4px solid #84621e;padding:12px 18px;background:#fff9e9;overflow-wrap:anywhere}" +
+  ".warn{border-left:4px solid #934420;padding:12px 18px;background:#fdf0e6;overflow-wrap:anywhere}" +
+  "section{background:#fff;padding:20px 24px;margin:20px 0;border:1px solid #d5d9d7;border-radius:12px}" +
+  "pre,code,p,li,dd,td,th,h1,h2,h3{overflow-wrap:anywhere}" +
+  "pre{white-space:pre-wrap;font:14px/1.55 ui-monospace,monospace}" +
+  "img{max-width:100%;height:auto;border:1px solid #d5d9d7}" +
+  "dt{font-weight:700}dd{margin:0 0 12px;overflow-wrap:anywhere}" +
+  ".tableWrap{overflow-x:auto}" +
+  "table{border-collapse:collapse;width:100%;min-width:280px}" +
+  "th,td{border-bottom:1px solid #ddd;text-align:left;padding:8px;vertical-align:top}" +
+  "ul{margin:8px 0;padding-left:24px}footer{font-size:13px;overflow-wrap:anywhere}" +
+  "@media(max-width:640px){main{padding:20px 14px}section{padding:14px}h1{font-size:24px}table{font-size:14px}}" +
+  "@media print{body{background:#fff}main{max-width:none;padding:12mm}section{break-inside:avoid;border-radius:0}.note,.warn{break-inside:avoid}}";
 
 function styleHash(): string {
   const bytes = new TextEncoder().encode(EXPORT_CSS);
@@ -73,22 +81,70 @@ function text(value: string): string {
   return esc(value.replaceAll("\u0000", "�"));
 }
 
+function jsonIncludesOriginalPdf(report: Report): boolean {
+  return (
+    report.document.source_asset_id !== null ||
+    report.export.included.includes("source_pdf") ||
+    report.export.mode === "replayable"
+  );
+}
+
+function heading(report: Report): string {
+  const name = report.document.display_name;
+  if (name !== null && name !== "") return name;
+  return "Reading report";
+}
+
+function summaryLine(report: Report): string {
+  const findings = report.findings.length;
+  const selected = report.plan.selected_pages.length;
+  const pages = report.document.page_count;
+  const completed = report.checks.filter((c) => c.status === "completed").length;
+  const checks = report.checks.length;
+  const incomplete = [
+    ...new Set(
+      report.checks.filter((c) => c.status !== "completed").map((c) => c.status),
+    ),
+  ];
+  const findingBit =
+    findings === 0
+      ? "No differences recorded."
+      : findings === 1
+        ? "1 difference is included."
+        : String(findings) + " differences are included.";
+  const pageBit =
+    "Checked " +
+    String(selected) +
+    " of " +
+    String(pages) +
+    (pages === 1 ? " page." : " pages.");
+  const checkBit =
+    String(completed) +
+    " of " +
+    String(checks) +
+    (checks === 1 ? " check finished." : " checks finished.");
+  const incompleteBit =
+    incomplete.length === 0
+      ? ""
+      : " Some checks did not finish (" + incomplete.join(", ") + ").";
+  return findingBit + " " + pageBit + " " + checkBit + incompleteBit;
+}
+
 function findingSections(
   report: Report,
   readers: Map<string, Report["readers"][number]>,
 ): string[] {
   const out: string[] = [];
   const occurrences = new Map(report.occurrences.map((o) => [o.id, o]));
+  if (report.findings.length === 0) {
+    out.push(
+      "<section><h2>Differences</h2><p>No differences were recorded in this export.</p></section>",
+    );
+    return out;
+  }
   for (const f of report.findings) {
     out.push(
       "<section><h2>" + text(f.title) + "</h2><p>" + text(f.explanation) + "</p>",
-      "<p>Finding kind: " +
-        esc(f.kind) +
-        " · Alignment: " +
-        esc(f.alignment) +
-        " · Basis: " +
-        text(f.basis) +
-        "</p>",
     );
     if (f.limitations.length > 0) {
       out.push("<p>Limits: " + text(f.limitations.join("; ")) + "</p>");
@@ -112,7 +168,15 @@ function findingSections(
           "</p>",
       );
     }
-    out.push("</section>");
+    out.push(
+      "<p>Kind " +
+        esc(f.kind) +
+        " · alignment " +
+        esc(f.alignment) +
+        " · basis " +
+        text(f.basis) +
+        "</p></section>",
+    );
   }
   return out;
 }
@@ -175,7 +239,7 @@ function imageSections(report: Report): string[] {
 
 function checkTable(report: Report): string {
   const out = [
-    "<section><h2>What was checked</h2><table><thead><tr>" +
+    "<h3>What was checked</h3><div class=\"tableWrap\"><table><thead><tr>" +
       "<th>Check</th><th>Capability</th><th>Status</th>" +
       "<th>Reason / readings</th></tr></thead><tbody>",
   ];
@@ -198,32 +262,31 @@ function checkTable(report: Report): string {
         "</td></tr>",
     );
   }
-  out.push("</tbody></table>");
+  out.push("</tbody></table></div>");
   return out.join("");
 }
 
 function coverageSection(report: Report): string {
   const completed = report.checks.filter((c) => c.status === "completed").length;
-  const out = [
-    checkTable(report),
+  return (
+    checkTable(report) +
     "<p>Coverage: " +
-      String(report.plan.selected_pages.length) +
-      " of " +
-      String(report.document.page_count) +
-      " document page(s) selected; " +
-      String(completed) +
-      " of " +
-      String(report.checks.length) +
-      " planned checks completed. " +
-      "Agreement is limited to completed, comparable readings on selected " +
-      "pages — never a document-wide verdict.</p></section>",
-  ];
-  return out.join("");
+    String(report.plan.selected_pages.length) +
+    " of " +
+    String(report.document.page_count) +
+    " document page(s) selected; " +
+    String(completed) +
+    " of " +
+    String(report.checks.length) +
+    " planned checks completed. " +
+    "Agreement is limited to completed, comparable readings on selected " +
+    "pages — never a document-wide verdict.</p>"
+  );
 }
 
 function readerSection(report: Report): string {
   const out = [
-    "<section><h2>Readers, settings and limits</h2><table><thead><tr>" +
+    "<h3>Readers, settings and limits</h3><div class=\"tableWrap\"><table><thead><tr>" +
       "<th>Reader</th><th>Method</th><th>Environment</th><th>Settings</th>" +
       "</tr></thead><tbody>",
   ];
@@ -255,7 +318,7 @@ function readerSection(report: Report): string {
         "</td></tr>",
     );
   }
-  out.push("</tbody></table>");
+  out.push("</tbody></table></div>");
   const b = report.plan.budget;
   out.push(
     "<p>Run profile " +
@@ -274,7 +337,6 @@ function readerSection(report: Report): string {
       esc(report.plan.alignment_version) +
       ".</p>",
   );
-  out.push("</section>");
   return out.join("");
 }
 
@@ -282,18 +344,51 @@ function disclosureSection(report: Report): string {
   const exp = report.export;
   const items = exp.included.map((i) => "<li>" + esc(i) + "</li>").join("");
   const misses = exp.omissions.map((i) => "<li>" + text(i) + "</li>").join("");
+  const jsonBit = jsonIncludesOriginalPdf(report)
+    ? "The separately saved JSON includes the original PDF."
+    : "The separately saved JSON also omitted the original PDF.";
   return (
-    "<section><h2>Included and omitted data</h2><ul>" +
+    "<h3>Included and omitted data</h3><ul>" +
     items +
     "</ul>" +
     "<p>Omitted:</p><ul>" +
     misses +
     "</ul>" +
-    "<p>Source PDF present in this report: " +
-    (report.document.source_asset_id === null ? "no" : "yes") +
-    ". This HTML embeds rendered excerpts, not a replay engine. Reopen the " +
-    "separately exported JSON for machine-readable transforms and " +
-    "configuration.</p></section>"
+    "<p>This HTML file does not contain the original PDF. " +
+    jsonBit +
+    " This HTML embeds rendered excerpts when they were selected, not a " +
+    "replay engine. Reopen the separately exported JSON in Inkflip for " +
+    "machine-readable transforms and configuration.</p>"
+  );
+}
+
+function technicalSection(report: Report): string {
+  const doc = report.document;
+  const execution = report.execution;
+  return (
+    "<section><h2>Technical details</h2><dl><dt>Document SHA-256</dt><dd><code>" +
+    esc(doc.sha256) +
+    "</code></dd><dt>Report identity</dt><dd><code>" +
+    esc(report.report_id) +
+    "</code></dd><dt>Document size</dt><dd>" +
+    String(doc.byte_length) +
+    " bytes · " +
+    String(doc.page_count) +
+    " page(s)</dd>" +
+    (doc.display_name === null
+      ? ""
+      : "<dt>Original filename</dt><dd><bdi>" + text(doc.display_name) + "</bdi></dd>") +
+    "<dt>Run</dt><dd>" +
+    esc(execution.status) +
+    " · " +
+    esc(execution.result_origin) +
+    " · <bdi>" +
+    text(execution.environment) +
+    "</bdi></dd></dl>" +
+    coverageSection(report) +
+    readerSection(report) +
+    disclosureSection(report) +
+    "</section>"
   );
 }
 
@@ -306,54 +401,27 @@ function disclosureSection(report: Report): string {
 export function renderReportHtml(report: Report): string {
   validate(report);
   const readers = new Map(report.readers.map((r) => [r.id, r]));
-  const doc = report.document;
-  const exp = report.export;
-  const execution = report.execution;
   const parts: string[] = [
     '<!doctype html><html lang="en"><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
     '<meta name="referrer" content="no-referrer">',
     '<meta http-equiv="Content-Security-Policy" content="' + esc(exportCsp()) + '">',
-    "<title>Inkflip — evidence report</title><style>" + EXPORT_CSS + "</style></head><body><main>",
-    "<p>INKFLIP / PDF READING INSPECTOR</p><h1>Two readings. One document.</h1>",
-    '<p class="note">This is a ' +
-      esc(exp.mode) +
-      " report. " +
-      esc(exp.replay) +
-      ". A disagreement does not establish which reading is correct, fraud " +
-      "or document safety.</p>",
-    "<dl><dt>Document SHA-256</dt><dd><code>" +
-      esc(doc.sha256) +
-      "</code></dd><dt>Report identity</dt><dd><code>" +
-      esc(report.report_id) +
-      "</code></dd><dt>Document size</dt><dd>" +
-      String(doc.byte_length) +
-      " bytes · " +
-      String(doc.page_count) +
-      " page(s)</dd>" +
-      (doc.display_name === null
-        ? ""
-        : "<dt>Original filename</dt><dd><bdi>" + text(doc.display_name) + "</bdi></dd>") +
-      "<dt>Run</dt><dd>" +
-      esc(execution.status) +
-      " · " +
-      esc(execution.result_origin) +
-      " · <bdi>" +
-      text(execution.environment) +
-      "</bdi></dd></dl>",
+    "<title>Inkflip — reading report</title><style>" + EXPORT_CSS + "</style></head><body><main>",
+    "<p>INKFLIP / PDF READING INSPECTOR</p><h1><bdi>" + text(heading(report)) + "</bdi></h1>",
+    '<p class="lede">' + esc(summaryLine(report)) + "</p>",
+    '<p class="note">A disagreement does not establish which reading is correct, fraud or document safety. This HTML file is not a replayable inspection.</p>',
   ];
-  if (exp.mode === "replayable") {
+  if (jsonIncludesOriginalPdf(report)) {
     parts.push(
-      '<p class="warn">This report includes the original PDF: every page ' +
-        "and any hidden content. A crop is not a safe redaction.</p>",
+      '<p class="warn">The separately saved JSON includes the original PDF: every page ' +
+        "and any hidden content. This HTML file does not contain those PDF bytes and " +
+        "cannot reopen the inspection by itself. A crop is not a safe redaction.</p>",
     );
   }
+  parts.push(...imageSections(report));
   parts.push(...findingSections(report, readers));
   parts.push(...annotationSections(report));
-  parts.push(...imageSections(report));
-  parts.push(coverageSection(report));
-  parts.push(readerSection(report));
-  parts.push(disclosureSection(report));
+  parts.push(technicalSection(report));
   parts.push(
     "<footer>Generated locally. No scripts, remote fonts, external " +
       "resources or tracking links. Browser memory/download deletion is " +
