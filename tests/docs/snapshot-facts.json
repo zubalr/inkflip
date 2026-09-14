@@ -40,19 +40,10 @@
     {
       "id": "no-corpus-cli-privacy-claim",
       "as_of": "2026-09-13",
-      "claim": "the network-disabled corpus/CLI execution is specified for the planned inkflip CLI, not implemented; docs must not present it as working",
-      "evidence": "planning/architecture/CLI_AND_REGRESSION.md",
-      "evidence_marker": "All commands below are required implementation contracts, not a claim that this planning package installs a finished CLI",
-      "per_doc": {
-        "docs/limitations.md": {
-          "must_contain": [
-            "not implemented|not built|being integrated"
-          ],
-          "must_not_contain": [
-            "network-disabled corpus"
-          ]
-        }
-      }
+      "claim": "the native CLI/corpus workflow is merged main-line; remote URL sources are refused (local paths only); the network-disabled execution claim is bounded to that enforced refusal, not a full offline guarantee at scale",
+      "evidence": "docs/CLI.md",
+      "evidence_marker": "Remote URL sources are refused",
+      "per_doc": {}
     }
   ]
 }

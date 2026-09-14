@@ -48,11 +48,6 @@ rediscover them. Each is dated; when one is fixed, this list and
   offline processing, which ran behind a dead proxy). What remains unproven
   is a host where the tools themselves (Bun, uv, compilers, browsers) have
   never been installed — that step is outside this repository's control.
-- **`bun run test:fixtures` has one erroring test on a fresh checkout**
-  (found 2026-09-13): `tests/fixtures/test_catalog_followup.py` reads a
-  baseline-hashes file from the working records directory, which the
-  local-only migration removed from tracking — the test needs its baseline
-  re-homed into tracked files. The other 69 fixture tests pass.
 - **`bun run test:regression` and `bun run check:static-dist` fail closed**
   with their owning tasks named: the regression suite and the
   static-dist/deployment preflight do not exist yet. This is the registry
@@ -63,16 +58,30 @@ rediscover them. Each is dated; when one is fixed, this list and
 The following are **not available in this snapshot** and must not be
 presented as working:
 
-- **The `inkflip` native CLI.** The command contract
-  ([planning/architecture/CLI_AND_REGRESSION.md](../planning/architecture/CLI_AND_REGRESSION.md))
-  specifies `inspect`, `compare-readers`, `models prepare`, `corpus run`,
-  `baseline create`, `compare`, `report`, `replay`, `validate` — the full
-  CLI and corpus workflow is still being integrated. Only the Python reader
-  library underneath it exists.
-- **Corpus runs, version-isolated reader profiles, immutable regression
-  baselines, and the local reader-upgrade CI example.**
-- **The complete public gallery** — one synthetic example is prepared and
-  verified; the full six-example set with prepared manifests is in progress.
+- **The packaged native image exists locally and is functionally verified;
+  it is not a certified cross-platform release.** The production image
+  (`linux/amd64`, digest `sha256:1923b04a…`) was built on this Mac with
+  qemu emulation (explicitly labeled — not native x86_64 hardware) and its
+  offline CLI journeys, containment limits and OCR were executed in it
+  (2026-09-13, candidate `84c839c`). The `inkflip` CLI itself (inspect /
+  validate / report / replay / corpus / baselines with version-isolated
+  profiles) is merged on main-line and executed on this branch the same
+  day. Not claimed: bit-identical rebuilds, signing/provenance attestations
+  (never executed), native x86_64 hardware behavior, Windows/macOS-packaged
+  desktop builds.
+- **The pdfjs Node-profile bridge needs a module path hint in this
+  checkout layout**: the native profiles test `test_real_pdfjs_not_stub`
+  requires `NODE_PATH=apps/web/node_modules` (Bun's isolated linker keeps
+  pdfjs-dist under apps/web). With it the native suite is 249/249; without
+  it, that one test fails on module resolution. Environment requirement of
+  the merged profile code, recorded 2026-09-13.
+- **Accessibility**: automated flows are merged and green (T37 suite); the
+  manual assistive-technology review remains open (tracked separately) —
+  no AT-conformance claim is made.
+- **Offline readiness is per-release and allowlisted**: preparing for
+  offline use covers exactly this release's app/reader/model/example files;
+  documents never enter the offline cache, and anything unlisted still needs
+  the network.
 - **Measured performance budgets, native containment/failure-recovery
   hardening, and browser/native parity verification** — open work.
 - **Deployment preflight and any public deployment** — the static-dist
@@ -115,12 +124,19 @@ These are product invariants, not missing features:
 
 ## Environment and platform limits
 
-- Browser suites are exercised in Chromium. Other browsers are untested here
-  (parity is open work).
+- **Release platform profile (owner decision, 2026-09-13): macOS and
+  Docker.** Supported release targets are this Mac's environment
+  (macOS/arm64, Chromium) and the Docker container profiles: the
+  production linux/amd64 image was built and exercised locally via
+  qemu emulation (labeled as such — emulation is acceptable for this
+  release and is not native x86_64 hardware certification). Windows, native Linux hardware, NVDA/Windows, physical mobile
+  devices and emulated-amd64 certification are deferred and unverified —
+  intentionally out of scope for this release, not missing owner inputs.
+  Browser behavior outside Chromium is untested (parity is open work).
 - One active document per workspace; the workspace session is in-memory and
   exports are the persistence mechanism.
-- Native tooling targets the pinned Python 3.13.15 on macOS/arm64 (verified
-  here) and Linux (exercised in task evidence); other platforms are untested.
+- Native tooling runs on the pinned Python 3.13.15; the macOS host and the
+  container profiles above are the verified environments.
 - Measured performance envelopes (device budgets, cold/warm timings) are not
   established and are not claimed anywhere in this documentation.
 
@@ -139,7 +155,8 @@ These are product invariants, not missing features:
 ## What this documentation still needs for final release
 
 Re-verification of every command against the release tag, the
-never-used-host install proof, screenshots re-tied to the tagged build (the
-prepared gallery may change them), the finished capability matrix once the
-gallery and deployment preflight land, and links checked together with the
-other documentation owners.
+never-used-host install proof, finished promotional captures and visual
+approval (pending visual-polish work — current-build captures used here are
+clearly dated and expected to be refreshed), the native CLI and image
+actually merged and accepted, deployment of the static site (an owner
+action), and links checked together with the other documentation owners.

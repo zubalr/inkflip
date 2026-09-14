@@ -206,26 +206,39 @@ def build_inventory() -> dict:
                 prepared_example_paths.add(path.relative_to(ROOT).as_posix())
     unknown_assets = []
     public_dir = ROOT / "apps" / "web" / "public"
+    static_runtime_paths = {"apps/web/public/sw.js", "apps/web/public/examples/index.json", "apps/web/public/_headers"}
     for path in sorted(public_dir.rglob("*")):
         if not path.is_file() or path.is_symlink():
             continue
         rel_full = path.relative_to(ROOT).as_posix()
-        rel_staged = path.relative_to(public_dir).as_posix()
-        if rel_full in prepared_example_paths:
+        if rel_full in prepared_example_paths or rel_full in static_runtime_paths:
             continue
+        rel_staged = path.relative_to(public_dir).as_posix()
         if rel_staged not in staged_paths:
             unknown_assets.append({"path": rel_full, "bytes": path.stat().st_size})
 
     prepared_example = []
+    offline_example_paths: set[str] = set()
+    manifest_ts = ROOT / "apps" / "web" / "src" / "offline" / "manifest.ts"
+    if manifest_ts.is_file():
+        import re as _re
+
+        offline_example_paths = {
+            m.group(1).lstrip("/")
+            for m in _re.finditer(r'path:\s*"/(examples/[^"]+)"', manifest_ts.read_text())
+        }
     examples_dir = ROOT / "apps" / "web" / "public" / "examples"
     if examples_dir.is_dir():
         for path in sorted(examples_dir.rglob("*")):
             if path.is_file() and not path.is_symlink():
+                rel = path.relative_to(ROOT).as_posix()
+                staged_rel = rel[len("apps/web/public/"):]
                 prepared_example.append(
                     {
-                        "path": path.relative_to(ROOT).as_posix(),
+                        "path": rel,
                         "bytes": path.stat().st_size,
                         "sha256": sha256_file(path),
+                        "in_offline_manifest": staged_rel in offline_example_paths,
                         "rights": "Prepared from this repository's own public fixtures by scripts/prepare_examples.py (project MIT terms; no third-party material).",
                     }
                 )
@@ -277,6 +290,52 @@ def build_inventory() -> dict:
 
     dev_npm = sorted((lock["workspaces"].get("", {}).get("devDependencies") or {}).keys())
 
+    # Tesseract Debian closure (production-image dependency, linux/amd64):
+    # recorded as its own bucket so the deb packages are neither double-
+    # counted with the python wheels nor silently absent from the SBOM.
+    native_deb_closure = []
+    tess_stamp_path = ROOT / "release" / "tesseract" / "tesseract.stamp.json"
+    if tess_stamp_path.is_file():
+        try:
+            tsd = json.loads(tess_stamp_path.read_text())
+        except json.JSONDecodeError:
+            tsd = {}
+        for pkg in tsd.get("packages", []):
+            native_deb_closure.append(
+                {
+                    "filename": pkg.get("filename"),
+                    "sha256": pkg.get("sha256"),
+                    "bytes": pkg.get("bytes"),
+                    "target": "linux/amd64 production image",
+                    "closure": f"{tsd.get('package')} {tsd.get('version')}",
+                    "license": tsd.get("license"),
+                }
+            )
+
+    static_runtime = []
+    sw = ROOT / "apps" / "web" / "public" / "sw.js"
+    if sw.is_file():
+        static_runtime.append(
+            {
+                "path": "apps/web/public/sw.js",
+                "bytes": sw.stat().st_size,
+                "sha256": sha256_file(sw),
+                "kind": "service-worker",
+                "rights": "Original project code (MIT). Manifest-bound explicit caching only; no precache at install.",
+            }
+        )
+    index_json = ROOT / "apps" / "web" / "public" / "examples" / "index.json"
+    if index_json.is_file():
+        static_runtime.append(
+            {
+                "path": "apps/web/public/examples/index.json",
+                "bytes": index_json.stat().st_size,
+                "sha256": sha256_file(index_json),
+                "kind": "example-catalog",
+                "rights": "Generated catalog of the prepared public examples (project MIT terms).",
+            }
+        )
+
     unknown = [u for u in unknown_assets]
     if unknown:
         sys.stderr.write(
@@ -296,11 +355,19 @@ def build_inventory() -> dict:
         "counts": {
             "shipped_asset_files": len(shipped_assets),
             "prepared_example_files": len(prepared_example),
+            "prepared_example_in_offline_manifest": sum(1 for e in prepared_example if e["in_offline_manifest"]),
+            "offline_manifest_example_entries": len(offline_example_paths),
             "bundled_npm_packages": len(npm_components),
             "native_lock_packages": len(native_packages),
             "fixture_entries": len(fixture_entries),
+            "native_deb_packages": len(native_deb_closure),
             "unknown": len(unknown),
         },
+        "native_deb_closure": {
+            "target": "linux/amd64 production image (Docker)",
+            "packages": native_deb_closure,
+        },
+        "static_runtime": static_runtime,
         "shipped_assets": shipped_assets,
         "prepared_example": prepared_example,
         "bundled_npm_packages": npm_components,

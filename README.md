@@ -18,10 +18,12 @@ The browser processes documents locally. There is no account or document
 upload service. A disagreement is evidence of different readings; it does
 not establish which reading is correct or whether a document is safe.
 
-The repository also contains Python reader adapters, a supervised native
-runtime, shared report contracts and synthetic PDF fixtures. The complete
-CLI and corpus workflow is still being integrated. Release qualification
-and the expanded example gallery are in progress.
+The repository also contains a native CLI (`inkflip`: inspect, compare,
+report, replay, corpus, baselines) with version-isolated reader profiles,
+an offline-capable browser build, shared report contracts and synthetic
+PDF fixtures. Accessibility flows are covered by an automated suite;
+release qualification, manual assistive-technology evidence and the
+packaged native image remain in progress.
 
 ## Run locally
 
