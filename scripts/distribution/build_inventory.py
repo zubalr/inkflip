@@ -312,6 +312,38 @@ def build_inventory() -> dict:
                 }
             )
 
+    # Node runtime + OCR model stamps (production-image inputs, linux/amd64)
+    runtime_stamps = []
+    for stamp_rel, kind in (("release/node/node.stamp.json", "node-runtime"),
+                            ("release/models/model.stamp.json", "ocr-model")):
+        sp = ROOT / stamp_rel
+        if sp.is_file():
+            try:
+                sd = json.loads(sp.read_text())
+            except json.JSONDecodeError:
+                continue
+            if sd.get("sha256"):
+                runtime_stamps.append({
+                    "kind": kind,
+                    "path": stamp_rel,
+                    "sha256": sd.get("sha256"),
+                    "bytes": sd.get("bytes"),
+                    "target": "linux/amd64 production image (Docker)",
+                    "classification": "native-bundle input; not browser-shipped",
+                })
+    notice_inventory = []
+    index_path = ROOT / "licenses" / "notice-index.json"
+    if index_path.is_file():
+        try:
+            nid = json.loads(index_path.read_text())
+            notice_inventory = [
+                {"id": e.get("id"), "sha256": e.get("sha256"),
+                 "path": e.get("path")}
+                for e in nid.get("entries", []) if isinstance(e, dict)
+            ]
+        except json.JSONDecodeError:
+            pass
+
     static_runtime = []
     sw = ROOT / "apps" / "web" / "public" / "sw.js"
     if sw.is_file():
@@ -361,12 +393,20 @@ def build_inventory() -> dict:
             "native_lock_packages": len(native_packages),
             "fixture_entries": len(fixture_entries),
             "native_deb_packages": len(native_deb_closure),
+            "runtime_stamp_inputs": len(runtime_stamps),
+            "notice_inventory_entries": len(notice_inventory),
             "unknown": len(unknown),
         },
         "native_deb_closure": {
             "target": "linux/amd64 production image (Docker)",
             "packages": native_deb_closure,
         },
+        "native_deb_closure": {
+            "target": "linux/amd64 production image (Docker)",
+            "packages": native_deb_closure,
+        },
+        "runtime_stamp_inputs": runtime_stamps,
+        "notice_inventory": notice_inventory,
         "static_runtime": static_runtime,
         "shipped_assets": shipped_assets,
         "prepared_example": prepared_example,
