@@ -6,7 +6,7 @@ import { FileDrop } from "../features/open/FileDrop";
 import { OpenWorkspace } from "../features/open/OpenWorkspace";
 import { resolveProfile } from "../features/open";
 import { InspectionSession } from "../features/inspect/session";
-import { isLocalExampleUrl } from "../features/gallery/loader";
+import { exampleAssetUrl, isLocalExampleUrl } from "../features/gallery/loader";
 import { ReplaceConfirmDialog } from "../components/Dialogs/ReplaceConfirmDialog";
 import { CoveragePanel } from "../features/coverage/CoveragePanel";
 import { ExportPanel } from "../features/export/ExportPanel";
@@ -364,11 +364,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [exampleError, setExampleError] = useState<string | null>(null);
   useEffect(() => {
     if (initialExampleId === null) return;
+    const reportUrl = exampleAssetUrl(initialExampleId, "report.json");
+    const manifestUrl = exampleAssetUrl(initialExampleId, "manifest.json");
+    if (!reportUrl || !manifestUrl) return;
     let cancelled = false;
     setExampleError(null);
     void (async () => {
       try {
-        const reportRes = await fetch(`examples/${initialExampleId}/report.json`, {
+        const reportRes = await fetch(reportUrl, {
           credentials: "same-origin",
         });
         if (!reportRes.ok) throw new Error(`example report unavailable (${reportRes.status})`);
@@ -380,7 +383,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         await session.offerFile(file);
         if (cancelled) return;
         const generation = session.getState().generation;
-        const manifestRes = await fetch(`examples/${initialExampleId}/manifest.json`, {
+        const manifestRes = await fetch(manifestUrl, {
           credentials: "same-origin",
         });
         if (!manifestRes.ok) return;

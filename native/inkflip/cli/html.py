@@ -103,6 +103,14 @@ def render_html_comparison(comparison: dict[str, Any], extra: str = "") -> str:
     def esc(value: Any) -> str:
         return html.escape(str(value), quote=True)
 
+    limitation_items = "".join(
+        f"<li>{esc(item)}</li>" for item in comparison.get("limitations") or []
+    )
+    limitations_block = (
+        f"<section><h2>Limitations</h2><ul>{limitation_items}</ul></section>"
+        if limitation_items
+        else ""
+    )
     rows = []
     for change in comparison.get("changes", []):
         rows.append(
@@ -124,7 +132,7 @@ def render_html_comparison(comparison: dict[str, Any], extra: str = "") -> str:
         f"<h1>Comparison {esc(comparison.get('status'))}</h1>"
         f"<p>Mode {esc(comparison.get('mode'))}. Left {esc(comparison.get('left_report_id'))}. "
         f"Right {esc(comparison.get('right_report_id'))}.</p>"
-        f"{extra}"
+        f"{limitations_block}{extra}"
         "<table><thead><tr><th>Id</th><th>Kind</th><th>Status</th><th>Rule</th>"
         "<th>Explanation</th></tr></thead><tbody>"
         f"{body_rows}</tbody></table>"

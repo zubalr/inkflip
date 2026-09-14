@@ -388,19 +388,33 @@ def cmd_baseline_create(args: argparse.Namespace) -> int:
 
 
 def cmd_compare(args: argparse.Namespace) -> int:
-    from inkflip.baselines.engine import compare
+    from inkflip.baselines.engine import _output_inside_or_contains, compare
 
+    left = Path(args.left)
+    right = Path(args.right)
+    out = Path(args.out) if args.out else None
+    if out is not None:
+        for source in (left, right):
+            if _output_inside_or_contains(source, out):
+                raise ArgumentError(
+                    f"Comparison output {out} overlaps input {source}; "
+                    "refusing so stored runs and baselines cannot be rewritten"
+                )
     result = compare(
-        left_path=Path(args.left),
-        right_path=Path(args.right),
+        left_path=left,
+        right_path=right,
         rules_path=Path(args.rules) if args.rules else None,
-        out_dir=Path(args.out) if args.out else None,
+        out_dir=out,
         fail_on_changed=bool(getattr(args, "fail_on", None) == "changed"),
         mode=args.mode or "reader_upgrade",
     )
     for violation in result.violations[:5]:
         sys.stderr.write(f"Error: {violation}\n")
     print(f"Comparison status: {result.status}")
+    for note in result.limitations:
+        if note.startswith("Portable comparison artifacts") or note.startswith("Comparison uses"):
+            continue
+        print(note)
     return result.exit_code
 
 

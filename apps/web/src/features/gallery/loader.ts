@@ -40,6 +40,15 @@ export function isLocalExampleUrl(url: string): boolean {
   return !url.split("/").includes("..");
 }
 
+/** Same-origin shipped example asset path, or null for anything else
+ *  (user-report URLs, traversal, remote schemes). */
+export function exampleAssetUrl(exampleId: string, filename: string): string | null {
+  if (!/^[a-z0-9-]+$/.test(exampleId)) return null;
+  if (!/^[A-Za-z0-9._-]+$/.test(filename)) return null;
+  const url = `/examples/${exampleId}/${filename}`;
+  return isLocalExampleUrl(url) ? url : null;
+}
+
 export async function loadExampleIndex(
   fetchImpl: typeof fetch = fetch,
 ): Promise<ExampleIndex> {

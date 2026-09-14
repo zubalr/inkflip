@@ -14,8 +14,11 @@ from inkflip.baselines.models import (
     ComparisonResult,
 )
 from inkflip.cli.html import render_html_comparison
+from inkflip.cli.paths import directories_overlap, paths_alias
 from inkflip.contracts import core
 from inkflip.runtime.artifacts import atomic_write_bytes
+
+_SHA256 = re.compile(r"^[a-f0-9]{64}$")
 
 EXIT_OK = 0
 EXIT_INVALID_ARGS = 2
@@ -97,15 +100,171 @@ def _run_reports(run_dir: Path) -> dict[str, dict[str, Any]]:
     return reports
 
 
+def _is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and bool(_SHA256.fullmatch(value))
+
+
 def _identity(run_dir: Path) -> dict[str, Any]:
     identity_path = run_dir / "identity.json"
     if identity_path.is_file():
-        return _read_json_file(identity_path, "run identity")
+        data = _read_json_file(identity_path, "run identity")
+        for field in ("profile_sha256", "corpus_manifest_sha256"):
+            value = data.get(field)
+            if value is None:
+                continue
+            if not _is_sha256(value):
+                raise BaselineError(
+                    f"Run identity {identity_path} has malformed {field}; "
+                    "refusing to compare an inconsistent bundle"
+                )
+        return data
     return {}
 
 
-def _sidecar_dir(baseline_path: Path) -> Path:
-    return baseline_path.with_suffix(baseline_path.suffix + ".reports")
+def _sidecar_dir(baseline_path: Path, *, follow_alias: bool = False) -> Path:
+    path = Path(baseline_path)
+    if follow_alias:
+        try:
+            path = path.resolve()
+        except OSError:
+            pass
+    return path.with_suffix(path.suffix + ".reports")
+
+
+def _reader_fingerprint(report: dict[str, Any]) -> tuple[tuple[Any, ...], ...]:
+    return tuple(
+        (
+            reader.get("id"),
+            reader.get("version"),
+            reader.get("adapter_version"),
+            (reader.get("settings") or {}).get("normalization"),
+        )
+        for reader in report.get("readers") or []
+    )
+
+
+def _bundle_environments_equivalent(
+    left_reports: dict[str, dict[str, Any] | None],
+    right_reports: dict[str, dict[str, Any] | None],
+) -> bool:
+    compared = False
+    for key in set(left_reports) | set(right_reports):
+        left = left_reports.get(key)
+        right = right_reports.get(key)
+        if not isinstance(left, dict) or not isinstance(right, dict):
+            continue
+        compared = True
+        left_env = (left.get("execution") or {}).get("environment")
+        right_env = (right.get("execution") or {}).get("environment")
+        if _reader_fingerprint(left) != _reader_fingerprint(right) or left_env != right_env:
+            return False
+    return compared
+
+
+def _profile_identity_conflict(
+    left_meta: dict[str, Any] | None,
+    right_meta: dict[str, Any] | None,
+    left_reports: dict[str, dict[str, Any] | None],
+    right_reports: dict[str, dict[str, Any] | None],
+) -> str | None:
+    left_profile = (left_meta or {}).get("profile_sha256")
+    right_profile = (right_meta or {}).get("profile_sha256")
+    if not _is_sha256(left_profile) or not _is_sha256(right_profile):
+        return None
+    if left_profile == right_profile:
+        return None
+    if _bundle_environments_equivalent(left_reports, right_reports):
+        return (
+            "Profile identities differ while recorded reader versions and execution "
+            f"environments match (left profile_sha256={left_profile}, right={right_profile}). "
+            "This is inconsistent run metadata, not a reader upgrade."
+        )
+    return None
+
+
+def _algorithm_identity_conflict(left_meta: dict[str, Any] | None, right_meta: dict[str, Any] | None) -> str | None:
+    left_algo = (left_meta or {}).get("algorithm_id")
+    right_algo = (right_meta or {}).get("algorithm_id")
+    if isinstance(left_algo, str) and isinstance(right_algo, str) and left_algo and right_algo and left_algo != right_algo:
+        return (
+            f"Algorithm identities differ (left={left_algo}, right={right_algo}); "
+            "a changed algorithm without an explicit document_versions comparison is incomparable."
+        )
+    return None
+
+
+def _provenance_limitations(
+    left_kind: str,
+    left_meta: dict[str, Any] | None,
+    right_kind: str,
+    right_meta: dict[str, Any] | None,
+    left_reports: dict[str, dict[str, Any] | None],
+    right_reports: dict[str, dict[str, Any] | None],
+    mode: str,
+) -> list[str]:
+    notes: list[str] = []
+    left_profile = (left_meta or {}).get("profile_sha256") if _is_sha256((left_meta or {}).get("profile_sha256")) else None
+    right_profile = (right_meta or {}).get("profile_sha256") if _is_sha256((right_meta or {}).get("profile_sha256")) else None
+    if left_profile and right_profile and left_profile != right_profile:
+        notes.append(
+            f"{mode} compared different profile identities "
+            f"(left={left_profile}, right={right_profile}) from {left_kind} vs {right_kind}. "
+            "Reader version/profile is the intended variable; identities are not equal."
+        )
+    elif left_profile and not right_profile:
+        notes.append(
+            f"Right {right_kind} has no profile identity; left profile_sha256={left_profile}. "
+            "Identities are not claimed equal."
+        )
+    elif right_profile and not left_profile:
+        notes.append(
+            f"Left {left_kind} has no profile identity; right profile_sha256={right_profile}. "
+            "Identities are not claimed equal."
+        )
+    for key in sorted(set(left_reports) | set(right_reports)):
+        left = left_reports.get(key)
+        right = right_reports.get(key)
+        if not isinstance(left, dict) or not isinstance(right, dict):
+            continue
+        left_env = (left.get("execution") or {}).get("environment")
+        right_env = (right.get("execution") or {}).get("environment")
+        if left_env and right_env and left_env != right_env:
+            notes.append(f"Recorded execution environments differ for {key}: left={left_env}; right={right_env}.")
+        left_fp = _reader_fingerprint(left)
+        right_fp = _reader_fingerprint(right)
+        if left_fp != right_fp:
+            notes.append(f"Recorded reader identities differ for {key}: left={left_fp}; right={right_fp}.")
+        break
+    return notes[:90]
+
+
+def _output_inside_or_contains(source: Path, out: Path) -> bool:
+    """True when writing ``out`` would rewrite ``source`` or its sidecar."""
+    if paths_alias(source, out):
+        return True
+    try:
+        src = source.resolve()
+        dest = out.resolve()
+    except OSError:
+        return False
+    if src.is_dir():
+        return directories_overlap(src, dest)
+    sidecar = _sidecar_dir(source, follow_alias=True)
+    if sidecar.exists() and (directories_overlap(sidecar, dest) or paths_alias(sidecar, dest)):
+        return True
+    return False
+
+
+def _refuse_comparison_output_overlap(left_path: Path, right_path: Path, out_dir: Path | None) -> None:
+    if out_dir is None:
+        return
+    out = Path(out_dir)
+    for source in (Path(left_path), Path(right_path)):
+        if _output_inside_or_contains(source, out):
+            raise BaselineError(
+                f"Comparison output {out} overlaps input {source}; "
+                "refusing so stored runs and baselines cannot be rewritten"
+            )
 
 
 def create_baseline(
@@ -117,7 +276,24 @@ def create_baseline(
     allow_incomplete: bool = False,
 ) -> dict[str, Any]:
     out_path = Path(out_path)
+    run_dir = Path(run_dir)
     sidecar = _sidecar_dir(out_path)
+    try:
+        out_resolved = out_path.resolve()
+        run_resolved = run_dir.resolve()
+        sidecar_resolved = sidecar.resolve()
+    except OSError as exc:
+        raise BaselineError(f"Cannot resolve baseline output {out_path}: {exc}") from exc
+    if out_resolved == run_resolved or out_resolved.is_relative_to(run_resolved):
+        raise BaselineError(
+            f"Baseline output {out_path} overlaps run directory {run_dir}; "
+            "refusing so the source run cannot be rewritten"
+        )
+    if sidecar_resolved == run_resolved or sidecar_resolved.is_relative_to(run_resolved):
+        raise BaselineError(
+            f"Baseline sidecar {sidecar} overlaps run directory {run_dir}; "
+            "refusing so the source run cannot be rewritten"
+        )
     if out_path.exists() or sidecar.exists():
         raise BaselineOverwriteError(
             f"Baseline already exists at {out_path}. Overwrite and auto-refresh are prohibited; "
@@ -235,9 +411,21 @@ def _load_baseline_bundle(path: Path) -> tuple[dict[str, Any], dict[str, dict[st
     if data.get("kind") != "baseline":
         raise BaselineError(f"{path} is not a baseline")
     core.validate(data)
-    sidecar = _sidecar_dir(path)
+    sidecar = _sidecar_dir(path, follow_alias=True)
     if not sidecar.is_dir():
-        raise BaselineError(f"Baseline {path} is missing verified backing reports at {sidecar}")
+        hint = ""
+        try:
+            resolved = Path(path).resolve()
+        except OSError:
+            resolved = Path(path)
+        if resolved != Path(path):
+            hint = (
+                f" {path} is an alias for {resolved}; "
+                "looked for backing reports next to the resolved file."
+            )
+        raise BaselineError(
+            f"Baseline {path} is missing verified backing reports at {sidecar}.{hint}"
+        )
     reports = {}
     for report_path in sorted(sidecar.glob("*.json")):
         report = _require_report(_load_json(report_path), report_path)
@@ -576,8 +764,12 @@ def _build_comparison(
     rules: dict | None,
     mode: str,
     alignments: list[dict] | None = None,
+    extra_limitations: list[str] | None = None,
 ) -> tuple[dict, int, bool, bool]:
     limitations = ["Comparison uses the shared Node alignment bridge and declared acceptance rules."]
+    if extra_limitations:
+        limitations.extend(extra_limitations)
+    limitations = limitations[:100]
     if left is None and right is None:
         raise BaselineError(f"Both sides missing for key {key}")
     if left is None or right is None:
@@ -650,9 +842,38 @@ def _build_comparison(
         comparison["id"] = core.digest(comparison)
         core.validate(comparison)
         return comparison, EXIT_INCOMPARABLE, False, True
-    if _incompatible_readers(left, right) and mode == "reader_upgrade":
-        # Version-isolated upgrades are expected to differ in reader identity.
-        pass
+    if _incompatible_readers(left, right) and mode not in {"reader_upgrade", "document_versions"}:
+        comparison = {
+            "kind": "comparison",
+            "schema_version": "1.0.0",
+            "id": "0" * 64,
+            "left_report_id": left["report_id"],
+            "right_report_id": right["report_id"],
+            "left_document_sha256": left["document"]["sha256"],
+            "right_document_sha256": right["document"]["sha256"],
+            "mode": mode,
+            "status": "incomparable",
+            "acceptance_rules_sha256": _sha256_bytes(json.dumps(rules, sort_keys=True).encode()) if rules else None,
+            "changes": [
+                {
+                    "id": "chg_reader_config",
+                    "kind": "configuration",
+                    "page_index": None,
+                    "left_occurrence_ids": [],
+                    "right_occurrence_ids": [],
+                    "status": "incomparable",
+                    "rule_id": None,
+                    "explanation": (
+                        "Reader identity or settings differ; this mode does not treat that "
+                        "as a reader upgrade"
+                    ),
+                }
+            ],
+            "limitations": limitations,
+        }
+        comparison["id"] = core.digest(comparison)
+        core.validate(comparison)
+        return comparison, EXIT_INCOMPARABLE, False, True
     violations, rule_changes = evaluate_rules(left, right, rules)
     align_changes, has_change = _changes_from_alignment(alignments or [], left, right)
     lost = _coverage_lost(left, right)
@@ -783,6 +1004,39 @@ def compare(
             violations=["No reports available to compare"],
         )
 
+    try:
+        _refuse_comparison_output_overlap(left_path, right_path, Path(out_dir) if out_dir else None)
+        conflict = _profile_identity_conflict(_left_meta, _right_meta, left_reports, right_reports)
+        if conflict:
+            raise BaselineError(conflict)
+    except BaselineError as exc:
+        return ComparisonResult(
+            status="incomparable",
+            exit_code=EXIT_INVALID_ARGS,
+            violations=[str(exc)],
+            limitations=["Malformed or missing comparison input is not a regression."],
+        )
+
+    extra_limitations = _provenance_limitations(
+        _left_kind,
+        _left_meta,
+        _right_kind,
+        _right_meta,
+        left_reports,
+        right_reports,
+        mode,
+    )
+    algorithm_conflict = _algorithm_identity_conflict(_left_meta, _right_meta)
+    if algorithm_conflict:
+        extra_limitations.append(algorithm_conflict)
+        return ComparisonResult(
+            status="incomparable",
+            exit_code=EXIT_INCOMPARABLE,
+            violations=[algorithm_conflict],
+            limitations=extra_limitations or [algorithm_conflict],
+            incomparable=True,
+        )
+
     worst = EXIT_OK
     all_changes = []
     all_violations = []
@@ -824,6 +1078,7 @@ def compare(
             rules,
             mode,
             alignments,
+            extra_limitations,
         )
         last_status = comparison["status"]
         all_changes.extend(comparison["changes"])
@@ -886,7 +1141,10 @@ def compare(
         exit_code=worst,
         changes=all_changes,
         violations=all_violations,
-        limitations=["Portable comparison artifacts are schema-validated Comparison documents."],
+        limitations=(
+            extra_limitations
+            + ["Portable comparison artifacts are schema-validated Comparison documents."]
+        )[:100],
         left_reports_count=sum(1 for v in left_reports.values() if isinstance(v, dict)),
         right_reports_count=sum(1 for v in right_reports.values() if isinstance(v, dict)),
         coverage_lost=coverage_lost,
