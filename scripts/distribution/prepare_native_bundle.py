@@ -50,6 +50,8 @@ import sys
 import tarfile
 import tempfile
 import tomllib
+import os
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -195,47 +197,135 @@ def extract_license_fields(metadata: str) -> dict:
     return fields
 
 
-def prepare_node(failures: list[str], do_download: bool) -> dict:
+def _fetch_shasums(shasums_url: str) -> str:
+    return urllib.request.urlopen(shasums_url, timeout=120).read().decode()
+
+
+def _fetch_to(url: str, dest: Path) -> None:
+    urllib.request.urlretrieve(url, dest)
+
+
+def prepare_node(failures: list[str], do_download: bool, *,
+                 fetch_shasums=_fetch_shasums, fetch_to=_fetch_to) -> dict:
+    """Prepare the pinned Node runtime tarball with verified-cache semantics.
+
+    States are distinguished and never conflated:
+
+      missing        no cached tarball (needs the network step, or --no-download failure)
+      corrupt        cached tarball present but its sha256 does not match the
+                     pinned expected digest (zero bytes, truncation, wrong
+                     bytes are all 'corrupt')
+      offline        --no-download blocked the repair of missing/corrupt state
+
+    The pinned expected digest always comes from the trusted source (official
+    SHASUMS256.txt, or a previously published stamp whose recorded digest was
+    itself verified at publish time) — never from the artifact being checked.
+    A corrupt cached file is kept intact until a verified replacement has been
+    downloaded and swapped in; a failed download never publishes a success
+    stamp and never overwrites the trusted expected digest with the observed
+    digest of bad bytes.
+    """
     version = (ROOT / ".node-version").read_text().strip()
-    stamp_path = RELEASE / "node" / "node.stamp.json"
     url_base = f"{NODE_MIRROR}/v{version}"
     shasums_url = f"{url_base}/SHASUMS256.txt"
     filename = f"node-v{version}-linux-x64.tar.xz"
     download_url = f"{url_base}/{filename}"
+    stamp_path = RELEASE / "node" / "node.stamp.json"
+    dest = PRIVATE / "node" / filename
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    # Trusted expected digest: a previously published stamp (whose digest was
+    # verified at its own publish time) or the official SHASUMS256 source.
+    expected: str | None = None
     stamp: dict = {}
     if stamp_path.is_file():
-        stamp = json.loads(stamp_path.read_text())
-    dest = PRIVATE / "node" / filename
-    # A stamp records identity, not local presence: the bulky tarball may be
-    # absent in a fresh checkout, in which case it must be (re-)downloaded
-    # unless the caller explicitly declined network access.
-    artifact_present = dest.is_file() and dest.stat().st_size > 0
-    if stamp.get("version") == version and stamp.get("sha256") and artifact_present:
+        try:
+            stamp = json.loads(stamp_path.read_text())
+        except json.JSONDecodeError:
+            stamp = {}
+        if stamp.get("version") == version and isinstance(stamp.get("sha256"), str) \
+                and re.fullmatch(r"[0-9a-f]{64}", stamp["sha256"]):
+            expected = stamp["sha256"]
+
+    present = dest.is_file() and not dest.is_symlink() and dest.stat().st_size > 0
+    actual = sha256_file(dest) if present else None
+    verified = present and actual == expected
+
+    if verified:
+        # Cache intact and matching the pinned digest: no network needed.
+        stamp.update({"filename": filename, "url": download_url,
+                      "shasums256_source": shasums_url, "sha256": actual,
+                      "version": version, "platform": "linux-x64"})
         return stamp
-    if stamp.get("version") == version and stamp.get("sha256") and not do_download and not artifact_present:
-        failures.append(f"node runtime tarball not prepared locally and --no-download set ({filename})")
-        return {}
+
+    if present and expected:
+        failures.append(
+            f"node runtime cache corrupt: {dest} (cached sha256 {actual[:12]}… "
+            f"does not match pinned {expected[:12]}…)"
+        )
+    elif not present:
+        failures.append(
+            f"node runtime cache missing: {dest} — run "
+            "python3 scripts/distribution/prepare_native_bundle.py (explicit network step)"
+        )
     if not do_download:
-        failures.append(f"node runtime not prepared and --no-download set ({filename})")
+        # Offline refusal: keep any existing artifact intact for later repair.
+        if present and expected:
+            failures.append(
+                "node runtime cache left unrepaired because --no-download was set; "
+                "re-run without --no-download to replace the corrupt file"
+            )
+        elif present:
+            failures.append(
+                "node runtime cache present but cannot be verified offline "
+                "(no pinned digest for this version); re-run without --no-download"
+            )
         return {}
-    shasums = urllib.request.urlopen(shasums_url, timeout=120).read().decode()
-    expected = None
-    for line in shasums.splitlines():
-        digest, fname = line.split(maxsplit=1)
-        if fname.strip() == filename:
-            expected = digest
-            break
-    if expected is None:
-        failures.append(f"official SHASUMS256.txt for node v{version} lists no entry for {filename}")
+
+    # Network repair: fetch expected digest, download to a temporary file,
+    # verify BEFORE publishing, then atomically swap in. The previously
+    # cached file stays untouched until the replacement is verified.
+    try:
+        if expected is None:
+            shasums = fetch_shasums(shasums_url)
+            for line in shasums.splitlines():
+                digest, _, fname = line.partition(" ")
+                if fname.strip() == filename:
+                    expected = digest
+                    break
+            if expected is None:
+                failures.append(
+                    f"official SHASUMS256.txt for node v{version} lists no entry for {filename}"
+                )
+                return {}
+        temp = dest.with_name(dest.name + ".downloading")
+        fetch_to(download_url, temp)
+        downloaded = sha256_file(temp)
+        if downloaded != expected:
+            failures.append(
+                f"node tarball download rejected: sha256 {downloaded[:12]}… does not match "
+                f"pinned {expected[:12]}…; the previous cache file is left in place"
+            )
+            temp.unlink(missing_ok=True)
+            return {}
+        os.replace(temp, dest)
+    except (OSError, urllib.error.URLError) as error:
+        failures.append(
+            f"node runtime download failed ({error}); the previous cache file is left in place"
+        )
         return {}
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    urllib.request.urlretrieve(download_url, dest)
+
     actual = sha256_file(dest)
-    if actual != expected:
-        failures.append(f"node tarball hash mismatch: official {expected} != downloaded {actual}")
-    with tarfile.open(dest) as tf:
-        binary = tf.extractfile(f"node-v{version}-linux-x64/bin/node")
-        node_sha = hashlib.sha256(binary.read()).hexdigest() if binary else None
+    try:
+        with tarfile.open(dest) as tf:
+            binary = tf.extractfile(f"node-v{version}-linux-x64/bin/node")
+            node_sha = hashlib.sha256(binary.read()).hexdigest() if binary else None
+    except (tarfile.TarError, OSError, EOFError) as error:
+        failures.append(
+            f"node runtime tarball unreadable after verification ({error}); "
+            "treated as failed preparation — no stamp published"
+        )
+        return {}
     stamp = {
         "name": "node",
         "version": version,
@@ -243,7 +333,7 @@ def prepare_node(failures: list[str], do_download: bool) -> dict:
         "filename": filename,
         "url": download_url,
         "shasums256_source": shasums_url,
-        "sha256": actual,
+        "sha256": actual,  # equals the pinned expected digest (verified above)
         "binary_sha256": node_sha,
         "license": "MIT (Node.js; bundled third-party components per official NOTICE — fetched with the runtime at build time)",
         "purpose": "comparison-bridge runtime for the native bundle",
