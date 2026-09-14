@@ -631,6 +631,52 @@ def check_dist(root: Path, dist_manifest_rel: str) -> list[str]:
     return failures
 
 
+# ------------------------------------------------- release candidate binding
+
+CANDIDATE_ALLOWED = {"kind", "schema_version", "recorded_by", "recorded_at",
+                     "production_image", "notes"}
+
+
+def load_candidate_binding(root: Path, candidate_rel: str, scope_notes: list) -> dict | None:
+    """Load the declared release candidate (trusted expected identity).
+
+    Returns {image_ref, expected_image_digest, architecture, expected_wheel_sha256,
+    expected_model_sha256, expected_tesseract_version} or None when no candidate
+    is bound. Expected identity comes ONLY from this declared file — never from
+    the artifact being checked."""
+    path = root / candidate_rel
+    if not path.is_file():
+        scope_notes.append(
+            f"no release candidate declared yet: {candidate_rel} "
+            "(bind after the final image rebuild; see docs/distribution/release-candidate.template.json)"
+        )
+        return None
+    try:
+        cand = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        scope_notes.append(f"release candidate unreadable ({exc}); image runtime verification skipped")
+        return None
+    if cand.get("kind") != "inkflip-release-candidate":
+        scope_notes.append("release candidate file has wrong kind; image runtime verification skipped")
+        return None
+    img = cand.get("production_image") or {}
+    ref = img.get("ref")
+    digest = img.get("digest")
+    if not ref or not (isinstance(digest, str) and re.fullmatch(r"sha256:[0-9a-f]{64}", digest)):
+        scope_notes.append(
+            "release candidate not fully bound (ref/digest pending final rebuild); "
+            "image runtime verification skipped"
+        )
+        return None
+    binding = {"image_ref": ref, "expected_image_digest": digest,
+               "architecture": img.get("architecture", "amd64")}
+    for key in ("expected_wheel_sha256", "expected_model_sha256",
+                "expected_tesseract_version"):
+        if img.get(key):
+            binding[key] = img[key]
+    return binding
+
+
 # ------------------------------------------------- production image (Docker)
 
 def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[str]:
@@ -641,7 +687,7 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
     import subprocess
     failures: list[str] = []
     ref = image.get("image_ref")
-    expected_digest = image.get("expected_image_digest")
+    expected_digest = image.get("expected_image_digest") or image.get("candidate_digest")
     if not ref or not expected_digest:
         return ["production image: image_ref and expected_image_digest are required for --docker verification"]
 
@@ -733,7 +779,8 @@ def main() -> int:
     parser.add_argument("--manifest", default="config/distribution-manifest.json")
     parser.add_argument("--root", default=".", help="repository root (default: cwd)")
     parser.add_argument("--dist-manifest", default=None, help="verify apps/web/dist against this recorded dist manifest (see scripts/distribution/record_dist.py)")
-    parser.add_argument("--docker", metavar="IMAGE", default=None, help="read-only production-image verification via docker (inspect + container checks)")
+    parser.add_argument("--docker", metavar="IMAGE", default=None, help="read-only production-image verification via docker (inspect + container checks); the trusted identity comes from the declared release candidate")
+    parser.add_argument("--candidate", default="config/release-candidate.json", help="declared release-candidate file (trusted expected identity)")
     parser.add_argument("--json", action="store_true", help="machine-readable report")
     args = parser.parse_args()
 
@@ -759,10 +806,18 @@ def main() -> int:
             if not docker_cmd:
                 problems.append("production image: docker CLI not found; --docker verification could not run")
             else:
-                image = dict(image)
-                image["image_ref"] = args.docker
-                problems.extend(verify_production_image(root, image, docker_cmd))
-                gate_scope_notes.append(f"production image verified via docker: {args.docker}")
+                bound = load_candidate_binding(root, args.candidate, gate_scope_notes)
+                if bound is None:
+                    gate_scope_notes.append(
+                        "production image runtime verification skipped: no declared release "
+                        f"candidate bound ({args.candidate}); Devin binds it after the final rebuild"
+                    )
+                else:
+                    image = {**image, **bound}
+                    problems.extend(verify_production_image(root, image, docker_cmd))
+                    gate_scope_notes.append(
+                        f"production image verified via docker against declared candidate: {bound['image_ref']}"
+                    )
                 code = (2 if any(e in problems for e in []) else 1) if problems else 0
     scope_notes = gate_scope_notes + scope_report(root, manifest, args.dist_manifest)
     if args.json:
