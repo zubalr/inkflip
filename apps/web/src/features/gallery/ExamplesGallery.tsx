@@ -59,7 +59,7 @@ function CardDetail({
       ) : (
         <>
           <div className={styles.mechanismSection} data-testid="card-mechanism-section">
-            <h4>Verification Mechanism</h4>
+            <h4>What this demonstrates</h4>
             <p className={styles.mechanismText}>{card.mechanism}</p>
             {card.example_id === "duplicates" && (
               <p className={styles.evidenceNote} data-testid="duplicates-evidence-note">
@@ -68,6 +68,9 @@ function CardDetail({
             )}
           </div>
 
+          {card.timing_ms != null && (
+            <p className={styles.sha}>Recorded run: {card.timing_ms} ms</p>
+          )}
           <div className={styles.detailGrid}>
             <section aria-label="Source files">
               <h4>Source files</h4>
@@ -169,11 +172,11 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onOpenExample 
   return (
     <section className={styles.section} aria-labelledby="examples-heading" data-testid="examples-gallery">
       <h2 id="examples-heading" className={styles.detailTitle}>
-        Prepared examples
+        Real examples
       </h2>
       <p className={styles.sub}>
-        Six real captured runs — every card's bytes, readers and findings are recorded
-        outputs of the same pipeline you can run locally.
+        Six situations where a PDF shows one thing and says another. Open one
+        to inspect its captured report — bytes, readers and findings recorded.
       </p>
       {error !== null && <p className={styles.error} role="alert">{error}</p>}
 
@@ -197,12 +200,10 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onOpenExample 
             onClick={() => setOpenId(openId === card.example_id ? null : card.example_id)}
           >
             <h3 className={styles.cardTitle}>{card.card_title}</h3>
-            <span className={styles.fixture}>{card.fixture_id}</span>
             <p className={styles.mechanism}>{card.mechanism}</p>
             <span className={styles.cardMeta}>
-              <span>{card.finding_count} finding{card.finding_count === 1 ? "" : "s"}</span>
               <span>
-                {card.readers.length} readers · {card.timing_ms} ms
+                {card.finding_count} finding{card.finding_count === 1 ? "" : "s"}
               </span>
             </span>
           </button>
