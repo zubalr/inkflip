@@ -521,9 +521,14 @@ class ApplicationWheelStampTests(unittest.TestCase):
 
 
 class ProductionImageDockerTests(unittest.TestCase):
-    """--docker production-image verification against a stub docker binary:
-    identity/arch mismatch, missing wheel, tesseract version and notice
-    inventory negatives (labels are not proof)."""
+    """--docker production-image verification (final-integrity contract).
+
+    Requested Docker verification must never pass by skipping: a missing,
+    malformed, wrong-kind or incomplete candidate is a nonzero, actionable
+    failure. The candidate's ref is the inspected target; --docker IMAGE
+    must match it or the run fails with a stable diagnostic. Expected
+    identity comes only from the declared candidate file.
+    """
 
     IMAGE_ID = "sha256:" + "1" * 64
     WHEEL_SHA = hashlib.sha256(b"app wheel").hexdigest()
@@ -566,9 +571,6 @@ class ProductionImageDockerTests(unittest.TestCase):
         return path
 
     def write_stub(self):
-        """Write a stub `docker` script driven entirely by DOCKER_STUB_STATE
-        (JSON): {'inspect': {...}, 'run_sha': {basename: sha}, 'run_index': {...},
-        'run_tesseract': 'version line'} — word-matching on sha256sum args."""
         stub_src = (
             "#!/usr/bin/env python3\n"
             "import json, os, sys\n"
@@ -592,7 +594,7 @@ class ProductionImageDockerTests(unittest.TestCase):
             "                    seen.add(name); print(sha, name)\n"
             "        elif base in state['run_sha'] and base not in seen:\n"
             "            seen.add(base); print(state['run_sha'][base], base)\n"
-            "    if '--version' in joined:\n"
+            "    if '--version' in joined and 'tesseract' in joined:\n"
             "        print(state['run_tesseract'])\n"
             "    sys.exit(0)\n"
             "if '--version' in joined:\n"
@@ -609,12 +611,15 @@ class ProductionImageDockerTests(unittest.TestCase):
         self.write("release/native-requirements.lock", b"# generated\n")
         self.write("release/native-wheels.manifest.json", json.dumps({"wheels": []}))
         self.write("release/node/node.stamp.json", json.dumps(
-            {"version": "22.23.2", "sha256": "a" * 64, "url": "u", "shasums256_source": "s"}))
+            {"version": "22.23.2", "sha256": "a" * 64, "url": "u",
+             "shasums256_source": "s"}))
         self.write("release/models/model.stamp.json", json.dumps(
-            {"name": "m", "sha256": "b" * 64, "license": "Apache-2.0", "source": "s"}))
+            {"name": "m", "sha256": "b" * 64, "license": "Apache-2.0",
+             "source": "s"}))
         self.write(".private/distribution/native-bundle/.prepared", b"")
         self.write("release/tesseract/tesseract.stamp.json", json.dumps({
-            "kind": "inkflip-native-tesseract-debs", "package": "tesseract-ocr",
+            "kind": "inkflip-native-tesseract-debs",
+            "package": "tesseract-ocr",
             "version": "5.5.0-1+b1", "arch": "amd64",
             "license": "Apache-2.0 (Tesseract)",
             "packages": [{"filename": "a.deb", "sha256": "c" * 64, "bytes": 10}]}))
@@ -637,43 +642,53 @@ class ProductionImageDockerTests(unittest.TestCase):
                     "expected_arch": "amd64",
                     "debs_dir": None,
                 },
-                "application_wheel": {"declared": False, "path": None, "sha256": None},
+                "application_wheel": {"declared": False, "path": None,
+                                      "sha256": None},
                 "production_image": {
                     "declared": True,
-                    "image_ref": "inkflip-native:pc-prod",
-                    "expected_image_digest": self.IMAGE_ID,
+                    "candidate_file": "config/release-candidate.json",
                     "architecture": "amd64",
                     "os": "linux",
-                    "expected_wheel_sha256": self.WHEEL_SHA,
-                    "expected_model_sha256": self.MODEL_SHA,
-                    "expected_tesseract_version": "5.5.0",
-                    "required_notice_ids": ["inkflip-mit", "pdfium-binary-appendix",
-                                            "node-license", "tesseract-apache"],
+                    "required_notice_ids": ["inkflip-mit",
+                                            "pdfium-binary-appendix",
+                                            "node-license",
+                                            "tesseract-apache"],
                 },
             },
         }
         self.write("distribution.json", json.dumps(manifest))
 
-    def run_with_stub(self, candidate=True):
+    def bound_candidate(self, ref="inkflip-native:pc-prod", digest=None,
+                        wheel=None, model=None, tesseract="5.5.0", **overrides):
+        wheel_value = self.WHEEL_SHA if wheel is None else wheel
+        model_value = self.MODEL_SHA if model is None else model
+        cand = {
+            "kind": "inkflip-release-candidate",
+            "schema_version": "1.0.0",
+            "recorded_by": "devin-integrator",
+            "recorded_at": "2026-09-14T00:00:00Z",
+            "production_image": {
+                "ref": ref,
+                "digest": digest or self.IMAGE_ID,
+                "architecture": "amd64",
+                "wheel_sha256": wheel_value,
+                "model_sha256": model_value,
+                "tesseract_version": tesseract,
+            },
+        }
+        if wheel is ...:
+            del cand["production_image"]["wheel_sha256"]
+        cand["production_image"].update(overrides)
+        self.write("config/release-candidate.json", json.dumps(cand))
+
+    def run_with_stub(self):
         self.write_stub()
-        if candidate:
-            self.write("config/release-candidate.json", json.dumps({
-                "kind": "inkflip-release-candidate",
-                "production_image": {
-                    "ref": "inkflip-native:pc-prod",
-                    "digest": self.IMAGE_ID,
-                    "architecture": "amd64",
-                    "expected_wheel_sha256": self.WHEEL_SHA,
-                    "expected_model_sha256": self.MODEL_SHA,
-                    "expected_tesseract_version": "5.5.0",
-                },
-            }))
-        args = [sys.executable, str(CHECKER), "--release", "--manifest", "distribution.json",
-                "--root", str(self.root),
-                "--candidate", "config/release-candidate.json",
-                "--docker", "inkflip-native:pc-prod"]
         return subprocess.run(
-            args, capture_output=True, text=True, timeout=120,
+            [sys.executable, str(CHECKER), "--release", "--manifest",
+             "distribution.json", "--root", str(self.root),
+             "--candidate", "config/release-candidate.json",
+             "--docker", "inkflip-native:pc-prod"],
+            capture_output=True, text=True, timeout=120,
             env={**os.environ,
                  "PATH": f"{self.bin_dir}:{os.environ['PATH']}",
                  "DOCKER_STUB_STATE": json.dumps(self.state)},
@@ -683,72 +698,179 @@ class ProductionImageDockerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, code, msg=proc.stdout + proc.stderr)
         self.assertIn(needle, proc.stdout)
 
-    # ---- cases ----
+    # ---- R1: skipped verification must fail ----
 
-    def test_consistent_image_passes(self):
+    def test_unbound_candidate_fails_requested_docker_check(self):
         self.base_manifest()
-        self.expect(self.run_with_stub(), 0, "production image verified via docker")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("required release candidate not found", proc.stdout)
+        self.assertNotIn("verified via docker", proc.stdout)
+
+    def test_partial_candidate_fails_requested_docker_check(self):
+        self.base_manifest()
+        self.bound_candidate(digest="pending")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("digest must be", proc.stdout)
+        self.assertNotIn("verified via docker", proc.stdout)
+
+    def test_malformed_candidate_is_config_error(self):
+        self.base_manifest()
+        self.write("config/release-candidate.json", b"{ not json ")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("malformed JSON", proc.stdout)
+
+    def test_wrong_kind_candidate_is_config_error(self):
+        self.base_manifest()
+        self.bound_candidate()
+        cand = json.loads((self.root / "config/release-candidate.json").read_text())
+        cand["kind"] = "something-else"
+        self.write("config/release-candidate.json", json.dumps(cand))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("wrong kind", proc.stdout)
+
+    def test_unknown_key_candidate_is_config_error(self):
+        self.base_manifest()
+        self.bound_candidate()
+        cand = json.loads((self.root / "config/release-candidate.json").read_text())
+        cand["unexpected"] = True
+        self.write("config/release-candidate.json", json.dumps(cand))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("unknown top-level key", proc.stdout)
+
+    def test_duplicate_key_candidate_is_config_error(self):
+        self.base_manifest()
+        self.bound_candidate()
+        raw = (self.root / "config/release-candidate.json").read_text()
+        raw = raw.replace('"production_image"', '"recorded_by"\n  "dupe", "x": 1, "production_image"', 1)
+        self.write("config/release-candidate.json", raw.encode())
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout + proc.stderr)
+        self.assertTrue("duplicate key" in proc.stdout or "malformed" in proc.stdout)
+
+    def test_missing_recorded_by_is_config_error(self):
+        self.base_manifest()
+        self.bound_candidate()
+        cand = json.loads((self.root / "config/release-candidate.json").read_text())
+        del cand["recorded_by"]
+        self.write("config/release-candidate.json", json.dumps(cand))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("recorded_by", proc.stdout)
+
+    def test_missing_wheel_identity_is_config_error(self):
+        self.base_manifest()
+        self.write("release/tesseract/tesseract.stamp.json",
+                   (self.root / "release/tesseract/tesseract.stamp.json").read_bytes())
+        cand = {
+            "kind": "inkflip-release-candidate", "schema_version": "1.0.0",
+            "recorded_by": "devin", "recorded_at": "2026-09-14T00:00:00Z",
+            "production_image": {"ref": "inkflip-native:pc-prod",
+                                 "digest": self.IMAGE_ID,
+                                 "architecture": "amd64",
+                                 "model_sha256": self.MODEL_SHA,
+                                 "tesseract_version": "5.5.0"},
+        }
+        self.write("config/release-candidate.json", json.dumps(cand))
+        self.write("config/release-candidate.json", json.dumps(cand))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("wheel_sha256", proc.stdout)
+
+    def test_missing_tesseract_version_is_config_error(self):
+        self.base_manifest()
+        self.bound_candidate()
+        cand = json.loads((self.root / "config/release-candidate.json").read_text())
+        cand["production_image"]["tesseract_version"] = ""
+        self.write("config/release-candidate.json", json.dumps(cand))
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 2, msg=proc.stdout)
+        self.assertIn("tesseract_version", proc.stdout)
+
+    # ---- R2: exact target ----
+
+    def test_requested_target_mismatch_fails(self):
+        self.base_manifest()
+        self.bound_candidate(ref="inkflip-native:merged",
+                             digest="sha256:" + "d" * 64)
+        self.state["inspect"]["id"] = "sha256:" + "d" * 64
+        self.state["run_sha"]["inkflip-0.0.0-py3-none-any.whl"] = self.WHEEL_SHA
+        proc = self.run_with_stub()  # --docker pc-prod vs candidate merged
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("does not match declared candidate ref", proc.stdout)
+
+    def test_matching_target_verifies(self):
+        self.base_manifest()
+        self.bound_candidate(ref="inkflip-native:pc-prod")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("production image verified via docker", proc.stdout)
+        self.assertIn("inkflip-native:pc-prod", proc.stdout)
+
+    # ---- R3: identity negatives against bound candidate ----
 
     def test_wrong_identity_fails(self):
         self.base_manifest()
+        self.bound_candidate()
         self.state["inspect"]["id"] = "sha256:" + "2" * 64
         proc = self.run_with_stub()
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("identity mismatch", proc.stdout)
-        self.assertIn("declared sha256:1111", proc.stdout)
 
     def test_wrong_architecture_fails(self):
         self.base_manifest()
+        self.bound_candidate()
         self.state["inspect"]["architecture"] = "arm64"
-        self.expect(self.run_with_stub(), 1, "architecture is 'arm64'")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("architecture is 'arm64'", proc.stdout)
 
-    def test_missing_wheel_fails(self):
+    def test_missing_wheel_hash_fails(self):
         self.base_manifest()
-        self.state["run_sha"]["inkflip-0.0.0-py3-none-any.whl"] = "0" * 64
-        self.expect(self.run_with_stub(), 1, "application wheel digest mismatch")
+        self.bound_candidate()
+        del self.state["run_sha"]["inkflip-0.0.0-py3-none-any.whl"]
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("application wheel digest mismatch", proc.stdout)
 
     def test_tesseract_version_mismatch_fails(self):
         self.base_manifest()
+        self.bound_candidate()
         self.state["run_tesseract"] = "tesseract 5.3.0"
-        self.expect(self.run_with_stub(), 1, "tesseract version line missing/mismatched")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("tesseract version line missing/mismatched", proc.stdout)
 
     def test_missing_notice_id_fails(self):
         self.base_manifest()
+        self.bound_candidate()
         self.state["run_index"] = {"entries": self.index["entries"][:3]}
-        self.expect(self.run_with_stub(), 1, "tesseract-apache")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("tesseract-apache", proc.stdout)
 
     def test_notice_bytes_mismatch_fails(self):
         self.base_manifest()
+        self.bound_candidate()
         self.state["run_sha"]["tesseract.txt"] = "0" * 64
-        self.expect(self.run_with_stub(), 1, "notice 'tesseract-apache' bytes do not match")
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("bytes do not match INDEX", proc.stdout)
 
-    def test_unbound_candidate_skips_image_verification(self):
+    def test_tesseract_stamp_version_drift_is_failure(self):
         self.base_manifest()
-        proc = self.run_with_stub(candidate=False)
-        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
-        self.assertIn("no release candidate declared", proc.stdout)
-        self.assertIn("image runtime verification skipped", proc.stdout)
-
-    def test_partially_bound_candidate_skips_verification(self):
-        self.base_manifest()
-        self.state["inspect"]["id"] = "sha256:" + "9" * 64  # any mismatch would fail if verified
-        self.write("config/release-candidate.json", json.dumps({
-            "kind": "inkflip-release-candidate",
-            "production_image": {"ref": "inkflip-native:merged",
-                                 "digest": "pending-final-rebuild"},
-        }))
-        proc = self.run_with_stub(candidate=False)
-        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
-        self.assertIn("not fully bound", proc.stdout)
-
-    def test_tesseract_stamp_version_mismatch_is_config_error(self):
-        self.base_manifest()
-        stamp = json.loads((self.root / "release/tesseract/tesseract.stamp.json").read_text())
+        self.bound_candidate()
+        stamp = json.loads(
+            (self.root / "release/tesseract/tesseract.stamp.json").read_text())
         stamp["version"] = "5.3.0"
         self.write("release/tesseract/tesseract.stamp.json", json.dumps(stamp))
         proc = self.run_with_stub()
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
-        self.assertIn("tesseract stamp version is '5.3.0', expected '5.5.0-1+b1'", proc.stdout)
+        self.assertIn("tesseract stamp version", proc.stdout)
 
 
 if __name__ == "__main__":
