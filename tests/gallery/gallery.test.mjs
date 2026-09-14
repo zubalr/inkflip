@@ -201,6 +201,21 @@ test("index card fields mirror the manifests they summarize", () => {
   }
 });
 
+test("exampleAssetUrl only builds shipped same-origin paths", async () => {
+  const { exampleAssetUrl, isLocalExampleUrl } = await import(
+    "../../apps/web/src/features/gallery/loader.ts"
+  );
+  assert.equal(exampleAssetUrl("amount", "report.json"), "/examples/amount/report.json");
+  assert.equal(exampleAssetUrl("duplicates", "manifest.json"), "/examples/duplicates/manifest.json");
+  assert.equal(exampleAssetUrl("https://evil.example/report.json", "report.json"), null);
+  assert.equal(exampleAssetUrl("../etc", "report.json"), null);
+  assert.equal(exampleAssetUrl("amount", "../passwd"), null);
+  assert.equal(exampleAssetUrl("amount", "https://evil.example/x.json"), null);
+  assert.equal(isLocalExampleUrl("/reports/user-upload.json"), false);
+  assert.equal(isLocalExampleUrl("https://evil.example/report.json"), false);
+  assert.equal(isLocalExampleUrl("/examples/amount/report.json"), true);
+});
+
 test("manifests carry no unexecuted expectations as results", () => {
   const index = loadJson(join(EXAMPLES, "index.json"));
   for (const card of index.cards) {
