@@ -7,7 +7,11 @@ repository (`scripts/check_distribution.py`, `scripts/distribution/`).
 
 Status: **preparation**. The final distribution gate (SBOM, vulnerability
 review, notices over the built release bundle) closes with the release
-tasks; nothing here claims completed release acceptance.
+tasks; nothing here claims completed release acceptance. The end-to-end
+release and rollback path — build, dist recording, static preflight,
+distribution gate, native bundle and container steps, declared artifact
+identity, rollback — is in
+[release-and-rollback.md](../release-and-rollback.md).
 
 ## The shipped browser surface
 

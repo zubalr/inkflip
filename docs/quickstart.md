@@ -13,7 +13,7 @@ product's Python code runs on). Do not conflate them.
 | Tool | Used for | Required version | Notes |
 | --- | --- | --- | --- |
 | [Bun](https://bun.sh) | workspace install, scripts, dev server, bundling | 1.4.0 (`packageManager` pin) | Bun supplies its own JavaScript runtime; no separate Node install needed for the app or tests. |
-| Python 3 (system) | bootstrap/coordination check harness only | any recent Python 3; standard-library only | Native product code does **not** use your system Python. |
+| Python 3 (system) | bootstrap/coordination check harness and the distribution/config checks | **3.11 or later**; standard-library only | Native product code does **not** use your system Python. The distribution scripts parse the frozen TOML locks with the standard-library `tomllib`, so an older system Python fails those checks instead of running them. |
 | [uv](https://docs.astral.sh/uv/) | native project runner: resolves the pinned interpreter and frozen lock | **≥ 0.12.13** on a cold host (recorded freeze in [config/test-toolchain.json](../config/test-toolchain.json)) | Older uv cannot be relied on to resolve the pinned interpreter's download index. |
 | Pinned CPython | native product interpreter | exactly 3.13.15 (`.python-version`, `native/pyproject.toml`) | Provisioned automatically by `uv sync --frozen`. |
 | Playwright browsers | browser, privacy, a11y, visual suites | Chromium via `@playwright/test` | Install explicitly with `bun x playwright install chromium`; browsers are never installed by an install script. |
@@ -91,6 +91,24 @@ license/notice evidence, and how the native bundle is prepared.
 - **`uv sync --frozen` refuses to resolve** — upgrade uv to ≥ 0.12.13 (the
   recorded minimum for resolving the pinned interpreter on a cold host). It
   fails closed on purpose; never replace `--frozen` with a resolving run.
+- **`bun run verify` or the distribution checks fail with
+  `No module named 'tomllib'`** — your system `python3` is older than 3.11;
+  the release/distribution scripts parse the frozen TOML locks with the
+  standard-library `tomllib`. Re-run with a 3.11+ interpreter (this snapshot
+  was verified with 3.11 and 3.13). The failure is the checks refusing to run,
+  not a broken tree.
+- **`bun run test:native` fails on a required skip, or the PDF.js wrapper
+  tests cannot resolve their dependency** — the PDF.js Node profile is its own
+  install, not part of the workspace install: run
+  `cd packages/readers-pdfjs/node && bun install --frozen-lockfile` first. The
+  harness counts a required skip as a failure, so the suite cannot pass until
+  that install exists.
+- **`bun run check:static-dist` fails with `prerequisites missing:
+  .private/distribution/dist-manifest.json`** — the registered preflight never
+  runs without a recorded build identity, and it never regenerates the
+  manifest for you. Build and record first: `bun run build`, then
+  `python3 scripts/distribution/record_dist.py --skip-build`. See
+  [release-and-rollback.md](release-and-rollback.md).
 - **Playwright suite cannot find Chromium** — run
   `bun x playwright install chromium` once.
 - **`bun run verify` fails after your own changes** — the harness fails

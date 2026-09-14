@@ -98,4 +98,5 @@ Source provenance and third-party notices are retained in
 | [docs/developer-guide.md](docs/developer-guide.md) | Workspace layout, command harness, suites, evidence rules |
 | [docs/development-history.md](docs/development-history.md) | How this was built, from Git history and validation records |
 | [docs/distribution/README.md](docs/distribution/README.md) | What ships, license/notice evidence, the distribution gate |
+| [docs/release-and-rollback.md](docs/release-and-rollback.md) | The release path: build, dist manifest, static preflight, distribution gate, native bundle, artifact identity, rollback |
 | [SECURITY.md](SECURITY.md) | Security expectations and reporting status |
