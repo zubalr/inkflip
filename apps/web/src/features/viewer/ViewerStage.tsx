@@ -319,15 +319,18 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
           />
         </div>
 
-        {/* 360px Evidence Slip */}
+        {/* Differences */}
         <aside
           id="evidence-slip"
           className={styles.evidenceSlip}
           aria-labelledby="evidence-slip-heading"
         >
           <h2 id="evidence-slip-heading" className={styles.evidenceHeading}>
-            Evidence Slip
+            Differences
           </h2>
+          <p className={styles.evidenceIntro}>
+            Readings that do not match between the page and extracted text.
+          </p>
 
           <div className={styles.findingNav}>
             <button

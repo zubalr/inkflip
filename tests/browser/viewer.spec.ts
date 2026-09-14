@@ -278,9 +278,9 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     await page.waitForSelector('[data-testid="file-drop"]');
 
     await expect(page.locator('[data-testid="file-drop"]')).toBeVisible();
-    await expect(page.locator("#btn-import-report")).toBeVisible();
-    await expect(page.locator("#btn-open-pdf")).toBeVisible();
-    await expect(page.locator("#btn-empty-load-example")).toBeVisible();
+    await expect(page.locator("#btn-header-import-report")).toBeVisible();
+    await expect(page.locator("#btn-header-open-pdf")).toBeVisible();
+    await expect(page.locator("#btn-load-demo")).toBeVisible();
 
     // Import a valid report JSON via the hidden file input
     const reportPath = path.resolve(

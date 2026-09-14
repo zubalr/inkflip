@@ -9,23 +9,40 @@ import {
 
 export type Route = "home" | "workspace" | "help";
 
+export type WorkspaceOpenIntent = "pdf" | "report" | null;
+
+function parseOpenIntent(hash: string, search: string): WorkspaceOpenIntent {
+  const haystack = `${hash}?${search}`.toLowerCase();
+  if (haystack.includes("open=report")) return "report";
+  if (haystack.includes("open=pdf")) return "pdf";
+  return null;
+}
+
 function parseWorkspaceExample(hash: string, search: string): {
   withExample: boolean;
   exampleId: string | null;
   loadSyntheticFixture: boolean;
+  openIntent: WorkspaceOpenIntent;
 } {
   const withExample = search.includes("example=true") || hash.includes("example=true");
   const exampleMatch = hash.match(/example=([a-z0-9-]+)/);
   const raw = exampleMatch?.[1] ?? null;
   const loadSyntheticFixture =
     raw === SYNTHETIC_EXAMPLE_FIXTURE_ID && __INKFLIP_TEST_HOOKS__;
+  const openIntent = parseOpenIntent(hash, search);
   if (loadSyntheticFixture) {
-    return { withExample: false, exampleId: null, loadSyntheticFixture: true };
+    return {
+      withExample: false,
+      exampleId: null,
+      loadSyntheticFixture: true,
+      openIntent: null,
+    };
   }
   return {
     withExample,
     exampleId: resolvePublicExampleId(withExample, raw),
     loadSyntheticFixture: false,
+    openIntent,
   };
 }
 
@@ -35,6 +52,7 @@ export default function App() {
     withExample: boolean;
     exampleId: string | null;
     loadSyntheticFixture: boolean;
+    openIntent: WorkspaceOpenIntent;
   } => {
     const hash = window.location.hash.toLowerCase();
     const pathname = window.location.pathname.toLowerCase();
@@ -42,12 +60,24 @@ export default function App() {
     const example = parseWorkspaceExample(hash, search);
 
     if (hash.includes("help") || pathname.includes("help")) {
-      return { route: "help", withExample: false, exampleId: null, loadSyntheticFixture: false };
+      return {
+        route: "help",
+        withExample: false,
+        exampleId: null,
+        loadSyntheticFixture: false,
+        openIntent: null,
+      };
     }
     if (hash.includes("workspace") || pathname.includes("workspace")) {
       return { route: "workspace", ...example };
     }
-    return { route: "home", withExample: false, exampleId: null, loadSyntheticFixture: false };
+    return {
+      route: "home",
+      withExample: false,
+      exampleId: null,
+      loadSyntheticFixture: false,
+      openIntent: null,
+    };
   };
 
   const initial = getInitialRoute();
@@ -57,6 +87,7 @@ export default function App() {
   const [loadSyntheticFixture, setLoadSyntheticFixture] = useState<boolean>(
     initial.loadSyntheticFixture,
   );
+  const [openIntent, setOpenIntent] = useState<WorkspaceOpenIntent>(initial.openIntent);
   const [workspaceEpoch, setWorkspaceEpoch] = useState<number>(0);
 
   // Preserve workspace state across temporary Help visits
@@ -79,11 +110,13 @@ export default function App() {
         setWithExample(current.withExample);
         setExampleId(current.exampleId);
         setLoadSyntheticFixture(current.loadSyntheticFixture);
+        setOpenIntent(current.openIntent);
       } else if (current.route === "home") {
         setWorkspaceEverMounted(false);
         setWithExample(false);
         setExampleId(null);
         setLoadSyntheticFixture(false);
+        setOpenIntent(null);
       }
       setRoute(current.route);
     };
@@ -119,6 +152,7 @@ export default function App() {
     setWithExample(loadExample);
     setExampleId(resolvePublicExampleId(loadExample, null));
     setLoadSyntheticFixture(false);
+    setOpenIntent(null);
     if (loadExample) {
       setWorkspaceEpoch((e) => e + 1);
     }
@@ -133,6 +167,7 @@ export default function App() {
     setWithExample(false);
     setExampleId(id);
     setLoadSyntheticFixture(false);
+    setOpenIntent(null);
     setWorkspaceEpoch((e) => e + 1);
     setRoute("workspace");
     const targetHash = `#/workspace?example=${id}`;
@@ -197,6 +232,7 @@ export default function App() {
             onLoadPublicExample={() => navigateToWorkspace(true)}
             initialExampleId={exampleId}
             loadSyntheticFixture={loadSyntheticFixture}
+            initialOpen={openIntent}
           />
         </div>
       )}
