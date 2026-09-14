@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 
 const BASE = process.env.PROD_BASE_URL || "http://127.0.0.1:41820";
-const ROOT = "/Users/zubair/Code/Projects/pdf project/worktrees/zcode-final-static";
+const ROOT = path.resolve(__dirname, "..", "..");
 const FIXTURE = path.join(ROOT, "fixtures", "public", "mapping-amount.pdf");
 const FIXTURE_SHA = "04898afc314b708f66e64171bf10073589cca634c3f40f93f1c2de6c8e658a80";
 const EVIDENCE = path.join(__dirname, "evidence");
