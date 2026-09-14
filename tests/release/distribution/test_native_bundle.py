@@ -540,26 +540,29 @@ class ProductionImageDockerTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.bin_dir = self.root / "bin"
         self.bin_dir.mkdir(parents=True)
+        notices = [
+            ("inkflip-mit", "notices/inkflip-MIT.txt", b"MIT text"),
+            ("pdfium-binary-appendix", "notices/pdfium.txt", b"pdfium appendix"),
+            ("node-license", "notices/node/LICENSE", b"node license"),
+            ("tesseract-apache", "notices/tesseract.txt", b"tesseract apache"),
+        ]
+        # declared digest and byte count are modelled from the same content the
+        # stub reports, so the healthy fixture is self-consistent
         self.index = {"entries": [
-            {"id": "inkflip-mit", "path": "notices/inkflip-MIT.txt",
-             "sha256": hashlib.sha256(b"MIT text").hexdigest()},
-            {"id": "pdfium-binary-appendix", "path": "notices/pdfium.txt",
-             "sha256": hashlib.sha256(b"pdfium appendix").hexdigest()},
-            {"id": "node-license", "path": "notices/node/LICENSE",
-             "sha256": hashlib.sha256(b"node license").hexdigest()},
-            {"id": "tesseract-apache", "path": "notices/tesseract.txt",
-             "sha256": hashlib.sha256(b"tesseract apache").hexdigest()},
+            {"id": notice_id, "path": path, "sha256": hashlib.sha256(content).hexdigest(),
+             "bytes": len(content)}
+            for notice_id, path, content in notices
         ]}
         self.state = {
             "inspect": {"id": self.IMAGE_ID, "architecture": "amd64", "os": "linux"},
             "run_sha": {
                 "inkflip-0.0.0-py3-none-any.whl": self.WHEEL_SHA,
                 "eng.traineddata": self.MODEL_SHA,
-                "inkflip-MIT.txt": self.index["entries"][0]["sha256"],
-                "pdfium.txt": self.index["entries"][1]["sha256"],
-                "LICENSE": self.index["entries"][2]["sha256"],
-                "tesseract.txt": self.index["entries"][3]["sha256"],
+                **{Path(path).name: hashlib.sha256(content).hexdigest()
+                   for _, path, content in notices},
             },
+            "run_size": {Path(path).name: len(content)
+                         for _, path, content in notices},
             "run_index": self.index,
             "run_tesseract": "tesseract 5.5.0",
         }
@@ -582,6 +585,11 @@ class ProductionImageDockerTests(unittest.TestCase):
             "    print(i['id']); print(i['architecture']); print(i['os']); sys.exit(0)\n"
             "if 'INDEX.json' in joined:\n"
             "    sys.stdout.write(json.dumps(state['run_index'])); sys.exit(0)\n"
+            "if '--entrypoint stat' in joined:\n"
+            "    base = os.path.basename(args[-1])\n"
+            "    if base in state['run_size']:\n"
+            "        print(state['run_size'][base]); sys.exit(0)\n"
+            "    sys.exit(1)\n"
             "if 'sha256sum' in joined:\n"
             "    import re\n"
             "    seen = set()\n"
@@ -860,6 +868,16 @@ class ProductionImageDockerTests(unittest.TestCase):
         proc = self.run_with_stub()
         self.assertEqual(proc.returncode, 1, msg=proc.stdout)
         self.assertIn("bytes do not match INDEX", proc.stdout)
+
+    def test_notice_length_mismatch_fails(self):
+        # the digest still matches: the declared byte count is wrong
+        self.base_manifest()
+        self.bound_candidate()
+        self.state["run_size"]["tesseract.txt"] += 1
+        proc = self.run_with_stub()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout)
+        self.assertIn("byte length mismatch", proc.stdout)
+        self.assertIn("tesseract-apache", proc.stdout)
 
     def test_tesseract_stamp_version_drift_is_failure(self):
         self.base_manifest()

@@ -786,13 +786,24 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
     if model_sha and hashes.get("eng.traineddata") != model_sha:
         failures.append("production image: model digest mismatch")
     tver = image.get("expected_tesseract_version")
-    if tver and f"tesseract {tver}" not in out:
-        failures.append(f"production image: tesseract version line missing/mismatched (expected {tver!r})")
-    # notice inventory: parse INDEX.json (id -> path/sha256) and hash-check
-    # each required entry's actual bytes inside the image — labels are not proof.
-    # Notice metadata is DATA: ids, paths and digests are validated before any
-    # container command is constructed, and hashing uses argv form (no shell),
-    # so INDEX content can never inject or escape the container command.
+    if tver:
+        # exact token after the `tesseract` word of the version line: the line
+        # is e.g. `tesseract 5.5.3` followed by a `leptonica-...` line, and a
+        # substring test would accept 5.5.00 for a declared 5.5.0.
+        printed_tver = None
+        for line in out.splitlines():
+            tokens = line.split()
+            if len(tokens) >= 2 and tokens[0] == "tesseract":
+                printed_tver = tokens[1]
+                break
+        if printed_tver != tver:
+            failures.append(f"production image: tesseract version line missing/mismatched (expected {tver!r})")
+    # notice inventory: parse INDEX.json (id -> path/sha256/bytes) and
+    # hash-check and size-check each required entry's actual bytes inside the
+    # image — labels are not proof. Notice metadata is DATA: ids, paths,
+    # digests and byte counts are validated before any container command is
+    # constructed, and hashing/sizing use argv form (no shell), so INDEX
+    # content can never inject or escape the container command.
     index_entries: dict[str, dict] = {}
     duplicate_ids: list[str] = []
     rc_idx, index_json = docker("run", "--rm", "--network", "none", "--user", "0",
@@ -805,6 +816,10 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
         except json.JSONDecodeError:
             failures.append("production image: notice INDEX.json is not valid JSON")
             parsed = None
+        else:
+            if not isinstance(parsed, dict):
+                failures.append("production image: notice INDEX.json root must be a JSON object")
+                parsed = None
         if parsed is not None:
             entries = parsed.get("entries")
             if not isinstance(entries, list):
@@ -851,6 +866,39 @@ def verify_production_image(root: Path, image: dict, docker_cmd: str) -> list[st
         if actual != entry_sha:
             failures.append(
                 f"production image: notice {notice_id!r} bytes do not match INDEX (expected {entry_sha[:12]}…, got {str(actual)[:12]}…)"
+            )
+        # declared byte count: a non-negative int, never a bool, since
+        # isinstance(True, int) is True in Python — a malformed count is a
+        # named failure rather than a skipped or silently satisfied comparison.
+        declared_bytes = entry.get("bytes")
+        if declared_bytes is None:
+            failures.append(f"production image: required notice {notice_id!r} has no 'bytes' count in INDEX")
+            continue
+        if isinstance(declared_bytes, bool):
+            failures.append(f"production image: required notice {notice_id!r} declares a boolean 'bytes' value: {declared_bytes!r}")
+            continue
+        if not isinstance(declared_bytes, int):
+            failures.append(f"production image: required notice {notice_id!r} declares a non-integer 'bytes' value: {declared_bytes!r}")
+            continue
+        if declared_bytes < 0:
+            failures.append(f"production image: required notice {notice_id!r} declares a negative 'bytes' value: {declared_bytes}")
+            continue
+        # argv-form size read of the same in-image path: no shell, notice data
+        # never interpreted; unparsable output is a named failure
+        rc3, size_out = docker("run", "--rm", "--network", "none", "--user", "0",
+                               "--entrypoint", "stat", ref, "-c", "%s", in_image)
+        actual_bytes = None
+        if rc3 == 0:
+            fields = size_out.split()
+            if len(fields) == 1 and re.fullmatch(r"[0-9]+", fields[0]):
+                actual_bytes = int(fields[0])
+        if actual_bytes is None:
+            failures.append(
+                f"production image: required notice {notice_id!r} size unreadable in image (declared {declared_bytes} bytes)"
+            )
+        elif actual_bytes != declared_bytes:
+            failures.append(
+                f"production image: notice {notice_id!r} byte length mismatch (declared {declared_bytes}, image has {actual_bytes})"
             )
     return failures
 
