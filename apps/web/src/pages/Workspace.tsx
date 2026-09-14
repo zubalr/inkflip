@@ -69,6 +69,23 @@ const RUN_STATUS_COPY: Record<string, string> = {
   preparing_assets: "Preparing the OCR model…",
 };
 
+/** What a check is doing, in the words a visitor would use. */
+const CHECK_STAGE_LABEL: Record<string, string> = {
+  render: "Rendering the page",
+  native_text: "Reading PDF text",
+  ocr: "Reading text from the image",
+  object_render_mode: "Checking how content is drawn",
+  crop_metadata: "Checking crop and page boxes",
+  paint_overlap: "Checking painted-over content",
+  reading_order: "Comparing reading order",
+  alignment: "Comparing readings",
+};
+
+function checkStageLabel(check: { capability: string; pageIndex: number }): string {
+  const stage = CHECK_STAGE_LABEL[check.capability] ?? "Running a check";
+  return `${stage} — page ${check.pageIndex + 1}`;
+}
+
 function sessionOccupied(session: InspectionSession): boolean {
   const snap = session.getState();
   return snap.report !== null || snap.doc !== null;
@@ -100,6 +117,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   // — the workspace then labels the result as a prepared example rather
   // than a fresh inspection of the user's own file.
   const [loadedExampleId, setLoadedExampleId] = useState<string | null>(null);
+  // Offering the user's own file clears every trace of the prepared
+  // example — including its source-byte pending/failed states.
+  const clearLoadedExample = useCallback(() => {
+    setLoadedExampleId(null);
+    setExampleSourcePending(false);
+    setExampleSourceFailed(null);
+  }, []);
 
   // Human notes (T23) live outside the sealed report — they are added to a
   // projection at export time only, never mutate machine evidence. Notes
@@ -140,6 +164,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   // is not enough: a newer local file in the same mounted workspace must
   // also own the session.
   const [exampleError, setExampleError] = useState<string | null>(null);
+  // Prepared-example source bytes arrive after the report import: pending
+  // while the verified fetch is in flight, failed if it errors — so the
+  // viewer can distinguish loading from a genuinely absent source.
+  const [exampleSourcePending, setExampleSourcePending] = useState<boolean>(false);
+  const [exampleSourceFailed, setExampleSourceFailed] = useState<string | null>(null);
   useEffect(() => {
     if (exampleIdToLoad === null) return;
     const reportUrl = exampleAssetUrl(exampleIdToLoad, "report.json");
@@ -159,6 +188,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       return true;
     };
     setExampleError(null);
+    setExampleSourcePending(false);
+    setExampleSourceFailed(null);
     void (async () => {
       try {
         const reportRes = await fetch(reportUrl, {
@@ -174,21 +205,40 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         if (!stillOurs()) return;
         setLoadedExampleId(exampleIdToLoad);
         const generation = session.getState().generation;
-        const manifestRes = await fetch(manifestUrl, {
-          credentials: "same-origin",
-        });
-        if (!manifestRes.ok || !stillOurs()) return;
-        const manifest = (await manifestRes.json()) as {
-          files?: { source?: { download_url?: string; sha256?: string } };
-        };
-        const downloadUrl = manifest.files?.source?.download_url;
-        const expectedSha = manifest.files?.source?.sha256;
-        if (!downloadUrl || !expectedSha || !isLocalExampleUrl(downloadUrl)) return;
-        const sourceRes = await fetch(downloadUrl, { credentials: "same-origin" });
-        if (!sourceRes.ok || !stillOurs()) return;
-        const bytes = new Uint8Array(await sourceRes.arrayBuffer());
-        if (!stillOurs()) return;
-        await session.retainVerifiedSourceBytes(bytes, expectedSha, generation);
+        // Pending covers the whole source phase — manifest fetch, source
+        // fetch and hash verification — so the viewer never flashes
+        // "no original PDF" while bytes are still being resolved.
+        setExampleSourcePending(true);
+        try {
+          const manifestRes = await fetch(manifestUrl, {
+            credentials: "same-origin",
+          });
+          if (!manifestRes.ok || !stillOurs()) return;
+          const manifest = (await manifestRes.json()) as {
+            files?: { source?: { download_url?: string; sha256?: string } };
+          };
+          const downloadUrl = manifest.files?.source?.download_url;
+          const expectedSha = manifest.files?.source?.sha256;
+          if (!downloadUrl || !expectedSha || !isLocalExampleUrl(downloadUrl)) return;
+          if (!stillOurs()) return;
+          const sourceRes = await fetch(downloadUrl, { credentials: "same-origin" });
+          if (!sourceRes.ok) {
+            if (stillOurs()) {
+              setExampleSourceFailed(`The example source could not be fetched (${sourceRes.status}).`);
+            }
+            return;
+          }
+          if (!stillOurs()) return;
+          const bytes = new Uint8Array(await sourceRes.arrayBuffer());
+          if (!stillOurs()) return;
+          await session.retainVerifiedSourceBytes(bytes, expectedSha, generation);
+        } catch (exc) {
+          if (stillOurs()) {
+            setExampleSourceFailed(exc instanceof Error ? exc.message : String(exc));
+          }
+        } finally {
+          if (stillOurs()) setExampleSourcePending(false);
+        }
       } catch (exc) {
         if (stillOurs()) {
           setExampleError(
@@ -237,7 +287,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     queueMicrotask(() => {
       if (cancelled || incomingOfferGen.current !== gen) return;
       bumpExampleIntent();
-      setLoadedExampleId(null);
+      clearLoadedExample();
       void session.offerFile(file).finally(() => {
         if (!cancelled && incomingOfferGen.current === gen) {
           onIncomingFileHandled?.();
@@ -247,7 +297,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [incomingFile, session, bumpExampleIntent, onIncomingFileHandled]);
+  }, [incomingFile, session, bumpExampleIntent, onIncomingFileHandled, clearLoadedExample]);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -259,7 +309,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       event.target.value = "";
       if (!file) return;
       bumpExampleIntent();
-      setLoadedExampleId(null);
+      clearLoadedExample();
       const occupied = session.getState().doc !== null || session.getState().report !== null;
       if (occupied) {
         setPendingFile(file);
@@ -267,7 +317,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       }
       void session.offerFile(file);
     },
-    [bumpExampleIntent, session],
+    [bumpExampleIntent, session, clearLoadedExample],
   );
 
   const onSourceChange = useCallback(
@@ -338,9 +388,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     session.close();
     setExampleDoc(null);
     setLocalExampleId(null);
-    setLoadedExampleId(null);
+    clearLoadedExample();
     setUserNotes([]);
-  }, [bumpExampleIntent, session]);
+  }, [bumpExampleIntent, session, clearLoadedExample]);
 
   return (
     <div className={styles.workspace}>
@@ -491,8 +541,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               fontSize: "var(--text-caption)",
             }}
           >
-            {snap.error.message}
-            {snap.error.detail ? ` (${snap.error.detail})` : ""}
+            <p className={styles.errorMessage}>{snap.error.message}</p>
+            {snap.error.detail && (
+              <details className={styles.errorDetail}>
+                <summary>Diagnostic details</summary>
+                <code className={styles.errorDetailCode}>{snap.error.detail}</code>
+              </details>
+            )}
           </div>
         )}
         {snap.notice && (
@@ -524,18 +579,29 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             }}
           >
             <h2 style={{ marginTop: 0 }}>{RUN_STATUS_COPY[fileState]}</h2>
-            <ul data-testid="run-checks" style={{ listStyle: "none", padding: 0 }}>
+            <ul data-testid="run-checks" style={{ listStyle: "none", padding: 0, margin: "0 0 var(--space-3)" }}>
               {(snap.run?.checks ?? []).map((check) => (
                 <li
                   key={check.id}
                   data-check-id={check.id}
                   data-status={check.status ?? check.phase}
+                  style={{ padding: "var(--space-1) 0", fontSize: "var(--text-caption)" }}
                 >
-                  <code>{check.id}</code> — {check.capability} on page{" "}
-                  {check.pageIndex + 1}: {check.status ?? check.phase}
+                  {checkStageLabel(check)} — {check.status ?? check.phase}
                 </li>
               ))}
             </ul>
+            <details style={{ marginBottom: "var(--space-3)", fontSize: "var(--text-caption)" }}>
+              <summary>Check details</summary>
+              <ul style={{ listStyle: "none", padding: "var(--space-2) 0 0", margin: 0 }}>
+                {(snap.run?.checks ?? []).map((check) => (
+                  <li key={check.id}>
+                    <code>{check.id}</code> — {check.capability} on page{" "}
+                    {check.pageIndex + 1}: {check.status ?? check.phase}
+                  </li>
+                ))}
+              </ul>
+            </details>
             <button
               id="btn-cancel-run"
               type="button"
@@ -607,6 +673,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               doc={viewerDoc}
               renderPage={session.renderViewerPage}
               pageSourceAvailable={snap.doc !== null || snap.hasSourceBytes}
+              pageSourcePending={snap.doc === null && exampleSourcePending}
+              pageSourceFailed={snap.doc === null ? exampleSourceFailed : null}
               annotations={userNotes}
               onAddAnnotation={addNote}
               onRemoveAnnotation={removeNote}
@@ -709,7 +777,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               phase="idle"
               onFile={(file) => {
                 bumpExampleIntent();
-                setLoadedExampleId(null);
+                clearLoadedExample();
                 void session.offerFile(file);
               }}
               hasDocument={false}
@@ -726,7 +794,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           setPendingFile(null);
           if (file) {
             bumpExampleIntent();
-            setLoadedExampleId(null);
+            clearLoadedExample();
             void session.offerFile(file);
           }
         }}

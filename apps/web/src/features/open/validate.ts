@@ -12,7 +12,7 @@
  * (one canonical message, `input.notpdf`); encrypted, malformed, oversized
  * and over-long documents are distinct buckets downstream.
  */
-import { OPEN_COPY, fill } from "./copy";
+import { OPEN_COPY, byteLimitLabel, fill } from "./copy";
 import type { OpenProfile } from "./limits";
 import { profileSizeLimitLabel } from "./limits";
 import type { FileCandidate, OpenError } from "./types";
@@ -49,6 +49,7 @@ export function validateCandidateSize(
     return error(
       "too_large",
       fill(OPEN_COPY.tooBig, {
+        actual: byteLimitLabel(candidate.size),
         limit: profileSizeLimitLabel(profile),
       }),
       `size:${candidate.size}>${profile.maxFileBytes}`,

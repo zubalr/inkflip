@@ -60,12 +60,44 @@
 .docActions {
   display: flex;
   gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* The loaded summary is itself a drop target — dropping a file here goes
+   through the same confirmed replace path as the button. */
+.documentDragging {
+  border-color: var(--color-teal);
+  border-style: dashed;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.errorDetailWrap {
+  margin-top: var(--space-1);
+}
+
+.errorDetailWrap summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
 }
 
 .errorDetail {
+  display: block;
+  margin-top: var(--space-1);
   font-size: var(--text-caption);
   color: var(--color-muted);
   font-family: var(--font-mono);
+  overflow-wrap: anywhere;
 }
 
 .previewRow {
@@ -289,7 +321,9 @@
     align-items: stretch;
   }
 
-  .docActions > *,
+  /* The visually-hidden replace input stays 1px — width:100% on an
+     absolutely-positioned element would extend past the viewport. */
+  .docActions > *:not(.hiddenInput),
   .previewRow > *,
   .startRow > * {
     width: 100%;

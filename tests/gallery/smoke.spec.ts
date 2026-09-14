@@ -36,7 +36,10 @@ test("gallery renders six cards; detail shows real files; open report imports", 
   await page.goto(`${baseUrl}/#/`);
   const gallery = page.getByTestId("examples-gallery");
   await expect(gallery).toBeVisible({ timeout: 15000 });
-  await expect(gallery.getByRole("button")).toHaveCount(6);
+  // Six example cards — each carries a details toggle and a direct
+  // "Inspect example" action.
+  await expect(gallery.locator("[data-testid^=example-card-]")).toHaveCount(6);
+  await expect(gallery.locator("[data-testid^=open-example-]")).toHaveCount(6);
   await expect(gallery.getByText("Repeated amounts at different positions")).toBeVisible();
 
   await page.getByTestId("example-card-duplicates").click();

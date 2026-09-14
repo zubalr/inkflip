@@ -191,6 +191,7 @@ test("320px layout: controls stack and stay usable, mobile profile engages", asy
   await expect(page.locator('[data-testid="ocr-consent"]')).not.toBeChecked();
 
   // Preview stays available but on-demand (no auto raster on mobile).
+  await page.locator('[data-testid="tuning-details"] > summary').click();
   await expect(page.locator('[data-testid="render-preview"]')).toBeVisible();
   await page.locator('[data-testid="render-preview"]').click();
 
@@ -217,6 +218,7 @@ test("mobile page changes discard the previous preview until requested", async (
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto(`${baseUrl}/#/workspace`);
   await openPdf(page, buildPdf({ pages: 2, text: "preview" }));
+  await page.locator('[data-testid="tuning-details"] > summary').click();
   const canvas = page.locator('[data-testid="region-canvas"]');
   await page.locator('[data-testid="render-preview"]').click();
   await expect.poll(() => canvas.evaluate((node: HTMLCanvasElement) => node.width)).toBeGreaterThan(0);

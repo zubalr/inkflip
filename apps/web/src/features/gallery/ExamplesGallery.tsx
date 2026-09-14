@@ -118,12 +118,7 @@ function CardDetail({
       )}
 
       <div className={styles.openActions}>
-        <button
-          type="button"
-          className={styles.openBtn}
-          data-testid={`open-example-${card.example_id}`}
-          onClick={onOpen}
-        >
+        <button type="button" className={styles.openBtn} onClick={onOpen}>
           Inspect this example
         </button>
       </div>
@@ -199,23 +194,35 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onOpenExample 
       <div className={styles.grid}>
         {(index?.cards ?? []).map((card) => {
           const display = exampleDisplayCopy(card.example_id, card.card_title, card.mechanism);
+          const open = openId === card.example_id;
           return (
-            <button
-              key={card.example_id}
-              type="button"
-              className={styles.card}
-              data-testid={`example-card-${card.example_id}`}
-              aria-expanded={openId === card.example_id}
-              onClick={() => setOpenId(openId === card.example_id ? null : card.example_id)}
-            >
-              <h3 className={styles.cardTitle}>{display.title}</h3>
-              <p className={styles.mechanism}>{display.description}</p>
-              <span className={styles.cardMeta}>
-                <span>
-                  {card.finding_count} finding{card.finding_count === 1 ? "" : "s"}
+            <div key={card.example_id} className={styles.cardWrap}>
+              <button
+                type="button"
+                className={styles.card}
+                data-testid={`example-card-${card.example_id}`}
+                aria-expanded={open}
+                aria-label={`${display.title} — details`}
+                onClick={() => setOpenId(open ? null : card.example_id)}
+              >
+                <h3 className={styles.cardTitle}>{display.title}</h3>
+                <p className={styles.mechanism}>{display.description}</p>
+                <span className={styles.cardMeta}>
+                  <span>
+                    {card.finding_count} finding{card.finding_count === 1 ? "" : "s"}
+                  </span>
+                  <span className={styles.cardDetailsHint}>{open ? "Hide details" : "Details"}</span>
                 </span>
-              </span>
-            </button>
+              </button>
+              <button
+                type="button"
+                className={styles.inspectBtn}
+                data-testid={`open-example-${card.example_id}`}
+                onClick={() => onOpenExample(card.example_id)}
+              >
+                Inspect example
+              </button>
+            </div>
           );
         })}
       </div>

@@ -775,6 +775,12 @@ test("G1 leg 1: public own-file journey — open/run/report/cancel/replace", asy
     x1: Math.ceil(Math.max(...xs)) + 10,
     y1: Math.ceil(Math.max(...ys)) + 10,
   };
+  // Region tuning lives behind the optional disclosure — open it first.
+  await page.locator("[data-testid=tuning-details] > summary").click();
+  await expect(page.locator("[data-testid=tuning-details]")).toHaveAttribute(
+    "open",
+    "",
+  );
   await page.locator("[data-testid=region-x0]").fill(String(region.x0));
   await page.locator("[data-testid=region-y0]").fill(String(region.y0));
   await page.locator("[data-testid=region-x1]").fill(String(region.x1));

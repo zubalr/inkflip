@@ -1,7 +1,7 @@
 export { ViewerStage } from "./ViewerStage";
 export type { ViewerStageProps } from "./ViewerStage";
-export { ComparePanes } from "./ComparePanes";
-export type { ComparePanesProps } from "./ComparePanes";
+export { CompareTable } from "./CompareTable";
+export type { CompareTableProps } from "./CompareTable";
 export { CanvasOverlay } from "./CanvasOverlay";
 export type { CanvasOverlayProps } from "./CanvasOverlay";
 export { AccessibleTextLayer } from "./AccessibleTextLayer";

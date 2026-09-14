@@ -116,9 +116,12 @@ test.describe("Workspace: oversized input, cancellation, and replacement disclos
 
     await page.locator("#input-open-pdf").setInputFiles(oversizedFixture());
 
-    const refusal = page.getByText(/exceeds the 20 MiB local browser limit/i).first();
+    const refusal = page.locator("#import-error");
     await expect(refusal).toBeVisible({ timeout: 15000 });
+    await expect(refusal).toContainText(/exceeds the 20 MiB local browser limit/i);
     const text = await refusal.textContent();
+    // The measured size is user-facing copy; the raw byte comparison stays
+    // in the diagnostic disclosure, still inside the refusal's text.
     expect(text, "the refusal must state the measured size, not just the limit").toMatch(/\d{7,}\s*>\s*20971520/);
 
     // Recovery: the intake still works for an acceptable file.

@@ -519,7 +519,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
         `gallery card ${id}`,
       ).toBeVisible();
     }
-    await expect(gallery.getByRole("button")).toHaveCount(6);
+    await expect(gallery.locator("[data-testid^=example-card-]")).toHaveCount(6);
 
     // Every card's manifest + sealed report + source bytes must be
     // fetchable from the built dist — fetched same-origin inside the real
@@ -707,6 +707,11 @@ test("G2 leg 2: own-file open, region selection, full run, viewer controls", asy
       x1: Math.ceil(Math.max(...xs)) + 10,
       y1: Math.ceil(Math.max(...ys)) + 10,
     };
+    // Region tuning lives behind the optional disclosure — open it first.
+    await page.locator("[data-testid=tuning-details] > summary").click();
+    await expect(
+      page.locator("[data-testid=tuning-details]"),
+    ).toHaveAttribute("open", "");
     await page.locator("[data-testid=region-x0]").fill(String(region.x0));
     await page.locator("[data-testid=region-y0]").fill(String(region.y0));
     await page.locator("[data-testid=region-x1]").fill(String(region.x1));
@@ -801,6 +806,11 @@ test("G2 leg 3: ambiguous candidates, repeated occurrences, page-level notice", 
     await expect(page.locator("#highlight-occ-p0-dup2")).toHaveClass(
       /highlightSelected/,
     );
+    // Evidence emphasis: the unselected finding's occurrence is not painted
+    // by default; "Show all positions" reveals it still unselected.
+    await expect(page.locator("#highlight-occ-p0-dup1")).toHaveCount(0);
+    await page.locator("#btn-all-positions").click();
+    await expect(page.locator("#highlight-occ-p0-dup1")).toBeVisible();
     await expect(page.locator("#highlight-occ-p0-dup1")).not.toHaveClass(
       /highlightSelected/,
     );
@@ -1147,6 +1157,9 @@ test("G2 leg 6: 360px mobile profile — limits, consent, windowed list, no over
     await expect(limits).toContainText("low-memory mode");
     await expect(page.locator("[data-testid=ocr-consent-row]")).toBeVisible();
     await expect(page.locator("[data-testid=ocr-consent]")).not.toBeChecked();
+    // Optional preview/region tuning starts closed — open it to reach
+    // the on-demand preview control.
+    await page.locator("[data-testid=tuning-details] > summary").click();
     await expect(page.locator("[data-testid=render-preview]")).toBeVisible();
     await page.locator("[data-testid=render-preview]").click();
     await expect
@@ -1182,8 +1195,9 @@ test("G2 leg 6: 360px mobile profile — limits, consent, windowed list, no over
 
     // The bundled-example viewer at 360px on a cold load — a same-tab
     // hash change cannot remount the example, so this is a fresh page on
-    // the same mobile-profiled context: finding cards are usable and
-    // compare mode stacks panes instead of squeezing.
+    // the same mobile-profiled context: finding rows are usable and the
+    // paired-reading table stacks each finding's two readings instead of
+    // squeezing two columns.
     const viewerPage = await ctx.newPage();
     await viewerPage.goto(`${baseURL}/#/workspace?example=true`);
     await viewerPage.waitForSelector("#viewer-stage", { timeout: 15_000 });
@@ -1192,17 +1206,20 @@ test("G2 leg 6: 360px mobile profile — limits, consent, windowed list, no over
     await finding.click();
     await expect(finding).toHaveAttribute("aria-current", "true");
     await viewerPage.locator("#tab-mode-compare").click();
-    await expect(viewerPage.locator("#compare-panes-container")).toBeVisible();
-    const leftBox = await viewerPage.locator("#compare-pane-left").boundingBox();
-    const rightBox = await viewerPage.locator("#compare-pane-right").boundingBox();
-    expect(leftBox).not.toBeNull();
-    expect(rightBox).not.toBeNull();
-    if (leftBox && rightBox) {
-      // Stacked, not squeezed side-by-side.
-      expect(rightBox.y).toBeGreaterThanOrEqual(leftBox.y + leftBox.height - 5);
-      expect(leftBox.width).toBeGreaterThanOrEqual(280);
-      expect(rightBox.width).toBeGreaterThanOrEqual(280);
-    }
+    await expect(viewerPage.locator('[data-testid="compare-table"]')).toBeVisible();
+    const cellBoxes = await viewerPage
+      .locator('[data-testid="compare-table"] tbody[data-finding-id] td[data-reader-side]')
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width };
+        }),
+      );
+    expect(cellBoxes.length).toBe(2);
+    // The second reading sits below the first, full width.
+    expect(cellBoxes[1].y).toBeGreaterThan(cellBoxes[0].y);
+    expect(cellBoxes[0].w).toBeGreaterThanOrEqual(280);
+    expect(cellBoxes[1].w).toBeGreaterThanOrEqual(280);
     const viewerOverflow = await viewerPage.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

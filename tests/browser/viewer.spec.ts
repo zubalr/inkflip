@@ -77,8 +77,12 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     const classAttr = await occ2Highlight.getAttribute("class");
     expect(classAttr).toContain("highlightSelected");
 
-    // Verify occurrence 1 highlight is NOT selected
+    // Verify occurrence 1 highlight is NOT selected. The default overlay
+    // emphasises only the selected finding's evidence — revealing every
+    // recorded position is the deliberate "Show all positions" action.
+    await page.locator("#btn-all-positions").click();
     const occ1Highlight = page.locator("#highlight-occ-p0-dup1");
+    await expect(occ1Highlight).toBeVisible();
     const classAttr1 = await occ1Highlight.getAttribute("class");
     expect(classAttr1).not.toContain("highlightSelected");
 
@@ -107,57 +111,56 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     });
   });
 
-  test("criterion 2: two views sync without scroll loop in compare mode", async ({ page }) => {
+  test("criterion 2: compare rows pair the finding's readings and share one preview", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
-    // Switch to compare mode
+    // Compare mode shows the paired-reading table, not dual page panes.
     const compareTab = page.locator("#tab-mode-compare");
     await compareTab.click();
-    await expect(page.locator("#compare-panes-container")).toBeVisible();
+    await expect(page.locator('[data-testid="compare-table"]')).toBeVisible();
 
-    // Zoom to 200% so scrollbars are active
-    const zoomInBtn = page.locator("#btn-zoom-in");
-    await zoomInBtn.click();
-    await zoomInBtn.click();
-    await zoomInBtn.click();
-    await zoomInBtn.click();
+    // The finding's named readers head the two columns (PDFium + pypdf
+    // on this fixture), and every named reading stays listed — the
+    // ambiguous finding keeps both duplicate candidates.
+    const leftReader = await page.locator("#compare-reader-left").inputValue().catch(() => null);
+    const rightReader = await page.locator("#compare-reader-right").inputValue().catch(() => null);
+    expect(leftReader).toBe("reader-pdfium");
+    expect(rightReader).toBe("reader-pypdf");
+    await expect(
+      page.locator("#compare-reading-finding-dup1-occ-p0-dup1"),
+    ).toBeVisible();
+    await expect(
+      page.locator("#compare-reading-finding-dup1-occ-p0-pypdf1"),
+    ).toBeVisible();
+    const status = page.locator('[data-testid="compare-status-finding-ambig-amounts"]');
+    await expect(status).toBeVisible();
 
-    const leftScroll = page.locator("#compare-scroll-left");
-    const rightScroll = page.locator("#compare-scroll-right");
+    // "Show on page" opens the row's shared preview: one page, evidence
+    // marks, and no sideways shift of the table.
+    const areaBoxBefore = await page.locator("#viewer-paper-area").boundingBox();
+    await page.locator("#compare-show-finding-dup1").click();
+    const preview = page.locator('[data-testid="compare-preview-finding-dup1"]');
+    await expect(preview).toBeVisible();
+    await expect(preview.locator("#document-paper")).toBeVisible();
+    await expect(preview.locator("#highlight-occ-p0-dup1")).toBeVisible();
+    const areaBoxAfter = await page.locator("#viewer-paper-area").boundingBox();
+    expect(Math.abs((areaBoxAfter?.x ?? 0) - (areaBoxBefore?.x ?? 0))).toBeLessThanOrEqual(1);
 
-    await expect(leftScroll).toBeVisible();
-    await expect(rightScroll).toBeVisible();
-
-    // Scroll left pane and observe right pane synchronizes
-    await leftScroll.evaluate((el) => {
-      el.scrollTop = 120;
-    });
-
-    // Wait for frame sync
-    await page.waitForTimeout(200);
-
-    const rightScrollTop = await rightScroll.evaluate((el) => el.scrollTop);
-    expect(rightScrollTop).toBeGreaterThan(50);
-
-    // Scroll right pane back and observe left pane synchronizes without infinite loop
-    await rightScroll.evaluate((el) => {
-      el.scrollTop = 30;
-    });
-
-    await page.waitForTimeout(200);
-
-    const leftScrollTop = await leftScroll.evaluate((el) => el.scrollTop);
-    expect(leftScrollTop).toBeLessThan(60);
+    // Toggling closes the preview; the finding row remains selected.
+    await page.locator("#compare-show-finding-dup1").click();
+    await expect(preview).toHaveCount(0);
 
     await page.screenshot({
-      path: "artifacts/tasks/T13/screenshots/compare-sync-scroll.png",
+      path: "artifacts/tasks/T13/screenshots/compare-shared-preview.png",
       fullPage: true,
     });
   });
 
-  test("criterion 3: narrow screen stacks instead of squeezing in compare mode", async ({
+  test("criterion 3: narrow screen stacks each finding's readings instead of squeezing", async ({
     page,
   }) => {
     // Narrow mobile viewport (360px width)
@@ -165,26 +168,25 @@ test.describe("T13: Integrated Viewer & Evidence Navigation", () => {
     await page.goto(`${baseUrl}/#/workspace?example=fixture`);
     await page.waitForSelector("#viewer-stage");
 
-    // Switch to compare mode
+    // Switch to compare mode — each finding stacks reader A label+value
+    // above reader B label+value rather than squeezing two columns.
     await page.locator("#tab-mode-compare").click();
-    await expect(page.locator("#compare-panes-container")).toBeVisible();
+    await expect(page.locator('[data-testid="compare-table"]')).toBeVisible();
 
-    const leftPane = page.locator("#compare-pane-left");
-    const rightPane = page.locator("#compare-pane-right");
-
-    const leftBox = await leftPane.boundingBox();
-    const rightBox = await rightPane.boundingBox();
-
-    expect(leftBox).not.toBeNull();
-    expect(rightBox).not.toBeNull();
-
-    if (leftBox && rightBox) {
-      // Right pane must be stacked below left pane vertically
-      expect(rightBox.y).toBeGreaterThanOrEqual(leftBox.y + leftBox.height - 5);
-      // Both panes must retain readable width (>= 280px) rather than being squeezed
-      expect(leftBox.width).toBeGreaterThanOrEqual(280);
-      expect(rightBox.width).toBeGreaterThanOrEqual(280);
-    }
+    const cells = page.locator(
+      '[data-testid="compare-table"] tbody[data-finding-id="finding-dup1"] td[data-reader-side]',
+    );
+    const cellBoxes = await cells.evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, w: r.width };
+      }),
+    );
+    expect(cellBoxes.length).toBe(2);
+    // The second reading sits below the first, full width — not beside it.
+    expect(cellBoxes[1].y).toBeGreaterThan(cellBoxes[0].y);
+    expect(cellBoxes[0].w).toBeGreaterThanOrEqual(280);
+    expect(cellBoxes[1].w).toBeGreaterThanOrEqual(280);
 
     // P2-F2 verification: ensure zero horizontal page scroll at 360px
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);

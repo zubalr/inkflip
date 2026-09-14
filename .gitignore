@@ -59,6 +59,7 @@ htmlcov/
 /artifacts/followups/
 /artifacts/integration/
 /artifacts/gates/
+/artifacts/ux-pass/
 /artifacts/performance/*.json
 
 # Provider local dev output (wrangler dev temp state; T48 preflight).

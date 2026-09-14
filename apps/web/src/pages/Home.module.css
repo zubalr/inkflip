@@ -429,7 +429,6 @@
 
 .inspectPage {
   background: var(--color-canvas);
-  border: 1px solid var(--color-line);
   border-radius: var(--radius-panel);
   padding: var(--space-5);
   box-sizing: border-box;
@@ -478,7 +477,6 @@
 }
 
 .inspectFinding {
-  border: 1px solid var(--color-line);
   border-radius: var(--radius-panel);
   padding: var(--space-4);
   background: var(--color-canvas);
@@ -492,31 +490,79 @@
   color: var(--color-ink);
 }
 
-.inspectReadings {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-3);
-  margin: 0;
+/* Paired-reading preview — mirrors the workspace compare table: two
+   columns, values first, reader names quiet, status in words. */
+.inspectPairTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-body);
 }
 
-.inspectReadings dt {
+.inspectPairTable th {
+  text-align: left;
+  vertical-align: baseline;
+  padding: 0 var(--space-3) var(--space-2) 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.inspectPairTable th + th {
+  border-left: 1px solid var(--color-line);
+  padding-left: var(--space-3);
+}
+
+.inspectPairTitle {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.inspectPairReader {
+  display: block;
   font-size: var(--text-caption);
-  color: var(--color-muted);
-  margin: 0 0 2px;
+  font-weight: 500;
+  color: var(--color-teal);
+  margin-top: 2px;
 }
 
-.inspectReadings dd {
-  margin: 0;
+.inspectPairTable td {
   font-family: var(--font-display);
   font-size: var(--space-5);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
+  padding: var(--space-2) var(--space-3) 0 0;
+  vertical-align: top;
   overflow-wrap: anywhere;
 }
 
-.inspectReadings div:last-child dd {
+.inspectPairTable td + td {
+  border-left: 1px solid var(--color-line);
+  padding-left: var(--space-3);
+}
+
+.inspectPairStatus {
+  margin: var(--space-3) 0 0;
+  text-align: center;
+}
+
+.inspectPairBadge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  background: var(--color-rust-soft);
   color: var(--color-rust);
+  border: 1px solid var(--color-rust);
+}
+
+.inspectPairHint {
+  margin: var(--space-1) 0 0;
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--color-teal);
 }
 
 .capabilityList {
@@ -665,8 +711,7 @@
   .main {
     padding: var(--space-5);
   }
-  .sampleReadings,
-  .inspectReadings {
+  .sampleReadings {
     grid-template-columns: minmax(0, 1fr);
   }
 }

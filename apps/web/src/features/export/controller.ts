@@ -53,8 +53,14 @@ export interface ExportControllerState {
 
 export interface FindingChoice {
   readonly id: string;
+  /** 1-based document-order number — the stable "Finding N" the report
+   *  and the compare table use. */
+  readonly number: number;
   readonly title: string;
   readonly pageIndex: number;
+  /** First named reading's raw text, truncated — distinguishes findings
+   *  whose titles read identically. */
+  readonly snippet: string | null;
 }
 
 export interface CropPreview {
@@ -273,17 +279,40 @@ export function probeReportId(source: unknown): string | null {
 
 /** Findings on the source report, in document order. */
 export function probeFindingChoices(source: unknown): readonly FindingChoice[] {
-  const findings = (source as { findings?: readonly {
-    id?: string; title?: string; page_index?: number;
-  }[] } | null)?.findings;
+  const report = source as {
+    findings?: readonly {
+      id?: string;
+      title?: string;
+      page_index?: number;
+      occurrence_ids?: readonly string[];
+    }[];
+    occurrences?: readonly { id?: string; raw_text?: string }[];
+  } | null;
+  const findings = report?.findings;
   if (!Array.isArray(findings)) return [];
+  const textById = new Map<string, string>();
+  for (const occ of report?.occurrences ?? []) {
+    if (typeof occ?.id === "string" && typeof occ.raw_text === "string") {
+      textById.set(occ.id, occ.raw_text);
+    }
+  }
   const out: FindingChoice[] = [];
   for (const f of findings) {
     if (typeof f?.id !== "string") continue;
+    let snippet: string | null = null;
+    for (const occId of f.occurrence_ids ?? []) {
+      const text = textById.get(occId);
+      if (text !== undefined) {
+        snippet = text.length > 48 ? `${text.slice(0, 48)}…` : text;
+        break;
+      }
+    }
     out.push({
       id: f.id,
+      number: out.length + 1,
       title: typeof f.title === "string" ? f.title : f.id,
       pageIndex: typeof f.page_index === "number" ? f.page_index : -1,
+      snippet,
     });
   }
   return out;

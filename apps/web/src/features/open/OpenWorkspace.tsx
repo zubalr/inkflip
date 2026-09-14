@@ -291,22 +291,49 @@ export function OpenWorkspace({
   const previewMeta = doc?.pages[previewPage] ?? null;
   const previewRegion = regions.get(previewPage) ?? null;
 
+  // Once a file is loaded the big drop area is replaced by the compact
+  // summary; this hidden input and the summary's drop handlers keep the
+  // same confirmed replace path (`onFile` → pending → ReplaceConfirmDialog).
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+  const [summaryDragging, setSummaryDragging] = useState(false);
+
   return (
     <div className={styles.workspace}>
-      <FileDrop phase={phase} onFile={onFile} hasDocument={doc !== null} />
+      {doc === null && <FileDrop phase={phase} onFile={onFile} />}
 
       {error && (
         <Notice type="error" title={error.message} id={`open-error-${error.kind}`}>
           {error.detail && (
-            <span className={styles.errorDetail} data-testid="open-error-detail">
-              {error.detail}
-            </span>
+            <details className={styles.errorDetailWrap}>
+              <summary>Diagnostic details</summary>
+              <span className={styles.errorDetail} data-testid="open-error-detail">
+                {error.detail}
+              </span>
+            </details>
           )}
         </Notice>
       )}
 
       {doc !== null && (
-        <section className={styles.document} aria-label="Open document">
+        <section
+          className={`${styles.document} ${summaryDragging ? styles.documentDragging : ""}`}
+          aria-label="Open document"
+          onDrop={(event) => {
+            event.preventDefault();
+            setSummaryDragging(false);
+            if (phase !== "idle") return;
+            const file = event.dataTransfer?.files?.[0];
+            if (file) onFile(file);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+            setSummaryDragging(true);
+          }}
+          onDragLeave={(event) => {
+            if (event.currentTarget === event.target) setSummaryDragging(false);
+          }}
+        >
           <div className={styles.summary}>
             <div className={styles.summaryText}>
               <p className={styles.summaryLabel}>{WORKSPACE_COPY.fileLabel}</p>
@@ -320,6 +347,29 @@ export function OpenWorkspace({
               </p>
             </div>
             <div className={styles.docActions}>
+              <input
+                ref={replaceInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                className={styles.hiddenInput}
+                aria-label={OPEN_COPY.replaceAction}
+                disabled={phase !== "idle"}
+                data-testid="file-input"
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  if (file) onFile(file);
+                }}
+              />
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => replaceInputRef.current?.click()}
+                disabled={phase !== "idle"}
+                data-testid="replace-file"
+              >
+                {OPEN_COPY.replaceAction}
+              </Button>
               <Button
                 variant="secondary"
                 size="small"
@@ -409,10 +459,10 @@ export function OpenWorkspace({
             </span>
           </div>
 
-          {/* Optional tuning: the preview page and the region editor. Open by
-              default so every control stays visible and reachable; collapsing
-              it hides the pixels without unmounting the editor's state. */}
-          <details className={styles.tuning} open>
+          {/* Optional tuning: the preview page and the region editor. Closed
+              by default — the ordinary path is file → pages → check; the
+              region crop is only needed to check one area of a page. */}
+          <details className={styles.tuning} data-testid="tuning-details">
             <summary className={styles.tuningSummary}>
               <span className={styles.disclosureTitle}>
                 {WORKSPACE_COPY.tuning}

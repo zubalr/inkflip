@@ -9,6 +9,9 @@
 export interface HomeSampleReader {
   name: string;
   version: string;
+  /** Reader method — lets the preview pair readings by real evidence kind
+   *  (native_text vs ocr) instead of generic "page vs extracted" labels. */
+  method: string;
 }
 
 export interface HomeSample {
@@ -36,7 +39,19 @@ interface ManifestLike {
   findings?: unknown;
 }
 
-export async function loadHomeSample(): Promise<HomeSample> {
+let cachedSample: Promise<HomeSample> | null = null;
+
+export function loadHomeSample(): Promise<HomeSample> {
+  // One fetch per session — the manifest is static content; a failure
+  // clears the cache so a later mount retries rather than re-failing.
+  cachedSample ??= fetchHomeSample().catch((err: unknown) => {
+    cachedSample = null;
+    throw err;
+  });
+  return cachedSample;
+}
+
+async function fetchHomeSample(): Promise<HomeSample> {
   const res = await fetch("/examples/amount/manifest.json");
   if (!res.ok) {
     throw new Error(`Sample manifest unavailable (${res.status})`);
@@ -55,12 +70,13 @@ export async function loadHomeSample(): Promise<HomeSample> {
 
   const readers: HomeSampleReader[] = Object.values(m.readers ?? {})
     .filter(
-      (r): r is { name: string; version?: string } =>
+      (r): r is { name: string; version?: string; method?: string } =>
         typeof r === "object" && r !== null && typeof (r as { name?: unknown }).name === "string",
     )
     .map((r) => ({
       name: r.name,
       version: typeof r.version === "string" ? r.version : "",
+      method: typeof r.method === "string" ? r.method : "",
     }));
 
   // The two dollar figures are recorded in the manifest's own mechanism
@@ -69,8 +85,8 @@ export async function loadHomeSample(): Promise<HomeSample> {
   let extractedAmount: string | null = null;
   const pair = mechanism.match(/visual\s+(\S+)\s+becomes\s+extracted\s+(\S+)/i);
   if (pair) {
-    visualAmount = pair[1];
-    extractedAmount = pair[2];
+    visualAmount = pair[1] ?? null;
+    extractedAmount = pair[2] ?? null;
   }
 
   return {

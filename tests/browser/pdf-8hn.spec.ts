@@ -153,6 +153,9 @@ async function waitForDocument(page: Page, pageCount?: number): Promise<void> {
       `${pageCount} page`,
     );
   }
+  // Optional preview/region tuning is a closed disclosure by default —
+  // specs that drive it open it here once per document.
+  await page.locator('[data-testid=tuning-details] > summary').click();
 }
 
 // ---------------------------------------------------------------------------

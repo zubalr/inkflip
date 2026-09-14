@@ -59,6 +59,14 @@
   color: var(--color-warning-text);
 }
 
+/* The finding's descriptive title sits under the "Finding N — "snippet""
+   line so identical titles still produce distinguishable choices. */
+.findingChoiceTitle {
+  display: block;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
 .preview {
   border-top: 1px solid var(--color-line);
   padding-top: var(--space-4);

@@ -1,0 +1,360 @@
+.compare {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.tableWrap {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-pure);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.colHead {
+  text-align: left;
+  vertical-align: baseline;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-subtle);
+  border-bottom: 2px solid var(--color-line);
+}
+
+.colHead + .colHead {
+  border-left: 1px solid var(--color-line);
+}
+
+.colTitle {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.colReader {
+  display: block;
+  margin-top: var(--space-1);
+}
+
+.colReaderName {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-teal);
+}
+
+.readerSelect {
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-teal);
+  background: var(--color-paper-pure);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-1) var(--space-2);
+  min-height: 32px;
+  max-width: 100%;
+}
+
+.readerSelect:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Each finding is one tbody so its meta / values / status / panel rows
+   stay grouped and never drift apart. */
+.findingGroup {
+  /* no-op base hook for group-level borders */
+}
+
+.findingGroup + .findingGroup > tr:first-child > td {
+  border-top: 2px solid var(--color-line);
+}
+
+.findingGroupSelected > tr > td {
+  background-color: var(--color-surface-subtle);
+}
+
+.findingGroupSelected .findingMetaCell {
+  background-color: var(--color-surface-muted);
+}
+
+.findingMetaCell {
+  padding: var(--space-2) var(--space-4) 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.findingRef {
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-right: var(--space-2);
+}
+
+.findingName {
+  color: var(--color-ink);
+  font-weight: 500;
+  margin-right: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.findingPage {
+  white-space: nowrap;
+}
+
+.valueCell {
+  vertical-align: top;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.valueCell + .valueCell {
+  border-left: 1px solid var(--color-line);
+}
+
+.cellLabel {
+  display: none;
+}
+
+.cellList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.reading {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--motion-state), border-color var(--motion-state);
+}
+
+.reading:hover {
+  background: var(--color-surface-subtle);
+}
+
+.reading:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.readingSelected {
+  border-color: var(--color-focus);
+  background: var(--color-paper-pure);
+  box-shadow: inset 3px 0 0 var(--color-focus);
+}
+
+.readingText {
+  display: block;
+  font-size: var(--text-body);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  quotes: "“" "”";
+}
+
+.readingMeta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.cellEmpty {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.statusCell {
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+.statusLine {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  border-top: 1px dashed var(--color-line);
+  padding-top: var(--space-2);
+}
+
+.actionLine {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.actionSep {
+  color: var(--color-muted);
+}
+
+.rowAction {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  background: none;
+  color: var(--color-teal);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-control);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rowAction:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-muted);
+}
+
+.rowAction:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+
+.badgeDifference {
+  background: var(--color-rust-soft);
+  color: var(--color-rust);
+  border-color: var(--color-rust);
+}
+
+.badgeOrder {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+
+.badgeAmbiguous,
+.badgeUnmatched,
+.badgeIncomplete {
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+  border-color: var(--color-warning-border);
+}
+
+.badgePageLevel,
+.badgeOneSided {
+  background: var(--color-canvas);
+  color: var(--color-muted);
+  border-color: var(--color-line);
+}
+
+.panelCell {
+  padding: 0;
+  border-top: 1px solid var(--color-line);
+  background: var(--color-canvas);
+}
+
+/* Mobile: each finding stacks its two readings — reader A label + value,
+   reader B label + value, then status + actions. The table headers hide;
+   per-cell labels restore the reader/value relationship. */
+@media (max-width: 767px) {
+  .tableWrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .table,
+  .table colgroup,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table colgroup {
+    display: none;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .findingGroup {
+    display: block;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-paper-pure);
+    margin-bottom: var(--space-3);
+    overflow: hidden;
+  }
+
+  .findingGroup + .findingGroup > tr:first-child > td {
+    border-top: none;
+  }
+
+  .findingGroupSelected {
+    border-color: var(--color-focus);
+    box-shadow: var(--shadow-paper);
+  }
+
+  .findingMetaCell {
+    padding: var(--space-3) var(--space-3) 0;
+  }
+
+  .valueCell {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .valueCell + .valueCell {
+    border-left: none;
+    border-top: 1px dashed var(--color-line);
+  }
+
+  .cellLabel {
+    display: block;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: var(--space-1);
+  }
+
+  .statusCell {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+
+  .statusLine,
+  .actionLine {
+    justify-content: flex-start;
+  }
+
+  .panelCell {
+    display: block;
+  }
+}

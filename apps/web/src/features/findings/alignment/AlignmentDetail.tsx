@@ -6,6 +6,12 @@
  * and keeps every named occurrence navigable. Ambiguous findings show all
  * candidates with no pre-picked answer; unmatched findings never claim
  * missing text; incomplete coverage is labeled partial, not clean.
+ *
+ * The default view is deliberately short: the status badge, one plain
+ * sentence and the named readings. Reader versions, adapter identity,
+ * occurrence ordinals, coordinates, precision, basis, limitations and
+ * unresolved references live in the Technical details disclosure — the
+ * evidence is retained, not removed.
  */
 import React from "react";
 import type {
@@ -37,6 +43,31 @@ const BADGE_CLASS: Record<string, string> = {
   one_sided: styles.badge_one_sided,
 };
 
+function methodLabel(reader: Reader): string {
+  switch (reader.method) {
+    case "native_text":
+      return "PDF text";
+    case "ocr":
+      return "text read from image";
+    case "render":
+      return "page image";
+    case "structure":
+      return "document structure";
+    default:
+      return reader.method;
+  }
+}
+
+function geometryLabel(occ: Occurrence): string {
+  const poly = occ.geometry.polygon;
+  if (poly === null || poly.length === 0) return "page-level (no polygon)";
+  const xs = poly.map((p) => p[0]);
+  const ys = poly.map((p) => p[1]);
+  return `${poly.length}-point polygon, bounds x≈${Math.round(Math.min(...xs))}–${Math.round(
+    Math.max(...xs),
+  )}pt y≈${Math.round(Math.min(...ys))}–${Math.round(Math.max(...ys))}pt`;
+}
+
 export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
   finding,
   occurrences,
@@ -46,6 +77,9 @@ export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
   returnFocusId,
 }) => {
   const semantics = classifyFinding(finding, occurrences, readers);
+  // Readers this finding's evidence names — shown in emitted order.
+  const namedReaderIds = new Set(semantics.candidates.map((c) => c.occurrence.reader_id));
+  const namedReaders = readers.filter((r) => namedReaderIds.has(r.id));
 
   return (
     <div
@@ -66,22 +100,13 @@ export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
         >
           {semantics.badge}
         </span>
+        {finding.page_index !== undefined && (
+          <span className={styles.scope}>Page {finding.page_index + 1}</span>
+        )}
       </div>
       <p className={styles.body} data-testid="alignment-body">
         {semantics.body}
       </p>
-      {finding.basis ? (
-        <p className={styles.basis} data-testid="alignment-basis">
-          How this was checked: {finding.basis}
-        </p>
-      ) : null}
-      {finding.limitations.length > 0 ? (
-        <ul className={styles.limits} data-testid="alignment-limitations">
-          {finding.limitations.map((lim, i) => (
-            <li key={i}>{lim}</li>
-          ))}
-        </ul>
-      ) : null}
       <OccurrenceCandidates
         finding={finding}
         occurrences={occurrences}
@@ -90,6 +115,64 @@ export const AlignmentDetail: React.FC<AlignmentDetailProps> = ({
         onSelectOccurrence={onSelectOccurrence}
         returnFocusId={returnFocusId}
       />
+      <details className={styles.tech}>
+        <summary className={styles.techSummary}>Technical details</summary>
+        <div className={styles.techBody}>
+          {namedReaders.length > 0 && (
+            <div className={styles.techGroup}>
+              <h5 className={styles.techHeading}>Readers</h5>
+              <ul className={styles.techList}>
+                {namedReaders.map((r) => (
+                  <li key={r.id}>
+                    {r.name}
+                    {r.version ? ` ${r.version}` : ""} — {methodLabel(r)} · adapter{" "}
+                    {r.adapter_version} · {r.environment}
+                    {r.limitations.length > 0 ? ` · limits: ${r.limitations.join("; ")}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {semantics.candidates.length > 0 && (
+            <div className={styles.techGroup}>
+              <h5 className={styles.techHeading}>Occurrence references</h5>
+              <ul className={styles.techList}>
+                {semantics.candidates.map((c) => (
+                  <li key={c.occurrence.id}>
+                    <code>{c.occurrence.id}</code> — occurrence #{c.occurrence.ordinal} on page{" "}
+                    {c.occurrence.page_index + 1}, {c.occurrence.geometry.precision} precision,{" "}
+                    {geometryLabel(c.occurrence)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {semantics.unresolvedIds.length > 0 && (
+            <div className={styles.techGroup}>
+              <h5 className={styles.techHeading}>Unresolved references</h5>
+              <ul className={styles.techList}>
+                {semantics.unresolvedIds.map((id) => (
+                  <li key={id}>
+                    <code>{id}</code> — named by this finding but absent from the occurrence set
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {finding.basis ? (
+            <p className={styles.basis} data-testid="alignment-basis">
+              How this was checked: {finding.basis}
+            </p>
+          ) : null}
+          {finding.limitations.length > 0 ? (
+            <ul className={styles.limits} data-testid="alignment-limitations">
+              {finding.limitations.map((lim, i) => (
+                <li key={i}>{lim}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </details>
     </div>
   );
 };

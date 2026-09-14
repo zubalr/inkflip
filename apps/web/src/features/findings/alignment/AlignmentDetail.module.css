@@ -10,7 +10,13 @@
 .badgeRow {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
+}
+
+.scope {
+  font-size: 12px;
+  color: var(--color-muted);
 }
 
 .badge {
@@ -75,4 +81,62 @@
   padding-left: var(--space-4);
   font-size: 12px;
   color: var(--color-muted);
+}
+
+/* Technical disclosure — versions, ordinals, geometry, basis, limits. */
+.tech {
+  border-top: 1px dashed var(--color-line);
+  padding-top: var(--space-2);
+}
+
+.techSummary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-teal);
+  cursor: pointer;
+  border-radius: var(--radius-control);
+}
+
+.techSummary:hover {
+  color: var(--color-ink);
+}
+
+.techSummary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.techBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.techGroup {
+  margin: 0;
+}
+
+.techHeading {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.techList {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.techList code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
 }

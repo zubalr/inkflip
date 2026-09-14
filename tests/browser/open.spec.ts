@@ -238,6 +238,17 @@ async function waitForDocument(page: Page, pageCount?: number): Promise<void> {
   }
 }
 
+/** Region/preview tuning is an optional disclosure — open it before
+ *  interacting with the region editor controls inside. */
+async function openTuning(page: Page): Promise<void> {
+  const details = page.locator('[data-testid=tuning-details]');
+  if ((await details.getAttribute('open')) === null) {
+    await details.locator('summary').click();
+  }
+  await expect(details).toHaveAttribute('open', '');
+  await expect(page.locator('[data-testid=region-surface]')).toBeVisible();
+}
+
 async function fileState(page: Page): Promise<string> {
   return page.evaluate(
     () => (globalThis as any).__t08.coordinator.fileState,
@@ -781,6 +792,7 @@ test('region drag and numeric entry stay inside page bounds; padding explicit', 
   await openPreview(page);
   await offerFixture(page, 'mapping-amount.pdf'); // 520 x 400 pt page
   await waitForDocument(page, 1);
+  await openTuning(page);
 
   const surface = page.locator('[data-testid=region-surface]');
   const canvas = page.locator('[data-testid=region-canvas]');
@@ -863,6 +875,7 @@ test('rotated page: drag converts to canonical bounds inside page extent', async
   await openPreview(page);
   await offerFixture(page, 'geometry-90.pdf'); // real /Rotate 90 fixture
   await waitForDocument(page, 1);
+  await openTuning(page);
 
   const meta = await page.evaluate(
     () => (globalThis as any).__t08.controller.currentDocument.pages[0],
@@ -911,6 +924,7 @@ test('huge page opens; region validation quotes its real bounds', async ({
     buildPdf({ pages: 1, box: [0, 0, 100000, 100000] }),
   );
   await waitForDocument(page, 1);
+  await openTuning(page);
 
   // Keyboard input beyond the 100 000 pt extent is refused with the real
   // bound in the message — the bound comes from page metadata, not a cap.
@@ -958,6 +972,7 @@ test('no document data reaches the URL, storage or any network request', async (
 
   // Exercise the whole surface: select pages, commit a region, start a run.
   await page.locator('[data-testid=select-all]').click();
+  await openTuning(page);
   const surface = page.locator('[data-testid=region-surface]');
   const canvas = page.locator('[data-testid=region-canvas]');
   await expect

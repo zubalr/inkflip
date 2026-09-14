@@ -39,28 +39,39 @@
   }
 }
 
-.card {
+/* Each card is a wrap: the body toggles optional details, and a separate
+   Inspect action opens the example straight into the workspace. */
+.cardWrap {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: var(--color-paper-pure);
-  padding: var(--space-5);
+  box-shadow: var(--shadow-paper);
+  overflow: hidden;
+}
+
+.card {
+  border: none;
+  background: transparent;
+  padding: var(--space-5) var(--space-5) var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: var(--shadow-paper);
+  flex: 1;
 }
 
-.card:hover {
+.cardWrap:hover {
   border-color: var(--color-teal, var(--color-line));
 }
 
 .card:focus-visible {
-  border-color: var(--color-teal, var(--color-line));
   outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
+  outline-offset: -1px;
+  border-radius: var(--radius-card);
 }
 
 .cardTitle {
@@ -93,6 +104,40 @@
   color: var(--color-muted);
   border-top: 1px solid var(--color-line);
   padding-top: var(--space-3);
+}
+
+.cardDetailsHint {
+  color: var(--color-teal);
+  font-weight: 600;
+}
+
+/* The Inspect action is separate from the details toggle and always
+   visible at the card's foot. */
+.inspectBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-min-height, 44px);
+  margin: 0 var(--space-5) var(--space-4);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  background: var(--color-ink);
+  color: var(--color-paper-pure);
+  cursor: pointer;
+  font-size: var(--text-body);
+  font-weight: 500;
+  transition: background var(--motion-state), border-color var(--motion-state);
+}
+
+.inspectBtn:hover {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.inspectBtn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .detail {

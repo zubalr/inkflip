@@ -53,6 +53,9 @@ export const FindingNotes: React.FC<FindingNotesProps> = ({
       <p className={styles.humanOnly}>
         Your notes stay yours. They are never reader output and never change the evidence.
       </p>
+      <p className={styles.humanOnly}>
+        Notes last for this session only — include them when saving a report to keep them.
+      </p>
       {own.length > 0 && (
         <ul className={styles.list}>
           {own.map((note) => (

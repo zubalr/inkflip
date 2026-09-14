@@ -79,6 +79,25 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MiB`;
 }
 
+/** Plain-words labels for the contract's `export.included` categories —
+ *  visitors read "selected readings", not "selected_text". Unknown
+ *  categories keep their recorded key rather than being paraphrased. */
+const INCLUDED_LABEL: Record<string, string> = {
+  selected_text: "selected readings (raw text and positions)",
+  crops: "crop images",
+  page_renders: "full-page images",
+  document_hash: "document fingerprint (SHA-256)",
+  settings: "reader settings",
+  coverage: "coverage summary",
+  annotations: "your notes",
+  filename: "original filename",
+  source_pdf: "original PDF bytes",
+};
+
+function includedLabel(key: string): string {
+  return INCLUDED_LABEL[key] ?? key;
+}
+
 function Option({
   id,
   label,
@@ -246,8 +265,10 @@ export function ExportPanel({
                 }
               />
               <label htmlFor={`${baseId}-finding-${f.id}`}>
-                {f.title}
+                {`Finding ${f.number}`}
+                {f.snippet !== null && ` — “${f.snippet}”`}
                 {f.pageIndex >= 0 && ` · page ${f.pageIndex + 1}`}
+                <span className={styles.findingChoiceTitle}>{f.title}</span>
               </label>
             </div>
           ))}
@@ -295,7 +316,8 @@ export function ExportPanel({
             </dl>
           </details>
           <p className={styles.manifest} data-testid="export-manifest">
-            Included: {preview.included.join(", ")}. Excluded: {preview.omissions.join(" ")}
+            Included: {preview.included.map(includedLabel).join(", ")}. Excluded:{" "}
+            {preview.omissions.join(" ")}
           </p>
           {(state.notices?.deselectedFindingIds?.length ?? 0) > 0 && (
             <p className={styles.manifest} data-testid="deselected-findings">

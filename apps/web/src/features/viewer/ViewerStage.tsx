@@ -15,7 +15,7 @@ import type {
   RotationDegree,
 } from "./types";
 import { CanvasOverlay } from "./CanvasOverlay";
-import { ComparePanes } from "./ComparePanes";
+import { CompareTable } from "./CompareTable";
 import { AccessibleTextLayer } from "./AccessibleTextLayer";
 import { AlignmentDetail } from "../findings/alignment/AlignmentDetail";
 import { isOrderOnlyFinding } from "../findings/alignment/classify.ts";
@@ -52,7 +52,8 @@ interface PaintState {
 }
 
 const NO_SOURCE_NOTE =
-  "This report has no verified source PDF attached, so there is no page image to paint.";
+  "This report has no verified source PDF attached, so there is no page image to paint. Recorded positions still appear as highlights; attach the original PDF to see it.";
+const LOADING_SOURCE_NOTE = "Loading preview…";
 
 export interface ViewerStageProps {
   doc: ViewerDoc;
@@ -61,6 +62,13 @@ export interface ViewerStageProps {
   /** False when no verified source exists — the viewer then shows the
    *  honest source-unavailable state without attempting a render. */
   pageSourceAvailable?: boolean;
+  /** True while verified source bytes are being fetched (prepared
+   *  examples) — the viewer shows "Loading preview", never a flash of
+   *  the absent-source state. */
+  pageSourcePending?: boolean;
+  /** Set when the source fetch failed — distinct from a genuinely
+   *  absent source and from a render error. */
+  pageSourceFailed?: string | null;
   initialFindingId?: string | null;
   initialMode?: ViewerMode;
   initialZoom?: number;
@@ -76,6 +84,8 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
   doc,
   renderPage,
   pageSourceAvailable = true,
+  pageSourcePending = false,
+  pageSourceFailed = null,
   initialFindingId = null,
   initialMode = "page",
   initialZoom = 100,
@@ -100,6 +110,14 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     left: string | null;
     right: string | null;
   }>({ left: null, right: null });
+  // Compare mode: the finding whose shared page preview is open, and the
+  // findings whose technical detail row is open. Both are independent of
+  // selection — a row can show detail without becoming the selection.
+  const [previewFindingId, setPreviewFindingId] = useState<string | null>(null);
+  const [detailFindingIds, setDetailFindingIds] = useState<ReadonlySet<string>>(new Set());
+  // Evidence emphasis: by default only finding-named positions draw boxes;
+  // this deliberate toggle reveals every recorded position on the page.
+  const [showAllPositions, setShowAllPositions] = useState<boolean>(false);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const paperAreaRef = useRef<HTMLDivElement>(null);
@@ -129,6 +147,26 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
 
   useEffect(() => {
     if (mode === "reading") return;
+    if (pageSourcePending) {
+      paintSeqRef.current += 1;
+      setPaint({
+        status: "loading",
+        note: LOADING_SOURCE_NOTE,
+        raster: null,
+        rasterPageIndex: -1,
+      });
+      return;
+    }
+    if (pageSourceFailed !== null) {
+      paintSeqRef.current += 1;
+      setPaint({
+        status: "unavailable",
+        note: `The original PDF could not be loaded. ${pageSourceFailed}`,
+        raster: null,
+        rasterPageIndex: -1,
+      });
+      return;
+    }
     if (renderPage === undefined || pageSourceAvailable === false) {
       paintSeqRef.current += 1;
       setPaint({ status: "unavailable", note: NO_SOURCE_NOTE, raster: null, rasterPageIndex: -1 });
@@ -175,7 +213,7 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     return () => {
       ac.abort();
     };
-  }, [doc, clampedPageIndex, requestScale, mode, renderPage, pageSourceAvailable]);
+  }, [doc, clampedPageIndex, requestScale, mode, renderPage, pageSourceAvailable, pageSourcePending, pageSourceFailed]);
 
   const paneRaster =
     paint.rasterPageIndex === clampedPageIndex ? paint.raster : null;
@@ -233,8 +271,40 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     return inScope.length > 0 ? inScope : doc.readers;
   }, [doc.readers, findingReaderIds, readersOnPage]);
 
-  const leftOccurrences = pageOccurrences.filter((o) => o.reader_id === leftReader.id);
-  const rightOccurrences = pageOccurrences.filter((o) => o.reader_id === rightReader.id);
+  // ------------------------------------------------------------------
+  // Evidence emphasis: every finding-named occurrence is evidence; all
+  // other recorded positions stay available through the explicit
+  // "show all positions" toggle rather than covering the page.
+  // ------------------------------------------------------------------
+  const findingNamedIds = useMemo(
+    () => new Set(doc.findings.flatMap((f) => f.occurrence_ids)),
+    [doc.findings],
+  );
+
+  const overlayOccurrences = useMemo(() => {
+    if (showAllPositions) return pageOccurrences;
+    if (selectedFinding) {
+      const named = new Set(selectedFinding.occurrence_ids);
+      return pageOccurrences.filter(
+        (o) => named.has(o.id) || o.id === selectedOccurrenceId,
+      );
+    }
+    const evidence = pageOccurrences.filter((o) => findingNamedIds.has(o.id));
+    return evidence.length > 0 ? evidence : pageOccurrences;
+  }, [pageOccurrences, selectedFinding, selectedOccurrenceId, showAllPositions, findingNamedIds]);
+
+  // The compare preview is bound to its row's finding, which may differ
+  // from the global selection.
+  const previewOccurrences = useCallback(
+    (finding: Finding) => {
+      if (showAllPositions) return pageOccurrences;
+      const named = new Set(finding.occurrence_ids);
+      return pageOccurrences.filter(
+        (o) => named.has(o.id) || o.id === selectedOccurrenceId,
+      );
+    },
+    [pageOccurrences, selectedOccurrenceId, showAllPositions],
+  );
 
   // ------------------------------------------------------------------
   // Selection / disclosure
@@ -283,6 +353,10 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     setSelectedFindingId(target.id);
     setExpandedFindingId(target.id);
     if (target.page_index !== undefined) setPageIndex(target.page_index);
+    if (mode === "compare") {
+      previewFitPendingRef.current = true;
+      setPreviewFindingId(target.id);
+    }
     if (
       target.occurrence_ids.length > 0 &&
       target.alignment !== "ambiguous" &&
@@ -292,7 +366,7 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     } else {
       setSelectedOccurrenceId(null);
     }
-  }, [doc.findings, selectedFindingId]);
+  }, [doc.findings, selectedFindingId, mode]);
 
   const handlePrevFinding = useCallback(() => {
     if (doc.findings.length === 0) return;
@@ -302,6 +376,10 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     setSelectedFindingId(target.id);
     setExpandedFindingId(target.id);
     if (target.page_index !== undefined) setPageIndex(target.page_index);
+    if (mode === "compare") {
+      previewFitPendingRef.current = true;
+      setPreviewFindingId(target.id);
+    }
     if (
       target.occurrence_ids.length > 0 &&
       target.alignment !== "ambiguous" &&
@@ -311,7 +389,25 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     } else {
       setSelectedOccurrenceId(null);
     }
-  }, [doc.findings, selectedFindingId]);
+  }, [doc.findings, selectedFindingId, mode]);
+
+  // Focus hand-off on mode switch: entering compare unmounts the findings
+  // aside, so a focused element disappears and focus falls to <body> —
+  // outside the stage's keydown scope, which silently kills every stage
+  // shortcut. When (and only when) focus was actually lost, land on the
+  // stage itself; focus still on a live control (e.g. the mode tab) is
+  // left alone.
+  const prevModeRef = useRef(mode);
+  useEffect(() => {
+    const prev = prevModeRef.current;
+    prevModeRef.current = mode;
+    if (mode === "compare" && prev !== "compare") {
+      const active = document.activeElement;
+      if (!active || active === document.body || !document.contains(active)) {
+        stageRef.current?.focus();
+      }
+    }
+  }, [mode]);
 
   const gotoPage = useCallback(
     (idx: number) => {
@@ -320,14 +416,54 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     [doc.pages.length],
   );
 
-  // Fit the rotated page box inside the visible paper area (or the left
-  // compare pane) instead of assuming 100%.
+  // Compare mode: "Show on page" opens the finding's shared preview row
+  // and navigates to the page its evidence is on. Activating again closes
+  // it. Preview is independent of selection expansion.
+  const handleShowOnPage = (finding: Finding) => {
+    if (previewFindingId === finding.id) {
+      setPreviewFindingId(null);
+      return;
+    }
+    if (finding.page_index !== undefined && finding.page_index !== clampedPageIndex) {
+      setPageIndex(finding.page_index);
+    }
+    setSelectedFindingId(finding.id);
+    previewFitPendingRef.current = true;
+    setPreviewFindingId(finding.id);
+  };
+
+  const handleToggleDetails = (finding: Finding) => {
+    setDetailFindingIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(finding.id)) {
+        next.delete(finding.id);
+      } else {
+        next.add(finding.id);
+      }
+      return next;
+    });
+  };
+
+  // Picking a reading in the table (or a polygon on the shared preview)
+  // selects that occurrence and reveals the preview on its page.
+  const handleLocateOccurrence = (finding: Finding, occ: Occurrence) => {
+    if (occ.page_index !== (currentPage?.index ?? clampedPageIndex)) {
+      setPageIndex(occ.page_index);
+    }
+    setSelectedFindingId(finding.id);
+    setSelectedOccurrenceId(occ.id);
+    if (previewFindingId !== finding.id) previewFitPendingRef.current = true;
+    setPreviewFindingId(finding.id);
+  };
+
+  // Fit the rotated page box inside the visible paper area (or the shared
+  // compare preview surface) instead of assuming 100%.
   const handleFit = useCallback(() => {
     const area = paperAreaRef.current;
     if (!area || !currentPage) return;
     const surface =
       (mode === "compare"
-        ? area.querySelector<HTMLElement>("#compare-scroll-left")
+        ? area.querySelector<HTMLElement>("[data-testid='compare-preview-surface']")
         : area) ?? area;
     const slack = 64; // padding + paper margins around the page box
     const availW = Math.max(0, surface.clientWidth - slack);
@@ -347,6 +483,19 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
     const pct = Math.round(Math.max(0.25, Math.min(fit, 4)) * 100);
     setZoom(pct);
   }, [mode, currentPage, rotation]);
+
+  // When a compare preview opens, fit the page inside it once — the flag
+  // keeps later zoom/handleFit identity changes from re-fitting.
+  const previewFitPendingRef = useRef(false);
+  useEffect(() => {
+    if (!previewFitPendingRef.current || previewFindingId === null || mode !== "compare") {
+      return;
+    }
+    previewFitPendingRef.current = false;
+    const raf = requestAnimationFrame(() => handleFit());
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewFindingId, mode, handleFit]);
 
   // Stage Keyboard Shortcuts
   const handleStageKeyDown = (e: React.KeyboardEvent) => {
@@ -403,6 +552,9 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
       : undefined;
     setSelectedFindingId(found?.id ?? null);
     setExpandedFindingId(found?.id ?? null);
+    setPreviewFindingId(null);
+    setDetailFindingIds(new Set());
+    setShowAllPositions(false);
     if (found) {
       if (found.page_index !== undefined) setPageIndex(found.page_index);
       if (
@@ -426,8 +578,148 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
         if (mode === "reading") setMode("page");
       }}
       limitations={currentPage?.limitations ?? []}
-      defaultDetailsOpen={mode === "reading" ? true : undefined}
+      defaultDetailsOpen={
+        mode === "reading" ? true : mode === "compare" ? false : undefined
+      }
     />
+  );
+
+  const findingNav = (
+    <div className={styles.findingNav}>
+      <button
+        id="btn-prev-finding"
+        type="button"
+        className={styles.toolButton}
+        onClick={handlePrevFinding}
+        disabled={doc.findings.length <= 1}
+        aria-label="Previous finding"
+      >
+        ← Prev
+      </button>
+      <span id="findings-counter" className={styles.findingNavCounter}>
+        {doc.findings.length > 0
+          ? selectedFindingId
+            ? `${doc.findings.findIndex((f) => f.id === selectedFindingId) + 1} of ${doc.findings.length}`
+            : `0 of ${doc.findings.length}`
+          : "0 findings"}
+      </span>
+      <button
+        id="btn-next-finding"
+        type="button"
+        className={styles.toolButton}
+        onClick={handleNextFinding}
+        disabled={doc.findings.length <= 1}
+        aria-label="Next finding"
+      >
+        Next →
+      </button>
+    </div>
+  );
+
+  // Deliberate reveal of every recorded position — the default view
+  // emphasises only the selected evidence.
+  const positionsToggle = (
+    <button
+      type="button"
+      id="btn-all-positions"
+      className={styles.toolButton}
+      aria-pressed={showAllPositions}
+      onClick={() => setShowAllPositions((prev) => !prev)}
+    >
+      {showAllPositions ? "Show selected evidence only" : "Show all positions"}
+    </button>
+  );
+
+  const renderComparePreview = (finding: Finding) => {
+    const findingOnOtherPage =
+      finding.page_index !== undefined && finding.page_index !== clampedPageIndex;
+    return (
+      <div
+        id={`compare-preview-${finding.id}`}
+        className={styles.previewPanel}
+        data-testid={`compare-preview-${finding.id}`}
+      >
+        <div className={styles.previewHeader}>
+          <p className={styles.previewTitle}>
+            Page {clampedPageIndex + 1}
+            {findingOnOtherPage ? ` — finding is on page ${finding.page_index! + 1}` : ""}
+          </p>
+          <div className={styles.previewHeaderActions}>
+            {positionsToggle}
+            <button
+              type="button"
+              className={styles.toolButton}
+              onClick={() => setPreviewFindingId(null)}
+            >
+              Close preview
+            </button>
+          </div>
+        </div>
+        <div className={styles.previewSurface} data-testid="compare-preview-surface">
+          <CanvasOverlay
+            page={currentPage}
+            occurrences={previewOccurrences(finding)}
+            selectedOccurrenceId={selectedOccurrenceId}
+            selectedFinding={finding}
+            zoom={zoom}
+            rotation={rotation}
+            onSelectOccurrence={(occ) => handleLocateOccurrence(finding, occ)}
+            renderCanvas={true}
+            raster={paneRaster}
+            rasterStatus={paint.status}
+            rasterNote={paint.note}
+          />
+        </div>
+        <p className={styles.previewHint}>
+          {findingOnOtherPage
+            ? "This finding's evidence is on a different page — its positions are not highlighted here."
+            : "Select a reading or a highlighted position to locate it. Page, zoom, Fit and Rotate controls above apply to this preview."}
+        </p>
+      </div>
+    );
+  };
+
+  const renderCompareDetails = (finding: Finding) => (
+    <div
+      id={`compare-detail-${finding.id}`}
+      className={styles.detailPanel}
+      data-testid={`compare-detail-${finding.id}`}
+    >
+      <AlignmentDetail
+        finding={finding}
+        occurrences={doc.occurrences}
+        readers={doc.readers}
+        selectedOccurrenceId={selectedOccurrenceId}
+        onSelectOccurrence={(occ) => handleLocateOccurrence(finding, occ)}
+        returnFocusId={`compare-details-${finding.id}`}
+      />
+      {onAddAnnotation && onRemoveAnnotation && (
+        <FindingNotes
+          finding={finding}
+          notes={annotations ?? []}
+          onAdd={onAddAnnotation}
+          onRemove={onRemoveAnnotation}
+        />
+      )}
+      <div className={styles.detailActions}>
+        {onKeepEvidence && (
+          <button
+            type="button"
+            className={styles.toolButton}
+            onClick={() => onKeepEvidence(finding)}
+          >
+            Keep this evidence
+          </button>
+        )}
+        <button
+          type="button"
+          className={styles.toolButton}
+          onClick={() => handleToggleDetails(finding)}
+        >
+          Back to finding
+        </button>
+      </div>
+    </div>
   );
 
   return (
@@ -569,26 +861,20 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
         </div>
       </header>
 
-      {/* Main Workspace Layout */}
-      <div className={styles.workspaceGrid}>
+      {/* Main Workspace Layout — compare mode drops the sidebar: the
+          paired-reading table is the content and its shared preview. */}
+      <div
+        className={`${styles.workspaceGrid} ${mode === "compare" ? styles.workspaceGridSingle : ""}`}
+      >
         {/* Paper / Canvas / Compare / Reading Area */}
         <div ref={paperAreaRef} id="viewer-paper-area" className={styles.stagePaperArea}>
           {mode === "compare" ? (
-            <ComparePanes
-              page={currentPage}
+            <CompareTable
+              findings={doc.findings}
+              occurrences={doc.occurrences}
+              readers={doc.readers}
               leftReader={leftReader}
               rightReader={rightReader}
-              leftOccurrences={leftOccurrences}
-              rightOccurrences={rightOccurrences}
-              selectedOccurrenceId={selectedOccurrenceId}
-              selectedFinding={selectedFinding}
-              namedOccurrences={
-                selectedFinding
-                  ? doc.occurrences.filter((o) =>
-                      selectedFinding.occurrence_ids.includes(o.id),
-                    )
-                  : []
-              }
               readerOptions={paneReaderOptions}
               onChangeLeftReader={(id) =>
                 setPaneReaderOverride((prev) => ({ ...prev, left: id }))
@@ -596,82 +882,64 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
               onChangeRightReader={(id) =>
                 setPaneReaderOverride((prev) => ({ ...prev, right: id }))
               }
-              zoom={zoom}
-              rotation={rotation}
-              onSelectOccurrence={handleSelectOccurrence}
-              raster={paneRaster}
-              rasterStatus={paint.status}
-              rasterNote={paint.note}
+              selectedFindingId={selectedFindingId}
+              selectedOccurrenceId={selectedOccurrenceId}
+              previewFindingId={previewFindingId}
+              detailFindingIds={detailFindingIds}
+              onShowOnPage={handleShowOnPage}
+              onToggleDetails={handleToggleDetails}
+              onLocateOccurrence={handleLocateOccurrence}
+              renderPreview={renderComparePreview}
+              renderDetails={renderCompareDetails}
+              findingNav={findingNav}
             />
           ) : mode === "reading" ? (
             textLayer
           ) : (
-            <CanvasOverlay
-              page={currentPage}
-              occurrences={pageOccurrences}
-              selectedOccurrenceId={selectedOccurrenceId}
-              selectedFinding={selectedFinding}
-              zoom={zoom}
-              rotation={rotation}
-              onSelectOccurrence={handleSelectOccurrence}
-              renderCanvas={true}
-              raster={paneRaster}
-              rasterStatus={paint.status}
-              rasterNote={paint.note}
-            />
+            <>
+              <CanvasOverlay
+                page={currentPage}
+                occurrences={overlayOccurrences}
+                selectedOccurrenceId={selectedOccurrenceId}
+                selectedFinding={selectedFinding}
+                zoom={zoom}
+                rotation={rotation}
+                onSelectOccurrence={handleSelectOccurrence}
+                renderCanvas={true}
+                raster={paneRaster}
+                rasterStatus={paint.status}
+                rasterNote={paint.note}
+              />
+              <div className={styles.pageModeActions}>{positionsToggle}</div>
+            </>
           )}
 
           {/* Accessible Text Equivalent & Limits — in Reading mode the
-              layer IS the main content, so it is not repeated below. */}
+              layer IS the main content, so it is not repeated below. In
+              compare mode it remains as the "all recorded readings" list. */}
           {mode !== "reading" && textLayer}
         </div>
 
-        {/* Differences */}
-        <aside
-          id="evidence-slip"
-          className={styles.evidenceSlip}
-          aria-labelledby="evidence-slip-heading"
-        >
-          <h2 id="evidence-slip-heading" className={styles.evidenceHeading}>
-            Differences
-          </h2>
-          <p className={styles.evidenceIntro}>
-            Readings that do not match between the page and extracted text.
-          </p>
+        {/* Differences — hidden in compare mode where each finding's own
+            row carries status, preview and detail. */}
+        {mode !== "compare" && (
+          <aside
+            id="evidence-slip"
+            className={styles.evidenceSlip}
+            aria-labelledby="evidence-slip-heading"
+          >
+            <h2 id="evidence-slip-heading" className={styles.evidenceHeading}>
+              Differences
+            </h2>
+            <p className={styles.evidenceIntro}>
+              Readings that do not match between the page and extracted text.
+            </p>
 
-          <div className={styles.findingNav}>
-            <button
-              id="btn-prev-finding"
-              type="button"
-              className={styles.toolButton}
-              onClick={handlePrevFinding}
-              disabled={doc.findings.length <= 1}
-              aria-label="Previous finding"
-            >
-              ← Prev
-            </button>
-            <span id="findings-counter" style={{ fontSize: "var(--text-caption)" }}>
-              {doc.findings.length > 0
-                ? selectedFindingId
-                  ? `${doc.findings.findIndex((f) => f.id === selectedFindingId) + 1} of ${doc.findings.length}`
-                  : `0 of ${doc.findings.length}`
-                : "0 findings"}
-            </span>
-            <button
-              id="btn-next-finding"
-              type="button"
-              className={styles.toolButton}
-              onClick={handleNextFinding}
-              disabled={doc.findings.length <= 1}
-              aria-label="Next finding"
-            >
-              Next →
-            </button>
-          </div>
+            {findingNav}
 
-          {/* List of findings */}
-          <div id="findings-nav-list" role="list" aria-label="Discovered findings">
-            {doc.findings.map((f) => {
+            {/* List of findings */}
+            <div id="findings-nav-list" role="list" aria-label="Discovered findings">
+              {doc.findings.map((f) => {
               const isSelected = f.id === selectedFindingId;
               const isExpanded = f.id === expandedFindingId;
               return (
@@ -748,8 +1016,9 @@ export const ViewerStage: React.FC<ViewerStageProps> = ({
                 </div>
               );
             })}
-          </div>
-        </aside>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

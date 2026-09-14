@@ -301,17 +301,26 @@ export const HelpPage: React.FC<HelpPageProps> = ({
 
         <section className={styles.section} aria-labelledby="steps-heading">
           <h2 id="steps-heading" className={styles.sectionHeading}>
-            Open → Check → Save
+            Open → Inspect → Save
           </h2>
           <ol className={styles.steps}>
             <li>
-              <strong>Open</strong> a PDF or an example.
+              <strong>Open</strong> a PDF — or start with an example to see the
+              interface before using your own file.
             </li>
             <li>
-              <strong>Review</strong> the differences it highlights.
+              <strong>Inspect</strong> the findings. In Compare, each finding shows
+              the paired readings side by side; <em>Show on page</em> marks the
+              evidence on the real page, and <em>Details</em> lists every
+              candidate reading.
             </li>
             <li>
-              <strong>Save</strong> a report you can reopen.
+              <strong>Interpret</strong> honestly — a difference means the readers
+              disagree, not that one of them is right.
+            </li>
+            <li>
+              <strong>Save</strong> a report: HTML to read or share, JSON to reopen
+              here later.
             </li>
           </ol>
         </section>
@@ -337,6 +346,24 @@ export const HelpPage: React.FC<HelpPageProps> = ({
             <dd>
               An HTML report for reading, or a JSON file you can reopen here.
               The original PDF is included in JSON only when you choose that.
+            </dd>
+            <dt>Why can't I see the page after reopening a report?</dt>
+            <dd>
+              If the saved JSON did not embed the original PDF, Inkflip still
+              shows every recorded reading and finding — only the painted page
+              preview is unavailable. Reattach the PDF (its checksum is verified
+              against the report) to restore page rendering.
+            </dd>
+            <dt>Do my notes persist?</dt>
+            <dd>
+              Notes are session-only while you work. To keep them, include them
+              in a saved report — the export makes notes an explicit opt-in.
+            </dd>
+            <dt>A check didn't finish — is the PDF still checked?</dt>
+            <dd>
+              Partial results are reported, never smoothed over. The coverage
+              summary lists skipped, failed, and unsupported checks, and a
+              completed selection never implies the whole document is clean.
             </dd>
             <dt>Does this work in Safari?</dt>
             <dd>

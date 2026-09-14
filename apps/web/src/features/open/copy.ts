@@ -19,9 +19,9 @@ export const OPEN_COPY = {
   /** input.notpdf — wrong declared type and/or missing %PDF- header. */
   notPdf:
     "This file could not be opened as a PDF. Choose a PDF you are permitted to inspect.",
-  /** input.toobig — {limit} is replaced with the human limit label. */
+  /** input.toobig — {actual}/{limit} are human byte labels. */
   tooBig:
-    "This file exceeds the {limit} local browser limit. Choose a smaller file or use the local CLI.",
+    "This file is {actual} — it exceeds the {limit} local browser limit. Choose a smaller file or use the local CLI.",
   /** input.encrypted — password-protected input is unsupported. */
   encrypted:
     "Encrypted PDFs are not supported in this release. Open an unencrypted copy you are permitted to inspect.",
@@ -39,6 +39,8 @@ export const OPEN_COPY = {
   replaceCancel: "Keep this file",
   /** clear.action / clear.done — workspace clearing labels. */
   clearAction: "Clear this file",
+  /** Compact replace action in the loaded-file summary. */
+  replaceAction: "Choose a different file",
 } as const;
 
 export const SELECTION_COPY = {

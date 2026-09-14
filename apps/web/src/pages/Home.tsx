@@ -28,6 +28,12 @@ const InspectionPreview: React.FC<{
   const visual = sample?.visualAmount ?? "";
   const extracted = sample?.extractedAmount ?? "";
   const finding = sample?.findingTitle ?? "Selected difference";
+  // Pair the readings by real evidence kind — the same pairing the
+  // compare table shows inside the workspace.
+  const textReader = sample?.readers.find((r) => r.method === "native_text") ?? null;
+  const ocrReader = sample?.readers.find((r) => r.method === "ocr") ?? null;
+  const textReaderLabel = textReader ? `${textReader.name} ${textReader.version}`.trim() : "PDF.js";
+  const ocrReaderLabel = ocrReader ? `${ocrReader.name} ${ocrReader.version}`.trim() : "OCR";
 
   return (
     <div
@@ -36,7 +42,7 @@ const InspectionPreview: React.FC<{
       aria-busy={loading}
     >
       <div className={styles.inspectPage} aria-label="Page preview">
-        <p className={styles.inspectPageLabel}>Page</p>
+        <p className={styles.inspectPageLabel}>On the page</p>
         <p className={styles.inspectPageBody}>
           Invoice total{" "}
           {loading ? (
@@ -48,26 +54,39 @@ const InspectionPreview: React.FC<{
           )}
         </p>
         <p className={styles.inspectPageHint}>
-          Highlighted text is what you see on the page.
+          The highlight marks where the finding's evidence sits on the real page.
         </p>
       </div>
       <div className={styles.inspectPanel}>
-        <p className={styles.inspectPanelLabel}>Differences</p>
         <article className={styles.inspectFinding}>
           <h3 className={styles.inspectFindingTitle}>{loading ? "Loading sample…" : finding}</h3>
-          <dl className={styles.inspectReadings}>
-            <div>
-              <dt>On the page</dt>
-              <dd>{loading ? "…" : visual || "unavailable"}</dd>
-            </div>
-            <div>
-              <dt>Extracted text</dt>
-              <dd>{loading ? "…" : extracted || "unavailable"}</dd>
-            </div>
-          </dl>
+          <table className={styles.inspectPairTable}>
+            <thead>
+              <tr>
+                <th scope="col">
+                  <span className={styles.inspectPairTitle}>PDF text</span>
+                  <span className={styles.inspectPairReader}>{textReaderLabel}</span>
+                </th>
+                <th scope="col">
+                  <span className={styles.inspectPairTitle}>Text read from image</span>
+                  <span className={styles.inspectPairReader}>{ocrReaderLabel}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{loading ? "…" : extracted || "unavailable"}</td>
+                <td>{loading ? "…" : visual || "unavailable"}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className={styles.inspectPairStatus}>
+            <span className={styles.inspectPairBadge}>Different text</span>
+          </p>
+          <p className={styles.inspectPairHint}>Show on page · Details</p>
         </article>
         <p className={styles.inspectSaveHint}>
-          Save an HTML report to read, or JSON to reopen this inspection later.
+          Neither reader is treated as the truth — you inspect what each returned.
         </p>
       </div>
     </div>
@@ -232,12 +251,16 @@ export const Home: React.FC<HomeProps> = ({
                 {sample.visualAmount !== null && sample.extractedAmount !== null && (
                   <div className={styles.sampleReadings} role="group" aria-label="The two readings">
                     <div className={styles.sampleReading}>
-                      <span className={styles.sampleReadingLabel}>On the page</span>
-                      <span className={styles.sampleReadingValue}>{sample.visualAmount}</span>
+                      <span className={styles.sampleReadingLabel}>
+                        PDF text · {sample.readers.find((r) => r.method === "native_text")?.name ?? "PDF.js"}
+                      </span>
+                      <span className={styles.sampleReadingValue}>{sample.extractedAmount}</span>
                     </div>
                     <div className={`${styles.sampleReading} ${styles.sampleReadingAlt}`}>
-                      <span className={styles.sampleReadingLabel}>Extracted text</span>
-                      <span className={styles.sampleReadingValue}>{sample.extractedAmount}</span>
+                      <span className={styles.sampleReadingLabel}>
+                        Text read from image · {sample.readers.find((r) => r.method === "ocr")?.name ?? "OCR"}
+                      </span>
+                      <span className={styles.sampleReadingValue}>{sample.visualAmount}</span>
                     </div>
                   </div>
                 )}
@@ -355,9 +378,8 @@ export const Home: React.FC<HomeProps> = ({
                   {sample?.findingTitle ?? "This amount reads differently"}
                 </p>
                 <p className={styles.htmlPreviewBody}>
-                  {sample?.visualAmount && sample?.extractedAmount
-                    ? `On the page: ${sample.visualAmount}. Extracted text: ${sample.extractedAmount}.`
-                    : "Named readings from each reader, with the page they came from."}
+                  Named readings from each reader, the page they came from, and
+                  how they were checked — readable without this app.
                 </p>
               </div>
             </article>

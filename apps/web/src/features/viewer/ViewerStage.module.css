@@ -178,6 +178,83 @@
   margin-bottom: var(--space-3);
 }
 
+.findingNavCounter {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* Compare mode drops the sidebar: the paired-reading table spans the
+   full width and carries its own shared preview/detail rows. */
+.workspaceGridSingle {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pageModeActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+/* Shared page preview inside a compare row. */
+.previewPanel {
+  padding: var(--space-3) var(--space-4);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+.previewTitle {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.previewHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.previewSurface {
+  overflow: auto;
+  max-height: 75vh;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-subtle);
+  padding: var(--space-3);
+}
+
+.previewHint {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+/* Technical detail row inside a compare row. */
+.detailPanel {
+  padding: var(--space-3) var(--space-4);
+}
+
+.detailActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+  border-top: 1px dashed var(--color-line);
+  padding-top: var(--space-2);
+}
+
 .findingCard {
   border: 1px solid var(--color-line);
   background-color: var(--color-surface-subtle);
@@ -191,11 +268,13 @@
 }
 
 .findingCardSelected {
-  border: 2px solid var(--color-focus);
+  /* Same 1px border as the unselected card — the selected ring is an
+     inset shadow so selecting never shifts the layout. */
+  border-color: var(--color-focus);
   background-color: var(--color-paper-pure);
-  padding: var(--space-3);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-paper);
+  box-shadow:
+    inset 0 0 0 1px var(--color-focus),
+    var(--shadow-paper);
 }
 
 .findingTitle {

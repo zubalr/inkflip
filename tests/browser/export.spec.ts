@@ -113,20 +113,20 @@ test.describe("T16 Browser Export", () => {
     const manifest = page.locator("p").filter({ hasText: "Included:" });
     await expect(manifest).toBeVisible();
 
-    // Initially filename and annotations are off
+    // Initially filename and notes are off
     const initialText = await manifest.innerText();
-    expect(initialText).not.toContain("filename");
-    expect(initialText).not.toContain("annotations");
+    expect(initialText).not.toContain("original filename");
+    expect(initialText).not.toContain("your notes");
 
-    // Toggle filename on
+    // Toggle filename on — the manifest shows the plain inclusion label
     const filenameOption = page.locator('label:has-text("Include original filename")');
     await filenameOption.click();
-    await expect(manifest).toContainText("filename");
+    await expect(manifest).toContainText("original filename");
 
     // Toggle notes on
     const notesOption = page.locator('label:has-text("Include my notes")');
     await notesOption.click();
-    await expect(manifest).toContainText("annotations");
+    await expect(manifest).toContainText("your notes");
   });
 
   test("prop synchronization: changing source prop refreshes controller and preview (F7)", async ({ page }) => {

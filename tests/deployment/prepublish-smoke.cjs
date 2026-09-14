@@ -229,9 +229,10 @@ function record(results, step, ok, detail) {
       `${expanded1}->${collapsed}->${expanded2}`,
     );
 
-    // --- Compare names the finding's readers; both panes paint. ---
+    // --- Compare names the finding's readers in the paired-reading
+    // table; values and status appear in the same row group. ---
     await page.locator("#tab-mode-compare").click();
-    await page.waitForSelector("#compare-panes-container", { timeout: 15_000 });
+    await page.waitForSelector('[data-testid="compare-table"]', { timeout: 15_000 });
     const compare = await page.evaluate(() => {
       const sel = (id) => {
         const el = document.getElementById(id);
@@ -239,28 +240,20 @@ function record(results, step, ok, detail) {
         const opt = el.tagName === "SELECT" ? el.options[el.selectedIndex] : el;
         return opt ? opt.textContent.trim() : null;
       };
-      const painted = (paneId) => {
-        const pane = document.getElementById(paneId);
-        if (!pane) return false;
-        const c = pane.querySelector("canvas");
-        if (!c || !c.width) return false;
-        const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
-        for (let i = 0; i < d.length; i += 400) {
-          if (d[i + 3] > 0 && d[i] < 240) return true;
-        }
-        return false;
-      };
+      const table = document.querySelector('[data-testid="compare-table"]');
       return {
         left: sel("compare-reader-left"),
         right: sel("compare-reader-right"),
-        leftPainted: painted("compare-pane-left"),
-        rightPainted: painted("compare-pane-right"),
+        tableText: table ? table.innerText : "",
         readings: document.querySelectorAll("[id^=compare-reading-]").length,
+        statuses: [...document.querySelectorAll("[data-testid^=compare-status-]")].map(
+          (el) => el.textContent.trim(),
+        ),
       };
     });
     record(
       results,
-      "compare: panes name the finding's readers",
+      "compare: columns name the finding's readers",
       Boolean(compare.left) &&
         Boolean(compare.right) &&
         compare.left !== compare.right &&
@@ -269,9 +262,107 @@ function record(results, step, ok, detail) {
     );
     record(
       results,
-      "compare: both panes painted + named readings shown",
-      compare.leftPainted && compare.rightPainted && compare.readings >= 2,
-      JSON.stringify(compare),
+      "compare: paired readings and worded status visible",
+      /\$1,000/.test(compare.tableText) &&
+        /\$100(?!\d)/.test(compare.tableText) &&
+        compare.readings >= 2 &&
+        compare.statuses.some((s) => /differ|order|missing|match/i.test(s)),
+      JSON.stringify({ readings: compare.readings, statuses: compare.statuses }),
+    );
+
+    // --- Show on page opens the shared preview, paints real pixels and
+    // marks the evidence without any horizontal shift. ---
+    const areaBoxBefore = await page
+      .locator("#viewer-paper-area")
+      .boundingBox()
+      .then((b) => (b ? Math.round(b.x) : -1));
+    await page.locator("[id^=compare-show-]").first().click();
+    await page.waitForSelector("[id^=compare-preview-]", { timeout: 15_000 });
+    await page
+      .waitForFunction(
+        () => {
+          const panel = document.querySelector("[id^=compare-preview-]");
+          const c = panel && panel.querySelector("canvas");
+          if (!c || !c.width || !c.height) return false;
+          const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+          for (let i = 0; i < d.length; i += 400) {
+            if (d[i + 3] > 0 && d[i] < 240) return true;
+          }
+          return false;
+        },
+        { timeout: 30_000 },
+      )
+      .catch(() => {});
+    const preview = await page.evaluate(() => {
+      const panel = document.querySelector("[id^=compare-preview-]");
+      if (!panel) return { panel: false };
+      const c = panel.querySelector("canvas");
+      let dark = 0;
+      if (c && c.width) {
+        const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+        for (let i = 0; i < d.length; i += 400) {
+          if (d[i + 3] > 0 && d[i] < 240) dark++;
+        }
+      }
+      const marks = [...panel.querySelectorAll("[id^=highlight-]")];
+      const pageEl = panel.querySelector("#document-paper");
+      const markBox = marks[0] ? marks[0].getBoundingClientRect() : null;
+      const pageBox = pageEl ? pageEl.getBoundingClientRect() : null;
+      return {
+        panel: true,
+        canvas: Boolean(c && c.width),
+        dark,
+        marks: marks.length,
+        // The evidence mark must sit inside the painted page box —
+        // geometry, not just presence.
+        markOnPage: Boolean(
+          markBox &&
+            pageBox &&
+            markBox.left >= pageBox.left - 2 &&
+            markBox.right <= pageBox.right + 2 &&
+            markBox.top >= pageBox.top - 2 &&
+            markBox.bottom <= pageBox.bottom + 2,
+        ),
+      };
+    });
+    const areaBoxAfter = await page
+      .locator("#viewer-paper-area")
+      .boundingBox()
+      .then((b) => (b ? Math.round(b.x) : -1));
+    record(
+      results,
+      "compare preview: painted page with evidence marks",
+      preview.panel && preview.canvas && preview.dark > 20 && preview.marks > 0 && preview.markOnPage,
+      JSON.stringify(preview),
+    );
+    record(
+      results,
+      "compare preview: expanding does not shift the page sideways",
+      areaBoxBefore >= 0 && Math.abs(areaBoxAfter - areaBoxBefore) <= 1,
+      `x ${areaBoxBefore} -> ${areaBoxAfter}`,
+    );
+
+    // --- Details opens the finding's technical row; toggling again
+    // collapses it. ---
+    const detailsBtn = page.locator("[id^=compare-details-]").first();
+    await detailsBtn.click();
+    await page.waitForSelector("[id^=compare-detail-]", { timeout: 15_000 });
+    const detailText = await page
+      .locator("[id^=compare-detail-]")
+      .first()
+      .innerText();
+    await detailsBtn.click();
+    const detailGone = await page
+      .locator("[id^=compare-detail-]")
+      .first()
+      .waitFor({ state: "detached", timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    record(
+      results,
+      "compare details: technical row opens and collapses",
+      /Technical details|readings|occurrence/i.test(detailText) && detailGone,
+      detailText.slice(0, 60),
     );
 
     // --- Reading mode exposes the text layer as the main content. ---

@@ -11,7 +11,9 @@ export interface AccessibleTextLayerProps {
   limitations?: string[];
   /** Reading view mounts the layer as the main content — open by default.
    *  Below the page it collapses on narrow viewports so the findings
-   *  panel is not pushed thousands of pixels down. */
+   *  panel is not pushed thousands of pixels down. `true` forces open,
+   *  `false` forces closed (compare mode keeps raw readings available
+   *  without overwhelming the table), `undefined` follows viewport. */
   defaultDetailsOpen?: boolean;
 }
 
@@ -26,13 +28,13 @@ export const AccessibleTextLayer: React.FC<AccessibleTextLayerProps> = ({
 }) => {
   // Resolved once at mount: the `open` attribute is initial markup; React
   // does not rewrite it on later renders, so user toggling persists.
-  // `defaultDetailsOpen === true` (Reading view) forces them open.
+  // `true`/`false` pin the state; `undefined` follows the viewport.
   const [autoOpen] = useState<boolean>(() =>
     typeof window === "undefined"
       ? true
       : window.matchMedia("(min-width: 1100px)").matches,
   );
-  const detailsOpen = defaultDetailsOpen === true ? true : autoOpen;
+  const detailsOpen = defaultDetailsOpen ?? autoOpen;
   const readerMap = new Map<string, Reader>();
   for (const r of readers) {
     readerMap.set(r.id, r);
