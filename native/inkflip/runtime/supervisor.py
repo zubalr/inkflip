@@ -62,6 +62,7 @@ RUNTIME_LIFECYCLE "errors disclose type and safe reason".
 from __future__ import annotations
 
 import ctypes
+import fcntl
 import hashlib
 import json
 import math
@@ -159,6 +160,69 @@ class SupervisionError(Exception):
     """Setup/configuration violation (bad spec, clobbered output dir, missing
     parallel admission, resume identity change). Job failures never raise —
     they are classified."""
+
+
+LOCK_FILE_NAME = ".inkflip-run.lock"
+
+
+class OutputClaim:
+    """An exclusive advisory claim on one corpus output directory.
+
+    ``flock`` is released by the kernel when the holding process exits or dies, so
+    an owner that crashes or is killed leaves no stale claim behind and no PID
+    heuristic is ever consulted - a stale PID test would be exactly the mechanism
+    that lets one run steal another's live lock.
+    """
+
+    def __init__(self, path: Path, fd: int):
+        self.path = path
+        self._fd = fd
+
+    @property
+    def held(self) -> bool:
+        return self._fd >= 0
+
+    def release(self) -> None:
+        if self._fd < 0:
+            return
+        try:
+            fcntl.flock(self._fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        finally:
+            try:
+                os.close(self._fd)
+            finally:
+                self._fd = -1
+
+
+def claim_output_directory(out_dir: Path) -> OutputClaim:
+    """Take the exclusive claim for one output directory, or refuse immediately.
+
+    Nonblocking, so a second writer is told to stop rather than queued behind the
+    first. Path aliases resolve to one claim because the directory is resolved
+    before the lock file is opened. The lock file is never unlinked here: removing
+    the inode while another process holds it would let a third process create a
+    fresh file and lock that instead.
+    """
+    root = Path(out_dir).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    lock_path = root / LOCK_FILE_NAME
+    fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as exc:
+        os.close(fd)
+        raise SupervisionError(
+            f"Output directory {root} is already owned by another run; "
+            "refusing to become a second writer"
+        ) from exc
+    try:
+        os.ftruncate(fd, 0)
+        os.write(fd, f"{os.getpid()}\n".encode("utf-8"))  # advisory metadata only
+    except OSError:
+        pass
+    return OutputClaim(lock_path, fd)
 
 
 @dataclass(frozen=True)
@@ -570,6 +634,11 @@ class Supervisor:
                 )
         self.resume = resume
         self.validate_report = validate_report
+        # Ownership starts here and is held across preflight, job execution, the
+        # report/index/journal writes and the caller's identity publication. The
+        # caller releases it with close(), which the corpus wrapper does after it
+        # has written identity.json - so no writer can slip in behind run().
+        self._claim = claim_output_directory(self.out_dir)
         self.reports_dir = self.out_dir / "reports"
         self.scratch_root = self.out_dir / "scratch"
         self.journal_path = self.out_dir / "journal.jsonl"
@@ -627,7 +696,9 @@ class Supervisor:
                 raise SupervisionError(
                     "output directory already holds a run; use resume=True or a fresh directory"
                 )
-            if self.out_dir.exists() and any(self.out_dir.iterdir()):
+            if self.out_dir.exists() and any(
+                entry for entry in self.out_dir.iterdir() if entry.name != LOCK_FILE_NAME
+            ):
                 raise SupervisionError("output directory is not empty")
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         self.scratch_root.mkdir(parents=True, exist_ok=True)
@@ -1075,6 +1146,18 @@ class Supervisor:
         )
 
     # -- main loop -------------------------------------------------------------------
+
+    def close(self) -> None:
+        """Release this supervisor's output claim. Safe to call more than once."""
+        claim = getattr(self, "_claim", None)
+        if claim is not None:
+            claim.release()
+
+    def __enter__(self) -> "Supervisor":
+        return self
+
+    def __exit__(self, *_exc) -> None:
+        self.close()
 
     def run(self, jobs: Iterable[JobSpec]) -> RunResult:
         jobs = list(jobs)

@@ -118,6 +118,9 @@ def run_corpus(
     except SupervisionError as exc:
         raise CorpusError(str(exc)) from exc
 
+    # identity.json is part of the run's published evidence, so it must be written
+    # while the output claim is still held: releasing it inside run() would leave a
+    # window where a second writer could claim the directory first.
     identity = {
         "kind": "inkflip-corpus-identity",
         "corpus_manifest_sha256": manifest_sha,
@@ -130,8 +133,11 @@ def run_corpus(
         "manifest_path": str(manifest_path),
         "split": manifest_data.get("split"),
     }
-    atomic_write_bytes(
-        out_dir / "identity.json",
-        (json.dumps(identity, indent=2, sort_keys=True) + "\n").encode("utf-8"),
-    )
+    try:
+        atomic_write_bytes(
+            out_dir / "identity.json",
+            (json.dumps(identity, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+        )
+    finally:
+        supervisor.close()
     return result
