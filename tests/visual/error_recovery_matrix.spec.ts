@@ -20,6 +20,7 @@ const ENCRYPTED = path.join(FIXTURES, "development", "bad-pdf-encrypted.pdf");
 const VALID = path.join(FIXTURES, "public", "mapping-amount.pdf");
 const EXAMPLE_REPORT = path.join(ROOT, "apps/web/public/examples/duplicates/report.json");
 const OTHER = path.join(FIXTURES, "public", "covered-amount.pdf");
+const NOTE_FOR_TRIPS = "note-survives-repeated-help-trips";
 
 test.beforeAll(async () => {
   prodServer = await startProdServer();
@@ -187,5 +188,57 @@ test.describe("Workspace: notes stay with their document", () => {
     const body = await page.locator("body").innerText();
     expect(body, "the previous document's note must not appear in the new session").not.toContain(NOTE);
     await expect(page.getByTestId("finding-notes")).toHaveCount(0);
+  });
+});
+
+test.describe("Workspace: repeated navigation and modal nesting", () => {
+  test("a finding selection and its note survive repeated Help trips", async ({ page }) => {
+    await page.goto(`${baseUrl}/#/workspace`);
+    await page.waitForSelector("#btn-header-import-report");
+    await page.locator("#input-import-report").setInputFiles(EXAMPLE_REPORT);
+    const finding = page.locator('[id^="finding-item-"]').first();
+    await finding.waitFor({ state: "visible", timeout: 20000 });
+    await finding.click();
+    await page.getByTestId("note-input").fill(NOTE_FOR_TRIPS);
+    await page.getByTestId("note-add").click();
+    await expect(page.getByTestId("finding-notes")).toContainText(NOTE_FOR_TRIPS);
+
+    for (let trip = 1; trip <= 3; trip += 1) {
+      await page.click("#btn-header-help");
+      await expect(page.locator('[data-testid="help-page"]')).toBeVisible({ timeout: 15000 });
+      await page.click("#btn-help-back-workspace");
+      await expect(page.getByTestId("finding-notes")).toContainText(NOTE_FOR_TRIPS, { timeout: 15000 });
+      await expect(finding).toHaveAttribute("aria-current", "true");
+    }
+  });
+
+  test("each guide dialog traps focus and Escape closes only the open one", async ({ page }) => {
+    await page.goto(`${baseUrl}/#/help`);
+    await page.waitForSelector('[data-testid="help-page"]');
+
+    const dialog = page.locator('[role="dialog"]');
+    for (const trigger of ["#btn-guide-cli", "#btn-guide-keyboard"]) {
+      const control = page.locator(trigger);
+      if ((await control.count()) === 0) continue;
+      await control.focus();
+      await page.keyboard.press("Enter");
+      await expect(dialog).toHaveCount(1, { timeout: 15000 });
+
+      // Focus must be inside the dialog while it is open.
+      // Check every dialog element, not just the first: the app may keep more than
+      // one in the DOM, and only the open one is expected to hold focus.
+      const inside = await page.evaluate(() => {
+        const active = document.activeElement as HTMLElement | null;
+        return Array.from(document.querySelectorAll('[role="dialog"]')).some((dialog) =>
+          dialog.contains(active),
+        );
+      });
+      expect(inside, "focus must move into the dialog when it opens").toBe(true);
+
+      await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0, { timeout: 15000 });
+      const restored = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.id ?? "");
+      expect(restored, "focus must return to the control that opened the dialog").toBe(trigger.slice(1));
+    }
   });
 });
