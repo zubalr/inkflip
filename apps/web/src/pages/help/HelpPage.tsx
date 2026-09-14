@@ -58,7 +58,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       id: "cli",
       badge: "Terminal Companion",
       title: "Command-Line Interface",
-      summary: "Run batch corpus inspections, compare reader outputs, and replay sealed reports directly from the shell.",
+      summary: "Batch inspections, report replay, and hardened Docker runs from the shell.",
       modalTitle: "Command-Line Interface Guide",
       modalDescription: "Terminal workflows for batch corpus inspections across macOS native and Docker environments.",
       content: (
@@ -99,7 +99,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       id: "a11y",
       badge: "Assistive Flows",
       title: "Accessibility & Assistive Flows",
-      summary: "Keyboard navigation shortcuts, accessible text equivalents, and non-mouse candidate selection.",
+      summary: "Keyboard shortcuts, focus restoration, and accessible text equivalents.",
       modalTitle: "Accessibility & Assistive Flows Guide",
       modalDescription: "Standards-compliant navigation, focus restoration, and screen reader equivalents.",
       content: (
@@ -131,7 +131,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       id: "corpus",
       badge: "Fixture Testing",
       title: "Corpus & Test Invariants",
-      summary: "Synthetic fixtures and real-world edge cases verifying multi-reader divergence detection.",
+      summary: "Fixture families and reproducibility backing multi-reader divergence detection.",
       modalTitle: "Corpus & Test Invariants Guide",
       modalDescription: "Ground-truth evaluation fixtures verifying detection across independent engines.",
       content: (
@@ -155,7 +155,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       id: "readers",
       badge: "Engine Architecture",
       title: "Reader Integration Guide",
-      summary: "Engine adapter specifications, canonical coordinate normalization, and explicit omission handling.",
+      summary: "Adapter contract, canonical coordinates, and explicit omission handling.",
       modalTitle: "Reader Integration Guide",
       modalDescription: "Standards for connecting independent extraction engines into Inkflip.",
       content: (
@@ -187,7 +187,7 @@ export const HelpPage: React.FC<HelpPageProps> = ({
       id: "attribution",
       badge: "Licenses & Credits",
       title: "Attribution & Licenses",
-      summary: "Credits and open-source licenses for bundled libraries, fonts, and extraction runtimes.",
+      summary: "Credits and licenses for bundled libraries, fonts, and runtimes.",
       modalTitle: "Attribution & Licenses Guide",
       modalDescription: "Open-source notices and clean-room provenance.",
       content: (
@@ -290,162 +290,111 @@ export const HelpPage: React.FC<HelpPageProps> = ({
 
       <main className={styles.main}>
         <section className={styles.hero} aria-labelledby="help-headline">
-          <div className={styles.eyebrow}>Product Guide &amp; Principles</div>
+          <div className={styles.eyebrow}>Help</div>
           <h1 id="help-headline" className={styles.headline}>
-            Understanding Inkflip
+            How to check a PDF
           </h1>
           <p className={styles.lede}>
-            Inkflip is a local-first PDF reading inspector. It exposes divergences between
-            visible page renderings and extracted text streams across independent reader engines.
+            Compare the text inside a PDF with what appears on the page.
           </p>
         </section>
 
-        <section aria-labelledby="core-concepts-heading">
-          <h2 id="core-concepts-heading" className={styles.sectionHeading}>
-            Core Concepts
+        <section className={styles.section} aria-labelledby="steps-heading">
+          <h2 id="steps-heading" className={styles.sectionHeading}>
+            Open → Check → Save
           </h2>
-          <div className={styles.grid}>
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Local-First Processing
-                <span className={`${styles.cardBadge} ${styles.cardBadgeHighlight}`}>
-                  Local Execution
-                </span>
-              </h3>
-              <p className={styles.cardText}>
-                Your documents never leave your device. All rendering, text extraction, coordinate
-                mapping, and alignment checks run locally inside your browser sandbox, macOS companion runtime, or reproducible Docker container.
-              </p>
-              <ul className={styles.cardList}>
-                <li>No telemetry, analytics, or remote data transmission.</li>
-                <li>Delivery targets: modern desktop browsers, macOS companion, and Docker CLI workflow.</li>
-                <li>Sandboxed Web Workers isolate reader engine execution.</li>
-              </ul>
-            </article>
-
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Multi-Reader Comparison &amp; OCR
-                <span className={styles.cardBadge}>Parallel Engines</span>
-              </h3>
-              <p className={styles.cardText}>
-                Different PDF readers interpret text streams, font encodings, and layout matrices in
-                divergent ways. Inkflip compares readings from distinct engines side-by-side.
-              </p>
-              <ul className={styles.cardList}>
-                <li>
-                  <strong>PDF.js:</strong> Standard browser client-side content stream extraction.
-                </li>
-                <li>
-                  <strong>PDFium:</strong> High-fidelity C++ engine extractions via macOS companion or Docker container.
-                </li>
-                <li>
-                  <strong>Tesseract OCR:</strong> Pixel-level optical character recognition from rendered raster images.
-                </li>
-              </ul>
-            </article>
-
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Geometry &amp; Alignment
-                <span className={styles.cardBadge}>Coordinate Space</span>
-              </h3>
-              <p className={styles.cardText}>
-                When reader engines provide bounding box coordinates, occurrences are mapped to
-                canonical PDF coordinate space. Selecting a finding highlights its bounds in the viewer.
-              </p>
-              <ul className={styles.cardList}>
-                <li>Page-level findings without localized coordinates display an explicit whole-page notice.</li>
-                <li>Ambiguous readings display candidate positions for comparison without claiming a single match.</li>
-                <li>Accessible text layer exposes character occurrences to screen readers and keyboard walks.</li>
-              </ul>
-            </article>
-
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Portable Reports &amp; Evidence Replay
-                <span className={styles.cardBadge}>Standard Schema</span>
-              </h3>
-              <p className={styles.cardText}>
-                Exported reports package check outcomes, reader extractions, and user annotations into
-                portable JSON files validated against the central schema.
-              </p>
-              <ul className={styles.cardList}>
-                <li>Evidence-replay mode allows reviewing recorded findings without re-running engines.</li>
-                <li>Re-running live reader comparisons or inspecting raster pages requires the original source PDF.</li>
-                <li>Strict import gate validates structure and cryptographic seals before mounting.</li>
-              </ul>
-            </article>
-
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Local Processing &amp; Offline Readiness
-                <span className={styles.cardBadge}>Disconnected Use</span>
-              </h3>
-              <p className={styles.cardText}>
-                Inspections run entirely locally without remote server calls. Once application assets,
-                WASM bundles, and OCR language models are cached by your browser, inspections run entirely offline.
-              </p>
-              <ul className={styles.cardList}>
-                <li>Browser cache persists engine assets for disconnected sessions.</li>
-                <li>Initial OCR run requires cached model assets before disconnecting.</li>
-                <li>No session timeouts or remote entitlement checks.</li>
-              </ul>
-            </article>
-
-            <article className={styles.card}>
-              <h3 className={styles.cardTitle}>
-                Inspection Coverage &amp; Status
-                <span className={styles.cardBadge}>Check Status</span>
-              </h3>
-              <p className={styles.cardText}>
-                Inkflip reports check completion counts and reader character tallies across compared pages,
-                providing visibility into partial or skipped stages.
-              </p>
-              <ul className={styles.cardList}>
-                <li>Character counts per reader and per page.</li>
-                <li>Explicit indicators for incomplete, skipped, or unsupported checks.</li>
-                <li>Coverage reflects verification status, not an all-inclusive geometric guarantee.</li>
-              </ul>
-            </article>
-          </div>
+          <ol className={styles.steps}>
+            <li>
+              <strong>Open</strong> a PDF or an example.
+            </li>
+            <li>
+              <strong>Review</strong> the differences it highlights.
+            </li>
+            <li>
+              <strong>Save</strong> a report you can reopen.
+            </li>
+          </ol>
         </section>
 
-        <section aria-labelledby="limits-heading">
+        <section className={styles.section} aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className={styles.sectionHeading}>
+            Common questions
+          </h2>
+          <dl className={styles.faq}>
+            <dt>What is compared?</dt>
+            <dd>
+              The text inside a PDF against what appears on the page, across PDF.js and Tesseract
+              OCR in the browser.
+            </dd>
+            <dt>Where do my files go?</dt>
+            <dd>They stay in your browser. Nothing is uploaded.</dd>
+            <dt>How do I read a difference?</dt>
+            <dd>
+              A highlighted difference needs review. It does not prove fraud or correctness.
+            </dd>
+            <dt>What gets saved?</dt>
+            <dd>
+              A report of the findings and your notes, which you can reopen through the same tool.
+            </dd>
+          </dl>
+        </section>
+
+        <section className={styles.section} aria-labelledby="limits-heading">
           <div className={styles.noticeCard}>
             <h2 id="limits-heading" className={styles.noticeTitle}>
-              Important Principles &amp; Limitations
+              Limits &amp; principles
             </h2>
             <p className={styles.noticeText}>
               <strong>Non-Certification Principle:</strong> Inkflip surfaces localized, observable
-              differences between independent reader implementations. Identifying a divergence does not
-              establish which reading is correct or authoritative. Crucially, the absence of detected
-              differences does NOT certify that a document is authentic, safe, accessible, or free of
-              hidden content.
+              differences between independent reader implementations. Identifying a divergence does
+              not establish which reading is correct or authoritative, and the absence of detected
+              differences does NOT certify that a document is authentic, safe, accessible, or free
+              of hidden content.
             </p>
-            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
+            <p className={styles.noticeText}>
               <strong>Explicit Omission Reporting:</strong> When a reader engine fails, encounters
-              unsupported PDF operators, or skips unparseable content, Inkflip explicitly records the
-              condition as an omission or incomplete check. Silence is never substituted for missing coverage.
+              unsupported PDF operators, or skips unparseable content, Inkflip explicitly records
+              the condition as an omission or incomplete check. Silence is never substituted for
+              missing coverage.
             </p>
-            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
-              <strong>Platform Scope &amp; Availability:</strong> Official delivery targets are modern
-              desktop web browsers, the macOS native companion, and the reproducible Docker CLI workflow.
-              Separate Windows and Linux desktop GUI applications remain deferred; automated remediation
-              or silent modifications to PDF binaries are intentionally not supported.
+            <p className={styles.noticeText}>
+              <strong>Platform Scope &amp; Availability:</strong> Official delivery targets are
+              modern desktop web browsers, the macOS native companion, and the reproducible Docker
+              CLI workflow. Separate Windows and Linux desktop GUI applications remain deferred;
+              automated remediation or silent modifications to PDF binaries are intentionally not
+              supported.
             </p>
-            <p className={styles.noticeText} style={{ marginTop: "var(--space-3)" }}>
-              <strong>Provenance &amp; Audit Trail:</strong> Exported inspection packages preserve reader
-              engine versions, adapter builds, and timestamped run metadata so findings can be independently
-              evaluated.
+            <p className={styles.noticeText}>
+              <strong>Provenance &amp; Audit Trail:</strong> Exported inspection packages preserve
+              reader engine versions, adapter builds, and timestamped run metadata so findings can
+              be independently evaluated.
             </p>
+            <ul className={styles.noticeList}>
+              <li>
+                <strong>Local-First Processing:</strong> Your documents never leave your device.
+                Rendering, extraction, and comparison run in your browser or in the companion
+                tools.
+              </li>
+              <li>
+                <strong>Offline Readiness:</strong> Once the app assets and OCR language models are
+                cached by your browser, inspections run without a connection.
+              </li>
+              <li>
+                <strong>Inspection Coverage &amp; Status:</strong> Reports show completed, skipped,
+                and unsupported checks; coverage reflects verification status, not a guarantee.
+              </li>
+            </ul>
           </div>
         </section>
 
         <section className={styles.guidesSection} aria-labelledby="guides-heading">
           <h2 id="guides-heading" className={styles.sectionHeading}>
-            Available Project Guides
+            Advanced guides
           </h2>
+          <p className={styles.guidesIntro}>
+            Technical references for the command-line companion, reader integrations, fixture
+            testing, accessibility flows, and licensing.
+          </p>
           <div className={styles.guidesGrid}>
             {guides.map((guide) => (
               <article key={guide.id} className={styles.guideCard}>
@@ -494,4 +443,3 @@ export const HelpPage: React.FC<HelpPageProps> = ({
 };
 
 export default HelpPage;
-
