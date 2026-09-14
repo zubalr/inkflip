@@ -17,7 +17,7 @@ product's Python code runs on). Do not conflate them.
 | [uv](https://docs.astral.sh/uv/) | native project runner: resolves the pinned interpreter and frozen lock | **≥ 0.12.13** on a cold host (recorded freeze in [config/test-toolchain.json](../config/test-toolchain.json)) | Older uv cannot be relied on to resolve the pinned interpreter's download index. |
 | Pinned CPython | native product interpreter | exactly 3.13.15 (`.python-version`, `native/pyproject.toml`) | Provisioned automatically by `uv sync --frozen`. |
 | Playwright browsers | browser, privacy, a11y, visual suites | Chromium via `@playwright/test` | Install explicitly with `bun x playwright install chromium`; browsers are never installed by an install script. |
-| pdf.js Node profile (optional) | native `--reader` profiles that use the PDF.js bridge | pinned `pdfjs-dist@6.3.289` (own lock) | `cd packages/readers-pdfjs/node && bun install --frozen-lockfile` |
+| pdf.js Node profile | native `--reader` profiles that use the PDF.js bridge, and the `bun run test:native` suite | pinned `pdfjs-dist@6.3.289` (own lock) | `cd packages/readers-pdfjs/node && bun install --frozen-lockfile` — required before `bun run test:native`; without it the PDF.js wrapper tests fail to resolve their dependency. The application itself does not need it. |
 
 The frozen toolchain also records Node 22.23.2 (`.node-version`) as the
 comparison-runtime baseline.
@@ -33,7 +33,8 @@ cd apps/web && bun run dev          # development server; open the printed local
 Dependency installation may use the network. Document processing does not:
 the app reads files locally in the browser tab, and everything after install
 runs without network access. This was verified on 2026-09-13 in a fresh clone
-with isolated, empty download caches: after the two install steps above,
+with isolated, empty download caches: after the install steps above (including the
+pdf.js Node profile install, which `bun run test:native` requires),
 `bun run verify`, `bun run build`, and `bun run test:native` were re-executed
 with all proxies pointed at a dead address and passed.
 

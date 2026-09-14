@@ -52,6 +52,13 @@ bun run test:native
 bun run test:fixtures
 ```
 
+`bun run test:native` also needs the PDF.js Node profile's own locked dependency,
+which is not part of the workspace install:
+
+```sh
+cd packages/readers-pdfjs/node && bun install --frozen-lockfile
+```
+
 For browser checks, install the test browser explicitly:
 
 ```sh
