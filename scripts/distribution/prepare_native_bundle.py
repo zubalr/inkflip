@@ -381,6 +381,23 @@ def prepare_model(failures: list[str]) -> dict:
     return stamp
 
 
+def recorded_provenance() -> dict:
+    """The node/model blocks already recorded in the tracked wheels manifest.
+
+    ``--check`` downloads nothing and stamps nothing, so it can only carry the
+    recorded blocks forward; building the check-mode document without them
+    would truncate committed provenance for the Node runtime tarball and the
+    OCR model. A missing or unreadable manifest records nothing to carry.
+    """
+    try:
+        recorded = json.loads((RELEASE / "native-wheels.manifest.json").read_text())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    if not isinstance(recorded, dict):
+        return {}
+    return {key: recorded[key] for key in ("node", "model") if key in recorded}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
@@ -464,6 +481,10 @@ def main() -> int:
         model_stamp = prepare_model(failures)
         wheels_manifest["node"] = node_stamp
         wheels_manifest["model"] = model_stamp
+    else:
+        # Verification only: keep the node/model blocks already recorded on
+        # disk so --check never drops committed provenance.
+        wheels_manifest.update(recorded_provenance())
 
     # Compact committed outputs.
     lock_path = RELEASE / "native-requirements.lock"
@@ -477,7 +498,11 @@ def main() -> int:
     lock_path.write_text("\n".join(lines) + "\n")
 
     manifest_path = RELEASE / "native-wheels.manifest.json"
-    manifest_path.write_text(json.dumps(wheels_manifest, indent=2, sort_keys=True) + "\n")
+    manifest_text = json.dumps(wheels_manifest, indent=2, sort_keys=True) + "\n"
+    # Byte-identical output is left untouched: a --check run must not rewrite
+    # the tracked tree it is only verifying.
+    if not manifest_path.is_file() or manifest_path.read_bytes() != manifest_text.encode():
+        manifest_path.write_text(manifest_text)
 
     # Build-context pointer so the prepared tree is directly consumable.
     context_readme = PRIVATE / "BUILD-CONTEXT.md"

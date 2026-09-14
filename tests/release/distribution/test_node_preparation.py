@@ -7,16 +7,26 @@ distinguishes missing/corrupt/offline states, keeps the previous artifact
 intact when a replacement download fails or is refused, and never publishes
 a success stamp whose digest came from bad bytes.
 
+Regression root (spot review 2026-09-14, `--check` provenance): the check mode
+skipped prepare_node/prepare_model but still rewrote the tracked wheels
+manifest from a document that never received the node/model blocks, silently
+truncating committed provenance. Check mode now carries the recorded blocks
+forward and leaves byte-identical output untouched.
+
 All tests use disposable caches and stub fetch functions; no network.
 """
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
+import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -238,6 +248,140 @@ class NodePreparationTests(unittest.TestCase):
         self.assertEqual(failures2, [], failures2)
         self.assertEqual(stamp2.get("sha256"), GOOD_SHA)
         self.assertEqual(calls["download"], 0, "verified cache must not re-download")
+
+
+class CheckModeProvenanceTests(unittest.TestCase):
+    """`--check` verifies the prepared tree; it must not destroy the tracked
+    interface it is verifying.
+
+    Drives the real `main()` in `--check` mode against a disposable fixture
+    root holding a prepared (hash-valid) bundle and a tracked manifest that
+    already records the node/model provenance blocks. The verification run
+    must report success, keep those blocks, and leave every byte of the
+    tracked output tree untouched.
+    """
+
+    WHEEL = ("attrs", "26.1.0")
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.private = self.root / ".private" / "distribution" / "native-bundle"
+        self.release = self.root / "release"
+        # Point the module's roots at the disposable tree.
+        self._orig = (pnb.ROOT, pnb.PRIVATE, pnb.RELEASE)
+        pnb.ROOT, pnb.PRIVATE, pnb.RELEASE = self.root, self.private, self.release
+        self.wheel_file = self.build_prepared_tree()
+
+    def tearDown(self):
+        pnb.ROOT, pnb.PRIVATE, pnb.RELEASE = self._orig
+
+    # ---- fixture ----
+
+    @staticmethod
+    def build_wheel() -> bytes:
+        """A minimal but valid wheel: a real zip with a dist-info METADATA
+        and a license file, as wheel_license_files() expects."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("attrs/__init__.py", b"")
+            zf.writestr(
+                "attrs-26.1.0.dist-info/METADATA",
+                "Metadata-Version: 2.1\nName: attrs\nVersion: 26.1.0\nLicense: MIT\n",
+            )
+            zf.writestr("attrs-26.1.0.dist-info/LICENSE", b"MIT license text (fixture)\n")
+        return buf.getvalue()
+
+    def build_prepared_tree(self) -> str:
+        name, version = self.WHEEL
+        wheel_bytes = self.build_wheel()
+        sha = hashlib.sha256(wheel_bytes).hexdigest()
+        filename = f"{name}-{version}-py3-none-any.whl"
+        dest = self.private / "wheels" / filename
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(wheel_bytes)
+        (self.root / "native").mkdir(parents=True, exist_ok=True)
+        (self.root / "native" / "uv.lock").write_text(
+            "[[package]]\n"
+            'name = "inkflip"\n'
+            'version = "0.1.0"\n'
+            'dependencies = [{ name = "attrs" }]\n'
+            "\n"
+            "[[package]]\n"
+            f'name = "{name}"\n'
+            f'version = "{version}"\n'
+            "\n"
+            "[[package.wheels]]\n"
+            f'url = "https://files.pythonhosted.org/packages/aa/bb/{filename}"\n'
+            f'hash = "sha256:{sha}"\n'
+            f"size = {len(wheel_bytes)}\n"
+        )
+        return filename
+
+    def run_check(self) -> tuple[int, str]:
+        buf = io.StringIO()
+        saved_argv = sys.argv
+        sys.argv = ["prepare_native_bundle.py", "--check"]
+        try:
+            with contextlib.redirect_stdout(buf):
+                code = pnb.main()
+        finally:
+            sys.argv = saved_argv
+        return code, buf.getvalue()
+
+    def snapshot_release(self) -> dict[str, bytes]:
+        return {
+            str(p.relative_to(self.release)): p.read_bytes()
+            for p in sorted(self.release.rglob("*"))
+            if p.is_file()
+        }
+
+    # ---- the confirmed defect ----
+
+    def test_check_keeps_recorded_node_and_model_provenance(self):
+        code, out = self.run_check()
+        self.assertEqual(code, 0, out)
+
+        manifest_path = self.release / "native-wheels.manifest.json"
+        self.assertTrue(manifest_path.is_file(), "check mode must still emit the manifest")
+        recorded = json.loads(manifest_path.read_text())
+        # The committed manifest records what the real preparation stamped.
+        recorded["node"] = {
+            "name": "node",
+            "version": "22.23.2",
+            "platform": "linux-x64",
+            "filename": "node-v22.23.2-linux-x64.tar.xz",
+            "url": "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz",
+            "shasums256_source": "https://nodejs.org/dist/v22.23.2/SHASUMS256.txt",
+            "sha256": "d" * 64,
+        }
+        recorded["model"] = {
+            "name": "tessdata_fast (eng.traineddata)",
+            "version": "pinned commit 7d4322bd",
+            "sha256": "e" * 64,
+            "bytes": 4113088,
+        }
+        manifest_path.write_text(json.dumps(recorded, indent=2, sort_keys=True) + "\n")
+        committed = manifest_path.read_text()
+        before = self.snapshot_release()
+
+        code, out = self.run_check()
+
+        self.assertEqual(code, 0, out)
+        self.assertIn("native bundle prepared: 1 wheels", out)
+        verification_doc = json.loads(manifest_path.read_text())
+        self.assertEqual(verification_doc.get("node"), recorded["node"],
+                         "--check dropped the recorded node provenance block")
+        self.assertEqual(verification_doc.get("model"), recorded["model"],
+                         "--check dropped the recorded model provenance block")
+        self.assertEqual(manifest_path.read_text(), committed,
+                         "--check rewrote the tracked manifest to different bytes")
+        changed = sorted(
+            key for key, value in self.snapshot_release().items()
+            if before.get(key) != value
+        )
+        self.assertEqual(changed, [], "--check rewrote tracked outputs it was only verifying")
 
 
 if __name__ == "__main__":
