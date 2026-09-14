@@ -1,9 +1,8 @@
 # User guide
 
-This guide describes the browser inspector as implemented in this snapshot.
-Where behavior is deliberately conservative (OCR limits, what a finding
-means), the limit is stated rather than glossed over. For what the app
-cannot do yet, see [limitations.md](limitations.md).
+Open the [browser app](https://inkflip-rose.vercel.app) to inspect a PDF or
+try an example. Files are processed in your browser. See
+[limitations](limitations.md) for OCR and platform support.
 
 ## The idea in one paragraph
 
@@ -42,7 +41,8 @@ Launch the app ([quickstart.md](quickstart.md)) and open the printed URL.
      collapse them.
   All examples are synthetic originals; behavior shown in one synthetic file
   under named reader versions is not a claim about PDFs in general.
-- **Open Workspace** starts with an empty workspace for your own file.
+- **Check a PDF** opens the file picker. Canceling leaves you on Home;
+  choosing a file opens the workspace.
 
 ## Open a PDF
 
@@ -81,7 +81,7 @@ finite per-run page and time budget) and cancellable.
 When readings disagree — or agree in a way worth recording (duplicated
 amounts, structural observations) — the app records a **finding**: what kind
 of difference it is, where it is (page and region), which readers produced
-which reading, and a plain-language explanation. The **Evidence Slip** panel
+which reading, and a plain-language explanation. The **Differences** panel
 lists findings in document order; Prev/Next walks the document through each
 one, and the page view follows.
 
@@ -122,13 +122,13 @@ stacked layout rather than a shrunken desktop grid.
 - **Choose what to include** — notes and page renders are opt-in and default
   off; the panel shows a pre-export preview with what will actually be
   written before anything is produced.
-- **Export JSON** writes a portable report: document identity, page
+- **Save JSON (reopens in Inkflip)** writes a portable report: document identity, page
   geometry, readings with reader versions, findings, chosen annotations and
   the images needed to review the evidence, with no reference to your local
   paths.
-- **Export HTML** writes a script-free snapshot of the same evidence — no
-  JavaScript, no external fetches — that opens in any browser and is safe to
-  attach to a ticket or email.
+- **Save HTML report (readable)** writes a script-free report with no
+  external resources or embedded PDF. Review the selected contents before
+  sharing it.
 - **Open saved report** re-opens an exported JSON report through the same
   validation boundary as a local file. Import is strict: the file must
   validate against the report schema, and deliberately hostile inputs

@@ -69,8 +69,7 @@ manifest; `scripts/prepare_assets.py verify` re-hashes them. Sources:
 - OCI reference image `python:3.13.15-slim-trixie` pinned by index digest
   `sha256:9d2e5553…e00285` (linux/arm64 `sha256:c89921a0…44b0b4`).
 - `actions/checkout@v4` resolved to commit
-  `11d5960a326750d5838078e36cf38b85af677262` (v4.4.0) — recorded; the workflow
-  file itself awaits the owning-surface pin (see `docs/proposals/T02.md`).
+  `11d5960a326750d5838078e36cf38b85af677262` (v4.4.0), pinned in the GitHub workflows.
 - Proof-time downloads (node 22.23.2 tarball, bun 1.4.0 zip, uv 0.12.13 wheel)
   verified against publisher checksums inside the Linux proof.
 
@@ -128,5 +127,5 @@ worker, WASM and model bytes and existing license notices are unchanged.
 
 ## T46 — compatibility receipt checker (2026-09-13)
 
-- `scripts/check_manual_receipts.py` is a small shared checker (T37/T46/T53 kinds). T46 lands the `compatibility` kind so the documented command can run. Other kinds fail closed until their owners add receipts. See `docs/proposals/T46.md`.
+- `scripts/check_manual_receipts.py` validates compatibility, accessibility and release receipts. See [compatibility](compatibility/README.md) for the supported profiles and evidence requirements.
 

@@ -5,12 +5,10 @@ third-party inputs for the native bundle are prepared. This is the public
 reference for the distribution work; the enforcing tools live in the
 repository (`scripts/check_distribution.py`, `scripts/distribution/`).
 
-Status: **preparation**. The final distribution gate (SBOM, vulnerability
-review, notices over the built release bundle) closes with the release
-tasks; nothing here claims completed release acceptance. The end-to-end
-release and rollback path — build, dist recording, static preflight,
-distribution gate, native bundle and container steps, declared artifact
-identity, rollback — is in
+The browser app is published at
+[inkflip-rose.vercel.app](https://inkflip-rose.vercel.app). Browser publication
+and native-image validation are separate workflows. The build, artifact
+checks and rollback procedures are in
 [release-and-rollback.md](../release-and-rollback.md).
 
 ## The shipped browser surface
@@ -41,7 +39,7 @@ notice inconsistencies (exit 0 pass, 1 failures, 2 config error).
   [licenses/README.md](../../licenses/README.md).
 - [NOTICE](../../NOTICE) — the third-party component list for the shipped
   browser bytes and the project's own license (MIT, "Copyright (c) 2026
-  zubair", owner decision recorded 2026-09-13; see the repository LICENSE).
+  zubair"; see the repository LICENSE).
 - Known unresolved item: `tr46@0.0.3` declares MIT in `package.json`, but no
   license text exists in the exact npm tarball or the upstream repository
   tag — recorded with source identities in `licenses/README.md`; resolution
@@ -71,9 +69,8 @@ Node runtime and model assets are copied into the same interface from the
 established pins (`.node-version`, `config/resolved-assets.json`) with their
 license texts indexed in `release/notices/` and NOTICE.
 
-The application wheel, CLI entry point and container build itself are owned
-by the packaging lane; until that wheel exists, the native bundle is an
-explicitly incomplete distribution, not a finished container.
+The assembler adds the application wheel, CLI entry point and notices to
+the dependency bundle. See [application artifacts](application-artifact-interface.md).
 
 ## Release-candidate binding (declarative, no hardcoded image)
 
@@ -180,15 +177,11 @@ completed on this Mac: third-party bundle → application wheel
 this source by `assemble_native_image.py`) → notices index →
 `native/dist/BUILD-CONTEXT.json`.
 
-Honest boundaries:
+Platform and reproducibility limits:
 
-- The production Dockerfile's wheel lock pins the recorded contract platform
-  (**linux/amd64**). On this Mac's aarch64 Docker the build fails at pip
-  exactly as it should for a platform-pinned lock ("no matching distribution"
-  for the compiled wheels); building the recorded amd64 profile requires
-  emulation, which is out of scope for this release. The arm64 checkout run
-  above is a functional check — **not** the recorded release profile and
-  **not** native Linux hardware certification.
+- The production wheel lock targets linux/amd64. Building this profile on
+  Apple Silicon requires `--platform linux/amd64` and emulation. The arm64
+  checkout image is a separate functional build.
 - The assembled wheel's provenance is this checkout's source built by
   `assemble_native_image.py`; reproducibility of the wheel bytes across
   machines is expected (pure-Python wheel) but cross-host reproduction has
@@ -207,7 +200,7 @@ This checks image identity and architecture, hashes the application wheel
 and model inside the image, verifies the tesseract version and hashes every
 required notice entry from the image's own `INDEX.json`. A tag or JSON label
 alone is not proof. Re-running it against a rebuilt image requires the
-declared digest in `config/distribution-manifest.json` to be updated through
+declared digest in `config/release-candidate.json` to be updated through
 the normal recorded-artifact flow.
 
 ## Advisory evidence

@@ -1,8 +1,8 @@
 {
   "kind": "inkflip-application-wheel-interface",
   "schema_version": "1.0.0",
-  "owner": "cursor-native-assembly",
-  "consumer": "zcode-check-distribution",
+  "owner": "native-image-assembly",
+  "consumer": "distribution-validation",
   "local_files": {
     "stamp": "native/dist/app.wheel.json",
     "wheel_glob": "native/dist/wheels/inkflip-*-py3-none-any.whl",

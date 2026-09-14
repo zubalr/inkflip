@@ -13,7 +13,12 @@ uploaded.
 
 ![Desktop home: check actions on the left and a $100 vs $1,000 sample on the right](docs/images/home-desktop.png)
 
-![The same home stacked on a 390px phone layout](docs/images/home-narrow.png)
+<details>
+<summary>Mobile layout</summary>
+
+![Home on a narrow screen](docs/images/home-narrow.png)
+
+</details>
 
 ![The amount example open in the inspector, with the difference selected](docs/images/example-difference.png)
 
@@ -27,7 +32,7 @@ A highlighted difference does not prove which reading is correct, and the
 absence of differences is not a certification. The HTML download does not
 embed the original PDF.
 
-## What is implemented
+## Features
 
 - Browser inspector: open a local PDF or a saved report, compare named
   readers, follow findings to the page, add notes, export JSON/HTML, reopen
@@ -46,10 +51,10 @@ embed the original PDF.
 - OCR quality depends on the scan; incomplete checks stay visible.
 - Automated accessibility flows exist; a manual assistive-technology review
   is still open.
-- A linux/amd64 native image was built and exercised locally. It is not a
-  signed, bit-identical, cross-platform public release.
+- The native companion targets macOS and Docker. Image-specific checks and
+  build instructions are in the distribution guide.
 
-Dated snapshot detail lives in [docs/limitations.md](docs/limitations.md).
+See [limitations](docs/limitations.md) for browser, OCR and native-tooling support.
 
 ## Run locally
 
@@ -95,10 +100,9 @@ bun run test:a11y
 bun run test:visual
 ```
 
-The production bundle is written to `apps/web/dist/`. CI checks repository
-and command integrity; a green CI run alone does not certify a signed
-native release. See [validation](docs/ACCEPTANCE.md) for the release
-evidence requirements.
+The production bundle is written to `apps/web/dist/`. GitHub Actions verifies
+main, builds the app, runs a browser smoke test and publishes it to Vercel.
+See [release and rollback](docs/release-and-rollback.md) for deployment details.
 
 ## Explore the code
 
@@ -111,17 +115,6 @@ evidence requirements.
 | `tests/` | Browser, privacy, contract and integration checks |
 | `planning/` | Preserved product specification and invariants |
 
-## How this was built
-
-Work started on 11 September 2026 and continued through 14 September 2026:
-a weekend of core implementation, then further polish of the inspector,
-reports, and publication path. [Devin](https://devin.ai) SWE-2 led
-implementation and integration under the owner's direction and review.
-Other coding agents handled parallel slices (UI, checks, documentation).
-This is not a claim that one model wrote every line, and it is not a
-bounded 48-hour contest log. Commit history, licenses, and
-[origin](docs/ORIGIN.md) records are the source of truth.
-
 ## Documentation
 
 | Document | Contents |
@@ -129,9 +122,8 @@ bounded 48-hour contest log. Commit history, licenses, and
 | [docs/quickstart.md](docs/quickstart.md) | Prerequisites, install, run, build and check |
 | [docs/user-guide.md](docs/user-guide.md) | Open, read, compare, annotate, export, reopen |
 | [docs/architecture.md](docs/architecture.md) | Components, data flow, contracts, privacy design |
-| [docs/limitations.md](docs/limitations.md) | Implemented vs incomplete vs not built |
+| [docs/limitations.md](docs/limitations.md) | OCR, browser and platform limitations |
 | [docs/developer-guide.md](docs/developer-guide.md) | Workspace layout, command harness, suites |
-| [docs/development-history.md](docs/development-history.md) | Build history from Git and validation records |
 | [docs/distribution/README.md](docs/distribution/README.md) | What ships, license/notice evidence |
 | [docs/release-and-rollback.md](docs/release-and-rollback.md) | Release path and rollback |
 | [SECURITY.md](SECURITY.md) | Security expectations and reporting |

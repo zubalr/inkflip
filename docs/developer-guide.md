@@ -164,8 +164,7 @@ mechanically:
 - every `bun run <name>` mentioned in the docs exists in the command registry;
 - a forbid-list of unsupported claim phrases (data-driven, in
   `tests/docs/claims-rules.json`) fails the build if one appears;
-- the licensing status stays explicitly recorded as pending until the root
-  LICENSE/NOTICE work lands;
+- license declarations agree with the repository LICENSE and NOTICE;
 - the checker itself is regression-tested against deliberately broken input
   (it must fail when the docs break).
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble the production native image build context.
 
-Consumes ZCode's hash-verified third-party bundle (``.private/distribution/native-bundle``
+Consumes the hash-verified third-party bundle (``.private/distribution/native-bundle``
 plus ``release/`` stamps) and adds the Inkflip application wheel. Writes
 ``native/dist/``:
 
@@ -13,10 +13,9 @@ plus ``release/`` stamps) and adds the Inkflip application wheel. Writes
   notices/                  license texts including tesseract Apache-2.0
   BUILD-CONTEXT.json        identities (platform/ABI, hashes, stamps)
 
-Does not download. Does not modify ZCode's committed third-party
-``release/native-requirements.lock`` (adding inkflip there would make
-``scripts/check_distribution.py`` reject an unexpected package until the
-shared ``config/distribution-manifest.json`` grows an app-wheel field).
+Does not download or modify the committed third-party
+``release/native-requirements.lock``. The complete application lock is
+written under ``native/dist/``.
 """
 from __future__ import annotations
 
@@ -335,8 +334,7 @@ def main() -> int:
     if not bundle.is_dir():
         return fail(
             f"third-party bundle missing at {bundle}; run "
-            "python3 scripts/distribution/prepare_native_bundle.py first "
-            "(or copy the yielded ZCode context)",
+            "python3 scripts/distribution/prepare_native_bundle.py first",
             2,
         )
 
@@ -396,7 +394,7 @@ def main() -> int:
         "# Third-party pins match release/native-requirements.lock; inkflip is the application wheel.",
         f"# platform: {PLATFORM['platform']}",
     ]
-    # Preserve ZCode third-party pins, then add inkflip.
+    # Preserve third-party pins, then add inkflip.
     for line in third_party_lock.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):

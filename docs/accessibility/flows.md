@@ -102,10 +102,8 @@ and the Button-component export buttons.
 
 ## Product findings
 
-Severity is about the accessibility contract, not code quality. T37 scope was
-tests/docs/artifacts only; all four findings were repaired afterwards in the
-coordinator's a11y product pass (`work/devin/a11y-f1`, merged `48cd0c3` +
-`9d65ac8`).
+All four findings below were repaired in commits `48cd0c3` and `9d65ac8`.
+Severity refers to the accessibility impact.
 
 ### T37-F1 — `nested-interactive` (axe, serious): finding `option` hosts focusable controls — FIXED
 

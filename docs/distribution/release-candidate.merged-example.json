@@ -1,7 +1,7 @@
 {
   "kind": "inkflip-release-candidate",
   "schema_version": "1.0.0",
-  "recorded_by": "zcode-release-verification (generated from the fixed observed artifact)",
+  "recorded_by": "release-verification (generated from the fixed observed artifact)",
   "recorded_at": "2026-09-14",
   "production_image": {
     "ref": "inkflip-native:merged",
@@ -11,5 +11,5 @@
     "model_sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
     "tesseract_version": "5.5.0"
   },
-  "source_identity": "linux/amd64 emulated on this Mac; predates later AutoClaw fixes; candidate binding required after final rebuild"
+  "source_identity": "linux/amd64 emulated on this Mac; predates later native fixes; candidate binding required after final rebuild"
 }

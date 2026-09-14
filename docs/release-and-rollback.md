@@ -193,18 +193,18 @@ Rollback rules:
   is to make the exact prior bytes identifiable — not to approve, promote or
   conceal a release.
 
-## 8. What this guide does not do
+## 8. Automated browser publication
 
-- Publication and promotion stay owner-run actions: nothing in this repository
-  publishes or promotes on its own. `wrangler.json` declares the Cloudflare
-  static-assets configuration that the local preflight validates, and the
-  Vercel adapter (`vercel.json` + `scripts/vercel_output.py`, see
-  `docs/vercel-static-deploy.md`) only packages an already-built dist for the
-  owner-authorized Vercel publication.
-- No CI change: `.github/workflows/ci.yml` continues to check repository and
-  command integrity, and a green run there does not certify release readiness.
-- No publication is performed by this repository, and this guide certifies no
-  artifact.
+`.github/workflows/deploy-web.yml` runs after successful verification of a
+push to main. It checks that the revision is still current, builds the
+static app, validates Vercel Build Output and runs a production browser
+smoke test. It uploads an immutable candidate and checks main again before
+promoting it. The live address is
+[inkflip-rose.vercel.app](https://inkflip-rose.vercel.app).
+
+The Vercel token is supplied by the production GitHub Environment. Native
+image validation is separate from browser deployment. See
+[Vercel deployment](vercel-static-deploy.md) for setup and failure handling.
 
 Verification state (2026-09-14): in this checkout the build, the manifest
 recording, the static preflight and the distribution gate (both with and
