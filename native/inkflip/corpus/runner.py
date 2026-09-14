@@ -107,12 +107,16 @@ def run_corpus(
     # The Supervisor constructor itself validates limits and admission, so it must
     # sit inside the translation: otherwise an unsupported jobs>1 request escaped as
     # an untranslated internal error with exit 4 instead of the documented exit 2.
+    supervisor: Supervisor | None = None
     try:
         supervisor = Supervisor(
             out_dir,
             limits,
             resume=resume,
             validate_report=_validate_committed_report,
+            # The wrapper publishes identity.json after run() returns, so it keeps
+            # ownership; the finally below is what releases it.
+            hold_claim_after_run=True,
         )
         result = supervisor.run(job_specs)
     except SupervisionError as exc:
@@ -138,6 +142,12 @@ def run_corpus(
             out_dir / "identity.json",
             (json.dumps(identity, indent=2, sort_keys=True) + "\n").encode("utf-8"),
         )
+    except BaseException:
+        raise
     finally:
-        supervisor.close()
+        # One release point for the whole lifecycle: a refusal from the constructor,
+        # any exception from run(), and a failed identity write all pass through the
+        # same finally, so a long-lived process never keeps ownership after a refusal.
+        if supervisor is not None:
+            supervisor.close()
     return result

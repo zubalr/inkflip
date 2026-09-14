@@ -62,6 +62,7 @@ RUNTIME_LIFECYCLE "errors disclose type and safe reason".
 from __future__ import annotations
 
 import ctypes
+import errno
 import fcntl
 import hashlib
 import json
@@ -72,6 +73,7 @@ import resource
 import selectors
 import shutil
 import signal
+import stat
 import struct
 import subprocess
 import sys
@@ -208,20 +210,48 @@ def claim_output_directory(out_dir: Path) -> OutputClaim:
     root = Path(out_dir).resolve()
     root.mkdir(parents=True, exist_ok=True)
     lock_path = root / LOCK_FILE_NAME
-    fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o600)
+    # O_NOFOLLOW so a symlink planted at the lock path is refused instead of being
+    # followed: following it would let the metadata write rewrite an unrelated file
+    # through the link. O_CLOEXEC so a child never inherits the claim.
+    flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
     try:
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fd = os.open(str(lock_path), flags, 0o600)
     except OSError as exc:
-        os.close(fd)
-        raise SupervisionError(
-            f"Output directory {root} is already owned by another run; "
-            "refusing to become a second writer"
-        ) from exc
+        if exc.errno in (errno.ELOOP, errno.EMLINK):
+            raise SupervisionError(
+                f"Refusing {lock_path}: the lock path is a symbolic link, not a regular file"
+            ) from exc
+        raise SupervisionError(f"Cannot open the output claim {lock_path}: {exc}") from exc
     try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise SupervisionError(
+                f"Refusing {lock_path}: the lock path is not a regular file "
+                f"(mode {stat.S_IFMT(info.st_mode):#o})"
+            )
+        if info.st_nlink != 1:
+            # A hard link means another name refers to the same inode, so writing
+            # metadata here would edit that other file.
+            raise SupervisionError(
+                f"Refusing {lock_path}: the lock file has {info.st_nlink} hard links"
+            )
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            raise SupervisionError(
+                f"Output directory {root} is already owned by another run; "
+                "refusing to become a second writer"
+            ) from exc
+        # Only now that the descriptor is a verified, exclusively claimed regular
+        # file is the advisory metadata written.
         os.ftruncate(fd, 0)
-        os.write(fd, f"{os.getpid()}\n".encode("utf-8"))  # advisory metadata only
-    except OSError:
-        pass
+        os.write(fd, f"{os.getpid()}\n".encode("utf-8"))
+    except BaseException:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        raise
     return OutputClaim(lock_path, fd)
 
 
@@ -635,11 +665,6 @@ class Supervisor:
                 )
         self.resume = resume
         self.validate_report = validate_report
-        # Ownership starts here and is held across preflight, job execution, the
-        # report/index/journal writes and the caller's identity publication. The
-        # caller releases it with close(), which the corpus wrapper does after it
-        # has written identity.json - so no writer can slip in behind run().
-        self._claim = claim_output_directory(self.out_dir)
         # A caller that publishes something after run() returns (the corpus wrapper
         # writes identity.json) keeps the claim by asking for it; every other caller
         # releases when the run ends, so a sequential second Supervisor on the same
@@ -654,6 +679,11 @@ class Supervisor:
         self._previous_handlers: dict = {}
         self._prior_index: dict | None = None
         self.rlimit_support: dict = {}
+        # Ownership is taken LAST: every earlier step in the constructor can still
+        # raise, and a claim taken before them would be stranded by such a failure.
+        # It is held across preflight, job execution, the report/index/journal writes
+        # and the caller's identity publication.
+        self._claim = claim_output_directory(self.out_dir)
 
     # -- signal handling ----------------------------------------------------
 

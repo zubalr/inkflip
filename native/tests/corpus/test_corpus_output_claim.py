@@ -31,7 +31,11 @@ FIXTURES = ROOT / "fixtures"
 if str(NATIVE) not in sys.path:
     sys.path.insert(0, str(NATIVE))
 
-from inkflip.runtime.supervisor import LOCK_FILE_NAME  # noqa: E402
+from inkflip.runtime.supervisor import (  # noqa: E402
+    LOCK_FILE_NAME,
+    SupervisionError,
+    claim_output_directory,
+)
 
 EXIT_OK = 0
 EXIT_INVALID_ARGS = 2
@@ -207,3 +211,112 @@ class TestOwnerDeathReleasesTheClaim(OutputClaimCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestLockTargetIsNeverFollowed(OutputClaimCase):
+    """A planted lock path must be refused without touching its referent."""
+
+    SENTINEL = b"preserve-me\n"
+
+    def _referent(self, name: str = "referent.bin") -> Path:
+        target = self.td / name
+        target.write_bytes(self.SENTINEL)
+        return target
+
+    def test_a_symlinked_lock_target_is_refused_and_its_referent_is_untouched(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        referent = self._referent()
+        os.symlink(referent, self.out / LOCK_FILE_NAME)
+
+        with self.assertRaises(SupervisionError) as ctx:
+            claim_output_directory(self.out)
+        self.assertIn("symbolic link", str(ctx.exception))
+        self.assertEqual(referent.read_bytes(), self.SENTINEL,
+                         "the symlink's referent must not be rewritten through the link")
+
+    def test_a_hardlinked_lock_target_is_refused_and_its_other_name_is_untouched(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        referent = self._referent("hardlink-source.bin")
+        os.link(referent, self.out / LOCK_FILE_NAME)
+
+        with self.assertRaises(SupervisionError) as ctx:
+            claim_output_directory(self.out)
+        self.assertIn("hard links", str(ctx.exception))
+        self.assertEqual(referent.read_bytes(), self.SENTINEL,
+                         "a hard-linked inode must not be rewritten under its other name")
+
+    def test_a_non_regular_lock_target_is_refused(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        lock = self.out / LOCK_FILE_NAME
+        os.mkfifo(lock)
+        with self.assertRaises(SupervisionError) as ctx:
+            claim_output_directory(self.out)
+        self.assertIn("not a regular file", str(ctx.exception))
+
+    def test_an_unrelated_file_in_the_directory_is_untouched_by_a_successful_claim(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        marker = self.out / "unrelated.txt"
+        marker.write_bytes(self.SENTINEL)
+        claim = claim_output_directory(self.out)
+        try:
+            self.assertEqual(marker.read_bytes(), self.SENTINEL)
+            # The claim file carries advisory PID metadata and nothing else; the
+            # unrelated file beside it is what must remain untouched.
+            self.assertEqual((self.out / LOCK_FILE_NAME).read_text().strip(), str(os.getpid()))
+        finally:
+            claim.release()
+
+    def test_a_refused_second_claim_does_not_rewrite_the_winner_lock(self):
+        first = claim_output_directory(self.out)
+        try:
+            lock = self.out / LOCK_FILE_NAME
+            lock.write_bytes(b"winner-pid\n")
+            with self.assertRaises(SupervisionError):
+                claim_output_directory(self.out)
+            self.assertEqual(lock.read_bytes(), b"winner-pid\n",
+                             "the refused claim must not have touched the winner's lock")
+        finally:
+            first.release()
+
+
+class TestOwnershipIsReleasedOnEveryFailurePath(OutputClaimCase):
+    def test_a_populated_directory_refusal_releases_ownership_for_the_same_process(self):
+        """The exact reported reproduction: refuse, then claim again in-process."""
+        self.out.mkdir(parents=True, exist_ok=True)
+        (self.out / "marker.txt").write_text("unrelated\n")
+
+        result = self.corpus()
+        self.assertNotEqual(result.returncode, EXIT_OK, result.stderr)
+        self.assertIn("not empty", result.stderr)
+
+        # Before the wrapper-wide release this raised "already owned by another run".
+        claim = claim_output_directory(self.out)
+        claim.release()
+        self.assertEqual((self.out / "marker.txt").read_text(), "unrelated\n")
+
+    def test_a_failed_identity_write_releases_ownership(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        # identity.json as a directory makes the publish step fail after run().
+        (self.out / "identity.json").mkdir()
+        result = self.corpus()
+        self.assertNotEqual(result.returncode, EXIT_OK)
+        claim = claim_output_directory(self.out)
+        claim.release()
+
+    def test_repeated_close_is_safe(self):
+        self.out.mkdir(parents=True, exist_ok=True)
+        claim = claim_output_directory(self.out)
+        claim.release()
+        claim.release()
+        self.assertFalse(claim.held)
+        again = claim_output_directory(self.out)
+        again.release()
+
+    def test_a_first_instance_that_never_ran_does_not_strand_the_directory(self):
+        from inkflip.runtime.supervisor import Limits, Supervisor
+
+        self.out.mkdir(parents=True, exist_ok=True)
+        first = Supervisor(self.out, Limits())
+        first.close()
+        second = Supervisor(self.out, Limits())
+        second.close()
