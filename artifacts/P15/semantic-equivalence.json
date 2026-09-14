@@ -1,0 +1,79 @@
+{
+  "source_hash_agreed": true,
+  "native_reader": {
+    "id": "pdfium-native",
+    "name": "PDFium",
+    "version": "5.8.0",
+    "build": "pypdfium2 5.8.0 / PDFium 149.0.7825.0",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "native",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "glyph-box granularity; consecutive characters sharing an exactly-equal reported box are coalesced without width guessing",
+          "UserUnit compensation derives physical geometry from pypdf page metadata; get_size() is not trusted for physical units"
+        ]
+      },
+      {
+        "name": "render",
+        "support": "unavailable",
+        "limits": [
+          "render scale compensation is proven under the OCR/render tasks; not claimed by this reader manifest yet"
+        ]
+      }
+    ],
+    "model_hashes": [
+      "3aed5632c54a689ade84a811b93943ea8afa8c3ccae6b3e7e9e58de87bea42af"
+    ],
+    "limitations": [
+      "single-threaded in-process adapter; supervision belongs to the native parent task",
+      "rotation is display-only and is not applied to stored occurrence coordinates"
+    ]
+  },
+  "pdfjs_reader": {
+    "id": "pdfjs-6_3_289-text",
+    "name": "pdf.js",
+    "version": "6.3.289",
+    "build": "pdfjs-dist 6.3.289 (node profile; actual runtime 6.3.289)",
+    "adapter_version": "1.0.0",
+    "method": "native_text",
+    "environment": "node",
+    "settings": {
+      "normalization": "scalar-whitespace-v1",
+      "language": null,
+      "psm": null,
+      "render_reader_id": null,
+      "raster_dpi": null,
+      "annotation_mode": "not_applicable"
+    },
+    "capabilities": [
+      {
+        "name": "native_text",
+        "support": "supported",
+        "limits": [
+          "raw_text is the unmodified getTextContent API string",
+          "geometry is page_only in this Node wrapper; precise overlays stay in the browser adapter"
+        ]
+      }
+    ],
+    "model_hashes": [],
+    "limitations": [
+      "fixed Node wrapper over the workspace-locked pdfjs-dist; no network, no scripting"
+    ]
+  },
+  "native_check": "completed",
+  "pdfjs_check": "completed",
+  "raw_text_equal": false,
+  "explanation": "expected engine difference: PDFium/pypdf vs pdf.js getTextContent; rasters not compared"
+}
