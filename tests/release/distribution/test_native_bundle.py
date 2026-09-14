@@ -20,6 +20,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -139,6 +140,16 @@ class NativeBundleCheckerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn(needle, proc.stdout)
 
+    def snapshot(self):
+        return {
+            str(p.relative_to(self.root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(self.root.rglob("*")) if p.is_file() and not p.is_symlink()
+        }
+
+    def assert_tree_unchanged(self, before):
+        self.assertEqual(self.snapshot(), before,
+                         "check_distribution must not rewrite, create or remove inputs")
+
     # ---------- tests ----------
 
     def test_valid_prepared_bundle_passes(self):
@@ -193,6 +204,169 @@ class NativeBundleCheckerTests(unittest.TestCase):
         self.write_manifest()
         proc = self.run_checker()
         self.assert_failure(proc, "license evidence missing")
+
+    def test_valid_directory_license_evidence_passes(self):
+        wheel = self.base_wheel(license_evidence="release/notices/pillow-12.3.0")
+        path = self.root / wheel["license_evidence"]
+        if path.is_file():
+            path.unlink()
+        path.mkdir(parents=True, exist_ok=True)
+        (path / "LICENSE.txt").write_bytes(b"MIT license text (fixture)\n")
+        self.write_bundle([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assert_tree_unchanged(before)
+
+    def test_native_license_evidence_direct_escape_is_refused(self):
+        cases = {}
+        absolute = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(absolute, ignore_errors=True))
+        (absolute / "NOTICE.txt").write_text("harmless generated notice\n")
+        cases["absolute"] = str(absolute)
+        sibling = self.root.parent / f"harmless-notices-{self.root.name}"
+        sibling.mkdir()
+        self.addCleanup(lambda: shutil.rmtree(sibling, ignore_errors=True))
+        (sibling / "NOTICE.txt").write_text("harmless generated notice\n")
+        cases["relative-escape"] = f"../{sibling.name}"
+        for label, evidence in cases.items():
+            with self.subTest(label):
+                wheel = self.base_wheel()
+                wheel["license_evidence"] = evidence
+                self.write_bundle([wheel])
+                self.write_manifest()
+                before = self.snapshot()
+                proc = self.run_checker()
+                self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+                self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+                self.assertIn("license evidence path escapes the repository", proc.stdout)
+                self.assert_tree_unchanged(before)
+
+    def test_native_license_evidence_symlink_is_refused(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "NOTICE.txt").write_text("harmless generated notice\n")
+        link = self.root / "release" / "notices" / "escaped-link"
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.symlink_to(outside)
+        wheel = self.base_wheel()
+        wheel["license_evidence"] = str(link.relative_to(self.root))
+        self.write_bundle([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("license evidence is a symlink", proc.stdout)
+        self.assert_tree_unchanged(before)
+
+    def test_native_nested_symlink_evidence_is_not_counted(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "NOTICE.txt").write_text("harmless generated notice\n")
+        evidence_rel = "release/notices/pillow-12.3.0"
+        wheel = self.base_wheel(license_evidence=evidence_rel)
+        ev = self.root / evidence_rel
+        if ev.is_file():
+            ev.unlink()
+        ev.mkdir(parents=True, exist_ok=True)
+        (ev / "nested-link").symlink_to(outside / "NOTICE.txt")
+        self.write_bundle([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("license evidence missing or empty", proc.stdout)
+        self.assert_tree_unchanged(before)
+
+    def test_native_nested_symlink_does_not_hide_real_evidence(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "NOTICE.txt").write_text("harmless generated notice\n")
+        evidence_rel = "release/notices/pillow-12.3.0"
+        wheel = self.base_wheel(license_evidence=evidence_rel)
+        ev = self.root / evidence_rel
+        if ev.is_file():
+            ev.unlink()
+        ev.mkdir(parents=True, exist_ok=True)
+        (ev / "LICENSE.txt").write_bytes(b"MIT license text (fixture)\n")
+        (ev / "nested-link").symlink_to(outside / "NOTICE.txt")
+        self.write_bundle([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assert_tree_unchanged(before)
+
+    def test_native_empty_license_evidence_is_named(self):
+        wheel = self.base_wheel()
+        self.write_bundle([wheel])
+        (self.root / wheel["license_evidence"]).write_bytes(b"")
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assert_failure(proc, "license evidence missing or empty")
+        self.assert_tree_unchanged(before)
+
+    def test_native_malformed_license_evidence_is_named_not_raised(self):
+        wheel = self.base_wheel()
+        wheel["license_evidence"] = True
+        self.write_bundle([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("lacks license evidence", proc.stdout)
+        self.assert_tree_unchanged(before)
+
+    def test_prepared_wheel_absolute_path_is_refused(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "outside.whl").write_bytes(b"fake wheel bytes")
+        wheel = self.base_wheel()
+        self.write_bundle([wheel])
+        wheel["path_in_context"] = str(outside / "outside.whl")
+        self.write_wheels_manifest([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("prepared wheel path escapes the context", proc.stdout)
+        self.assert_tree_unchanged(before)
+
+    def test_prepared_wheel_symlink_is_refused(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "outside.whl").write_bytes(b"fake wheel bytes")
+        wheel = self.base_wheel()
+        self.write_bundle([wheel])
+        artifact = self.root / ".private/distribution/native-bundle" / wheel["path_in_context"]
+        artifact.unlink()
+        artifact.symlink_to(outside / "outside.whl")
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("prepared wheel is a symlink", proc.stdout)
+        self.assert_tree_unchanged(before)
+
+    def test_prepared_wheel_malformed_path_is_named_not_raised(self):
+        wheel = self.base_wheel()
+        self.write_bundle([wheel])
+        wheel["path_in_context"] = True
+        self.write_wheels_manifest([wheel])
+        self.write_manifest()
+        before = self.snapshot()
+        proc = self.run_checker()
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        self.assertIn("prepared wheel path malformed", proc.stdout)
+        self.assert_tree_unchanged(before)
 
     def test_incomplete_node_stamp_fails(self):
         self.write_bundle([self.base_wheel()])

@@ -39,6 +39,12 @@ satisfied if any non-empty file existed there. Evidence must stay inside the
 fixture root and must not be a symlink. select_wheel's sort also preferred
 newer glibc tags despite the recorded oldest-glibc policy.
 
+Regression root (spot review 2026-09-14, nested evidence symlink):
+--check counted a non-empty file reached only through a nested symlink
+inside an otherwise-contained notice directory. Nested symlink targets are
+not allowed content; a required evidence claim needs a real regular file
+in that directory.
+
 All tests use disposable caches and stub fetch functions; no network.
 """
 
@@ -921,6 +927,60 @@ class CheckModeVerificationTests(unittest.TestCase):
                 else:
                     self.assertIn("license evidence path escapes the repository", out)
                 self.assert_tree_unchanged(before)
+
+    def _notice_dir(self) -> Path:
+        document = json.loads(self.manifest_path.read_text())
+        return self.root / document["wheels"][0]["license_evidence"]
+
+    def test_nested_symlink_evidence_is_not_counted(self):
+        """An outside file reached only through a nested symlink must not
+        satisfy the required evidence claim."""
+        notice_dir = self._notice_dir()
+        self.assertTrue(notice_dir.is_dir(), "fixture must record a notice directory")
+        for child in list(notice_dir.iterdir()):
+            if child.is_file() or child.is_symlink():
+                child.unlink()
+            elif child.is_dir():
+                shutil.rmtree(child)
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(outside, ignore_errors=True))
+        (outside / "NOTICE.txt").write_text("harmless generated notice\n")
+        (notice_dir / "nested-link").symlink_to(outside / "NOTICE.txt")
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("Traceback", out)
+        self.assertNotIn("native bundle verified:", out)
+        self.assertIn("license evidence missing or empty", out)
+        self.assert_tree_unchanged(before)
+
+    def test_empty_license_evidence_directory_is_named(self):
+        notice_dir = self._notice_dir()
+        for child in list(notice_dir.iterdir()):
+            if child.is_file() or child.is_symlink():
+                child.unlink()
+            elif child.is_dir():
+                shutil.rmtree(child)
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("Traceback", out)
+        self.assertNotIn("native bundle verified:", out)
+        self.assertIn("license evidence missing or empty", out)
+        self.assert_tree_unchanged(before)
+
+    def test_malformed_license_evidence_is_named_not_raised(self):
+        document = json.loads(self.manifest_path.read_text())
+        item = dict(document["wheels"][0])
+        item["license_evidence"] = True
+        self.rewrite_wheels([item])
+        before = self.snapshot()
+        code, out = self.check()
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("Traceback", out)
+        self.assertNotIn("native bundle verified:", out)
+        self.assertIn("license evidence missing or empty", out)
+        self.assert_tree_unchanged(before)
 
 
 if __name__ == "__main__":
