@@ -563,5 +563,185 @@ class InventoryGeneratorTests(unittest.TestCase):
         self.assertEqual({c["name"] for c in sbom["components"]}, set(PROD_PACKAGES) | {"pillow"})
 
 
+class CheckModeReadOnlyTests(InventoryGeneratorTests):
+    """--check must never write: bytes, mtimes and the directory-entry set of
+    the whole fixture tree are unchanged on success and on every failure."""
+
+    def tree_state(self) -> dict:
+        """{(kind, relative path): (bytes | None, mtime_ns)} under the root."""
+        state = {}
+        for path in sorted(self.root.rglob("*")):
+            rel = path.relative_to(self.root).as_posix()
+            if path.is_dir():
+                state[("dir", rel)] = (None, path.stat().st_mtime_ns)
+            else:
+                state[("file", rel)] = (path.read_bytes(), path.stat().st_mtime_ns)
+        return state
+
+    def test_check_missing_output_directory_creates_nothing(self):
+        before = self.tree_state()
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("MISSING:", err)
+        self.assertIn("inventory.json", err)
+        self.assertIn("sbom.cdx.json", err)
+        self.assertNotIn("wrote", out)
+        # the output directory itself was never created, and no file appeared
+        # anywhere else under the fixture root
+        self.assertFalse((self.root / self.out).exists())
+        self.assertEqual(self.tree_state(), before)
+
+    def test_check_one_missing_output_names_it_and_leaves_the_rest(self):
+        self.assertEqual(self.run_build()[0], 0)
+        (self.root / self.out / "sbom.cdx.json").unlink()
+        inv = self.root / self.out / "inventory.json"
+        inv_bytes, inv_mtime = inv.read_bytes(), inv.stat().st_mtime_ns
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("MISSING:", err)
+        self.assertIn("sbom.cdx.json", err)
+        self.assertNotIn("CHANGED", err)
+        # exactly the absent file is named; the present file draws no failure
+        self.assertEqual(err.count("MISSING:"), 1)
+        self.assertFalse((self.root / self.out / "sbom.cdx.json").exists())
+        self.assertEqual(inv.read_bytes(), inv_bytes)
+        self.assertEqual(inv.stat().st_mtime_ns, inv_mtime)
+
+    def test_check_all_matching_outputs_is_read_only(self):
+        self.assertEqual(self.run_build()[0], 0)
+        before = self.tree_state()
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 0, msg=err)
+        self.assertNotIn("wrote", out)
+        self.assertNotIn("CHANGED", err)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_check_partial_mismatch_leaves_untouched_outputs(self):
+        self.assertEqual(self.run_build()[0], 0)
+        inv = self.root / self.out / "inventory.json"
+        inv.write_text(inv.read_text().replace("inkflip-distribution-inventory", "tampered", 1))
+        inv_bytes, inv_mtime = inv.read_bytes(), inv.stat().st_mtime_ns
+        sbom = self.root / self.out / "sbom.cdx.json"
+        sbom_bytes, sbom_mtime = sbom.read_bytes(), sbom.stat().st_mtime_ns
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("CHANGED:", err)
+        self.assertIn("inventory.json", err)
+        self.assertNotIn("sbom.cdx.json", err)
+        # the differing file is reported, never rewritten; the matching file
+        # is left byte-for-byte and mtime-for-mtime untouched
+        self.assertEqual(inv.read_bytes(), inv_bytes)
+        self.assertEqual(inv.stat().st_mtime_ns, inv_mtime)
+        self.assertEqual(sbom.read_bytes(), sbom_bytes)
+        self.assertEqual(sbom.stat().st_mtime_ns, sbom_mtime)
+
+    def test_check_surface_doc_missing_is_named_and_not_created(self):
+        self.assertEqual(self.run_build()[0], 0)
+        before = self.tree_state()
+        code, out, err = self.run_main("--out", self.out, "--check", "--surface-doc", "SURFACE.md")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("MISSING:", err)
+        self.assertIn("SURFACE.md", err)
+        self.assertFalse((self.root / "SURFACE.md").exists())
+        self.assertEqual(self.tree_state(), before)
+
+    def test_check_surface_doc_differing_is_named_and_not_rewritten(self):
+        self.assertEqual(self.run_build("--surface-doc", "SURFACE.md")[0], 0)
+        surface = self.root / "SURFACE.md"
+        surface.write_text(surface.read_text().replace("Distribution surface digest", "TAMPERED", 1))
+        before = self.tree_state()
+        code, out, err = self.run_main("--out", self.out, "--check", "--surface-doc", "SURFACE.md")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("CHANGED:", err)
+        self.assertIn("SURFACE.md", err)
+        # the differing doc is reported, never rewritten — and neither is any
+        # other output (a check must not repair matching files either)
+        self.assertEqual(self.tree_state(), before)
+
+    def test_check_directory_in_place_of_output_is_named_and_untouched(self):
+        self.assertEqual(self.run_build()[0], 0)
+        inv = self.root / self.out / "inventory.json"
+        inv.unlink()
+        inv.mkdir()
+        marker = inv / "keep.txt"
+        marker.write_text("keep")
+        sbom = self.root / self.out / "sbom.cdx.json"
+        sbom_bytes, sbom_mtime = sbom.read_bytes(), sbom.stat().st_mtime_ns
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("NOT-A-FILE:", err)
+        self.assertIn("inventory.json", err)
+        self.assertTrue(marker.exists())
+        self.assertEqual(sbom.read_bytes(), sbom_bytes)
+        self.assertEqual(sbom.stat().st_mtime_ns, sbom_mtime)
+
+    def test_check_unreadable_output_is_named(self):
+        self.assertEqual(self.run_build()[0], 0)
+        inv = self.root / self.out / "inventory.json"
+        inv.chmod(0o000)
+        self.addCleanup(inv.chmod, 0o644)
+        code, out, err = self.run_build("--check")
+        self.assertEqual(code, 1, msg=err)
+        self.assertIn("UNREADABLE:", err)
+        self.assertIn("inventory.json", err)
+
+
+class MalformedWorkspaceTests(InventoryGeneratorTests):
+    """The consumed workspace/dependency values are validated before use: a
+    malformed shape is a named config error (exit 2, no traceback, no
+    partial output); absent, null and empty tables stay valid."""
+
+    def rewrite_workspaces(self, **entries):
+        lock = self.read_doc("bun.lock")
+        for key, value in entries.items():
+            lock["workspaces"][key] = value
+        self.write_json("bun.lock", lock)
+
+    def test_malformed_workspace_values_are_named_config_errors(self):
+        cases = [
+            ({"apps/web": []}, 'bun.lock: workspaces["apps/web"] must be a JSON object'),
+            ({"apps/web": "x"}, 'bun.lock: workspaces["apps/web"] must be a JSON object'),
+            ({"apps/web": {"dependencies": []}},
+             'bun.lock: workspaces["apps/web"].dependencies must be a JSON object'),
+            ({"apps/web": {"dependencies": "x"}},
+             'bun.lock: workspaces["apps/web"].dependencies must be a JSON object'),
+            ({"": {"devDependencies": []}},
+             'bun.lock: workspaces[""].devDependencies must be a JSON object'),
+        ]
+        for entries, needle in cases:
+            with self.subTest(entries=entries):
+                self.write_healthy_tree()
+                self.clear_out()
+                self.rewrite_workspaces(**entries)
+                code, out, err = self.run_build()
+                self.assertEqual(code, 2, msg=err)
+                self.assertIn(f"config error: {needle}", err)
+                self.assertNotIn("wrote", out)
+                # no partial output: nothing was written, not even a directory
+                self.assertFalse((self.root / self.out).exists())
+                self.assert_no_traceback(err)
+
+    def test_null_or_empty_dependency_tables_stay_valid(self):
+        prod = sorted(PROD_PACKAGES)
+        cases = [
+            ({"apps/web": None}, [], ["vitest"]),
+            ({"apps/web": {"dependencies": None}}, [], ["vitest"]),
+            ({"apps/web": {"dependencies": {}}}, [], ["vitest"]),
+            ({"apps/web": {}}, [], ["vitest"]),
+            ({"": {"devDependencies": None}}, prod, []),
+            ({"": {}}, prod, []),
+        ]
+        for entries, bundled, dev in cases:
+            with self.subTest(entries=entries):
+                self.write_healthy_tree()
+                self.clear_out()
+                self.rewrite_workspaces(**entries)
+                code, out, err = self.run_build()
+                self.assertEqual(code, 0, msg=err)
+                inv = self.inventory()
+                self.assertEqual([p["name"] for p in inv["bundled_npm_packages"]], bundled)
+                self.assertEqual(inv["development_only_npm"], dev)
+
+
 if __name__ == "__main__":
     unittest.main()
