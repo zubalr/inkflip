@@ -394,6 +394,25 @@ def parse_bun_lock() -> dict:
     return data
 
 
+def workspace_table(lock: dict, workspace: str, field: str) -> dict:
+    """Validated {field} table of one bun.lock workspace entry.
+
+    Absent or null means "no workspace entry / no table" -> empty. The entry
+    and the table must be JSON objects when present: a list, string or number
+    in either place is a named config error, never an AttributeError."""
+    entry = lock["workspaces"].get(workspace)
+    if entry is None:
+        return {}
+    if not isinstance(entry, dict):
+        raise ConfigError(f'bun.lock: workspaces["{workspace}"] must be a JSON object')
+    table = entry.get(field)
+    if table is None:
+        return {}
+    if not isinstance(table, dict):
+        raise ConfigError(f'bun.lock: workspaces["{workspace}"].{field} must be a JSON object')
+    return table
+
+
 def npm_prod_closure(lock: dict, workspace: str = "apps/web") -> list[dict]:
     """Transitive closure of the workspace's production dependencies.
 
@@ -401,8 +420,7 @@ def npm_prod_closure(lock: dict, workspace: str = "apps/web") -> list[dict]:
     by bare name; dependency entries may be ranges, so matching is by name and
     the resolved identity is taken from the lock entry itself."""
     packages = lock.get("packages", {})
-    workspaces = lock.get("workspaces", {})
-    wanted = dict(workspaces.get(workspace, {}).get("dependencies", {}))
+    wanted = dict(workspace_table(lock, workspace, "dependencies"))
     seen: dict[str, dict] = {}
     queue = list(wanted.items())
     while queue:
@@ -689,7 +707,7 @@ def build_inventory() -> dict:
             }
         )
 
-    dev_npm = sorted((lock["workspaces"].get("", {}).get("devDependencies") or {}).keys())
+    dev_npm = sorted(workspace_table(lock, "", "devDependencies").keys())
 
     # Tesseract Debian closure (production-image dependency, linux/amd64):
     # recorded as its own bucket so the deb packages are neither double-
@@ -912,6 +930,30 @@ def render_surface_doc(inventory: dict) -> str:
     return "\n".join(lines)
 
 
+def check_output(path: Path, content: str) -> int:
+    """Compare one output file against the derived bytes — never writing.
+
+    Returns 0 when the file matches, 1 for a named failure (missing, not a
+    regular file, unreadable, or differing bytes). The file is left untouched
+    and no directory is created, so a successful check cannot manufacture its
+    own evidence."""
+    if not path.exists():
+        print(f"MISSING: {path}", file=sys.stderr)
+        return 1
+    if not path.is_file():
+        print(f"NOT-A-FILE: {path}", file=sys.stderr)
+        return 1
+    try:
+        existing = path.read_bytes()
+    except OSError as exc:
+        print(f"UNREADABLE: {path} ({exc})", file=sys.stderr)
+        return 1
+    if existing != content.encode():
+        print(f"CHANGED: {path}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
@@ -945,11 +987,11 @@ def main() -> int:
     status = 0
     written: list[str] = []
     for path, label, content in targets:
-        if args.check and path.is_file() and path.read_text() != content:
-            # Check mode compares: a differing output is reported and left
-            # untouched (never rewritten as a "repaired" file).
-            print(f"CHANGED: {path}", file=sys.stderr)
-            status = 1
+        if args.check:
+            # Check mode is strictly read-only: every target is compared and
+            # left untouched, and nothing (not even the parent directory) is
+            # created. Each kind of failure is named on stderr.
+            status = max(status, check_output(path, content))
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
