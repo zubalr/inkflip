@@ -610,7 +610,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
       page.getByRole("region", { name: "PDF reading inspector viewer stage" }),
     ).toBeVisible({ timeout: 30_000 });
     await expect(page.locator("[data-testid=doc-stats]")).toContainText(
-      "1 pages · 1 findings",
+      "1 page · 1 finding",
     );
     await expect(page.locator("[id^=finding-item-]").first()).toBeVisible();
     await expect(
@@ -626,7 +626,7 @@ test("G2 leg 1: six real examples — gallery cards, verified dist artifacts, re
     ).toBeVisible({ timeout: 30_000 });
     await expect(page2.locator("[id^=finding-item-]")).toHaveCount(5);
     await expect(page2.locator("[data-testid=doc-stats]")).toContainText(
-      "1 pages · 5 findings",
+      "1 page · 5 findings",
     );
 
     expect(cap.pageErrors, "gallery leg produced page errors").toHaveLength(0);
