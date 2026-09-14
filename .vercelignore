@@ -1,0 +1,8 @@
+.git
+.private
+.env
+.env.*
+.tools
+.venv
+*.map
+.DS_Store

@@ -63,3 +63,7 @@ htmlcov/
 
 # Provider local dev output (wrangler dev temp state; T48 preflight).
 /.wrangler/
+
+# Vercel CLI link metadata, env pulls, and generated Build Output API tree.
+# Publication uploads only the prepared static output via --prebuilt.
+.vercel/
